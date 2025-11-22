@@ -31,6 +31,7 @@ import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
 import WhatYouGetVideo from './components/WhatYouGetVideo';
 import ConciergePage from './pages/ConciergePage';
+import ConciergeCheckout from './pages/ConciergeCheckout';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
 
 interface CartItem {
@@ -59,8 +60,16 @@ const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '')
   .map((host) => host.trim().toLowerCase())
   .filter(Boolean);
 
+// Optional: comma‑separated list of secure/Square-only hosts.
+// Example value in env: secure.streamstickpro.com
+const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || '')
+  .split(',')
+  .map((host) => host.trim().toLowerCase())
+  .filter(Boolean);
+
 function App() {
   const [isConciergeDomain, setIsConciergeDomain] = useState(false);
+  const [isSecureDomain, setIsSecureDomain] = useState(false);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [emailCaptured, setEmailCaptured] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -92,6 +101,16 @@ function App() {
     const isConciergePath = pathname.startsWith('/concierge');
 
     setIsConciergeDomain(isConciergeHost || isConciergePath);
+
+    // Secure domain: lock to Square-safe checkout experience.
+    const isSecureHost =
+      secureHosts.length > 0 &&
+      secureHosts.some((allowedHost) => hostname === allowedHost);
+
+    // Also treat direct /secure path on any host as secure mode.
+    const isSecurePath = pathname.startsWith('/secure');
+
+    setIsSecureDomain(isSecureHost || isSecurePath);
   }, []);
 
   useEffect(() => {
@@ -154,6 +173,20 @@ function App() {
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+  // Secure domain: show Square-safe checkout only (no IPTV UI).
+  if (isSecureDomain) {
+    return (
+      <ErrorBoundary>
+        <SEOHead />
+        <GoogleAnalytics />
+        <StructuredData />
+        <VisitorTracker />
+        <ConciergeCheckout />
+      </ErrorBoundary>
+    );
+  }
+
+  // Concierge domain: dedicated concierge landing experience.
   if (isConciergeDomain) {
     return <ConciergePage />;
   }
