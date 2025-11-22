@@ -1,0 +1,61 @@
+URGENT: Files need to be in GitHub directly, then Cloudflare needs to deploy them
+
+THE SITUATION:
+- GitHub Desktop is not working for me
+- Need to push files directly to GitHub using command line
+- Then need to fix Cloudflare to deploy from the correct repository
+
+STEP 1: PUSH FILES DIRECTLY TO GITHUB
+
+Open PowerShell (as administrator) and run these commands:
+
+1. Go to folder:
+cd "C:\Users\rdela\Downloads\New folder (2)\streamerstickprofinal"
+
+2. Add all files:
+git add .
+
+3. Commit:
+git commit -m "Push all files directly to GitHub - complete website"
+
+4. Force push:
+git push origin main --force
+
+5. Verify in GitHub:
+Go to: https://github.com/reloadedfiretvteam-hash/streamerstickprofinal
+Check that ALL files are there (src/, public/, package.json, etc.)
+
+STEP 2: FIX CLOUDFLARE DEPLOYMENT
+
+After files are in GitHub:
+
+1. Go to Cloudflare: https://dash.cloudflare.com
+2. Click "Pages" in sidebar
+3. Find project "streamerstickprofinal"
+4. Click on it
+5. Go to "Settings" → "Builds & deployments"
+6. Verify it's connected to: reloadedfiretvteam-hash/streamerstickprofinal
+7. If not connected, click "Connect to Git" and connect it
+8. Make sure "Auto-deploy from Git" is ENABLED
+
+STEP 3: TRIGGER DEPLOYMENT
+
+1. In "streamerstickprofinal" project
+2. Go to "Deployments" tab
+3. Click "Create deployment"
+4. Click "Deploy latest commit"
+5. Wait for it to build
+
+STEP 4: FIX DOMAIN
+
+1. Remove domain from template project (wrong one)
+2. Add domain to "streamerstickprofinal" project (correct one)
+3. Add secure subdomain: secure.streamstickpro.com
+
+REPOSITORY DETAILS:
+- GitHub: reloadedfiretvteam-hash/streamerstickprofinal
+- Cloudflare Project: streamerstickprofinal
+- Branch: main
+
+If GitHub Desktop isn't working, use PowerShell commands above to push directly.
+
