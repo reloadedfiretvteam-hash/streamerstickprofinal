@@ -1,0 +1,24 @@
+I need help connecting my live domain to the correct Cloudflare Pages project.
+
+CURRENT SITUATION:
+- My domain is connected to a Cloudflare project that shows a template/placeholder site (wrong one)
+- I have another Cloudflare project called "streamerstickprofinal" that has my real website code
+- The real project is connected to GitHub repository: reloadedfiretvteam-hash/streamerstickprofinal
+- I need to move my domain from the template project to the real project
+
+WHAT I NEED:
+1. Remove my domain from the template project
+2. Connect my domain to the "streamerstickprofinal" project (the one with my real code)
+
+REPOSITORY DETAILS:
+- GitHub: reloadedfiretvteam-hash/streamerstickprofinal
+- Cloudflare Project: streamerstickprofinal
+- Both are already connected and working
+
+Please help me:
+1. First, ask me what my domain name is
+2. Then guide me step-by-step to remove it from the template project
+3. Then guide me step-by-step to add it to the "streamerstickprofinal" project
+
+I'm not very technical, so please give me very clear, simple instructions.
+

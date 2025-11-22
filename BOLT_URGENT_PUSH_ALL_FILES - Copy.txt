@@ -1,0 +1,50 @@
+URGENT: Push ALL files to GitHub - Template website keeps showing
+
+THE PROBLEM:
+- Template website keeps showing instead of my real website
+- Files might not be in GitHub
+- Need to push everything from local folder to GitHub
+
+EXACT FOLDER LOCATION:
+C:\Users\rdela\Downloads\New folder (2)\streamerstickprofinal
+
+WHAT TO DO:
+
+1. Open PowerShell (as administrator)
+
+2. Go to the exact folder:
+cd "C:\Users\rdela\Downloads\New folder (2)\streamerstickprofinal"
+
+3. Verify files are there:
+dir
+(You should see src/, public/, package.json, etc.)
+
+4. Add ALL files:
+git add .
+
+5. Commit everything:
+git commit -m "Push all files - complete website with all updates"
+
+6. Force push to GitHub:
+git push origin main --force
+
+7. Verify in GitHub:
+Go to: https://github.com/reloadedfiretvteam-hash/streamerstickprofinal
+Check that src/ folder, public/ folder, and all files are there
+
+IMPORTANT FILES THAT MUST BE PUSHED:
+- Everything in src/ folder (your website code)
+- Everything in public/ folder (images, assets)
+- package.json
+- vite.config.ts
+- wrangler.toml
+- .nvmrc
+- index.html
+- All configuration files
+
+REPOSITORY:
+- GitHub: reloadedfiretvteam-hash/streamerstickprofinal
+- Branch: main
+
+If files are still not showing in GitHub after pushing, tell me what error you get.
+

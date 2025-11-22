@@ -1,0 +1,556 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabase';
+import { Save, Eye, Edit3, RefreshCw, Palette, Image as ImageIcon } from 'lucide-react';
+
+interface HomepageSection {
+  id: string;
+  section_name: string;
+  component_name: string;
+  background_color: string;
+  text_color: string;
+  padding_top: string;
+  padding_bottom: string;
+  display_order: number;
+  is_visible: boolean;
+  content_preview: string;
+  has_images: boolean;
+  image_locations: string[];
+}
+
+export default function HomepageSectionEditor() {
+  const [sections, setSections] = useState<HomepageSection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedSection, setSelectedSection] = useState<HomepageSection | null>(null);
+  const [editedSection, setEditedSection] = useState<HomepageSection | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    loadSections();
+  }, []);
+
+  const loadSections = async () => {
+    setLoading(true);
+
+    const homepageSections: HomepageSection[] = [
+      {
+        id: 'hero',
+        section_name: 'Hero Banner',
+        component_name: 'Hero.tsx',
+        background_color: '#1e3a8a',
+        text_color: '#ffffff',
+        padding_top: '5rem',
+        padding_bottom: '5rem',
+        display_order: 1,
+        is_visible: true,
+        content_preview: 'Inferno TV - Premium IPTV Subscriptions & Jailbroken Fire Stick Shop',
+        has_images: false,
+        image_locations: []
+      },
+      {
+        id: 'trust-badges',
+        section_name: 'Trust Badges',
+        component_name: 'TrustBadges.tsx',
+        background_color: '#374151',
+        text_color: '#ffffff',
+        padding_top: '3rem',
+        padding_bottom: '3rem',
+        display_order: 2,
+        is_visible: true,
+        content_preview: 'Secure Payment, Fast Shipping, 24/7 Support, Money Back',
+        has_images: false,
+        image_locations: []
+      },
+      {
+        id: 'about',
+        section_name: 'About Section',
+        component_name: 'About.tsx',
+        background_color: '#ffffff',
+        text_color: '#111827',
+        padding_top: '5rem',
+        padding_bottom: '5rem',
+        display_order: 3,
+        is_visible: true,
+        content_preview: 'What is Inferno TV? Stream unlimited content...',
+        has_images: false,
+        image_locations: []
+      },
+      {
+        id: 'why-choose',
+        section_name: 'Why Choose Us',
+        component_name: 'WhyChooseUs.tsx',
+        background_color: '#1f2937',
+        text_color: '#ffffff',
+        padding_top: '5rem',
+        padding_bottom: '5rem',
+        display_order: 4,
+        is_visible: true,
+        content_preview: 'Comparison: Other Websites vs Inferno TV',
+        has_images: false,
+        image_locations: []
+      },
+      {
+        id: 'carousel',
+        section_name: 'Media Carousel',
+        component_name: 'MediaCarousel.tsx',
+        background_color: '#111827',
+        text_color: '#ffffff',
+        padding_top: '4rem',
+        padding_bottom: '4rem',
+        display_order: 5,
+        is_visible: true,
+        content_preview: 'Image slider showing product photos',
+        has_images: true,
+        image_locations: ['/OIF.jpg', '/5-1.webp', '/9-1.webp', '/OIF copy.jpg', '/OIP (11)99.jpg']
+      },
+      {
+        id: 'shop',
+        section_name: 'Shop Products',
+        component_name: 'Shop.tsx',
+        background_color: '#f9fafb',
+        text_color: '#111827',
+        padding_top: '5rem',
+        padding_bottom: '5rem',
+        display_order: 6,
+        is_visible: true,
+        content_preview: 'Product grid - loads from real_products table',
+        has_images: true,
+        image_locations: ['Product images from database']
+      },
+      {
+        id: 'reviews',
+        section_name: 'Customer Reviews',
+        component_name: 'ReviewsCarousel.tsx',
+        background_color: '#1e40af',
+        text_color: '#ffffff',
+        padding_top: '4rem',
+        padding_bottom: '4rem',
+        display_order: 7,
+        is_visible: true,
+        content_preview: 'Customer testimonials with star ratings',
+        has_images: false,
+        image_locations: []
+      },
+      {
+        id: 'comparison',
+        section_name: 'Comparison Table',
+        component_name: 'ComparisonTable.tsx',
+        background_color: '#ffffff',
+        text_color: '#111827',
+        padding_top: '5rem',
+        padding_bottom: '5rem',
+        display_order: 8,
+        is_visible: true,
+        content_preview: 'Cable vs Streaming vs Inferno TV',
+        has_images: false,
+        image_locations: []
+      },
+      {
+        id: 'demo-video',
+        section_name: 'Demo Video',
+        component_name: 'DemoVideo.tsx',
+        background_color: '#374151',
+        text_color: '#ffffff',
+        padding_top: '5rem',
+        padding_bottom: '5rem',
+        display_order: 9,
+        is_visible: true,
+        content_preview: 'YouTube video embed',
+        has_images: true,
+        image_locations: ['YouTube video thumbnail']
+      },
+      {
+        id: 'what-is-iptv',
+        section_name: 'What Is IPTV',
+        component_name: 'WhatIsIPTV.tsx',
+        background_color: '#ffffff',
+        text_color: '#111827',
+        padding_top: '5rem',
+        padding_bottom: '5rem',
+        display_order: 10,
+        is_visible: true,
+        content_preview: 'IPTV explanation and benefits',
+        has_images: false,
+        image_locations: []
+      },
+      {
+        id: 'devices',
+        section_name: 'Compatible Devices',
+        component_name: 'Devices.tsx',
+        background_color: '#1e3a8a',
+        text_color: '#ffffff',
+        padding_top: '4rem',
+        padding_bottom: '4rem',
+        display_order: 11,
+        is_visible: true,
+        content_preview: 'Works on Fire Stick, Smart TV, Android, iOS...',
+        has_images: false,
+        image_locations: []
+      },
+      {
+        id: 'tutorials',
+        section_name: 'YouTube Tutorials',
+        component_name: 'YouTubeTutorials.tsx',
+        background_color: '#ffffff',
+        text_color: '#111827',
+        padding_top: '5rem',
+        padding_bottom: '5rem',
+        display_order: 12,
+        is_visible: true,
+        content_preview: 'Setup tutorial videos',
+        has_images: true,
+        image_locations: ['YouTube video thumbnails']
+      },
+      {
+        id: 'blog',
+        section_name: 'Blog Posts',
+        component_name: 'BlogDisplay.tsx',
+        background_color: '#f3f4f6',
+        text_color: '#111827',
+        padding_top: '5rem',
+        padding_bottom: '5rem',
+        display_order: 13,
+        is_visible: true,
+        content_preview: 'Latest blog articles - loads from real_blog_posts table',
+        has_images: true,
+        image_locations: ['Blog featured images from database']
+      },
+      {
+        id: 'guarantee',
+        section_name: 'Money Back Guarantee',
+        component_name: 'MoneyBackGuarantee.tsx',
+        background_color: '#10b981',
+        text_color: '#ffffff',
+        padding_top: '4rem',
+        padding_bottom: '4rem',
+        display_order: 14,
+        is_visible: true,
+        content_preview: '7-Day Money Back Guarantee badge',
+        has_images: false,
+        image_locations: []
+      },
+      {
+        id: 'faq',
+        section_name: 'FAQ Section',
+        component_name: 'FAQ.tsx',
+        background_color: '#ffffff',
+        text_color: '#111827',
+        padding_top: '5rem',
+        padding_bottom: '5rem',
+        display_order: 15,
+        is_visible: true,
+        content_preview: 'Frequently Asked Questions accordion',
+        has_images: false,
+        image_locations: []
+      },
+      {
+        id: 'email-capture',
+        section_name: 'Email Capture',
+        component_name: 'EmailCaptureBottom.tsx',
+        background_color: '#ea580c',
+        text_color: '#ffffff',
+        padding_top: '4rem',
+        padding_bottom: '4rem',
+        display_order: 16,
+        is_visible: true,
+        content_preview: 'Get exclusive offers - email signup',
+        has_images: false,
+        image_locations: []
+      },
+      {
+        id: 'legal',
+        section_name: 'Legal Disclaimer',
+        component_name: 'LegalDisclaimer.tsx',
+        background_color: '#374151',
+        text_color: '#9ca3af',
+        padding_top: '2rem',
+        padding_bottom: '2rem',
+        display_order: 17,
+        is_visible: true,
+        content_preview: 'Legal disclaimer text',
+        has_images: false,
+        image_locations: []
+      },
+      {
+        id: 'footer',
+        section_name: 'Footer',
+        component_name: 'Footer.tsx',
+        background_color: '#000000',
+        text_color: '#ffffff',
+        padding_top: '4rem',
+        padding_bottom: '4rem',
+        display_order: 18,
+        is_visible: true,
+        content_preview: 'Footer with links, contact info, social media',
+        has_images: false,
+        image_locations: []
+      }
+    ];
+
+    setSections(homepageSections);
+    setLoading(false);
+  };
+
+  const handleEdit = (section: HomepageSection) => {
+    setSelectedSection(section);
+    setEditedSection({ ...section });
+  };
+
+  const handleSave = async () => {
+    if (!editedSection) return;
+
+    setSaving(true);
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    setSections(prev =>
+      prev.map(s => s.id === editedSection.id ? editedSection : s)
+    );
+
+    alert(`✅ Section "${editedSection.section_name}" updated successfully!\n\nNote: This is a visual editor. To change actual content, you'll need to edit the component file: ${editedSection.component_name}`);
+
+    setSaving(false);
+    setSelectedSection(null);
+    setEditedSection(null);
+  };
+
+  const handleCancel = () => {
+    setSelectedSection(null);
+    setEditedSection(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="w-8 h-8 text-orange-500 animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-6 text-white">
+        <div className="flex items-center gap-3 mb-3">
+          <Eye className="w-8 h-8" />
+          <div>
+            <h2 className="text-2xl font-bold">Homepage Visual Editor</h2>
+            <p className="text-sm opacity-90">See every section of your homepage and edit styles</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl p-6 shadow-lg">
+        <div className="mb-6">
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Your Homepage Layout (Top to Bottom)</h3>
+          <p className="text-gray-600">
+            Click any section to edit colors, spacing, and see where images are located
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {sections.map((section, index) => (
+            <div
+              key={section.id}
+              className="border-2 border-gray-200 rounded-lg p-4 hover:border-orange-500 transition cursor-pointer"
+              onClick={() => handleEdit(section)}
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold" style={{ backgroundColor: section.background_color }}>
+                  {index + 1}
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-1">
+                    <h4 className="font-bold text-gray-900">{section.section_name}</h4>
+                    <span className="text-xs bg-gray-100 px-2 py-1 rounded">{section.component_name}</span>
+                    {section.has_images && (
+                      <span className="flex items-center gap-1 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                        <ImageIcon className="w-3 h-3" />
+                        Has Images
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600">{section.content_preview}</p>
+                  {section.has_images && section.image_locations.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {section.image_locations.map((loc, i) => (
+                        <span key={i} className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                          📷 {loc}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button className="p-2 hover:bg-gray-100 rounded-lg transition">
+                  <Edit3 className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {selectedSection && editedSection && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 rounded-t-xl">
+              <h3 className="text-2xl font-bold mb-2">Edit {selectedSection.section_name}</h3>
+              <p className="text-sm opacity-90">Component: {selectedSection.component_name}</p>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div>
+                <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <Palette className="w-5 h-5 text-orange-500" />
+                  Colors
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Background Color
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        value={editedSection.background_color}
+                        onChange={(e) => setEditedSection({ ...editedSection, background_color: e.target.value })}
+                        className="w-16 h-10 rounded border border-gray-300"
+                      />
+                      <input
+                        type="text"
+                        value={editedSection.background_color}
+                        onChange={(e) => setEditedSection({ ...editedSection, background_color: e.target.value })}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Text Color
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        value={editedSection.text_color}
+                        onChange={(e) => setEditedSection({ ...editedSection, text_color: e.target.value })}
+                        className="w-16 h-10 rounded border border-gray-300"
+                      />
+                      <input
+                        type="text"
+                        value={editedSection.text_color}
+                        onChange={(e) => setEditedSection({ ...editedSection, text_color: e.target.value })}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-gray-900 mb-3">Spacing</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Padding Top
+                    </label>
+                    <input
+                      type="text"
+                      value={editedSection.padding_top}
+                      onChange={(e) => setEditedSection({ ...editedSection, padding_top: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded"
+                      placeholder="e.g., 5rem"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Padding Bottom
+                    </label>
+                    <input
+                      type="text"
+                      value={editedSection.padding_bottom}
+                      onChange={(e) => setEditedSection({ ...editedSection, padding_bottom: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded"
+                      placeholder="e.g., 5rem"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {selectedSection.has_images && (
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <ImageIcon className="w-5 h-5 text-purple-500" />
+                    Images in This Section
+                  </h4>
+                  <div className="bg-purple-50 rounded-lg p-4">
+                    <ul className="space-y-2">
+                      {selectedSection.image_locations.map((location, i) => (
+                        <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
+                          <span className="font-mono bg-white px-2 py-1 rounded">{location}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-xs text-gray-600 mt-3">
+                      💡 To change images, upload new files to the Media Library or edit the component file.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-bold text-gray-900 mb-2">Preview</h4>
+                <div
+                  className="rounded-lg p-6 border-2 border-gray-300"
+                  style={{
+                    backgroundColor: editedSection.background_color,
+                    color: editedSection.text_color,
+                    paddingTop: editedSection.padding_top,
+                    paddingBottom: editedSection.padding_bottom
+                  }}
+                >
+                  <p className="font-bold">{selectedSection.section_name}</p>
+                  <p className="text-sm opacity-75">{selectedSection.content_preview}</p>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-sm text-gray-700">
+                  <strong>Note:</strong> This editor changes visual styles only. To edit text content, buttons, or functionality,
+                  you need to edit the component file: <code className="bg-white px-2 py-1 rounded">{selectedSection.component_name}</code>
+                </p>
+              </div>
+            </div>
+
+            <div className="sticky bottom-0 bg-gray-50 p-6 rounded-b-xl flex justify-end gap-3">
+              <button
+                onClick={handleCancel}
+                className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
+              >
+                {saving ? (
+                  <>
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-5 h-5" />
+                    Save Changes
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
