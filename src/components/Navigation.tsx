@@ -34,7 +34,8 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
               About
             </a>
             <a
-              href="/shop"
+              href="#shop"
+              onClick={(e) => { e.preventDefault(); document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' }); }}
               className="hover:text-orange-400 transition-colors font-semibold"
             >
               Shop
@@ -97,8 +98,8 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
               About
             </a>
             <a
-              href="/shop"
-              onClick={() => setIsMenuOpen(false)}
+              href="#shop"
+              onClick={(e) => { e.preventDefault(); document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' }); setIsMenuOpen(false); }}
               className="block py-2 hover:text-orange-400 transition-colors font-semibold"
             >
               Shop

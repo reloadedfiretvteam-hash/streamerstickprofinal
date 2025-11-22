@@ -21,3 +21,9 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Ignore old nested project folders
+New folder/
+New folder (2)/
+New folder (3)/
+New folder (5)/
