@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.env.local
+.DS_Store
+
+# Junk folders from prompt
+New folder/
+New folder (2)/
+New folder (3)/
+New folder (5)/
