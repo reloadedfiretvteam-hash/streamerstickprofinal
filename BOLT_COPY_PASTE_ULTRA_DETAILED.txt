@@ -1,0 +1,70 @@
+I need extremely detailed step-by-step instructions. I'm having trouble finding files and fixing the deployment.
+
+THE PROBLEM:
+- Template website keeps showing instead of my real website
+- Need to find files in GitHub repository
+- Need to fix Cloudflare domain connection
+- Need to trigger deployment
+- Need to add secure subdomain for Square payments
+
+GITHUB REPOSITORY:
+- URL: https://github.com/reloadedfiretvteam-hash/streamerstickprofinal
+- Owner: reloadedfiretvteam-hash
+- Repository name: streamerstickprofinal
+- Branch: main
+
+WHAT TO FIND IN GITHUB:
+1. Go to the repository URL above
+2. Look for folder named "src" - click on it, should see many files
+3. Look for folder named "public" - click on it, should see images and files
+4. Look for file named "package.json" - in the root (not in a folder)
+5. Look for file named "wrangler.toml" - in the root
+6. Look for file named ".nvmrc" - in the root, should contain "20"
+
+If any of these are missing, files are NOT pushed. Tell me which ones are missing.
+
+CLOUDFLARE LOCATION:
+- Dashboard: https://dash.cloudflare.com
+- Go to: Pages (in left sidebar)
+- You should see TWO projects:
+  * Template project (WRONG - has my domain, shows template)
+  * streamerstickprofinal (CORRECT - has my real code, needs my domain)
+
+FIX DOMAIN CONNECTION:
+1. Click on TEMPLATE project (the one showing template website)
+2. Click "Domains" tab at the top
+3. Find my domain in the list
+4. Click "Remove" or "Disconnect" next to my domain
+5. Confirm removal
+6. Go back to Pages dashboard
+7. Click on "streamerstickprofinal" project (the correct one)
+8. Click "Domains" tab
+9. Click "Add custom domain" button
+10. Type my main domain (e.g., streamstickpro.com)
+11. Click "Add" or "Continue"
+12. Click "Add custom domain" AGAIN
+13. Type my secure subdomain: secure.streamstickpro.com
+14. Click "Add" or "Continue"
+
+TRIGGER DEPLOYMENT:
+1. In "streamerstickprofinal" project
+2. Click "Deployments" tab
+3. Click "Create deployment" button (top right)
+4. Click "Deploy latest commit"
+5. Click "Deploy"
+6. Wait for status to show "Building" then "Success"
+
+WHAT TO LOOK FOR:
+- Deployment status should be "Building" then "Success"
+- If it says "Failed", click on it and check build logs
+- Build logs should show "Installing dependencies" and "Building project"
+- If you see errors, tell me what they say
+
+MODIFICATIONS MADE TODAY:
+- Added .nvmrc file (Node version 20)
+- Updated wrangler.toml (project name)
+- All files in src/ folder (136+ files)
+- All files in public/ folder (55+ files)
+
+Give me step-by-step instructions for EACH task. Don't skip any steps. Tell me exactly where to click and what to look for.
+
