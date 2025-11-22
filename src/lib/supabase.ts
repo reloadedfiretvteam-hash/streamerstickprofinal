@@ -3,38 +3,19 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-export interface PricingPlan {
-  id: string;
-  name: string;
-  price: number;
-  currency: string;
-  billing_period: string;
-  features: string[];
-  is_popular: boolean;
-  display_order: number;
-  active: boolean;
+// Don't crash the whole app if env vars are missing.
+// The main marketing site should still render; Supabase‑powered
+// features (analytics/admin) will just be disabled until configured.
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn(
+    'Supabase environment variables are missing. ' +
+      'Main site will load, but analytics/admin features are disabled.',
+  );
 }
 
-export interface EmailSubscriber {
-  email: string;
-  source: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface CartAbandonment {
-  email: string;
-  plan_id: string;
-  amount: number;
-  metadata?: Record<string, unknown>;
-}
-
-export interface VisitorAnalytics {
-  visitor_id: string;
-  page_view: string;
-  referrer?: string;
-  device_type: string;
-  country?: string;
-  session_duration?: number;
-}
+// Use a safe fallback so createClient always returns something.
+// When real env vars are set, those will be used automatically.
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'public-anon-key-placeholder',
+);
