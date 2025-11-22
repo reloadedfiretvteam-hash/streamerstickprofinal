@@ -1,0 +1,41 @@
+{
+  "name": "Stream Stick Pro - Premium IPTV & Fire Sticks",
+  "short_name": "Stream Stick Pro",
+  "description": "20,000+ live channels, 60,000+ movies, all sports & PPV events. Premium IPTV subscriptions and jailbroken Fire Sticks.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#f97316",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["entertainment", "lifestyle", "shopping"],
+  "shortcuts": [
+    {
+      "name": "Shop Products",
+      "short_name": "Shop",
+      "description": "Browse Fire Sticks and IPTV subscriptions",
+      "url": "/#shop",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Free Trial",
+      "short_name": "Free Trial",
+      "description": "Start your 36-hour free trial",
+      "url": "/#shop",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
