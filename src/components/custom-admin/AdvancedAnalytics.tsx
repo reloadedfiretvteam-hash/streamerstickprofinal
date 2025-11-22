@@ -35,7 +35,7 @@ export default function AdvancedAnalytics() {
 
       const [ordersData, visitorsData] = await Promise.all([
         supabase.from('orders').select('*'),
-        supabase.from('visitor_tracking').select('*')
+        supabase.from('website_visitors').select('*')
       ]);
 
       const orders = ordersData.data || [];
@@ -49,9 +49,9 @@ export default function AdvancedAnalytics() {
       const weekRevenue = weekOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
       const monthRevenue = monthOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
 
-      const todayVisitors = visitors.filter(v => new Date(v.created_at) >= today).length;
-      const weekVisitors = visitors.filter(v => new Date(v.created_at) >= weekAgo).length;
-      const monthVisitors = visitors.filter(v => new Date(v.created_at) >= monthAgo).length;
+      const todayVisitors = visitors.filter(v => new Date(v.visit_date) >= today).length;
+      const weekVisitors = visitors.filter(v => new Date(v.visit_date) >= weekAgo).length;
+      const monthVisitors = visitors.filter(v => new Date(v.visit_date) >= monthAgo).length;
 
       const conversionRate = weekVisitors > 0 ? ((weekOrders.length / weekVisitors) * 100).toFixed(2) : 0;
       const avgOrderValue = weekOrders.length > 0 ? (weekRevenue / weekOrders.length).toFixed(2) : 0;

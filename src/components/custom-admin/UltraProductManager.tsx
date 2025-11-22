@@ -24,8 +24,7 @@ import {
   ShoppingCart,
   Box,
   Truck,
-  Star,
-  X
+  Star
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 

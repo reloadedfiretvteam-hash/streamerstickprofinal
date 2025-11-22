@@ -40,6 +40,13 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
               Shop
             </a>
             <a
+              href="#blog"
+              onClick={(e) => { e.preventDefault(); document.getElementById('blog')?.scrollIntoView({ behavior: 'smooth' }); }}
+              className="hover:text-orange-400 transition-colors font-semibold"
+            >
+              Blog
+            </a>
+            <a
               href="/faq"
               className="hover:text-orange-400 transition-colors font-semibold"
             >
@@ -95,6 +102,13 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
               className="block py-2 hover:text-orange-400 transition-colors font-semibold"
             >
               Shop
+            </a>
+            <a
+              href="#blog"
+              onClick={(e) => { e.preventDefault(); document.getElementById('blog')?.scrollIntoView({ behavior: 'smooth' }); setIsMenuOpen(false); }}
+              className="block py-2 hover:text-orange-400 transition-colors font-semibold"
+            >
+              Blog
             </a>
             <a
               href="/faq"

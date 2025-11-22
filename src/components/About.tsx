@@ -50,7 +50,7 @@ export default function About() {
               <Flame className="w-12 h-12 text-orange-400 mb-4" />
               <h3 className="text-xl font-bold mb-3">Easy Setup</h3>
               <p className="text-blue-200">
-                Devices ready in 5 minutes with simple plug-and-play. Just log in your details, no technical knowledge required - start watching instantly.
+                Pre-configured devices ready in 5 minutes. No technical knowledge required - just plug in and watch.
               </p>
             </div>
 

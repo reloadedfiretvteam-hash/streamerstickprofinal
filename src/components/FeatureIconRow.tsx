@@ -1,53 +1,58 @@
-import { Tv, Smartphone, Globe, Zap, Shield, DollarSign } from 'lucide-react';
+import { Tv, Smartphone, Wifi, Shield, Clock, Headphones } from 'lucide-react';
 
 export default function FeatureIconRow() {
   const features = [
     {
       icon: Tv,
       title: '20,000+ Channels',
-      subtitle: 'Live TV'
+      description: 'All premium channels included'
     },
     {
       icon: Smartphone,
       title: 'All Devices',
-      subtitle: 'Any Platform'
+      description: 'Works on any device'
     },
     {
-      icon: Globe,
-      title: 'Worldwide',
-      subtitle: 'International'
-    },
-    {
-      icon: Zap,
-      title: 'HD/4K Quality',
-      subtitle: 'Crystal Clear'
+      icon: Wifi,
+      title: '4K Streaming',
+      description: 'Crystal clear quality'
     },
     {
       icon: Shield,
-      title: '7-Day Guarantee',
-      subtitle: 'Risk Free'
+      title: 'Secure & Legal',
+      description: '100% safe service'
     },
     {
-      icon: DollarSign,
-      title: 'Best Prices',
-      subtitle: 'Save 50%+'
+      icon: Clock,
+      title: 'Instant Access',
+      description: 'Setup in 5 minutes'
+    },
+    {
+      icon: Headphones,
+      title: '24/7 Support',
+      description: 'Always here to help'
     }
   ];
 
   return (
-    <section className="py-8 bg-gray-900">
+    <section className="py-12 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center text-center p-4 bg-gradient-to-br from-gray-800 to-gray-800/50 rounded-lg hover:from-orange-600/20 hover:to-red-600/20 transition-all border border-gray-700/50 hover:border-orange-500/50"
-            >
-              <feature.icon className="w-8 h-8 text-orange-400 mb-2" />
-              <h3 className="text-white font-bold text-sm mb-1">{feature.title}</h3>
-              <p className="text-gray-400 text-xs">{feature.subtitle}</p>
-            </div>
-          ))}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          {features.map((feature, index) => {
+            const Icon = feature.icon;
+            return (
+              <div
+                key={index}
+                className="flex flex-col items-center text-center p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-orange-400/50 transition-all hover:transform hover:scale-105"
+              >
+                <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center mb-3 shadow-lg shadow-orange-500/30">
+                  <Icon className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-white font-bold text-sm mb-1">{feature.title}</h3>
+                <p className="text-blue-200 text-xs">{feature.description}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

@@ -31,7 +31,7 @@ export default function OrderTracking() {
 
     try {
       // First try customer_orders
-      const { data: customerOrder } = await supabase
+      const { data: customerOrder, error: customerError } = await supabase
         .from('customer_orders')
         .select('*')
         .or(`order_number.eq.${searchTerm},customer_email.eq.${searchTerm}`)
@@ -45,7 +45,7 @@ export default function OrderTracking() {
       }
 
       // If not found, try bitcoin_orders
-      const { data: bitcoinOrder } = await supabase
+      const { data: bitcoinOrder, error: bitcoinError } = await supabase
         .from('bitcoin_orders')
         .select('*')
         .or(`order_code.eq.${searchTerm},customer_email.eq.${searchTerm}`)

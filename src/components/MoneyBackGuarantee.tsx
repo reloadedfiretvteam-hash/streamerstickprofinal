@@ -20,9 +20,9 @@ export default function MoneyBackGuarantee() {
                 <div className="flex items-start gap-4">
                   <Clock className="w-8 h-8 text-white flex-shrink-0" />
                   <div>
-                    <h3 className="text-xl font-bold text-white mb-2">7-Day Money-Back Guarantee</h3>
+                    <h3 className="text-xl font-bold text-white mb-2">36-Hour Free Trial</h3>
                     <p className="text-white/90">
-                      Try our service completely risk-free for 7 days. Not satisfied? Get a full refund - no questions asked, no hassle, no hidden fees.
+                      Try our service completely free for 36 hours. Experience all premium features with full access - no credit card required, no commitment, no hidden fees.
                     </p>
                   </div>
                 </div>

@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { ShoppingCart, Search, Filter } from 'lucide-react';
+import { ShoppingCart, Search, Filter, Star } from 'lucide-react';
 
 interface Product {
   id: string;
   name: string;
   description: string;
   price: string;
-  compare_at_price: string | null;
-  image_url: string;
-  product_type: string;
-  inventory_count: number;
-  is_featured: boolean;
+  sale_price: string;
+  main_image: string;
+  category: string;
+  stock_quantity: number;
+  rating: number;
+  featured: boolean;
 }
 
 interface CartItem {
@@ -40,10 +41,10 @@ export default function ShopPage() {
   const loadProducts = async () => {
     try {
       const { data, error } = await supabase
-        .from('products')
+        .from('real_products')
         .select('*')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
+        .in('status', ['active', 'publish', 'published'])
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setProducts(data || []);
@@ -81,7 +82,8 @@ export default function ShopPage() {
     }
 
     saveCart(newCart);
-    alert('Added to cart!');
+    // Redirect to checkout immediately
+    window.location.href = '/checkout';
   };
 
   const filterAndSortProducts = () => {
@@ -97,26 +99,29 @@ export default function ShopPage() {
 
     // Category filter
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(p => p.product_type === selectedCategory);
+      filtered = filtered.filter(p => p.category === selectedCategory);
     }
 
     // Sort
     switch (sortBy) {
       case 'price-low':
-        filtered.sort((a, b) => parseFloat(a.compare_at_price || a.price) - parseFloat(b.compare_at_price || b.price));
+        filtered.sort((a, b) => parseFloat(a.sale_price || a.price) - parseFloat(b.sale_price || b.price));
         break;
       case 'price-high':
-        filtered.sort((a, b) => parseFloat(b.compare_at_price || b.price) - parseFloat(a.compare_at_price || a.price));
+        filtered.sort((a, b) => parseFloat(b.sale_price || b.price) - parseFloat(a.sale_price || a.price));
+        break;
+      case 'rating':
+        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case 'featured':
       default:
-        filtered.sort((a, b) => (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0));
+        filtered.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     }
 
     setFilteredProducts(filtered);
   };
 
-  const categories = ['all', ...new Set(products.map(p => p.product_type))];
+  const categories = ['all', ...new Set(products.map(p => p.category))];
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   if (loading) {
@@ -205,9 +210,9 @@ export default function ShopPage() {
             >
               {/* Product Image */}
               <div className="relative h-64 bg-gray-200 overflow-hidden">
-                {product.image_url ? (
+                {product.main_image ? (
                   <img
-                    src={product.image_url}
+                    src={product.main_image}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     onError={(e) => {
@@ -219,12 +224,12 @@ export default function ShopPage() {
                     <img src="/OIF.jpg" alt="placeholder" className="w-full h-full object-cover" />
                   </div>
                 )}
-                {product.is_featured && (
+                {product.featured && (
                   <div className="absolute top-2 left-2 bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
                     Featured
                   </div>
                 )}
-                {product.compare_at_price && parseFloat(product.compare_at_price) < parseFloat(product.price) && (
+                {product.sale_price && parseFloat(product.sale_price) < parseFloat(product.price) && (
                   <div className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
                     Sale
                   </div>
@@ -240,15 +245,34 @@ export default function ShopPage() {
                   {product.description}
                 </p>
 
+                {/* Rating */}
+                {product.rating && (
+                  <div className="flex items-center gap-1 mb-3">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          i < product.rating
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                    <span className="text-sm text-gray-600 ml-1">
+                      ({product.rating})
+                    </span>
+                  </div>
+                )}
+
                 {/* Price */}
                 <div className="flex items-center gap-2 mb-4">
-                  {product.compare_at_price && parseFloat(product.compare_at_price) > parseFloat(product.price) ? (
+                  {product.sale_price && parseFloat(product.sale_price) < parseFloat(product.price) ? (
                     <>
                       <span className="text-2xl font-bold text-orange-600">
-                        ${product.price}
+                        ${product.sale_price}
                       </span>
                       <span className="text-lg text-gray-500 line-through">
-                        ${product.compare_at_price}
+                        ${product.price}
                       </span>
                     </>
                   ) : (
@@ -260,9 +284,9 @@ export default function ShopPage() {
 
                 {/* Stock Status */}
                 <div className="mb-4">
-                  {product.inventory_count > 0 ? (
+                  {product.stock_quantity > 0 ? (
                     <span className="text-sm text-green-600 font-semibold">
-                      In Stock ({product.inventory_count} available)
+                      In Stock ({product.stock_quantity} available)
                     </span>
                   ) : (
                     <span className="text-sm text-red-600 font-semibold">
@@ -274,9 +298,9 @@ export default function ShopPage() {
                 {/* Add to Cart Button */}
                 <button
                   onClick={() => addToCart(product)}
-                  disabled={product.inventory_count === 0}
+                  disabled={product.stock_quantity === 0}
                   className={`w-full py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
-                    product.inventory_count > 0
+                    product.stock_quantity > 0
                       ? 'bg-orange-600 text-white hover:bg-orange-700'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}

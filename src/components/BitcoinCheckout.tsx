@@ -6,7 +6,7 @@ interface BitcoinCheckoutProps {
   totalAmount: number;
   customerEmail: string;
   customerName: string;
-  products: Array<{id: string; name: string; quantity: number; price: number}>;
+  products: any[];
   onOrderCreated?: (orderCode: string) => void;
 }
 
@@ -73,13 +73,13 @@ export default function BitcoinCheckout({
       if (data?.data?.rates?.USD) {
         setBtcPrice(parseFloat(data.data.rates.USD));
       }
-    } catch {
-      console.error('Error fetching BTC price');
+    } catch (error) {
+      console.error('Error fetching BTC price:', error);
     }
   };
 
   const generateOrderCode = async () => {
-    const { data } = await supabase.rpc('generate_order_code');
+    const { data, error } = await supabase.rpc('generate_order_code');
     if (data) return data;
     return 'BTC-' + Math.random().toString(36).substring(2, 10).toUpperCase();
   };

@@ -32,14 +32,10 @@ export default function RealBlogManager() {
 
   const loadPosts = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('blog_posts')
+    const { data } = await supabase
+      .from('real_blog_posts')
       .select('*')
       .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error loading posts:', error);
-    }
 
     if (data) {
       setPosts(data);
@@ -106,7 +102,7 @@ export default function RealBlogManager() {
 
     if (editingPost.id) {
       const { error } = await supabase
-        .from('blog_posts')
+        .from('real_blog_posts')
         .update(postData)
         .eq('id', editingPost.id);
 
@@ -119,7 +115,7 @@ export default function RealBlogManager() {
       }
     } else {
       const { error } = await supabase
-        .from('blog_posts')
+        .from('real_blog_posts')
         .insert([postData]);
 
       if (!error) {
@@ -138,7 +134,7 @@ export default function RealBlogManager() {
     if (!confirm('Delete this blog post permanently?')) return;
 
     await supabase
-      .from('blog_posts')
+      .from('real_blog_posts')
       .delete()
       .eq('id', id);
 

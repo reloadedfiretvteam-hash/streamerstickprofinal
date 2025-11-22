@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Smartphone, Copy, Check, AlertCircle, CheckCircle, ArrowLeft, Mail, Clock, Shield, Send } from 'lucide-react';
+import { Smartphone, Copy, Check, AlertCircle, CheckCircle, ArrowLeft, Mail, Clock, Shield, DollarSign, Send } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Props {
@@ -26,7 +26,7 @@ export default function CashAppPaymentFlow({ totalAmount, customerInfo, products
   const [copiedCashtag, setCopiedCashtag] = useState(false);
   const [copiedAmount, setCopiedAmount] = useState(false);
 
-  const CASH_APP_TAG = '$starstreem1';
+  const CASH_APP_TAG = '$StreamStickPro';
   const CONTACT_EMAIL = 'reloadedfiretvteam@gmail.com';
 
   const generateOrderCode = () => {
@@ -134,7 +134,7 @@ export default function CashAppPaymentFlow({ totalAmount, customerInfo, products
   const openCashApp = () => {
     const amount = totalAmount.toFixed(2);
     const note = encodeURIComponent(orderCode);
-    const cashAppUrl = `https://cash.app/$starstreem1/${amount}?note=${note}`;
+    const cashAppUrl = `https://cash.app/$StreamStickPro/${amount}?note=${note}`;
     window.open(cashAppUrl, '_blank');
   };
 

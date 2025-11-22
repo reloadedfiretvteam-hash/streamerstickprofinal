@@ -1,5 +1,4 @@
-import { Mail, DollarSign, Flame } from 'lucide-react';
-import AdminFooterLogin from './AdminFooterLogin';
+import { Mail, DollarSign, CreditCard, Flame } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -43,21 +42,22 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4 text-green-400" />
-                <span>Cash App: $starstreem1</span>
+                <span>Cash App: $starevan11</span>
               </li>
               <li className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-purple-400" />
-                <span>Venmo: @starevan11</span>
+                <CreditCard className="w-4 h-4 text-orange-400" />
+                <span>Bitcoin: Accepted</span>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-white font-semibold mb-4">Support</h3>
+            <h3 className="text-white font-semibold mb-4">Support & Admin</h3>
             <ul className="space-y-2 text-sm">
               <li><a href="/faq" className="hover:text-orange-400 transition-colors">FAQ</a></li>
               <li><a href="/track-order" className="hover:text-orange-400 transition-colors">Track Order</a></li>
               <li><a href="mailto:reloadedfiretvteam@gmail.com" className="hover:text-orange-400 transition-colors">Contact Us</a></li>
+              <li><a href="/custom-admin" className="hover:text-orange-400 transition-colors">Admin Portal</a></li>
             </ul>
           </div>
         </div>
@@ -75,9 +75,6 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      <AdminFooterLogin onLogin={() => {
-        window.location.href = '/admin';
-      }} />
     </footer>
   );
 }

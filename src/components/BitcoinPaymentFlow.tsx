@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bitcoin, Copy, Check, AlertCircle, ExternalLink, RefreshCw, CheckCircle, CreditCard, QrCode, ArrowLeft, Mail, Clock, Shield, Zap } from 'lucide-react';
+import { Bitcoin, Copy, Check, AlertCircle, ExternalLink, RefreshCw, CheckCircle, CreditCard, QrCode, ArrowLeft, Mail, Clock, Shield } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Props {
@@ -31,7 +31,7 @@ export default function BitcoinPaymentFlow({ totalAmount, customerInfo, products
   const [copiedOrderCode, setCopiedOrderCode] = useState(false);
   const [paymentCreated, setPaymentCreated] = useState(false);
   const [gatewayEnabled, setGatewayEnabled] = useState(false);
-  const [nowPaymentsConfig, setNowPaymentsConfig] = useState<{api_key: string; api_url: string; ipn_secret: string} | null>(null);
+  const [nowPaymentsConfig, setNowPaymentsConfig] = useState<any>(null);
 
   useEffect(() => {
     loadGatewayConfig();
@@ -51,12 +51,12 @@ export default function BitcoinPaymentFlow({ totalAmount, customerInfo, products
       .eq('gateway_name', 'nowpayments')
       .maybeSingle();
 
-    if (data?.is_active && data?.api_key_encrypted && data.api_key_encrypted !== 'YOUR_NOWPAYMENTS_API_KEY_HERE') {
+    if (data?.is_enabled && data?.api_key) {
       setGatewayEnabled(true);
       setNowPaymentsConfig({
-        api_key: data.api_key_encrypted,
-        api_url: data.additional_config?.api_url || 'https://api.nowpayments.io/v1',
-        ipn_secret: data.additional_config?.ipn_secret || data.webhook_secret_encrypted || '',
+        api_key: data.api_key,
+        api_url: data.config?.api_url || 'https://api.nowpayments.io/v1',
+        ipn_secret: data.config?.ipn_secret || '',
       });
     }
   };
@@ -68,8 +68,8 @@ export default function BitcoinPaymentFlow({ totalAmount, customerInfo, products
       if (data?.data?.rates?.USD) {
         setBtcPrice(parseFloat(data.data.rates.USD));
       }
-    } catch {
-      console.error('Error fetching BTC price');
+    } catch (error) {
+      console.error('Error fetching BTC price:', error);
       setBtcPrice(95000); // Fallback price
     }
   };
@@ -92,7 +92,7 @@ export default function BitcoinPaymentFlow({ totalAmount, customerInfo, products
       const code = generateOrderCode();
       setOrderCode(code);
 
-      let paymentData: {payment_id?: string; pay_address?: string; pay_amount?: string; invoice_url?: string} = {};
+      let paymentData: any = {};
 
       // Try NOWPayments if configured
       if (gatewayEnabled && nowPaymentsConfig?.api_key) {
@@ -161,11 +161,7 @@ export default function BitcoinPaymentFlow({ totalAmount, customerInfo, products
         setPaymentCreated(true);
 
         // Send email notifications
-        await sendOrderEmails(
-          code,
-          paymentData.pay_address || '',
-          paymentData.pay_amount || totalBtc?.toFixed(8) || '0'
-        );
+        await sendOrderEmails(code, paymentData.pay_address, paymentData.pay_amount);
       } else {
         console.error('Database error:', error);
         alert('Error creating order. Please try again.');
@@ -375,37 +371,24 @@ export default function BitcoinPaymentFlow({ totalAmount, customerInfo, products
               <CreditCard className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
-              <div className="inline-block bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-2">
-                EASIEST OPTION - RECOMMENDED
-              </div>
               <h4 className="font-bold text-blue-900 text-xl mb-2">
-                Option 1: Buy Bitcoin Instantly & Pay with Credit/Debit Card
+                Option 1: Buy Bitcoin with Credit/Debit Card (Recommended)
               </h4>
-              <p className="text-sm text-blue-800 mb-2">
-                <strong>Don't have Bitcoin? No problem!</strong> Use your regular credit or debit card to purchase Bitcoin and complete your order instantly.
-              </p>
-              <p className="text-xs text-blue-700 font-semibold">
-                ✓ No Bitcoin wallet needed ✓ Instant purchase ✓ Direct delivery to merchant
+              <p className="text-sm text-blue-800 mb-4">
+                <strong>Don't have Bitcoin? No problem!</strong> This is the easiest way to complete your purchase.
               </p>
             </div>
           </div>
 
           <div className="bg-white/70 rounded-lg p-5 mb-4">
-            <p className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-yellow-500" />
-              How it works (Simple 3-Step Process):
-            </p>
+            <p className="font-semibold text-gray-900 mb-3">How it works:</p>
             <ol className="space-y-2 text-sm text-gray-700 pl-5 list-decimal">
-              <li className="font-semibold">Click the button below to open NOWPayments secure checkout page</li>
-              <li>Enter your credit/debit card information (same as any online purchase)</li>
-              <li className="font-semibold">NOWPayments automatically buys Bitcoin for you and sends it directly to us (the merchant) - You don't need to do anything else!</li>
+              <li>Click the button below to open NOWPayments secure checkout</li>
+              <li>Select "Buy Crypto" and enter your credit/debit card details</li>
+              <li>NOWPayments will convert your USD to Bitcoin automatically</li>
+              <li>Bitcoin is sent directly to complete your order - all automatic!</li>
+              <li>Get confirmation within 10-30 minutes</li>
             </ol>
-            <div className="mt-4 bg-green-50 border border-green-200 rounded p-3">
-              <p className="text-xs text-green-800">
-                <Shield className="w-4 h-4 inline mr-1" />
-                <strong>Secure & Simple:</strong> NOWPayments handles everything - you just pay like any online purchase. Bitcoin is automatically purchased and sent to complete your order. Get confirmation in 10-30 minutes!
-              </p>
-            </div>
           </div>
 
           {paymentUrl && (

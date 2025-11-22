@@ -5,10 +5,10 @@ export default function StructuredData() {
     const organizationSchema = {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "Stream Stick Pro",
-      "alternateName": "Stream Stick Pro IPTV",
-      "url": "https://streamstickpro.com",
-      "logo": "https://streamstickpro.com/logo.png",
+      "name": "Inferno TV",
+      "alternateName": "Stream Unlimited",
+      "url": "https://streamunlimited.com",
+      "logo": "https://streamunlimited.com/logo.png",
       "description": "Premium IPTV subscriptions and jailbroken Fire Stick devices. Access 20,000+ live TV channels, movies, sports, and PPV events.",
       "contactPoint": {
         "@type": "ContactPoint",
@@ -18,9 +18,9 @@ export default function StructuredData() {
         "availableLanguage": ["English"]
       },
       "sameAs": [
-        "https://facebook.com/streamstickpro",
-        "https://twitter.com/streamstickpro",
-        "https://instagram.com/streamstickpro"
+        "https://facebook.com/infernotv",
+        "https://twitter.com/infernotv",
+        "https://instagram.com/infernotv"
       ],
       "address": {
         "@type": "PostalAddress",
@@ -31,8 +31,8 @@ export default function StructuredData() {
     const localBusinessSchema = {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
-      "name": "Stream Stick Pro",
-      "image": "https://streamstickpro.com/logo.png",
+      "name": "Inferno TV",
+      "image": "https://streamunlimited.com/logo.png",
       "priceRange": "$$$",
       "telephone": "+1-XXX-XXX-XXXX",
       "email": "reloadedfiretvteam@gmail.com",
@@ -45,7 +45,7 @@ export default function StructuredData() {
         "latitude": "40.7128",
         "longitude": "-74.0060"
       },
-      "url": "https://streamstickpro.com",
+      "url": "https://streamunlimited.com",
       "openingHoursSpecification": {
         "@type": "OpeningHoursSpecification",
         "dayOfWeek": [
@@ -72,11 +72,11 @@ export default function StructuredData() {
     const websiteSchema = {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "Stream Stick Pro",
-      "url": "https://streamstickpro.com",
+      "name": "Inferno TV",
+      "url": "https://streamunlimited.com",
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://streamstickpro.com/search?q={search_term_string}",
+        "target": "https://streamunlimited.com/search?q={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     };
@@ -88,7 +88,7 @@ export default function StructuredData() {
       "description": "Access 20,000+ live TV channels, movies, sports, and PPV events with our premium IPTV service. No contracts, no hidden fees.",
       "brand": {
         "@type": "Brand",
-        "name": "Stream Stick Pro"
+        "name": "Inferno TV"
       },
       "offers": {
         "@type": "AggregateOffer",
@@ -99,7 +99,7 @@ export default function StructuredData() {
         "priceValidUntil": "2025-12-31",
         "seller": {
           "@type": "Organization",
-          "name": "Stream Stick Pro"
+          "name": "Inferno TV"
         }
       },
       "aggregateRating": {
@@ -134,19 +134,19 @@ export default function StructuredData() {
           "@type": "ListItem",
           "position": 1,
           "name": "Home",
-          "item": "https://streamstickpro.com"
+          "item": "https://streamunlimited.com"
         },
         {
           "@type": "ListItem",
           "position": 2,
           "name": "Products",
-          "item": "https://streamstickpro.com#shop"
+          "item": "https://streamunlimited.com#shop"
         },
         {
           "@type": "ListItem",
           "position": 3,
           "name": "IPTV Subscriptions",
-          "item": "https://streamstickpro.com#iptv"
+          "item": "https://streamunlimited.com#iptv"
         }
       ]
     };
@@ -176,7 +176,7 @@ export default function StructuredData() {
           "name": "Do you offer a money-back guarantee?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes! We offer a 7-day money-back guarantee. If you're not completely satisfied with our service within the first 7 days, we'll provide a full refund, no questions asked."
+            "text": "Yes! We offer a 36-hour free trial. Experience our premium IPTV service completely free for 36 hours with full access to all features - no credit card required."
           }
         },
         {
@@ -210,7 +210,7 @@ export default function StructuredData() {
       "validThrough": "2025-12-31",
       "seller": {
         "@type": "Organization",
-        "name": "Stream Stick Pro"
+        "name": "Inferno TV"
       }
     };
 
@@ -219,10 +219,10 @@ export default function StructuredData() {
       "@type": "VideoObject",
       "name": "How to Setup IPTV on Fire Stick",
       "description": "Complete step-by-step guide to setting up IPTV on your Amazon Fire Stick device.",
-      "thumbnailUrl": "https://streamstickpro.com/tutorial-thumb.jpg",
+      "thumbnailUrl": "https://streamunlimited.com/tutorial-thumb.jpg",
       "uploadDate": "2024-01-01",
-      "contentUrl": "https://streamstickpro.com/tutorials",
-      "embedUrl": "https://streamstickpro.com/tutorials"
+      "contentUrl": "https://streamunlimited.com/tutorials",
+      "embedUrl": "https://streamunlimited.com/tutorials"
     };
 
     const schemas = [

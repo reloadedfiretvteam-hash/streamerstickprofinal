@@ -1,6 +1,5 @@
 import { Lock } from 'lucide-react';
 import { useState } from 'react';
-import { supabase } from '../lib/supabase';
 
 interface AdminFooterLoginProps {
   onLogin: () => void;
@@ -19,46 +18,27 @@ export default function AdminFooterLogin({ onLogin }: AdminFooterLoginProps) {
     setLoading(true);
 
     try {
-      // Check credentials in database
-      const { data: admin, error: dbError } = await supabase
-        .from('admin_credentials')
-        .select('*')
-        .or(`username.eq.${email},email.eq.${email}`)
-        .eq('password_hash', password)
-        .maybeSingle();
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
-      if (dbError) {
-        console.error('Database error:', dbError);
-        setError('Login error. Please try again.');
-        setLoading(false);
-        return;
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('admin_token', data.access_token);
+        localStorage.setItem('admin_user', JSON.stringify(data.user));
+        onLogin();
+      } else {
+        setError('Invalid email or password');
       }
-
-      if (!admin) {
-        setError('Invalid username or password');
-        setLoading(false);
-        return;
-      }
-
-      // Update last login
-      await supabase
-        .from('admin_credentials')
-        .update({ last_login: new Date().toISOString() })
-        .eq('id', admin.id);
-
-      // Set authentication tokens
-      localStorage.setItem('custom_admin_token', 'authenticated');
-      localStorage.setItem('custom_admin_user', JSON.stringify({
-        id: admin.id,
-        username: admin.username,
-        email: admin.email,
-        role: admin.role || 'admin'
-      }));
-
-      // Redirect to admin dashboard
-      window.location.href = '/admin/dashboard';
     } catch (err) {
-      console.error('Login error:', err);
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
@@ -96,16 +76,14 @@ export default function AdminFooterLogin({ onLogin }: AdminFooterLoginProps) {
             )}
 
             <div>
-              <label className="block text-gray-400 text-sm mb-2">Username</label>
+              <label className="block text-gray-400 text-sm mb-2">Email</label>
               <input
-                type="text"
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Enter username"
                 required
                 disabled={loading}
-                autoComplete="off"
               />
             </div>
 
@@ -116,10 +94,8 @@ export default function AdminFooterLogin({ onLogin }: AdminFooterLoginProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Enter password"
                 required
                 disabled={loading}
-                autoComplete="off"
               />
             </div>
 

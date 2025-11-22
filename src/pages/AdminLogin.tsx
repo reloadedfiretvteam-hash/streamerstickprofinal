@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Lock, User } from 'lucide-react';
-import StreamlinedAdminDashboard from './StreamlinedAdminDashboard';
+import AdminDashboard from './AdminDashboard';
 
 export default function AdminLogin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -24,7 +24,7 @@ export default function AdminLogin() {
 
   // Check if already authenticated
   if (isAuthenticated || localStorage.getItem('admin_authenticated') === 'true') {
-    return <StreamlinedAdminDashboard />;
+    return <AdminDashboard />;
   }
 
   return (

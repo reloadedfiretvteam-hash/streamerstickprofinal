@@ -16,7 +16,7 @@ export default function SEOHead() {
       element.content = content;
     };
 
-    setMetaTag('description', 'Premium IPTV subscriptions with 20,000+ live channels, movies, sports & PPV. Jailbroken Fire Stick 4K devices. 7-day money-back guarantee. 24/7 support. Free trial available.');
+    setMetaTag('description', 'Premium IPTV subscriptions with 20,000+ live channels, movies, sports & PPV. Jailbroken Fire Stick 4K devices. 36-hour free trial. 24/7 support. Free trial available.');
 
     setMetaTag('keywords', 'IPTV, premium IPTV, IPTV subscription, Fire Stick, jailbroken Fire Stick, Fire TV, live TV streaming, 4K streaming, sports IPTV, movie streaming, PPV events, cord cutting, cable alternative, streaming service, Fire Stick IPTV, Android IPTV, Smart TV IPTV, best IPTV service, affordable IPTV, reliable IPTV, HD streaming');
 
@@ -25,8 +25,10 @@ export default function SEOHead() {
     setMetaTag('googlebot', 'index, follow');
     setMetaTag('bingbot', 'index, follow');
 
+    setMetaTag('google-site-verification', 'YOUR_GOOGLE_VERIFICATION_CODE');
+
     setMetaTag('language', 'English');
-    setMetaTag('revisit-after', '7 days');
+    setMetaTag('revisit-after', '1 day');
     setMetaTag('distribution', 'global');
     setMetaTag('rating', 'general');
 
@@ -38,7 +40,7 @@ export default function SEOHead() {
 
     setMetaTag('og:site_name', 'Stream Stick Pro', true);
     setMetaTag('og:title', 'Stream Stick Pro - Premium IPTV with 20,000+ Channels', true);
-    setMetaTag('og:description', 'Stream 20,000+ live channels, movies, sports & PPV events. Premium IPTV subscriptions and jailbroken Fire Stick devices. 7-day guarantee.', true);
+    setMetaTag('og:description', 'Stream 20,000+ live channels, movies, sports & PPV events. Premium IPTV subscriptions and jailbroken Fire Stick devices. 36-hour free trial.', true);
     setMetaTag('og:type', 'website', true);
     setMetaTag('og:url', window.location.href, true);
     setMetaTag('og:image', `${window.location.origin}/og-image.jpg`, true);
@@ -51,7 +53,7 @@ export default function SEOHead() {
     setMetaTag('twitter:site', '@streamstickpro');
     setMetaTag('twitter:creator', '@streamstickpro');
     setMetaTag('twitter:title', 'Stream Stick Pro - Premium IPTV Streaming Service');
-    setMetaTag('twitter:description', 'Access 20,000+ live channels, movies, sports and PPV events. Premium IPTV subscriptions and Fire Stick devices. Try free for 7 days.');
+    setMetaTag('twitter:description', 'Access 20,000+ live channels, movies, sports and PPV events. Premium IPTV subscriptions and Fire Stick devices. Try free for 36 hours.');
     setMetaTag('twitter:image', `${window.location.origin}/twitter-card.jpg`);
 
     setMetaTag('geo.region', 'US');
@@ -180,7 +182,7 @@ export default function SEOHead() {
           name: 'Do you offer a money-back guarantee?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes! We offer a 7-day money-back guarantee. If you are not completely satisfied with our service within the first 7 days, we will provide a full refund, no questions asked.'
+            text: 'Yes! We offer a 36-hour free trial. Experience our premium IPTV service completely free for 36 hours with full access to all features.'
           }
         },
         {

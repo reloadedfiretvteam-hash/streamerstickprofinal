@@ -44,7 +44,7 @@ export default function FAQ() {
     },
     {
       question: 'Do you offer a free trial or money-back guarantee?',
-      answer: 'Yes! We offer a 7-day money-back guarantee on all plans. If you\'re not completely satisfied with our service within the first week, contact us for a full refund - no questions asked.',
+      answer: 'Yes! We offer a 36-hour free trial on all plans. Experience our premium IPTV service completely free for 36 hours with full access to all features - no credit card required.',
     },
     {
       question: 'How do I cancel my subscription?',

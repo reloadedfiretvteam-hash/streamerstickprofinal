@@ -35,8 +35,8 @@ export default function InfernoTVProducts({ onSelectProduct }: Props) {
       .order('sort_order');
 
     if (!error && data) {
-      const iptv = data.filter((p: Product) => p.product_type === 'iptv_subscription');
-      const firesticks = data.filter((p: Product) => p.product_type === 'firestick_bundle');
+      const iptv = data.filter((p: any) => p.product_type === 'iptv_subscription');
+      const firesticks = data.filter((p: any) => p.product_type === 'firestick_bundle');
 
       setIptvProducts(iptv as Product[]);
       setFirestickProducts(firesticks as Product[]);

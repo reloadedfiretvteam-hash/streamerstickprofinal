@@ -1,84 +1,75 @@
-import { Play, Download, Power, Zap } from 'lucide-react';
+import { ShoppingCart, Package, Plug, Play } from 'lucide-react';
 
 export default function HowItWorksSteps() {
   const steps = [
     {
-      number: 1,
-      icon: Download,
-      title: 'Order Your Device',
-      description: 'Choose from Fire Stick HD, 4K, or 4K Max with pre-configured IPTV'
+      icon: ShoppingCart,
+      number: '1',
+      title: 'Choose Your Plan',
+      description: 'Select from our Fire Stick devices or IPTV subscriptions. All plans include premium features.'
     },
     {
-      number: 2,
-      icon: Power,
-      title: 'Plug & Play Setup',
-      description: 'Simply plug into your TV and connect to WiFi - it\'s that easy!'
+      icon: Package,
+      number: '2',
+      title: 'Fast Delivery',
+      description: 'Fire Sticks ship same-day. IPTV subscriptions activate instantly via email.'
     },
     {
-      number: 3,
+      icon: Plug,
+      number: '3',
+      title: 'Quick Setup',
+      description: 'Plug in your device or follow simple setup instructions. Takes less than 5 minutes.'
+    },
+    {
       icon: Play,
+      number: '4',
       title: 'Start Streaming',
-      description: 'Access 20,000+ channels, movies, sports & PPV instantly'
-    },
-    {
-      number: 4,
-      icon: Zap,
-      title: 'Enjoy Premium Content',
-      description: '24/7 support and unlimited streaming with no buffering'
+      description: 'Enjoy 20,000+ channels, 60,000+ movies, live sports, and PPV events immediately.'
     }
   ];
 
   return (
-    <section className="py-16 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <section className="py-20 bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            How It Works
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            How It <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Works</span>
           </h2>
-          <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-            Get started in 4 simple steps and enjoy unlimited streaming today
+          <p className="text-xl text-blue-200 max-w-2xl mx-auto">
+            Get started with Stream Stick Pro in 4 simple steps
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-          {steps.map((step) => (
-            <div key={step.number} className="relative">
-              {/* Connector Line - Desktop Only */}
-              {step.number < 4 && (
-                <div className="hidden lg:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-orange-500 to-transparent z-0"></div>
-              )}
-              
-              {/* Step Card */}
-              <div className="relative bg-gray-800/50 rounded-xl p-6 border border-gray-700/50 hover:border-orange-500/50 transition-all text-center">
-                {/* Number Badge */}
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full mb-4 text-white font-bold text-xl">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+          {steps.map((step, index) => {
+            const Icon = step.icon;
+            return (
+              <div
+                key={index}
+                className="relative bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-orange-400/50 transition-all hover:transform hover:scale-105"
+              >
+                <div className="absolute -top-4 -right-4 w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-orange-500/50">
                   {step.number}
                 </div>
 
-                {/* Icon */}
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-900 rounded-full mb-4">
-                  <step.icon className="w-8 h-8 text-orange-400" />
+                <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl flex items-center justify-center mb-4 border border-orange-400/30">
+                  <Icon className="w-8 h-8 text-orange-400" />
                 </div>
 
-                {/* Content */}
-                <h3 className="text-white font-bold text-lg mb-3">
-                  {step.title}
-                </h3>
-                <p className="text-gray-400 text-sm">
-                  {step.description}
-                </p>
+                <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>
+                <p className="text-blue-200 text-sm leading-relaxed">{step.description}</p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="text-center mt-12">
-          <button
-            onClick={() => window.location.href = '/shop'}
-            className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-xl font-bold text-lg text-white transition-all transform hover:scale-105 shadow-lg"
+          <a
+            href="/shop"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold text-lg rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-orange-500/50"
           >
             Get Started Now
-          </button>
+          </a>
         </div>
       </div>
     </section>

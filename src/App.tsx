@@ -2,15 +2,18 @@ import { useState, useEffect } from 'react';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navigation from './components/Navigation';
 import Hero from './components/Hero';
-import FeatureIconRow from './components/FeatureIconRow';
-import ReviewsCarousel from './components/ReviewsCarousel';
+import About from './components/About';
+import WhyChooseUs from './components/WhyChooseUs';
 import Shop from './components/Shop';
-import HowItWorksSteps from './components/HowItWorksSteps';
-import FreeTrialBadge from './components/FreeTrialBadge';
-import WhatYouGetVideo from './components/WhatYouGetVideo';
-import BlogDisplay from './components/BlogDisplay';
+import MediaCarousel from './components/MediaCarousel';
+import DemoVideo from './components/DemoVideo';
+import WhatIsIPTV from './components/WhatIsIPTV';
 import FAQ from './components/FAQ';
+import Devices from './components/Devices';
+import YouTubeTutorials from './components/YouTubeTutorials';
+import BlogDisplay from './components/BlogDisplay';
 import LegalDisclaimer from './components/LegalDisclaimer';
+import EmailCaptureBottom from './components/EmailCaptureBottom';
 import Footer from './components/Footer';
 import EmailPopup from './components/EmailPopup';
 import CheckoutCart from './components/CheckoutCart';
@@ -18,8 +21,16 @@ import SEOHead from './components/SEOHead';
 import VisitorTracker from './components/VisitorTracker';
 import GoogleAnalytics from './components/GoogleAnalytics';
 import StructuredData from './components/StructuredData';
+import ReviewsCarousel from './components/ReviewsCarousel';
+import TrustBadges from './components/TrustBadges';
 import StickyBuyButton from './components/StickyBuyButton';
-import WhatsAppWidget from './components/WhatsAppWidget';
+import ComparisonTable from './components/ComparisonTable';
+import SocialProof from './components/SocialProof';
+import MoneyBackGuarantee from './components/MoneyBackGuarantee';
+import FeatureIconRow from './components/FeatureIconRow';
+import HowItWorksSteps from './components/HowItWorksSteps';
+import WhatYouGetVideo from './components/WhatYouGetVideo';
+import ConciergePage from './pages/ConciergePage';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
 
 interface CartItem {
@@ -43,7 +54,13 @@ interface Product {
   features: string[];
 }
 
+const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '')
+  .split(',')
+  .map((host) => host.trim().toLowerCase())
+  .filter(Boolean);
+
 function App() {
+  const [isConciergeDomain, setIsConciergeDomain] = useState(false);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [emailCaptured, setEmailCaptured] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -52,6 +69,33 @@ function App() {
   useAnalytics();
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const forcedMode = searchParams.get('mode');
+
+    if (forcedMode === 'main') {
+      setIsConciergeDomain(false);
+      return;
+    }
+
+    if (forcedMode === 'concierge') {
+      setIsConciergeDomain(true);
+      return;
+    }
+
+    const hostname = window.location.hostname.toLowerCase();
+    const pathname = window.location.pathname;
+
+    const isConciergeHost =
+      conciergeHosts.length > 0 &&
+      conciergeHosts.some((allowedHost) => hostname === allowedHost);
+
+    const isConciergePath = pathname.startsWith('/concierge');
+
+    setIsConciergeDomain(isConciergeHost || isConciergePath);
+  }, []);
+
+  useEffect(() => {
+    if (isConciergeDomain) return;
     const hasSeenPopup = localStorage.getItem('email_popup_seen');
     if (!hasSeenPopup) {
       const timer = setTimeout(() => {
@@ -59,7 +103,7 @@ function App() {
       }, 15000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [isConciergeDomain]);
 
   const handleEmailCapture = async (email: string, source: string = 'bottom') => {
     const success = await trackEmailCapture(email, source);
@@ -110,6 +154,10 @@ function App() {
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+  if (isConciergeDomain) {
+    return <ConciergePage />;
+  }
+
   return (
     <ErrorBoundary>
       <SEOHead />
@@ -121,33 +169,29 @@ function App() {
           cartItemCount={cartItemCount}
           onCartClick={() => setIsCartOpen(true)}
         />
-        
-        {/* Above the Fold - Optimized for Conversions */}
         <Hero />
         <FeatureIconRow />
-        <ReviewsCarousel />
-        
-        {/* Product Grid with Prominent Buy Buttons */}
-        <Shop onAddToCart={handleAddToCart} />
-        
-        {/* How It Works Visual Steps */}
-        <HowItWorksSteps />
-        
-        {/* What You Get Video Box */}
+        <TrustBadges />
+        <About />
+        <WhyChooseUs />
         <WhatYouGetVideo />
-        
-        {/* Below the Fold - Supporting Content */}
+        <MediaCarousel />
+        <HowItWorksSteps />
+        <Shop onAddToCart={handleAddToCart} />
+        <ReviewsCarousel />
+        <ComparisonTable />
+        <DemoVideo />
+        <WhatIsIPTV />
+        <Devices />
+        <YouTubeTutorials />
         <BlogDisplay />
+        <MoneyBackGuarantee />
         <FAQ />
+        <EmailCaptureBottom onEmailCapture={handleEmailCapture} />
         <LegalDisclaimer />
-        
-        {/* Clean Footer */}
         <Footer />
-        
-        {/* Floating Elements */}
-        <FreeTrialBadge />
         <StickyBuyButton />
-        <WhatsAppWidget />
+        <SocialProof />
 
         {showEmailPopup && !emailCaptured && (
           <EmailPopup

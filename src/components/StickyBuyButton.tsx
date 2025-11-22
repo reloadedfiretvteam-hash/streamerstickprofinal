@@ -17,8 +17,8 @@ export default function StickyBuyButton() {
     return () => window.removeEventListener('scroll', toggleVisibility);
   }, []);
 
-  const goToShop = () => {
-    window.location.href = '/shop';
+  const goToCheckout = () => {
+    window.location.href = '/checkout';
   };
 
   return (
@@ -28,7 +28,7 @@ export default function StickyBuyButton() {
       }`}
     >
       <button
-        onClick={goToShop}
+        onClick={goToCheckout}
         className="group relative px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-full shadow-2xl hover:shadow-orange-500/50 transition-all transform hover:scale-110 flex items-center gap-3 animate-pulse"
       >
         <ShoppingCart className="w-6 h-6 text-white group-hover:animate-bounce" />

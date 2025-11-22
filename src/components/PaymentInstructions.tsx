@@ -22,7 +22,7 @@ export default function PaymentInstructions({
   orderCode,
   amount,
   btcAmount,
-  cashAppTag = '$starstreem1',
+  cashAppTag = '$InfernoTV',
   bitcoinAddress = 'bc1q448jm49ypzwsrrk75c974uqla28k0kmnx6w95r'
 }: PaymentInstructionsProps) {
   const [instructions, setInstructions] = useState<PaymentInstruction | null>(null);

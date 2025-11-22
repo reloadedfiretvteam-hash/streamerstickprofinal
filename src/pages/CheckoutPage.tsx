@@ -358,7 +358,6 @@ export default function CheckoutPage() {
                   customerEmail={customerInfo.email}
                   customerName={customerInfo.name}
                   products={cart.map(item => ({
-                    id: item.product.id,
                     name: item.product.name,
                     price: parseFloat(item.product.sale_price || item.product.price),
                     quantity: item.quantity

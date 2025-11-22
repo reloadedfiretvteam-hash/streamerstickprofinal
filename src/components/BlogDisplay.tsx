@@ -17,12 +17,19 @@ interface BlogPost {
   category_id: string;
 }
 
+interface Category {
+  id: string;
+  category_name: string;
+}
+
 export default function BlogDisplay() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadPosts();
+    loadCategories();
   }, []);
 
   const loadPosts = async () => {
@@ -49,6 +56,20 @@ export default function BlogDisplay() {
       console.error('Error loading posts:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_categories')
+        .select('*')
+        .eq('is_active', true);
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error loading categories:', error);
     }
   };
 
@@ -105,10 +126,11 @@ export default function BlogDisplay() {
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
-                  <div className="absolute top-4 left-4">
+                  <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                     <span className="px-3 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full">
                       {getCategoryName(post.category_id)}
                     </span>
+                    {/* Tags will be added here when available in database */}
                   </div>
                 </div>
               )}
@@ -136,14 +158,18 @@ export default function BlogDisplay() {
                 <div className="flex items-center justify-between">
                   <a
                     href={`/blog/${post.slug}`}
-                    className="inline-flex items-center gap-2 text-orange-500 hover:text-orange-400 font-semibold"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.location.href = `/blog/${post.slug}`;
+                    }}
+                    className="inline-flex items-center gap-2 text-orange-500 hover:text-orange-400 font-semibold transition-colors"
                   >
                     Read More
                     <ArrowRight className="w-4 h-4" />
                   </a>
                   <div className="flex items-center gap-1 text-gray-500 text-sm">
                     <Eye className="w-4 h-4" />
-                    <span>{post.view_count}</span>
+                    <span>{post.view_count || 0}</span>
                   </div>
                 </div>
               </div>
@@ -152,12 +178,16 @@ export default function BlogDisplay() {
         </div>
 
         <div className="text-center mt-12">
-          <a
-            href="/blog"
-            className="inline-block px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors"
+          <button
+            onClick={() => {
+              // Scroll to top and show all blog posts or navigate to blog page
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              // Could navigate to /blog if you create a dedicated blog listing page
+            }}
+            className="inline-block px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors transform hover:scale-105"
           >
             View All Blog Posts
-          </a>
+          </button>
         </div>
       </div>
     </section>

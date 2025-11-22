@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Plus, Minus, Copy, Check, DollarSign, Wallet, ShoppingBag } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import OrderConfirmation from './OrderConfirmation';
+import LegalDisclaimer from './LegalDisclaimer';
 
 interface CartItem {
   productId: string;
@@ -9,12 +10,6 @@ interface CartItem {
   price: number;
   quantity: number;
   image?: string;
-}
-
-interface OrderItem {
-  product_name: string;
-  quantity: number;
-  total_price: number;
 }
 
 interface Props {
@@ -41,13 +36,14 @@ export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity,
 
   const [processing, setProcessing] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [orderData, setOrderData] = useState<{orderNumber: string; purchaseCode: string; items: OrderItem[]; total: number; paymentMethod: string; customerEmail: string; btcAmount: string | null; btcAddress: string | null; cashAppTag: string | null} | null>(null);
+  const [orderData, setOrderData] = useState<any>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Payment gateway details
-  const CASH_APP_TAG = '$starstreem1';
+  const CASH_APP_TAG = '$starevan11';
   const BITCOIN_ADDRESS = 'bc1q448jm49ypzwsrrk75c974uqla28k0kmnx6w95r';
   const SHOP_OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
+  const SERVICE_PORTAL_URL = 'http://ky-tv.cc';
 
   // Calculate total
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -95,7 +91,22 @@ export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity,
     }
   };
 
-  const sendCustomerEmail = async (purchaseCode: string, orderNumber: string, items: OrderItem[]) => {
+  // Generate 8–9 character username/password using customer name + random letters/numbers
+  const generateCredential = (baseName: string): string => {
+    const cleaned = (baseName || 'user')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .toLowerCase();
+    const prefix = cleaned.slice(0, 4) || 'user';
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    const length = 8 + Math.floor(Math.random() * 2); // 8 or 9
+    let suffix = '';
+    while ((prefix + suffix).length < length) {
+      suffix += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return (prefix + suffix).slice(0, length);
+  };
+
+  const sendCustomerEmail = async (purchaseCode: string, orderNumber: string, items: any[]) => {
     const itemsList = items.map(item =>
       `- ${item.product_name} x${item.quantity} = $${item.total_price.toFixed(2)}`
     ).join('\n');
@@ -176,16 +187,16 @@ Need Support? Email: ${SHOP_OWNER_EMAIL}
 
     await supabase.from('email_logs').insert({
       recipient: customerEmail,
+      template_key: 'order_confirmation',
       subject: `Order Confirmation - ${orderNumber} - Purchase Code: ${purchaseCode}`,
       body: emailBody,
-      status: 'pending',
-      type: 'order_confirmation'
+      status: 'pending'
     });
 
     return emailBody;
   };
 
-  const sendShopOwnerEmail = async (purchaseCode: string, orderNumber: string, items: OrderItem[]) => {
+  const sendShopOwnerEmail = async (purchaseCode: string, orderNumber: string, items: any[]) => {
     const itemsList = items.map(item =>
       `- ${item.product_name} x${item.quantity} = $${item.total_price.toFixed(2)}`
     ).join('\n');
@@ -232,10 +243,71 @@ Customer has been sent complete payment instructions including their unique purc
 
     await supabase.from('email_logs').insert({
       recipient: SHOP_OWNER_EMAIL,
+      template_key: 'shop_notification',
       subject: `🛒 NEW ORDER: ${orderNumber} - Code: ${purchaseCode}`,
       body: emailBody,
-      status: 'pending',
-      type: 'shop_notification'
+      status: 'pending'
+    });
+  };
+
+  // Log portal + credentials emails for customer and shop owner
+  const logCredentialsEmails = async (orderNumber: string, isFirestickOrder: boolean) => {
+    const portalUsername = generateCredential(customerName || username || 'user');
+    const portalPassword = generateCredential(customerEmail || customerName || 'pass');
+
+    const baseLines = [
+      `Portal URL: ${SERVICE_PORTAL_URL}`,
+      `Username: ${portalUsername}`,
+      `Password: ${portalPassword}`,
+      ``,
+      `Please keep this information safe. You and the shop owner both receive this email so your account can be set up on the service side.`
+    ];
+
+    const tutorialLines = isFirestickOrder
+      ? [
+          ``,
+          `Fire Stick Setup Tutorial:`,
+          `YouTube: https://youtu.be/sO2Id0bXHIY?si=1FBAbzYvUViIpepS`
+        ]
+      : [];
+
+    const customerBody = [
+      `Thank you for your purchase from Inferno TV!`,
+      ``,
+      `Here is your permanent streaming portal access:`,
+      ...baseLines,
+      ...tutorialLines
+    ].join('\n');
+
+    const ownerBody = [
+      `NEW CUSTOMER PORTAL CREDENTIALS`,
+      ``,
+      `Order Number: ${orderNumber}`,
+      `Customer: ${customerName}`,
+      `Email: ${customerEmail}`,
+      ``,
+      ...baseLines,
+      ...tutorialLines,
+      ``,
+      `Use these credentials to configure their access on ${SERVICE_PORTAL_URL}.`
+    ].join('\n');
+
+    // Customer credentials email
+    await supabase.from('email_logs').insert({
+      recipient: customerEmail,
+      template_key: 'service_credentials',
+      subject: `Your Streaming Portal Access - Order ${orderNumber}`,
+      body: customerBody,
+      status: 'pending'
+    });
+
+    // Shop owner copy
+    await supabase.from('email_logs').insert({
+      recipient: SHOP_OWNER_EMAIL,
+      template_key: 'service_credentials_owner_copy',
+      subject: `NEW PORTAL CREDENTIALS - ${orderNumber}`,
+      body: ownerBody,
+      status: 'pending'
     });
   };
 
@@ -312,6 +384,12 @@ Customer has been sent complete payment instructions including their unique purc
         total_price: item.price * item.quantity
       }));
 
+      const isFirestickOrder = items.some(item =>
+        item.name.toLowerCase().includes('fire stick') ||
+        item.name.toLowerCase().includes('firestick') ||
+        item.name.toLowerCase().includes('fire tv')
+      );
+
       // Create order in database with purchase code
       const { data: order, error: orderError } = await supabase
         .from('orders')
@@ -344,11 +422,14 @@ Customer has been sent complete payment instructions including their unique purc
         used: false
       });
 
-      // Send customer email
+      // Send customer order confirmation email
       await sendCustomerEmail(purchaseCode, orderNumber, orderItems);
 
-      // Send shop owner email
+      // Send shop owner order notification email
       await sendShopOwnerEmail(purchaseCode, orderNumber, orderItems);
+
+      // Log streaming portal credentials emails for both customer and owner
+      await logCredentialsEmails(orderNumber, isFirestickOrder);
 
       // Capture customer email
       await supabase.from('email_captures').upsert({
@@ -360,11 +441,7 @@ Customer has been sent complete payment instructions including their unique purc
       setOrderData({
         orderNumber,
         purchaseCode,
-        items: orderItems.map(item => ({
-          product_name: item.product_name,
-          quantity: item.quantity,
-          total_price: item.total_price
-        })),
+        items: orderItems,
         total,
         paymentMethod,
         customerEmail,
@@ -375,10 +452,9 @@ Customer has been sent complete payment instructions including their unique purc
 
       setShowConfirmation(true);
       console.log('Order created successfully with purchase code:', purchaseCode);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating order:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unable to process order. Please try again or contact support.';
-      alert(`Error: ${errorMessage}`);
+      alert(`Error: ${error.message || 'Unable to process order. Please try again or contact support.'}`);
     } finally {
       setProcessing(false);
     }
@@ -720,6 +796,11 @@ Customer has been sent complete payment instructions including their unique purc
                     )}
                   </div>
                 </div>
+              </div>
+
+              {/* Legal Disclaimer - Before Purchase */}
+              <div className="mb-6">
+                <LegalDisclaimer variant="checkout" />
               </div>
 
               {/* Purchase Button */}

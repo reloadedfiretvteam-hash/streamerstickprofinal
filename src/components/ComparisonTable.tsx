@@ -15,34 +15,34 @@ export default function ComparisonTable() {
   ];
 
   return (
-    <section className="py-20 bg-gray-900">
+    <section className="py-12 bg-gray-900">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
             Why Choose Inferno TV?
           </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
             Compare us to traditional cable and streaming services
           </p>
         </div>
 
-        <div className="max-w-6xl mx-auto overflow-x-auto">
-          <table className="w-full bg-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="max-w-5xl mx-auto overflow-x-auto">
+          <table className="w-full bg-gray-800 rounded-xl overflow-hidden shadow-xl">
             <thead>
               <tr className="bg-gradient-to-r from-gray-900 to-gray-800">
-                <th className="px-6 py-6 text-left text-white font-bold text-lg">Feature</th>
-                <th className="px-6 py-6 text-center">
+                <th className="px-4 py-4 text-left text-white font-bold text-sm">Feature</th>
+                <th className="px-4 py-4 text-center">
                   <div className="flex flex-col items-center">
-                    <div className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent mb-2">
+                    <div className="text-lg font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent mb-1">
                       Inferno TV
                     </div>
-                    <div className="bg-green-500 text-white text-xs px-3 py-1 rounded-full font-semibold">
+                    <div className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
                       BEST VALUE
                     </div>
                   </div>
                 </th>
-                <th className="px-6 py-6 text-center text-gray-400 font-semibold">Cable TV</th>
-                <th className="px-6 py-6 text-center text-gray-400 font-semibold">Streaming</th>
+                <th className="px-4 py-4 text-center text-gray-400 font-semibold text-sm">Cable TV</th>
+                <th className="px-4 py-4 text-center text-gray-400 font-semibold text-sm">Streaming</th>
               </tr>
             </thead>
             <tbody>
@@ -51,38 +51,38 @@ export default function ComparisonTable() {
                   key={index}
                   className="border-t border-gray-700 hover:bg-gray-750 transition-colors"
                 >
-                  <td className="px-6 py-4 text-white font-medium">{feature.name}</td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-4 py-3 text-white font-medium text-sm">{feature.name}</td>
+                  <td className="px-4 py-3 text-center">
                     {typeof feature.inferno === 'boolean' ? (
                       feature.inferno ? (
-                        <Check className="w-6 h-6 text-green-400 mx-auto" />
+                        <Check className="w-5 h-5 text-green-400 mx-auto" />
                       ) : (
-                        <X className="w-6 h-6 text-red-400 mx-auto" />
+                        <X className="w-5 h-5 text-red-400 mx-auto" />
                       )
                     ) : (
-                      <span className="text-orange-400 font-bold">{feature.inferno}</span>
+                      <span className="text-orange-400 font-bold text-sm">{feature.inferno}</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-4 py-3 text-center">
                     {typeof feature.cable === 'boolean' ? (
                       feature.cable ? (
-                        <Check className="w-6 h-6 text-gray-400 mx-auto" />
+                        <Check className="w-5 h-5 text-gray-400 mx-auto" />
                       ) : (
-                        <X className="w-6 h-6 text-gray-600 mx-auto" />
+                        <X className="w-5 h-5 text-gray-600 mx-auto" />
                       )
                     ) : (
-                      <span className="text-gray-400">{feature.cable}</span>
+                      <span className="text-gray-400 text-sm">{feature.cable}</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-4 py-3 text-center">
                     {typeof feature.streaming === 'boolean' ? (
                       feature.streaming ? (
-                        <Check className="w-6 h-6 text-gray-400 mx-auto" />
+                        <Check className="w-5 h-5 text-gray-400 mx-auto" />
                       ) : (
-                        <X className="w-6 h-6 text-gray-600 mx-auto" />
+                        <X className="w-5 h-5 text-gray-600 mx-auto" />
                       )
                     ) : (
-                      <span className="text-gray-400">{feature.streaming}</span>
+                      <span className="text-gray-400 text-sm">{feature.streaming}</span>
                     )}
                   </td>
                 </tr>
@@ -91,14 +91,14 @@ export default function ComparisonTable() {
           </table>
         </div>
 
-        <div className="text-center mt-12">
+        <div className="text-center mt-8">
           <button
-            onClick={() => document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' })}
-            className="px-12 py-5 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold text-xl rounded-xl shadow-2xl hover:shadow-orange-500/50 transition-all transform hover:scale-105"
+            onClick={() => window.location.href = '/checkout'}
+            className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold text-lg rounded-xl shadow-xl hover:shadow-orange-500/50 transition-all transform hover:scale-105"
           >
             Get Started - Save $1,920/Year
           </button>
-          <p className="text-gray-400 mt-4 text-sm">
+          <p className="text-gray-400 mt-3 text-xs">
             Join 2,700+ happy customers who switched from cable
           </p>
         </div>

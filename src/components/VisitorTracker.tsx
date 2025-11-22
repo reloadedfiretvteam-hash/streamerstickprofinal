@@ -9,40 +9,38 @@ export default function VisitorTracker() {
   const trackVisitor = async () => {
     try {
       const sessionId = getOrCreateSessionId();
-      const visitorId = getOrCreateVisitorId();
-
-      const visitData = {
-        session_id: sessionId,
-        visitor_id: visitorId,
-        user_agent: navigator.userAgent,
-        landing_page: window.location.pathname,
-        referrer_url: document.referrer || null,
-        referrer_domain: document.referrer ? new URL(document.referrer).hostname : null,
-        language: navigator.language,
-        screen_resolution: `${window.screen.width}x${window.screen.height}`,
-        entry_time: new Date().toISOString(),
-        pages_viewed: 1,
-        is_bounce: false,
-        converted: false
-      };
+      getOrCreateVisitorId();
 
       const { data, error } = await supabase
-        .from('visitor_tracking')
-        .insert(visitData)
+        .from('visitors')
+        .insert({
+          session_id: sessionId,
+          page_url: window.location.href,
+          referrer: document.referrer || null,
+          user_agent: navigator.userAgent
+        })
         .select()
         .maybeSingle();
 
-      if (error) {
-        console.error('Visitor tracking error:', error);
-      } else if (data) {
+      if (!error && data) {
         sessionStorage.setItem('visitor_tracking_id', data.id);
+        trackPageView(data.id, sessionId);
       }
+
+      window.addEventListener('beforeunload', () => {
+        updateSessionEnd(data?.id);
+      });
 
     } catch (error) {
       console.error('Visitor tracking error:', error);
     }
   };
 
+  const trackPageView = async (_visitorTrackingId: string, _sessionId: string) => {
+  };
+
+  const updateSessionEnd = async (_visitorTrackingId: string | undefined) => {
+  };
 
   const getOrCreateSessionId = (): string => {
     let sessionId = sessionStorage.getItem('session_id');

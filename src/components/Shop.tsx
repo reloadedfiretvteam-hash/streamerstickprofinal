@@ -23,17 +23,11 @@ interface DBProduct {
   name: string;
   price: number;
   sale_price: number | null;
-  base_price?: number;
   short_description: string;
   description: string;
   featured: boolean;
   status: string;
   main_image: string;
-  product_images?: Array<{
-    image_url: string;
-    alt_text: string;
-    is_primary: boolean;
-  }>;
 }
 
 export default function Shop({ onAddToCart }: ShopProps) {
@@ -51,26 +45,30 @@ export default function Shop({ onAddToCart }: ShopProps) {
 
   const loadProducts = async () => {
     const { data: dbProducts } = await supabase
-      .from('products')
+      .from('real_products')
       .select('*')
+      .in('status', ['published', 'publish', 'active'])
       .order('sort_order', { ascending: true });
 
     if (dbProducts) {
-      const mappedProducts: Product[] = dbProducts.map((p: any) => {
-        const features = p.description ? p.description.split('.').filter((f: string) => f.trim()).map((f: string) => f.trim()) : ['Premium quality', '24/7 support'];
+
+      const mappedProducts: Product[] = dbProducts.map((p: DBProduct) => {
+        const features = p.description ? p.description.split(',').map(f => f.trim()) : [];
         const isFirestick = p.name.toLowerCase().includes('fire stick') || p.name.toLowerCase().includes('fire tv');
-        const price = parseFloat(p.price?.toString() || '0');
+
+        // Parse prices to numbers
+        const price = parseFloat(p.sale_price?.toString() || p.price?.toString() || '0');
 
         return {
           id: p.id,
           name: p.name,
           price: price,
           type: isFirestick ? 'firestick' : 'iptv',
-          image: p.image_url || '/OIF.jpg',
+          image: p.main_image || (isFirestick ? 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=800' : 'https://images.pexels.com/photos/1202723/pexels-photo-1202723.jpeg?auto=compress&cs=tinysrgb&w=800'),
           badge: isFirestick ? 'BEST VALUE' : 'POPULAR',
-          popular: p.featured || false,
+          popular: p.featured,
           period: isFirestick ? undefined : '/month',
-          features: features.slice(0, 4)
+          features: features.length > 0 ? features : ['Premium quality', '24/7 support']
         };
       });
 
@@ -90,26 +88,6 @@ export default function Shop({ onAddToCart }: ShopProps) {
     setFreeTrialLoading(true);
 
     try {
-      const orderNumber = `TRIAL-${Date.now()}`;
-
-      await supabase
-        .from('orders_full')
-        .insert([{
-          order_number: orderNumber,
-          customer_email: freeTrialEmail,
-          customer_name: freeTrialName,
-          customer_phone: freeTrialPhone || null,
-          subtotal: 0,
-          discount_amount: 0,
-          tax_amount: 0,
-          shipping_cost: 0,
-          total_amount: 0,
-          payment_method: 'free_trial',
-          payment_status: 'pending',
-          order_status: 'pending',
-          notes: '36-Hour Free Trial - Awaiting Activation'
-        }]);
-
       await supabase
         .from('email_captures')
         .insert([{
@@ -117,16 +95,11 @@ export default function Shop({ onAddToCart }: ShopProps) {
           name: freeTrialName,
           phone: freeTrialPhone || null,
           source: 'free-trial-signup',
-          metadata: {
-            product: '36-Hour Free Trial - IPTV Subscription',
-            order_number: orderNumber
-          }
+          metadata: { product: 'Free Trial - IPTV Subscription' }
         }]);
 
       const emailBody = `
-NEW FREE TRIAL REQUEST - 36 HOURS
-
-Order Number: ${orderNumber}
+FREE TRIAL REQUEST - IPTV SUBSCRIPTION
 
 Customer Details:
 - Name: ${freeTrialName}
@@ -134,29 +107,24 @@ Customer Details:
 - Phone: ${freeTrialPhone || 'Not provided'}
 - Date: ${new Date().toLocaleString()}
 
-Product: 36-Hour Free Trial IPTV Subscription
-- 22,000+ Live TV Channels
-- 120,000+ Movies & Shows
-- All Sports & PPV Events
-- 4K Ultra HD Quality
+Product: Free Trial IPTV Subscription
+- 7 Days Free Access
+- All channels included
+- All features included
 
-ACTION REQUIRED:
-Please process this free trial request and send activation details to:
-${freeTrialEmail}
-
-The customer should receive their trial code within 24 hours.
+Please process this free trial request and send activation details to the customer.
 
 ---
-This order has been added to your admin panel at streamstickpro.com/admin
+This is an automated message from StreamStickPro.com
       `.trim();
 
-      const mailtoLink = `mailto:reloadedfiretvteam@gmail.com?cc=${freeTrialEmail}&subject=New 36-Hour Free Trial Request - ${freeTrialName}&body=${encodeURIComponent(emailBody)}`;
+      const mailtoLink = `mailto:reloadedfiretvteam@gmail.com?subject=Free Trial Request - ${freeTrialName}&body=${encodeURIComponent(emailBody)}`;
       window.location.href = mailtoLink;
 
       setFreeTrialSubmitted(true);
 
       setTimeout(() => {
-        alert('Email opened! Please send the email to complete your free trial request. You will receive your activation details within 24 hours.');
+        alert('Email opened! Please send the email to complete your free trial request. We will contact you within 24 hours.');
       }, 500);
 
     } catch (error) {
@@ -203,7 +171,7 @@ This order has been added to your admin panel at streamstickpro.com/admin
       name: 'Fire Stick HD',
       price: 140.00,
       type: 'firestick',
-      image: '/OIP (11)99 copy copy copy copy.jpg',
+      image: 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=800',
       badge: 'HD QUALITY',
       popular: false,
       features: [
@@ -224,7 +192,7 @@ This order has been added to your admin panel at streamstickpro.com/admin
       name: 'Fire Stick 4K',
       price: 150.00,
       type: 'firestick',
-      image: '/71+Pvh7WB6L._AC_SL1500_ copy copy.jpg',
+      image: 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=800',
       badge: 'BEST VALUE',
       popular: true,
       features: [
@@ -245,7 +213,7 @@ This order has been added to your admin panel at streamstickpro.com/admin
       name: 'Fire Stick 4K Max',
       price: 160.00,
       type: 'firestick',
-      image: '/71E1te69hZL._AC_SL1500_ copy copy copy.jpg',
+      image: 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=800',
       badge: 'PREMIUM',
       popular: false,
       features: [
@@ -267,7 +235,7 @@ This order has been added to your admin panel at streamstickpro.com/admin
       name: '1 Month IPTV Subscription',
       price: 15.00,
       type: 'iptv',
-      image: '/OIF copy copy copy copy.jpg',
+      image: 'https://images.pexels.com/photos/1202723/pexels-photo-1202723.jpeg?auto=compress&cs=tinysrgb&w=800',
       badge: 'STARTER',
       popular: false,
       period: '/month',
@@ -289,7 +257,7 @@ This order has been added to your admin panel at streamstickpro.com/admin
       name: '3 Month IPTV Subscription',
       price: 30.00,
       type: 'iptv',
-      image: '/OIF copy copy copy copy.jpg',
+      image: 'https://images.pexels.com/photos/1202723/pexels-photo-1202723.jpeg?auto=compress&cs=tinysrgb&w=800',
       badge: 'POPULAR',
       popular: true,
       features: [
@@ -310,7 +278,7 @@ This order has been added to your admin panel at streamstickpro.com/admin
       name: '6 Month IPTV Subscription',
       price: 50.00,
       type: 'iptv',
-      image: '/OIF copy copy copy copy.jpg',
+      image: 'https://images.pexels.com/photos/1202723/pexels-photo-1202723.jpeg?auto=compress&cs=tinysrgb&w=800',
       badge: 'GREAT VALUE',
       popular: false,
       features: [
@@ -331,7 +299,7 @@ This order has been added to your admin panel at streamstickpro.com/admin
       name: '1 Year IPTV Subscription',
       price: 75.00,
       type: 'iptv',
-      image: '/OIF copy copy copy copy.jpg',
+      image: 'https://images.pexels.com/photos/1202723/pexels-photo-1202723.jpeg?auto=compress&cs=tinysrgb&w=800',
       badge: 'BEST DEAL',
       popular: false,
       features: [
@@ -400,7 +368,7 @@ This order has been added to your admin panel at streamstickpro.com/admin
                 </h2>
 
                 <p className="text-xl md:text-2xl text-gray-200 mb-8 leading-relaxed">
-                  Easy setup with simple plug-and-play installation. Just log in your details and start streaming. Cut the chains of expensive cable and experience true streaming freedom.
+                  Pre-loaded, pre-configured, and ready to stream. Cut the chains of expensive cable and experience true streaming freedom.
                 </p>
 
                 <div className="flex flex-wrap gap-4 text-sm md:text-base">
@@ -674,7 +642,7 @@ This order has been added to your admin panel at streamstickpro.com/admin
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="w-full h-full object-contain bg-gradient-to-br from-gray-800 to-gray-900 p-4"
+                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
                     loading="lazy"
                   />
                   <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full font-bold text-xs">
