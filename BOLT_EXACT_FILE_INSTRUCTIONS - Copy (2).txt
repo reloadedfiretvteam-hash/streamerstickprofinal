@@ -1,0 +1,99 @@
+EXACT FILE INSTRUCTIONS FOR BOLT - WHERE TO LOOK, WHAT TO INCLUDE, WHAT TO EXCLUDE
+
+EXACT FILE LOCATION:
+C:\Users\rdela\Downloads\New folder (2)\streamerstickprofinal
+
+THIS IS WHERE ALL YOUR FILES ARE. GO TO THIS EXACT FOLDER.
+
+FILES TO INCLUDE (MUST PUSH THESE):
+
+1. src/ FOLDER - ALL FILES
+   Location: C:\Users\rdela\Downloads\New folder (2)\streamerstickprofinal\src\
+   Contains: 136+ files
+   What: All your website code (components, pages, TypeScript files)
+   MUST INCLUDE: Everything in this folder
+
+2. public/ FOLDER - ALL FILES
+   Location: C:\Users\rdela\Downloads\New folder (2)\streamerstickprofinal\public\
+   Contains: 55+ files
+   What: All images, robots.txt, sitemap.xml, static assets
+   MUST INCLUDE: Everything in this folder
+
+3. CONFIGURATION FILES (Root folder)
+   Location: C:\Users\rdela\Downloads\New folder (2)\streamerstickprofinal\
+   MUST INCLUDE these files:
+   - package.json
+   - vite.config.ts
+   - wrangler.toml
+   - .nvmrc
+   - index.html
+   - tsconfig.json
+   - tsconfig.app.json
+   - tsconfig.node.json
+   - tailwind.config.js
+   - postcss.config.js
+   - eslint.config.js
+
+4. supabase/ FOLDER - ALL FILES
+   Location: C:\Users\rdela\Downloads\New folder (2)\streamerstickprofinal\supabase\
+   Contains: Functions and migrations
+   MUST INCLUDE: Everything in this folder
+
+FILES TO EXCLUDE (DON'T PUSH THESE):
+
+- *.md files (documentation files - not needed for website)
+  Examples: BOLT_*.md, *_GUIDE.md, *_INSTRUCTIONS.md, etc.
+  Exception: README.md can stay
+
+- node_modules/ folder (will be installed during build)
+- .env files (secrets - use environment variables instead)
+- *.log files
+- *.tmp files
+
+HOW TO PUSH:
+
+1. Go to exact folder:
+cd "C:\Users\rdela\Downloads\New folder (2)\streamerstickprofinal"
+
+2. Add all files (git will automatically exclude .gitignore files):
+git add .
+
+3. Commit:
+git commit -m "Push complete website - all source files, assets, and configurations"
+
+4. Push:
+git push origin main --force
+
+VERIFY AFTER PUSHING:
+
+Go to: https://github.com/reloadedfiretvteam-hash/streamerstickprofinal
+
+Check that you see:
+- src/ folder (with many files inside)
+- public/ folder (with images inside)
+- package.json
+- vite.config.ts
+- wrangler.toml
+- .nvmrc
+- All configuration files
+
+WHAT WAS ADDED TODAY:
+
+1. .nvmrc file (Node version 20) - NEW
+2. wrangler.toml (updated project name) - MODIFIED
+3. All files in src/ folder - YOUR COMPLETE WEBSITE CODE
+4. All files in public/ folder - ALL IMAGES AND ASSETS
+
+REPOSITORY:
+- GitHub: reloadedfiretvteam-hash/streamerstickprofinal
+- Branch: main
+- Token: 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
+
+GIVE ME STEP-BY-STEP INSTRUCTIONS:
+1. Go to the exact folder location above
+2. Verify the files are there (src/, public/, package.json, etc.)
+3. Push all files using git commands
+4. Verify files are in GitHub
+5. Tell me what files were pushed
+
+
