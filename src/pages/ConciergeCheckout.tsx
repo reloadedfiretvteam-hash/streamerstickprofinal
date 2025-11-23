@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Shield, Lock, Info } from 'lucide-react';
-import SquarePaymentForm from './SquarePaymentForm';
+import SquarePaymentForm from '../components/SquarePaymentForm';
 
 export default function ConciergeCheckout() {
   const [step, setStep] = useState(1);
