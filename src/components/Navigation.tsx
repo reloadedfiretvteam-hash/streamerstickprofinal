@@ -1,6 +1,8 @@
 import { Flame, Menu, X, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 
+// Updated: Cart button now opens modal instead of redirecting
+
 interface NavigationProps {
   cartItemCount?: number;
   onCartClick?: () => void;
@@ -34,7 +36,8 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
               About
             </a>
             <a
-              href="/shop"
+              href="#shop"
+              onClick={(e) => { e.preventDefault(); document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' }); }}
               className="hover:text-orange-400 transition-colors font-semibold"
             >
               Shop
@@ -58,8 +61,8 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
             >
               Track Order
             </a>
-            <a
-              href="/checkout"
+            <button
+              onClick={() => onCartClick?.()}
               className="relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
             >
               <ShoppingCart className="w-5 h-5" />
@@ -69,7 +72,7 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
                   {cartItemCount}
                 </span>
               )}
-            </a>
+            </button>
           </div>
 
           <button
@@ -97,8 +100,8 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
               About
             </a>
             <a
-              href="/shop"
-              onClick={() => setIsMenuOpen(false)}
+              href="#shop"
+              onClick={(e) => { e.preventDefault(); document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' }); setIsMenuOpen(false); }}
               className="block py-2 hover:text-orange-400 transition-colors font-semibold"
             >
               Shop
