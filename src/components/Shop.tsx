@@ -59,14 +59,30 @@ export default function Shop({ onAddToCart }: ShopProps) {
         // Parse prices to numbers
         const price = parseFloat(p.sale_price?.toString() || p.price?.toString() || '0');
 
+        // Get image - prioritize main_image, then image_url, then fallback
+        let productImage = p.main_image || p.image_url || '';
+        
+        // If no image, use type-specific fallback
+        if (!productImage || productImage.trim() === '') {
+          if (isFirestick) {
+            if (p.name.toLowerCase().includes('4k max')) {
+              productImage = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k%20max.jpg';
+            } else if (p.name.toLowerCase().includes('4k')) {
+              productImage = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k.jpg';
+            } else {
+              productImage = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg';
+            }
+          } else {
+            productImage = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
+          }
+        }
+
         return {
           id: p.id,
           name: p.name,
           price: price,
           type: isFirestick ? 'firestick' : 'iptv',
-          image: p.main_image || (isFirestick 
-            ? 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg'
-            : 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg'),
+          image: productImage,
           badge: isFirestick ? 'BEST VALUE' : 'POPULAR',
           popular: p.featured,
           period: isFirestick ? undefined : '/month',

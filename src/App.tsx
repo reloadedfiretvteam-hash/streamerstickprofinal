@@ -6,7 +6,6 @@ import About from './components/About';
 import WhyChooseUs from './components/WhyChooseUs';
 import Shop from './components/Shop';
 import MediaCarousel from './components/MediaCarousel';
-import DemoVideo from './components/DemoVideo';
 import IPTVPreviewVideo from './components/IPTVPreviewVideo';
 import WhatIsIPTV from './components/WhatIsIPTV';
 import FAQ from './components/FAQ';
@@ -107,12 +106,19 @@ function App() {
     // Secure domain: lock to Square-safe checkout experience.
     const isSecureHost =
       secureHosts.length > 0 &&
-      secureHosts.some((allowedHost) => hostname === allowedHost);
+      secureHosts.some((allowedHost) => hostname === allowedHost || hostname.includes(allowedHost));
 
     // Also treat direct /secure path on any host as secure mode.
-    const isSecurePath = pathname.startsWith('/secure');
+    const isSecurePath = pathname.startsWith('/secure') || pathname.startsWith('/checkout-secure');
 
-    setIsSecureDomain(isSecureHost || isSecurePath);
+    const isSecure = isSecureHost || isSecurePath;
+    
+    // Debug logging
+    if (isSecure) {
+      console.log('🔒 Secure domain detected:', { hostname, pathname, secureHosts, isSecureHost, isSecurePath });
+    }
+    
+    setIsSecureDomain(isSecure);
   }, []);
 
   useEffect(() => {
@@ -212,7 +218,6 @@ function App() {
         <ReviewsCarousel />
         <ComparisonTable />
         <IPTVPreviewVideo />
-        <DemoVideo />
         <WhatIsIPTV />
         <Devices />
         <YouTubeTutorials />
