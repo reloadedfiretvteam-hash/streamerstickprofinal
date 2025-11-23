@@ -92,19 +92,6 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
                 <span className="text-sm font-bold tracking-wide">BREAK FREE FROM CABLE</span>
               </div>
 
-              <h2 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight">
-                Unleash
-                <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 animate-pulse">
-                  Unlimited
-                </span>
-                <br />
-                Entertainment
-              </h2>
-
-              <p className="text-xl md:text-2xl text-gray-200 mb-8 leading-relaxed">
-                Easy setup - just add your login credentials and start streaming. Cut the chains of expensive cable and experience true streaming freedom.
-              </p>
 
               <div className="flex flex-wrap gap-4 text-sm md:text-base">
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">

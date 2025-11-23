@@ -375,19 +375,6 @@ This is an automated message from StreamStickPro.com
                   <span className="text-sm font-bold tracking-wide">BREAK FREE FROM CABLE</span>
                 </div>
 
-                <h2 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight">
-                  Unleash
-                  <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 animate-pulse">
-                    Unlimited
-                  </span>
-                  <br />
-                  Entertainment
-                </h2>
-
-                <p className="text-xl md:text-2xl text-gray-200 mb-8 leading-relaxed">
-                  Pre-loaded, pre-configured, and ready to stream. Cut the chains of expensive cable and experience true streaming freedom.
-                </p>
 
                 <div className="flex flex-wrap gap-4 text-sm md:text-base">
                   <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
@@ -500,7 +487,7 @@ This is an automated message from StreamStickPro.com
           <div className="max-w-5xl mx-auto bg-gradient-to-br from-green-600 via-teal-600 to-green-600 rounded-3xl overflow-hidden shadow-2xl border-4 border-green-400">
             <div className="bg-gradient-to-r from-green-500 to-teal-500 text-white text-center py-3 font-bold text-lg relative">
               <Gift className="w-6 h-6 absolute left-6 top-1/2 -translate-y-1/2 animate-bounce" />
-              🎉 LIMITED TIME - TRY FREE FOR 36 HOURS!
+              🎉 LIMITED TIME - 50% OFF ALL PLANS!
               <Gift className="w-6 h-6 absolute right-6 top-1/2 -translate-y-1/2 animate-bounce" />
             </div>
 
@@ -509,10 +496,10 @@ This is an automated message from StreamStickPro.com
                 {/* Left Side - Info */}
                 <div>
                   <h3 className="text-4xl font-bold text-white mb-4">
-                    36-Hour Free Trial
+                    50% OFF
                   </h3>
                   <p className="text-green-100 text-lg mb-6">
-                    No credit card required. Experience everything our premium IPTV service has to offer completely free!
+                    Get 50% off all IPTV subscription plans! Limited time offer - don't miss out on this incredible deal!
                   </p>
 
                   <div className="space-y-3 mb-6">

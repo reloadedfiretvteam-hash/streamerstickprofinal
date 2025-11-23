@@ -29,7 +29,6 @@ import SocialProof from './components/SocialProof';
 import MoneyBackGuarantee from './components/MoneyBackGuarantee';
 import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
-import WhatYouGetVideo from './components/WhatYouGetVideo';
 import ConciergePage from './pages/ConciergePage';
 import ConciergeCheckout from './pages/ConciergeCheckout';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
@@ -211,16 +210,15 @@ function App() {
         <TrustBadges />
         <About />
         <WhyChooseUs />
-        <WhatYouGetVideo />
         <MediaCarousel />
         <HowItWorksSteps />
         <Shop onAddToCart={handleAddToCart} />
+        <YouTubeTutorials />
         <ReviewsCarousel />
         <ComparisonTable />
         <IPTVPreviewVideo />
         <WhatIsIPTV />
         <Devices />
-        <YouTubeTutorials />
         <BlogDisplay />
         <MoneyBackGuarantee />
         <FAQ />
