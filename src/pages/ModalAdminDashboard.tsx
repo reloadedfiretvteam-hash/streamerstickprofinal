@@ -71,16 +71,16 @@ export default function ModalAdminDashboard() {
         { count: mediaCount },
         { data: orders }
       ] = await Promise.all([
-        supabase.from('products').select('*', { count: 'exact', head: true }),
+        supabase.from('real_products').select('*', { count: 'exact', head: true }),
         supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
         supabase.from('orders').select('*', { count: 'exact', head: true }),
         supabase.from('bitcoin_orders').select('*', { count: 'exact', head: true }),
         supabase.from('media_files').select('*', { count: 'exact', head: true }),
-        supabase.from('orders').select('total_amount')
+        supabase.from('orders').select('total')
       ]);
 
       const totalRevenue = orders?.reduce((sum, order) => {
-        return sum + parseFloat(order.total_amount || '0');
+        return sum + parseFloat(order.total || '0');
       }, 0) || 0;
 
       setStats({
