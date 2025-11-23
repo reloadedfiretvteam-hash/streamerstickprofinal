@@ -26,3 +26,4 @@ dist-ssr
 cursor-mcp-config.json
 *.md
 !README.md
+!DEPLOYMENT_FIX_GUIDE.md
