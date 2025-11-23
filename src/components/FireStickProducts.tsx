@@ -1,73 +1,121 @@
+import { useState, useEffect } from 'react';
 import { Check, Flame, Star, Zap } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface ProductsProps {
   onSelectProduct: (productId: string, amount: number) => void;
 }
 
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  sale_price?: number;
+  image_url: string;
+  description: string;
+  short_description?: string;
+  category: string;
+  is_featured: boolean;
+  sort_order: number;
+}
+
 export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
-  const products = [
-    {
-      id: 'firestick-hd',
-      name: 'Fire Stick HD',
-      price: 140.00,
-      image: '/OIF.jpg',
-      badge: 'HD QUALITY',
-      popular: false,
-      features: [
-        'Brand New Amazon Fire Stick HD',
-        '18,000+ Live TV Channels',
-        '60,000+ Movies & TV Shows',
-        'All Sports Channels & PPV Events',
-        'HD Quality',
-        'Pre-Configured & Ready to Use',
-        'Plug & Play Setup (5 Minutes)',
-        '1 Year Premium IPTV Included',
-        'Free Shipping',
-        '24/7 Support'
-      ]
-    },
-    {
-      id: 'firestick-4k',
-      name: 'Fire Stick 4K',
-      price: 150.00,
-      image: 'https://images.pexels.com/photos/4178672/pexels-photo-4178672.jpeg?auto=compress&cs=tinysrgb&w=800',
-      badge: 'BEST VALUE',
-      popular: true,
-      features: [
-        'Brand New Amazon Fire Stick 4K',
-        '18,000+ Live TV Channels',
-        '60,000+ Movies & TV Shows',
-        'All Sports Channels & PPV Events',
-        '4K Ultra HD Quality',
-        'Pre-Configured & Ready to Use',
-        'Plug & Play Setup (5 Minutes)',
-        '1 Year Premium IPTV Included',
-        'Priority Customer Support',
-        'Free Shipping'
-      ]
-    },
-    {
-      id: 'firestick-4k-max',
-      name: 'Fire Stick 4K Max',
-      price: 160.00,
-      image: 'https://images.pexels.com/photos/7533347/pexels-photo-7533347.jpeg?auto=compress&cs=tinysrgb&w=800',
-      badge: 'PREMIUM',
-      popular: false,
-      features: [
-        'Brand New Amazon Fire Stick 4K Max',
-        '18,000+ Live TV Channels',
-        '60,000+ Movies & TV Shows',
-        'All Sports Channels & PPV Events',
-        '4K Ultra HD Quality',
-        'Fastest Performance',
-        'Pre-Configured & Ready to Use',
-        'Plug & Play Setup (5 Minutes)',
-        '1 Year Premium IPTV Included',
-        'VIP Customer Support',
-        'Free Shipping'
-      ]
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('is_active', true)
+        .eq('category', 'firestick')
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+
+      setProducts(data || []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      // Fallback to hardcoded products if database fetch fails
+      setProducts([
+        {
+          id: 'firestick-hd',
+          name: 'Fire Stick HD',
+          price: 140.00,
+          image_url: '/OIF.jpg',
+          description: 'Brand New Amazon Fire Stick HD with 18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports Channels & PPV Events, HD Quality, Pre-Configured & Ready to Use, Plug & Play Setup (5 Minutes), 1 Year Premium IPTV Included, Free Shipping, 24/7 Support',
+          short_description: 'HD QUALITY',
+          category: 'firestick',
+          is_featured: false,
+          sort_order: 1
+        },
+        {
+          id: 'firestick-4k',
+          name: 'Fire Stick 4K',
+          price: 150.00,
+          image_url: 'https://images.pexels.com/photos/4178672/pexels-photo-4178672.jpeg?auto=compress&cs=tinysrgb&w=800',
+          description: 'Brand New Amazon Fire Stick 4K with 18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports Channels & PPV Events, 4K Ultra HD Quality, Pre-Configured & Ready to Use, Plug & Play Setup (5 Minutes), 1 Year Premium IPTV Included, Priority Customer Support, Free Shipping',
+          short_description: 'BEST VALUE',
+          category: 'firestick',
+          is_featured: true,
+          sort_order: 2
+        },
+        {
+          id: 'firestick-4k-max',
+          name: 'Fire Stick 4K Max',
+          price: 160.00,
+          image_url: 'https://images.pexels.com/photos/7533347/pexels-photo-7533347.jpeg?auto=compress&cs=tinysrgb&w=800',
+          description: 'Brand New Amazon Fire Stick 4K Max with 18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports Channels & PPV Events, 4K Ultra HD Quality, Fastest Performance, Pre-Configured & Ready to Use, Plug & Play Setup (5 Minutes), 1 Year Premium IPTV Included, VIP Customer Support, Free Shipping',
+          short_description: 'PREMIUM',
+          category: 'firestick',
+          is_featured: false,
+          sort_order: 3
+        }
+      ] as Product[]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const getFeatures = (description: string): string[] => {
+    // Extract features from description or use a default set
+    const features = description.split(',').map(f => f.trim());
+    if (features.length > 0) return features;
+    
+    return [
+      '18,000+ Live TV Channels',
+      '60,000+ Movies & TV Shows',
+      'All Sports Channels & PPV Events',
+      'Pre-Configured & Ready to Use',
+      'Plug & Play Setup (5 Minutes)',
+      '1 Year Premium IPTV Included',
+      'Free Shipping',
+      '24/7 Support'
+    ];
+  };
+
+  const getBadge = (product: Product): string => {
+    if (product.short_description) return product.short_description;
+    if (product.name.includes('HD') && !product.name.includes('4K')) return 'HD QUALITY';
+    if (product.name.includes('4K Max')) return 'PREMIUM';
+    if (product.name.includes('4K')) return 'BEST VALUE';
+    return 'QUALITY';
+  };
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <div className="animate-pulse">Loading products...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="products" className="py-20 bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white relative overflow-hidden">
@@ -135,71 +183,82 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {products.map((product, index) => (
-            <div
-              key={product.id}
-              className={`relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl animate-slide-up ${
-                product.popular ? 'ring-4 ring-orange-500 scale-105 shadow-2xl shadow-orange-500/50' : ''
-              }`}
-              style={{ animationDelay: `${index * 200}ms` }}
-            >
-              {product.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                  <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce">
-                    <Star className="w-4 h-4 fill-current" />
-                    MOST POPULAR
-                  </div>
-                </div>
-              )}
-
-              <div className="relative h-56 overflow-hidden">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-sm">
-                  {product.badge}
-                </div>
-              </div>
-
-              <div className="p-8">
-                <h3 className="text-2xl font-bold mb-4">{product.name}</h3>
-
-                <div className="mb-6">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold text-orange-400">
-                      ${product.price.toFixed(2)}
-                    </span>
-                  </div>
-                  <p className="text-blue-200 text-sm mt-2">
-                    Includes 1 Year IPTV Subscription
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => onSelectProduct(product.id, product.price)}
-                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 ${
-                    product.popular
-                      ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
-                      : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg'
-                  }`}
-                >
-                  <Zap className="w-5 h-5" />
-                  Order Now
-                </button>
-
-                <div className="space-y-3">
-                  {product.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-start gap-3 group">
-                      <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5 group-hover:scale-125 transition-transform" />
-                      <span className="text-blue-100 text-sm">{feature}</span>
+          {products.map((product, index) => {
+            const displayPrice = product.sale_price || product.price;
+            const features = getFeatures(product.description);
+            const badge = getBadge(product);
+            
+            return (
+              <div
+                key={product.id}
+                className={`relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl animate-slide-up ${
+                  product.is_featured ? 'ring-4 ring-orange-500 scale-105 shadow-2xl shadow-orange-500/50' : ''
+                }`}
+                style={{ animationDelay: `${index * 200}ms` }}
+              >
+                {product.is_featured && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                    <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce">
+                      <Star className="w-4 h-4 fill-current" />
+                      MOST POPULAR
                     </div>
-                  ))}
+                  </div>
+                )}
+
+                <div className="relative h-56 overflow-hidden">
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-sm">
+                    {badge}
+                  </div>
+                </div>
+
+                <div className="p-8">
+                  <h3 className="text-2xl font-bold mb-4">{product.name}</h3>
+
+                  <div className="mb-6">
+                    <div className="flex items-baseline gap-2">
+                      {product.sale_price && (
+                        <span className="text-2xl text-gray-400 line-through">
+                          ${product.price.toFixed(2)}
+                        </span>
+                      )}
+                      <span className="text-5xl font-bold text-orange-400">
+                        ${displayPrice.toFixed(2)}
+                      </span>
+                    </div>
+                    <p className="text-blue-200 text-sm mt-2">
+                      Includes 1 Year IPTV Subscription
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => onSelectProduct(product.id, displayPrice)}
+                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 ${
+                      product.is_featured
+                        ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
+                        : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg'
+                    }`}
+                  >
+                    <Zap className="w-5 h-5" />
+                    Order Now
+                  </button>
+
+                  <div className="space-y-3">
+                    {features.map((feature, idx) => (
+                      <div key={idx} className="flex items-start gap-3 group">
+                        <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5 group-hover:scale-125 transition-transform" />
+                        <span className="text-blue-100 text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-16 text-center animate-fade-in animation-delay-800">
