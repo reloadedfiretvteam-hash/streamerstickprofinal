@@ -24,5 +24,3 @@ dist-ssr
 .env.local
 .env.*.local
 cursor-mcp-config.json
-*.md
-!README.md
