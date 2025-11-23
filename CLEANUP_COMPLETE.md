@@ -26,8 +26,8 @@
 ## Auto-Deploy Setup
 ✅ GitHub Actions workflow created
 ⚠️ Need to add secrets in GitHub:
-1. Go to: https://github.com/evandelamarter-max/streamerstickprofinal/settings/secrets/actions
-2. Add: CLOUDFLARE_API_TOKEN = c1jj9YuHXodsMirm2dx9lzlXxQ1iCuT_53ILCgXA
-3. Add: CLOUDFLARE_ACCOUNT_ID = f1d6fdedf801e39f184a19ae201e8be1
+1. Go to your repo: **Settings → Secrets and variables → Actions**
+2. Add: `CLOUDFLARE_API_TOKEN` = *your Cloudflare API token from the Cloudflare dashboard*
+3. Add: `CLOUDFLARE_ACCOUNT_ID` = *your Cloudflare account ID from the Cloudflare dashboard*
 
 After secrets added: Every push to main = automatic deployment

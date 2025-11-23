@@ -41,10 +41,10 @@ Click **"Add variable"** for each:
 
 ```bash
 VITE_SUPABASE_URL
-Value: https://tqecnmygspkrijovrbah.supabase.co
+Value: https://<your-supabase-project>.supabase.co
 
 VITE_SUPABASE_ANON_KEY
-Value: [Your Supabase Anon Key from .env file]
+Value: [Your Supabase Anon Key from the Supabase dashboard]
 ```
 
 **⚠️ IMPORTANT**: Get your actual anon key from your local `.env` file.

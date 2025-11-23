@@ -13,23 +13,23 @@ Your GitHub Actions deployment is failing with "input required API token" becaus
 
 #### Secret 1: CLOUDFLARE_API_TOKEN
 - **Name**: `CLOUDFLARE_API_TOKEN`
-- **Value**: `4-C5HtCVpwO7fKGcxJXdd76X9l09avZuMVTdi2S0`
+- **Value**: *your Cloudflare API token from the Cloudflare dashboard*
 - Click **"Add secret"**
 
 #### Secret 2: CLOUDFLARE_ACCOUNT_ID
 - **Name**: `CLOUDFLARE_ACCOUNT_ID`
-- **Value**: `f1d6fdedf801e39f184a19ae201e8be1`
+- **Value**: *your Cloudflare account ID from the Cloudflare dashboard*
 - Click **"Add secret"**
 
 #### Secret 3: VITE_SUPABASE_URL
 - **Name**: `VITE_SUPABASE_URL`
-- **Value**: `https://tqecnmygspkrijovrbah.supabase.co`
+- **Value**: *your Supabase project URL (from the Supabase dashboard)*
 - Click **"Add secret"**
 
 #### Secret 4: VITE_SUPABASE_ANON_KEY
 - **Name**: `VITE_SUPABASE_ANON_KEY`
-- **Value**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxZWNubXlnc3Brcmlqb3ZyYmFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzOTMwMDAsImV4cCI6MjA3Nzk2OTAwMH0.GYZQIZyGQKneze-My5VEsU-Ik25gvA1Cm3iC0Sq8uxs`
-- Click **"Add secret"**
+- **Value**: *your Supabase anonymous public key (from the Supabase dashboard)*
+- Click **\"Add secret\"**
 
 ### Step 3: Trigger Deployment
 After adding all 4 secrets, go to:
@@ -40,10 +40,11 @@ After adding all 4 secrets, go to:
 ## Or Use This One-Command Fix (If You Have GitHub CLI)
 
 ```bash
-gh secret set CLOUDFLARE_API_TOKEN -b"4-C5HtCVpwO7fKGcxJXdd76X9l09avZuMVTdi2S0" -R evandelamarter-max/streamstickpro
-gh secret set CLOUDFLARE_ACCOUNT_ID -b"f1d6fdedf801e39f184a19ae201e8be1" -R evandelamarter-max/streamstickpro
-gh secret set VITE_SUPABASE_URL -b"https://tqecnmygspkrijovrbah.supabase.co" -R evandelamarter-max/streamstickpro
-gh secret set VITE_SUPABASE_ANON_KEY -b"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxZWNubXlnc3Brcmlqb3ZyYmFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzOTMwMDAsImV4cCI6MjA3Nzk2OTAwMH0.GYZQIZyGQKneze-My5VEsU-Ik25gvA1Cm3iC0Sq8uxs" -R evandelamarter-max/streamstickpro
+# Example using GitHub CLI – replace values with your own tokens/URLs/keys
+gh secret set CLOUDFLARE_API_TOKEN     -b"<your-cloudflare-api-token>"      -R <your-username>/<your-repo>
+gh secret set CLOUDFLARE_ACCOUNT_ID    -b"<your-cloudflare-account-id>"     -R <your-username>/<your-repo>
+gh secret set VITE_SUPABASE_URL        -b"<your-supabase-url>"              -R <your-username>/<your-repo>
+gh secret set VITE_SUPABASE_ANON_KEY   -b"<your-supabase-anon-key>"         -R <your-username>/<your-repo>
 ```
 
 ## What Happens Next?

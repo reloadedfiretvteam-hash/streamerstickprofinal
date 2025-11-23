@@ -110,7 +110,7 @@ Password: starevan11$
 
 ### Database Connection
 **Provider:** Supabase
-**URL:** https://tqecnmygspkrijovrbah.supabase.co
+**URL:** https://<your-supabase-project>.supabase.co
 **Region:** US East
 **Status:** Active
 **Tables:** 40+ production tables
@@ -176,9 +176,9 @@ URL: /admin or footer login button
 
 ### Supabase Database
 ```
-URL: https://tqecnmygspkrijovrbah.supabase.co
-Anon Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxZWNubXlnc3Brcmlqb3ZyYmFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzOTMwMDAsImV4cCI6MjA3Nzk2OTAwMH0.GYZQIZyGQKneze-My5VEsU-Ik25gvA1Cm3iC0Sq8uxs
-Dashboard: https://supabase.com/dashboard/project/tqecnmygspkrijovrbah
+URL: https://<your-supabase-project>.supabase.co
+Anon Key: <your-supabase-anon-key>
+Dashboard: https://supabase.com/dashboard/project/<your-supabase-project>
 ```
 
 ### Cloudflare

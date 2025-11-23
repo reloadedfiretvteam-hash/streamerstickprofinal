@@ -33,19 +33,19 @@ npx wrangler pages deploy dist --project-name=streamstickpro
 ### Option 3: Deploy Old Code Manually
 
 ```bash
-# Use the API token
-export CLOUDFLARE_API_TOKEN="c1jj9YuHXodsMirm2dx9lzlXxQ1iCuT_53ILCgXA"
-export CLOUDFLARE_ACCOUNT_ID="f1d6fdedf801e39f184a19ae201e8be1"
+# Use your Cloudflare API token and account ID from the Cloudflare dashboard
+export CLOUDFLARE_API_TOKEN="<your-cloudflare-api-token>"
+export CLOUDFLARE_ACCOUNT_ID="<your-cloudflare-account-id>"
 
-# Clone the old version
-git clone https://github.com/evandelamarter-max/streamstickpro.git old-design
+# Clone the old version (example – replace with your own repo/branch if needed)
+git clone https://github.com/<your-username>/<your-repo>.git old-design
 cd old-design
-git checkout v1.0-production-backup-20251113
+git checkout <your-backup-branch-or-tag>
 
 # Build and deploy
 npm ci
 npm run build
-npx wrangler pages deploy dist --project-name=streamstickpro
+npx wrangler pages deploy dist --project-name=<your-project-name>
 ```
 
 ## 📋 What Gets Restored

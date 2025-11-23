@@ -24,7 +24,7 @@ You have **3 different Supabase databases** that were causing conflicts:
    - **This was causing the blank site!**
 
 3. **Other Supabase Instance** (Not used)
-   - URL: `https://tqecnmygspkrijovrbah.supabase.co`
+   - URL: `https://<your-supabase-project>.supabase.co`
    - Status: Unknown/test database
 
 ---
