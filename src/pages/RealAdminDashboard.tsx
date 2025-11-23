@@ -10,7 +10,6 @@ import RealBlogManager from '../components/custom-admin/RealBlogManager';
 import FrontendVisualEditor from '../components/custom-admin/FrontendVisualEditor';
 import CompleteSEOManager from '../components/custom-admin/CompleteSEOManager';
 import RankMathProSEOManager from '../components/custom-admin/RankMathProSEOManager';
-import StripeProductManager from '../components/custom-admin/StripeProductManager';
 import SquareProductManager from '../components/custom-admin/SquareProductManager';
 import RealAIVideoGenerator from '../components/custom-admin/RealAIVideoGenerator';
 import AmazonFireStickAutomation from '../components/custom-admin/AmazonFireStickAutomation';
@@ -47,8 +46,7 @@ export default function RealAdminDashboard() {
     { id: 'dashboard', label: 'Dashboard', icon: Home, color: 'bg-blue-500' },
     { id: 'homepage-editor', label: 'HOMEPAGE EDITOR (Click & Edit)', icon: Layout, color: 'bg-purple-500' },
     { id: 'products', label: 'PRODUCTS (Your Actual Products)', icon: Package, color: 'bg-green-500' },
-    { id: 'stripe-products', label: 'STRIPE-SAFE PRODUCTS (secure.streamstickpro.com)', icon: Package, color: 'bg-blue-600' },
-    { id: 'square-products', label: 'SQUARE-SAFE PRODUCTS (secure.streamstickpro.com)', icon: Package, color: 'bg-green-600' },
+    { id: 'square-products', label: 'SQUARE PAYMENT PRODUCTS (secure.streamstickpro.com)', icon: Package, color: 'bg-green-600' },
     { id: 'ai-video-generator', label: '🎬 AI VIDEO GENERATOR (TikTok/YouTube)', icon: Video, color: 'bg-pink-600' },
     { id: 'amazon-automation', label: '⚡ Amazon Fire Stick Automation', icon: Zap, color: 'bg-orange-600' },
     { id: 'blog', label: 'BLOG POSTS (With SEO Scores)', icon: FileText, color: 'bg-orange-500' },
@@ -69,8 +67,6 @@ export default function RealAdminDashboard() {
         return <FrontendVisualEditor />;
       case 'products':
         return <RealProductManager />;
-      case 'stripe-products':
-        return <StripeProductManager />;
       case 'square-products':
         return <SquareProductManager />;
       case 'ai-video-generator':

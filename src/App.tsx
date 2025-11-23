@@ -16,7 +16,7 @@ import LegalDisclaimer from './components/LegalDisclaimer';
 import EmailCaptureBottom from './components/EmailCaptureBottom';
 import Footer from './components/Footer';
 import EmailPopup from './components/EmailPopup';
-import CheckoutCart from './components/CheckoutCart';
+import CheckoutCartSquare from './components/CheckoutCartSquare';
 import SEOHead from './components/SEOHead';
 import VisitorTracker from './components/VisitorTracker';
 import GoogleAnalytics from './components/GoogleAnalytics';
@@ -233,7 +233,7 @@ function App() {
           />
         )}
 
-        <CheckoutCart
+        <CheckoutCartSquare
           isOpen={isCartOpen}
           onClose={() => {
             setIsCartOpen(false);
