@@ -129,24 +129,21 @@ export default function SquareProductManager() {
       </div>
 
       <div className="bg-blue-500/20 border border-blue-500/50 rounded-xl p-6 mb-6">
-        <h3 className="text-lg font-bold text-white mb-3">📋 Product Mapping</h3>
+        <h3 className="text-lg font-bold text-white mb-3">📋 AI Tool Suite Products</h3>
         <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-300">
           <div>
-            <strong className="text-white">Fire Sticks:</strong>
+            <strong className="text-white">Square-Safe Products:</strong>
             <ul className="ml-4 mt-1 space-y-1">
-              <li>$140 → One Website Page</li>
-              <li>$150 → Website Page + 1 Month SEO</li>
-              <li>$160 → Website Page + 6 Months SEO</li>
+              <li>FREE → AI LaunchPad Demo & Onboarding</li>
+              <li>$15 → AI Page Builder Pro (1 Month)</li>
+              <li>$30 → AI SEO Strategy Suite (3 Months)</li>
             </ul>
           </div>
           <div>
-            <strong className="text-white">IPTV Services:</strong>
+            <strong className="text-white">Premium Packages:</strong>
             <ul className="ml-4 mt-1 space-y-1">
-              <li>Free Trial → Free Consultation</li>
-              <li>1 Month → AI Tool (1 Month)</li>
-              <li>3 Months → AI Tool (3 Months)</li>
-              <li>6 Months → AI Tool (6 Months)</li>
-              <li>1 Year → AI Tool (1 Year)</li>
+              <li>$50 → AI Blog Automation Engine (6 Months)</li>
+              <li>$75 → AI Local Marketing Power Pack (12 Months)</li>
             </ul>
           </div>
         </div>

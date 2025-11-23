@@ -1,15 +1,54 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, Lock, Info } from 'lucide-react';
-import SquarePaymentForm from './SquarePaymentForm';
+import SquarePaymentForm from '../components/SquarePaymentForm';
+import { supabase } from '../lib/supabase';
 
 export default function ConciergeCheckout() {
   const [step, setStep] = useState(1);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   
-  // This would come from your cart/session
-  const product = {
-    name: "Professional Website Page Design",
-    price: 149.99,
-    description: "Complete website page design and development service."
+  useEffect(() => {
+    loadProduct();
+  }, []);
+
+  const loadProduct = async () => {
+    // Get product from URL params or localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('product') || localStorage.getItem('selected_product');
+    
+    if (productId) {
+      const { data } = await supabase
+        .from('square_products')
+        .select('*')
+        .eq('id', productId)
+        .single();
+      
+      if (data) {
+        setSelectedProduct(data);
+      }
+    }
+    
+    // Default to AI Page Builder Pro if no product selected
+    if (!productId) {
+      const { data } = await supabase
+        .from('square_products')
+        .select('*')
+        .eq('name', 'AI Page Builder Pro (1 Month)')
+        .single();
+      
+      if (data) {
+        setSelectedProduct(data);
+      }
+    }
+    
+    setLoading(false);
+  };
+  
+  const product = selectedProduct || {
+    name: "AI Page Builder Pro (1 Month)",
+    price: 15.00,
+    description: "Create stunning pages with auto-layout, image optimization, built-in site speed booster, and SEO snippet editor. 1 month full access."
   };
 
   const handlePaymentSubmit = async (token: string) => {
@@ -21,6 +60,17 @@ export default function ConciergeCheckout() {
     
     setStep(2); // Success step
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading checkout...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (step === 2) {
     return (

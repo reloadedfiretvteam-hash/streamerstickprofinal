@@ -39,7 +39,9 @@ export default function ConciergePage() {
 
   function handleCheckout(product: Product) {
     setSelectedProduct(product);
-    alert(`Square checkout would open here for: ${product.name} - $${product.price}`);
+    // Store product selection and redirect to secure checkout
+    localStorage.setItem('selected_product', product.id);
+    window.location.href = `/secure/checkout?product=${product.id}`;
   }
 
   if (loading) {
@@ -73,10 +75,10 @@ export default function ConciergePage() {
       <section className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
-            Professional Services
+            AI-Powered Web Solutions
           </h1>
           <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-            Expert solutions for your digital needs. Choose the service that fits your requirements.
+            Transform your digital presence with intelligent tools for web design, SEO, and content automation.
           </p>
         </div>
 
