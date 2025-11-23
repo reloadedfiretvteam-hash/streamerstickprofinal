@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Plus, Minus, ShoppingBag, CreditCard, Shield, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import SquarePaymentForm from './SquarePaymentForm';
+import { CHECKOUT_CONFIG, generateOrderNumber, calculateTax, calculateTotal } from '../config/checkout';
 
 interface CartItem {
   productId: string;
@@ -37,10 +38,10 @@ export default function CheckoutCartSquare({
   const [orderNumber, setOrderNumber] = useState('');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  // Calculate total
+  // Calculate total using config
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const tax = subtotal * 0.08; // 8% tax - update based on actual requirements
-  const total = subtotal + tax;
+  const tax = calculateTax(subtotal);
+  const total = calculateTotal(subtotal);
 
   // Reset step when cart opens
   useEffect(() => {
@@ -88,8 +89,8 @@ export default function CheckoutCartSquare({
     setProcessing(true);
 
     try {
-      // Generate order number
-      const orderNum = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+      // Generate order number using config
+      const orderNum = generateOrderNumber();
       setOrderNumber(orderNum);
 
       // Create order in database
@@ -181,7 +182,7 @@ We'll send you tracking information once your order ships.
 
 Thank you for choosing us!
 
-Need Support? Email: reloadedfiretvteam@gmail.com
+Need Support? Email: ${CHECKOUT_CONFIG.emails.shopOwner}
     `.trim();
   };
 
