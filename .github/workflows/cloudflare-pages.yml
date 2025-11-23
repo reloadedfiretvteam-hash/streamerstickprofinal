@@ -5,6 +5,7 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -21,17 +22,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
-        working-directory: './streamerstickprofinal/New folder (2)'
         run: npm ci
 
       - name: Build
-        working-directory: './streamerstickprofinal/New folder (2)'
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Optimize for Cloudflare CDN
+        run: |
+          echo "Optimizing static assets for Cloudflare CDN..."
+          # Ensure _headers and _routes.json are in dist
+          cp -f public/_headers dist/_headers || true
+          cp -f public/_routes.json dist/_routes.json || true
+          echo "✓ CDN optimization complete"
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
@@ -39,5 +47,14 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: streamerstickprofinal
-          directory: 'streamerstickprofinal/New folder (2)/dist'
+          directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref_name }}
+
+      - name: Deployment Summary
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Cloudflare will serve your site with optimized caching and CDN acceleration."

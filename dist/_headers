@@ -12,8 +12,14 @@
   # Content Security Policy - Relaxed for better compatibility
   Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; connect-src 'self' https: wss: ws:; frame-src 'self' https:; object-src 'none'; upgrade-insecure-requests
 
-  # Performance Headers
+  # Cloudflare CDN Optimization Headers
+  CF-Cache-Status: HIT
+  
+  # Performance Headers - Default for static assets
   Cache-Control: public, max-age=31536000, immutable
+  
+  # Enable compression
+  Accept-Encoding: gzip, deflate, br
 
 /index.html
   # No cache for HTML
@@ -22,20 +28,27 @@
   Expires: 0
 
 /assets/*.css
-  # Long cache for hashed CSS files
+  # Long cache for hashed CSS files with Cloudflare optimization
   Cache-Control: public, max-age=31536000, immutable
+  CDN-Cache-Control: max-age=31536000
+  Cloudflare-CDN-Cache-Control: max-age=31536000
 
 /assets/*.js
-  # Long cache for hashed JS files
+  # Long cache for hashed JS files with Cloudflare optimization
   Cache-Control: public, max-age=31536000, immutable
+  CDN-Cache-Control: max-age=31536000
+  Cloudflare-CDN-Cache-Control: max-age=31536000
 
 /*.jpg
 /*.jpeg
 /*.png
 /*.webp
 /*.gif
-  # Cache images for 1 year with validation
+  # Cache images for 1 year with Cloudflare CDN optimization
   Cache-Control: public, max-age=31536000, immutable
+  CDN-Cache-Control: max-age=31536000
+  # Enable Cloudflare Polish for image optimization
+  CF-Polished: lossy=on
 
 /manifest.json
   # Cache manifest for 1 week

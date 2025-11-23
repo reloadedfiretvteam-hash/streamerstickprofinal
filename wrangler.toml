@@ -1,3 +1,79 @@
 name = "streamerstickprofinal"
 compatibility_date = "2024-11-02"
 pages_build_output_dir = "dist"
+
+# Cloudflare Pages Configuration
+# This file configures Cloudflare Workers and Pages settings
+
+[build]
+command = "npm run build"
+cwd = ""
+watch_paths = ["src/**", "public/**"]
+
+[build.upload]
+format = "service-worker"
+
+# Environment variables for different deployment stages
+[env.production]
+# Production environment variables should be set in Cloudflare Dashboard
+# or via GitHub Secrets
+
+[env.preview]
+# Preview environment variables
+
+# Enable Node.js compatibility
+compatibility_flags = ["nodejs_compat"]
+
+# Analytics and monitoring
+[analytics_engine_datasets]
+# Add analytics datasets if needed
+
+# Static asset optimization
+[site]
+bucket = "./dist"
+
+# Custom routes for advanced caching
+# Excludes edge functions from specific paths
+[[rules]]
+pattern = "/assets/*"
+cache = true
+
+[[rules]]
+pattern = "*.js"
+cache = true
+
+[[rules]]
+pattern = "*.css"
+cache = true
+
+[[rules]]
+pattern = "*.woff"
+cache = true
+
+[[rules]]
+pattern = "*.woff2"
+cache = true
+
+[[rules]]
+pattern = "*.jpg"
+cache = true
+
+[[rules]]
+pattern = "*.jpeg"
+cache = true
+
+[[rules]]
+pattern = "*.png"
+cache = true
+
+[[rules]]
+pattern = "*.webp"
+cache = true
+
+[[rules]]
+pattern = "*.gif"
+cache = true
+
+[[rules]]
+pattern = "*.svg"
+cache = true
