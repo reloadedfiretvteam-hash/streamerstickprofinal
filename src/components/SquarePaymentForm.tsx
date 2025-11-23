@@ -19,13 +19,34 @@ export default function SquarePaymentForm({ amount, onSubmit }: SquarePaymentFor
 
   useEffect(() => {
     const initializeSquare = async () => {
-      if (!window.Square) return;
+      // Wait for Square SDK to load if not already available
+      let retries = 0;
+      while (!window.Square && retries < 10) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+      }
+
+      if (!window.Square) {
+        setErrorMessage('Square payment system is loading. Please wait...');
+        // Try loading the script dynamically
+        const script = document.createElement('script');
+        script.src = 'https://sandbox.web.squarecdn.com/v1/square.js';
+        script.async = true;
+        script.onload = () => {
+          setTimeout(initializeSquare, 500);
+        };
+        script.onerror = () => {
+          setErrorMessage('Failed to load Square payment system. Please refresh the page.');
+        };
+        document.head.appendChild(script);
+        return;
+      }
 
       const applicationId = import.meta.env.VITE_SQUARE_APP_ID;
       const locationId = import.meta.env.VITE_SQUARE_LOCATION_ID;
 
       if (!applicationId || !locationId) {
-        setErrorMessage('Square configuration missing');
+        setErrorMessage('Square configuration missing. Please contact support.');
         return;
       }
 
@@ -34,9 +55,10 @@ export default function SquarePaymentForm({ amount, onSubmit }: SquarePaymentFor
         const card = await payments.card();
         await card.attach('#card-container');
         setCard(card);
+        setErrorMessage(''); // Clear any previous errors
       } catch (e) {
         console.error('Square initialization failed:', e);
-        setErrorMessage('Failed to load secure payment form');
+        setErrorMessage('Failed to load secure payment form. Please refresh the page.');
       }
     };
 

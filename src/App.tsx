@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import ErrorBoundary from './components/ErrorBoundary';
+
+// Updated: Admin routes, secure checkout, and all features integrated
 import Navigation from './components/Navigation';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -32,6 +34,8 @@ import HowItWorksSteps from './components/HowItWorksSteps';
 import WhatYouGetVideo from './components/WhatYouGetVideo';
 import ConciergePage from './pages/ConciergePage';
 import ConciergeCheckout from './pages/ConciergeCheckout';
+import UnifiedAdminLogin from './pages/UnifiedAdminLogin';
+import ModalAdminDashboard from './pages/ModalAdminDashboard';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
 
 interface CartItem {
@@ -80,6 +84,13 @@ function App() {
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const forcedMode = searchParams.get('mode');
+    const pathname = window.location.pathname;
+
+    // Handle admin routes
+    if (pathname.startsWith('/admin')) {
+      // Admin routing is handled below in render logic
+      return;
+    }
 
     if (forcedMode === 'main') {
       setIsConciergeDomain(false);
@@ -92,7 +103,6 @@ function App() {
     }
 
     const hostname = window.location.hostname.toLowerCase();
-    const pathname = window.location.pathname;
 
     const isConciergeHost =
       conciergeHosts.length > 0 &&
@@ -172,6 +182,17 @@ function App() {
   };
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Handle admin routes
+  const pathname = window.location.pathname;
+  if (pathname.startsWith('/admin')) {
+    const token = localStorage.getItem('custom_admin_token');
+    if (token === 'authenticated') {
+      return <ModalAdminDashboard />;
+    } else {
+      return <UnifiedAdminLogin />;
+    }
+  }
 
   // Secure domain: show Square-safe checkout only (no IPTV UI).
   if (isSecureDomain) {

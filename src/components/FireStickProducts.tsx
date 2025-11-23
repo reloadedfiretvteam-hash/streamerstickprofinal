@@ -10,7 +10,7 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
       id: 'firestick-hd',
       name: 'Fire Stick HD',
       price: 140.00,
-      image: '/OIF.jpg',
+      image: '/images/firestick-hd.jpg',
       badge: 'HD QUALITY',
       popular: false,
       features: [
@@ -30,7 +30,7 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
       id: 'firestick-4k',
       name: 'Fire Stick 4K',
       price: 150.00,
-      image: 'https://images.pexels.com/photos/4178672/pexels-photo-4178672.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: '/images/firestick-4k.jpg',
       badge: 'BEST VALUE',
       popular: true,
       features: [
@@ -50,7 +50,7 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
       id: 'firestick-4k-max',
       name: 'Fire Stick 4K Max',
       price: 160.00,
-      image: 'https://images.pexels.com/photos/7533347/pexels-photo-7533347.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: '/images/firestick-4k-max.jpg',
       badge: 'PREMIUM',
       popular: false,
       features: [

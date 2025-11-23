@@ -21,3 +21,8 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.local
+.env.*.local
+cursor-mcp-config.json
+*.md
+!README.md

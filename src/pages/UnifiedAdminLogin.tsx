@@ -14,6 +14,21 @@ export default function UnifiedAdminLogin() {
     setLoading(true);
 
     try {
+      // Fallback authentication: check for starevan11/starevan11 first
+      // This works even if Supabase is unavailable
+      if (username.toLowerCase() === 'starevan11' && password === 'starevan11') {
+        localStorage.setItem('custom_admin_token', 'authenticated');
+        localStorage.setItem('custom_admin_user', JSON.stringify({
+          id: 'admin-fallback',
+          email: 'starevan11',
+          username: 'starevan11',
+          role: 'admin'
+        }));
+        window.location.href = '/admin';
+        return;
+      }
+
+      // Try Supabase authentication if fallback doesn't match
       const { data: admin, error: dbError } = await supabase
         .from('admin_credentials')
         .select('*')
@@ -21,7 +36,10 @@ export default function UnifiedAdminLogin() {
         .eq('password_hash', password)
         .maybeSingle();
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        // If Supabase fails, throw error (fallback was already checked above)
+        throw dbError;
+      }
 
       if (!admin) {
         setError('Invalid credentials. Access denied.');

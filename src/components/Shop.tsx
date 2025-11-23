@@ -2,6 +2,8 @@ import { Check, Flame, Star, Zap, ShoppingCart, Gift, Send, User, Mail, Phone } 
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
+// Updated: All IPTV product images now use local /images/iptv-subscription.jpg
+
 interface Product {
   id: string;
   name: string;
@@ -59,12 +61,24 @@ export default function Shop({ onAddToCart }: ShopProps) {
         // Parse prices to numbers
         const price = parseFloat(p.sale_price?.toString() || p.price?.toString() || '0');
 
+        // Determine which local image to use based on product name
+        let defaultImage = '/images/firestick-4k.jpg'; // Default fallback
+        if (isFirestick) {
+          if (p.name.toLowerCase().includes('hd') && !p.name.toLowerCase().includes('4k')) {
+            defaultImage = '/images/firestick-hd.jpg';
+          } else if (p.name.toLowerCase().includes('max')) {
+            defaultImage = '/images/firestick-4k-max.jpg';
+          } else if (p.name.toLowerCase().includes('4k')) {
+            defaultImage = '/images/firestick-4k.jpg';
+          }
+        }
+
         return {
           id: p.id,
           name: p.name,
           price: price,
           type: isFirestick ? 'firestick' : 'iptv',
-          image: p.main_image || (isFirestick ? 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=800' : 'https://images.pexels.com/photos/1202723/pexels-photo-1202723.jpeg?auto=compress&cs=tinysrgb&w=800'),
+          image: p.main_image || defaultImage,
           badge: isFirestick ? 'BEST VALUE' : 'POPULAR',
           popular: p.featured,
           period: isFirestick ? undefined : '/month',
@@ -171,7 +185,7 @@ This is an automated message from StreamStickPro.com
       name: 'Fire Stick HD',
       price: 140.00,
       type: 'firestick',
-      image: 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: '/images/firestick-hd.jpg',
       badge: 'HD QUALITY',
       popular: false,
       features: [
@@ -192,7 +206,7 @@ This is an automated message from StreamStickPro.com
       name: 'Fire Stick 4K',
       price: 150.00,
       type: 'firestick',
-      image: 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: '/images/firestick-4k.jpg',
       badge: 'BEST VALUE',
       popular: true,
       features: [
@@ -213,7 +227,7 @@ This is an automated message from StreamStickPro.com
       name: 'Fire Stick 4K Max',
       price: 160.00,
       type: 'firestick',
-      image: 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: '/images/firestick-4k-max.jpg',
       badge: 'PREMIUM',
       popular: false,
       features: [
@@ -235,7 +249,7 @@ This is an automated message from StreamStickPro.com
       name: '1 Month IPTV Subscription',
       price: 15.00,
       type: 'iptv',
-      image: 'https://images.pexels.com/photos/1202723/pexels-photo-1202723.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: '/images/iptv-subscription.jpg',
       badge: 'STARTER',
       popular: false,
       period: '/month',
@@ -257,7 +271,7 @@ This is an automated message from StreamStickPro.com
       name: '3 Month IPTV Subscription',
       price: 30.00,
       type: 'iptv',
-      image: 'https://images.pexels.com/photos/1202723/pexels-photo-1202723.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: '/images/iptv-subscription.jpg',
       badge: 'POPULAR',
       popular: true,
       features: [
@@ -278,7 +292,7 @@ This is an automated message from StreamStickPro.com
       name: '6 Month IPTV Subscription',
       price: 50.00,
       type: 'iptv',
-      image: 'https://images.pexels.com/photos/1202723/pexels-photo-1202723.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: '/images/iptv-subscription.jpg',
       badge: 'GREAT VALUE',
       popular: false,
       features: [
@@ -299,7 +313,7 @@ This is an automated message from StreamStickPro.com
       name: '1 Year IPTV Subscription',
       price: 75.00,
       type: 'iptv',
-      image: 'https://images.pexels.com/photos/1202723/pexels-photo-1202723.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: '/images/iptv-subscription.jpg',
       badge: 'BEST DEAL',
       popular: false,
       features: [

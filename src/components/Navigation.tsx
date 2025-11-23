@@ -62,6 +62,7 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
               Track Order
             </a>
             <button
+              type="button"
               onClick={() => onCartClick?.()}
               className="relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
             >
@@ -126,6 +127,7 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
               Track Order
             </a>
             <button
+              type="button"
               onClick={() => { onCartClick?.(); setIsMenuOpen(false); }}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-lg transition-all font-semibold"
             >

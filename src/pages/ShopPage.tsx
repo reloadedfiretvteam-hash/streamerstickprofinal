@@ -216,12 +216,12 @@ export default function ShopPage() {
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     onError={(e) => {
-                      e.currentTarget.src = '/OIF.jpg';
+                      e.currentTarget.src = '/images/firestick-4k.jpg';
                     }}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <img src="/OIF.jpg" alt="placeholder" className="w-full h-full object-cover" />
+                    <img src="/images/firestick-4k.jpg" alt="placeholder" className="w-full h-full object-cover" />
                   </div>
                 )}
                 {product.featured && (
