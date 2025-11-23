@@ -1,4 +1,4 @@
-import { Check, Flame, Star, Zap } from 'lucide-react';
+import { Check, Star, Zap } from 'lucide-react';
 
 interface ProductsProps {
   onSelectProduct: (productId: string, amount: number) => void;
