@@ -97,12 +97,28 @@ npm run typecheck  # Check TypeScript types
 ## Tech Stack
 
 - **Framework:** React 18 + TypeScript
-- **Build Tool:** Vite
+- **Build Tool:** Vite (with optimized chunking)
 - **Styling:** Tailwind CSS
 - **Icons:** Lucide React
 - **Database:** Supabase
-- **Hosting:** Cloudflare Pages
-- **CI/CD:** GitHub Actions
+- **Hosting:** Cloudflare Pages (with CDN acceleration)
+- **CI/CD:** GitHub Actions (automated deployment)
+
+## Cloudflare Optimizations
+
+This project is fully optimized for Cloudflare Pages with:
+- ✅ Vendor chunking for better caching
+- ✅ Static asset acceleration (1-year cache)
+- ✅ Image optimization (Polish)
+- ✅ Brotli compression
+- ✅ DNS prefetch & preconnect
+- ✅ Security headers (HSTS, CSP, etc.)
+- ✅ Edge caching rules
+- ✅ HTTP/3 ready
+
+**See `CLOUDFLARE_CONFIG.md` for complete configuration details.**
+**See `CLOUDFLARE_ENV_SETUP.md` for environment variables setup.**
+**See `CLOUDFLARE_OPTIMIZATION_SUMMARY.md` for optimization details.**
 
 ## Security Notes
 
