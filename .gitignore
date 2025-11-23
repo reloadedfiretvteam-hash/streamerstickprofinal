@@ -6,9 +6,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+node_modules/
+dist/
+dist-ssr/
 *.local
 
 .vscode/*
@@ -26,3 +26,6 @@ dist-ssr
 cursor-mcp-config.json
 *.md
 !README.md
+!DEPLOYMENT_AUDIT_REPORT.md
+!SECURITY_SUMMARY.md
+!QUICK_START_DEPLOY.md
