@@ -26,3 +26,5 @@ dist-ssr/
 cursor-mcp-config.json
 *.md
 !README.md
+!DEPLOYMENT_AUDIT_REPORT.md
+!SECURITY_SUMMARY.md
