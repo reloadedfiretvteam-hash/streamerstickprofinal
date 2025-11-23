@@ -7,39 +7,22 @@ export default function MediaCarousel() {
   // Carousel images from Supabase Storage - replace placeholder stock photos
   const supabaseBaseUrl = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/';
   
+  // Unique images only - one of each
   const mediaItems = [
-    // BLOCKBUSTER MOVIES - Cinema & Theater
+    // MOVIES
     { type: 'movie', title: 'Action Movies 2024', image: `${supabaseBaseUrl}Playback-Tile-1024x512.webp`, year: '2024' },
     { type: 'movie', title: 'Thriller & Horror', image: `${supabaseBaseUrl}Movies-categories_11zon-1024x512.webp`, year: '2024' },
-    { type: 'movie', title: 'Drama & Romance', image: `${supabaseBaseUrl}Playback-Tile-1024x512.webp`, year: '2024' },
-    { type: 'movie', title: 'Comedy Specials', image: `${supabaseBaseUrl}5-1.webp`, year: '2024' },
-    { type: 'movie', title: 'Sci-Fi Adventure', image: `${supabaseBaseUrl}9-1.webp`, year: '2024' },
-
-    // TV SERIES - Streaming Entertainment
+    
+    // TV SERIES
     { type: 'series', title: 'Top US Series', image: `${supabaseBaseUrl}IPTVSmarters%20TV%20IMAG.jpg`, year: '2024' },
     { type: 'series', title: 'Trending Shows', image: `${supabaseBaseUrl}iptv3.jpg`, year: '2024' },
     { type: 'series', title: 'Binge-Worthy Series', image: `${supabaseBaseUrl}OIP%20(11)%20websit%20pic%20copy%20copy.jpg`, year: '2024' },
 
-    // NFL FOOTBALL - Stadium & Action
+    // SPORTS - One image per sport
     { type: 'sport', title: 'NFL All Teams Live', image: `${supabaseBaseUrl}c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg`, logo: '🏈' },
-    { type: 'sport', title: 'Super Bowl LIX', image: `${supabaseBaseUrl}c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg`, logo: '🏈' },
-    { type: 'sport', title: 'Monday Night Football', image: `${supabaseBaseUrl}c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg`, logo: '🏈' },
-    { type: 'sport', title: 'NFL Playoffs', image: `${supabaseBaseUrl}c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg`, logo: '🏈' },
-
-    // MLB BASEBALL - Stadium Views
     { type: 'sport', title: 'MLB All 30 Teams', image: `${supabaseBaseUrl}BASEBALL.webp`, logo: '⚾' },
-    { type: 'sport', title: 'World Series Live', image: `${supabaseBaseUrl}BASEBALL.webp`, logo: '⚾' },
-    { type: 'sport', title: 'MLB Playoffs', image: `${supabaseBaseUrl}BASEBALL.webp`, logo: '⚾' },
-
-    // NBA BASKETBALL - Court Action
     { type: 'sport', title: 'NBA All Games', image: `${supabaseBaseUrl}downloadBASKET%20BALL.jpg`, logo: '🏀' },
-    { type: 'sport', title: 'NBA Playoffs 2024', image: `${supabaseBaseUrl}downloadBASKET%20BALL.jpg`, logo: '🏀' },
-    { type: 'sport', title: 'NBA Finals', image: `${supabaseBaseUrl}downloadBASKET%20BALL.jpg`, logo: '🏀' },
-
-    // OTHER SPORTS - Hockey, Soccer, Combat
     { type: 'sport', title: 'UFC & Boxing PPV', image: `${supabaseBaseUrl}UFC.jpg`, logo: '🥊' },
-    { type: 'sport', title: 'Soccer - All Leagues', image: `${supabaseBaseUrl}5-1.webp`, logo: '⚽' },
-    { type: 'sport', title: 'Premier League', image: `${supabaseBaseUrl}9-1.webp`, logo: '⚽' },
   ];
 
   useEffect(() => {

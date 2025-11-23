@@ -418,6 +418,21 @@ This is an automated message from StreamStickPro.com
                     alt={product.name}
                     className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
                     loading="lazy"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      // Fallback based on product type
+                      if (product.type === 'firestick') {
+                        if (product.name.includes('4K Max')) {
+                          target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k%20max.jpg';
+                        } else if (product.name.includes('4K')) {
+                          target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k.jpg';
+                        } else {
+                          target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg';
+                        }
+                      } else {
+                        target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
+                      }
+                    }}
                   />
                   <div className="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-sm">
                     {product.badge}

@@ -10,6 +10,7 @@ interface Product {
   price: number;
   features: string[];
   image_url: string;
+  main_image?: string;
   is_featured: boolean;
   product_type: string;
 }
@@ -88,6 +89,18 @@ export default function InfernoTVProducts({ onSelectProduct }: Props) {
                   </div>
                 </div>
               )}
+
+              <div className="relative h-56 overflow-hidden bg-gradient-to-br from-blue-800 to-blue-900 flex items-center justify-center">
+                <img
+                  src={product.image_url || product.main_image || 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg'}
+                  alt={product.name}
+                  className="h-full w-full object-cover transform hover:scale-110 transition-transform duration-500"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
+                  }}
+                />
+              </div>
 
               <div className="p-8">
                 <h3 className="text-2xl font-bold mb-4 text-white">{product.name}</h3>
@@ -171,12 +184,26 @@ export default function InfernoTVProducts({ onSelectProduct }: Props) {
                 {/* Real Amazon Fire Stick product images from Supabase */}
                 <img
                   src={
-                    product.name.includes('4K Max')
-                      ? 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k%20max.jpg'
-                      : product.name.includes('4K')
-                      ? 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k.jpg'
-                      : 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg'
+                    product.image_url || product.main_image || (
+                      product.name.includes('4K Max')
+                        ? 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k%20max.jpg'
+                        : product.name.includes('4K')
+                        ? 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k.jpg'
+                        : 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg'
+                    )
                   }
+                  alt={product.name}
+                  className="h-full w-full object-cover transform hover:scale-110 transition-transform duration-500"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (product.name.includes('4K Max')) {
+                      target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k%20max.jpg';
+                    } else if (product.name.includes('4K')) {
+                      target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k.jpg';
+                    } else {
+                      target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg';
+                    }
+                  }}
                   alt={product.name}
                   className="h-full object-contain transform hover:scale-110 transition-transform duration-500 p-4"
                 />
