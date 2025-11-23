@@ -1,6 +1,7 @@
 import { Check, Flame, Star, Zap, ShoppingCart, Gift, Send, User, Mail, Phone } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { generateProductSchema } from '../utils/seoHelpers';
 
 interface Product {
   id: string;
@@ -321,20 +322,47 @@ This is an automated message from StreamStickPro.com
   const firestickProducts = displayProducts.filter(p => p.type === 'firestick');
   const iptvProducts = displayProducts.filter(p => p.type === 'iptv');
 
+  // Add product schema for SEO
+  useEffect(() => {
+    if (displayProducts.length > 0) {
+      // Generate schema for the first popular product
+      const popularProduct = displayProducts.find(p => p.popular) || displayProducts[0];
+      if (popularProduct) {
+        generateProductSchema({
+          name: popularProduct.name,
+          description: popularProduct.features.join(', '),
+          image: popularProduct.image,
+          price: popularProduct.price,
+          currency: 'USD',
+          availability: 'InStock',
+          brand: 'Stream Stick Pro',
+          sku: popularProduct.id,
+          rating: 4.9,
+          reviewCount: 2700,
+        });
+      }
+    }
+  }, [displayProducts]);
+
   return (
-    <section id="shop" className="py-20 bg-gray-900 text-white">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full px-6 py-2 mb-6">
+    <section id="shop" className="py-24 bg-gradient-to-b from-gray-900 via-slate-900 to-gray-900 text-white relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-blue-500/5"></div>
+      
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="text-center mb-20 animate-fade-in">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-sm border border-orange-400/40 rounded-full px-7 py-3 mb-8 shadow-lg shadow-orange-500/20">
             <Flame className="w-5 h-5 text-orange-400 animate-pulse" />
-            <span className="text-sm font-medium">SHOP ALL PRODUCTS</span>
+            <span className="text-sm font-semibold tracking-wide">SHOP ALL PRODUCTS</span>
+            <Zap className="w-5 h-5 text-yellow-400" />
           </div>
-          <h2 className="text-4xl md:text-6xl font-bold mb-6">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Premium Products</span>
+          <h2 className="text-4xl md:text-7xl font-extrabold mb-6">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 animate-gradient">Premium Products</span>
           </h2>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-            Browse our complete collection of jailbroken Fire Sticks and IPTV subscriptions
+          <p className="text-xl md:text-2xl text-blue-100 max-w-4xl mx-auto font-medium">
+            Browse our complete collection of <span className="text-orange-400 font-bold">jailbroken Fire Sticks</span> and <span className="text-orange-400 font-bold">IPTV subscriptions</span>
           </p>
+          <p className="text-lg text-blue-300 mt-4">🔥 Save up to 50% • Free Shipping • 24/7 Support</p>
         </div>
 
         <div className="mb-16">
@@ -389,72 +417,87 @@ This is an automated message from StreamStickPro.com
             </div>
           </div>
 
-          <h3 className="text-3xl font-bold mb-8 text-center">
-            <Flame className="inline w-8 h-8 text-orange-500 mr-2" />
+          <h3 className="text-4xl md:text-5xl font-bold mb-12 text-center animate-slide-up">
+            <Flame className="inline w-10 h-10 text-orange-500 mr-3 animate-pulse" />
             Choose Your Fire Stick
           </h3>
-          <div className="grid md:grid-cols-3 gap-8">
-            {firestickProducts.map((product) => (
+          <div className="grid md:grid-cols-3 gap-8 lg:gap-10">
+            {firestickProducts.map((product, index) => (
               <div
                 key={product.id}
-                className={`relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+                className={`group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-3xl overflow-hidden transform transition-all duration-500 hover:scale-105 hover:shadow-2xl animate-slide-up ${
                   product.popular ? 'ring-4 ring-orange-500 scale-105 shadow-2xl shadow-orange-500/50' : ''
                 }`}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 {product.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                    <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce">
-                      <Star className="w-4 h-4 fill-current" />
+                    <div className="bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 text-white px-7 py-2.5 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce">
+                      <Star className="w-5 h-5 fill-current" />
                       MOST POPULAR
                     </div>
                   </div>
                 )}
 
-                <div className="relative h-56 overflow-hidden">
+                <div className="relative h-64 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                     loading="lazy"
                   />
-                  <div className="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-sm">
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-5 py-2 rounded-full font-bold text-sm shadow-lg z-20">
                     {product.badge}
                   </div>
+                  {product.popular && (
+                    <div className="absolute bottom-4 left-4 bg-orange-500/90 backdrop-blur-sm text-white px-4 py-2 rounded-full font-semibold text-sm z-20 flex items-center gap-2">
+                      <Zap className="w-4 h-4" />
+                      Save $50
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-8">
-                  <h3 className="text-2xl font-bold mb-4">{product.name}</h3>
+                  <h3 className="text-2xl md:text-3xl font-bold mb-4 group-hover:text-orange-400 transition-colors">{product.name}</h3>
 
                   <div className="mb-6">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-5xl font-bold text-orange-400">
+                      <span className="text-5xl md:text-6xl font-extrabold text-orange-400 group-hover:scale-110 transition-transform inline-block">
                         ${product.price.toFixed(2)}
                       </span>
                     </div>
-                    <p className="text-blue-200 text-sm mt-2">
-                      Includes 1 Year IPTV Subscription
+                    <p className="text-blue-200 text-base mt-2 font-medium">
+                      ✓ Includes 1 Year IPTV Subscription
+                    </p>
+                    <p className="text-green-400 text-sm mt-1 font-semibold">
+                      🚚 Free Shipping • Same Day Available
                     </p>
                   </div>
 
                   <button
                     onClick={() => onAddToCart(product)}
-                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 ${
+                    className={`w-full py-5 rounded-2xl font-bold text-lg transition-all transform hover:scale-110 mb-6 flex items-center justify-center gap-3 shadow-xl group relative overflow-hidden ${
                       product.popular
-                        ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
-                        : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg'
+                        ? 'bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 hover:from-orange-600 hover:via-red-600 hover:to-orange-600 shadow-orange-500/50'
+                        : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600'
                     }`}
                   >
-                    <ShoppingCart className="w-5 h-5" />
-                    Add to Cart
+                    <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                    <ShoppingCart className="w-6 h-6 group-hover:rotate-12 transition-transform relative z-10" />
+                    <span className="relative z-10">Add to Cart</span>
                   </button>
 
-                  <div className="space-y-3">
-                    {product.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                        <span className="text-blue-100 text-sm">{feature}</span>
+                  <div className="space-y-3 border-t border-white/10 pt-6">
+                    {product.features.slice(0, 6).map((feature, idx) => (
+                      <div key={idx} className="flex items-start gap-3 group/item">
+                        <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5 group-hover/item:scale-125 transition-transform" />
+                        <span className="text-blue-100 text-sm leading-relaxed">{feature}</span>
                       </div>
                     ))}
+                    {product.features.length > 6 && (
+                      <p className="text-blue-300 text-xs font-semibold mt-2">+ {product.features.length - 6} more features</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -616,46 +659,48 @@ This is an automated message from StreamStickPro.com
           </div>
         </div>
 
-        <div>
-          <h3 className="text-3xl font-bold mb-8 text-center">
-            <Zap className="inline w-8 h-8 text-blue-500 mr-2" />
+        <div className="mt-20">
+          <h3 className="text-4xl md:text-5xl font-bold mb-12 text-center animate-slide-up">
+            <Zap className="inline w-10 h-10 text-blue-400 mr-3 animate-pulse" />
             IPTV Subscriptions Only
           </h3>
-          <div className="grid md:grid-cols-4 gap-6">
-            {iptvProducts.map((product) => (
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
+            {iptvProducts.map((product, index) => (
               <div
                 key={product.id}
-                className={`relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+                className={`group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-3xl overflow-hidden transform transition-all duration-500 hover:scale-110 hover:shadow-2xl animate-slide-up ${
                   product.popular ? 'ring-4 ring-blue-500 scale-105 shadow-2xl shadow-blue-500/50' : ''
                 }`}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 {product.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                    <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
+                    <div className="bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 text-white px-5 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
                       <Star className="w-4 h-4 fill-current" />
                       POPULAR
                     </div>
                   </div>
                 )}
 
-                <div className="relative h-48 overflow-hidden">
+                <div className="relative h-52 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                     loading="lazy"
                   />
-                  <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full font-bold text-xs">
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-1.5 rounded-full font-bold text-xs shadow-lg z-20">
                     {product.badge}
                   </div>
                 </div>
 
                 <div className="p-6">
-                  <h3 className="text-xl font-bold mb-4">{product.name}</h3>
+                  <h3 className="text-xl font-bold mb-4 group-hover:text-blue-400 transition-colors">{product.name}</h3>
 
                   <div className="mb-6">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold text-blue-400">
+                      <span className="text-4xl md:text-5xl font-extrabold text-blue-400 group-hover:scale-110 transition-transform inline-block">
                         ${product.price.toFixed(2)}
                       </span>
                     </div>
