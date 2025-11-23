@@ -183,14 +183,6 @@ function App() {
       </ErrorBoundary>
     );
   }
-        <SEOHead />
-        <GoogleAnalytics />
-        <StructuredData />
-        <VisitorTracker />
-        <SecureCheckoutPage />
-      </ErrorBoundary>
-    );
-  }
 
   // Concierge domain: dedicated concierge landing experience.
   if (isConciergeDomain) {
