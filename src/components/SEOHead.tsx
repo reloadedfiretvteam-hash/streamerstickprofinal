@@ -16,14 +16,15 @@ export default function SEOHead() {
       element.content = content;
     };
 
-    setMetaTag('description', 'Premium IPTV subscriptions with 20,000+ live channels, movies, sports & PPV. Jailbroken Fire Stick 4K devices. 36-hour free trial. 24/7 support. Free trial available.');
+    // Primary Meta Tags - Enhanced
+    setMetaTag('description', 'Premium IPTV subscriptions with 20,000+ live channels, 60,000+ movies & shows, sports & PPV. Jailbroken Fire Stick 4K devices. 36-hour free trial. 24/7 support. Save up to 50%.');
 
-    setMetaTag('keywords', 'IPTV, premium IPTV, IPTV subscription, Fire Stick, jailbroken Fire Stick, Fire TV, live TV streaming, 4K streaming, sports IPTV, movie streaming, PPV events, cord cutting, cable alternative, streaming service, Fire Stick IPTV, Android IPTV, Smart TV IPTV, best IPTV service, affordable IPTV, reliable IPTV, HD streaming');
+    setMetaTag('keywords', 'IPTV, premium IPTV, IPTV subscription, Fire Stick, jailbroken Fire Stick, Fire TV, live TV streaming, 4K streaming, sports IPTV, movie streaming, PPV events, cord cutting, cable alternative, streaming service, Fire Stick IPTV, Android IPTV, Smart TV IPTV, best IPTV service, affordable IPTV, reliable IPTV, HD streaming, streaming devices, IPTV providers, Fire Stick 4K, Fire TV Stick');
 
     setMetaTag('author', 'Stream Stick Pro');
     setMetaTag('robots', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
-    setMetaTag('googlebot', 'index, follow');
-    setMetaTag('bingbot', 'index, follow');
+    setMetaTag('googlebot', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
+    setMetaTag('bingbot', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
 
     setMetaTag('google-site-verification', 'YOUR_GOOGLE_VERIFICATION_CODE');
 
