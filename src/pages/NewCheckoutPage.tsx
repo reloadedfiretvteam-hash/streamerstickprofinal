@@ -3,6 +3,7 @@ import { ShoppingCart, Lock, Bitcoin, CreditCard, Smartphone, Mail, User, Phone,
 import { supabase } from '../lib/supabase';
 import BitcoinPaymentFlow from '../components/BitcoinPaymentFlow';
 import CashAppPaymentFlow from '../components/CashAppPaymentFlow';
+import SquarePaymentForm from '../components/SquarePaymentForm';
 
 interface CartItem {
   product: {
@@ -18,7 +19,7 @@ interface CartItem {
 export default function NewCheckoutPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState<'bitcoin' | 'cashapp' | ''>('');
+  const [paymentMethod, setPaymentMethod] = useState<'square' | 'bitcoin' | 'cashapp' | ''>('');
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderCode, setOrderCode] = useState('');
 
@@ -357,6 +358,54 @@ export default function NewCheckoutPage() {
                 </h2>
 
                 <div className="space-y-4 mb-6">
+                  {/* Square Payment Option */}
+                  <label
+                    className={`block p-6 border-2 rounded-xl cursor-pointer transition-all hover:shadow-lg ${
+                      paymentMethod === 'square'
+                        ? 'border-blue-500 bg-blue-50 shadow-lg'
+                        : 'border-gray-200 hover:border-blue-300'
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <input
+                        type="radio"
+                        name="payment"
+                        value="square"
+                        checked={paymentMethod === 'square'}
+                        onChange={(e) => setPaymentMethod(e.target.value as 'square')}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <CreditCard className="w-8 h-8 text-blue-600" />
+                          <div>
+                            <h3 className="font-bold text-lg text-gray-900">Credit/Debit Card</h3>
+                            <p className="text-sm text-gray-600">Secure Payment via Square</p>
+                          </div>
+                        </div>
+                        <div className="bg-white rounded-lg p-4 border border-blue-200">
+                          <p className="text-sm text-gray-700 mb-3">
+                            <strong>Pay securely with your credit or debit card</strong>
+                          </p>
+                          <ul className="space-y-2 text-xs text-gray-600">
+                            <li className="flex items-center gap-2">
+                              <Shield className="w-4 h-4 text-blue-500" />
+                              PCI-compliant secure payment processing
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4 text-green-500" />
+                              Instant payment confirmation
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <Lock className="w-4 h-4 text-gray-500" />
+                              Your card details are never stored
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+
                   {/* Bitcoin Option */}
                   <label
                     className={`block p-6 border-2 rounded-xl cursor-pointer transition-all hover:shadow-lg ${
@@ -484,6 +533,53 @@ export default function NewCheckoutPage() {
             {/* Step 3: Payment Flow */}
             {currentStep === 3 && (
               <div className="animate-fade-in">
+                {paymentMethod === 'square' && (
+                  <div className="bg-white rounded-2xl shadow-xl p-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                      <CreditCard className="w-6 h-6 text-blue-600" />
+                      Secure Card Payment
+                    </h2>
+                    <SquarePaymentForm
+                      amount={calculateTotal()}
+                      onSubmit={async (token) => {
+                        try {
+                          // Save order to Supabase
+                          const { data, error } = await supabase
+                            .from('orders')
+                            .insert([{
+                              customer_name: customerInfo.name,
+                              customer_email: customerInfo.email,
+                              customer_phone: customerInfo.phone,
+                              shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
+                              total_amount: calculateTotal().toString(),
+                              payment_method: 'square',
+                              payment_token: token,
+                              status: 'pending',
+                              items: cart.map(item => ({
+                                product_id: item.product.id,
+                                product_name: item.product.name,
+                                quantity: item.quantity,
+                                price: item.product.price
+                              }))
+                            }]);
+
+                          if (error) throw error;
+                          const orderCode = data?.[0]?.id || `SQ-${Date.now()}`;
+                          handleOrderComplete(orderCode);
+                        } catch (error) {
+                          console.error('Order creation failed:', error);
+                          alert('Payment processed but order creation failed. Please contact support.');
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => setCurrentStep(2)}
+                      className="mt-6 w-full bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition-all"
+                    >
+                      Back to Payment Methods
+                    </button>
+                  </div>
+                )}
                 {paymentMethod === 'bitcoin' && (
                   <BitcoinPaymentFlow
                     totalAmount={calculateTotal()}

@@ -131,8 +131,7 @@ export default function EnhancedNavigation({ cartItemCount = 0, onCartClick }: N
             ))}
 
             <a
-              href="#shop"
-              onClick={(e) => { e.preventDefault(); scrollToSection('shop'); }}
+              href="/shop"
               className="px-4 py-2 hover:text-orange-400 transition-colors font-semibold"
             >
               Shop
@@ -224,8 +223,7 @@ export default function EnhancedNavigation({ cartItemCount = 0, onCartClick }: N
               </div>
             ))}
             <a
-              href="#shop"
-              onClick={(e) => { e.preventDefault(); scrollToSection('shop'); }}
+              href="/shop"
               className="block py-2 hover:text-orange-400 transition-colors font-semibold"
             >
               Shop

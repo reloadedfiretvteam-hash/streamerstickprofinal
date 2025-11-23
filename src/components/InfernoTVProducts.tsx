@@ -115,7 +115,26 @@ export default function InfernoTVProducts({ onSelectProduct }: Props) {
                 </div>
 
                 <button
-                  onClick={() => onSelectProduct(product.id, product.price)}
+                  onClick={() => {
+                    // Add to cart and go to shop
+                    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                    const existingItem = cart.find((item: any) => item.product.id === product.id);
+                    if (existingItem) {
+                      existingItem.quantity += 1;
+                    } else {
+                      cart.push({
+                        product: {
+                          id: product.id,
+                          name: product.name,
+                          price: product.price.toString(),
+                          image_url: product.image_url || product.main_image
+                        },
+                        quantity: 1
+                      });
+                    }
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    window.location.href = '/shop';
+                  }}
                   className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 ${
                     product.is_featured
                       ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/50'

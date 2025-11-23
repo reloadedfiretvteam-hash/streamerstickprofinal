@@ -1,8 +1,8 @@
 import { ShoppingCart, Play } from 'lucide-react';
 
 export default function Hero() {
-  const goToCheckout = () => {
-    window.location.href = '/checkout';
+  const goToShop = () => {
+    window.location.href = '/shop';
   };
 
   const scrollToAbout = () => {
@@ -49,7 +49,7 @@ export default function Hero() {
 
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8 animate-slide-up animation-delay-400">
             <button
-              onClick={goToCheckout}
+              onClick={goToShop}
               className="group px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-xl font-bold text-lg transition-all transform hover:scale-105 hover:shadow-2xl shadow-orange-500/50 inline-flex items-center justify-center gap-3"
             >
               <ShoppingCart className="w-6 h-6 group-hover:animate-bounce" />
