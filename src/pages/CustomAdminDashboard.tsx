@@ -88,6 +88,7 @@ import HomepageSectionEditor from '../components/custom-admin/HomepageSectionEdi
 import SiteBrandingManager from '../components/custom-admin/SiteBrandingManager';
 import NOWPaymentsManager from '../components/custom-admin/NOWPaymentsManager';
 import BitcoinOrdersManager from '../components/custom-admin/BitcoinOrdersManager';
+import LiveVisitorStatistics from '../components/custom-admin/LiveVisitorStatistics';
 
 export default function CustomAdminDashboard() {
   const [activeSection, setActiveSection] = useState('dashboard-overview');
@@ -153,6 +154,7 @@ export default function CustomAdminDashboard() {
     { id: 'payment-config', label: 'Payment Setup', icon: CreditCard, color: 'green' },
     { id: 'security', label: 'Security & Protection', icon: Shield, color: 'red' },
     { id: 'advanced-analytics', label: 'Real-Time Analytics', icon: Activity, color: 'purple' },
+    { id: 'live-visitors', label: '👥 Live Visitor Statistics', icon: Users, color: 'green', featured: true },
     { id: 'seo-dashboard', label: 'SEO Dashboard', icon: TrendingUp, color: 'cyan' },
     { id: 'analytics', label: 'Analytics & GSC', icon: BarChart3, color: 'emerald' },
     { id: 'orders', label: 'Orders', icon: ShoppingCart, color: 'pink' },
@@ -331,6 +333,7 @@ export default function CustomAdminDashboard() {
             {activeSection === 'payment-config' && <RealTimePaymentConfig />}
             {activeSection === 'security' && <SecurityManager />}
             {activeSection === 'advanced-analytics' && <AdvancedAnalytics />}
+            {activeSection === 'live-visitors' && <LiveVisitorStatistics />}
             {activeSection === 'seo-dashboard' && <MathRankSEODashboard />}
             {activeSection === 'analytics' && <GoogleAnalyticsManager />}
             {activeSection === 'orders' && <OrdersCustomersManager />}
