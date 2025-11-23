@@ -44,7 +44,7 @@ export default function HomePage() {
               href="https://secure.streamstickpro.com"
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition"
             >
-              Premium Services
+              AI Tools & Services
             </a>
           </div>
         </div>
@@ -52,10 +52,10 @@ export default function HomePage() {
 
       <section className="max-w-7xl mx-auto px-6 py-20 text-center">
         <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-          StreamStick Pro Services
+          AI-Powered Web Solutions
         </h1>
         <p className="text-xl md:text-2xl text-blue-200 mb-12 max-w-3xl mx-auto">
-          Professional setup, technical support, and premium configuration services for your streaming devices
+          Transform your digital presence with intelligent tools for web design, SEO optimization, and content automation
         </p>
       </section>
 
@@ -63,9 +63,9 @@ export default function HomePage() {
         <div className="grid md:grid-cols-3 gap-8">
           <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 hover:bg-white/10 transition">
             <Zap className="w-12 h-12 text-blue-400 mb-4" />
-            <h3 className="text-2xl font-bold text-white mb-3">Fast Setup</h3>
+            <h3 className="text-2xl font-bold text-white mb-3">Instant Activation</h3>
             <p className="text-blue-200">
-              Quick professional installation and configuration. Get streaming in minutes.
+              Start using powerful AI tools immediately. No technical setup required.
             </p>
           </div>
 
@@ -73,15 +73,15 @@ export default function HomePage() {
             <Shield className="w-12 h-12 text-blue-400 mb-4" />
             <h3 className="text-2xl font-bold text-white mb-3">Expert Support</h3>
             <p className="text-blue-200">
-              Professional technical support and ongoing maintenance for optimal performance.
+              24/7 technical assistance and guidance to maximize your results.
             </p>
           </div>
 
           <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 hover:bg-white/10 transition">
             <Star className="w-12 h-12 text-blue-400 mb-4" />
-            <h3 className="text-2xl font-bold text-white mb-3">Premium Quality</h3>
+            <h3 className="text-2xl font-bold text-white mb-3">AI-Powered Quality</h3>
             <p className="text-blue-200">
-              Advanced customization and premium configurations tailored to your needs.
+              Advanced algorithms deliver professional results automatically.
             </p>
           </div>
         </div>
@@ -89,7 +89,7 @@ export default function HomePage() {
 
       <section className="max-w-7xl mx-auto px-6 py-20">
         <h2 className="text-4xl font-bold text-white text-center mb-12">
-          Our Services
+          Our AI Tool Suites
         </h2>
         {loading ? (
           <div className="text-center text-blue-300 text-xl">Loading services...</div>
