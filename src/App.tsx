@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import ErrorBoundary from './components/ErrorBoundary';
-import Navigation from './components/Navigation';
+import Navigation from './components/EnhancedNavigation';
 import Hero from './components/Hero';
 import About from './components/About';
 import WhyChooseUs from './components/WhyChooseUs';
