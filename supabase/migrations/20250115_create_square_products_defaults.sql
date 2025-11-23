@@ -180,3 +180,6 @@ INSERT INTO square_products (
 CREATE INDEX IF NOT EXISTS idx_square_products_active ON square_products(is_active, sort_order);
 CREATE INDEX IF NOT EXISTS idx_square_products_category ON square_products(category);
 
+
+
+
