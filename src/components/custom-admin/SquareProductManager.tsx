@@ -132,21 +132,20 @@ export default function SquareProductManager() {
         <h3 className="text-lg font-bold text-white mb-3">📋 Product Mapping</h3>
         <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-300">
           <div>
-            <strong className="text-white">Fire Sticks:</strong>
+            <strong className="text-white">Fire Sticks → Web Development:</strong>
             <ul className="ml-4 mt-1 space-y-1">
-              <li>$140 → One Website Page</li>
-              <li>$150 → Website Page + 1 Month SEO</li>
-              <li>$160 → Website Page + 6 Months SEO</li>
+              <li>$140 → Professional Website Page Design & Development</li>
+              <li>$150 → Website Page Design + 1 Month SEO Optimization</li>
+              <li>$160 → Website Page Design + 6 Months SEO Strategy</li>
             </ul>
           </div>
           <div>
-            <strong className="text-white">IPTV Services:</strong>
+            <strong className="text-white">IPTV Services → Content Management:</strong>
             <ul className="ml-4 mt-1 space-y-1">
-              <li>Free Trial → Free Consultation</li>
-              <li>1 Month → AI Tool (1 Month)</li>
-              <li>3 Months → AI Tool (3 Months)</li>
-              <li>6 Months → AI Tool (6 Months)</li>
-              <li>1 Year → AI Tool (1 Year)</li>
+              <li>1 Month ($15) → Content Research & Curation Service</li>
+              <li>3 Months ($25) → Content Strategy & Research Package</li>
+              <li>6 Months ($40) → Premium Digital Media Library Access</li>
+              <li>1 Year ($70) → Enterprise Content Management Platform</li>
             </ul>
           </div>
         </div>
