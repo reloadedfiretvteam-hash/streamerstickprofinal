@@ -7,64 +7,103 @@ interface ProductsProps {
 export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
   const products = [
     {
-      id: 'firestick-hd',
-      name: 'Fire Stick HD',
-      price: 140.00,
-      image: '/OIF.jpg',
-      badge: 'HD QUALITY',
+      id: 'ai-launchpad-demo',
+      name: 'AI LaunchPad Demo & Onboarding',
+      price: 0.00,
+      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop&q=80',
+      badge: 'FREE TRIAL',
       popular: false,
       features: [
-        'Brand New Amazon Fire Stick HD',
-        '18,000+ Live TV Channels',
-        '60,000+ Movies & TV Shows',
-        'All Sports Channels & PPV Events',
-        'HD Quality',
-        'Pre-Configured & Ready to Use',
-        'Plug & Play Setup (5 Minutes)',
-        '1 Year Premium IPTV Included',
-        'Free Shipping',
-        '24/7 Support'
+        'Instant Onboarding Process',
+        'Complete Site Audit',
+        'Design Preview & Mockups',
+        'SEO Health Check',
+        'Performance Analysis',
+        'No Credit Card Required',
+        'Full Suite Access',
+        'Priority Support During Trial',
+        'Export Reports',
+        'Video Tutorials'
       ]
     },
     {
-      id: 'firestick-4k',
-      name: 'Fire Stick 4K',
-      price: 150.00,
-      image: 'https://images.pexels.com/photos/4178672/pexels-photo-4178672.jpeg?auto=compress&cs=tinysrgb&w=800',
-      badge: 'BEST VALUE',
+      id: 'ai-page-builder-1mo',
+      name: 'AI Page Builder Pro',
+      price: 15.00,
+      image: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&h=600&fit=crop&q=80',
+      badge: '1 MONTH',
+      popular: false,
+      features: [
+        'Auto-Layout Page Builder',
+        'Image Optimization Engine',
+        'Built-in Speed Booster',
+        'SEO Snippet Editor',
+        'Mobile Responsive Templates',
+        'A/B Testing Tools',
+        'Analytics Integration',
+        'Drag & Drop Interface',
+        '24/7 Technical Support',
+        'Regular Updates'
+      ]
+    },
+    {
+      id: 'ai-seo-strategy-3mo',
+      name: 'AI SEO Strategy Suite',
+      price: 30.00,
+      image: 'https://images.unsplash.com/photo-1432888622747-4eb9a8f2c3b6?w=800&h=600&fit=crop&q=80',
+      badge: '3 MONTHS',
       popular: true,
       features: [
-        'Brand New Amazon Fire Stick 4K',
-        '18,000+ Live TV Channels',
-        '60,000+ Movies & TV Shows',
-        'All Sports Channels & PPV Events',
-        '4K Ultra HD Quality',
-        'Pre-Configured & Ready to Use',
-        'Plug & Play Setup (5 Minutes)',
-        '1 Year Premium IPTV Included',
-        'Priority Customer Support',
-        'Free Shipping'
+        'Automated Site Audits',
+        'Smart Keyword Research',
+        'Content Topic Generator',
+        'Traffic Analytics Dashboard',
+        'Competitor Gap Analysis',
+        'Backlink Monitoring',
+        'Rank Tracking (Unlimited Keywords)',
+        'Monthly Performance Reports',
+        'Priority Email Support',
+        'Best Value for Growth'
       ]
     },
     {
-      id: 'firestick-4k-max',
-      name: 'Fire Stick 4K Max',
-      price: 160.00,
-      image: 'https://images.pexels.com/photos/7533347/pexels-photo-7533347.jpeg?auto=compress&cs=tinysrgb&w=800',
-      badge: 'PREMIUM',
+      id: 'ai-blog-automation-6mo',
+      name: 'AI Blog Automation Engine',
+      price: 50.00,
+      image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&h=600&fit=crop&q=80',
+      badge: '6 MONTHS',
       popular: false,
       features: [
-        'Brand New Amazon Fire Stick 4K Max',
-        '18,000+ Live TV Channels',
-        '60,000+ Movies & TV Shows',
-        'All Sports Channels & PPV Events',
-        '4K Ultra HD Quality',
-        'Fastest Performance',
-        'Pre-Configured & Ready to Use',
-        'Plug & Play Setup (5 Minutes)',
-        '1 Year Premium IPTV Included',
-        'VIP Customer Support',
-        'Free Shipping'
+        'AI-Powered Content Generator',
+        'Automatic Publishing Scheduler',
+        'Keyword Ranking Reports',
+        'Competitor Gap Analysis',
+        'Rich Content Suggestions',
+        'SEO Optimization Per Post',
+        'Social Media Integration',
+        'Engagement Analytics',
+        'Duplicate Content Checker',
+        'Dedicated Account Manager'
+      ]
+    },
+    {
+      id: 'ai-local-marketing-12mo',
+      name: 'AI Local Marketing Power Pack',
+      price: 75.00,
+      image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=600&fit=crop&q=80',
+      badge: '12 MONTHS',
+      popular: false,
+      features: [
+        'Lead Magnet Builder',
+        'Review & Reputation Monitoring',
+        'Local Keyword Optimizer',
+        'Google My Business Insights',
+        'Local Citation Builder',
+        'Reputation Alert System',
+        'Competitor Local Analysis',
+        'Monthly Strategy Sessions',
+        'Premium Support',
+        'Full Year Access'
       ]
     }
   ];
@@ -78,8 +117,8 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
         <div className="relative rounded-3xl overflow-hidden mb-16 animate-fade-in">
           <div className="absolute inset-0">
             <img
-              src="/Screenshot_20251102-131641.png"
-              alt="Fire Stick Breaking Free"
+              src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=600&fit=crop&q=80"
+              alt="AI-Powered Web Tools"
               className="w-full h-full object-cover opacity-80"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
@@ -87,37 +126,37 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
 
           <div className="relative z-10 px-8 md:px-16 py-16 md:py-24">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 bg-orange-500/30 backdrop-blur-sm border border-orange-400/50 rounded-full px-6 py-2 mb-6">
-                <Flame className="w-5 h-5 text-orange-400 animate-pulse" />
-                <span className="text-sm font-bold tracking-wide">BREAK FREE FROM CABLE</span>
+              <div className="inline-flex items-center gap-2 bg-blue-500/30 backdrop-blur-sm border border-blue-400/50 rounded-full px-6 py-2 mb-6">
+                <Zap className="w-5 h-5 text-blue-400 animate-pulse" />
+                <span className="text-sm font-bold tracking-wide">AI-POWERED WEB SOLUTIONS</span>
               </div>
 
               <h2 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight">
-                Unleash
+                Transform Your
                 <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 animate-pulse">
-                  Unlimited
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-500 to-blue-400 animate-pulse">
+                  Digital Presence
                 </span>
                 <br />
-                Entertainment
+                with AI Tools
               </h2>
 
               <p className="text-xl md:text-2xl text-gray-200 mb-8 leading-relaxed">
-                Easy setup - just add your login credentials and start streaming. Cut the chains of expensive cable and experience true streaming freedom.
+                Powerful AI-driven tools for web design, SEO optimization, content creation, and local marketing. Grow your business online with intelligent automation.
               </p>
 
               <div className="flex flex-wrap gap-4 text-sm md:text-base">
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
                   <Check className="w-5 h-5 text-green-400" />
-                  <span>18,000+ Channels</span>
+                  <span>AI Page Builder</span>
                 </div>
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
                   <Check className="w-5 h-5 text-green-400" />
-                  <span>60,000+ Movies</span>
+                  <span>SEO Optimization</span>
                 </div>
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
                   <Check className="w-5 h-5 text-green-400" />
-                  <span>All Sports & PPV</span>
+                  <span>Content Automation</span>
                 </div>
               </div>
             </div>
@@ -127,10 +166,10 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
         {/* Section Title */}
         <div className="text-center mb-16 animate-fade-in">
           <h3 className="text-3xl md:text-5xl font-bold mb-4">
-            Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Fire Stick</span>
+            Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-500">AI Tool Suite</span>
           </h3>
           <p className="text-lg text-blue-100 max-w-2xl mx-auto">
-            Every device comes fully loaded and ready to stream in under 5 minutes
+            Every package includes powerful AI-driven features to boost your online presence
           </p>
         </div>
 
@@ -168,12 +207,12 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
 
                 <div className="mb-6">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold text-orange-400">
-                      ${product.price.toFixed(2)}
+                    <span className="text-5xl font-bold text-blue-400">
+                      {product.price === 0 ? 'FREE' : `$${product.price.toFixed(2)}`}
                     </span>
                   </div>
                   <p className="text-blue-200 text-sm mt-2">
-                    Includes 1 Year IPTV Subscription
+                    {product.price === 0 ? 'No credit card required' : `${product.badge} access included`}
                   </p>
                 </div>
 
@@ -209,31 +248,31 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
                 <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Zap className="w-8 h-8" />
                 </div>
-                <h4 className="font-bold text-lg mb-2">Instant Setup</h4>
-                <p className="text-blue-200 text-sm">Plug in and start watching in under 5 minutes</p>
+                <h4 className="font-bold text-lg mb-2">Instant Activation</h4>
+                <p className="text-blue-200 text-sm">Start using AI tools immediately after purchase</p>
               </div>
 
               <div className="text-center">
                 <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Star className="w-8 h-8" />
                 </div>
-                <h4 className="font-bold text-lg mb-2">Premium Quality</h4>
-                <p className="text-blue-200 text-sm">4K streams with anti-freeze technology</p>
+                <h4 className="font-bold text-lg mb-2">AI-Powered Quality</h4>
+                <p className="text-blue-200 text-sm">Advanced algorithms for superior results</p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Flame className="w-8 h-8" />
+                <div className="w-16 h-16 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Check className="w-8 h-8" />
                 </div>
-                <h4 className="font-bold text-lg mb-2">Lifetime Support</h4>
-                <p className="text-blue-200 text-sm">24/7 customer service whenever you need help</p>
+                <h4 className="font-bold text-lg mb-2">Expert Support</h4>
+                <p className="text-blue-200 text-sm">24/7 technical assistance for all subscribers</p>
               </div>
             </div>
           </div>
         </div>
 
         <p className="text-center mt-8 text-blue-200">
-          ✓ Ships same day | ✓ Free shipping on all orders | ✓ 7-day money-back guarantee
+          ✓ Instant access | ✓ No setup fees | ✓ 30-day money-back guarantee
         </p>
       </div>
     </section>

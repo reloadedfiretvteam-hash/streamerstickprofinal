@@ -107,8 +107,8 @@ function App() {
       secureHosts.length > 0 &&
       secureHosts.some((allowedHost) => hostname === allowedHost);
 
-    // Also treat direct /secure path on any host as secure mode.
-    const isSecurePath = pathname.startsWith('/secure');
+    // Also treat direct /secure path or /square path on any host as secure mode.
+    const isSecurePath = pathname.startsWith('/secure') || pathname.startsWith('/square');
 
     setIsSecureDomain(isSecureHost || isSecurePath);
   }, []);
