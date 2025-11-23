@@ -14,7 +14,7 @@ export default function Hero() {
       {/* Background image: Fire Stick breaking out of cage */}
       <div className="absolute inset-0">
         <img
-          src="/images/hero-firestick-breakout.jpg"
+          src="https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/hero-firestick-breakout.jpg"
           alt="Fire Stick breaking free"
           className="w-full h-full object-cover"
         />

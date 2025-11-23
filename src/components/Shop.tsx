@@ -64,7 +64,9 @@ export default function Shop({ onAddToCart }: ShopProps) {
           name: p.name,
           price: price,
           type: isFirestick ? 'firestick' : 'iptv',
-          image: p.main_image || (isFirestick ? 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=800' : 'https://images.pexels.com/photos/1202723/pexels-photo-1202723.jpeg?auto=compress&cs=tinysrgb&w=800'),
+          image: p.main_image || (isFirestick 
+            ? 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg'
+            : 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg'),
           badge: isFirestick ? 'BEST VALUE' : 'POPULAR',
           popular: p.featured,
           period: isFirestick ? undefined : '/month',

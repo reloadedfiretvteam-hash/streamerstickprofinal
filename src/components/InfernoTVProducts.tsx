@@ -168,14 +168,14 @@ export default function InfernoTVProducts({ onSelectProduct }: Props) {
               )}
 
               <div className="relative h-56 overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-                {/* Real Amazon Fire Stick product images */}
+                {/* Real Amazon Fire Stick product images from Supabase */}
                 <img
                   src={
                     product.name.includes('4K Max')
-                      ? 'https://m.media-amazon.com/images/I/51CgKqh+AkL._AC_SL1000_.jpg'
+                      ? 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k%20max.jpg'
                       : product.name.includes('4K')
-                      ? 'https://m.media-amazon.com/images/I/41kqFp+XKGL._AC_SL1000_.jpg'
-                      : 'https://m.media-amazon.com/images/I/41bhgYiA8LL._AC_SL1000_.jpg'
+                      ? 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k.jpg'
+                      : 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg'
                   }
                   alt={product.name}
                   className="h-full object-contain transform hover:scale-110 transition-transform duration-500 p-4"

@@ -4,40 +4,42 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 export default function MediaCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Carousel images from Supabase Storage - replace placeholder stock photos
+  const supabaseBaseUrl = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/';
+  
   const mediaItems = [
     // BLOCKBUSTER MOVIES - Cinema & Theater
-    { type: 'movie', title: 'Action Movies 2024', image: 'https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
-    { type: 'movie', title: 'Thriller & Horror', image: 'https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
-    { type: 'movie', title: 'Drama & Romance', image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
-    { type: 'movie', title: 'Comedy Specials', image: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
-    { type: 'movie', title: 'Sci-Fi Adventure', image: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
+    { type: 'movie', title: 'Action Movies 2024', image: `${supabaseBaseUrl}Playback-Tile-1024x512.webp`, year: '2024' },
+    { type: 'movie', title: 'Thriller & Horror', image: `${supabaseBaseUrl}Movies-categories_11zon-1024x512.webp`, year: '2024' },
+    { type: 'movie', title: 'Drama & Romance', image: `${supabaseBaseUrl}Playback-Tile-1024x512.webp`, year: '2024' },
+    { type: 'movie', title: 'Comedy Specials', image: `${supabaseBaseUrl}5-1.webp`, year: '2024' },
+    { type: 'movie', title: 'Sci-Fi Adventure', image: `${supabaseBaseUrl}9-1.webp`, year: '2024' },
 
     // TV SERIES - Streaming Entertainment
-    { type: 'series', title: 'Top US Series', image: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
-    { type: 'series', title: 'Trending Shows', image: 'https://images.unsplash.com/photo-1574267432644-f610e0494a3d?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
-    { type: 'series', title: 'Binge-Worthy Series', image: 'https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
+    { type: 'series', title: 'Top US Series', image: `${supabaseBaseUrl}IPTVSmarters%20TV%20IMAG.jpg`, year: '2024' },
+    { type: 'series', title: 'Trending Shows', image: `${supabaseBaseUrl}iptv3.jpg`, year: '2024' },
+    { type: 'series', title: 'Binge-Worthy Series', image: `${supabaseBaseUrl}OIP%20(11)%20websit%20pic%20copy%20copy.jpg`, year: '2024' },
 
     // NFL FOOTBALL - Stadium & Action
-    { type: 'sport', title: 'NFL All Teams Live', image: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏈' },
-    { type: 'sport', title: 'Super Bowl LIX', image: 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏈' },
-    { type: 'sport', title: 'Monday Night Football', image: 'https://images.unsplash.com/photo-1577223625816-7546f36a3173?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏈' },
-    { type: 'sport', title: 'NFL Playoffs', image: 'https://images.unsplash.com/photo-1566577134770-3d85bb3a9cc4?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏈' },
+    { type: 'sport', title: 'NFL All Teams Live', image: `${supabaseBaseUrl}c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg`, logo: '🏈' },
+    { type: 'sport', title: 'Super Bowl LIX', image: `${supabaseBaseUrl}c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg`, logo: '🏈' },
+    { type: 'sport', title: 'Monday Night Football', image: `${supabaseBaseUrl}c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg`, logo: '🏈' },
+    { type: 'sport', title: 'NFL Playoffs', image: `${supabaseBaseUrl}c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg`, logo: '🏈' },
 
     // MLB BASEBALL - Stadium Views
-    { type: 'sport', title: 'MLB All 30 Teams', image: 'https://images.unsplash.com/photo-1529446618125-1dee7f0e71ea?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '⚾' },
-    { type: 'sport', title: 'World Series Live', image: 'https://images.unsplash.com/photo-1566577739943-c48fdd8d0bc1?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '⚾' },
-    { type: 'sport', title: 'MLB Playoffs', image: 'https://images.unsplash.com/photo-1508394522741-82ac9c15ba69?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '⚾' },
+    { type: 'sport', title: 'MLB All 30 Teams', image: `${supabaseBaseUrl}BASEBALL.webp`, logo: '⚾' },
+    { type: 'sport', title: 'World Series Live', image: `${supabaseBaseUrl}BASEBALL.webp`, logo: '⚾' },
+    { type: 'sport', title: 'MLB Playoffs', image: `${supabaseBaseUrl}BASEBALL.webp`, logo: '⚾' },
 
     // NBA BASKETBALL - Court Action
-    { type: 'sport', title: 'NBA All Games', image: 'https://images.unsplash.com/photo-1519861531473-9200262188bf?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏀' },
-    { type: 'sport', title: 'NBA Playoffs 2024', image: 'https://images.unsplash.com/photo-1608245449230-4ac19066d2d0?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏀' },
-    { type: 'sport', title: 'NBA Finals', image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏀' },
+    { type: 'sport', title: 'NBA All Games', image: `${supabaseBaseUrl}downloadBASKET%20BALL.jpg`, logo: '🏀' },
+    { type: 'sport', title: 'NBA Playoffs 2024', image: `${supabaseBaseUrl}downloadBASKET%20BALL.jpg`, logo: '🏀' },
+    { type: 'sport', title: 'NBA Finals', image: `${supabaseBaseUrl}downloadBASKET%20BALL.jpg`, logo: '🏀' },
 
     // OTHER SPORTS - Hockey, Soccer, Combat
-    { type: 'sport', title: 'NHL Hockey Live', image: 'https://images.unsplash.com/photo-1589403785865-f6282213f28c?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏒' },
-    { type: 'sport', title: 'UFC & Boxing PPV', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🥊' },
-    { type: 'sport', title: 'Soccer - All Leagues', image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '⚽' },
-    { type: 'sport', title: 'Premier League', image: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '⚽' },
+    { type: 'sport', title: 'UFC & Boxing PPV', image: `${supabaseBaseUrl}UFC.jpg`, logo: '🥊' },
+    { type: 'sport', title: 'Soccer - All Leagues', image: `${supabaseBaseUrl}5-1.webp`, logo: '⚽' },
+    { type: 'sport', title: 'Premier League', image: `${supabaseBaseUrl}9-1.webp`, logo: '⚽' },
   ];
 
   useEffect(() => {
@@ -106,7 +108,8 @@ export default function MediaCarousel() {
                       crossOrigin="anonymous"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = 'https://images.unsplash.com/photo-1574267432644-f610e0494a3d?w=600&h=400&fit=crop&q=80&auto=format';
+                        // Fallback to IPTV image if Supabase image fails
+                        target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv3.jpg';
                       }}
                     />
                     {/* Always visible gradient overlay */}
