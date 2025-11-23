@@ -102,6 +102,7 @@ export default function Shop({ onAddToCart }: ShopProps) {
     setFreeTrialLoading(true);
 
     try {
+      // Save to email captures database
       await supabase
         .from('email_captures')
         .insert([{
@@ -112,6 +113,7 @@ export default function Shop({ onAddToCart }: ShopProps) {
           metadata: { product: 'Free Trial - IPTV Subscription' }
         }]);
 
+      // Create a notification email log for the shop owner
       const emailBody = `
 FREE TRIAL REQUEST - IPTV SUBSCRIPTION
 
@@ -122,7 +124,7 @@ Customer Details:
 - Date: ${new Date().toLocaleString()}
 
 Product: Free Trial IPTV Subscription
-- 7 Days Free Access
+- 36 Hours Free Access
 - All channels included
 - All features included
 
@@ -132,14 +134,18 @@ Please process this free trial request and send activation details to the custom
 This is an automated message from StreamStickPro.com
       `.trim();
 
-      const mailtoLink = `mailto:reloadedfiretvteam@gmail.com?subject=Free Trial Request - ${freeTrialName}&body=${encodeURIComponent(emailBody)}`;
-      window.location.href = mailtoLink;
+      await supabase.from('email_logs').insert({
+        recipient: 'reloadedfiretvteam@gmail.com',
+        template_key: 'free_trial_request',
+        subject: `Free Trial Request - ${freeTrialName}`,
+        body: emailBody,
+        status: 'pending'
+      });
 
+      // Mark as submitted
       setFreeTrialSubmitted(true);
 
-      setTimeout(() => {
-        alert('Email opened! Please send the email to complete your free trial request. We will contact you within 24 hours.');
-      }, 500);
+      alert('Thank you! Your free trial request has been submitted. We will contact you within 24 hours with activation details.');
 
     } catch (error) {
       console.error('Error:', error);
@@ -604,7 +610,7 @@ This is an automated message from StreamStickPro.com
                         </button>
 
                         <p className="text-xs text-gray-500 text-center">
-                          By clicking the button, your email client will open with a pre-filled message. Simply send it to complete your request.
+                          By clicking the button, your free trial request will be submitted to our team for processing.
                         </p>
                       </form>
                     </div>
@@ -617,7 +623,7 @@ This is an automated message from StreamStickPro.com
                         Request Submitted!
                       </h4>
                       <p className="text-gray-600 mb-4">
-                        Thank you {freeTrialName}! We've opened your email client with a pre-filled message.
+                        Thank you {freeTrialName}! Your free trial request has been received successfully.
                       </p>
                       <p className="text-sm text-gray-500">
                         We'll send your activation details to <strong>{freeTrialEmail}</strong> within 24 hours.
