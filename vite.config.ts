@@ -12,7 +12,8 @@ export default defineConfig({
     target: 'es2015',
     minify: 'esbuild',
     cssMinify: true,
-    // Enable source maps for debugging (can be disabled for production)
+    // Source maps - set to true for production debugging, false for smaller bundle
+    // Can be controlled via environment: sourcemap: process.env.NODE_ENV !== 'production'
     sourcemap: false,
     rollupOptions: {
       output: {

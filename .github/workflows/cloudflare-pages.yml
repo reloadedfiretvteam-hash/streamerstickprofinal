@@ -37,8 +37,14 @@ jobs:
         run: |
           echo "Optimizing static assets for Cloudflare CDN..."
           # Ensure _headers and _routes.json are in dist
-          cp -f public/_headers dist/_headers || true
-          cp -f public/_routes.json dist/_routes.json || true
+          if [ -f public/_headers ]; then
+            cp -f public/_headers dist/_headers
+            echo "✓ _headers copied"
+          fi
+          if [ -f public/_routes.json ]; then
+            cp -f public/_routes.json dist/_routes.json
+            echo "✓ _routes.json copied"
+          fi
           echo "✓ CDN optimization complete"
 
       - name: Deploy to Cloudflare Pages
