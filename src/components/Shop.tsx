@@ -4,6 +4,9 @@ import { supabase } from '../lib/supabase';
 
 // Updated: All IPTV product images now use local /images/iptv-subscription.jpg
 
+// Support email configuration
+const SUPPORT_EMAIL = import.meta.env.VITE_SUPPORT_EMAIL || 'reloadedfiretvteam@gmail.com';
+
 interface Product {
   id: string;
   name: string;
@@ -94,21 +97,39 @@ export default function Shop({ onAddToCart }: ShopProps) {
   const handleFreeTrialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!freeTrialName || !freeTrialEmail) {
+    // Validate inputs
+    const trimmedName = freeTrialName.trim();
+    const trimmedEmail = freeTrialEmail.trim().toLowerCase();
+    const trimmedPhone = freeTrialPhone.trim();
+
+    if (!trimmedName || !trimmedEmail) {
       alert('Please enter your name and email');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+
+    // Name validation (2-100 characters, letters, spaces, hyphens, apostrophes)
+    if (trimmedName.length < 2 || trimmedName.length > 100) {
+      alert('Name must be between 2 and 100 characters');
       return;
     }
 
     setFreeTrialLoading(true);
 
     try {
-      // Save to email captures database
+      // Save to email captures database with sanitized inputs
       await supabase
         .from('email_captures')
         .insert([{
-          email: freeTrialEmail,
-          name: freeTrialName,
-          phone: freeTrialPhone || null,
+          email: trimmedEmail,
+          name: trimmedName,
+          phone: trimmedPhone || null,
           source: 'free-trial-signup',
           metadata: { product: 'Free Trial - IPTV Subscription' }
         }]);
@@ -118,9 +139,9 @@ export default function Shop({ onAddToCart }: ShopProps) {
 FREE TRIAL REQUEST - IPTV SUBSCRIPTION
 
 Customer Details:
-- Name: ${freeTrialName}
-- Email: ${freeTrialEmail}
-- Phone: ${freeTrialPhone || 'Not provided'}
+- Name: ${trimmedName}
+- Email: ${trimmedEmail}
+- Phone: ${trimmedPhone || 'Not provided'}
 - Date: ${new Date().toLocaleString()}
 
 Product: Free Trial IPTV Subscription
@@ -135,9 +156,9 @@ This is an automated message from StreamStickPro.com
       `.trim();
 
       await supabase.from('email_logs').insert({
-        recipient: 'reloadedfiretvteam@gmail.com',
+        recipient: SUPPORT_EMAIL,
         template_key: 'free_trial_request',
-        subject: `Free Trial Request - ${freeTrialName}`,
+        subject: `Free Trial Request - ${trimmedName}`,
         body: emailBody,
         status: 'pending'
       });
@@ -149,7 +170,7 @@ This is an automated message from StreamStickPro.com
 
     } catch (error) {
       console.error('Error:', error);
-      alert('Submission error. Please email us directly at reloadedfiretvteam@gmail.com');
+      alert(`Submission error. Please email us directly at ${SUPPORT_EMAIL}`);
     } finally {
       setFreeTrialLoading(false);
     }
