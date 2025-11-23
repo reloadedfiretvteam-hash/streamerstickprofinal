@@ -1,0 +1,18 @@
+# Cloudflare Pages Runtime Configuration
+# This file provides hints to Cloudflare about how to handle your application
+
+# Build configuration
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Environment
+[env]
+  NODE_VERSION = "20"
+
+# Functions configuration (if using Cloudflare Functions)
+[functions]
+  directory = "functions"
+  node_compat = true
+
+# Headers and routing are handled via public/_headers and public/_routes.json
