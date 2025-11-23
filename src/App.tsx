@@ -6,11 +6,9 @@ import About from './components/About';
 import WhyChooseUs from './components/WhyChooseUs';
 import Shop from './components/Shop';
 import MediaCarousel from './components/MediaCarousel';
-import IPTVPreviewVideo from './components/IPTVPreviewVideo';
 import WhatIsIPTV from './components/WhatIsIPTV';
 import FAQ from './components/FAQ';
 import Devices from './components/Devices';
-import YouTubeTutorials from './components/YouTubeTutorials';
 import BlogDisplay from './components/BlogDisplay';
 import LegalDisclaimer from './components/LegalDisclaimer';
 import EmailCaptureBottom from './components/EmailCaptureBottom';
@@ -213,10 +211,8 @@ function App() {
         <MediaCarousel />
         <HowItWorksSteps />
         <Shop onAddToCart={handleAddToCart} />
-        <YouTubeTutorials />
         <ReviewsCarousel />
         <ComparisonTable />
-        <IPTVPreviewVideo />
         <WhatIsIPTV />
         <Devices />
         <BlogDisplay />
