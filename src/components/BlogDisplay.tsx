@@ -118,14 +118,18 @@ export default function BlogDisplay() {
               key={post.id}
               className="bg-gray-800 rounded-xl overflow-hidden hover:transform hover:scale-105 transition-all duration-300 shadow-xl"
             >
-              {post.featured_image && (
-                <div className="relative h-48 overflow-hidden">
-                  <img
-                    src={post.featured_image}
-                    alt={post.title}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
+              <div className="relative h-48 overflow-hidden">
+                <img
+                  src={post.featured_image || 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg'}
+                  alt={post.title}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    // Fallback to IPTV subscription image if featured image fails
+                    target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
+                  }}
+                />
                   <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                     <span className="px-3 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full">
                       {getCategoryName(post.category_id)}
@@ -133,7 +137,6 @@ export default function BlogDisplay() {
                     {/* Tags will be added here when available in database */}
                   </div>
                 </div>
-              )}
 
               <div className="p-6">
                 <div className="flex items-center gap-4 text-sm text-gray-400 mb-3">

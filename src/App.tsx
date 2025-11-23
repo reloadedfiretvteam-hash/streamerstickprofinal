@@ -32,6 +32,7 @@ import HowItWorksSteps from './components/HowItWorksSteps';
 import WhatYouGetVideo from './components/WhatYouGetVideo';
 import ConciergePage from './pages/ConciergePage';
 import ConciergeCheckout from './pages/ConciergeCheckout';
+import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
 
 interface CartItem {
@@ -177,11 +178,15 @@ function App() {
   if (isSecureDomain) {
     return (
       <ErrorBoundary>
+        <SecureCheckoutPage />
+      </ErrorBoundary>
+    );
+  }
         <SEOHead />
         <GoogleAnalytics />
         <StructuredData />
         <VisitorTracker />
-        <ConciergeCheckout />
+        <SecureCheckoutPage />
       </ErrorBoundary>
     );
   }
