@@ -38,7 +38,13 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
             </a>
             <a
               href="#shop"
-              onClick={(e) => { e.preventDefault(); document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' }); }}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                const shopElement = document.getElementById('shop');
+                if (shopElement) {
+                  shopElement.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
               className="hover:text-orange-400 transition-all font-semibold text-base hover:scale-110 transform"
             >
               Shop

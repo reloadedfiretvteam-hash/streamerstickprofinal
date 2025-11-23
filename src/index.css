@@ -36,3 +36,8 @@ html {
     background-position: 100% 50%;
   }
 }
+
+/* Ensure gradient animations work properly */
+.animate-gradient {
+  background-size: 200% 200%;
+}
