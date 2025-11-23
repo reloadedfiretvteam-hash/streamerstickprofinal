@@ -62,8 +62,8 @@ export default function Shop({ onAddToCart }: ShopProps) {
         // Get image - prioritize main_image, then image_url, then fallback
         let productImage = p.main_image || p.image_url || '';
         
-        // If no image, use type-specific fallback
-        if (!productImage || productImage.trim() === '') {
+        // If no image or image is placeholder/empty, use type-specific fallback
+        if (!productImage || productImage.trim() === '' || productImage.includes('placeholder') || productImage.includes('pexels')) {
           if (isFirestick) {
             if (p.name.toLowerCase().includes('4k max')) {
               productImage = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k%20max.jpg';
