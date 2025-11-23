@@ -44,12 +44,26 @@ export default function BlogDisplay() {
       if (error) throw error;
 
       // Map data to include calculated fields
-      const mappedPosts = (data || []).map(post => ({
-        ...post,
-        read_time_minutes: Math.ceil((post.word_count || 300) / 200),
-        view_count: post.view_count || 0,
-        category_id: post.category || 'General'
-      }));
+      const mappedPosts = (data || []).map(post => {
+        // Parse tags from keywords if tags field doesn't exist
+        let tags: string[] = [];
+        if (post.tags && Array.isArray(post.tags)) {
+          tags = post.tags;
+        } else if (post.keywords) {
+          // If keywords is a string, split by comma
+          tags = typeof post.keywords === 'string' 
+            ? post.keywords.split(',').map(t => t.trim()).filter(Boolean)
+            : post.keywords;
+        }
+        
+        return {
+          ...post,
+          read_time_minutes: Math.ceil((post.word_count || 300) / 200),
+          view_count: post.view_count || 0,
+          category_id: post.category || 'General',
+          tags: tags
+        };
+      });
 
       setPosts(mappedPosts);
     } catch (error) {
@@ -134,7 +148,21 @@ export default function BlogDisplay() {
                     <span className="px-3 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full">
                       {getCategoryName(post.category_id)}
                     </span>
-                    {/* Tags will be added here when available in database */}
+                    {post.tags && post.tags.length > 0 && (
+                      post.tags.slice(0, 3).map((tag: string, idx: number) => (
+                        <a
+                          key={idx}
+                          href={`/blog/tag/${encodeURIComponent(tag.toLowerCase().replace(/\s+/g, '-'))}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            window.location.href = `/blog/tag/${encodeURIComponent(tag.toLowerCase().replace(/\s+/g, '-'))}`;
+                          }}
+                          className="px-3 py-1 bg-blue-500/80 hover:bg-blue-500 text-white text-xs font-semibold rounded-full transition-colors"
+                        >
+                          #{tag}
+                        </a>
+                      ))
+                    )}
                   </div>
                 </div>
 

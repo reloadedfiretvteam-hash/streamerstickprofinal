@@ -30,16 +30,53 @@ export default function EnhancedBlogPost() {
   const [tocItems, setTocItems] = useState<{id: string; text: string}[]>([]);
 
   useEffect(() => {
-    const slug = window.location.pathname.split('/').pop();
-    loadPost(slug || '');
+    const path = window.location.pathname;
+    
+    // Check if it's a tag page
+    if (path.startsWith('/blog/tag/')) {
+      const tagSlug = path.split('/blog/tag/').pop() || '';
+      loadPostByTag(tagSlug);
+    } else {
+      const slug = path.split('/').pop();
+      loadPost(slug || '');
+    }
   }, []);
+
+  const loadPostByTag = async (tagSlug: string) => {
+    // Convert tag slug back to tag name
+    const tagName = tagSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    
+    try {
+      const { data, error } = await supabase
+        .from('real_blog_posts')
+        .select('*')
+        .eq('status', 'publish')
+        .contains('tags', [tagName])
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!error && data) {
+        setPost(data);
+        loadRelatedPosts(data.id, data.category);
+        incrementViewCount(data.slug);
+        setupSEO(data);
+        extractTableOfContents(data.content);
+      }
+    } catch (error) {
+      console.error('Error loading post by tag:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadPost = async (slug: string) => {
     try {
       const { data, error } = await supabase
-        .from('blog_posts')
+        .from('real_blog_posts')
         .select('*')
         .eq('slug', slug)
+        .eq('status', 'publish')
         .maybeSingle();
 
       if (error) throw error;
@@ -61,13 +98,18 @@ export default function EnhancedBlogPost() {
   const loadRelatedPosts = async (currentId: string, category?: string) => {
     try {
       const { data, error } = await supabase
-        .from('blog_posts')
-        .select('title, slug, seo_description')
+        .from('real_blog_posts')
+        .select('title, slug, meta_description, excerpt')
         .neq('id', currentId)
+        .eq('status', 'publish')
         .limit(3);
 
       if (!error && data) {
-        setRelatedPosts(data);
+        setRelatedPosts(data.map(p => ({
+          title: p.title,
+          slug: p.slug,
+          seo_description: p.meta_description || p.excerpt || ''
+        })));
       }
     } catch (error) {
       console.error('Error loading related posts:', error);
@@ -76,7 +118,19 @@ export default function EnhancedBlogPost() {
 
   const incrementViewCount = async (slug: string) => {
     try {
-      await supabase.rpc('increment_blog_view', { post_slug: slug });
+      // Update view count directly
+      const { data } = await supabase
+        .from('real_blog_posts')
+        .select('view_count')
+        .eq('slug', slug)
+        .single();
+      
+      if (data) {
+        await supabase
+          .from('real_blog_posts')
+          .update({ view_count: (data.view_count || 0) + 1 })
+          .eq('slug', slug);
+      }
     } catch (error) {
       console.error('Error incrementing view:', error);
     }

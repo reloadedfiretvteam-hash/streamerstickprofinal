@@ -55,6 +55,12 @@ export default function AppRouter() {
     return <FAQPage />;
   }
 
+  // Blog post routing
+  if (currentPath.startsWith('/blog/tag/') && currentPath !== '/blog/tag/') {
+    // Tag page - will be handled by a new component or EnhancedBlogPost
+    return <EnhancedBlogPost />;
+  }
+
   if (currentPath.startsWith('/blog/') && currentPath !== '/blog/') {
     return <EnhancedBlogPost />;
   }
