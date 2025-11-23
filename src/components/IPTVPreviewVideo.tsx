@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Play, X } from 'lucide-react';
+import { Play, X, Upload, AlertCircle } from 'lucide-react';
 
 interface IPTVPreviewVideoProps {
   videoUrl?: string;
@@ -8,6 +8,7 @@ interface IPTVPreviewVideoProps {
 export default function IPTVPreviewVideo({ videoUrl }: IPTVPreviewVideoProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [videoError, setVideoError] = useState(false);
 
   // Default video URL from Supabase Storage - user can update this in admin panel
   const defaultVideoUrl = videoUrl || 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-preview-video.mp4';
@@ -56,6 +57,25 @@ export default function IPTVPreviewVideo({ videoUrl }: IPTVPreviewVideoProps) {
                     </p>
                   </div>
                 </>
+              ) : videoError ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-900/90">
+                  <div className="text-center p-8">
+                    <AlertCircle className="w-16 h-16 text-orange-500 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-white mb-2">Video Not Found</h3>
+                    <p className="text-gray-300 mb-4">
+                      The preview video hasn't been uploaded yet. Please upload it to Supabase Storage.
+                    </p>
+                    <a
+                      href="https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/storage/buckets/imiges"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors"
+                    >
+                      <Upload className="w-5 h-5" />
+                      Upload Video to Supabase
+                    </a>
+                  </div>
+                </div>
               ) : (
                 <video
                   src={defaultVideoUrl}
@@ -63,6 +83,7 @@ export default function IPTVPreviewVideo({ videoUrl }: IPTVPreviewVideoProps) {
                   autoPlay
                   className="w-full h-full object-contain"
                   onEnded={handleClose}
+                  onError={() => setVideoError(true)}
                 >
                   Your browser does not support the video tag.
                 </video>
@@ -110,15 +131,39 @@ export default function IPTVPreviewVideo({ videoUrl }: IPTVPreviewVideoProps) {
             <X className="w-8 h-8" />
           </button>
           <div className="max-w-6xl w-full" onClick={(e) => e.stopPropagation()}>
-            <video
-              src={defaultVideoUrl}
-              controls
-              autoPlay
-              className="w-full h-auto rounded-lg"
-              onEnded={handleClose}
-            >
-              Your browser does not support the video tag.
-            </video>
+            {videoError ? (
+              <div className="bg-gray-900 rounded-lg p-12 text-center">
+                <AlertCircle className="w-20 h-20 text-orange-500 mx-auto mb-6" />
+                <h3 className="text-2xl font-bold text-white mb-4">Video Not Found</h3>
+                <p className="text-gray-300 mb-6 max-w-md mx-auto">
+                  The preview video file hasn't been uploaded to Supabase Storage yet. 
+                  Please upload your video file to see the preview.
+                </p>
+                <a
+                  href="https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/storage/buckets/imiges"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors text-lg"
+                >
+                  <Upload className="w-6 h-6" />
+                  Upload Video to Supabase Storage
+                </a>
+                <p className="text-sm text-gray-400 mt-4">
+                  File name should be: <code className="bg-gray-800 px-2 py-1 rounded">iptv-preview-video.mp4</code>
+                </p>
+              </div>
+            ) : (
+              <video
+                src={defaultVideoUrl}
+                controls
+                autoPlay
+                className="w-full h-auto rounded-lg"
+                onEnded={handleClose}
+                onError={() => setVideoError(true)}
+              >
+                Your browser does not support the video tag.
+              </video>
+            )}
           </div>
         </div>
       )}
