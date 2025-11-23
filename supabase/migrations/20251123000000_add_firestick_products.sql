@@ -50,8 +50,8 @@ BEGIN
   END IF;
 END $$;
 
--- Delete old Fire Stick products to avoid duplicates
-DELETE FROM products WHERE name IN ('Fire Stick HD', 'Fire Stick 4K', 'Fire Stick 4K Max');
+-- Delete old Fire Stick products to avoid duplicates (only in firestick category)
+DELETE FROM products WHERE category = 'firestick' AND name IN ('Fire Stick HD', 'Fire Stick 4K', 'Fire Stick 4K Max');
 
 -- Insert Fire Stick HD
 INSERT INTO products (name, price, sale_price, description, short_description, image_url, category, is_active, is_featured, sort_order)

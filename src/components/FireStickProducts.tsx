@@ -39,8 +39,8 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
       if (error) throw error;
 
       setProducts(data || []);
-    } catch (error) {
-      console.error('Error fetching products:', error);
+    } catch (error: any) {
+      console.error('Error fetching products from database:', error?.message || error);
       // Fallback to hardcoded products if database fetch fails
       setProducts([
         {
@@ -83,10 +83,27 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
   };
 
   const getFeatures = (description: string): string[] => {
-    // Extract features from description or use a default set
-    const features = description.split(',').map(f => f.trim());
-    if (features.length > 0) return features;
+    // Extract features from description - handle both comma-separated and sentence format
+    if (!description) {
+      return [
+        '18,000+ Live TV Channels',
+        '60,000+ Movies & TV Shows',
+        'All Sports Channels & PPV Events',
+        'Pre-Configured & Ready to Use',
+        'Plug & Play Setup (5 Minutes)',
+        '1 Year Premium IPTV Included',
+        'Free Shipping',
+        '24/7 Support'
+      ];
+    }
     
+    // Check if description is comma-separated
+    if (description.includes(',')) {
+      const features = description.split(',').map(f => f.trim()).filter(f => f.length > 0);
+      if (features.length > 1) return features;
+    }
+    
+    // If not comma-separated or only one item, return default features
     return [
       '18,000+ Live TV Channels',
       '60,000+ Movies & TV Shows',
@@ -184,9 +201,11 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
 
         <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {products.map((product, index) => {
+            // Pre-calculate values to avoid recalculation on re-render
             const displayPrice = product.sale_price || product.price;
             const features = getFeatures(product.description);
             const badge = getBadge(product);
+            const hasDiscount = product.sale_price && product.sale_price < product.price;
             
             return (
               <div
@@ -221,7 +240,7 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
 
                   <div className="mb-6">
                     <div className="flex items-baseline gap-2">
-                      {product.sale_price && (
+                      {hasDiscount && (
                         <span className="text-2xl text-gray-400 line-through">
                           ${product.price.toFixed(2)}
                         </span>
