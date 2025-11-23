@@ -31,13 +31,11 @@
   # Long cache for hashed CSS files with Cloudflare optimization
   Cache-Control: public, max-age=31536000, immutable
   CDN-Cache-Control: max-age=31536000
-  Cloudflare-CDN-Cache-Control: max-age=31536000
 
 /assets/*.js
   # Long cache for hashed JS files with Cloudflare optimization
   Cache-Control: public, max-age=31536000, immutable
   CDN-Cache-Control: max-age=31536000
-  Cloudflare-CDN-Cache-Control: max-age=31536000
 
 /*.jpg
 /*.jpeg
@@ -47,8 +45,7 @@
   # Cache images for 1 year with Cloudflare CDN optimization
   Cache-Control: public, max-age=31536000, immutable
   CDN-Cache-Control: max-age=31536000
-  # Enable Cloudflare Polish for image optimization
-  CF-Polished: lossy=on
+  # Note: Cloudflare Polish is enabled via Dashboard > Speed > Optimization
 
 /manifest.json
   # Cache manifest for 1 week

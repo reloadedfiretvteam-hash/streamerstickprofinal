@@ -35,8 +35,8 @@ This document summarizes the Cloudflare optimizations implemented for streamerst
 
 ✅ **Cloudflare-Specific Headers**
 - `CDN-Cache-Control`: Extended caching for Cloudflare edge
-- `CF-Polished`: Image optimization enabled
 - Compression: Brotli, gzip, deflate
+- Note: Image optimization (Polish) is enabled via Cloudflare Dashboard
 
 ✅ **Security Headers**
 - HSTS: Force HTTPS for 1 year
