@@ -6,6 +6,7 @@ import About from './components/About';
 import WhyChooseUs from './components/WhyChooseUs';
 import Shop from './components/Shop';
 import MediaCarousel from './components/MediaCarousel';
+import WhatYouGetVideo from './components/WhatYouGetVideo';
 import WhatIsIPTV from './components/WhatIsIPTV';
 import FAQ from './components/FAQ';
 import Devices from './components/Devices';
@@ -28,7 +29,6 @@ import MoneyBackGuarantee from './components/MoneyBackGuarantee';
 import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
 import ConciergePage from './pages/ConciergePage';
-import ConciergeCheckout from './pages/ConciergeCheckout';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
 
@@ -55,14 +55,14 @@ interface Product {
 
 const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '')
   .split(',')
-  .map((host) => host.trim().toLowerCase())
+  .map((host: string) => host.trim().toLowerCase())
   .filter(Boolean);
 
 // Optional: comma‑separated list of secure/Square-only hosts.
 // Example value in env: secure.streamstickpro.com
 const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || '')
   .split(',')
-  .map((host) => host.trim().toLowerCase())
+  .map((host: string) => host.trim().toLowerCase())
   .filter(Boolean);
 
 function App() {
@@ -94,28 +94,25 @@ function App() {
 
     const isConciergeHost =
       conciergeHosts.length > 0 &&
-      conciergeHosts.some((allowedHost) => hostname === allowedHost);
+      conciergeHosts.some((allowedHost: string) => hostname === allowedHost);
 
     const isConciergePath = pathname.startsWith('/concierge');
 
     setIsConciergeDomain(isConciergeHost || isConciergePath);
 
-    // Secure domain: lock to Square-safe checkout experience.
+    // Secure domain: Show SecureCheckoutPage on entire secure/Square domain
+    // This is for Square payment processing - should NOT show real website
+    // Check for common secure/Square domain patterns
     const isSecureHost =
-      secureHosts.length > 0 &&
-      secureHosts.some((allowedHost) => hostname === allowedHost || hostname.includes(allowedHost));
+      (secureHosts.length > 0 &&
+      secureHosts.some((allowedHost: string) => hostname === allowedHost || hostname.includes(allowedHost))) ||
+      hostname.includes('square') || 
+      hostname.includes('secure') ||
+      hostname.includes('checkout-secure');
 
-    // Also treat direct /secure path on any host as secure mode.
-    const isSecurePath = pathname.startsWith('/secure') || pathname.startsWith('/checkout-secure');
-
-    const isSecure = isSecureHost || isSecurePath;
-    
-    // Debug logging
-    if (isSecure) {
-      console.log('🔒 Secure domain detected:', { hostname, pathname, secureHosts, isSecureHost, isSecurePath });
-    }
-    
-    setIsSecureDomain(isSecure);
+    // If on secure host, show SecureCheckoutPage for entire domain
+    // This ensures Square domain shows checkout page, not real website
+    setIsSecureDomain(isSecureHost);
   }, []);
 
   useEffect(() => {
@@ -210,6 +207,7 @@ function App() {
         <WhyChooseUs />
         <MediaCarousel />
         <HowItWorksSteps />
+        <WhatYouGetVideo />
         <Shop onAddToCart={handleAddToCart} />
         <ReviewsCarousel />
         <ComparisonTable />
