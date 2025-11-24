@@ -12,7 +12,13 @@ echo ""
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
+
+# Repository configuration
+REPO_OWNER="reloadedfiretvteam-hash"
+REPO_NAME="streamerstickprofinal"
+CLOUDFLARE_ACCOUNT_ID="f1d6fdedf801e39f184a19ae201e8be1"
 
 # Check if we're in a git repository
 if [ ! -d .git ]; then
@@ -27,7 +33,10 @@ echo ""
 
 # Fetch latest changes
 echo -e "${BLUE}Fetching latest changes...${NC}"
-git fetch origin
+if ! git fetch origin 2>/dev/null; then
+    echo -e "${YELLOW}⚠️  Could not fetch from origin (network issue or no remote configured)${NC}"
+    echo "Continuing with local branches only..."
+fi
 
 # Check if clean-main already exists remotely
 if git ls-remote --heads origin clean-main | grep -q clean-main; then
@@ -41,8 +50,14 @@ if git ls-remote --heads origin clean-main | grep -q clean-main; then
     
     # Checkout clean-main and merge current branch
     echo -e "${BLUE}Checking out clean-main...${NC}"
-    git checkout clean-main
-    git pull origin clean-main
+    if git show-ref --verify --quiet refs/heads/clean-main; then
+        # Local branch exists, just check it out
+        git checkout clean-main
+        git pull origin clean-main 2>/dev/null || echo "Using local branch"
+    else
+        # Local branch doesn't exist, create from remote
+        git checkout -B clean-main origin/clean-main
+    fi
     
     echo -e "${BLUE}Merging changes from $CURRENT_BRANCH...${NC}"
     git merge $CURRENT_BRANCH -m "Merge latest changes from $CURRENT_BRANCH"
@@ -81,10 +96,10 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "   3. Update your live site"
     echo ""
     echo "📊 Monitor deployment progress:"
-    echo "   https://github.com/reloadedfiretvteam-hash/streamerstickprofinal/actions"
+    echo "   https://github.com/${REPO_OWNER}/${REPO_NAME}/actions"
     echo ""
     echo "🌐 Cloudflare deployment dashboard:"
-    echo "   https://dash.cloudflare.com/f1d6fdedf801e39f184a19ae201e8be1/pages/view/streamerstickprofinal"
+    echo "   https://dash.cloudflare.com/${CLOUDFLARE_ACCOUNT_ID}/pages/view/${REPO_NAME}"
     echo ""
     echo "⏱️  Estimated deployment time: 3-5 minutes"
     echo ""
