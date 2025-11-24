@@ -75,9 +75,9 @@ export async function generateSitemap(): Promise<string> {
 
   try {
     const { data: products } = await supabase
-      .from('products')
+      .from('real_products')
       .select('id, name, updated_at, created_at')
-      .eq('is_active', true)
+      .in('status', ['published', 'publish', 'active'])
       .order('created_at', { ascending: false });
 
     if (products) {

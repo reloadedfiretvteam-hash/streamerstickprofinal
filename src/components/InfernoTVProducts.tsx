@@ -30,9 +30,9 @@ export default function InfernoTVProducts({ onSelectProduct }: Props) {
 
   const loadProducts = async () => {
     const { data, error } = await supabase
-      .from('products')
+      .from('real_products')
       .select('*')
-      .eq('is_active', true)
+      .in('status', ['published', 'publish', 'active'])
       .order('sort_order');
 
     if (!error && data) {

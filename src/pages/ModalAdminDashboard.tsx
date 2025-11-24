@@ -71,7 +71,7 @@ export default function ModalAdminDashboard() {
         { count: mediaCount },
         { data: orders }
       ] = await Promise.all([
-        supabase.from('products').select('*', { count: 'exact', head: true }),
+        supabase.from('real_products').select('*', { count: 'exact', head: true }),
         supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
         supabase.from('orders').select('*', { count: 'exact', head: true }),
         supabase.from('bitcoin_orders').select('*', { count: 'exact', head: true }),
