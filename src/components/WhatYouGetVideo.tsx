@@ -1,6 +1,16 @@
-import { Play, Check } from 'lucide-react';
+import { useState } from 'react';
+import { Play, Check, X } from 'lucide-react';
 
-export default function WhatYouGetVideo() {
+interface WhatYouGetVideoProps {
+  videoUrl?: string;
+}
+
+export default function WhatYouGetVideo({ videoUrl }: WhatYouGetVideoProps) {
+  const [showModal, setShowModal] = useState(false);
+  
+  // Use video from Supabase storage bucket - user uploaded
+  const defaultVideoUrl = videoUrl || 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/what-you-get-demo.mp4';
+  
   const benefits = [
     '20,000+ Live TV Channels',
     '60,000+ Movies & TV Shows',
@@ -30,10 +40,13 @@ export default function WhatYouGetVideo() {
           <div className="grid md:grid-cols-2 gap-8 items-center">
             {/* Video Preview */}
             <div className="relative">
-              <div className="aspect-video bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border-2 border-orange-400/50 shadow-2xl shadow-orange-500/20 overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
+              <div 
+                className="aspect-video bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border-2 border-orange-400/50 shadow-2xl shadow-orange-500/20 overflow-hidden cursor-pointer"
+                onClick={() => setShowModal(true)}
+              >
+                <div className="absolute inset-0 flex items-center justify-center hover:scale-105 transition-transform">
                   <div className="text-center">
-                    <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4 cursor-pointer hover:scale-110 transition-transform shadow-lg shadow-orange-500/50">
+                    <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-500/50">
                       <Play className="w-10 h-10 text-white ml-1" />
                     </div>
                     <p className="text-white font-semibold text-lg">Watch Demo Video</p>
@@ -72,18 +85,48 @@ export default function WhatYouGetVideo() {
 
           <div className="mt-12 text-center">
             <a
-              href="/shop"
+              href="#shop"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold text-lg rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-orange-500/50"
             >
               <Play className="w-5 h-5" />
-              Start Your 36-Hour Trial
+              See Products Below
             </a>
             <p className="text-blue-200 text-sm mt-3">
-              No credit card required • Cancel anytime
+              Scroll down to explore our Fire Stick packages
             </p>
           </div>
         </div>
       </div>
+
+      {/* Video Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
+          <div className="relative w-full max-w-5xl" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute -top-12 right-0 text-white hover:text-orange-400 transition-colors"
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <div className="aspect-video bg-black rounded-lg overflow-hidden">
+              <video
+                src={defaultVideoUrl}
+                controls
+                autoPlay
+                className="w-full h-full"
+                onError={() => {
+                  console.error('Video failed to load from:', defaultVideoUrl);
+                }}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            <p className="text-white text-center mt-4 text-sm">
+              Video source: Supabase Storage (imiges bucket)
+            </p>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
