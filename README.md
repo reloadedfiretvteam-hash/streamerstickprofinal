@@ -2,6 +2,21 @@
 
 Automated deployment pipeline from local development to production via GitHub and Cloudflare Pages.
 
+---
+
+## 🚀 **READY TO DEPLOY?**
+
+**👉 Start here: [START_HERE.md](START_HERE.md)** - Complete deployment guide in 3 simple steps!
+
+### Quick Deploy:
+1. Create `clean-main` branch: `./create-clean-main-branch.sh`
+2. Configure 4 GitHub Secrets (detailed in START_HERE.md)
+3. Watch automatic deployment (~5 minutes)
+
+**More info**: See [DEPLOY_NOW.md](DEPLOY_NOW.md) | [PRODUCTION_DEPLOYMENT_SUMMARY.md](PRODUCTION_DEPLOYMENT_SUMMARY.md)
+
+---
+
 ## Repository
 
 **GitHub:** https://github.com/reloadedfiretvteam-hash/streamstickprofinal
