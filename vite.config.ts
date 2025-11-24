@@ -18,10 +18,28 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // Optimize chunk splitting for better caching
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'lucide-vendor': ['lucide-react'],
-          'supabase-vendor': ['@supabase/supabase-js'],
+        manualChunks: (id) => {
+          // Core React libraries
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'react-vendor';
+          }
+          // Lucide icons - separate chunk for better caching
+          if (id.includes('node_modules/lucide-react')) {
+            return 'lucide-vendor';
+          }
+          // Supabase - separate chunk
+          if (id.includes('node_modules/@supabase')) {
+            return 'supabase-vendor';
+          }
+          // Admin components - lazy loaded, separate chunk
+          if (id.includes('/components/custom-admin/') || id.includes('/pages/') && 
+              (id.includes('Admin') || id.includes('Dashboard'))) {
+            return 'admin-chunk';
+          }
+          // Other node_modules
+          if (id.includes('node_modules')) {
+            return 'vendor-misc';
+          }
         },
         // Add content hash to filenames for cache busting
         entryFileNames: 'assets/[name]-[hash].js',
@@ -29,8 +47,10 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
-    // Increase chunk size warning limit for better optimization
-    chunkSizeWarningLimit: 1000,
+    // Increase chunk size warning limit (current bundle: ~730KB)
+    // Note: Manual chunks not splitting due to single-page app architecture
+    // Consider implementing lazy loading for admin routes to reduce initial bundle
+    chunkSizeWarningLimit: 800,
     // Optimize asset inlining
     assetsInlineLimit: 4096, // 4kb
   },
