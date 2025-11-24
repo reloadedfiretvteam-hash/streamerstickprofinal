@@ -32,9 +32,9 @@ export default function SimpleImageManager() {
 
   const loadProducts = async () => {
     const { data } = await supabase
-      .from('products_full')
+      .from('real_products')
       .select('id, name')
-      .eq('status', 'published')
+      .in('status', ['active', 'publish', 'published'])
       .order('name');
     if (data) setProducts(data);
   };

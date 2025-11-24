@@ -52,7 +52,7 @@ export default function ProductManagement() {
   const loadData = async () => {
     setLoading(true);
     const [productsResult, categoriesResult] = await Promise.all([
-      supabase.from('products_full').select('*').order('created_at', { ascending: false }),
+      supabase.from('real_products').select('*').order('created_at', { ascending: false }),
       supabase.from('categories').select('*').order('name')
     ]);
 
@@ -66,7 +66,7 @@ export default function ProductManagement() {
 
     if (editingProduct) {
       const { error } = await supabase
-        .from('products_full')
+        .from('real_products')
         .update(formData)
         .eq('id', editingProduct.id);
 
@@ -75,7 +75,7 @@ export default function ProductManagement() {
       }
     } else {
       const { error } = await supabase
-        .from('products_full')
+        .from('real_products')
         .insert([formData]);
 
       if (!error) {
@@ -83,7 +83,7 @@ export default function ProductManagement() {
       }
     }
 
-    if (!(await supabase.from('products_full').select('*').single()).error) {
+    if (!(await supabase.from('real_products').select('*').single()).error) {
       setShowForm(false);
       setEditingProduct(null);
       resetForm();
@@ -95,7 +95,7 @@ export default function ProductManagement() {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     const { error } = await supabase
-      .from('products_full')
+      .from('real_products')
       .delete()
       .eq('id', id);
 
