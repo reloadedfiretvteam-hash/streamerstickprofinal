@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Play, Check, X } from 'lucide-react';
+import { getStorageUrl } from '../lib/supabase';
 
 interface WhatYouGetVideoProps {
   videoUrl?: string;
@@ -9,7 +10,7 @@ export default function WhatYouGetVideo({ videoUrl }: WhatYouGetVideoProps) {
   const [showModal, setShowModal] = useState(false);
   
   // Use video from Supabase storage bucket - user uploaded
-  const defaultVideoUrl = videoUrl || 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/what-you-get-demo.mp4';
+  const defaultVideoUrl = videoUrl || getStorageUrl('images', 'what-you-get-demo.mp4');
   
   const benefits = [
     '20,000+ Live TV Channels',
