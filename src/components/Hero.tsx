@@ -1,4 +1,5 @@
 import { ShoppingCart, Play } from 'lucide-react';
+import { getStorageUrl } from '../lib/supabase';
 
 export default function Hero() {
   const goToShop = () => {
@@ -14,7 +15,7 @@ export default function Hero() {
       {/* Background image: Fire Stick breaking out of cage */}
       <div className="absolute inset-0">
         <img
-          src="https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/hero-firestick-breakout.jpg"
+          src={getStorageUrl('images', 'hero-firestick-breakout.jpg')}
           alt="Fire Stick breaking free"
           className="w-full h-full object-cover"
         />
