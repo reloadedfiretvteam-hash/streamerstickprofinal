@@ -1,5 +1,5 @@
 import { Check, Flame, Star, Zap, ShoppingCart, Gift, Send, User, Mail, Phone } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 
 interface Product {
@@ -183,8 +183,8 @@ This is an automated message from StreamStickPro.com
     );
   }
 
-  const firestickProducts = products.filter(p => p.type === 'firestick');
-  const iptvProducts = products.filter(p => p.type === 'iptv');
+  const firestickProducts = useMemo(() => products.filter(p => p.type === 'firestick'), [products]);
+  const iptvProducts = useMemo(() => products.filter(p => p.type === 'iptv'), [products]);
 
   return (
     <section id="shop" className="py-20 bg-gray-900 text-white">

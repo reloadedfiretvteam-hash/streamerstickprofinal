@@ -85,13 +85,17 @@ function App() {
 
   useAnalytics();
 
-  // Persist cart to localStorage whenever it changes
+  // Persist cart to localStorage whenever it changes (with debounce)
   useEffect(() => {
-    try {
-      localStorage.setItem('cart_items', JSON.stringify(cartItems));
-    } catch (error) {
-      console.error('Error saving cart to localStorage:', error);
-    }
+    const timeoutId = setTimeout(() => {
+      try {
+        localStorage.setItem('cart_items', JSON.stringify(cartItems));
+      } catch (error) {
+        console.error('Error saving cart to localStorage:', error);
+      }
+    }, 300);
+    
+    return () => clearTimeout(timeoutId);
   }, [cartItems]);
 
   useEffect(() => {
