@@ -13,11 +13,12 @@
     - Fallback images are handled by the frontend code
 */
 
--- Update Fire Stick HD images
+-- Update Fire Stick HD images (specifically exclude 4K variants to avoid false matches)
 UPDATE real_products
 SET main_image = 'firestick hd.jpg'
 WHERE (name ILIKE '%fire stick hd%' OR slug ILIKE '%fire-stick-hd%')
-  AND name NOT ILIKE '%4k%';
+  AND name NOT ILIKE '%4k%'
+  AND name NOT ILIKE '%max%';
 
 -- Update Fire Stick 4K images (not Max)
 UPDATE real_products
