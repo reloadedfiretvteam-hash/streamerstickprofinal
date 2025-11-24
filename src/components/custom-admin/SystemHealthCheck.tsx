@@ -275,7 +275,7 @@ export default function SystemHealthCheck() {
 
     try {
       // Try to access without auth - should be allowed for public data
-      const { error } = await supabase.from('products').select('id').limit(1);
+      const { error } = await supabase.from('real_products').select('id').limit(1);
       results[results.length - 1] = {
         name: 'Security (RLS)',
         status: 'pass',
