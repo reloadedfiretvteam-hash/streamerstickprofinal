@@ -72,10 +72,27 @@ function App() {
   const [isSecureDomain, setIsSecureDomain] = useState(false);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [emailCaptured, setEmailCaptured] = useState(false);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    // Load cart from localStorage on initial render
+    try {
+      const savedCart = localStorage.getItem('cart_items');
+      return savedCart ? JSON.parse(savedCart) : [];
+    } catch {
+      return [];
+    }
+  });
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   useAnalytics();
+
+  // Persist cart to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('cart_items', JSON.stringify(cartItems));
+    } catch (error) {
+      console.error('Error saving cart to localStorage:', error);
+    }
+  }, [cartItems]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
