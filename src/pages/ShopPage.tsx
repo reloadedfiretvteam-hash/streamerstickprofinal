@@ -44,10 +44,52 @@ export default function ShopPage() {
         .from('real_products')
         .select('*')
         .in('status', ['active', 'publish', 'published'])
+        .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setProducts(data || []);
+      if (error) {
+        console.error('Error loading products:', error);
+        throw error;
+      }
+      
+      // Ensure images are properly formatted from Supabase Storage
+      const productsWithImages = (data || []).map((product: any) => {
+        let imageUrl = product.main_image || product.image_url || '';
+        
+        // If image URL doesn't start with http, it might be a relative path - convert to full Supabase URL
+        if (imageUrl && !imageUrl.startsWith('http')) {
+          // If it's just a filename, prepend the Supabase storage URL
+          if (!imageUrl.includes('/')) {
+            imageUrl = `https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/${encodeURIComponent(imageUrl)}`;
+          } else {
+            // If it's a path, ensure it's the full Supabase URL
+            imageUrl = `https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/${imageUrl}`;
+          }
+        }
+        
+        // Type-specific fallbacks if no image
+        if (!imageUrl || imageUrl.includes('placeholder') || imageUrl.includes('pexels')) {
+          const isFirestick = product.name?.toLowerCase().includes('fire stick') || product.name?.toLowerCase().includes('fire tv');
+          if (isFirestick) {
+            if (product.name?.toLowerCase().includes('4k max')) {
+              imageUrl = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k%20max.jpg';
+            } else if (product.name?.toLowerCase().includes('4k')) {
+              imageUrl = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k.jpg';
+            } else {
+              imageUrl = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg';
+            }
+          } else {
+            imageUrl = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
+          }
+        }
+        
+        return {
+          ...product,
+          main_image: imageUrl
+        };
+      });
+      
+      setProducts(productsWithImages);
     } catch (error) {
       console.error('Error loading products:', error);
     } finally {
@@ -216,12 +258,32 @@ export default function ShopPage() {
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     onError={(e) => {
-                      e.currentTarget.src = '/OIF.jpg';
+                      const target = e.currentTarget;
+                      // Type-specific fallback
+                      const isFirestick = product.name?.toLowerCase().includes('fire stick') || product.name?.toLowerCase().includes('fire tv');
+                      if (isFirestick) {
+                        if (product.name?.toLowerCase().includes('4k max')) {
+                          target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k%20max.jpg';
+                        } else if (product.name?.toLowerCase().includes('4k')) {
+                          target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k.jpg';
+                        } else {
+                          target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg';
+                        }
+                      } else {
+                        target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
+                      }
                     }}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <img src="/OIF.jpg" alt="placeholder" className="w-full h-full object-cover" />
+                  <div className="w-full h-full flex items-center justify-center bg-gray-300">
+                    <img 
+                      src="https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg" 
+                      alt="placeholder" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
                   </div>
                 )}
                 {product.featured && (
