@@ -6,9 +6,9 @@ interface Product {
   id: string;
   name: string;
   description: string;
-  price: string;
-  image_url: string;
-  category: string;
+  price: number;
+  main_image: string;
+  status: string;
 }
 
 export default function HomePage() {
@@ -18,10 +18,10 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchProducts() {
       const { data, error } = await supabase
-        .from('square_products')
+        .from('real_products')
         .select('*')
-        .eq('is_active', true)
-        .order('price');
+        .in('status', ['active', 'publish', 'published'])
+        .order('created_at', { ascending: false });
 
       if (data && !error) {
         setProducts(data);
@@ -101,7 +101,7 @@ export default function HomePage() {
                 className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden hover:border-blue-400 hover:scale-105 transition-all"
               >
                 <img
-                  src={product.image_url}
+                  src={product.main_image}
                   alt={product.name}
                   className="w-full h-48 object-cover"
                 />
@@ -112,10 +112,7 @@ export default function HomePage() {
                   </div>
                   <p className="text-blue-200 text-sm mb-4 leading-relaxed">{product.description}</p>
                   <div className="flex items-center justify-between">
-                    <span className="inline-block px-3 py-1 bg-blue-600/30 text-blue-300 rounded-full text-xs font-semibold uppercase">
-                      {product.category}
-                    </span>
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition w-full">
                       Learn More
                     </button>
                   </div>
