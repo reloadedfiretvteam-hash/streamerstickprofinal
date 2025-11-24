@@ -32,8 +32,8 @@ export default defineConfig({
             return 'supabase-vendor';
           }
           // Admin components - lazy loaded, separate chunk
-          if (id.includes('/components/custom-admin/') || id.includes('/pages/') && 
-              (id.includes('Admin') || id.includes('Dashboard'))) {
+          if (id.includes('/components/custom-admin/') || 
+              (id.includes('/pages/') && (id.includes('Admin') || id.includes('Dashboard')))) {
             return 'admin-chunk';
           }
           // Other node_modules
@@ -48,9 +48,10 @@ export default defineConfig({
       },
     },
     // Increase chunk size warning limit (current bundle: ~730KB)
-    // Note: Manual chunks not splitting due to single-page app architecture
+    // Note: Manual chunks not splitting optimally due to single-page app architecture
     // Consider implementing lazy loading for admin routes to reduce initial bundle
-    chunkSizeWarningLimit: 800,
+    // Set to 900KB to avoid false warnings during development
+    chunkSizeWarningLimit: 900,
     // Optimize asset inlining
     assetsInlineLimit: 4096, // 4kb
   },
