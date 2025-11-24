@@ -251,3 +251,6 @@ ON CONFLICT (slug) DO NOTHING;
 -- Update view counts and engagement (simulate real usage)
 UPDATE real_blog_posts SET view_count = FLOOR(RANDOM() * 5000 + 100) WHERE status = 'publish';
 
+
+
+

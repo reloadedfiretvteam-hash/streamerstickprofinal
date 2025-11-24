@@ -1,0 +1,35 @@
+IMAGES TO UPLOAD TO SUPABASE STORAGE (imiges bucket)
+====================================================
+
+1. HERO BACKGROUND (already uploaded):
+   ✅ hero-firestick-breakout.jpg
+
+2. FIRE STICK PRODUCTS (already uploaded):
+   ✅ firestick hd.jpg
+   ✅ firestick 4k.jpg
+   ✅ firestick 4k max.jpg
+
+3. IPTV SUBSCRIPTION IMAGE (for ALL subscriptions):
+   Upload ONE image and name it:
+   iptv-subscription.jpg
+
+4. CAROUSEL IMAGES (replace placeholder stock photos):
+   Upload these 11 images with EXACT filenames:
+   
+   - OIP (11) websit pic copy copy.jpg (Fire Stick device)
+   - iptv3.jpg (IPTV Service interface)
+   - IPTVSmarters TV IMAG.jpg (IPTV Smarters app)
+   - Playback-Tile-1024x512.webp (Movies on demand)
+   - Movies-categories_11zon-1024x512.webp (Live channels)
+   - UFC.jpg (UFC/MMA sports)
+   - c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg (NFL football)
+   - downloadBASKET BALL.jpg (NBA basketball)
+   - BASEBALL.webp (MLB baseball)
+   - 5-1.webp (Live TV)
+   - 9-1.webp (Premium content)
+
+After uploading, I'll update the code to use these Supabase URLs instead of placeholder images.
+
+
+
+
