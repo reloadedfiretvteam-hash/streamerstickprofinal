@@ -243,7 +243,7 @@ export default function FireStickProducts({ onSelectProduct }: ProductsProps) {
         </div>
 
         <p className="text-center mt-8 text-blue-200">
-          ✓ Ships same day | ✓ Free shipping on all orders | ✓ 7-day money-back guarantee
+          ✓ Ships same day | ✓ Free shipping on all orders | ✓ 36-hour free trial
         </p>
       </div>
     </section>

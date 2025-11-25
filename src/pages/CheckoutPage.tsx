@@ -105,7 +105,7 @@ export default function CheckoutPage() {
       };
 
       const { data, error } = await supabase
-        .from('customer_orders')
+        .from('orders')
         .insert([orderData])
         .select()
         .single();

@@ -27,7 +27,7 @@ export default function SiteBrandingManager() {
     contact_phone: '+1 (555) 123-4567',
     business_address: 'United States',
     meta_title: 'Stream Stick Pro - Premium IPTV Subscriptions & Jailbroken Fire Stick | 20,000+ Channels',
-    meta_description: 'Premium IPTV subscriptions with 20,000+ live channels, movies, sports & PPV. Jailbroken Fire Stick 4K devices. 7-day money-back guarantee. 24/7 support.',
+    meta_description: 'Premium IPTV subscriptions with 20,000+ live channels, movies, sports & PPV. Jailbroken Fire Stick 4K devices. 36-hour free trial. 24/7 support.',
     meta_keywords: 'IPTV, premium IPTV, Fire Stick, jailbroken Fire Stick, live TV streaming, sports IPTV, movie streaming, cord cutting',
     twitter_handle: '@streamstickpro',
     facebook_page: 'streamstickpro',

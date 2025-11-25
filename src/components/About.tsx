@@ -58,7 +58,7 @@ export default function About() {
               <Award className="w-12 h-12 text-yellow-400 mb-4" />
               <h3 className="text-xl font-bold mb-3">Quality Guarantee</h3>
               <p className="text-blue-200">
-                7-day money-back guarantee. If you're not satisfied, we'll refund your purchase - no questions asked.
+                36-hour free trial. If you're not satisfied, we'll refund your purchase - no questions asked.
               </p>
             </div>
           </div>

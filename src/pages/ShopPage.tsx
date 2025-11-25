@@ -90,13 +90,110 @@ export default function ShopPage() {
         };
       });
       
-      setProducts(productsWithImages);
+      // Use database products if available, otherwise use fallback products
+      if (productsWithImages && productsWithImages.length > 0) {
+        setProducts(productsWithImages);
+      } else {
+        setProducts(fallbackProducts);
+      }
     } catch (error) {
       console.error('Error loading products:', error);
+      // On error, use fallback products
+      setProducts(fallbackProducts);
     } finally {
       setLoading(false);
     }
   };
+
+  // Fallback products to display when database is empty or unavailable
+  const fallbackProducts: Product[] = [
+    // Fire Stick Products
+    {
+      id: 'firestick-hd',
+      name: 'Fire Stick HD - Jailbroken & Ready',
+      description: 'Brand New Amazon Fire Stick HD with 1 Year Premium IPTV. Pre-configured with 18,000+ channels, 60,000+ movies. Plug & play - ready in 5 minutes!',
+      price: '140.00',
+      sale_price: '140.00',
+      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg',
+      category: 'Fire Stick',
+      stock_quantity: 50,
+      rating: 5,
+      featured: false
+    },
+    {
+      id: 'firestick-4k',
+      name: 'Fire Stick 4K - Jailbroken & Ready',
+      description: 'Brand New Amazon Fire Stick 4K with 1 Year Premium IPTV. Pre-configured with 18,000+ channels, 60,000+ movies in stunning 4K quality. Best seller!',
+      price: '150.00',
+      sale_price: '150.00',
+      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k.jpg',
+      category: 'Fire Stick',
+      stock_quantity: 50,
+      rating: 5,
+      featured: true
+    },
+    {
+      id: 'firestick-4k-max',
+      name: 'Fire Stick 4K Max - Jailbroken & Ready',
+      description: 'Brand New Amazon Fire Stick 4K Max with 1 Year Premium IPTV. Fastest performance, 4K Ultra HD, pre-configured with all premium content.',
+      price: '160.00',
+      sale_price: '160.00',
+      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k%20max.jpg',
+      category: 'Fire Stick',
+      stock_quantity: 50,
+      rating: 5,
+      featured: false
+    },
+    // IPTV Subscription Products
+    {
+      id: 'iptv-1month',
+      name: '1 Month IPTV Subscription',
+      description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Instant Activation',
+      price: '15.00',
+      sale_price: '15.00',
+      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg',
+      category: 'IPTV Subscription',
+      stock_quantity: 999,
+      rating: 5,
+      featured: false
+    },
+    {
+      id: 'iptv-3months',
+      name: '3 Month IPTV Subscription',
+      description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Priority Support',
+      price: '30.00',
+      sale_price: '30.00',
+      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg',
+      category: 'IPTV Subscription',
+      stock_quantity: 999,
+      rating: 5,
+      featured: true
+    },
+    {
+      id: 'iptv-6months',
+      name: '6 Month IPTV Subscription',
+      description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Priority Support',
+      price: '50.00',
+      sale_price: '50.00',
+      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg',
+      category: 'IPTV Subscription',
+      stock_quantity: 999,
+      rating: 5,
+      featured: false
+    },
+    {
+      id: 'iptv-12months',
+      name: '1 Year IPTV Subscription',
+      description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, VIP Support, Best Value!',
+      price: '75.00',
+      sale_price: '75.00',
+      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg',
+      category: 'IPTV Subscription',
+      stock_quantity: 999,
+      rating: 5,
+      featured: false
+    }
+  ];
 
   const loadCart = () => {
     const savedCart = localStorage.getItem('cart');
