@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { ShoppingCart, Search, Filter, Star } from 'lucide-react';
+import Footer from '../components/Footer';
 
 interface Product {
   id: string;
@@ -401,6 +402,9 @@ export default function ShopPage() {
           ← Back to Home
         </a>
       </div>
+
+      {/* Unified Footer */}
+      <Footer />
     </div>
   );
 }

@@ -40,7 +40,9 @@ export default function AppRouter() {
     return null;
   }
 
-  if (currentPath === '/admin' || currentPath === '/admin/' || currentPath === '/admin/dashboard') {
+  // Handle all admin routes - /admin, /admin/, /admin/dashboard, /custom-admin, /custom-admin/
+  if (currentPath === '/admin' || currentPath === '/admin/' || currentPath === '/admin/dashboard' ||
+      currentPath === '/custom-admin' || currentPath === '/custom-admin/') {
     if (isAuthenticated) {
       return <ModalAdminDashboard />;
     }

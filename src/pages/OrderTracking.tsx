@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, Package, CheckCircle, Clock, Truck, Mail, X, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import Footer from '../components/Footer';
 
 interface Order {
   id: string;
@@ -268,6 +269,9 @@ export default function OrderTracking() {
           </div>
         )}
       </div>
+
+      {/* Unified Footer */}
+      <Footer />
     </div>
   );
 }
