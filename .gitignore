@@ -26,3 +26,4 @@ dist-ssr
 cursor-mcp-config.json
 *.md
 !README.md
+!REPO_AUDIT_REPORT.md
