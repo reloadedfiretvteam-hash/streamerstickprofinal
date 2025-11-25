@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { ShoppingCart, Search, Filter, Star } from 'lucide-react';
 import Footer from '../components/Footer';
+import PremiumRequestsPackages from '../components/PremiumRequestsPackages';
 
 interface Product {
   id: string;
@@ -19,6 +20,17 @@ interface Product {
 interface CartItem {
   product: Product;
   quantity: number;
+}
+
+interface PremiumPackage {
+  id: string;
+  name: string;
+  requests: number;
+  price: number;
+  pricePerRequest: number;
+  popular: boolean;
+  badge: string;
+  features: string[];
 }
 
 export default function ShopPage() {
@@ -223,6 +235,38 @@ export default function ShopPage() {
 
     saveCart(newCart);
     // Redirect to checkout immediately
+    window.location.href = '/checkout';
+  };
+
+  const addPremiumPackageToCart = (pkg: PremiumPackage) => {
+    // Convert premium package to a product-like structure for cart
+    const premiumProduct: Product = {
+      id: pkg.id,
+      name: pkg.name,
+      description: pkg.features.join(', '),
+      price: pkg.price.toString(),
+      sale_price: pkg.price.toString(),
+      main_image: '',
+      category: 'Premium Requests',
+      stock_quantity: 999,
+      rating: 5,
+      featured: pkg.popular
+    };
+    
+    const existing = cart.find(item => item.product.id === pkg.id);
+    let newCart;
+
+    if (existing) {
+      newCart = cart.map(item =>
+        item.product.id === pkg.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      );
+    } else {
+      newCart = [...cart, { product: premiumProduct, quantity: 1 }];
+    }
+
+    saveCart(newCart);
     window.location.href = '/checkout';
   };
 
@@ -489,6 +533,9 @@ export default function ShopPage() {
           </div>
         )}
       </div>
+
+      {/* Premium Requests Packages */}
+      <PremiumRequestsPackages onAddToCart={addPremiumPackageToCart} />
 
       {/* Back to Home */}
       <div className="container mx-auto px-4 pb-8">

@@ -28,6 +28,7 @@ import SocialProof from './components/SocialProof';
 import MoneyBackGuarantee from './components/MoneyBackGuarantee';
 import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
+import PremiumRequestsPackages from './components/PremiumRequestsPackages';
 import ConciergePage from './pages/ConciergePage';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
@@ -50,6 +51,17 @@ interface Product {
   popular: boolean;
   period?: string;
   savings?: string;
+  features: string[];
+}
+
+interface PremiumPackage {
+  id: string;
+  name: string;
+  requests: number;
+  price: number;
+  pricePerRequest: number;
+  popular: boolean;
+  badge: string;
   features: string[];
 }
 
@@ -161,6 +173,27 @@ function App() {
     setIsCartOpen(true);
   };
 
+  const handleAddPremiumPackageToCart = (pkg: PremiumPackage) => {
+    setCartItems(prev => {
+      const existing = prev.find(item => item.id === pkg.id);
+      if (existing) {
+        return prev.map(item =>
+          item.id === pkg.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, {
+        id: pkg.id,
+        name: pkg.name,
+        price: pkg.price,
+        quantity: 1,
+        image: '' // Premium packages don't have images
+      }];
+    });
+    setIsCartOpen(true);
+  };
+
   const handleUpdateQuantity = (id: string, quantity: number) => {
     setCartItems(prev =>
       prev.map(item =>
@@ -209,6 +242,7 @@ function App() {
         <HowItWorksSteps />
         <WhatYouGetVideo />
         <Shop onAddToCart={handleAddToCart} />
+        <PremiumRequestsPackages onAddToCart={handleAddPremiumPackageToCart} />
         <ReviewsCarousel />
         <ComparisonTable />
         <WhatIsIPTV />
