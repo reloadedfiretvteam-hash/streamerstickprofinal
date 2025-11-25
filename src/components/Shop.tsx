@@ -100,7 +100,7 @@ export default function Shop({ onAddToCart }: ShopProps) {
     e.preventDefault();
 
     if (!freeTrialName || !freeTrialEmail) {
-      alert('Please enter your name and email');
+      alert('Please enter your name and email.');
       return;
     }
 
@@ -120,22 +120,22 @@ export default function Shop({ onAddToCart }: ShopProps) {
       const emailBody = `
 FREE TRIAL REQUEST - 36-HOUR IPTV SUBSCRIPTION
 
-Customer Details:
+Customer Information:
 - Name: ${freeTrialName}
 - Email: ${freeTrialEmail}
 - Phone: ${freeTrialPhone || 'Not provided'}
-- Date: ${new Date().toLocaleString()}
+- Request Date: ${new Date().toLocaleString()}
 
-Product Requested: 36-Hour Free Trial IPTV Subscription
+Product Requested: 36-Hour Free IPTV Trial
 
-What's Included in the Trial:
+Trial Includes:
 - 18,000+ Live TV Channels
 - 60,000+ Movies & TV Shows
 - All Sports Channels & Pay-Per-View Events
-- 4K/FHD/HD Quality Streaming
-- Compatible with Any Device
+- 4K, Full HD, and HD Streaming
+- Compatible with All Devices
 
-Action Required: Please process this free trial request and send the activation details to the customer's email address listed above.
+Please send the trial activation details to the customer's email address.
 
 ---
 Automated message from StreamerStickPro.com
@@ -147,12 +147,12 @@ Automated message from StreamerStickPro.com
       setFreeTrialSubmitted(true);
 
       setTimeout(() => {
-        alert('Your email app has opened. Please click "Send" to submit your free trial request. We will process your request and send you activation details within 24 hours.');
+        alert('Your email app has opened. Please click "Send" to complete your request. You will receive your activation details within 24 hours.');
       }, 500);
 
     } catch (error) {
       console.error('Error:', error);
-      alert('There was a problem submitting your request. Please email us directly at reloadedfiretvteam@gmail.com');
+      alert('There was a problem submitting your request. Please email us at reloadedfiretvteam@gmail.com.');
     } finally {
       setFreeTrialLoading(false);
     }
@@ -577,7 +577,7 @@ Automated message from StreamerStickPro.com
                       <Check className="w-6 h-6 text-white" />
                     </div>
                     <p className="text-green-200 text-sm font-medium">Request Submitted!</p>
-                    <p className="text-green-300 text-xs mt-1">Please send the email that opened to complete your request.</p>
+                    <p className="text-green-300 text-xs mt-1">Please send the email to complete your request.</p>
                   </div>
                 )}
 
