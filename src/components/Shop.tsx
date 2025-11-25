@@ -74,7 +74,7 @@ export default function Shop({ onAddToCart }: ShopProps) {
               productImage = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg';
             }
           } else {
-            productImage = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
+            productImage = '/images/iptv-subscription.jpg';
           }
         }
 
@@ -258,7 +258,7 @@ Automated message from StreamStickPro.com
       name: '1 Month IPTV Subscription',
       price: 15.00,
       type: 'iptv',
-      image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg',
+      image: '/images/iptv-subscription.jpg',
       badge: 'STARTER',
       popular: false,
       period: '/month',
@@ -280,7 +280,7 @@ Automated message from StreamStickPro.com
       name: '3 Month IPTV Subscription',
       price: 30.00,
       type: 'iptv',
-      image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg',
+      image: '/images/iptv-subscription.jpg',
       badge: 'POPULAR',
       popular: true,
       features: [
@@ -301,7 +301,7 @@ Automated message from StreamStickPro.com
       name: '6 Month IPTV Subscription',
       price: 50.00,
       type: 'iptv',
-      image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg',
+      image: '/images/iptv-subscription.jpg',
       badge: 'GREAT VALUE',
       popular: false,
       features: [
@@ -322,7 +322,7 @@ Automated message from StreamStickPro.com
       name: '1 Year IPTV Subscription',
       price: 75.00,
       type: 'iptv',
-      image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg',
+      image: '/images/iptv-subscription.jpg',
       badge: 'BEST DEAL',
       popular: false,
       features: [
@@ -438,7 +438,7 @@ Automated message from StreamStickPro.com
                           target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg';
                         }
                       } else {
-                        target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
+                        target.src = '/images/iptv-subscription.jpg';
                       }
                     }}
                   />
