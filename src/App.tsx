@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import ErrorBoundary from './components/ErrorBoundary';
 
-// Updated: Admin routes, secure checkout, and all features integrated
+// Updated: Admin routes, secure checkout, policy pages, and all features integrated
 import Navigation from './components/Navigation';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -23,19 +23,22 @@ import SEOHead from './components/SEOHead';
 import VisitorTracker from './components/VisitorTracker';
 import GoogleAnalytics from './components/GoogleAnalytics';
 import StructuredData from './components/StructuredData';
-import ReviewsCarousel from './components/ReviewsCarousel';
+import ReviewsSection from './components/ReviewsSection';
 import TrustBadges from './components/TrustBadges';
 import StickyBuyButton from './components/StickyBuyButton';
 import ComparisonTable from './components/ComparisonTable';
-import SocialProof from './components/SocialProof';
 import MoneyBackGuarantee from './components/MoneyBackGuarantee';
 import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
 import WhatYouGetVideo from './components/WhatYouGetVideo';
 import ConciergePage from './pages/ConciergePage';
-import ConciergeCheckout from './pages/ConciergeCheckout';
+import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import UnifiedAdminLogin from './pages/UnifiedAdminLogin';
 import ModalAdminDashboard from './pages/ModalAdminDashboard';
+import RefundPolicy from './pages/RefundPolicy';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import Terms from './pages/Terms';
+import DeliveryActivation from './pages/DeliveryActivation';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
 
 interface CartItem {
@@ -194,6 +197,39 @@ function App() {
     }
   }
 
+  // Handle policy pages
+  if (pathname === '/refund-policy') {
+    return (
+      <ErrorBoundary>
+        <RefundPolicy />
+      </ErrorBoundary>
+    );
+  }
+
+  if (pathname === '/privacy-policy') {
+    return (
+      <ErrorBoundary>
+        <PrivacyPolicy />
+      </ErrorBoundary>
+    );
+  }
+
+  if (pathname === '/terms') {
+    return (
+      <ErrorBoundary>
+        <Terms />
+      </ErrorBoundary>
+    );
+  }
+
+  if (pathname === '/delivery-activation') {
+    return (
+      <ErrorBoundary>
+        <DeliveryActivation />
+      </ErrorBoundary>
+    );
+  }
+
   // Secure domain: show Square-safe checkout only (no IPTV UI).
   if (isSecureDomain) {
     return (
@@ -202,7 +238,7 @@ function App() {
         <GoogleAnalytics />
         <StructuredData />
         <VisitorTracker />
-        <ConciergeCheckout />
+        <SecureCheckoutPage />
       </ErrorBoundary>
     );
   }
@@ -232,7 +268,7 @@ function App() {
         <MediaCarousel />
         <HowItWorksSteps />
         <Shop onAddToCart={handleAddToCart} />
-        <ReviewsCarousel />
+        <ReviewsSection />
         <ComparisonTable />
         <DemoVideo />
         <WhatIsIPTV />
@@ -245,7 +281,6 @@ function App() {
         <LegalDisclaimer />
         <Footer />
         <StickyBuyButton />
-        <SocialProof />
 
         {showEmailPopup && !emailCaptured && (
           <EmailPopup

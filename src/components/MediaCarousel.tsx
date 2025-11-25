@@ -1,60 +1,126 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+
+interface MediaItem {
+  type: 'movie' | 'series' | 'sport';
+  title: string;
+  image: string;
+  logo?: string;
+  year?: string;
+}
+
+// Default fallback images (Unsplash - reliable, free, no empty placeholders)
+const defaultMediaItems: MediaItem[] = [
+  // Movies
+  { type: 'movie', title: 'Action Movies 2024', image: 'https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=600&h=400&fit=crop&q=80', year: '2024' },
+  { type: 'movie', title: 'Thriller & Horror', image: 'https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=600&h=400&fit=crop&q=80', year: '2024' },
+  { type: 'movie', title: 'Drama & Romance', image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&h=400&fit=crop&q=80', year: '2024' },
+  { type: 'movie', title: 'Comedy Specials', image: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600&h=400&fit=crop&q=80', year: '2024' },
+  { type: 'movie', title: 'Sci-Fi Adventure', image: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=600&h=400&fit=crop&q=80', year: '2024' },
+  // TV Series
+  { type: 'series', title: 'Top US Series', image: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=600&h=400&fit=crop&q=80', year: '2024' },
+  { type: 'series', title: 'Trending Shows', image: 'https://images.unsplash.com/photo-1574267432644-f610e0494a3d?w=600&h=400&fit=crop&q=80', year: '2024' },
+  { type: 'series', title: 'Binge-Worthy Series', image: 'https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?w=600&h=400&fit=crop&q=80', year: '2024' },
+  // Sports
+  { type: 'sport', title: 'NFL All Teams Live', image: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=600&h=400&fit=crop&q=80', logo: '🏈' },
+  { type: 'sport', title: 'Super Bowl LIX', image: 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=600&h=400&fit=crop&q=80', logo: '🏈' },
+  { type: 'sport', title: 'NBA All Games', image: 'https://images.unsplash.com/photo-1519861531473-9200262188bf?w=600&h=400&fit=crop&q=80', logo: '🏀' },
+  { type: 'sport', title: 'MLB All 30 Teams', image: 'https://images.unsplash.com/photo-1529446618125-1dee7f0e71ea?w=600&h=400&fit=crop&q=80', logo: '⚾' },
+  { type: 'sport', title: 'NHL Hockey Live', image: 'https://images.unsplash.com/photo-1589403785865-f6282213f28c?w=600&h=400&fit=crop&q=80', logo: '🏒' },
+  { type: 'sport', title: 'UFC & Boxing PPV', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop&q=80', logo: '🥊' },
+  { type: 'sport', title: 'Soccer - All Leagues', image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&h=400&fit=crop&q=80', logo: '⚽' },
+  { type: 'sport', title: 'Premier League', image: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=400&fit=crop&q=80', logo: '⚽' },
+];
 
 export default function MediaCarousel() {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>(defaultMediaItems);
+  const [isPaused, setIsPaused] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<number | null>(null);
+  const scrollPositionRef = useRef(0);
 
-  const mediaItems = [
-    // BLOCKBUSTER MOVIES - Cinema & Theater
-    { type: 'movie', title: 'Action Movies 2024', image: 'https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
-    { type: 'movie', title: 'Thriller & Horror', image: 'https://images.unsplash.com/photo-1514306191717-452ec28c7814?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
-    { type: 'movie', title: 'Drama & Romance', image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
-    { type: 'movie', title: 'Comedy Specials', image: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
-    { type: 'movie', title: 'Sci-Fi Adventure', image: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
+  // Load carousel images from Supabase if available
+  const loadCarouselImages = useCallback(async () => {
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      if (!supabaseUrl) return;
 
-    // TV SERIES - Streaming Entertainment
-    { type: 'series', title: 'Top US Series', image: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
-    { type: 'series', title: 'Trending Shows', image: 'https://images.unsplash.com/photo-1574267432644-f610e0494a3d?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
-    { type: 'series', title: 'Binge-Worthy Series', image: 'https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), year: '2024' },
+      // Try to get carousel images from storage bucket
+      const { data: files } = await supabase.storage
+        .from('imiges')
+        .list('carousel', { limit: 50 });
 
-    // NFL FOOTBALL - Stadium & Action
-    { type: 'sport', title: 'NFL All Teams Live', image: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏈' },
-    { type: 'sport', title: 'Super Bowl LIX', image: 'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏈' },
-    { type: 'sport', title: 'Monday Night Football', image: 'https://images.unsplash.com/photo-1577223625816-7546f36a3173?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏈' },
-    { type: 'sport', title: 'NFL Playoffs', image: 'https://images.unsplash.com/photo-1566577134770-3d85bb3a9cc4?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏈' },
+      if (files && files.length > 0) {
+        const supabaseImages: MediaItem[] = files
+          .filter((file) => file.name.match(/\.(jpg|jpeg|png|webp)$/i))
+          .map((file) => ({
+            type: 'movie' as const,
+            title: file.name.replace(/\.[^/.]+$/, '').replace(/-/g, ' '),
+            image: `${supabaseUrl}/storage/v1/object/public/imiges/carousel/${file.name}`,
+          }));
 
-    // MLB BASEBALL - Stadium Views
-    { type: 'sport', title: 'MLB All 30 Teams', image: 'https://images.unsplash.com/photo-1529446618125-1dee7f0e71ea?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '⚾' },
-    { type: 'sport', title: 'World Series Live', image: 'https://images.unsplash.com/photo-1566577739943-c48fdd8d0bc1?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '⚾' },
-    { type: 'sport', title: 'MLB Playoffs', image: 'https://images.unsplash.com/photo-1508394522741-82ac9c15ba69?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '⚾' },
-
-    // NBA BASKETBALL - Court Action
-    { type: 'sport', title: 'NBA All Games', image: 'https://images.unsplash.com/photo-1519861531473-9200262188bf?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏀' },
-    { type: 'sport', title: 'NBA Playoffs 2024', image: 'https://images.unsplash.com/photo-1608245449230-4ac19066d2d0?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏀' },
-    { type: 'sport', title: 'NBA Finals', image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏀' },
-
-    // OTHER SPORTS - Hockey, Soccer, Combat
-    { type: 'sport', title: 'NHL Hockey Live', image: 'https://images.unsplash.com/photo-1589403785865-f6282213f28c?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🏒' },
-    { type: 'sport', title: 'UFC & Boxing PPV', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '🥊' },
-    { type: 'sport', title: 'Soccer - All Leagues', image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '⚽' },
-    { type: 'sport', title: 'Premier League', image: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&h=400&fit=crop&q=80&auto=format&t=' + Date.now(), logo: '⚽' },
-  ];
+        if (supabaseImages.length > 0) {
+          // Merge with defaults, preferring Supabase images
+          setMediaItems([...supabaseImages, ...defaultMediaItems.slice(supabaseImages.length)]);
+        }
+      }
+    } catch {
+      // Use default items on error
+      console.log('Using default carousel images');
+    }
+  }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % Math.max(mediaItems.length - 4, 1));
-    }, 4000);
+    loadCarouselImages();
+  }, [loadCarouselImages]);
 
-    return () => clearInterval(interval);
-  }, [mediaItems.length]);
+  // Smooth continuous scrolling animation
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer || isPaused) return;
 
-  const next = () => {
-    setCurrentIndex((prev) => (prev + 1) % Math.max(mediaItems.length - 4, 1));
+    const speed = 0.5; // pixels per frame
+    const contentWidth = scrollContainer.scrollWidth / 2; // Half because we duplicate items
+
+    const animate = () => {
+      if (!isPaused && scrollContainer) {
+        scrollPositionRef.current += speed;
+        
+        // Reset position for seamless loop
+        if (scrollPositionRef.current >= contentWidth) {
+          scrollPositionRef.current = 0;
+        }
+        
+        scrollContainer.style.transform = `translateX(-${scrollPositionRef.current}px)`;
+      }
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isPaused, mediaItems.length]);
+
+  const handlePrev = () => {
+    const container = scrollRef.current;
+    if (!container) return;
+    scrollPositionRef.current = Math.max(0, scrollPositionRef.current - 300);
   };
 
-  const prev = () => {
-    setCurrentIndex((prev) => (prev - 1 + Math.max(mediaItems.length - 4, 1)) % Math.max(mediaItems.length - 4, 1));
+  const handleNext = () => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const contentWidth = container.scrollWidth / 2;
+    scrollPositionRef.current = (scrollPositionRef.current + 300) % contentWidth;
   };
+
+  // Duplicate items for seamless loop
+  const displayItems = [...mediaItems, ...mediaItems];
 
   return (
     <section className="py-20 bg-gradient-to-br from-gray-900 to-black overflow-hidden">
@@ -68,10 +134,14 @@ export default function MediaCarousel() {
           </p>
         </div>
 
-        <div className="relative max-w-7xl mx-auto">
+        <div 
+          className="relative max-w-7xl mx-auto"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
           {/* Navigation Buttons */}
           <button
-            onClick={prev}
+            onClick={handlePrev}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm p-3 rounded-full transition-all"
             aria-label="Previous"
           >
@@ -79,46 +149,46 @@ export default function MediaCarousel() {
           </button>
 
           <button
-            onClick={next}
+            onClick={handleNext}
             className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm p-3 rounded-full transition-all"
             aria-label="Next"
           >
             <ChevronRight className="w-6 h-6 text-white" />
           </button>
 
-          {/* Carousel */}
+          {/* Carousel - Continuous scroll */}
           <div className="overflow-hidden mx-12">
             <div
-              className="flex gap-4 transition-transform duration-500 ease-in-out"
-              style={{ transform: `translateX(-${currentIndex * (100 / 6)}%)` }}
+              ref={scrollRef}
+              className="flex gap-4"
+              style={{ willChange: 'transform' }}
             >
-              {mediaItems.map((item, index) => (
+              {displayItems.map((item, index) => (
                 <div
                   key={`carousel-${index}-${item.title}`}
-                  className="flex-shrink-0 w-1/6 min-w-[200px] group cursor-pointer"
+                  className="flex-shrink-0 w-48 md:w-56 lg:w-64 group cursor-pointer"
                 >
-                  <div className="relative rounded-xl overflow-hidden shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
+                  <div className="relative rounded-xl overflow-hidden shadow-lg transform transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl">
                     <img
                       src={item.image}
                       alt={item.title}
-                      className="w-full h-64 object-cover"
-                      loading="eager"
-                      crossOrigin="anonymous"
+                      className="w-full h-48 md:h-56 lg:h-64 object-cover"
+                      loading="lazy"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = 'https://images.unsplash.com/photo-1574267432644-f610e0494a3d?w=600&h=400&fit=crop&q=80&auto=format';
+                        target.src = 'https://images.unsplash.com/photo-1574267432644-f610e0494a3d?w=600&h=400&fit=crop&q=80';
                       }}
                     />
-                    {/* Always visible gradient overlay */}
+                    {/* Gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
 
-                    {/* Content - Always visible */}
+                    {/* Content */}
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       {item.logo && (
-                        <div className="text-4xl mb-2 drop-shadow-lg">{item.logo}</div>
+                        <div className="text-3xl mb-2 drop-shadow-lg">{item.logo}</div>
                       )}
-                      <h3 className="text-white font-bold text-lg mb-1 drop-shadow-lg leading-tight">{item.title}</h3>
-                      <p className="text-gray-300 text-sm capitalize">{item.type}</p>
+                      <h3 className="text-white font-bold text-sm md:text-base mb-1 drop-shadow-lg leading-tight">{item.title}</h3>
+                      <p className="text-gray-300 text-xs capitalize">{item.type}</p>
                     </div>
 
                     {/* Live Badge */}
