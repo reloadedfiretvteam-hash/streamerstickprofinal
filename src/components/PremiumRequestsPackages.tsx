@@ -1,16 +1,6 @@
 import { useState } from 'react';
 import { Check, Sparkles, Zap, Crown, ShoppingCart, Star } from 'lucide-react';
-
-interface PremiumPackage {
-  id: string;
-  name: string;
-  requests: number;
-  price: number;
-  pricePerRequest: number;
-  popular: boolean;
-  badge: string;
-  features: string[];
-}
+import { PremiumPackage } from '../lib/types';
 
 interface PremiumRequestsPackagesProps {
   onAddToCart: (pkg: PremiumPackage) => void;

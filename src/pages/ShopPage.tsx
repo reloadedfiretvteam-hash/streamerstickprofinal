@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { ShoppingCart, Search, Filter, Star } from 'lucide-react';
 import Footer from '../components/Footer';
 import PremiumRequestsPackages from '../components/PremiumRequestsPackages';
+import { PremiumPackage, PREMIUM_PACKAGE_DEFAULTS } from '../lib/types';
 
 interface Product {
   id: string;
@@ -20,17 +21,6 @@ interface Product {
 interface CartItem {
   product: Product;
   quantity: number;
-}
-
-interface PremiumPackage {
-  id: string;
-  name: string;
-  requests: number;
-  price: number;
-  pricePerRequest: number;
-  popular: boolean;
-  badge: string;
-  features: string[];
 }
 
 export default function ShopPage() {
@@ -247,9 +237,9 @@ export default function ShopPage() {
       price: pkg.price.toString(),
       sale_price: pkg.price.toString(),
       main_image: '',
-      category: 'Premium Requests',
-      stock_quantity: 999,
-      rating: 5,
+      category: PREMIUM_PACKAGE_DEFAULTS.CATEGORY,
+      stock_quantity: PREMIUM_PACKAGE_DEFAULTS.STOCK_QUANTITY,
+      rating: PREMIUM_PACKAGE_DEFAULTS.RATING,
       featured: pkg.popular
     };
     

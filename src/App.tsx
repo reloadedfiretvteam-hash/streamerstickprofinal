@@ -32,38 +32,11 @@ import PremiumRequestsPackages from './components/PremiumRequestsPackages';
 import ConciergePage from './pages/ConciergePage';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
+import { PremiumPackage, CartItem as SharedCartItem, Product as SharedProduct } from './lib/types';
 
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
+interface CartItem extends SharedCartItem {}
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  type: 'firestick' | 'iptv';
-  image: string;
-  badge: string;
-  popular: boolean;
-  period?: string;
-  savings?: string;
-  features: string[];
-}
-
-interface PremiumPackage {
-  id: string;
-  name: string;
-  requests: number;
-  price: number;
-  pricePerRequest: number;
-  popular: boolean;
-  badge: string;
-  features: string[];
-}
+interface Product extends SharedProduct {}
 
 const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '')
   .split(',')
