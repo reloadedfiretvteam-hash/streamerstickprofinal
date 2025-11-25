@@ -144,8 +144,10 @@ export default function CustomerReviewsSection() {
     }
   };
 
-  // Calculate average rating
-  const avgRating = (customerReviews.reduce((sum, r) => sum + r.rating, 0) / customerReviews.length).toFixed(1);
+  // Calculate average rating with guard against empty array
+  const avgRating = customerReviews.length > 0 
+    ? (customerReviews.reduce((sum, r) => sum + r.rating, 0) / customerReviews.length).toFixed(1)
+    : '0.0';
 
   return (
     <section className="py-16 bg-gradient-to-b from-gray-50 to-white" id="customer-reviews">
