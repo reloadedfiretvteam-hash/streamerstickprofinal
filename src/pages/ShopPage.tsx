@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { ShoppingCart, Search, Filter, Star } from 'lucide-react';
 import Footer from '../components/Footer';
 import PremiumRequestsPackages from '../components/PremiumRequestsPackages';
+import CustomerReviewsSection from '../components/CustomerReviewsSection';
 import { PremiumPackage, PREMIUM_PACKAGE_DEFAULTS } from '../lib/types';
 
 interface Product {
@@ -526,6 +527,9 @@ export default function ShopPage() {
 
       {/* Premium Requests Packages */}
       <PremiumRequestsPackages onAddToCart={addPremiumPackageToCart} />
+
+      {/* Customer Reviews Section */}
+      <CustomerReviewsSection />
 
       {/* Back to Home */}
       <div className="container mx-auto px-4 pb-8">

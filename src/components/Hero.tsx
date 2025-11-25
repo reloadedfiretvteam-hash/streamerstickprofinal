@@ -15,8 +15,11 @@ export default function Hero() {
       <div className="absolute inset-0 overflow-hidden">
         <img
           src="https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/hero-firestick-breakout.jpg"
-          alt="Fire Stick breaking free"
+          alt="Best Jailbroken Fire Stick 2025 - Premium IPTV Streaming Device"
           className="w-full h-full object-cover object-center"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
           style={{ 
             objectPosition: 'center center',
             /* Scale up slightly and crop edges to remove phone screenshot borders */
