@@ -7,6 +7,7 @@ import WhyChooseUs from './components/WhyChooseUs';
 import Shop from './components/Shop';
 import MediaCarousel from './components/MediaCarousel';
 import WhatYouGetVideo from './components/WhatYouGetVideo';
+import IPTVPreviewVideo from './components/IPTVPreviewVideo';
 import WhatIsIPTV from './components/WhatIsIPTV';
 import FAQ from './components/FAQ';
 import Devices from './components/Devices';
@@ -207,7 +208,7 @@ function App() {
         <WhyChooseUs />
         <MediaCarousel />
         <HowItWorksSteps />
-        <WhatYouGetVideo />
+        <IPTVPreviewVideo />
         <Shop onAddToCart={handleAddToCart} />
         <ReviewsCarousel />
         <ComparisonTable />
