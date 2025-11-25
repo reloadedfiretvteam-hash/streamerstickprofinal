@@ -31,9 +31,9 @@ export default function OrderTracking() {
     setOrder(null);
 
     try {
-      // First try customer_orders
+      // First try orders table
       const { data: customerOrder, error: customerError } = await supabase
-        .from('customer_orders')
+        .from('orders')
         .select('*')
         .or(`order_number.eq.${searchTerm},customer_email.eq.${searchTerm}`)
         .order('created_at', { ascending: false })

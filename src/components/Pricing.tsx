@@ -116,7 +116,7 @@ export default function Pricing({ onSelectPlan }: PricingProps) {
 
         <div className="text-center mt-12">
           <p className="text-gray-600">
-            All plans are backed by our 7-day money-back guarantee. No questions asked.
+            All plans are backed by our 36-hour free trial. No questions asked.
           </p>
         </div>
       </div>

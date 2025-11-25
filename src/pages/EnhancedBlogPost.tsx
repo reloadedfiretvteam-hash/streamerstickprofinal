@@ -453,7 +453,7 @@ export default function EnhancedBlogPost() {
                 </h3>
                 <p className="text-gray-300 mb-6">
                   Get 18,000+ live channels, 60,000+ movies, and all sports with our premium IPTV service.
-                  7-day money-back guarantee. Free setup support.
+                  36-hour free trial. Free setup support.
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <a
