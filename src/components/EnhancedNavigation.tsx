@@ -1,4 +1,4 @@
-import { Flame, Menu, X, ShoppingCart, Tv, Smartphone, BookOpen, HelpCircle } from 'lucide-react';
+import { Flame, Menu, X, ShoppingCart, Tv, Smartphone, BookOpen, HelpCircle, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
 interface NavigationProps {
@@ -28,6 +28,7 @@ export default function EnhancedNavigation({ cartItemCount = 0, onCartClick }: N
     { label: 'Home', action: () => window.location.href = '/' },
     { label: 'Fire Sticks', action: () => scrollToSection('shop'), icon: <Tv className="w-4 h-4" /> },
     { label: 'IPTV Subscriptions', action: () => scrollToSection('shop'), icon: <Smartphone className="w-4 h-4" /> },
+    { label: 'Premium Requests', action: () => scrollToSection('premium-requests'), icon: <Sparkles className="w-4 h-4" /> },
     { label: 'Shop All', action: () => window.location.href = '/shop', icon: <ShoppingCart className="w-4 h-4" /> },
     { label: 'Blog', action: () => scrollToSection('blog'), icon: <BookOpen className="w-4 h-4" /> },
     { label: 'FAQ', action: () => window.location.href = '/faq', icon: <HelpCircle className="w-4 h-4" /> },
