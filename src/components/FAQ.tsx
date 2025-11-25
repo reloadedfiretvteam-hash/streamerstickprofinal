@@ -109,7 +109,7 @@ export default function FAQ() {
               Our customer support team is available 24/7 to help you with any questions or concerns.
             </p>
             <a
-              href="#contact"
+              href="mailto:reloadedfiretvteam@gmail.com"
               className="inline-block px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl font-semibold transition-all transform hover:scale-105"
             >
               Contact Support

@@ -7,6 +7,8 @@ import FAQPage from './pages/FAQPage';
 import EnhancedBlogPost from './pages/EnhancedBlogPost';
 import ShopPage from './pages/ShopPage';
 import NewCheckoutPage from './pages/NewCheckoutPage';
+import FireSticksPage from './pages/FireSticksPage';
+import IPTVServicesPage from './pages/IPTVServicesPage';
 
 export default function AppRouter() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -26,6 +28,16 @@ export default function AppRouter() {
 
   if (currentPath === '/shop' || currentPath === '/shop/') {
     return <ShopPage />;
+  }
+
+  // Fire Sticks page route
+  if (currentPath === '/fire-sticks' || currentPath === '/fire-sticks/') {
+    return <FireSticksPage />;
+  }
+
+  // IPTV Services page route
+  if (currentPath === '/iptv-services' || currentPath === '/iptv-services/') {
+    return <IPTVServicesPage />;
   }
 
   if (currentPath === '/checkout' || currentPath === '/checkout/') {

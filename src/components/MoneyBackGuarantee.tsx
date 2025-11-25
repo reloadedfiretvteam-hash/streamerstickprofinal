@@ -42,7 +42,7 @@ export default function MoneyBackGuarantee() {
 
               <div className="text-center">
                 <button
-                  onClick={() => document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => window.location.href = '/shop'}
                   className="px-10 py-4 bg-white text-green-600 font-bold text-lg rounded-xl shadow-2xl hover:shadow-white/50 transition-all transform hover:scale-105"
                 >
                   Try Risk-Free Now

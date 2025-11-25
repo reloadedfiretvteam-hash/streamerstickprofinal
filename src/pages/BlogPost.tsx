@@ -128,7 +128,7 @@ export default function BlogPost() {
 
         <div className="mt-12 pt-8 border-t border-gray-800">
           <a
-            href="/#shop"
+            href="/shop"
             className="inline-block px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors"
           >
             Shop Fire Sticks & IPTV

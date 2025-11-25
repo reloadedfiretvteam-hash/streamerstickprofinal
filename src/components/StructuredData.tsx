@@ -140,13 +140,13 @@ export default function StructuredData() {
           "@type": "ListItem",
           "position": 2,
           "name": "Products",
-          "item": "https://streamunlimited.com#shop"
+          "item": "https://streamunlimited.com/shop"
         },
         {
           "@type": "ListItem",
           "position": 3,
           "name": "IPTV Subscriptions",
-          "item": "https://streamunlimited.com#iptv"
+          "item": "https://streamunlimited.com/iptv-services"
         }
       ]
     };
