@@ -138,7 +138,7 @@ Trial Includes:
 Please send the trial activation details to the customer's email address.
 
 ---
-Automated message from StreamerStickPro.com
+Automated message from StreamStickPro.com
       `.trim();
 
       const mailtoLink = `mailto:reloadedfiretvteam@gmail.com?subject=36-Hour Free Trial Request - ${freeTrialName}&body=${encodeURIComponent(emailBody)}`;
