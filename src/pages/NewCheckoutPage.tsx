@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import BitcoinPaymentFlow from '../components/BitcoinPaymentFlow';
 import CashAppPaymentFlow from '../components/CashAppPaymentFlow';
 import SquarePaymentForm from '../components/SquarePaymentForm';
+import Footer from '../components/Footer';
 
 interface CartItem {
   product: {
@@ -695,6 +696,9 @@ export default function NewCheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* Unified Footer */}
+      <Footer />
     </div>
   );
 }

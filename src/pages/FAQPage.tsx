@@ -1,5 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import { useEffect } from 'react';
+import Footer from '../components/Footer';
 
 export default function FAQPage() {
   useEffect(() => {
@@ -151,17 +152,8 @@ export default function FAQPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 border-t border-gray-800 py-8 mt-20">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-400">
-            © {new Date().getFullYear()} Inferno TV. All rights reserved.
-          </p>
-          <p className="text-gray-500 text-sm mt-2">
-            Providing transparent and secure streaming solutions
-          </p>
-        </div>
-      </footer>
+      {/* Unified Footer */}
+      <Footer />
     </div>
   );
 }

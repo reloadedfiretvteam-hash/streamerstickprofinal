@@ -57,7 +57,7 @@ export default function Footer() {
               <li><a href="/faq" className="hover:text-orange-400 transition-colors">FAQ</a></li>
               <li><a href="/track-order" className="hover:text-orange-400 transition-colors">Track Order</a></li>
               <li><a href="mailto:reloadedfiretvteam@gmail.com" className="hover:text-orange-400 transition-colors">Contact Us</a></li>
-              <li><a href="/custom-admin" className="hover:text-orange-400 transition-colors">Admin Portal</a></li>
+              <li><a href="/admin" className="hover:text-orange-400 transition-colors">Admin Portal</a></li>
             </ul>
           </div>
         </div>
