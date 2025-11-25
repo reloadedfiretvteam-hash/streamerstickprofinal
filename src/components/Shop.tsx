@@ -363,11 +363,17 @@ Automated message from StreamStickPro.com
         <div className="mb-16">
           {/* Dramatic Fire Stick Hero Banner */}
           <div className="relative rounded-3xl overflow-hidden mb-12 animate-fade-in">
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 overflow-hidden">
               <img
                 src="/Screenshot_20251102-131641.png"
                 alt="Fire Stick Breaking Free"
                 className="w-full h-full object-cover"
+                style={{ 
+                  objectPosition: 'center center',
+                  /* Scale up slightly to crop phone screenshot borders */
+                  transform: 'scale(1.15)',
+                  transformOrigin: 'center center'
+                }}
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>

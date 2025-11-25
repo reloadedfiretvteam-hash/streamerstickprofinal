@@ -29,11 +29,10 @@ import SocialProof from './components/SocialProof';
 import MoneyBackGuarantee from './components/MoneyBackGuarantee';
 import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
-import PremiumRequestsPackages from './components/PremiumRequestsPackages';
 import ConciergePage from './pages/ConciergePage';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
-import { PremiumPackage, CartItem as SharedCartItem, Product as SharedProduct } from './lib/types';
+import { CartItem as SharedCartItem, Product as SharedProduct } from './lib/types';
 
 interface CartItem extends SharedCartItem {}
 
@@ -147,27 +146,6 @@ function App() {
     setIsCartOpen(true);
   };
 
-  const handleAddPremiumPackageToCart = (pkg: PremiumPackage) => {
-    setCartItems(prev => {
-      const existing = prev.find(item => item.id === pkg.id);
-      if (existing) {
-        return prev.map(item =>
-          item.id === pkg.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, {
-        id: pkg.id,
-        name: pkg.name,
-        price: pkg.price,
-        quantity: 1,
-        image: '' // Premium packages don't have images
-      }];
-    });
-    setIsCartOpen(true);
-  };
-
   const handleUpdateQuantity = (id: string, quantity: number) => {
     setCartItems(prev =>
       prev.map(item =>
@@ -214,9 +192,9 @@ function App() {
         <WhyChooseUs />
         <MediaCarousel />
         <HowItWorksSteps />
+        <WhatYouGetVideo />
         <IPTVPreviewVideo />
         <Shop onAddToCart={handleAddToCart} />
-        <PremiumRequestsPackages onAddToCart={handleAddPremiumPackageToCart} />
         <ReviewsCarousel />
         <ComparisonTable />
         <WhatIsIPTV />

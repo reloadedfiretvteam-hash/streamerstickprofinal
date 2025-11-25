@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Package, CheckCircle, Clock, Truck, Mail, X, ArrowLeft } from 'lucide-react';
+import { Search, Package, CheckCircle, Clock, Truck, Mail, X, ArrowLeft, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Footer from '../components/Footer';
 
@@ -31,11 +31,20 @@ export default function OrderTracking() {
     setOrder(null);
 
     try {
-      // First try orders table
+      // Sanitize search term - remove special characters that could interfere with queries
+      const sanitizedTerm = searchTerm.trim().replace(/[%_\\]/g, '');
+      
+      if (!sanitizedTerm) {
+        setError('Please enter a valid order number or email address.');
+        setLoading(false);
+        return;
+      }
+
+      // First try orders table - search by email or order number
       const { data: customerOrder, error: customerError } = await supabase
         .from('orders')
         .select('*')
-        .or(`order_number.eq.${searchTerm},customer_email.eq.${searchTerm}`)
+        .or(`order_number.ilike.%${sanitizedTerm}%,customer_email.ilike.%${sanitizedTerm}%`)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -49,7 +58,7 @@ export default function OrderTracking() {
       const { data: bitcoinOrder, error: bitcoinError } = await supabase
         .from('bitcoin_orders')
         .select('*')
-        .or(`order_code.eq.${searchTerm},customer_email.eq.${searchTerm}`)
+        .or(`order_code.ilike.%${sanitizedTerm}%,customer_email.ilike.%${sanitizedTerm}%`)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -59,15 +68,51 @@ export default function OrderTracking() {
         setOrder({
           ...bitcoinOrder,
           order_number: bitcoinOrder.order_code,
-          status: bitcoinOrder.payment_status || 'pending'
+          order_status: bitcoinOrder.payment_status || 'pending'
         });
       } else {
-        setError('Order not found. Please check your order number/code or email.');
+        setError('Order not found. Please check your order number/code or email address.');
       }
     } catch (err: any) {
       setError('Error searching for order: ' + err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Determine if order contains Fire Stick products
+  const isFirestickOrder = order?.items?.some((item: any) => {
+    const name = (item.product_name || item.name || '').toLowerCase();
+    return name.includes('fire stick') || name.includes('firestick') || name.includes('fire tv');
+  });
+
+  // Calculate expected delivery based on product type
+  const getExpectedDelivery = () => {
+    if (!order) return null;
+    
+    const orderDate = new Date(order.created_at);
+    
+    if (isFirestickOrder) {
+      // Fire Stick: 4-6 business days
+      const minDate = new Date(orderDate);
+      const maxDate = new Date(orderDate);
+      minDate.setDate(minDate.getDate() + 4);
+      maxDate.setDate(maxDate.getDate() + 6);
+      return {
+        type: 'Fire Stick',
+        estimate: '4-6 Business Days',
+        minDate: minDate.toLocaleDateString(),
+        maxDate: maxDate.toLocaleDateString()
+      };
+    } else {
+      // IPTV Subscription: 1-24 hours
+      const deliveryDate = new Date(orderDate);
+      deliveryDate.setHours(deliveryDate.getHours() + 24);
+      return {
+        type: 'IPTV Subscription',
+        estimate: '1-24 Hours',
+        expectedBy: deliveryDate.toLocaleString()
+      };
     }
   };
 
@@ -119,6 +164,8 @@ export default function OrderTracking() {
     setError('');
     setSearchTerm('');
   };
+
+  const deliveryInfo = getExpectedDelivery();
 
   return (
     <div className="min-h-screen bg-gray-900 py-20">
@@ -186,7 +233,7 @@ export default function OrderTracking() {
                     Order #{order.order_number}
                   </h2>
                   <p className="text-gray-400">
-                    Placed on {new Date(order.created_at).toLocaleDateString()}
+                    Placed on {new Date(order.created_at).toLocaleDateString()} at {new Date(order.created_at).toLocaleTimeString()}
                   </p>
                 </div>
                 <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${getStatusColor(order.order_status)}`}>
@@ -194,6 +241,60 @@ export default function OrderTracking() {
                   <span className="font-semibold capitalize">{order.order_status}</span>
                 </div>
               </div>
+
+              {/* Expected Delivery Section */}
+              {deliveryInfo && (
+                <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-xl p-6 mb-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    {isFirestickOrder ? (
+                      <Truck className="w-8 h-8 text-purple-400" />
+                    ) : (
+                      <Zap className="w-8 h-8 text-blue-400" />
+                    )}
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Expected Delivery</h3>
+                      <p className="text-gray-400">{deliveryInfo.type}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-white/5 rounded-lg p-4">
+                      <p className="text-sm text-gray-400 mb-1">Delivery Estimate</p>
+                      <p className="text-2xl font-bold text-white">{deliveryInfo.estimate}</p>
+                    </div>
+                    {isFirestickOrder ? (
+                      <div className="bg-white/5 rounded-lg p-4">
+                        <p className="text-sm text-gray-400 mb-1">Expected Between</p>
+                        <p className="text-lg font-semibold text-white">
+                          {deliveryInfo.minDate} - {deliveryInfo.maxDate}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="bg-white/5 rounded-lg p-4">
+                        <p className="text-sm text-gray-400 mb-1">Credentials Expected By</p>
+                        <p className="text-lg font-semibold text-white">{deliveryInfo.expectedBy}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {isFirestickOrder && (
+                    <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                      <p className="text-yellow-300 text-sm">
+                        📦 <strong>Physical Shipment:</strong> Your Fire Stick will be shipped to your address. 
+                        You'll receive tracking information once shipped.
+                      </p>
+                    </div>
+                  )}
+                  {!isFirestickOrder && (
+                    <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                      <p className="text-green-300 text-sm">
+                        ⚡ <strong>Digital Delivery:</strong> Your IPTV subscription credentials will be sent 
+                        to your email address within 1-24 hours of payment confirmation.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <div>
@@ -210,12 +311,12 @@ export default function OrderTracking() {
                 <div>
                   <h3 className="text-sm text-gray-400 mb-2">Payment Status</h3>
                   <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${getPaymentStatusColor(order.payment_status)}`}>
-                    {order.payment_status.toUpperCase()}
+                    {order.payment_status?.toUpperCase() || 'PENDING'}
                   </span>
                 </div>
                 <div>
                   <h3 className="text-sm text-gray-400 mb-2">Total Amount</h3>
-                  <p className="text-2xl font-bold text-orange-400">${order.total.toFixed(2)}</p>
+                  <p className="text-2xl font-bold text-orange-400">${(order.total || 0).toFixed(2)}</p>
                 </div>
               </div>
 
@@ -229,17 +330,19 @@ export default function OrderTracking() {
               <div className="border-t border-gray-700 pt-6">
                 <h3 className="text-lg font-bold text-white mb-4">Order Items</h3>
                 <div className="space-y-3">
-                  {order.items.map((item: any, index: number) => (
+                  {order.items?.map((item: any, index: number) => (
                     <div key={index} className="flex justify-between items-center bg-gray-900 rounded-lg p-4">
                       <div>
-                        <p className="text-white font-semibold">{item.product_name}</p>
+                        <p className="text-white font-semibold">{item.product_name || item.name}</p>
                         <p className="text-gray-400 text-sm">Quantity: {item.quantity}</p>
                       </div>
                       <p className="text-orange-400 font-bold">
-                        ${item.total_price.toFixed(2)}
+                        ${(item.total_price || item.price || 0).toFixed(2)}
                       </p>
                     </div>
-                  ))}
+                  )) || (
+                    <p className="text-gray-400">No items found</p>
+                  )}
                 </div>
               </div>
             </div>
