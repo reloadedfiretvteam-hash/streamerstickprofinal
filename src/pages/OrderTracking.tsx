@@ -31,11 +31,20 @@ export default function OrderTracking() {
     setOrder(null);
 
     try {
+      // Sanitize search term - remove special characters that could interfere with queries
+      const sanitizedTerm = searchTerm.trim().replace(/[%_\\]/g, '');
+      
+      if (!sanitizedTerm) {
+        setError('Please enter a valid order number or email address.');
+        setLoading(false);
+        return;
+      }
+
       // First try orders table - search by email or order number
       const { data: customerOrder, error: customerError } = await supabase
         .from('orders')
         .select('*')
-        .or(`order_number.ilike.%${searchTerm}%,customer_email.ilike.%${searchTerm}%`)
+        .or(`order_number.ilike.%${sanitizedTerm}%,customer_email.ilike.%${sanitizedTerm}%`)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -49,7 +58,7 @@ export default function OrderTracking() {
       const { data: bitcoinOrder, error: bitcoinError } = await supabase
         .from('bitcoin_orders')
         .select('*')
-        .or(`order_code.ilike.%${searchTerm}%,customer_email.ilike.%${searchTerm}%`)
+        .or(`order_code.ilike.%${sanitizedTerm}%,customer_email.ilike.%${sanitizedTerm}%`)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();

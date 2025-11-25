@@ -12,11 +12,17 @@ export default function Hero() {
   return (
     <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden min-h-[600px] flex items-center">
       {/* Background image: Fire Stick breaking out of cage */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 overflow-hidden">
         <img
           src="https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/hero-firestick-breakout.jpg"
           alt="Fire Stick breaking free"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-center"
+          style={{ 
+            objectPosition: 'center center',
+            /* Scale up slightly and crop edges to remove phone screenshot borders */
+            transform: 'scale(1.15)',
+            transformOrigin: 'center center'
+          }}
         />
         {/* Dark overlay so text stays readable */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
@@ -44,7 +50,7 @@ export default function Hero() {
           </h1>
 
           <p className="text-lg sm:text-xl md:text-2xl text-orange-100 mb-8 animate-slide-up animation-delay-200 max-w-3xl mx-auto">
-            20,000+ live channels • 60,000+ movies & shows • All sports & PPV events
+            18,000+ live channels • 60,000+ movies & shows • All sports & PPV events
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8 animate-slide-up animation-delay-400">

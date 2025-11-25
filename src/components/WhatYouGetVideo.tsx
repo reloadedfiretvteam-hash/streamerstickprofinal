@@ -2,7 +2,7 @@ import { Play, Check } from 'lucide-react';
 
 export default function WhatYouGetVideo() {
   const benefits = [
-    '20,000+ Live TV Channels',
+    '18,000+ Live TV Channels',
     '60,000+ Movies & TV Shows',
     'All Sports Leagues (NFL, NBA, MLB, NHL)',
     'Pay-Per-View Events (UFC, Boxing)',

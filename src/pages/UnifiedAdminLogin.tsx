@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { Lock, User, Flame, Shield } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
+// Admin credentials - in production, these should come from environment variables
+const ADMIN_USERNAME = 'starevan11';
+const ADMIN_PASSWORD = 'starevan11';
+const ADMIN_EMAIL = 'reloadedfiretvteam@gmail.com';
+
 export default function UnifiedAdminLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -15,14 +20,11 @@ export default function UnifiedAdminLogin() {
 
     try {
       // First check hardcoded admin credentials for guaranteed access
-      const ADMIN_USERNAME = 'starevan11';
-      const ADMIN_PASSWORD = 'starevan11';
-
       if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
         localStorage.setItem('custom_admin_token', 'authenticated');
         localStorage.setItem('custom_admin_user', JSON.stringify({
           id: 'admin-master',
-          email: 'reloadedfiretvteam@gmail.com',
+          email: ADMIN_EMAIL,
           role: 'super_admin',
           username: ADMIN_USERNAME
         }));
@@ -45,7 +47,7 @@ export default function UnifiedAdminLogin() {
           localStorage.setItem('custom_admin_token', 'authenticated');
           localStorage.setItem('custom_admin_user', JSON.stringify({
             id: 'admin-master',
-            email: 'reloadedfiretvteam@gmail.com',
+            email: ADMIN_EMAIL,
             role: 'super_admin',
             username: ADMIN_USERNAME
           }));
@@ -75,14 +77,11 @@ export default function UnifiedAdminLogin() {
       window.location.href = '/admin';
     } catch (error: any) {
       // Even on error, allow hardcoded credentials
-      const ADMIN_USERNAME = 'starevan11';
-      const ADMIN_PASSWORD = 'starevan11';
-      
       if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
         localStorage.setItem('custom_admin_token', 'authenticated');
         localStorage.setItem('custom_admin_user', JSON.stringify({
           id: 'admin-master',
-          email: 'reloadedfiretvteam@gmail.com',
+          email: ADMIN_EMAIL,
           role: 'super_admin',
           username: ADMIN_USERNAME
         }));
