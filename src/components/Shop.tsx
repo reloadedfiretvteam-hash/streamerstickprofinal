@@ -31,12 +31,13 @@ interface DBProduct {
 }
 
 // Fallback products when Supabase is not configured or returns no data
+// Prices match FireSticksPage.tsx and IPTVServicesPage.tsx
 const fallbackProducts: Product[] = [
   // Fire Stick Products
   {
     id: 'firestick-hd',
-    name: 'Fire Stick HD + 1 Year IPTV',
-    price: 149.99,
+    name: 'Fire Stick HD - Jailbroken & Ready',
+    price: 140.00,
     type: 'firestick',
     image: '/images/firestick-hd.jpg',
     badge: 'STARTER',
@@ -54,8 +55,8 @@ const fallbackProducts: Product[] = [
   },
   {
     id: 'firestick-4k',
-    name: 'Fire Stick 4K + 1 Year IPTV',
-    price: 179.99,
+    name: 'Fire Stick 4K - Jailbroken & Ready',
+    price: 150.00,
     type: 'firestick',
     image: '/images/firestick-4k.jpg',
     badge: 'BEST VALUE',
@@ -74,8 +75,8 @@ const fallbackProducts: Product[] = [
   },
   {
     id: 'firestick-4k-max',
-    name: 'Fire Stick 4K Max + 1 Year IPTV',
-    price: 199.99,
+    name: 'Fire Stick 4K Max - Jailbroken & Ready',
+    price: 160.00,
     type: 'firestick',
     image: '/images/firestick-4k-max.jpg',
     badge: 'PREMIUM',
@@ -97,7 +98,7 @@ const fallbackProducts: Product[] = [
   {
     id: 'iptv-1-month',
     name: '1 Month IPTV Subscription',
-    price: 14.99,
+    price: 15.00,
     type: 'iptv',
     image: '/images/iptv-subscription.jpg',
     badge: 'STARTER',
@@ -115,11 +116,11 @@ const fallbackProducts: Product[] = [
   {
     id: 'iptv-3-month',
     name: '3 Month IPTV Subscription',
-    price: 34.99,
+    price: 30.00,
     type: 'iptv',
     image: '/images/iptv-subscription.jpg',
-    badge: 'SAVE 22%',
-    popular: false,
+    badge: 'POPULAR',
+    popular: true,
     period: '/3 months',
     features: [
       '18,000+ Live TV Channels',
@@ -133,11 +134,11 @@ const fallbackProducts: Product[] = [
   {
     id: 'iptv-6-month',
     name: '6 Month IPTV Subscription',
-    price: 59.99,
+    price: 50.00,
     type: 'iptv',
     image: '/images/iptv-subscription.jpg',
-    badge: 'POPULAR',
-    popular: true,
+    badge: 'GREAT VALUE',
+    popular: false,
     period: '/6 months',
     features: [
       '18,000+ Live TV Channels',
@@ -150,8 +151,8 @@ const fallbackProducts: Product[] = [
   },
   {
     id: 'iptv-12-month',
-    name: '12 Month IPTV Subscription',
-    price: 99.99,
+    name: '1 Year IPTV Subscription',
+    price: 75.00,
     type: 'iptv',
     image: '/images/iptv-subscription.jpg',
     badge: 'BEST VALUE',
