@@ -1,6 +1,6 @@
 import { Check, Flame, Star, Zap, ShoppingCart, Gift, Send, User, Mail, Phone } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
-import { supabase, getStorageUrl } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 
 interface Product {
   id: string;
@@ -30,6 +30,146 @@ interface DBProduct {
   main_image: string;
 }
 
+// Fallback products when Supabase is not configured or returns no data
+// Prices match FireSticksPage.tsx and IPTVServicesPage.tsx
+const fallbackProducts: Product[] = [
+  // Fire Stick Products
+  {
+    id: 'firestick-hd',
+    name: 'Fire Stick HD - Jailbroken & Ready',
+    price: 140.00,
+    type: 'firestick',
+    image: '/images/firestick-hd.jpg',
+    badge: 'STARTER',
+    popular: false,
+    features: [
+      'Fire TV Stick HD Streaming',
+      '1080p Full HD Resolution',
+      '1 Year IPTV Subscription Included',
+      '18,000+ Live TV Channels',
+      '60,000+ Movies & TV Shows',
+      'All Sports & PPV Events',
+      'Pre-configured & Ready to Use',
+      '24/7 Customer Support'
+    ]
+  },
+  {
+    id: 'firestick-4k',
+    name: 'Fire Stick 4K - Jailbroken & Ready',
+    price: 150.00,
+    type: 'firestick',
+    image: '/images/firestick-4k.jpg',
+    badge: 'BEST VALUE',
+    popular: true,
+    features: [
+      'Fire TV Stick 4K Streaming',
+      '4K Ultra HD Resolution',
+      'Dolby Vision & HDR10+',
+      '1 Year IPTV Subscription Included',
+      '18,000+ Live TV Channels',
+      '60,000+ Movies & TV Shows',
+      'All Sports & PPV Events',
+      'Pre-configured & Ready to Use',
+      '24/7 Customer Support'
+    ]
+  },
+  {
+    id: 'firestick-4k-max',
+    name: 'Fire Stick 4K Max - Jailbroken & Ready',
+    price: 160.00,
+    type: 'firestick',
+    image: '/images/firestick-4k-max.jpg',
+    badge: 'PREMIUM',
+    popular: false,
+    features: [
+      'Fire TV Stick 4K Max - Fastest Model',
+      '4K Ultra HD with Wi-Fi 6E',
+      'Dolby Vision, Atmos & HDR10+',
+      '1 Year IPTV Subscription Included',
+      '18,000+ Live TV Channels',
+      '60,000+ Movies & TV Shows',
+      'All Sports & PPV Events',
+      'Ambient Experience Support',
+      'Pre-configured & Ready to Use',
+      '24/7 Customer Support'
+    ]
+  },
+  // IPTV Subscription Products
+  {
+    id: 'iptv-1-month',
+    name: '1 Month IPTV Subscription',
+    price: 15.00,
+    type: 'iptv',
+    image: '/images/iptv-subscription.jpg',
+    badge: 'STARTER',
+    popular: false,
+    period: '/month',
+    features: [
+      '18,000+ Live TV Channels',
+      '60,000+ Movies & TV Shows',
+      'All Sports & PPV Events',
+      '4K/HD Quality Streaming',
+      'Works on All Devices',
+      '24/7 Customer Support'
+    ]
+  },
+  {
+    id: 'iptv-3-month',
+    name: '3 Month IPTV Subscription',
+    price: 30.00,
+    type: 'iptv',
+    image: '/images/iptv-subscription.jpg',
+    badge: 'POPULAR',
+    popular: true,
+    period: '/3 months',
+    features: [
+      '18,000+ Live TV Channels',
+      '60,000+ Movies & TV Shows',
+      'All Sports & PPV Events',
+      '4K/HD Quality Streaming',
+      'Works on All Devices',
+      'Priority Customer Support'
+    ]
+  },
+  {
+    id: 'iptv-6-month',
+    name: '6 Month IPTV Subscription',
+    price: 50.00,
+    type: 'iptv',
+    image: '/images/iptv-subscription.jpg',
+    badge: 'GREAT VALUE',
+    popular: false,
+    period: '/6 months',
+    features: [
+      '18,000+ Live TV Channels',
+      '60,000+ Movies & TV Shows',
+      'All Sports & PPV Events',
+      '4K/HD Quality Streaming',
+      'Works on All Devices',
+      'VIP Customer Support'
+    ]
+  },
+  {
+    id: 'iptv-12-month',
+    name: '1 Year IPTV Subscription',
+    price: 75.00,
+    type: 'iptv',
+    image: '/images/iptv-subscription.jpg',
+    badge: 'BEST VALUE',
+    popular: false,
+    period: '/year',
+    features: [
+      '18,000+ Live TV Channels',
+      '60,000+ Movies & TV Shows',
+      'All Sports & PPV Events',
+      '4K/HD Quality Streaming',
+      'Works on All Devices',
+      'Premium VIP Support',
+      'Free Setup Assistance'
+    ]
+  }
+];
+
 export default function Shop({ onAddToCart }: ShopProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,53 +188,61 @@ export default function Shop({ onAddToCart }: ShopProps) {
   }, []);
 
   const loadProducts = async () => {
-    const { data: dbProducts } = await supabase
-      .from('real_products')
-      .select('*')
-      .in('status', ['published', 'publish', 'active'])
-      .order('sort_order', { ascending: true });
+    try {
+      const { data: dbProducts } = await supabase
+        .from('real_products')
+        .select('*')
+        .in('status', ['published', 'publish', 'active'])
+        .order('sort_order', { ascending: true });
 
-    if (dbProducts) {
+      if (dbProducts && dbProducts.length > 0) {
+        const mappedProducts: Product[] = dbProducts.map((p: DBProduct) => {
+          const features = p.description ? p.description.split(',').map(f => f.trim()) : [];
+          const isFirestick = p.name.toLowerCase().includes('fire stick') || p.name.toLowerCase().includes('fire tv');
 
-      const mappedProducts: Product[] = dbProducts.map((p: DBProduct) => {
-        const features = p.description ? p.description.split(',').map(f => f.trim()) : [];
-        const isFirestick = p.name.toLowerCase().includes('fire stick') || p.name.toLowerCase().includes('fire tv');
+          // Parse prices to numbers
+          const price = parseFloat(p.sale_price?.toString() || p.price?.toString() || '0');
 
-        // Parse prices to numbers
-        const price = parseFloat(p.sale_price?.toString() || p.price?.toString() || '0');
-
-        // Get image - prioritize main_image, then fallback
-        let productImage = p.main_image || '';
-        
-        // If no image or image is placeholder/empty, use type-specific fallback
-        if (!productImage || productImage.trim() === '' || productImage.includes('placeholder') || productImage.includes('pexels')) {
-          if (isFirestick) {
-            if (p.name.toLowerCase().includes('4k max')) {
-              productImage = getStorageUrl('images', 'firestick 4k max.jpg');
-            } else if (p.name.toLowerCase().includes('4k')) {
-              productImage = getStorageUrl('images', 'firestick 4k.jpg');
+          // Get image - prioritize main_image, then fallback to local images
+          let productImage = p.main_image || '';
+          
+          // If no image or image is placeholder/empty, use type-specific fallback from local public folder
+          if (!productImage || productImage.trim() === '' || productImage.includes('placeholder') || productImage.includes('pexels')) {
+            if (isFirestick) {
+              if (p.name.toLowerCase().includes('4k max')) {
+                productImage = '/images/firestick-4k-max.jpg';
+              } else if (p.name.toLowerCase().includes('4k')) {
+                productImage = '/images/firestick-4k.jpg';
+              } else {
+                productImage = '/images/firestick-hd.jpg';
+              }
             } else {
-              productImage = getStorageUrl('images', 'firestick hd.jpg');
+              productImage = '/images/iptv-subscription.jpg';
             }
-          } else {
-            productImage = getStorageUrl('images', 'iptv-subscription.jpg');
           }
-        }
 
-        return {
-          id: p.id,
-          name: p.name,
-          price: price,
-          type: isFirestick ? 'firestick' : 'iptv',
-          image: productImage,
-          badge: isFirestick ? 'BEST VALUE' : 'POPULAR',
-          popular: p.featured,
-          period: isFirestick ? undefined : '/month',
-          features: features.length > 0 ? features : ['Premium quality', '24/7 support']
-        };
-      });
+          return {
+            id: p.id,
+            name: p.name,
+            price: price,
+            type: isFirestick ? 'firestick' : 'iptv',
+            image: productImage,
+            badge: isFirestick ? 'BEST VALUE' : 'POPULAR',
+            popular: p.featured,
+            period: isFirestick ? undefined : '/month',
+            features: features.length > 0 ? features : ['Premium quality', '24/7 support']
+          };
+        });
 
-      setProducts(mappedProducts);
+        setProducts(mappedProducts);
+      } else {
+        // Use fallback products when Supabase returns no data
+        setProducts(fallbackProducts);
+      }
+    } catch (error) {
+      console.warn('Error loading products from database, using fallback products:', error);
+      // Use fallback products on error
+      setProducts(fallbackProducts);
     }
     setLoading(false);
   };
@@ -208,7 +356,7 @@ This is an automated message from StreamStickPro.com
           <div className="relative rounded-3xl overflow-hidden mb-12 animate-fade-in">
             <div className="absolute inset-0">
               <img
-                src="https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/hero-firestick-breakout.jpg"
+                src="/images/firestick-4k.jpg"
                 alt="Fire Stick Breaking Free"
                 className="w-full h-full object-cover"
                 loading="lazy"
@@ -275,17 +423,17 @@ This is an automated message from StreamStickPro.com
                     loading="lazy"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      // Fallback based on product type
+                      // Fallback based on product type using local images
                       if (product.type === 'firestick') {
                         if (product.name.includes('4K Max')) {
-                          target.src = getStorageUrl('images', 'firestick 4k max.jpg');
+                          target.src = '/images/firestick-4k-max.jpg';
                         } else if (product.name.includes('4K')) {
-                          target.src = getStorageUrl('images', 'firestick 4k.jpg');
+                          target.src = '/images/firestick-4k.jpg';
                         } else {
-                          target.src = getStorageUrl('images', 'firestick hd.jpg');
+                          target.src = '/images/firestick-hd.jpg';
                         }
                       } else {
-                        target.src = getStorageUrl('images', 'iptv-subscription.jpg');
+                        target.src = '/images/iptv-subscription.jpg';
                       }
                     }}
                   />
