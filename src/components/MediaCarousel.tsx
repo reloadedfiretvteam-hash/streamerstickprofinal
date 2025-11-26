@@ -1,26 +1,25 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getStorageUrl } from '../lib/supabase';
 
 export default function MediaCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Unique images only - one of each
+  // Unique images only - one of each (use local public folder images as primary)
   const mediaItems = [
     // MOVIES
-    { type: 'movie', title: 'Action Movies 2024', image: getStorageUrl('images', 'Playback-Tile-1024x512.webp'), year: '2024' },
-    { type: 'movie', title: 'Thriller & Horror', image: getStorageUrl('images', 'Movies-categories_11zon-1024x512.webp'), year: '2024' },
+    { type: 'movie', title: 'Action Movies 2024', image: '/Playback-Tile-1024x512.webp', year: '2024' },
+    { type: 'movie', title: 'Thriller & Horror', image: '/Movies-categories_11zon-1024x512.webp', year: '2024' },
     
     // TV SERIES
-    { type: 'series', title: 'Top US Series', image: getStorageUrl('images', 'IPTVSmarters TV IMAG.jpg'), year: '2024' },
-    { type: 'series', title: 'Trending Shows', image: getStorageUrl('images', 'iptv3.jpg'), year: '2024' },
-    { type: 'series', title: 'Binge-Worthy Series', image: getStorageUrl('images', 'OIP (11) websit pic copy copy.jpg'), year: '2024' },
+    { type: 'series', title: 'Top US Series', image: '/IPTVSmarters TV IMAG.jpg', year: '2024' },
+    { type: 'series', title: 'Trending Shows', image: '/iptv3.jpg', year: '2024' },
+    { type: 'series', title: 'Binge-Worthy Series', image: '/OIP (11) websit pic.jpg', year: '2024' },
 
-    // SPORTS - One image per sport
-    { type: 'sport', title: 'NFL All Teams Live', image: getStorageUrl('images', 'c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg'), logo: '🏈' },
-    { type: 'sport', title: 'MLB All 30 Teams', image: getStorageUrl('images', 'BASEBALL.webp'), logo: '⚾' },
-    { type: 'sport', title: 'NBA All Games', image: getStorageUrl('images', 'downloadBASKET BALL.jpg'), logo: '🏀' },
-    { type: 'sport', title: 'UFC & Boxing PPV', image: getStorageUrl('images', 'UFC.jpg'), logo: '🥊' },
+    // SPORTS - One image per sport (Football, Baseball, Basketball, UFC)
+    { type: 'sport', title: 'NFL All Teams Live', image: '/c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg', logo: '🏈' },
+    { type: 'sport', title: 'MLB All 30 Teams', image: '/BASEBALL.webp', logo: '⚾' },
+    { type: 'sport', title: 'NBA All Games', image: '/downloadBASKET BALL.jpg', logo: '🏀' },
+    { type: 'sport', title: 'UFC & Boxing PPV', image: '/UFC.jpg', logo: '🥊' },
   ];
 
   useEffect(() => {
@@ -86,11 +85,10 @@ export default function MediaCarousel() {
                       alt={item.title}
                       className="w-full h-64 object-cover"
                       loading="eager"
-                      crossOrigin="anonymous"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        // Fallback to IPTV image if Supabase image fails
-                        target.src = getStorageUrl('images', 'iptv3.jpg');
+                        // Fallback to IPTV image if image fails
+                        target.src = '/iptv3.jpg';
                       }}
                     />
                     {/* Always visible gradient overlay */}

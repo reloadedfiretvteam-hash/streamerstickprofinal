@@ -39,6 +39,10 @@ export default function Shop({ onAddToCart }: ShopProps) {
   const [freeTrialSubmitted, setFreeTrialSubmitted] = useState(false);
   const [freeTrialLoading, setFreeTrialLoading] = useState(false);
 
+  // Memoized filtered products - must be declared before any conditional returns
+  const firestickProducts = useMemo(() => products.filter(p => p.type === 'firestick'), [products]);
+  const iptvProducts = useMemo(() => products.filter(p => p.type === 'iptv'), [products]);
+
   useEffect(() => {
     loadProducts();
   }, []);
@@ -183,9 +187,6 @@ This is an automated message from StreamStickPro.com
     );
   }
 
-  const firestickProducts = useMemo(() => products.filter(p => p.type === 'firestick'), [products]);
-  const iptvProducts = useMemo(() => products.filter(p => p.type === 'iptv'), [products]);
-
   return (
     <section id="shop" className="py-20 bg-gray-900 text-white">
       <div className="container mx-auto px-4">
@@ -207,10 +208,14 @@ This is an automated message from StreamStickPro.com
           <div className="relative rounded-3xl overflow-hidden mb-12 animate-fade-in">
             <div className="absolute inset-0">
               <img
-                src="/Screenshot_20251102-131641.png"
+                src="https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/hero-firestick-breakout.jpg"
                 alt="Fire Stick Breaking Free"
                 className="w-full h-full object-cover"
                 loading="lazy"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/OIF.jpg';
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
             </div>
