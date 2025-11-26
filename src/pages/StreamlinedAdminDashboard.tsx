@@ -59,7 +59,7 @@ export default function StreamlinedAdminDashboard() {
     try {
       // Get products count
       const { count: productsCount } = await supabase
-        .from('products')
+        .from('real_products')
         .select('*', { count: 'exact', head: true });
 
       // Get blog posts count
