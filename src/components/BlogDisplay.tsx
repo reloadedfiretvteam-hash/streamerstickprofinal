@@ -134,14 +134,14 @@ export default function BlogDisplay() {
             >
               <div className="relative h-48 overflow-hidden">
                 <img
-                  src={post.featured_image || 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg'}
+                  src={post.featured_image || 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/IPTV%20subscription%20image.jpg'}
                   alt={post.title}
                   className="w-full h-full object-cover"
                   loading="lazy"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     // Fallback to IPTV subscription image if featured image fails
-                    target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
+                    target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/IPTV%20subscription%20image.jpg';
                   }}
                 />
                   <div className="absolute top-4 left-4 flex flex-wrap gap-2">
