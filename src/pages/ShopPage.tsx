@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { ShoppingCart, Search, Filter, Star } from 'lucide-react';
 import Footer from '../components/Footer';
-import PremiumRequestsPackages from '../components/PremiumRequestsPackages';
 import CustomerReviewsSection from '../components/CustomerReviewsSection';
-import { PremiumPackage, PREMIUM_PACKAGE_DEFAULTS } from '../lib/types';
 
 interface Product {
   id: string;
@@ -226,38 +224,6 @@ export default function ShopPage() {
 
     saveCart(newCart);
     // Redirect to checkout immediately
-    window.location.href = '/checkout';
-  };
-
-  const addPremiumPackageToCart = (pkg: PremiumPackage) => {
-    // Convert premium package to a product-like structure for cart
-    const premiumProduct: Product = {
-      id: pkg.id,
-      name: pkg.name,
-      description: pkg.features.join(', '),
-      price: pkg.price.toString(),
-      sale_price: pkg.price.toString(),
-      main_image: '',
-      category: PREMIUM_PACKAGE_DEFAULTS.CATEGORY,
-      stock_quantity: PREMIUM_PACKAGE_DEFAULTS.STOCK_QUANTITY,
-      rating: PREMIUM_PACKAGE_DEFAULTS.RATING,
-      featured: pkg.popular
-    };
-    
-    const existing = cart.find(item => item.product.id === pkg.id);
-    let newCart;
-
-    if (existing) {
-      newCart = cart.map(item =>
-        item.product.id === pkg.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
-    } else {
-      newCart = [...cart, { product: premiumProduct, quantity: 1 }];
-    }
-
-    saveCart(newCart);
     window.location.href = '/checkout';
   };
 
@@ -524,9 +490,6 @@ export default function ShopPage() {
           </div>
         )}
       </div>
-
-      {/* Premium Requests Packages */}
-      <PremiumRequestsPackages onAddToCart={addPremiumPackageToCart} />
 
       {/* Customer Reviews Section */}
       <CustomerReviewsSection />
