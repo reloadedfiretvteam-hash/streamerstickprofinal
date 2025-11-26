@@ -83,7 +83,7 @@ export default function ShopPage() {
               imageUrl = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg';
             }
           } else {
-            imageUrl = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/IPTV%20subscription%20image.jpg';
+            imageUrl = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
           }
         }
         
@@ -154,7 +154,7 @@ export default function ShopPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Instant Activation',
       price: '15.00',
       sale_price: '15.00',
-      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/IPTV%20subscription%20image.jpg',
+      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg',
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -166,7 +166,7 @@ export default function ShopPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Priority Support',
       price: '30.00',
       sale_price: '30.00',
-      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/IPTV%20subscription%20image.jpg',
+      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg',
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -178,7 +178,7 @@ export default function ShopPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Priority Support',
       price: '50.00',
       sale_price: '50.00',
-      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/IPTV%20subscription%20image.jpg',
+      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg',
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -190,7 +190,7 @@ export default function ShopPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, VIP Support, Best Value!',
       price: '75.00',
       sale_price: '75.00',
-      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/IPTV%20subscription%20image.jpg',
+      main_image: 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg',
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -403,14 +403,14 @@ export default function ShopPage() {
                           target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg';
                         }
                       } else {
-                        target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/IPTV%20subscription%20image.jpg';
+                        target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
                       }
                     }}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-300">
                     <img 
-                      src="https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/IPTV%20subscription%20image.jpg" 
+                      src="https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg" 
                       alt="placeholder" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
