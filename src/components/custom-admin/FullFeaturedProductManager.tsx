@@ -60,7 +60,7 @@ export default function FullFeaturedProductManager() {
 
   const loadProducts = async () => {
     const { data } = await supabase
-      .from('products_full')
+      .from('real_products')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -141,7 +141,7 @@ export default function FullFeaturedProductManager() {
     try {
       if (editing) {
         const { error } = await supabase
-          .from('products_full')
+          .from('real_products')
           .update(dataToSave)
           .eq('id', editing);
 
@@ -149,7 +149,7 @@ export default function FullFeaturedProductManager() {
         alert('Product updated successfully!');
       } else {
         const { error } = await supabase
-          .from('products_full')
+          .from('real_products')
           .insert([dataToSave]);
 
         if (error) throw error;
@@ -168,7 +168,7 @@ export default function FullFeaturedProductManager() {
 
     try {
       await supabase.from('product_images').delete().eq('product_id', id);
-      await supabase.from('products_full').delete().eq('id', id);
+      await supabase.from('real_products').delete().eq('id', id);
       alert('Product deleted successfully!');
       loadData();
     } catch (error: any) {
@@ -246,7 +246,7 @@ export default function FullFeaturedProductManager() {
 
     try {
       const { data, error } = await supabase
-        .from('products_full')
+        .from('real_products')
         .insert([newProduct])
         .select()
         .single();

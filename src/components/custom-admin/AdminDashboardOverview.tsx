@@ -72,7 +72,7 @@ export default function AdminDashboardOverview() {
         recentOrdersResult,
         recentProductsResult
       ] = await Promise.all([
-        supabase.from('products').select('*', { count: 'exact' }),
+        supabase.from('real_products').select('*', { count: 'exact' }),
         supabase.from('orders_full').select('*', { count: 'exact' }),
         supabase.from('email_subscribers').select('*', { count: 'exact' }),
         supabase.from('blog_posts').select('*', { count: 'exact' }),
@@ -80,7 +80,7 @@ export default function AdminDashboardOverview() {
         supabase.from('promotions').select('*', { count: 'exact' }),
         supabase.from('email_campaigns').select('*', { count: 'exact' }),
         supabase.from('orders_full').select('*').order('created_at', { ascending: false }).limit(5),
-        supabase.from('products').select('*').order('created_at', { ascending: false }).limit(5)
+        supabase.from('real_products').select('*').order('created_at', { ascending: false }).limit(5)
       ]);
 
       // Calculate revenue

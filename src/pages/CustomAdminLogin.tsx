@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { Lock, User, Mail, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
+// Admin credentials from environment variables for local/dev testing only
+// In production, use Supabase admin_credentials table
+const ADMIN_DEFAULT_USER = import.meta.env.VITE_ADMIN_DEFAULT_USER;
+const ADMIN_DEFAULT_PASSWORD = import.meta.env.VITE_ADMIN_DEFAULT_PASSWORD;
+const ADMIN_DEFAULT_EMAIL = import.meta.env.VITE_ADMIN_DEFAULT_EMAIL || '';
+
 export default function CustomAdminLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -16,13 +22,38 @@ export default function CustomAdminLogin() {
     setMessage('');
 
     try {
+      // First check environment-based admin credentials for local/dev testing
+      if (ADMIN_DEFAULT_USER && ADMIN_DEFAULT_PASSWORD && 
+          username === ADMIN_DEFAULT_USER && password === ADMIN_DEFAULT_PASSWORD) {
+        localStorage.setItem('custom_admin_token', 'authenticated');
+        localStorage.setItem('custom_admin_user', JSON.stringify({
+          username: ADMIN_DEFAULT_USER,
+          email: ADMIN_DEFAULT_EMAIL
+        }));
+        window.location.href = '/custom-admin/dashboard';
+        return;
+      }
+
       const { data: admin, error } = await supabase
         .from('admin_credentials')
         .select('*')
         .eq('username', username)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        // If database fails, check env-based credentials
+        if (ADMIN_DEFAULT_USER && ADMIN_DEFAULT_PASSWORD && 
+            username === ADMIN_DEFAULT_USER && password === ADMIN_DEFAULT_PASSWORD) {
+          localStorage.setItem('custom_admin_token', 'authenticated');
+          localStorage.setItem('custom_admin_user', JSON.stringify({
+            username: ADMIN_DEFAULT_USER,
+            email: ADMIN_DEFAULT_EMAIL
+          }));
+          window.location.href = '/custom-admin/dashboard';
+          return;
+        }
+        throw error;
+      }
 
       if (!admin) {
         setMessage('Invalid username or password');
@@ -47,8 +78,9 @@ export default function CustomAdminLogin() {
       } else {
         setMessage('Invalid username or password');
       }
-    } catch (error: any) {
-      setMessage('Login failed: ' + error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setMessage('Login failed: ' + errorMessage);
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, Eye, ArrowRight } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, getStorageUrl } from '../lib/supabase';
 
 interface BlogPost {
   id: string;
@@ -134,14 +134,14 @@ export default function BlogDisplay() {
             >
               <div className="relative h-48 overflow-hidden">
                 <img
-                  src={post.featured_image || 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/IPTV%20subscription%20image.jpg'}
+                  src={post.featured_image || getStorageUrl('images', 'iptv-subscription.jpg')}
                   alt={post.title}
                   className="w-full h-full object-cover"
                   loading="lazy"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     // Fallback to IPTV subscription image if featured image fails
-                    target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/IPTV%20subscription%20image.jpg';
+                    target.src = getStorageUrl('images', 'iptv-subscription.jpg');
                   }}
                 />
                   <div className="absolute top-4 left-4 flex flex-wrap gap-2">
