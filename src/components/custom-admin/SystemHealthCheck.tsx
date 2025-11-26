@@ -22,7 +22,7 @@ export default function SystemHealthCheck() {
     setChecks([...results]);
 
     try {
-      const { error } = await supabase.from('products').select('count', { count: 'exact', head: true });
+      const { error } = await supabase.from('real_products').select('count', { count: 'exact', head: true });
       if (error) throw error;
       results[results.length - 1] = {
         name: 'Database Connection',
@@ -45,7 +45,7 @@ export default function SystemHealthCheck() {
     setChecks([...results]);
 
     try {
-      const { data, error } = await supabase.from('products').select('id, name, price').limit(1);
+      const { data, error } = await supabase.from('real_products').select('id, name, price').limit(1);
       if (error) throw error;
       results[results.length - 1] = {
         name: 'Products Table',
@@ -275,7 +275,7 @@ export default function SystemHealthCheck() {
 
     try {
       // Try to access without auth - should be allowed for public data
-      const { error } = await supabase.from('products').select('id').limit(1);
+      const { error } = await supabase.from('real_products').select('id').limit(1);
       results[results.length - 1] = {
         name: 'Security (RLS)',
         status: 'pass',

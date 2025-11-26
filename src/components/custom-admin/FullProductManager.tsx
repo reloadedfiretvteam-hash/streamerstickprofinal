@@ -48,7 +48,7 @@ export default function FullProductManager() {
   const loadProducts = async () => {
     try {
       const { data, error } = await supabase
-        .from('products')
+        .from('real_products')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -73,7 +73,7 @@ export default function FullProductManager() {
       if (editingProduct.id) {
         // Update existing
         const { error } = await supabase
-          .from('products')
+          .from('real_products')
           .update(productData)
           .eq('id', editingProduct.id);
 
@@ -82,7 +82,7 @@ export default function FullProductManager() {
       } else {
         // Create new
         const { error } = await supabase
-          .from('products')
+          .from('real_products')
           .insert([{
             ...productData,
             product_id: `prod-${Date.now()}`,
@@ -109,7 +109,7 @@ export default function FullProductManager() {
 
     try {
       const { error } = await supabase
-        .from('products')
+        .from('real_products')
         .delete()
         .eq('id', productId);
 

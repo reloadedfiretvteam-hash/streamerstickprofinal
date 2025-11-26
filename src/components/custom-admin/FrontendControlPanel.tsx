@@ -89,9 +89,9 @@ export default function FrontendControlPanel() {
 
       // Get active products
       const { count: productsCount } = await supabase
-        .from('products')
+        .from('real_products')
         .select('*', { count: 'exact', head: true })
-        .eq('is_active', true);
+        .in('status', ['published', 'publish', 'active']);
 
       // Get email subscribers
       const { count: emailCount } = await supabase
