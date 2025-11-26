@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Lock, AlertCircle, Settings } from 'lucide-react';
+import { Shield, Lock, CreditCard, AlertCircle } from 'lucide-react';
 
 interface SquarePaymentFormProps {
   amount: number;
@@ -12,48 +12,31 @@ declare global {
   }
 }
 
-// Check for missing environment variables at module load time
-const SQUARE_APP_ID = import.meta.env.VITE_SQUARE_APP_ID;
-const SQUARE_LOCATION_ID = import.meta.env.VITE_SQUARE_LOCATION_ID;
-
-function getMissingEnvVars(): string[] {
-  const missing: string[] = [];
-  if (!SQUARE_APP_ID) missing.push('VITE_SQUARE_APP_ID');
-  if (!SQUARE_LOCATION_ID) missing.push('VITE_SQUARE_LOCATION_ID');
-  return missing;
-}
-
 export default function SquarePaymentForm({ amount, onSubmit }: SquarePaymentFormProps) {
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [card, setCard] = useState<any>(null);
-  const [configError, setConfigError] = useState<string[]>([]);
 
   useEffect(() => {
     const initializeSquare = async () => {
-      // Check for missing environment variables first
-      const missingVars = getMissingEnvVars();
-      if (missingVars.length > 0) {
-        setConfigError(missingVars);
-        return;
-      }
+      if (!window.Square) return;
 
-      // Wait for Square SDK to load
-      if (!window.Square) {
-        // Square SDK not loaded yet - this is expected if the script hasn't loaded
-        setErrorMessage('Payment form is initializing...');
+      const applicationId = import.meta.env.VITE_SQUARE_APP_ID;
+      const locationId = import.meta.env.VITE_SQUARE_LOCATION_ID;
+
+      if (!applicationId || !locationId) {
+        setErrorMessage('Square configuration missing');
         return;
       }
 
       try {
-        const payments = await window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
+        const payments = await window.Square.payments(applicationId, locationId);
         const card = await payments.card();
         await card.attach('#card-container');
         setCard(card);
-        setErrorMessage(''); // Clear any loading message
       } catch (e) {
         console.error('Square initialization failed:', e);
-        setErrorMessage('Unable to initialize payment form. Please try again or contact support.');
+        setErrorMessage('Failed to load secure payment form');
       }
     };
 
@@ -78,51 +61,6 @@ export default function SquarePaymentForm({ amount, onSubmit }: SquarePaymentFor
       setErrorMessage(e.message || 'Payment failed');
     }
   };
-
-  // Show configuration error if environment variables are missing
-  if (configError.length > 0) {
-    return (
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-amber-200">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-            <Settings className="w-5 h-5 text-amber-600" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-900">Payment Configuration Required</h3>
-            <p className="text-sm text-gray-600">Square payment is not configured yet</p>
-          </div>
-        </div>
-        
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
-          <p className="text-sm text-amber-800 mb-2">
-            <strong>Missing environment variables:</strong>
-          </p>
-          <ul className="list-disc list-inside text-sm text-amber-700 space-y-1">
-            {configError.map((varName) => (
-              <li key={varName}>
-                <code className="bg-amber-100 px-1 rounded">{varName}</code>
-              </li>
-            ))}
-          </ul>
-        </div>
-        
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800">
-            <strong>To enable credit card payments:</strong>
-          </p>
-          <ol className="list-decimal list-inside text-sm text-blue-700 mt-2 space-y-1">
-            <li>Create a Square Developer account at <a href="https://developer.squareup.com" target="_blank" rel="noopener noreferrer" className="underline">developer.squareup.com</a></li>
-            <li>Get your Application ID and Location ID from the Square Dashboard</li>
-            <li>Add the environment variables to your deployment platform</li>
-          </ol>
-        </div>
-        
-        <p className="text-center text-xs text-gray-400 mt-4">
-          Please contact the site administrator if you need assistance.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
