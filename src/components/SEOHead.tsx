@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 export default function SEOHead() {
   useEffect(() => {
-    document.title = 'Stream Stick Pro - Premium IPTV Subscriptions & Jailbroken Fire Stick | 20,000+ Channels';
+    document.title = 'Best Jailbroken Fire Stick Websites 2025 | Premium IPTV Subscriptions | 20,000+ Channels';
 
     const setMetaTag = (name: string, content: string, isProperty = false) => {
       const attribute = isProperty ? 'property' : 'name';
@@ -16,9 +16,11 @@ export default function SEOHead() {
       element.content = content;
     };
 
-    setMetaTag('description', 'Premium IPTV subscriptions with 20,000+ live channels, movies, sports & PPV. Jailbroken Fire Stick 4K devices. 36-hour free trial. 24/7 support. Free trial available.');
+    // Optimized meta description targeting key search terms
+    setMetaTag('description', 'Best jailbroken Fire Stick websites 2025. Premium IPTV subscriptions with 20,000+ live channels, movies, sports & PPV. Top Fire Stick apps pre-installed. Best IPTV for Fire Stick. 36-hour free trial. 24/7 support.');
 
-    setMetaTag('keywords', 'IPTV, premium IPTV, IPTV subscription, Fire Stick, Fire Stick HD, Fire Stick 4K, Fire Stick 4K Max, jailbroken Fire Stick, Fire TV, live TV streaming, 4K streaming, sports IPTV, movie streaming, PPV events, cord cutting, cable alternative, streaming service, Fire Stick IPTV, Android IPTV, Smart TV IPTV, best IPTV service, affordable IPTV, reliable IPTV, HD streaming, Downloader app, Downloader setup, TV Mate, TV Mate setup, Smarters Pro, Smarters Pro setup, IPTV media players, IPTV players, live TV subscription, streaming TV, Fire Stick setup, Fire Stick configuration, IPTV setup guide, Downloader tutorial, TV Mate guide, Smarters Pro guide, IPTV player comparison, best IPTV app, Fire Stick optimization, IPTV troubleshooting, IPTV for beginners, complete IPTV setup, Fire Stick jailbreak, unlock Fire Stick, IPTV subscription plans, 1 month IPTV, 3 month IPTV, 6 month IPTV, 1 year IPTV, live TV channels, streaming devices, Fire Stick accessories, IPTV installation, IPTV configuration');
+    // Enhanced keywords targeting competitor search terms
+    setMetaTag('keywords', 'jailbroken fire stick websites, jailbroken fire stick, best IPTV subscriptions for FireStick, top jailbroken FireStick apps 2025, IPTV subscription pages, premium IPTV, IPTV subscription, Fire Stick 4K, Fire Stick 4K Max, jailbroken Fire Stick 2025, Fire TV jailbreak, live TV streaming, 4K streaming, sports IPTV, movie streaming, PPV events, cord cutting, cable alternative, best IPTV service, affordable IPTV, IPTV setup guide, Fire Stick jailbreak, unlock Fire Stick, IPTV subscription plans, best streaming apps Fire Stick, Fire Stick fully loaded, pre-configured Fire Stick, IPTV free trial, streaming devices');
 
     setMetaTag('author', 'Stream Stick Pro');
     setMetaTag('robots', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
@@ -38,22 +40,24 @@ export default function SEOHead() {
     setMetaTag('apple-mobile-web-app-capable', 'yes');
     setMetaTag('apple-mobile-web-app-status-bar-style', 'black-translucent');
 
+    // Enhanced Open Graph tags for social sharing
     setMetaTag('og:site_name', 'Stream Stick Pro', true);
-    setMetaTag('og:title', 'Stream Stick Pro - Premium IPTV with 20,000+ Channels', true);
-    setMetaTag('og:description', 'Stream 20,000+ live channels, movies, sports & PPV events. Premium IPTV subscriptions and jailbroken Fire Stick devices. 36-hour free trial.', true);
+    setMetaTag('og:title', 'Best Jailbroken Fire Stick 2025 | Premium IPTV Subscriptions | 20,000+ Channels', true);
+    setMetaTag('og:description', 'Best jailbroken Fire Stick websites 2025. Stream 20,000+ live channels, movies, sports & PPV events. Top Fire Stick apps pre-installed. 36-hour free trial.', true);
     setMetaTag('og:type', 'website', true);
     setMetaTag('og:url', window.location.href, true);
     setMetaTag('og:image', `${window.location.origin}/og-image.jpg`, true);
     setMetaTag('og:image:width', '1200', true);
     setMetaTag('og:image:height', '630', true);
-    setMetaTag('og:image:alt', 'Stream Stick Pro Premium IPTV Service', true);
+    setMetaTag('og:image:alt', 'Stream Stick Pro - Best Jailbroken Fire Stick and IPTV Service', true);
     setMetaTag('og:locale', 'en_US', true);
 
+    // Enhanced Twitter Card tags
     setMetaTag('twitter:card', 'summary_large_image');
     setMetaTag('twitter:site', '@streamstickpro');
     setMetaTag('twitter:creator', '@streamstickpro');
-    setMetaTag('twitter:title', 'Stream Stick Pro - Premium IPTV Streaming Service');
-    setMetaTag('twitter:description', 'Access 20,000+ live channels, movies, sports and PPV events. Premium IPTV subscriptions and Fire Stick devices. Try free for 36 hours.');
+    setMetaTag('twitter:title', 'Best Jailbroken Fire Stick 2025 | Premium IPTV Service');
+    setMetaTag('twitter:description', 'Top jailbroken Fire Stick apps 2025. Best IPTV subscriptions with 20,000+ channels, movies, sports and PPV. Free 36-hour trial.');
     setMetaTag('twitter:image', `${window.location.origin}/twitter-card.jpg`);
 
     setMetaTag('geo.region', 'US');

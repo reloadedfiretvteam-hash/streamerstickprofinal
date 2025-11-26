@@ -1,5 +1,5 @@
 import { ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface FAQItem {
   question: string;
@@ -60,45 +60,95 @@ export default function FAQ() {
     },
   ];
 
+  // Add FAQ Schema to head
+  useEffect(() => {
+    const faqSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.answer,
+        },
+      })),
+    };
+
+    // Remove existing FAQ schema if present
+    const existingScript = document.querySelector('script[data-faq-schema="true"]');
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    // Add new FAQ schema
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-faq-schema', 'true');
+    script.textContent = JSON.stringify(faqSchema);
+    document.head.appendChild(script);
+
+    return () => {
+      const scriptToRemove = document.querySelector('script[data-faq-schema="true"]');
+      if (scriptToRemove) {
+        scriptToRemove.remove();
+      }
+    };
+  }, []);
+
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-gray-50" id="faq">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
+          {/* SEO-optimized header */}
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Frequently Asked Questions
+              Frequently Asked Questions About IPTV & Fire Stick
             </h2>
             <p className="text-xl text-gray-600">
-              Everything you need to know about our IPTV service
+              Everything you need to know about our IPTV subscription service and jailbroken Fire Stick devices
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4" itemScope itemType="https://schema.org/FAQPage">
             {faqs.map((faq, index) => (
               <div
                 key={index}
                 className="bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg"
+                itemScope
+                itemProp="mainEntity"
+                itemType="https://schema.org/Question"
               >
                 <button
                   onClick={() => toggleFAQ(index)}
                   className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 hover:bg-gray-50 transition-colors"
+                  aria-expanded={openIndex === index}
+                  aria-controls={`faq-answer-${index}`}
                 >
-                  <h3 className="text-lg font-semibold text-gray-900 pr-4">{faq.question}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 pr-4" itemProp="name">{faq.question}</h3>
                   <ChevronDown
-                    className={`w-5 h-5 text-gray-500 flex-shrink-0 transition-transform ${
+                    className={`w-5 h-5 text-gray-500 flex-shrink-0 transition-transform duration-200 ${
                       openIndex === index ? 'transform rotate-180' : ''
                     }`}
                   />
                 </button>
-                {openIndex === index && (
+                <div
+                  id={`faq-answer-${index}`}
+                  className={`overflow-hidden transition-all duration-200 ${
+                    openIndex === index ? 'max-h-96' : 'max-h-0'
+                  }`}
+                  itemScope
+                  itemProp="acceptedAnswer"
+                  itemType="https://schema.org/Answer"
+                >
                   <div className="px-6 pb-5 pt-2">
-                    <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                    <p className="text-gray-600 leading-relaxed" itemProp="text">{faq.answer}</p>
                   </div>
-                )}
+                </div>
               </div>
             ))}
           </div>

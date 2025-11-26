@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navigation from './components/EnhancedNavigation';
 import Hero from './components/Hero';
@@ -25,10 +25,13 @@ import ReviewsCarousel from './components/ReviewsCarousel';
 import TrustBadges from './components/TrustBadges';
 import StickyBuyButton from './components/StickyBuyButton';
 import ComparisonTable from './components/ComparisonTable';
-import SocialProof from './components/SocialProof';
 import MoneyBackGuarantee from './components/MoneyBackGuarantee';
 import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
+import CustomerReviewsSection from './components/CustomerReviewsSection';
+import FireStickComparisonTable from './components/FireStickComparisonTable';
+import EducationalGuides from './components/EducationalGuides';
+import InternalLinking from './components/InternalLinking';
 import ConciergePage from './pages/ConciergePage';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
@@ -103,13 +106,46 @@ function App() {
   useEffect(() => {
     if (isConciergeDomain) return;
     const hasSeenPopup = localStorage.getItem('email_popup_seen');
-    if (!hasSeenPopup) {
-      const timer = setTimeout(() => {
+    if (hasSeenPopup) return;
+
+    let hasInteracted = false;
+    let timeSpent = 0;
+    const POPUP_DELAY_SECONDS = 30;
+    const SCROLL_THRESHOLD = 300; // pixels scrolled before counting as interaction
+
+    // Track user interaction (scroll)
+    const handleScroll = () => {
+      if (window.scrollY > SCROLL_THRESHOLD) {
+        hasInteracted = true;
+      }
+    };
+
+    // Track time on page and show popup after 30 seconds of engagement
+    const timeInterval = setInterval(() => {
+      timeSpent += 1;
+      // Show popup if user has been on page for 30+ seconds AND has scrolled
+      if (timeSpent >= POPUP_DELAY_SECONDS && hasInteracted && !showEmailPopup) {
         setShowEmailPopup(true);
-      }, 15000);
-      return () => clearTimeout(timer);
-    }
-  }, [isConciergeDomain]);
+        clearInterval(timeInterval);
+        window.removeEventListener('scroll', handleScroll);
+      }
+    }, 1000);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Fallback: show popup after 45 seconds even without interaction
+    const fallbackTimer = setTimeout(() => {
+      if (!showEmailPopup) {
+        setShowEmailPopup(true);
+      }
+    }, 45000);
+
+    return () => {
+      clearInterval(timeInterval);
+      clearTimeout(fallbackTimer);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isConciergeDomain, showEmailPopup]);
 
   const handleEmailCapture = async (email: string, source: string = 'bottom') => {
     const success = await trackEmailCapture(email, source);
@@ -199,6 +235,10 @@ function App() {
         <ComparisonTable />
         <WhatIsIPTV />
         <Devices />
+        <CustomerReviewsSection />
+        <FireStickComparisonTable />
+        <EducationalGuides />
+        <InternalLinking />
         <BlogDisplay />
         <MoneyBackGuarantee />
         <FAQ />
@@ -206,7 +246,6 @@ function App() {
         <LegalDisclaimer />
         <Footer />
         <StickyBuyButton />
-        <SocialProof />
 
         {showEmailPopup && !emailCaptured && (
           <EmailPopup
