@@ -26,9 +26,9 @@ export default function EnhancedNavigation({ cartItemCount = 0, onCartClick }: N
   // Simple, clear navigation items with direct paths
   const navItems = [
     { label: 'Home', action: () => window.location.href = '/' },
-    { label: 'Fire Sticks', action: () => scrollToSection('shop'), icon: <Tv className="w-4 h-4" /> },
-    { label: 'IPTV Subscriptions', action: () => scrollToSection('shop'), icon: <Smartphone className="w-4 h-4" /> },
-    { label: 'Shop All', action: () => scrollToSection('shop'), icon: <Package className="w-4 h-4" /> },
+    { label: 'Fire Sticks', action: () => window.location.href = '/fire-sticks', icon: <Tv className="w-4 h-4" /> },
+    { label: 'IPTV Subscriptions', action: () => window.location.href = '/iptv-services', icon: <Smartphone className="w-4 h-4" /> },
+    { label: 'Shop All', action: () => window.location.href = '/shop', icon: <Package className="w-4 h-4" /> },
     { label: 'FAQ', action: () => window.location.href = '/faq', icon: <HelpCircle className="w-4 h-4" /> },
     { label: 'Track Order', action: () => window.location.href = '/track-order', icon: <Search className="w-4 h-4" /> },
   ];

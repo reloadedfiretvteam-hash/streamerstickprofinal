@@ -30,9 +30,10 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#shop" onClick={(e) => { e.preventDefault(); document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-blue-400 transition-colors cursor-pointer">Shop Products</a></li>
-              <li><a href="#about" onClick={(e) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-blue-400 transition-colors cursor-pointer">What is IPTV?</a></li>
-              <li><a href="/" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-blue-400 transition-colors cursor-pointer">Home</a></li>
+              <li><a href="/shop" className="hover:text-blue-400 transition-colors cursor-pointer">Shop All Products</a></li>
+              <li><a href="/fire-sticks" className="hover:text-blue-400 transition-colors cursor-pointer">Fire Sticks</a></li>
+              <li><a href="/iptv-services" className="hover:text-blue-400 transition-colors cursor-pointer">IPTV Subscriptions</a></li>
+              <li><a href="/" className="hover:text-blue-400 transition-colors cursor-pointer">Home</a></li>
               <li><a href="/faq" className="hover:text-blue-400 transition-colors">Help & FAQ</a></li>
             </ul>
           </div>

@@ -457,13 +457,13 @@ export default function EnhancedBlogPost() {
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <a
-                    href="/#shop"
+                    href="/iptv-services"
                     className="inline-block px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors"
                   >
                     View Pricing Plans
                   </a>
                   <a
-                    href="/#shop"
+                    href="/fire-sticks"
                     className="inline-block px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors border border-gray-700"
                   >
                     Shop Fire Sticks

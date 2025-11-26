@@ -68,7 +68,7 @@ export default function Download() {
 
         <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
           <a
-            href="#shop"
+            href="/fire-sticks"
             className="bg-white/10 backdrop-blur-sm text-white p-6 rounded-xl hover:bg-white/20 transition-all duration-300 text-center group"
           >
             <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">📺</div>
