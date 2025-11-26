@@ -7,6 +7,11 @@
   2. Security
     - Enable RLS
     - Add policies for admin access only
+    
+  ⚠️  SECURITY WARNING: This migration stores passwords in plain text.
+      This is NOT secure for production use. The password_hash field should
+      contain bcrypt/argon2 hashes, not plain text passwords.
+      See ADMIN_AUTHENTICATION_GUIDE.md for migration instructions.
 */
 
 -- Create admin credentials table

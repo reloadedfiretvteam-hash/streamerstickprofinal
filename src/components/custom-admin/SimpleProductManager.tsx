@@ -38,7 +38,7 @@ export default function SimpleProductManager({ aiMode }: { aiMode: boolean }) {
 
   const loadProducts = async () => {
     const { data } = await supabase
-      .from('products_full')
+      .from('real_products')
       .select('*')
       .order('created_at', { ascending: false });
     if (data) {
@@ -100,10 +100,10 @@ export default function SimpleProductManager({ aiMode }: { aiMode: boolean }) {
     const dataToSave = { ...formData, slug };
 
     if (editing) {
-      await supabase.from('products_full').update(dataToSave).eq('id', editing);
+      await supabase.from('real_products').update(dataToSave).eq('id', editing);
       alert('Product updated!');
     } else {
-      await supabase.from('products_full').insert([dataToSave]);
+      await supabase.from('real_products').insert([dataToSave]);
       alert('Product created!');
     }
 
@@ -114,7 +114,7 @@ export default function SimpleProductManager({ aiMode }: { aiMode: boolean }) {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this product?')) return;
-    await supabase.from('products_full').delete().eq('id', id);
+    await supabase.from('real_products').delete().eq('id', id);
     loadProducts();
   };
 

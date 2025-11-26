@@ -1,6 +1,6 @@
 import { Check, Flame, Star, Zap, ShoppingCart, Gift, Send, User, Mail, Phone } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, getStorageUrl } from '../lib/supabase';
 
 interface Product {
   id: string;
@@ -59,21 +59,21 @@ export default function Shop({ onAddToCart }: ShopProps) {
         // Parse prices to numbers
         const price = parseFloat(p.sale_price?.toString() || p.price?.toString() || '0');
 
-        // Get image - prioritize main_image, then image_url, then fallback
-        let productImage = p.main_image || p.image_url || '';
+        // Get image - prioritize main_image, then fallback
+        let productImage = p.main_image || '';
         
         // If no image or image is placeholder/empty, use type-specific fallback
         if (!productImage || productImage.trim() === '' || productImage.includes('placeholder') || productImage.includes('pexels')) {
           if (isFirestick) {
             if (p.name.toLowerCase().includes('4k max')) {
-              productImage = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k%20max.jpg';
+              productImage = getStorageUrl('images', 'firestick 4k max.jpg');
             } else if (p.name.toLowerCase().includes('4k')) {
-              productImage = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k.jpg';
+              productImage = getStorageUrl('images', 'firestick 4k.jpg');
             } else {
-              productImage = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg';
+              productImage = getStorageUrl('images', 'firestick hd.jpg');
             }
           } else {
-            productImage = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
+            productImage = getStorageUrl('images', 'iptv-subscription.jpg');
           }
         }
 
@@ -273,14 +273,14 @@ This is an automated message from StreamStickPro.com
                       // Fallback based on product type
                       if (product.type === 'firestick') {
                         if (product.name.includes('4K Max')) {
-                          target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k%20max.jpg';
+                          target.src = getStorageUrl('images', 'firestick 4k max.jpg');
                         } else if (product.name.includes('4K')) {
-                          target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k.jpg';
+                          target.src = getStorageUrl('images', 'firestick 4k.jpg');
                         } else {
-                          target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg';
+                          target.src = getStorageUrl('images', 'firestick hd.jpg');
                         }
                       } else {
-                        target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
+                        target.src = getStorageUrl('images', 'iptv-subscription.jpg');
                       }
                     }}
                   />

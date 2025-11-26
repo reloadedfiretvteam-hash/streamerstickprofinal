@@ -41,21 +41,21 @@ export default function SystemHealthCheck() {
     setChecks([...results]);
 
     // Check 2: Products Table
-    results.push({ name: 'Products Table', status: 'checking', message: 'Checking...' });
+    results.push({ name: 'Real Products Table', status: 'checking', message: 'Checking...' });
     setChecks([...results]);
 
     try {
-      const { data, error } = await supabase.from('real_products').select('id, name, price').limit(1);
+      const { data, error } = await supabase.from('real_products').select('id, name, price, main_image').limit(1);
       if (error) throw error;
       results[results.length - 1] = {
-        name: 'Products Table',
+        name: 'Real Products Table',
         status: 'pass',
         message: `${data?.length || 0} products found`,
-        details: 'Products table is accessible and contains data'
+        details: 'Real products table is accessible and contains data'
       };
     } catch (error: any) {
       results[results.length - 1] = {
-        name: 'Products Table',
+        name: 'Real Products Table',
         status: 'fail',
         message: 'Unable to read products',
         details: error.message
