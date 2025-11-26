@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Lock, User, Flame, Shield } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-// Admin credentials - in production, these should come from environment variables
-const ADMIN_USERNAME = 'starevan11';
-const ADMIN_PASSWORD = 'starevan11';
-const ADMIN_EMAIL = 'reloadedfiretvteam@gmail.com';
+// Admin credentials from environment variables for local/dev testing only
+// In production, use Supabase admin_credentials table
+const ADMIN_DEFAULT_USER = import.meta.env.VITE_ADMIN_DEFAULT_USER;
+const ADMIN_DEFAULT_PASSWORD = import.meta.env.VITE_ADMIN_DEFAULT_PASSWORD;
+const ADMIN_DEFAULT_EMAIL = import.meta.env.VITE_ADMIN_DEFAULT_EMAIL || '';
 
 export default function UnifiedAdminLogin() {
   const [username, setUsername] = useState('');
@@ -19,14 +20,15 @@ export default function UnifiedAdminLogin() {
     setLoading(true);
 
     try {
-      // First check hardcoded admin credentials for guaranteed access
-      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      // First check environment-based admin credentials for local/dev testing
+      if (ADMIN_DEFAULT_USER && ADMIN_DEFAULT_PASSWORD && 
+          username === ADMIN_DEFAULT_USER && password === ADMIN_DEFAULT_PASSWORD) {
         localStorage.setItem('custom_admin_token', 'authenticated');
         localStorage.setItem('custom_admin_user', JSON.stringify({
-          id: 'admin-master',
-          email: ADMIN_EMAIL,
+          id: 'admin-env',
+          email: ADMIN_DEFAULT_EMAIL,
           role: 'super_admin',
-          username: ADMIN_USERNAME
+          username: ADMIN_DEFAULT_USER
         }));
         window.location.href = '/admin';
         return;
@@ -42,14 +44,15 @@ export default function UnifiedAdminLogin() {
 
       if (dbError) {
         console.error('Database error:', dbError);
-        // If database fails, still allow hardcoded credentials
-        if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        // If database fails, still allow env-based credentials for local/dev testing
+        if (ADMIN_DEFAULT_USER && ADMIN_DEFAULT_PASSWORD && 
+            username === ADMIN_DEFAULT_USER && password === ADMIN_DEFAULT_PASSWORD) {
           localStorage.setItem('custom_admin_token', 'authenticated');
           localStorage.setItem('custom_admin_user', JSON.stringify({
-            id: 'admin-master',
-            email: ADMIN_EMAIL,
+            id: 'admin-env',
+            email: ADMIN_DEFAULT_EMAIL,
             role: 'super_admin',
-            username: ADMIN_USERNAME
+            username: ADMIN_DEFAULT_USER
           }));
           window.location.href = '/admin';
           return;
@@ -75,15 +78,16 @@ export default function UnifiedAdminLogin() {
       }));
 
       window.location.href = '/admin';
-    } catch (error: any) {
-      // Even on error, allow hardcoded credentials
-      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    } catch (error: unknown) {
+      // Even on error, allow env-based credentials for local/dev testing
+      if (ADMIN_DEFAULT_USER && ADMIN_DEFAULT_PASSWORD && 
+          username === ADMIN_DEFAULT_USER && password === ADMIN_DEFAULT_PASSWORD) {
         localStorage.setItem('custom_admin_token', 'authenticated');
         localStorage.setItem('custom_admin_user', JSON.stringify({
-          id: 'admin-master',
-          email: ADMIN_EMAIL,
+          id: 'admin-env',
+          email: ADMIN_DEFAULT_EMAIL,
           role: 'super_admin',
-          username: ADMIN_USERNAME
+          username: ADMIN_DEFAULT_USER
         }));
         window.location.href = '/admin';
         return;

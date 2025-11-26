@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { Lock, User } from 'lucide-react';
 import AdminDashboard from './AdminDashboard';
 
+// Admin credentials from environment variables for local/dev testing only
+// In production, use Supabase admin_credentials table
+const ADMIN_DEFAULT_USER = import.meta.env.VITE_ADMIN_DEFAULT_USER;
+const ADMIN_DEFAULT_PASSWORD = import.meta.env.VITE_ADMIN_DEFAULT_PASSWORD;
+
 export default function AdminLogin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
@@ -11,9 +16,9 @@ export default function AdminLogin() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Simple authentication check
-    // In production, this should verify against database
-    if (username === 'admin' && password === 'streamunlimited2025') {
+    // Check against environment-based credentials for local/dev testing
+    if (ADMIN_DEFAULT_USER && ADMIN_DEFAULT_PASSWORD &&
+        username === ADMIN_DEFAULT_USER && password === ADMIN_DEFAULT_PASSWORD) {
       setIsAuthenticated(true);
       setError('');
       localStorage.setItem('admin_authenticated', 'true');
@@ -91,10 +96,9 @@ export default function AdminLogin() {
           </form>
 
           <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-900 font-semibold mb-2">🔐 Default Credentials:</p>
-            <p className="text-sm text-blue-800">Username: <code className="bg-white px-2 py-1 rounded">admin</code></p>
-            <p className="text-sm text-blue-800">Password: <code className="bg-white px-2 py-1 rounded">streamunlimited2025</code></p>
-            <p className="text-xs text-blue-700 mt-2">⚠️ Change these in production!</p>
+            <p className="text-sm text-blue-900 font-semibold mb-2">🔐 Admin Access:</p>
+            <p className="text-sm text-blue-800">Credentials are configured via environment variables.</p>
+            <p className="text-xs text-blue-700 mt-2">See docs/AUDIT-FIXES.md for setup instructions.</p>
           </div>
 
           <div className="mt-6 text-center">
@@ -105,7 +109,7 @@ export default function AdminLogin() {
         </div>
 
         <div className="mt-6 text-center text-white text-sm">
-          <p>Need help? Check <code className="bg-white/10 px-2 py-1 rounded">ADMIN_ACCESS.md</code></p>
+          <p>Need help? Check <code className="bg-white/10 px-2 py-1 rounded">docs/AUDIT-FIXES.md</code></p>
         </div>
       </div>
     </div>
