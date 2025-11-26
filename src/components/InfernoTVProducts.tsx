@@ -92,12 +92,12 @@ export default function InfernoTVProducts({ onSelectProduct }: Props) {
 
               <div className="relative h-56 overflow-hidden bg-gradient-to-br from-blue-800 to-blue-900 flex items-center justify-center">
                 <img
-                  src={product.image_url || product.main_image || 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg'}
+                  src={product.image_url || product.main_image || 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/IPTV%20subscription%20image.jpg'}
                   alt={product.name}
                   className="h-full w-full object-cover transform hover:scale-110 transition-transform duration-500"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg';
+                    target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/IPTV%20subscription%20image.jpg';
                   }}
                 />
               </div>
