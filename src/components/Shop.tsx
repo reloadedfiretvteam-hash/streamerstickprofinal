@@ -356,7 +356,7 @@ This is an automated message from StreamStickPro.com
           <div className="relative rounded-3xl overflow-hidden mb-12 animate-fade-in">
             <div className="absolute inset-0">
               <img
-                src="https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/hero-firestick-breakout.jpg"
+                src="/images/firestick-4k.jpg"
                 alt="Fire Stick Breaking Free"
                 className="w-full h-full object-cover"
                 loading="lazy"
