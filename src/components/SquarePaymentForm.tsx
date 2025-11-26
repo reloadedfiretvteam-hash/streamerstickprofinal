@@ -41,7 +41,7 @@ export default function SquarePaymentForm({ amount, onSubmit }: SquarePaymentFor
       // Wait for Square SDK to load
       if (!window.Square) {
         // Square SDK not loaded yet - this is expected if the script hasn't loaded
-        setErrorMessage('Square payment SDK is loading...');
+        setErrorMessage('Payment form is initializing...');
         return;
       }
 
@@ -53,7 +53,7 @@ export default function SquarePaymentForm({ amount, onSubmit }: SquarePaymentFor
         setErrorMessage(''); // Clear any loading message
       } catch (e) {
         console.error('Square initialization failed:', e);
-        setErrorMessage('Failed to load secure payment form. Please refresh the page.');
+        setErrorMessage('Unable to initialize payment form. Please try again or contact support.');
       }
     };
 
