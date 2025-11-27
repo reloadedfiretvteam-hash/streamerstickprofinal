@@ -2,6 +2,10 @@ import { Check, Flame, Star, Zap, ShoppingCart, Gift, Send, User, Mail, Phone } 
 import { useEffect, useState, useMemo } from 'react';
 import { supabase, getStorageUrl } from '../lib/supabase';
 
+// Fallback images when Supabase is not configured or local images fail
+const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
+const FALLBACK_IPTV_IMAGE = 'https://images.pexels.com/photos/5474282/pexels-photo-5474282.jpeg?auto=compress&cs=tinysrgb&w=600';
+
 interface Product {
   id: string;
   name: string;
@@ -39,7 +43,7 @@ const fallbackProducts: Product[] = [
     name: 'Fire Stick HD - Jailbroken & Ready',
     price: 140.00,
     type: 'firestick',
-    image: '/images/firestick-hd.jpg',
+    image: getStorageUrl('imiges', 'firestick hd.jpg'),
     badge: 'STARTER',
     popular: false,
     features: [
@@ -58,7 +62,7 @@ const fallbackProducts: Product[] = [
     name: 'Fire Stick 4K - Jailbroken & Ready',
     price: 150.00,
     type: 'firestick',
-    image: '/images/firestick-4k.jpg',
+    image: getStorageUrl('imiges', 'firestick 4k.jpg'),
     badge: 'BEST VALUE',
     popular: true,
     features: [
@@ -78,7 +82,7 @@ const fallbackProducts: Product[] = [
     name: 'Fire Stick 4K Max - Jailbroken & Ready',
     price: 160.00,
     type: 'firestick',
-    image: '/images/firestick-4k-max.jpg',
+    image: getStorageUrl('imiges', 'firestick 4k max.jpg'),
     badge: 'PREMIUM',
     popular: false,
     features: [
@@ -100,7 +104,7 @@ const fallbackProducts: Product[] = [
     name: '1 Month IPTV Subscription',
     price: 15.00,
     type: 'iptv',
-    image: '/images/iptv-subscription.jpg',
+    image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
     badge: 'STARTER',
     popular: false,
     period: '/month',
@@ -118,7 +122,7 @@ const fallbackProducts: Product[] = [
     name: '3 Month IPTV Subscription',
     price: 30.00,
     type: 'iptv',
-    image: '/images/iptv-subscription.jpg',
+    image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
     badge: 'POPULAR',
     popular: true,
     period: '/3 months',
@@ -136,7 +140,7 @@ const fallbackProducts: Product[] = [
     name: '6 Month IPTV Subscription',
     price: 50.00,
     type: 'iptv',
-    image: '/images/iptv-subscription.jpg',
+    image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
     badge: 'GREAT VALUE',
     popular: false,
     period: '/6 months',
@@ -154,7 +158,7 @@ const fallbackProducts: Product[] = [
     name: '1 Year IPTV Subscription',
     price: 75.00,
     type: 'iptv',
-    image: '/images/iptv-subscription.jpg',
+    image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
     badge: 'BEST VALUE',
     popular: false,
     period: '/year',
@@ -206,22 +210,22 @@ export default function Shop({ onAddToCart }: ShopProps) {
           // Get image - check if it's from Supabase bucket or local
           let productImage = p.main_image || '';
 
-          // If image is just a filename (no protocol), use Supabase storage
+          // If image is just a filename (no protocol), use Supabase storage with 'imiges' bucket
           if (productImage && !productImage.startsWith('http') && !productImage.startsWith('/')) {
-            productImage = getStorageUrl('images', productImage);
+            productImage = getStorageUrl('imiges', productImage);
           }
-          // If no image or image is placeholder/empty, use type-specific fallback from local public folder
+          // If no image or image is placeholder/empty, use type-specific fallback from Supabase storage
           else if (!productImage || productImage.trim() === '' || productImage.includes('placeholder') || productImage.includes('pexels')) {
             if (isFirestick) {
               if (p.name.toLowerCase().includes('4k max')) {
-                productImage = '/images/firestick-4k-max.jpg';
+                productImage = getStorageUrl('imiges', 'firestick 4k max.jpg');
               } else if (p.name.toLowerCase().includes('4k')) {
-                productImage = '/images/firestick-4k.jpg';
+                productImage = getStorageUrl('imiges', 'firestick 4k.jpg');
               } else {
-                productImage = '/images/firestick-hd.jpg';
+                productImage = getStorageUrl('imiges', 'firestick hd.jpg');
               }
             } else {
-              productImage = '/images/iptv-subscription.jpg';
+              productImage = getStorageUrl('imiges', 'iptv-subscription.jpg');
             }
           }
 
@@ -360,13 +364,13 @@ This is an automated message from StreamStickPro.com
           <div className="relative rounded-3xl overflow-hidden mb-12 animate-fade-in">
             <div className="absolute inset-0">
               <img
-                src="/images/firestick-4k.jpg"
+                src={getStorageUrl('imiges', 'firestick 4k.jpg')}
                 alt="Fire Stick Breaking Free"
                 className="w-full h-full object-cover"
                 loading="lazy"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.src = '/OIF.jpg';
+                  target.src = FALLBACK_FIRESTICK_IMAGE;
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
@@ -427,17 +431,11 @@ This is an automated message from StreamStickPro.com
                     loading="lazy"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      // Fallback based on product type using local images
+                      // Fallback to pexels placeholder images
                       if (product.type === 'firestick') {
-                        if (product.name.includes('4K Max')) {
-                          target.src = '/images/firestick-4k-max.jpg';
-                        } else if (product.name.includes('4K')) {
-                          target.src = '/images/firestick-4k.jpg';
-                        } else {
-                          target.src = '/images/firestick-hd.jpg';
-                        }
+                        target.src = FALLBACK_FIRESTICK_IMAGE;
                       } else {
-                        target.src = '/images/iptv-subscription.jpg';
+                        target.src = FALLBACK_IPTV_IMAGE;
                       }
                     }}
                   />

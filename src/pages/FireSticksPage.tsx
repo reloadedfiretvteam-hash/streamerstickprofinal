@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { ShoppingCart, Star, Check, Flame, ArrowLeft, Zap } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, getStorageUrl } from '../lib/supabase';
 import Footer from '../components/Footer';
+
+// Fallback image when all else fails
+const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
 
 interface Product {
   id: string;
@@ -59,14 +62,14 @@ export default function FireSticksPage() {
         .map((product: any) => {
           let imageUrl = product.main_image || product.image_url || '';
           
-          // Use local images as fallback for reliability
+          // Use Supabase storage URLs as fallback for reliability
           if (!imageUrl || imageUrl.includes('placeholder') || imageUrl.includes('pexels')) {
             if (product.name?.toLowerCase().includes('4k max')) {
-              imageUrl = '/images/firestick-4k-max.jpg';
+              imageUrl = getStorageUrl('imiges', 'firestick 4k max.jpg');
             } else if (product.name?.toLowerCase().includes('4k')) {
-              imageUrl = '/images/firestick-4k.jpg';
+              imageUrl = getStorageUrl('imiges', 'firestick 4k.jpg');
             } else {
-              imageUrl = '/images/firestick-hd.jpg';
+              imageUrl = getStorageUrl('imiges', 'firestick hd.jpg');
             }
           }
           
@@ -96,7 +99,7 @@ export default function FireSticksPage() {
       description: 'Brand New Amazon Fire Stick HD with 1 Year Premium IPTV. Pre-configured with 18,000+ channels, 60,000+ movies. Plug & play - ready in 5 minutes!',
       price: '140.00',
       sale_price: '140.00',
-      main_image: '/images/firestick-hd.jpg',
+      main_image: getStorageUrl('imiges', 'firestick hd.jpg'),
       category: 'Fire Stick',
       stock_quantity: 50,
       rating: 5,
@@ -108,7 +111,7 @@ export default function FireSticksPage() {
       description: 'Brand New Amazon Fire Stick 4K with 1 Year Premium IPTV. Pre-configured with 18,000+ channels, 60,000+ movies in stunning 4K quality. Best seller!',
       price: '150.00',
       sale_price: '150.00',
-      main_image: '/images/firestick-4k.jpg',
+      main_image: getStorageUrl('imiges', 'firestick 4k.jpg'),
       category: 'Fire Stick',
       stock_quantity: 50,
       rating: 5,
@@ -120,7 +123,7 @@ export default function FireSticksPage() {
       description: 'Brand New Amazon Fire Stick 4K Max with 1 Year Premium IPTV. Fastest performance, 4K Ultra HD, pre-configured with all premium content.',
       price: '160.00',
       sale_price: '160.00',
-      main_image: '/images/firestick-4k-max.jpg',
+      main_image: getStorageUrl('imiges', 'firestick 4k max.jpg'),
       category: 'Fire Stick',
       stock_quantity: 50,
       rating: 5,
@@ -256,13 +259,8 @@ export default function FireSticksPage() {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   onError={(e) => {
                     const target = e.currentTarget;
-                    if (product.name?.toLowerCase().includes('4k max')) {
-                      target.src = '/images/firestick-4k-max.jpg';
-                    } else if (product.name?.toLowerCase().includes('4k')) {
-                      target.src = '/images/firestick-4k.jpg';
-                    } else {
-                      target.src = '/images/firestick-hd.jpg';
-                    }
+                    // Use pexels fallback on error
+                    target.src = FALLBACK_FIRESTICK_IMAGE;
                   }}
                 />
               </div>

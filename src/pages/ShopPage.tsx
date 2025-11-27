@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, getStorageUrl } from '../lib/supabase';
 import { ShoppingCart, Search, Filter, Star } from 'lucide-react';
 import Footer from '../components/Footer';
 import CustomerReviewsSection from '../components/CustomerReviewsSection';
+
+// Fallback images
+const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
+const FALLBACK_IPTV_IMAGE = 'https://images.pexels.com/photos/5474282/pexels-photo-5474282.jpeg?auto=compress&cs=tinysrgb&w=600';
 
 interface Product {
   id: string;
@@ -58,19 +62,19 @@ export default function ShopPage() {
       const productsWithImages = (data || []).map((product: any) => {
         let imageUrl = product.main_image || product.image_url || '';
         
-        // Use local images as fallback for reliability
+        // Use Supabase storage images as fallback for reliability
         if (!imageUrl || imageUrl.includes('placeholder') || imageUrl.includes('pexels')) {
           const isFirestick = product.name?.toLowerCase().includes('fire stick') || product.name?.toLowerCase().includes('fire tv');
           if (isFirestick) {
             if (product.name?.toLowerCase().includes('4k max')) {
-              imageUrl = '/images/firestick-4k-max.jpg';
+              imageUrl = getStorageUrl('imiges', 'firestick 4k max.jpg');
             } else if (product.name?.toLowerCase().includes('4k')) {
-              imageUrl = '/images/firestick-4k.jpg';
+              imageUrl = getStorageUrl('imiges', 'firestick 4k.jpg');
             } else {
-              imageUrl = '/images/firestick-hd.jpg';
+              imageUrl = getStorageUrl('imiges', 'firestick hd.jpg');
             }
           } else {
-            imageUrl = '/images/iptv-subscription.jpg';
+            imageUrl = getStorageUrl('imiges', 'iptv-subscription.jpg');
           }
         }
         
@@ -104,7 +108,7 @@ export default function ShopPage() {
       description: 'Brand New Amazon Fire Stick HD with 1 Year Premium IPTV. Pre-configured with 18,000+ channels, 60,000+ movies. Plug & play - ready in 5 minutes!',
       price: '140.00',
       sale_price: '140.00',
-      main_image: '/images/firestick-hd.jpg',
+      main_image: getStorageUrl('imiges', 'firestick hd.jpg'),
       category: 'Fire Stick',
       stock_quantity: 50,
       rating: 5,
@@ -116,7 +120,7 @@ export default function ShopPage() {
       description: 'Brand New Amazon Fire Stick 4K with 1 Year Premium IPTV. Pre-configured with 18,000+ channels, 60,000+ movies in stunning 4K quality. Best seller!',
       price: '150.00',
       sale_price: '150.00',
-      main_image: '/images/firestick-4k.jpg',
+      main_image: getStorageUrl('imiges', 'firestick 4k.jpg'),
       category: 'Fire Stick',
       stock_quantity: 50,
       rating: 5,
@@ -128,7 +132,7 @@ export default function ShopPage() {
       description: 'Brand New Amazon Fire Stick 4K Max with 1 Year Premium IPTV. Fastest performance, 4K Ultra HD, pre-configured with all premium content.',
       price: '160.00',
       sale_price: '160.00',
-      main_image: '/images/firestick-4k-max.jpg',
+      main_image: getStorageUrl('imiges', 'firestick 4k max.jpg'),
       category: 'Fire Stick',
       stock_quantity: 50,
       rating: 5,
@@ -141,7 +145,7 @@ export default function ShopPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Instant Activation',
       price: '15.00',
       sale_price: '15.00',
-      main_image: '/images/iptv-subscription.jpg',
+      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -153,7 +157,7 @@ export default function ShopPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Priority Support',
       price: '30.00',
       sale_price: '30.00',
-      main_image: '/images/iptv-subscription.jpg',
+      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -165,7 +169,7 @@ export default function ShopPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Priority Support',
       price: '50.00',
       sale_price: '50.00',
-      main_image: '/images/iptv-subscription.jpg',
+      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -177,7 +181,7 @@ export default function ShopPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, VIP Support, Best Value!',
       price: '75.00',
       sale_price: '75.00',
-      main_image: '/images/iptv-subscription.jpg',
+      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -347,29 +351,19 @@ export default function ShopPage() {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     onError={(e) => {
                       const target = e.currentTarget;
-                      // Type-specific fallback using local images
+                      // Type-specific fallback using pexels
                       const isFirestick = product.name?.toLowerCase().includes('fire stick') || product.name?.toLowerCase().includes('fire tv');
-                      if (isFirestick) {
-                        if (product.name?.toLowerCase().includes('4k max')) {
-                          target.src = '/images/firestick-4k-max.jpg';
-                        } else if (product.name?.toLowerCase().includes('4k')) {
-                          target.src = '/images/firestick-4k.jpg';
-                        } else {
-                          target.src = '/images/firestick-hd.jpg';
-                        }
-                      } else {
-                        target.src = '/images/iptv-subscription.jpg';
-                      }
+                      target.src = isFirestick ? FALLBACK_FIRESTICK_IMAGE : FALLBACK_IPTV_IMAGE;
                     }}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-300">
                     <img 
-                      src="/images/iptv-subscription.jpg" 
+                      src={getStorageUrl('imiges', 'iptv-subscription.jpg')} 
                       alt="placeholder" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.src = FALLBACK_IPTV_IMAGE;
                       }}
                     />
                   </div>
