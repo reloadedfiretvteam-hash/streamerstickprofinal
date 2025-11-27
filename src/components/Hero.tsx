@@ -1,6 +1,9 @@
 import { ShoppingCart, Play } from 'lucide-react';
+import { getStorageUrl } from '../lib/supabase';
 
 export default function Hero() {
+  // Get hero image from Supabase storage with fallback
+  const heroImageUrl = getStorageUrl('imiges', 'hero-firestick-breakout.jpg');
   const goToShop = () => {
     window.location.href = '/shop';
   };
@@ -14,7 +17,7 @@ export default function Hero() {
       {/* Background image: Fire Stick breaking out of cage */}
       <div className="absolute inset-0 overflow-hidden">
         <img
-          src="https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/hero-firestick-breakout.jpg"
+          src={heroImageUrl}
           alt="Best Jailbroken Fire Stick 2025 - Premium IPTV Streaming Device"
           className="w-full h-full object-cover object-center"
           loading="eager"
@@ -25,6 +28,11 @@ export default function Hero() {
             /* Scale up slightly and crop edges to remove phone screenshot borders */
             transform: 'scale(1.15)',
             transformOrigin: 'center center'
+          }}
+          onError={(e) => {
+            // Fallback to a gradient background if image fails
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
           }}
         />
         {/* Dark overlay so text stays readable */}

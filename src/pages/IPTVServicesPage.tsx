@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { ShoppingCart, Star, Check, Zap, ArrowLeft, Gift, User, Mail, Phone, Send } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, getStorageUrl } from '../lib/supabase';
 import Footer from '../components/Footer';
+
+// Fallback image when all else fails
+const FALLBACK_IPTV_IMAGE = 'https://images.pexels.com/photos/5474282/pexels-photo-5474282.jpeg?auto=compress&cs=tinysrgb&w=600';
 
 interface Product {
   id: string;
@@ -72,9 +75,9 @@ export default function IPTVServicesPage() {
         .map((product: any) => {
           let imageUrl = product.main_image || product.image_url || '';
           
-          // Use local images as fallback for reliability
+          // Use Supabase storage as fallback for reliability
           if (!imageUrl || imageUrl.includes('placeholder') || imageUrl.includes('pexels')) {
-            imageUrl = '/images/iptv-subscription.jpg';
+            imageUrl = getStorageUrl('imiges', 'iptv-subscription.jpg');
           }
           
           return {
@@ -103,7 +106,7 @@ export default function IPTVServicesPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Instant Activation',
       price: '15.00',
       sale_price: '15.00',
-      main_image: '/images/iptv-subscription.jpg',
+      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -115,7 +118,7 @@ export default function IPTVServicesPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Priority Support',
       price: '30.00',
       sale_price: '30.00',
-      main_image: '/images/iptv-subscription.jpg',
+      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -127,7 +130,7 @@ export default function IPTVServicesPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Priority Support',
       price: '50.00',
       sale_price: '50.00',
-      main_image: '/images/iptv-subscription.jpg',
+      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -139,7 +142,7 @@ export default function IPTVServicesPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, VIP Support, Best Value!',
       price: '75.00',
       sale_price: '75.00',
-      main_image: '/images/iptv-subscription.jpg',
+      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
