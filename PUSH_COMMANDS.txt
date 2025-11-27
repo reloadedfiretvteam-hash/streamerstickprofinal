@@ -1,0 +1,17 @@
+Run these commands to push everything:
+
+1. git checkout clean-main
+
+2. git remote remove origin
+   git remote add origin https://github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
+
+3. git add -A
+
+4. git commit -m "COMPLETE FIX: All fixes consolidated"
+
+5. git push origin clean-main --force
+
+6. git push origin clean-main:main --force
+
+Or run: powershell -ExecutionPolicy Bypass -File "FRESH_PUSH_ALL.ps1"
+
