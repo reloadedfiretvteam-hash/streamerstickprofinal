@@ -42,9 +42,12 @@ function normalizeBucketName(bucket: string): string {
   // Check if there's a mapping for this bucket name
   if (lowerBucket in BUCKET_NAME_MAPPINGS) {
     const normalized = BUCKET_NAME_MAPPINGS[lowerBucket];
-    console.debug(
-      `[getStorageUrl] Bucket name normalized: '${bucket}' -> '${normalized}'`
-    );
+    // Only log in development to avoid performance impact in production
+    if (import.meta.env.DEV) {
+      console.debug(
+        `[getStorageUrl] Bucket name normalized: '${bucket}' -> '${normalized}'`
+      );
+    }
     return normalized;
   }
   

@@ -44,7 +44,8 @@ export default function ValidatedImage({
   className,
   ...imgProps
 }: ValidatedImageProps) {
-  const [currentSrc, setCurrentSrc] = useState<string>(src);
+  // Start with fallbackSrc to prevent flash of invalid image during validation
+  const [currentSrc, setCurrentSrc] = useState<string>(fallbackSrc);
   const [isValidating, setIsValidating] = useState<boolean>(true);
   const [hasFailed, setHasFailed] = useState<boolean>(false);
 
@@ -60,7 +61,9 @@ export default function ValidatedImage({
       });
 
       if (!response.ok) {
-        console.debug(`[ValidatedImage] HEAD request failed for ${url}: ${response.status}`);
+        if (import.meta.env.DEV) {
+          console.debug(`[ValidatedImage] HEAD request failed for ${url}: ${response.status}`);
+        }
         return false;
       }
 
@@ -68,7 +71,9 @@ export default function ValidatedImage({
       if (contentLength) {
         const bytes = parseInt(contentLength, 10);
         if (bytes < minBytes) {
-          console.debug(`[ValidatedImage] Image too small: ${bytes} bytes (min: ${minBytes})`);
+          if (import.meta.env.DEV) {
+            console.debug(`[ValidatedImage] Image too small: ${bytes} bytes (min: ${minBytes})`);
+          }
           return false;
         }
         return true;
@@ -78,7 +83,9 @@ export default function ValidatedImage({
       return true;
     } catch {
       // CORS blocked or network error - fall back to Image() validation
-      console.debug(`[ValidatedImage] HEAD request blocked for ${url}, using Image() fallback`);
+      if (import.meta.env.DEV) {
+        console.debug(`[ValidatedImage] HEAD request blocked for ${url}, using Image() fallback`);
+      }
       return true; // Let Image() validation handle it
     }
   }, [minBytes]);
@@ -95,13 +102,17 @@ export default function ValidatedImage({
         if (img.naturalWidth > 0 && img.naturalHeight > 0) {
           resolve(true);
         } else {
-          console.debug(`[ValidatedImage] Invalid dimensions: ${img.naturalWidth}x${img.naturalHeight}`);
+          if (import.meta.env.DEV) {
+            console.debug(`[ValidatedImage] Invalid dimensions: ${img.naturalWidth}x${img.naturalHeight}`);
+          }
           resolve(false);
         }
       };
       
       img.onerror = () => {
-        console.debug(`[ValidatedImage] Image failed to load: ${url}`);
+        if (import.meta.env.DEV) {
+          console.debug(`[ValidatedImage] Image failed to load: ${url}`);
+        }
         resolve(false);
       };
       
@@ -152,7 +163,9 @@ export default function ValidatedImage({
       setHasFailed(false);
     } catch (error) {
       // Unexpected error, use fallback
-      console.debug(`[ValidatedImage] Validation error:`, error);
+      if (import.meta.env.DEV) {
+        console.debug(`[ValidatedImage] Validation error:`, error);
+      }
       setCurrentSrc(fallbackSrc);
       setHasFailed(true);
       onValidationFail?.('Validation error: ' + String(error));
@@ -171,29 +184,16 @@ export default function ValidatedImage({
    */
   const handleError = useCallback(() => {
     if (currentSrc !== fallbackSrc) {
-      console.debug(`[ValidatedImage] Runtime error, switching to fallback`);
+      if (import.meta.env.DEV) {
+        console.debug(`[ValidatedImage] Runtime error, switching to fallback`);
+      }
       setCurrentSrc(fallbackSrc);
       setHasFailed(true);
       onValidationFail?.('Runtime load error');
     }
   }, [currentSrc, fallbackSrc, onValidationFail]);
 
-  // Show nothing or a placeholder while validating (optional: could show skeleton)
-  if (isValidating) {
-    return (
-      <div 
-        className={className}
-        style={{ 
-          backgroundColor: 'rgba(128, 128, 128, 0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-        aria-label="Loading image..."
-      />
-    );
-  }
-
+  // Render the image - starts with fallback, switches to validated src if validation passes
   return (
     <img
       {...imgProps}
