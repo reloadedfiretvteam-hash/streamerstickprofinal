@@ -1,7 +1,15 @@
 # Supabase Image Storage Setup Guide
 
 ## Overview
-This application uses Supabase Storage for managing all product and content images. Images are stored in the `images` bucket and referenced by filename in the database.
+This application uses Supabase Storage for managing all product and content images. Images are stored in the `images` bucket (canonical name) and referenced by filename in the database.
+
+**Recommended bucket name:** `images`
+
+The application automatically normalizes common typos:
+- `imiges` → `images`
+- `imagees` → `images`
+- `imags` → `images`
+- `image` → `images`
 
 ## Required Images
 
@@ -84,6 +92,7 @@ Create a `.env` file in your project root:
 ```env
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key-here
+VITE_STORAGE_BUCKET_NAME=images
 ```
 
 Get these values from: https://supabase.com/dashboard/project/_/settings/api
@@ -120,17 +129,35 @@ const imageUrl = getStorageUrl('images', 'firestick 4k.jpg');
 ```
 
 ### Fallback Behavior
-If Supabase is not configured, the app uses Pexels placeholder images to prevent broken images.
+If Supabase is not configured, the app uses Pexels placeholder images to prevent broken images. Additionally, the `ValidatedImage` component validates images before displaying them, falling back to placeholder images if the source is too small (< 1000 bytes) or fails to load.
 
-## Troubleshooting
+## Quick Diagnostic with curl
 
-### Images Not Displaying
+Use this command to verify image accessibility:
 
-1. **Check bucket exists**: Verify `images` bucket in Supabase Dashboard
-2. **Check bucket is public**: Ensure "Public" is enabled for the bucket
-3. **Check file exists**: Verify exact filename in storage (case-sensitive)
-4. **Check environment variables**: Ensure VITE_SUPABASE_URL is correct
-5. **Check browser console**: Look for 404 or CORS errors
+```bash
+# Check image headers and content-length
+curl -I "https://YOUR_PROJECT_ID.supabase.co/storage/v1/object/public/images/firestick%204k.jpg"
+
+# Expected successful response:
+# HTTP/2 200
+# content-length: 123456  (should be > 1000 bytes)
+# content-type: image/jpeg
+
+# If you see 404 or content-length < 1000, the image is missing or corrupt
+```
+
+## Troubleshooting Checklist
+
+Use this checklist when images aren't displaying:
+
+- [ ] **Bucket exists:** Verify `images` bucket in Supabase Dashboard → Storage
+- [ ] **Bucket is public:** Click bucket and ensure "Public bucket" is enabled
+- [ ] **File exists:** Check exact filename in storage (case-sensitive!)
+- [ ] **Environment variables set:** Verify VITE_SUPABASE_URL is correct
+- [ ] **Content-length valid:** Use curl HEAD to check size > 1000 bytes
+- [ ] **No CORS errors:** Check browser console for CORS-related errors
+- [ ] **Redeploy after config changes:** Environment variable changes require new build
 
 ### Common Issues
 
@@ -147,6 +174,11 @@ If Supabase is not configured, the app uses Pexels placeholder images to prevent
 **Images Work Locally But Not in Production**
 - Environment variables not set in deployment
 - Check Cloudflare Pages / Vercel / Netlify environment variables
+
+**Images appear as tiny placeholders (< 1000 bytes)**
+- The ValidatedImage component detected a corrupt/tiny file
+- Re-upload the image with proper quality
+- Use curl HEAD to verify content-length
 
 ## Migration from Old System
 

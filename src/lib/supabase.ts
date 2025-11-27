@@ -21,8 +21,47 @@ export const supabase = createClient(
 );
 
 /**
+ * Common bucket name typo mappings.
+ * Maps commonly misspelled bucket names to canonical versions.
+ */
+const BUCKET_NAME_MAPPINGS: Record<string, string> = {
+  'imiges': 'images',    // Common typo: 'imiges' -> 'images'
+  'imagees': 'images',   // Common typo: 'imagees' -> 'images'
+  'imags': 'images',     // Common typo: 'imags' -> 'images'
+  'image': 'images',     // Singular -> plural
+};
+
+/**
+ * Normalize bucket name by applying typo corrections.
+ * @param bucket - The bucket name to normalize
+ * @returns The normalized bucket name
+ */
+function normalizeBucketName(bucket: string): string {
+  const lowerBucket = bucket.toLowerCase();
+  
+  // Check if there's a mapping for this bucket name
+  if (lowerBucket in BUCKET_NAME_MAPPINGS) {
+    const normalized = BUCKET_NAME_MAPPINGS[lowerBucket];
+    console.debug(
+      `[getStorageUrl] Bucket name normalized: '${bucket}' -> '${normalized}'`
+    );
+    return normalized;
+  }
+  
+  return bucket;
+}
+
+/**
  * Get the public URL for a file in Supabase Storage
- * @param bucket - The storage bucket name (e.g., 'images', 'product-images', 'imiges')
+ * 
+ * Features:
+ * - Normalizes common bucket name typos (e.g., 'imiges' -> 'images')
+ * - Supports VITE_STORAGE_BUCKET_NAME override
+ * - URL-encodes file paths for special characters
+ * - Strips leading slashes from paths
+ * - Returns placeholder image when Supabase is not configured
+ * 
+ * @param bucket - The storage bucket name (e.g., 'images', 'product-images')
  * @param path - The file path within the bucket
  * @returns The full public URL to the file
  */
@@ -35,10 +74,27 @@ export function getStorageUrl(bucket: string, path: string): string {
   // Allow override of bucket name via environment variable
   // This supports cases where images are in 'imiges', 'product-images', or other bucket names
   const bucketOverride = import.meta.env.VITE_STORAGE_BUCKET_NAME;
-  const actualBucket = bucketOverride || bucket;
   
-  // Ensure path doesn't start with a slash
-  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  // Determine actual bucket: use override if set, otherwise normalize the provided bucket
+  let actualBucket: string;
+  if (bucketOverride) {
+    actualBucket = normalizeBucketName(bucketOverride);
+  } else {
+    actualBucket = normalizeBucketName(bucket);
+  }
   
-  return `${supabaseUrl}/storage/v1/object/public/${actualBucket}/${cleanPath}`;
+  // Strip leading slashes from path
+  let cleanPath = path;
+  while (cleanPath.startsWith('/')) {
+    cleanPath = cleanPath.slice(1);
+  }
+  
+  // URL-encode the file path (handles spaces, special characters)
+  // We encode each path segment separately to preserve directory structure
+  const encodedPath = cleanPath
+    .split('/')
+    .map(segment => encodeURIComponent(segment))
+    .join('/');
+  
+  return `${supabaseUrl}/storage/v1/object/public/${actualBucket}/${encodedPath}`;
 }
