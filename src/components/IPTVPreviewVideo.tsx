@@ -67,15 +67,9 @@ export default function IPTVPreviewVideo({ videoUrl }: IPTVPreviewVideoProps) {
                     <p className="text-gray-300 mb-4">
                       The preview video hasn't been uploaded yet. Please upload it to Supabase Storage.
                     </p>
-                    <a
-                      href="https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/storage/buckets/imiges"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors"
-                    >
-                      <Upload className="w-5 h-5" />
-                      Upload Video to Supabase
-                    </a>
+                    <p className="text-gray-400 text-sm">
+                      Please upload the video file <code className="bg-gray-800 px-2 py-1 rounded">iptv-preview-video.mp4</code> to your Supabase Storage bucket.
+                    </p>
                   </div>
                 </div>
               ) : (
@@ -141,17 +135,8 @@ export default function IPTVPreviewVideo({ videoUrl }: IPTVPreviewVideoProps) {
                   The preview video file hasn't been uploaded to Supabase Storage yet. 
                   Please upload your video file to see the preview.
                 </p>
-                <a
-                  href="https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/storage/buckets/imiges"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors text-lg"
-                >
-                  <Upload className="w-6 h-6" />
-                  Upload Video to Supabase Storage
-                </a>
-                <p className="text-sm text-gray-400 mt-4">
-                  File name should be: <code className="bg-gray-800 px-2 py-1 rounded">iptv-preview-video.mp4</code>
+                <p className="text-gray-400">
+                  Please upload the video file <code className="bg-gray-800 px-2 py-1 rounded">iptv-preview-video.mp4</code> to your Supabase Storage bucket.
                 </p>
               </div>
             ) : (
