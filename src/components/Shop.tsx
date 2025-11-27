@@ -1,6 +1,6 @@
 import { Check, Flame, Star, Zap, ShoppingCart, Gift, Send, User, Mail, Phone } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, getStorageUrl } from '../lib/supabase';
 
 interface Product {
   id: string;
@@ -203,11 +203,15 @@ export default function Shop({ onAddToCart }: ShopProps) {
           // Parse prices to numbers
           const price = parseFloat(p.sale_price?.toString() || p.price?.toString() || '0');
 
-          // Get image - prioritize main_image, then fallback to local images
+          // Get image - check if it's from Supabase bucket or local
           let productImage = p.main_image || '';
-          
+
+          // If image is just a filename (no protocol), use Supabase storage
+          if (productImage && !productImage.startsWith('http') && !productImage.startsWith('/')) {
+            productImage = getStorageUrl('images', productImage);
+          }
           // If no image or image is placeholder/empty, use type-specific fallback from local public folder
-          if (!productImage || productImage.trim() === '' || productImage.includes('placeholder') || productImage.includes('pexels')) {
+          else if (!productImage || productImage.trim() === '' || productImage.includes('placeholder') || productImage.includes('pexels')) {
             if (isFirestick) {
               if (p.name.toLowerCase().includes('4k max')) {
                 productImage = '/images/firestick-4k-max.jpg';
