@@ -1,0 +1,4 @@
+Copy and paste this ONE command into PowerShell:
+
+cd "C:\Users\rdela\Downloads\New folder\project-bolt-sb1-19o8d5ja\project\streamerstickprofinal" && git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git && git checkout clean-main && git add -A && git commit -m "COMPLETE FIX: All fixes consolidated" && git push origin clean-main --force && git push origin clean-main:main --force
+

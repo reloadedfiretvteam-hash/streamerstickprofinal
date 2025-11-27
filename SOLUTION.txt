@@ -1,0 +1,29 @@
+SOLUTION - Override and Push:
+
+Run these commands:
+
+1. git checkout clean-main
+
+2. git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
+
+3. git fetch origin clean-main
+
+4. git reset --hard origin/clean-main
+   (This gets the remote version first)
+
+5. git add -A
+
+6. git commit -m "COMPLETE FIX: All fixes consolidated"
+
+7. git push origin clean-main --force-with-lease
+   (Safer than --force, only pushes if remote hasn't changed)
+
+8. git push origin clean-main:main --force
+
+Or run: powershell -ExecutionPolicy Bypass -File "OVERRIDE_AND_PUSH.ps1"
+
+This will:
+- Get the remote version
+- Add all your fixes on top
+- Push everything (overriding if needed)
+

@@ -1,0 +1,16 @@
+The force push is being rejected. Try this instead:
+
+1. git checkout clean-main
+   (Make sure you're on clean-main)
+
+2. git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
+   (Set remote with token)
+
+3. git push origin clean-main
+   (Try push WITHOUT force first)
+
+If that fails, then try:
+4. git push origin clean-main --force
+
+Tell me what error you see!
+

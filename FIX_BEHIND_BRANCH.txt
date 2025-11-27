@@ -1,0 +1,25 @@
+Your branch is behind the remote. Do this:
+
+1. git checkout clean-main
+   (Make sure you're on clean-main)
+
+2. git fetch origin clean-main
+   (Get latest from remote)
+
+3. git pull origin clean-main
+   (Merge remote changes into your local branch)
+
+4. git add -A
+   (Stage any changes)
+
+5. git commit -m "COMPLETE FIX: All fixes consolidated"
+   (Commit if needed)
+
+6. git push origin clean-main
+   (Push - should work now without force)
+
+7. git push origin clean-main:main --force
+   (Push to main for Cloudflare)
+
+Or run: powershell -ExecutionPolicy Bypass -File "PULL_THEN_PUSH.ps1"
+

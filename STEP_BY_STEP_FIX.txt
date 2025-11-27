@@ -1,0 +1,31 @@
+Run these commands ONE AT A TIME and tell me what you see:
+
+1. git branch --show-current
+   (This shows what branch you're on)
+
+2. git status
+   (This shows if you have uncommitted changes)
+
+3. git checkout clean-main
+   (Switch to clean-main - if it says "error" tell me)
+
+4. git remote -v
+   (Shows the remote URL)
+
+5. git remote remove origin
+   (Remove old remote)
+
+6. git remote add origin https://github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
+   (Add correct remote)
+
+7. git add -A
+   (Stage all changes)
+
+8. git commit -m "COMPLETE FIX: All fixes consolidated"
+   (Commit changes)
+
+9. git push origin clean-main --force
+   (Push to clean-main)
+
+Tell me what errors you see at each step!
+

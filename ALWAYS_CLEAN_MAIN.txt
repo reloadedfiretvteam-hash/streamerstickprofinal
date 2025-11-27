@@ -1,0 +1,10 @@
+Run these commands - ALWAYS clean-main:
+
+git checkout clean-main
+git remote remove origin
+git remote add origin https://github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
+git add -A
+git commit -m "COMPLETE FIX: All fixes consolidated"
+git push origin clean-main --force
+git push origin clean-main:main --force
+

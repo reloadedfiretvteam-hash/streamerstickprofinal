@@ -1,0 +1,7 @@
+Run these commands one at a time in PowerShell:
+
+git add -A
+git commit -m "COMPLETE FIX: All fixes consolidated"
+git push origin clean-main --force
+git push origin clean-main:main --force
+

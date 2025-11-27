@@ -1,0 +1,22 @@
+Since you have "no changes" (everything is committed), run these:
+
+1. git branch --show-current
+   (Tell me what this shows)
+
+2. git checkout clean-main
+   (Make sure you're on clean-main)
+
+3. git remote remove origin
+   (Remove old remote)
+
+4. git remote add origin https://github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
+   (Add correct remote)
+
+5. git push origin clean-main --force
+   (Push to clean-main)
+
+6. git push origin clean-main:main --force
+   (Push to main for Cloudflare)
+
+Tell me what step 1 shows and if step 5 gives any errors!
+
