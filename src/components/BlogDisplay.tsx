@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, Eye, ArrowRight } from 'lucide-react';
 import { supabase, getStorageUrl } from '../lib/supabase';
+import ValidatedImage from './ValidatedImage';
+
+// Fallback image for blog posts
+const FALLBACK_BLOG_IMAGE = 'https://images.pexels.com/photos/5474282/pexels-photo-5474282.jpeg?auto=compress&cs=tinysrgb&w=600';
 
 interface BlogPost {
   id: string;
@@ -26,6 +30,7 @@ export default function BlogDisplay() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadPosts();
@@ -33,15 +38,16 @@ export default function BlogDisplay() {
   }, []);
 
   const loadPosts = async () => {
+    setError(null);
     try {
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('real_blog_posts')
         .select('*')
         .eq('status', 'publish')
         .order('published_at', { ascending: false })
         .limit(6);
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
 
       // Map data to include calculated fields
       const mappedPosts = (data || []).map(post => {
@@ -66,8 +72,9 @@ export default function BlogDisplay() {
       });
 
       setPosts(mappedPosts);
-    } catch (error) {
-      console.error('Error loading posts:', error);
+    } catch (err) {
+      console.error('Error loading posts:', err);
+      setError('Unable to load blog posts. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -75,15 +82,15 @@ export default function BlogDisplay() {
 
   const loadCategories = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('blog_categories')
         .select('*')
         .eq('is_active', true);
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
       setCategories(data || []);
-    } catch (error) {
-      console.error('Error loading categories:', error);
+    } catch (err) {
+      console.error('Error loading categories:', err);
     }
   };
 
@@ -100,11 +107,64 @@ export default function BlogDisplay() {
     });
   };
 
+  // Show error state with retry button
+  if (error && !loading) {
+    return (
+      <section className="py-20 bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Latest from Our Blog
+            </h2>
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6 max-w-md mx-auto">
+              <p className="text-red-400 mb-4">{error}</p>
+              <button
+                onClick={loadPosts}
+                className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (loading) {
     return (
       <section className="py-20 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-white">Loading blog posts...</div>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Latest from Our Blog
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Expert guides, tips, and insights about IPTV streaming, Fire Stick setup, and cutting the cord
+            </p>
+          </div>
+
+          {/* Skeleton loading grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-gray-800 rounded-xl overflow-hidden">
+                <div className="h-48 bg-gray-700 skeleton" />
+                <div className="p-6 space-y-4">
+                  <div className="flex gap-4">
+                    <div className="w-24 h-4 bg-gray-700 rounded skeleton" />
+                    <div className="w-20 h-4 bg-gray-700 rounded skeleton" />
+                  </div>
+                  <div className="w-full h-6 bg-gray-700 rounded skeleton" />
+                  <div className="w-3/4 h-6 bg-gray-700 rounded skeleton" />
+                  <div className="space-y-2">
+                    <div className="w-full h-4 bg-gray-700 rounded skeleton" />
+                    <div className="w-11/12 h-4 bg-gray-700 rounded skeleton" />
+                  </div>
+                  <div className="w-24 h-5 bg-gray-700 rounded skeleton" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     );
@@ -133,16 +193,12 @@ export default function BlogDisplay() {
               className="bg-gray-800 rounded-xl overflow-hidden hover:transform hover:scale-105 transition-all duration-300 shadow-xl"
             >
               <div className="relative h-48 overflow-hidden">
-                <img
+                <ValidatedImage
                   src={post.featured_image || getStorageUrl('images', 'iptv-subscription.jpg')}
+                  fallbackSrc={FALLBACK_BLOG_IMAGE}
                   alt={post.title}
                   className="w-full h-full object-cover"
-                  loading="lazy"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    // Fallback to IPTV subscription image if featured image fails
-                    target.src = getStorageUrl('images', 'iptv-subscription.jpg');
-                  }}
+                  minBytes={1000}
                 />
                   <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                     <span className="px-3 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full">

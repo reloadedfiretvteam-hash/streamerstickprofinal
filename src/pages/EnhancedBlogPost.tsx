@@ -1,8 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Calendar, Clock, ArrowLeft, BookOpen, Share2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
+import ValidatedImage from '../components/ValidatedImage';
+
+// Fallback image for blog posts
+const FALLBACK_BLOG_IMAGE = 'https://images.pexels.com/photos/5474282/pexels-photo-5474282.jpeg?auto=compress&cs=tinysrgb&w=800';
 
 interface BlogPostData {
   id: string;
@@ -27,7 +31,69 @@ export default function EnhancedBlogPost() {
   const [post, setPost] = useState<BlogPostData | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<RelatedPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [tocItems, setTocItems] = useState<{id: string; text: string}[]>([]);
+
+  const loadPostByTag = useCallback(async (tagSlug: string) => {
+    // Convert tag slug back to tag name
+    const tagName = tagSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    
+    setError(null);
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('real_blog_posts')
+        .select('*')
+        .eq('status', 'publish')
+        .contains('tags', [tagName])
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!fetchError && data) {
+        setPost(data);
+        loadRelatedPosts(data.id);
+        incrementViewCount(data.slug);
+        setupSEO(data);
+        extractTableOfContents(data.content);
+      } else if (!data) {
+        setError('No posts found for this tag.');
+      }
+    } catch (err) {
+      console.error('Error loading post by tag:', err);
+      setError('Failed to load blog post. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadPost = useCallback(async (slug: string) => {
+    setError(null);
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('real_blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .eq('status', 'publish')
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      if (data) {
+        setPost(data);
+        loadRelatedPosts(data.id);
+        incrementViewCount(slug);
+        setupSEO(data);
+        extractTableOfContents(data.content);
+      } else {
+        setError('Blog post not found.');
+      }
+    } catch (err) {
+      console.error('Error loading post:', err);
+      setError('Failed to load blog post. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -40,79 +106,26 @@ export default function EnhancedBlogPost() {
       const slug = path.split('/').pop();
       loadPost(slug || '');
     }
-  }, []);
+  }, [loadPost, loadPostByTag]);
 
-  const loadPostByTag = async (tagSlug: string) => {
-    // Convert tag slug back to tag name
-    const tagName = tagSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    
+  const loadRelatedPosts = async (currentId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('real_blog_posts')
-        .select('*')
-        .eq('status', 'publish')
-        .contains('tags', [tagName])
-        .order('published_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (!error && data) {
-        setPost(data);
-        loadRelatedPosts(data.id, data.category);
-        incrementViewCount(data.slug);
-        setupSEO(data);
-        extractTableOfContents(data.content);
-      }
-    } catch (error) {
-      console.error('Error loading post by tag:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadPost = async (slug: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('real_blog_posts')
-        .select('*')
-        .eq('slug', slug)
-        .eq('status', 'publish')
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (data) {
-        setPost(data);
-        loadRelatedPosts(data.id, data.category);
-        incrementViewCount(slug);
-        setupSEO(data);
-        extractTableOfContents(data.content);
-      }
-    } catch (error) {
-      console.error('Error loading post:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadRelatedPosts = async (currentId: string, category?: string) => {
-    try {
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('real_blog_posts')
         .select('title, slug, meta_description, excerpt')
         .neq('id', currentId)
         .eq('status', 'publish')
         .limit(3);
 
-      if (!error && data) {
+      if (!fetchError && data) {
         setRelatedPosts(data.map(p => ({
           title: p.title,
           slug: p.slug,
           seo_description: p.meta_description || p.excerpt || ''
         })));
       }
-    } catch (error) {
-      console.error('Error loading related posts:', error);
+    } catch (err) {
+      console.error('Error loading related posts:', err);
     }
   };
 
@@ -334,18 +347,29 @@ export default function EnhancedBlogPost() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-4"></div>
+          <div className="text-white text-xl">Loading article...</div>
+        </div>
       </div>
     );
   }
 
-  if (!post) {
+  if (error || !post) {
     return (
       <div className="min-h-screen bg-gray-900">
         <Navigation cartItemCount={0} onCartClick={() => {}} />
         <div className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Post Not Found</h1>
-          <a href="/" className="text-orange-500 hover:text-orange-400">
+          <h1 className="text-4xl font-bold text-white mb-4">
+            {error || 'Post Not Found'}
+          </h1>
+          <p className="text-gray-400 mb-6">
+            The article you're looking for might have been moved or doesn't exist.
+          </p>
+          <a 
+            href="/" 
+            className="inline-block px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
+          >
             Return to Home
           </a>
         </div>
@@ -395,14 +419,13 @@ export default function EnhancedBlogPost() {
               Back to Home
             </a>
 
-            {post.featured_image && (
-              <img
-                src={post.featured_image}
-                alt={post.title}
-                className="w-full h-96 object-cover rounded-2xl mb-8"
-                loading="eager"
-              />
-            )}
+            <ValidatedImage
+              src={post.featured_image || FALLBACK_BLOG_IMAGE}
+              fallbackSrc={FALLBACK_BLOG_IMAGE}
+              alt={post.title}
+              className="w-full h-96 object-cover rounded-2xl mb-8"
+              minBytes={1000}
+            />
 
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
               {post.title}
