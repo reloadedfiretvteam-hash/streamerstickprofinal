@@ -31,30 +31,10 @@ import MoneyBackGuarantee from './components/MoneyBackGuarantee';
 import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
 import ConciergePage from './pages/ConciergePage';
-import ConciergeCheckout from './pages/ConciergeCheckout';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
-
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  type: 'firestick' | 'iptv';
-  image: string;
-  badge: string;
-  popular: boolean;
-  period?: string;
-  savings?: string;
-  features: string[];
-}
+import { useCart } from './context/CartContext';
+import { Product } from './lib/types';
 
 const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '')
   .split(',')
@@ -73,8 +53,10 @@ function App() {
   const [isSecureDomain, setIsSecureDomain] = useState(false);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [emailCaptured, setEmailCaptured] = useState(false);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  
+  // Use global cart context
+  const { items: cartItems, addItem, updateQuantity, removeItem, clearCart, getItemCount } = useCart();
 
   useAnalytics();
 
@@ -147,39 +129,19 @@ function App() {
   };
 
   const handleAddToCart = (product: Product) => {
-    setCartItems(prev => {
-      const existing = prev.find(item => item.id === product.id);
-      if (existing) {
-        return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: 1,
-        image: product.image
-      }];
-    });
+    addItem(product);
     setIsCartOpen(true);
   };
 
   const handleUpdateQuantity = (id: string, quantity: number) => {
-    setCartItems(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, quantity } : item
-      )
-    );
+    updateQuantity(id, quantity);
   };
 
   const handleRemoveItem = (id: string) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
+    removeItem(id);
   };
 
-  const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const cartItemCount = getItemCount();
 
   // Secure domain: show Square-safe checkout only (no IPTV UI).
   if (isSecureDomain) {
@@ -258,7 +220,7 @@ function App() {
           }))}
           onUpdateQuantity={handleUpdateQuantity}
           onRemoveItem={handleRemoveItem}
-          onClearCart={() => setCartItems([])}
+          onClearCart={clearCart}
         />
       </div>
     </ErrorBoundary>

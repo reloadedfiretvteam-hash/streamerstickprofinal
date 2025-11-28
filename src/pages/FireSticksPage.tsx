@@ -3,6 +3,8 @@ import { ShoppingCart, Star, Check, Flame, ArrowLeft, Zap } from 'lucide-react';
 import { supabase, getStorageUrl } from '../lib/supabase';
 import Footer from '../components/Footer';
 import ValidatedImage from '../components/ValidatedImage';
+import Navigation from '../components/EnhancedNavigation';
+import { useCart } from '../context/CartContext';
 
 // Fallback image when all else fails
 const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -20,19 +22,13 @@ interface Product {
   featured: boolean;
 }
 
-interface CartItem {
-  product: Product;
-  quantity: number;
-}
-
 export default function FireSticksPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const { addItem, getItemCount } = useCart();
 
   useEffect(() => {
     loadProducts();
-    loadCart();
   }, []);
 
   const loadProducts = async () => {
@@ -132,37 +128,22 @@ export default function FireSticksPage() {
     }
   ];
 
-  const loadCart = () => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
-  };
-
-  const saveCart = (newCart: CartItem[]) => {
-    setCart(newCart);
-    localStorage.setItem('cart', JSON.stringify(newCart));
-  };
-
   const addToCart = (product: Product) => {
-    const existing = cart.find(item => item.product.id === product.id);
-    let newCart;
-
-    if (existing) {
-      newCart = cart.map(item =>
-        item.product.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
-    } else {
-      newCart = [...cart, { product, quantity: 1 }];
-    }
-
-    saveCart(newCart);
-    window.location.href = '/checkout';
+    // Convert to the format expected by CartContext
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: parseFloat(product.sale_price || product.price),
+      type: 'firestick',
+      image: product.main_image,
+      badge: product.featured ? 'BEST VALUE' : 'STARTER',
+      popular: product.featured,
+      features: product.description.split(',').map(f => f.trim())
+    });
+    window.location.href = '/cart';
   };
 
-  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartItemCount = getItemCount();
 
   if (loading) {
     return (
@@ -174,8 +155,10 @@ export default function FireSticksPage() {
 
   return (
     <div className="min-h-screen bg-gray-900">
+      <Navigation cartItemCount={cartItemCount} onCartClick={() => window.location.href = '/cart'} />
+      
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white py-8">
+      <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white py-8 mt-16">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
