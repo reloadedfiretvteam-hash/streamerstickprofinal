@@ -13,6 +13,72 @@ interface CartItem {
   quantity: number;
 }
 
+// Simple HMAC-SHA256 implementation for Stripe signature verification
+async function computeHmacSha256(key: string, message: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(key);
+  const messageData = encoder.encode(message);
+  
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  
+  const signature = await crypto.subtle.sign("HMAC", cryptoKey, messageData);
+  return Array.from(new Uint8Array(signature))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+// Verify Stripe webhook signature
+async function verifyStripeSignature(
+  payload: string,
+  signature: string,
+  secret: string
+): Promise<boolean> {
+  try {
+    // Parse the signature header
+    const parts = signature.split(',');
+    let timestamp = '';
+    let v1Signatures: string[] = [];
+    
+    for (const part of parts) {
+      const [key, value] = part.split('=');
+      if (key === 't') {
+        timestamp = value;
+      } else if (key === 'v1') {
+        v1Signatures.push(value);
+      }
+    }
+    
+    if (!timestamp || v1Signatures.length === 0) {
+      console.error('Invalid signature format');
+      return false;
+    }
+    
+    // Check timestamp tolerance (5 minutes)
+    const timestampNum = parseInt(timestamp, 10);
+    const now = Math.floor(Date.now() / 1000);
+    if (Math.abs(now - timestampNum) > 300) {
+      console.error('Webhook timestamp too old');
+      return false;
+    }
+    
+    // Compute expected signature
+    const signedPayload = `${timestamp}.${payload}`;
+    const expectedSignature = await computeHmacSha256(secret, signedPayload);
+    
+    // Check if any v1 signature matches
+    return v1Signatures.some(sig => sig === expectedSignature);
+  } catch (error) {
+    console.error('Error verifying signature:', error);
+    return false;
+  }
+}
+
 Deno.serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -40,8 +106,25 @@ Deno.serve(async (req: Request) => {
     const signature = req.headers.get("Stripe-Signature");
 
     // Verify webhook signature if secret is configured
-    // For now, we'll process the event directly
-    // In production, you should verify the signature using Stripe's library
+    if (stripeWebhookSecret && signature) {
+      const isValid = await verifyStripeSignature(body, signature, stripeWebhookSecret);
+      if (!isValid) {
+        console.error("Invalid webhook signature");
+        return new Response(
+          JSON.stringify({ error: "Invalid signature" }),
+          {
+            status: 401,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+    } else if (stripeWebhookSecret && !signature) {
+      // Webhook secret is configured but no signature provided
+      console.warn("Webhook signature missing, but verification is configured");
+    }
 
     const event = JSON.parse(body);
 

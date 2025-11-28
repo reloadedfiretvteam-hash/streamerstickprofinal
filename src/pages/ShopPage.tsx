@@ -186,18 +186,29 @@ export default function ShopPage() {
     }
   ];
 
+  // Helper function to determine product type more robustly
+  const getProductType = (product: Product): 'firestick' | 'iptv' => {
+    const name = (product.name || '').toLowerCase();
+    const category = (product.category || '').toLowerCase();
+    
+    // Check for fire stick related keywords
+    const firestickKeywords = ['fire stick', 'fire tv', 'firestick', 'fire_stick', 'amazon fire'];
+    const isFirestick = firestickKeywords.some(keyword => 
+      name.includes(keyword) || category.includes(keyword)
+    );
+    
+    return isFirestick ? 'firestick' : 'iptv';
+  };
+
   const addToCart = (product: Product) => {
-    // Determine product type
-    const isFirestick = product.name?.toLowerCase().includes('fire stick') || 
-                        product.name?.toLowerCase().includes('fire tv') ||
-                        product.category?.toLowerCase().includes('fire stick');
+    const productType = getProductType(product);
     
     // Convert to the format expected by CartContext
     addItem({
       id: product.id,
       name: product.name,
       price: parseFloat(product.sale_price || product.price),
-      type: isFirestick ? 'firestick' : 'iptv',
+      type: productType,
       image: product.main_image,
       badge: product.featured ? 'BEST VALUE' : 'STARTER',
       popular: product.featured,
