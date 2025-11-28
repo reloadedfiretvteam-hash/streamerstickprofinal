@@ -31,17 +31,10 @@ import MoneyBackGuarantee from './components/MoneyBackGuarantee';
 import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
 import ConciergePage from './pages/ConciergePage';
-import ConciergeCheckout from './pages/ConciergeCheckout';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
-
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
+import { useCart } from './contexts/CartContext';
+import { useToast } from './contexts/ToastContext';
 
 interface Product {
   id: string;
@@ -73,8 +66,22 @@ function App() {
   const [isSecureDomain, setIsSecureDomain] = useState(false);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [emailCaptured, setEmailCaptured] = useState(false);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Use Cart Context for site-wide cart state
+  const { 
+    items: cartItems, 
+    addItem, 
+    updateQuantity, 
+    removeItem, 
+    clearCart,
+    isOpen: isCartOpen,
+    openCart,
+    closeCart,
+    itemCount 
+  } = useCart();
+  
+  // Use Toast Context for notifications
+  const { showSuccess } = useToast();
 
   useAnalytics();
 
@@ -137,7 +144,7 @@ function App() {
     if (success) {
       setEmailCaptured(true);
       localStorage.setItem('captured_email', email);
-      alert('Thank you! Check your email for exclusive offers.');
+      showSuccess('Thank you! Check your email for exclusive offers.');
     }
   };
 
@@ -147,39 +154,16 @@ function App() {
   };
 
   const handleAddToCart = (product: Product) => {
-    setCartItems(prev => {
-      const existing = prev.find(item => item.id === product.id);
-      if (existing) {
-        return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: 1,
-        image: product.image
-      }];
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      type: product.type
     });
-    setIsCartOpen(true);
+    showSuccess(`${product.name} added to cart!`);
+    openCart();
   };
-
-  const handleUpdateQuantity = (id: string, quantity: number) => {
-    setCartItems(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, quantity } : item
-      )
-    );
-  };
-
-  const handleRemoveItem = (id: string) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
-  };
-
-  const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   // Secure domain: show Square-safe checkout only (no IPTV UI).
   if (isSecureDomain) {
@@ -203,8 +187,8 @@ function App() {
       <VisitorTracker />
       <div className="min-h-screen bg-gray-900">
         <Navigation
-          cartItemCount={cartItemCount}
-          onCartClick={() => setIsCartOpen(true)}
+          cartItemCount={itemCount}
+          onCartClick={openCart}
         />
         <Hero />
         <FeatureIconRow />
@@ -246,9 +230,7 @@ function App() {
 
         <CheckoutCart
           isOpen={isCartOpen}
-          onClose={() => {
-            setIsCartOpen(false);
-          }}
+          onClose={closeCart}
           items={cartItems.map(item => ({
             productId: item.id,
             name: item.name,
@@ -256,9 +238,9 @@ function App() {
             quantity: item.quantity,
             image: item.image
           }))}
-          onUpdateQuantity={handleUpdateQuantity}
-          onRemoveItem={handleRemoveItem}
-          onClearCart={() => setCartItems([])}
+          onUpdateQuantity={updateQuantity}
+          onRemoveItem={removeItem}
+          onClearCart={clearCart}
         />
       </div>
     </ErrorBoundary>

@@ -6,10 +6,26 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-interface PaymentIntentRequest {
+interface CartItem {
   productId: string;
+  quantity: number;
+}
+
+interface PaymentIntentRequest {
+  // Single product checkout (backwards compatible)
+  productId?: string;
+  // Cart checkout (multiple items)
+  items?: CartItem[];
   customerEmail: string;
   customerName: string;
+  customerPhone?: string;
+}
+
+interface StripeProduct {
+  id: string;
+  name: string;
+  price: number;
+  sale_price: number | null;
 }
 
 Deno.serve(async (req: Request) => {
@@ -35,19 +51,29 @@ Deno.serve(async (req: Request) => {
     }
 
     const payload: PaymentIntentRequest = await req.json();
-    const { productId, customerEmail, customerName } = payload;
-
-    if (!productId) {
-      throw new Error("Product ID is required");
-    }
+    const { productId, items, customerEmail, customerName, customerPhone } = payload;
 
     if (!customerEmail) {
       throw new Error("Customer email is required");
     }
 
-    // Fetch the product from stripe_products table
+    // Determine if this is a single product or cart checkout
+    const cartItems: CartItem[] = items && items.length > 0
+      ? items
+      : productId
+        ? [{ productId, quantity: 1 }]
+        : [];
+
+    if (cartItems.length === 0) {
+      throw new Error("At least one product is required");
+    }
+
+    // Fetch all product IDs from cart
+    const productIds = cartItems.map(item => item.productId);
+
+    // Fetch products from stripe_products table (security: prices come from server, not client)
     const productResponse = await fetch(
-      `${supabaseUrl}/rest/v1/stripe_products?id=eq.${productId}&is_active=eq.true`,
+      `${supabaseUrl}/rest/v1/stripe_products?id=in.(${productIds.map(id => `"${id}"`).join(",")})&is_active=eq.true`,
       {
         method: "GET",
         headers: {
@@ -59,42 +85,91 @@ Deno.serve(async (req: Request) => {
     );
 
     if (!productResponse.ok) {
-      throw new Error("Failed to fetch product");
+      throw new Error("Failed to fetch products");
     }
 
-    const products = await productResponse.json();
+    const products: StripeProduct[] = await productResponse.json();
 
     if (!products || products.length === 0) {
-      throw new Error("Product not found or inactive");
+      throw new Error("No valid products found");
     }
 
-    const product = products[0];
-    
-    // Use sale_price if available, otherwise use regular price
-    const amount = product.sale_price || product.price;
-    
-    // Convert to cents for Stripe (Stripe requires amounts in smallest currency unit)
-    const amountInCents = Math.round(amount * 100);
+    // Create a map for quick lookup
+    const productMap = new Map<string, StripeProduct>();
+    products.forEach(p => productMap.set(p.id, p));
 
-    // Create a Stripe PaymentIntent
+    // Calculate total and build line items description
+    let totalAmount = 0;
+    const lineItems: string[] = [];
+    const itemsMetadata: Array<{ id: string; name: string; quantity: number; price: number }> = [];
+
+    for (const item of cartItems) {
+      const product = productMap.get(item.productId);
+      if (!product) {
+        throw new Error(`Product ${item.productId} not found or inactive`);
+      }
+
+      // Use sale_price if available, otherwise use regular price
+      const unitPrice = product.sale_price || product.price;
+      const itemTotal = unitPrice * item.quantity;
+      totalAmount += itemTotal;
+
+      lineItems.push(`${product.name} x${item.quantity}`);
+      itemsMetadata.push({
+        id: product.id,
+        name: product.name,
+        quantity: item.quantity,
+        price: unitPrice,
+      });
+    }
+
+    // Convert to cents for Stripe (Stripe requires amounts in smallest currency unit)
+    const amountInCents = Math.round(totalAmount * 100);
+
+    // Build description
+    const description = lineItems.length === 1
+      ? `Payment for ${lineItems[0]}`
+      : `Payment for ${lineItems.length} items: ${lineItems.join(", ")}`;
+
+    // Truncate description if too long (Stripe limit is 1000 chars)
+    const truncatedDescription = description.length > 500
+      ? description.substring(0, 497) + "..."
+      : description;
+
+    // Create Stripe PaymentIntent
+    const formData = new URLSearchParams({
+      amount: amountInCents.toString(),
+      currency: "usd",
+      "automatic_payment_methods[enabled]": "true",
+      "metadata[customer_email]": customerEmail,
+      "metadata[customer_name]": customerName,
+      "metadata[item_count]": cartItems.length.toString(),
+      "metadata[items_json]": JSON.stringify(itemsMetadata).substring(0, 500),
+      description: truncatedDescription,
+      receipt_email: customerEmail,
+      statement_descriptor_suffix: "PRO DIGITAL",
+    });
+
+    // Add single product metadata for backwards compatibility
+    if (cartItems.length === 1) {
+      const singleProduct = productMap.get(cartItems[0].productId);
+      if (singleProduct) {
+        formData.append("metadata[product_id]", singleProduct.id);
+        formData.append("metadata[product_name]", singleProduct.name);
+      }
+    }
+
+    if (customerPhone) {
+      formData.append("metadata[customer_phone]", customerPhone);
+    }
+
     const stripeResponse = await fetch("https://api.stripe.com/v1/payment_intents", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${stripeSecretKey}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({
-        amount: amountInCents.toString(),
-        currency: "usd",
-        "automatic_payment_methods[enabled]": "true",
-        "metadata[product_id]": productId,
-        "metadata[product_name]": product.name,
-        "metadata[customer_email]": customerEmail,
-        "metadata[customer_name]": customerName,
-        description: `Payment for ${product.name}`,
-        receipt_email: customerEmail,
-        statement_descriptor_suffix: "PRO DIGITAL",
-      }),
+      body: formData,
     });
 
     if (!stripeResponse.ok) {
@@ -105,14 +180,15 @@ Deno.serve(async (req: Request) => {
 
     const paymentIntent = await stripeResponse.json();
 
-    // Log the payment intent creation (optional - for debugging)
-    console.log(`PaymentIntent created: ${paymentIntent.id} for product: ${product.name}, amount: $${amount}`);
+    // Log the payment intent creation
+    console.log(`PaymentIntent created: ${paymentIntent.id} for ${cartItems.length} item(s), amount: $${totalAmount.toFixed(2)}`);
 
     return new Response(
       JSON.stringify({
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
-        amount: amount,
+        amount: totalAmount,
+        itemCount: cartItems.length,
       }),
       {
         headers: {
