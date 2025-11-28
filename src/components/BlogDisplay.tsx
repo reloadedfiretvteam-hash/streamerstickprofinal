@@ -209,16 +209,12 @@ export default function BlogDisplay() {
         </div>
 
         <div className="text-center mt-12">
-          <button
-            onClick={() => {
-              // Scroll to top and show all blog posts or navigate to blog page
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-              // Could navigate to /blog if you create a dedicated blog listing page
-            }}
+          <a
+            href="/blog"
             className="inline-block px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors transform hover:scale-105"
           >
             View All Blog Posts
-          </button>
+          </a>
         </div>
       </div>
     </section>
