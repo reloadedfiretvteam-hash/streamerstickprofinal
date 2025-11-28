@@ -4,6 +4,10 @@ import { supabase, getStorageUrl } from '../lib/supabase';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 
+// Constants for read time calculation
+const DEFAULT_WORD_COUNT = 300;
+const WORDS_PER_MINUTE = 200;
+
 interface BlogPost {
   id: string;
   title: string;
@@ -40,7 +44,8 @@ export default function BlogPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const tagParam = urlParams.get('tag');
     if (tagParam) {
-      setSelectedTag(tagParam);
+      // Decode the URL parameter to handle special characters
+      setSelectedTag(decodeURIComponent(tagParam));
     }
   }, []);
 
@@ -140,7 +145,7 @@ export default function BlogPage() {
   };
 
   const calculateReadTime = (wordCount: number) => {
-    return Math.ceil((wordCount || 300) / 200);
+    return Math.ceil((wordCount || DEFAULT_WORD_COUNT) / WORDS_PER_MINUTE);
   };
 
   // Pagination

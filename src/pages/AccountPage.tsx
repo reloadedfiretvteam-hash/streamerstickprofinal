@@ -5,6 +5,9 @@ import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 
+// Password requirements
+const MIN_PASSWORD_LENGTH = 6;
+
 interface Order {
   id: string;
   order_number: string;
@@ -89,8 +92,8 @@ export default function AccountPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setAuthError('Password must be at least 6 characters');
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      setAuthError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
       return;
     }
 

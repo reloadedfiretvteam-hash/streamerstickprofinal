@@ -196,8 +196,22 @@ Deno.serve(async (req: Request) => {
         lineItem.price_data.product_data.description = productDescription;
       }
 
-      if (productImage && productImage.startsWith("http")) {
-        lineItem.price_data.product_data.images = [productImage];
+      // Only allow HTTPS images from trusted domains
+      if (productImage && productImage.startsWith("https://")) {
+        // Validate against allowed image domains
+        const allowedDomains = [
+          "fiwkgpsvcvzitnuevqxz.supabase.co",
+          "images.pexels.com",
+          "streamstickpro.com"
+        ];
+        try {
+          const imageUrl = new URL(productImage);
+          if (allowedDomains.some(domain => imageUrl.hostname.includes(domain))) {
+            lineItem.price_data.product_data.images = [productImage];
+          }
+        } catch {
+          // Invalid URL, skip image
+        }
       }
 
       lineItems.push(lineItem);
