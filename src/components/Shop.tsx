@@ -44,7 +44,7 @@ const fallbackProducts: Product[] = [
     name: 'Fire Stick HD - Jailbroken & Ready',
     price: 140.00,
     type: 'firestick',
-    image: getStorageUrl('imiges', 'firestick hd.jpg'),
+    image: getStorageUrl('images', 'firestick hd.jpg'),
     badge: 'STARTER',
     popular: false,
     features: [
@@ -63,7 +63,7 @@ const fallbackProducts: Product[] = [
     name: 'Fire Stick 4K - Jailbroken & Ready',
     price: 150.00,
     type: 'firestick',
-    image: getStorageUrl('imiges', 'firestick 4k.jpg'),
+    image: getStorageUrl('images', 'firestick 4k.jpg'),
     badge: 'BEST VALUE',
     popular: true,
     features: [
@@ -83,7 +83,7 @@ const fallbackProducts: Product[] = [
     name: 'Fire Stick 4K Max - Jailbroken & Ready',
     price: 160.00,
     type: 'firestick',
-    image: getStorageUrl('imiges', 'firestick 4k max.jpg'),
+    image: getStorageUrl('images', 'firestick 4k max.jpg'),
     badge: 'PREMIUM',
     popular: false,
     features: [
@@ -105,7 +105,7 @@ const fallbackProducts: Product[] = [
     name: '1 Month IPTV Subscription',
     price: 15.00,
     type: 'iptv',
-    image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+    image: getStorageUrl('images', 'iptv-subscription.jpg'),
     badge: 'STARTER',
     popular: false,
     period: '/month',
@@ -123,7 +123,7 @@ const fallbackProducts: Product[] = [
     name: '3 Month IPTV Subscription',
     price: 30.00,
     type: 'iptv',
-    image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+    image: getStorageUrl('images', 'iptv-subscription.jpg'),
     badge: 'POPULAR',
     popular: true,
     period: '/3 months',
@@ -141,7 +141,7 @@ const fallbackProducts: Product[] = [
     name: '6 Month IPTV Subscription',
     price: 50.00,
     type: 'iptv',
-    image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+    image: getStorageUrl('images', 'iptv-subscription.jpg'),
     badge: 'GREAT VALUE',
     popular: false,
     period: '/6 months',
@@ -159,7 +159,7 @@ const fallbackProducts: Product[] = [
     name: '1 Year IPTV Subscription',
     price: 75.00,
     type: 'iptv',
-    image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+    image: getStorageUrl('images', 'iptv-subscription.jpg'),
     badge: 'BEST VALUE',
     popular: false,
     period: '/year',
@@ -211,22 +211,22 @@ export default function Shop({ onAddToCart }: ShopProps) {
           // Get image - check if it's from Supabase bucket or local
           let productImage = p.main_image || '';
 
-          // If image is just a filename (no protocol), use Supabase storage with 'imiges' bucket
+          // If image is just a filename (no protocol), use Supabase storage with 'images' bucket
           if (productImage && !productImage.startsWith('http') && !productImage.startsWith('/')) {
-            productImage = getStorageUrl('imiges', productImage);
+            productImage = getStorageUrl('images', productImage);
           }
           // If no image or image is placeholder/empty, use type-specific fallback from Supabase storage
           else if (!productImage || productImage.trim() === '' || productImage.includes('placeholder') || productImage.includes('pexels')) {
             if (isFirestick) {
               if (p.name.toLowerCase().includes('4k max')) {
-                productImage = getStorageUrl('imiges', 'firestick 4k max.jpg');
+                productImage = getStorageUrl('images', 'firestick 4k max.jpg');
               } else if (p.name.toLowerCase().includes('4k')) {
-                productImage = getStorageUrl('imiges', 'firestick 4k.jpg');
+                productImage = getStorageUrl('images', 'firestick 4k.jpg');
               } else {
-                productImage = getStorageUrl('imiges', 'firestick hd.jpg');
+                productImage = getStorageUrl('images', 'firestick hd.jpg');
               }
             } else {
-              productImage = getStorageUrl('imiges', 'iptv-subscription.jpg');
+              productImage = getStorageUrl('images', 'iptv-subscription.jpg');
             }
           }
 

@@ -68,14 +68,14 @@ export default function ShopPage() {
           const isFirestick = product.name?.toLowerCase().includes('fire stick') || product.name?.toLowerCase().includes('fire tv');
           if (isFirestick) {
             if (product.name?.toLowerCase().includes('4k max')) {
-              imageUrl = getStorageUrl('imiges', 'firestick 4k max.jpg');
+              imageUrl = getStorageUrl('images', 'firestick 4k max.jpg');
             } else if (product.name?.toLowerCase().includes('4k')) {
-              imageUrl = getStorageUrl('imiges', 'firestick 4k.jpg');
+              imageUrl = getStorageUrl('images', 'firestick 4k.jpg');
             } else {
-              imageUrl = getStorageUrl('imiges', 'firestick hd.jpg');
+              imageUrl = getStorageUrl('images', 'firestick hd.jpg');
             }
           } else {
-            imageUrl = getStorageUrl('imiges', 'iptv-subscription.jpg');
+            imageUrl = getStorageUrl('images', 'iptv-subscription.jpg');
           }
         }
         
@@ -109,7 +109,7 @@ export default function ShopPage() {
       description: 'Brand New Amazon Fire Stick HD with 1 Year Premium IPTV. Pre-configured with 18,000+ channels, 60,000+ movies. Plug & play - ready in 5 minutes!',
       price: '140.00',
       sale_price: '140.00',
-      main_image: getStorageUrl('imiges', 'firestick hd.jpg'),
+      main_image: getStorageUrl('images', 'firestick hd.jpg'),
       category: 'Fire Stick',
       stock_quantity: 50,
       rating: 5,
@@ -121,7 +121,7 @@ export default function ShopPage() {
       description: 'Brand New Amazon Fire Stick 4K with 1 Year Premium IPTV. Pre-configured with 18,000+ channels, 60,000+ movies in stunning 4K quality. Best seller!',
       price: '150.00',
       sale_price: '150.00',
-      main_image: getStorageUrl('imiges', 'firestick 4k.jpg'),
+      main_image: getStorageUrl('images', 'firestick 4k.jpg'),
       category: 'Fire Stick',
       stock_quantity: 50,
       rating: 5,
@@ -133,7 +133,7 @@ export default function ShopPage() {
       description: 'Brand New Amazon Fire Stick 4K Max with 1 Year Premium IPTV. Fastest performance, 4K Ultra HD, pre-configured with all premium content.',
       price: '160.00',
       sale_price: '160.00',
-      main_image: getStorageUrl('imiges', 'firestick 4k max.jpg'),
+      main_image: getStorageUrl('images', 'firestick 4k max.jpg'),
       category: 'Fire Stick',
       stock_quantity: 50,
       rating: 5,
@@ -146,7 +146,7 @@ export default function ShopPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Instant Activation',
       price: '15.00',
       sale_price: '15.00',
-      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+      main_image: getStorageUrl('images', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -158,7 +158,7 @@ export default function ShopPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Priority Support',
       price: '30.00',
       sale_price: '30.00',
-      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+      main_image: getStorageUrl('images', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -170,7 +170,7 @@ export default function ShopPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Priority Support',
       price: '50.00',
       sale_price: '50.00',
-      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+      main_image: getStorageUrl('images', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -182,7 +182,7 @@ export default function ShopPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, VIP Support, Best Value!',
       price: '75.00',
       sale_price: '75.00',
-      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+      main_image: getStorageUrl('images', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,

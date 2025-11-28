@@ -31,7 +31,7 @@ Upload these images to your Supabase Storage `images` bucket:
 7. **Movies-categories_11zon-1024x512.webp** - Thriller & Horror thumbnail
 8. **IPTVSmarters TV IMAG.jpg** - TV series thumbnail
 9. **iptv3.jpg** - Trending shows thumbnail
-10. **OIP (11) websit pic copy copy.jpg** - Binge-worthy series thumbnail
+10. **OIP (11) websit pic.jpg** - Binge-worthy series thumbnail
 11. **c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg** - NFL sports thumbnail
 12. **BASEBALL.webp** - MLB sports thumbnail
 13. **downloadBASKET BALL.jpg** - NBA sports thumbnail

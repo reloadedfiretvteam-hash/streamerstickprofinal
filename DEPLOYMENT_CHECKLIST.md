@@ -64,7 +64,7 @@ This checklist ensures ALL critical functions are working before and after deplo
 7. `Movies-categories_11zon-1024x512.webp`
 8. `IPTVSmarters TV IMAG.jpg`
 9. `iptv3.jpg`
-10. `OIP (11) websit pic copy copy.jpg`
+10. `OIP (11) websit pic.jpg`
 11. `c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg`
 12. `BASEBALL.webp`
 13. `downloadBASKET BALL.jpg`

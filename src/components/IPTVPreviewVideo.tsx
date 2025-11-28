@@ -12,8 +12,7 @@ export default function IPTVPreviewVideo({ videoUrl }: IPTVPreviewVideoProps) {
   const [videoError, setVideoError] = useState(false);
 
   // Default video URL from Supabase Storage - user can update this in admin panel
-  // Note: bucket name is 'imiges' (not 'images')
-  const defaultVideoUrl = videoUrl || getStorageUrl('imiges', 'iptv-preview-video.mp4');
+  const defaultVideoUrl = videoUrl || getStorageUrl('images', 'iptv-preview-video.mp4');
 
   const handlePlay = () => {
     setIsPlaying(true);
