@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ShoppingCart, Star, Check, Flame, ArrowLeft, Zap } from 'lucide-react';
 import { supabase, getStorageUrl } from '../lib/supabase';
 import Footer from '../components/Footer';
+import ValidatedImage from '../components/ValidatedImage';
 
 // Fallback image when all else fails
 const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -253,15 +254,12 @@ export default function FireSticksPage() {
 
               {/* Product Image */}
               <div className="relative h-64 bg-gray-800 overflow-hidden">
-                <img
+                <ValidatedImage
                   src={product.main_image}
+                  fallbackSrc={FALLBACK_FIRESTICK_IMAGE}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    // Use pexels fallback on error
-                    target.src = FALLBACK_FIRESTICK_IMAGE;
-                  }}
+                  minBytes={1000}
                 />
               </div>
 

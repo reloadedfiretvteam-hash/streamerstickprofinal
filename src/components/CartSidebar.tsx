@@ -1,4 +1,8 @@
 import { X, ShoppingCart, Trash2, Plus, Minus, Home } from 'lucide-react';
+import ValidatedImage from './ValidatedImage';
+
+// Fallback image for cart items
+const FALLBACK_CART_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=200';
 
 interface CartItem {
   id: string;
@@ -77,10 +81,12 @@ export default function CartSidebar({
                   key={item.id}
                   className="bg-gray-800 rounded-lg p-4 flex gap-4"
                 >
-                  <img
+                  <ValidatedImage
                     src={item.image}
+                    fallbackSrc={FALLBACK_CART_IMAGE}
                     alt={item.name}
                     className="w-20 h-20 object-cover rounded-lg"
+                    minBytes={1000}
                   />
                   <div className="flex-1">
                     <h3 className="font-semibold mb-2 text-sm">{item.name}</h3>

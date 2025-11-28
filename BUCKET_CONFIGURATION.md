@@ -14,8 +14,8 @@ Since you've already uploaded your images to a Supabase bucket, you just need to
 2. Select your project
 3. Click **Storage** in the left menu
 4. Look at your bucket names - common ones are:
-   - `images`
-   - `imiges` (typo version)
+   - `images` (canonical/recommended)
+   - `imiges` (typo version - automatically normalized to 'images')
    - `product-images`
    - Or any custom name you created
 
@@ -28,10 +28,10 @@ Add this to your `.env` file or Cloudflare environment variables:
 ```env
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key-here
-VITE_STORAGE_BUCKET_NAME=imiges
+VITE_STORAGE_BUCKET_NAME=images
 ```
 
-Replace `imiges` with YOUR actual bucket name.
+**Recommended: Use `images` as your canonical bucket name.**
 
 **Option B: If Using Cloudflare Pages**
 
@@ -41,7 +41,24 @@ Replace `imiges` with YOUR actual bucket name.
 4. Add:
    - `VITE_SUPABASE_URL` = `https://your-project-id.supabase.co`
    - `VITE_SUPABASE_ANON_KEY` = `your-anon-key`
-   - `VITE_STORAGE_BUCKET_NAME` = `imiges` (or your bucket name)
+   - `VITE_STORAGE_BUCKET_NAME` = `images` (recommended)
+
+---
+
+## Bucket Name Normalization
+
+The application automatically normalizes common bucket name typos:
+
+| Input Bucket Name | Normalized To |
+|-------------------|---------------|
+| `imiges`          | `images`      |
+| `imagees`         | `images`      |
+| `imags`           | `images`      |
+| `image`           | `images`      |
+
+This means if you have a bucket named `imiges`, you can leave it as-is in your Supabase dashboard - the application will automatically map it to `images`.
+
+**Recommendation:** Create your bucket with the canonical name `images` to avoid confusion.
 
 ---
 
@@ -64,8 +81,9 @@ const imageUrl = getStorageUrl('images', 'firestick-4k.jpg');
 ```env
 VITE_STORAGE_BUCKET_NAME=imiges
 ```
+The app will automatically normalize this to `images`.
 
-### If your bucket is named `images`:
+### If your bucket is named `images` (recommended):
 ```env
 VITE_STORAGE_BUCKET_NAME=images
 ```
@@ -89,6 +107,24 @@ Replace:
 - `YOUR_PROJECT_ID` with your actual project ID
 - `YOUR_BUCKET_NAME` with your bucket name
 - `test-image.jpg` with an actual image filename you uploaded
+
+---
+
+## Quick Diagnostic with curl
+
+Use this curl command to check if an image is accessible and has valid content:
+
+```bash
+# Check image accessibility and content-length
+curl -I "https://YOUR_PROJECT_ID.supabase.co/storage/v1/object/public/images/firestick%204k.jpg"
+
+# Expected output for a valid image:
+# HTTP/2 200
+# content-length: 123456  (should be > 1000 bytes)
+# content-type: image/jpeg
+```
+
+If you get a 404 or content-length < 1000, the image may be missing or corrupt.
 
 ---
 
@@ -141,34 +177,26 @@ Make sure these files exist in your bucket:
 
 ---
 
-## Troubleshooting
+## Troubleshooting Checklist
 
 ### Images Still Not Loading?
 
-1. **Check bucket is public**:
-   - In Supabase Storage, click your bucket
-   - Verify "Public bucket" is enabled
-   - Or run this SQL:
-   ```sql
-   UPDATE storage.buckets 
-   SET public = true 
-   WHERE id = 'YOUR_BUCKET_NAME';
-   ```
+- [ ] **Check bucket is public**: In Supabase Storage, click your bucket and verify "Public bucket" is enabled
+- [ ] **Check file exists**: Visit the direct URL in your browser
+- [ ] **Check filename matches exactly**: Filenames are case-sensitive (`Firestick-4k.jpg` ≠ `firestick 4k.jpg`)
+- [ ] **Check environment variable is set**: In Cloudflare: Settings → Environment Variables
+- [ ] **Redeploy after adding variables**: Changes require a new build
+- [ ] **Check content-length**: Use curl HEAD to verify image size is > 1000 bytes
+- [ ] **Check browser console**: Look for 404 errors or CORS issues
 
-2. **Check file exists**:
-   - Visit the direct URL in your browser
-   - `https://PROJECT_ID.supabase.co/storage/v1/object/public/BUCKET/filename.jpg`
-   - Should show the image or 404 if missing
+### Making Bucket Public
 
-3. **Check filename matches exactly**:
-   - Filenames are case-sensitive
-   - `Firestick-4k.jpg` ≠ `firestick 4k.jpg`
-   - Check for extra spaces or special characters
-
-4. **Check environment variable is set**:
-   - In Cloudflare: Settings → Environment Variables
-   - Verify `VITE_STORAGE_BUCKET_NAME` exists
-   - Redeploy after adding variables
+If your bucket is not public, run this SQL in Supabase:
+```sql
+UPDATE storage.buckets 
+SET public = true 
+WHERE id = 'YOUR_BUCKET_NAME';
+```
 
 ---
 
@@ -179,11 +207,11 @@ Make sure these files exist in your bucket:
 
 VITE_SUPABASE_URL=https://emlqlmfzqsnqokrqvmcm.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-VITE_STORAGE_BUCKET_NAME=imiges
+VITE_STORAGE_BUCKET_NAME=images
 ```
 
 After setting this:
-- All images will load from the `imiges` bucket
+- All images will load from the `images` bucket
 - No code changes needed
 - Just redeploy
 

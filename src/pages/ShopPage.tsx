@@ -3,6 +3,7 @@ import { supabase, getStorageUrl } from '../lib/supabase';
 import { ShoppingCart, Search, Filter, Star } from 'lucide-react';
 import Footer from '../components/Footer';
 import CustomerReviewsSection from '../components/CustomerReviewsSection';
+import ValidatedImage from '../components/ValidatedImage';
 
 // Fallback images
 const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -345,26 +346,21 @@ export default function ShopPage() {
               {/* Product Image */}
               <div className="relative h-64 bg-gray-200 overflow-hidden">
                 {product.main_image ? (
-                  <img
+                  <ValidatedImage
                     src={product.main_image}
+                    fallbackSrc={product.name?.toLowerCase().includes('fire stick') || product.name?.toLowerCase().includes('fire tv') ? FALLBACK_FIRESTICK_IMAGE : FALLBACK_IPTV_IMAGE}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      // Type-specific fallback using pexels
-                      const isFirestick = product.name?.toLowerCase().includes('fire stick') || product.name?.toLowerCase().includes('fire tv');
-                      target.src = isFirestick ? FALLBACK_FIRESTICK_IMAGE : FALLBACK_IPTV_IMAGE;
-                    }}
+                    minBytes={1000}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-300">
-                    <img 
-                      src={getStorageUrl('imiges', 'iptv-subscription.jpg')} 
-                      alt="placeholder" 
+                    <ValidatedImage
+                      src={getStorageUrl('images', 'iptv-subscription.jpg')}
+                      fallbackSrc={FALLBACK_IPTV_IMAGE}
+                      alt="placeholder"
                       className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = FALLBACK_IPTV_IMAGE;
-                      }}
+                      minBytes={1000}
                     />
                   </div>
                 )}

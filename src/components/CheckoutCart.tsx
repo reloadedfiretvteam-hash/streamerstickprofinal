@@ -4,6 +4,10 @@ import { supabase } from '../lib/supabase';
 import OrderConfirmation from './OrderConfirmation';
 import LegalDisclaimer from './LegalDisclaimer';
 import SquarePaymentForm from './SquarePaymentForm';
+import ValidatedImage from './ValidatedImage';
+
+// Fallback image for cart items
+const FALLBACK_CART_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=200';
 
 interface CartItem {
   productId: string;
@@ -489,7 +493,13 @@ Customer has been sent complete payment instructions including their unique purc
                 {items.map((item) => (
                   <div key={item.productId} className="bg-gray-800 rounded-lg p-4 flex gap-4">
                     {item.image && (
-                      <img src={item.image} alt={item.name} className="w-20 h-20 object-contain rounded" />
+                      <ValidatedImage
+                        src={item.image}
+                        fallbackSrc={FALLBACK_CART_IMAGE}
+                        alt={item.name}
+                        className="w-20 h-20 object-contain rounded"
+                        minBytes={1000}
+                      />
                     )}
                     <div className="flex-1">
                       <h3 className="text-white font-semibold mb-2 text-sm">{item.name}</h3>

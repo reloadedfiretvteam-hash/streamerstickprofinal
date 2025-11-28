@@ -1,6 +1,7 @@
 import { Check, Flame, Star, Zap, ShoppingCart, Gift, Send, User, Mail, Phone } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import { supabase, getStorageUrl } from '../lib/supabase';
+import ValidatedImage from './ValidatedImage';
 
 // Fallback images when Supabase is not configured or local images fail
 const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -363,15 +364,12 @@ This is an automated message from StreamStickPro.com
           {/* Dramatic Fire Stick Hero Banner */}
           <div className="relative rounded-3xl overflow-hidden mb-12 animate-fade-in">
             <div className="absolute inset-0">
-              <img
-                src={getStorageUrl('imiges', 'firestick 4k.jpg')}
+              <ValidatedImage
+                src={getStorageUrl('images', 'firestick 4k.jpg')}
+                fallbackSrc={FALLBACK_FIRESTICK_IMAGE}
                 alt="Fire Stick Breaking Free"
                 className="w-full h-full object-cover"
-                loading="lazy"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = FALLBACK_FIRESTICK_IMAGE;
-                }}
+                minBytes={1000}
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
             </div>
@@ -424,20 +422,12 @@ This is an automated message from StreamStickPro.com
                 )}
 
                 <div className="relative h-56 overflow-hidden">
-                  <img
+                  <ValidatedImage
                     src={product.image}
+                    fallbackSrc={product.type === 'firestick' ? FALLBACK_FIRESTICK_IMAGE : FALLBACK_IPTV_IMAGE}
                     alt={product.name}
                     className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                    loading="lazy"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      // Fallback to pexels placeholder images
-                      if (product.type === 'firestick') {
-                        target.src = FALLBACK_FIRESTICK_IMAGE;
-                      } else {
-                        target.src = FALLBACK_IPTV_IMAGE;
-                      }
-                    }}
+                    minBytes={1000}
                   />
                   <div className="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-sm">
                     {product.badge}
@@ -661,11 +651,12 @@ This is an automated message from StreamStickPro.com
                 )}
 
                 <div className="relative h-48 overflow-hidden">
-                  <img
+                  <ValidatedImage
                     src={product.image}
+                    fallbackSrc={FALLBACK_IPTV_IMAGE}
                     alt={product.name}
                     className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                    loading="lazy"
+                    minBytes={1000}
                   />
                   <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full font-bold text-xs">
                     {product.badge}

@@ -149,6 +149,12 @@ export default function CustomerReviewsSection() {
     ? (customerReviews.reduce((sum, r) => sum + r.rating, 0) / customerReviews.length).toFixed(1)
     : '0.0';
 
+  // Don't render anything if there are no reviews
+  // This prevents empty containers from appearing on the page
+  if (customerReviews.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-16 bg-gradient-to-b from-gray-50 to-white" id="customer-reviews">
       <div className="container mx-auto px-4">
