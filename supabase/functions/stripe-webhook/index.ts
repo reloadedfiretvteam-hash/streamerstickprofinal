@@ -62,8 +62,16 @@ async function verifyStripeSignature(
   const signatureParts: Record<string, string> = {};
 
   for (const element of elements) {
-    const [key, value] = element.split("=");
-    signatureParts[key] = value;
+    const parts = element.split("=");
+    // Validate that we have exactly a key=value pair
+    if (parts.length >= 2) {
+      const key = parts[0];
+      // Join remaining parts in case value contains '='
+      const value = parts.slice(1).join("=");
+      if (key && value) {
+        signatureParts[key] = value;
+      }
+    }
   }
 
   const timestamp = signatureParts["t"];
@@ -225,21 +233,38 @@ Deno.serve(async (req: Request) => {
       }
 
       // Log email for sending (actual email sending would be done by a separate process)
-      await fetch(`${supabaseUrl}/rest/v1/email_logs`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${supabaseKey}`,
-          apikey: supabaseKey,
-        },
-        body: JSON.stringify({
-          recipient: paymentIntent.metadata?.customer_email || paymentIntent.receipt_email || "",
-          template_key: "stripe_order_confirmation",
-          subject: `Order Confirmation - ${orderNumber}`,
-          body: `Thank you for your order! Your order number is ${orderNumber}. Amount: $${(paymentIntent.amount / 100).toFixed(2)}`,
-          status: "pending",
-        }),
-      });
+      // Validate email format before logging
+      const recipientEmail = paymentIntent.metadata?.customer_email || paymentIntent.receipt_email || "";
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      
+      if (recipientEmail && emailRegex.test(recipientEmail)) {
+        try {
+          const emailResponse = await fetch(`${supabaseUrl}/rest/v1/email_logs`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${supabaseKey}`,
+              apikey: supabaseKey,
+            },
+            body: JSON.stringify({
+              recipient: recipientEmail,
+              template_key: "stripe_order_confirmation",
+              subject: `Order Confirmation - ${orderNumber}`,
+              body: `Thank you for your order! Your order number is ${orderNumber}. Amount: $${(paymentIntent.amount / 100).toFixed(2)}`,
+              status: "pending",
+            }),
+          });
+
+          if (!emailResponse.ok) {
+            console.error("Failed to log email:", await emailResponse.text());
+          }
+        } catch (emailError) {
+          console.error("Error logging email:", emailError);
+          // Continue processing - don't fail the webhook for email logging issues
+        }
+      } else {
+        console.warn(`Invalid or missing email address for order ${orderNumber}: ${recipientEmail}`);
+      }
 
       console.log(`Payment succeeded for PaymentIntent: ${paymentIntent.id}, Order: ${orderNumber}`);
     }

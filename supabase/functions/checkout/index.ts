@@ -90,12 +90,13 @@ Deno.serve(async (req: Request) => {
     // SECURITY: Calculate total amount on the server using database prices
     let totalAmountCents = 0;
     const lineItems: { productId: string; name: string; quantity: number; unitPrice: number; total: number }[] = [];
+    const invalidProducts: string[] = [];
 
     for (const cartItem of items) {
       const product = products.find((p) => p.id === cartItem.productId);
       if (!product) {
-        console.warn(`Product ${cartItem.productId} not found in database`);
-        continue; // Skip products not found - could also throw an error
+        invalidProducts.push(cartItem.productId);
+        continue;
       }
 
       // Use sale_price if available, otherwise use regular price
@@ -112,6 +113,13 @@ Deno.serve(async (req: Request) => {
         unitPrice,
         total: itemTotal,
       });
+    }
+
+    // SECURITY: Reject checkout if any products are invalid
+    // This prevents price manipulation by mixing invalid products with valid ones
+    if (invalidProducts.length > 0) {
+      console.error(`Invalid product IDs in cart: ${invalidProducts.join(", ")}`);
+      throw new Error(`One or more products in your cart are no longer available. Please refresh and try again.`);
     }
 
     if (totalAmountCents <= 0) {
