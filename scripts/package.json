@@ -1,0 +1,16 @@
+{
+  "name": "supabase-product-scripts",
+  "version": "1.0.0",
+  "description": "Scripts for managing Supabase product data",
+  "type": "module",
+  "scripts": {
+    "update-images": "node update_images.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
