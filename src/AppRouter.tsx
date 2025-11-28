@@ -11,6 +11,10 @@ import FireSticksPage from './pages/FireSticksPage';
 import IPTVServicesPage from './pages/IPTVServicesPage';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import StripeSecureCheckoutPage from './pages/StripeSecureCheckoutPage';
+import CartPage from './pages/CartPage';
+import OrderSuccessPage from './pages/OrderSuccessPage';
+import OrderCancelPage from './pages/OrderCancelPage';
+import AccountPage from './pages/AccountPage';
 
 // Check if current host is a Stripe payment subdomain
 function isStripePaymentHost(): boolean {
@@ -98,6 +102,26 @@ export default function AppRouter() {
 
   if (currentPath === '/faq' || currentPath === '/faq/') {
     return <FAQPage />;
+  }
+
+  // Cart page route
+  if (currentPath === '/cart' || currentPath === '/cart/') {
+    return <CartPage />;
+  }
+
+  // Order success page route
+  if (currentPath === '/order/success' || currentPath === '/order/success/') {
+    return <OrderSuccessPage />;
+  }
+
+  // Order cancel page route
+  if (currentPath === '/order/cancel' || currentPath === '/order/cancel/') {
+    return <OrderCancelPage />;
+  }
+
+  // Account page route
+  if (currentPath === '/account' || currentPath === '/account/') {
+    return <AccountPage />;
   }
 
   // Blog post routing

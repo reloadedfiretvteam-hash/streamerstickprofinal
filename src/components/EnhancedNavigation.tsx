@@ -1,4 +1,4 @@
-import { Flame, Menu, X, ShoppingCart, Tv, Smartphone, BookOpen, HelpCircle, Package, Search } from 'lucide-react';
+import { Flame, Menu, X, ShoppingCart, Tv, Smartphone, HelpCircle, Package, Search, User } from 'lucide-react';
 import { useState } from 'react';
 
 interface NavigationProps {
@@ -31,6 +31,7 @@ export default function EnhancedNavigation({ cartItemCount = 0, onCartClick }: N
     { label: 'Shop All', action: () => window.location.href = '/shop', icon: <Package className="w-4 h-4" /> },
     { label: 'FAQ', action: () => window.location.href = '/faq', icon: <HelpCircle className="w-4 h-4" /> },
     { label: 'Track Order', action: () => window.location.href = '/track-order', icon: <Search className="w-4 h-4" /> },
+    { label: 'Account', action: () => window.location.href = '/account', icon: <User className="w-4 h-4" /> },
   ];
 
   return (
@@ -58,9 +59,9 @@ export default function EnhancedNavigation({ cartItemCount = 0, onCartClick }: N
               </button>
             ))}
             
-            {/* Cart Button */}
+            {/* Cart Button - Go to Cart Page */}
             <button
-              onClick={() => onCartClick?.()}
+              onClick={() => window.location.href = '/cart'}
               className="relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg ml-2"
             >
               <ShoppingCart className="w-5 h-5" />
@@ -99,9 +100,9 @@ export default function EnhancedNavigation({ cartItemCount = 0, onCartClick }: N
               </button>
             ))}
             
-            {/* Mobile Cart Button */}
+            {/* Mobile Cart Button - Go to Cart Page */}
             <button
-              onClick={() => { onCartClick?.(); setIsMenuOpen(false); }}
+              onClick={() => { window.location.href = '/cart'; setIsMenuOpen(false); }}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-lg transition-all font-semibold mt-2"
             >
               <ShoppingCart className="w-5 h-5" />
