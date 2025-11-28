@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Package, DollarSign, Edit, X } from 'lucide-react';
+import { Save, Package, DollarSign, Edit, X, CreditCard } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface StripeProduct {
@@ -102,12 +102,15 @@ export default function StripeProductManager() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-3xl font-bold text-white mb-2">Stripe-Safe Product Manager</h2>
-          <p className="text-gray-400">Manage products shown on secure.streamstickpro.com (Stripe-facing domain)</p>
+          <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+            <CreditCard className="w-8 h-8 text-purple-500" />
+            Stripe-Safe Product Manager
+          </h2>
+          <p className="text-gray-400">Manage products shown on pay.streamstickpro.com (Stripe-facing domain)</p>
         </div>
         <button
           onClick={syncPrices}
-          className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold flex items-center gap-2"
+          className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold flex items-center gap-2"
         >
           <DollarSign className="w-5 h-5" />
           Sync Prices with Real Products
@@ -117,11 +120,25 @@ export default function StripeProductManager() {
       <div className="bg-gray-800 rounded-xl p-6 mb-6">
         <h3 className="text-xl font-bold text-white mb-4">⚠️ Important</h3>
         <ul className="text-gray-300 space-y-2 list-disc list-inside">
-          <li>These products are ONLY shown on <strong className="text-white">secure.streamstickpro.com</strong></li>
+          <li>These products are ONLY shown on <strong className="text-white">pay.streamstickpro.com</strong></li>
           <li>Use generic, compliant language (no "IPTV", "jailbroken", etc.)</li>
           <li>Prices automatically sync with your real products</li>
           <li>Stripe will ONLY see these product names/descriptions</li>
+          <li>Payments are processed securely via Stripe PaymentIntent API</li>
         </ul>
+      </div>
+
+      <div className="bg-purple-500/20 border border-purple-500/50 rounded-xl p-6 mb-6">
+        <h3 className="text-lg font-bold text-white mb-3">💳 Stripe Integration</h3>
+        <div className="text-sm text-gray-300">
+          <p className="mb-2">The Stripe checkout flow uses PaymentIntents for secure, PCI-compliant payments:</p>
+          <ul className="ml-4 space-y-1 list-disc list-inside">
+            <li>Frontend creates a payment intent via the Edge Function</li>
+            <li>Secret key is securely stored in Supabase Edge Functions</li>
+            <li>Only the client_secret is returned to the browser</li>
+            <li>Payment is confirmed using Stripe Elements</li>
+          </ul>
+        </div>
       </div>
 
       <div className="space-y-4">
