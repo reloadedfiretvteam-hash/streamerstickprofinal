@@ -45,6 +45,14 @@ interface OrderDataType {
   cashAppTag: string | null;
 }
 
+interface OrderItem {
+  product_id: string;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+}
+
 export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, onClearCart }: Props) {
   const [paymentMethod, setPaymentMethod] = useState<'cashapp' | 'bitcoin' | 'square'>('cashapp');
   const [btcPrice, setBtcPrice] = useState<number>(0);
@@ -130,8 +138,8 @@ export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity,
     return (prefix + suffix).slice(0, length);
   };
 
-  const sendCustomerEmail = async (purchaseCode: string, orderNumber: string, items: any[]) => {
-    const itemsList = items.map(item =>
+  const sendCustomerEmail = async (purchaseCode: string, orderNumber: string, orderItems: OrderItem[]) => {
+    const itemsList = orderItems.map(item =>
       `- ${item.product_name} x${item.quantity} = $${item.total_price.toFixed(2)}`
     ).join('\n');
 
@@ -220,8 +228,8 @@ Need Support? Email: ${SHOP_OWNER_EMAIL}
     return emailBody;
   };
 
-  const sendShopOwnerEmail = async (purchaseCode: string, orderNumber: string, items: any[]) => {
-    const itemsList = items.map(item =>
+  const sendShopOwnerEmail = async (purchaseCode: string, orderNumber: string, orderItems: OrderItem[]) => {
+    const itemsList = orderItems.map(item =>
       `- ${item.product_name} x${item.quantity} = $${item.total_price.toFixed(2)}`
     ).join('\n');
 
@@ -606,7 +614,7 @@ Customer has been sent complete payment instructions including their unique purc
                     </p>
                     <SquarePaymentForm 
                       amount={total}
-                      onSubmit={async (token: string) => {
+                      onSubmit={async (_token: string) => {
                         // Handle Square payment - token is used by the payment form internally
                         await handleCompleteOrder();
                       }}
