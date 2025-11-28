@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { Shield, Lock, Package, CheckCircle, AlertCircle, ArrowRight, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import StripePaymentForm from '../components/StripePaymentForm';
+import { ToastProvider, showToast } from '../components/ToastProvider';
+
+// Fallback image for products
+const FALLBACK_PRODUCT_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=400';
 
 interface Product {
   id: string;
@@ -148,11 +152,13 @@ export default function StripeSecureCheckoutPage() {
 
   function handlePaymentSuccess(paymentIntentId: string) {
     console.log('Payment successful:', paymentIntentId);
+    showToast.success('Payment successful! Thank you for your order.');
     setStep('success');
   }
 
   function handlePaymentError(error: string) {
     setPaymentError(error);
+    showToast.error(error || 'Payment failed. Please try again.');
   }
 
   const totalAmount = selectedProduct 
@@ -161,51 +167,59 @@ export default function StripeSecureCheckoutPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-slate-600">Loading secure checkout...</p>
+      <>
+        <ToastProvider />
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="mt-4 text-slate-600">Loading secure checkout...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (step === 'success') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-12 h-12 text-green-600" />
-          </div>
-          <h2 className="text-3xl font-bold mb-4 text-gray-900">Payment Successful!</h2>
-          <p className="text-gray-600 mb-6">Your secure transaction has been completed.</p>
-          {selectedProduct && (
-            <div className="p-4 bg-gray-50 rounded-lg text-left mb-6">
-              <p className="text-sm text-gray-500 mb-1">Service</p>
-              <p className="font-medium text-gray-900">{selectedProduct.name}</p>
-              <p className="text-sm text-gray-500 mt-2">Amount</p>
-              <p className="font-bold text-lg text-gray-900">${totalAmount.toFixed(2)}</p>
+      <>
+        <ToastProvider />
+        <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
+          <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-12 h-12 text-green-600" />
             </div>
-          )}
-          <div className="bg-blue-50 p-4 rounded-lg mb-6 text-left">
-            <p className="text-sm text-blue-800">
-              <strong>Next Steps:</strong> You will receive a confirmation email with your order details and service access information.
-            </p>
+            <h2 className="text-3xl font-bold mb-4 text-gray-900">Payment Successful!</h2>
+            <p className="text-gray-600 mb-6">Your secure transaction has been completed.</p>
+            {selectedProduct && (
+              <div className="p-4 bg-gray-50 rounded-lg text-left mb-6">
+                <p className="text-sm text-gray-500 mb-1">Service</p>
+                <p className="font-medium text-gray-900">{selectedProduct.name}</p>
+                <p className="text-sm text-gray-500 mt-2">Amount</p>
+                <p className="font-bold text-lg text-gray-900">${totalAmount.toFixed(2)}</p>
+              </div>
+            )}
+            <div className="bg-blue-50 p-4 rounded-lg mb-6 text-left">
+              <p className="text-sm text-blue-800">
+                <strong>Next Steps:</strong> You will receive a confirmation email with your order details and service access information.
+              </p>
+            </div>
+            <button 
+              onClick={() => window.location.href = '/'}
+              className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition-all"
+            >
+              Return to Home
+            </button>
           </div>
-          <button 
-            onClick={() => window.location.href = '/'}
-            className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition-all"
-          >
-            Return to Home
-          </button>
         </div>
-      </div>
+      </>
     );
   }
 
   if (step === 'select') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <>
+        <ToastProvider />
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
         {/* Header */}
         <nav className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-6 py-4">
@@ -250,6 +264,10 @@ export default function StripeSecureCheckoutPage() {
                       src={product.image_url}
                       alt={product.name}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = FALLBACK_PRODUCT_IMAGE;
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -347,24 +365,27 @@ export default function StripeSecureCheckoutPage() {
             </div>
           </div>
         </section>
-      </div>
+        </div>
+      </>
     );
   }
 
   // Checkout Step
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Back Button */}
-        <button
-          onClick={handleBackToProducts}
-          className="mb-6 flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors"
-        >
-          <ArrowRight className="w-4 h-4 rotate-180" />
-          <span>Back to Products</span>
-        </button>
+    <>
+      <ToastProvider />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          {/* Back Button */}
+          <button
+            onClick={handleBackToProducts}
+            className="mb-6 flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors"
+          >
+            <ArrowRight className="w-4 h-4 rotate-180" />
+            <span>Back to Products</span>
+          </button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Order Summary & Customer Info */}
           <div className="lg:col-span-1 space-y-6">
             {/* Order Summary */}
@@ -382,6 +403,10 @@ export default function StripeSecureCheckoutPage() {
                         src={selectedProduct.image_url}
                         alt={selectedProduct.name}
                         className="w-20 h-20 object-cover rounded-lg"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = FALLBACK_PRODUCT_IMAGE;
+                        }}
                       />
                     )}
                     <div className="flex-1">
@@ -504,5 +529,6 @@ export default function StripeSecureCheckoutPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

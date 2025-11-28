@@ -5,6 +5,7 @@ import OrderConfirmation from './OrderConfirmation';
 import LegalDisclaimer from './LegalDisclaimer';
 import SquarePaymentForm from './SquarePaymentForm';
 import ValidatedImage from './ValidatedImage';
+import { showToast } from './ToastProvider';
 
 // Fallback image for cart items
 const FALLBACK_CART_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=200';
@@ -26,6 +27,24 @@ interface Props {
   onClearCart?: () => void;
 }
 
+interface OrderDataType {
+  orderNumber: string;
+  purchaseCode: string;
+  items: {
+    product_id: string;
+    product_name: string;
+    quantity: number;
+    unit_price: number;
+    total_price: number;
+  }[];
+  total: number;
+  paymentMethod: 'cashapp' | 'bitcoin' | 'square';
+  customerEmail: string;
+  btcAmount: string | null;
+  btcAddress: string | null;
+  cashAppTag: string | null;
+}
+
 export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, onClearCart }: Props) {
   const [paymentMethod, setPaymentMethod] = useState<'cashapp' | 'bitcoin' | 'square'>('cashapp');
   const [btcPrice, setBtcPrice] = useState<number>(0);
@@ -41,7 +60,7 @@ export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity,
 
   const [processing, setProcessing] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [orderData, setOrderData] = useState<any>(null);
+  const [orderData, setOrderData] = useState<OrderDataType | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Payment gateway details
@@ -365,12 +384,12 @@ Customer has been sent complete payment instructions including their unique purc
 
   const handleCompleteOrder = async () => {
     if (items.length === 0) {
-      alert('Your cart is empty');
+      showToast.warning('Your cart is empty');
       return;
     }
 
     if (!validateAllFields()) {
-      alert('Please fill in all required fields correctly');
+      showToast.error('Please fill in all required fields correctly');
       return;
     }
 
@@ -456,10 +475,12 @@ Customer has been sent complete payment instructions including their unique purc
       });
 
       setShowConfirmation(true);
+      showToast.success('Order placed successfully!');
       console.log('Order created successfully with purchase code:', purchaseCode);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating order:', error);
-      alert(`Error: ${error.message || 'Unable to process order. Please try again or contact support.'}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unable to process order. Please try again or contact support.';
+      showToast.error(errorMessage);
     } finally {
       setProcessing(false);
     }

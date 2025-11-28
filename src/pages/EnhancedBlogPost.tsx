@@ -333,8 +333,31 @@ export default function EnhancedBlogPost() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen bg-gray-900">
+        <Navigation cartItemCount={0} onCartClick={() => {}} />
+        <div className="container mx-auto px-4 py-12 max-w-4xl animate-pulse">
+          {/* Featured Image Skeleton */}
+          <div className="w-full h-96 bg-gray-800 rounded-2xl mb-8"></div>
+          
+          {/* Title Skeleton */}
+          <div className="h-12 bg-gray-800 rounded w-3/4 mb-6"></div>
+          
+          {/* Meta info skeleton */}
+          <div className="flex gap-6 mb-8 pb-6 border-b border-gray-800">
+            <div className="h-5 bg-gray-800 rounded w-32"></div>
+            <div className="h-5 bg-gray-800 rounded w-24"></div>
+          </div>
+          
+          {/* Content skeleton */}
+          <div className="space-y-4">
+            <div className="h-4 bg-gray-800 rounded"></div>
+            <div className="h-4 bg-gray-800 rounded w-5/6"></div>
+            <div className="h-4 bg-gray-800 rounded w-4/5"></div>
+            <div className="h-4 bg-gray-800 rounded"></div>
+            <div className="h-4 bg-gray-800 rounded w-3/4"></div>
+          </div>
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -401,6 +424,11 @@ export default function EnhancedBlogPost() {
                 alt={post.title}
                 className="w-full h-96 object-cover rounded-2xl mb-8"
                 loading="eager"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  // Fallback to a generic blog image on error
+                  target.src = 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=800';
+                }}
               />
             )}
 
