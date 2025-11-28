@@ -12,17 +12,19 @@ export function CartProvider({ children }: CartProviderProps) {
   const [items, setItems] = useState<CartItem[]>([]);
 
   /**
-   * Adds an item to the cart
+   * Adds an item to the cart. If the item already exists (by productId),
+   * updates the quantity while keeping other properties unchanged.
    */
   const addToCart = (item: CartItem) => {
     setItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.productId === item.productId);
-      if (existingItem) {
-        return prevItems.map((i) =>
-          i.productId === item.productId
-            ? { ...i, quantity: i.quantity + item.quantity }
-            : i
-        );
+      const existingIndex = prevItems.findIndex((i) => i.productId === item.productId);
+      if (existingIndex !== -1) {
+        const updated = [...prevItems];
+        updated[existingIndex] = {
+          ...prevItems[existingIndex],
+          quantity: prevItems[existingIndex].quantity + item.quantity,
+        };
+        return updated;
       }
       return [...prevItems, item];
     });
