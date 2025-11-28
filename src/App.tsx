@@ -6,7 +6,8 @@ import About from './components/About';
 import WhyChooseUs from './components/WhyChooseUs';
 import Shop from './components/Shop';
 import MediaCarousel from './components/MediaCarousel';
-import IPTVPreviewVideo from './components/IPTVPreviewVideo';
+// IPTVPreviewVideo removed - duplicate "See What You Get" section
+// The video is now displayed only in the WhatYouGetVideo component
 import WhatYouGetVideo from './components/WhatYouGetVideo';
 import WhatIsIPTV from './components/WhatIsIPTV';
 import FAQ from './components/FAQ';
@@ -213,12 +214,20 @@ function App() {
         <WhyChooseUs />
         <MediaCarousel />
         <HowItWorksSteps />
+        {/* 
+          WhatYouGetVideo component - Main "What You Get" section
+          Displays the Supabase MP4 video preview showing IPTV features
+          Video URL is configured in the WhatYouGetVideo.tsx component
+        */}
         <WhatYouGetVideo />
         <Shop onAddToCart={handleAddToCart} />
         <YouTubeTutorials />
         <ReviewsCarousel />
         <ComparisonTable />
-        <IPTVPreviewVideo />
+        {/* 
+          IPTVPreviewVideo removed - was a duplicate "See What You Get" section
+          The video is now only displayed in the WhatYouGetVideo component above
+        */}
         <WhatIsIPTV />
         <Devices />
         <BlogDisplay />
