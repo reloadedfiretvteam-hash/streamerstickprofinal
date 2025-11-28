@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
-  Home, Package, FileText, ShoppingCart, Settings, LogOut,
+  Package, FileText, ShoppingCart, Settings, LogOut,
   TrendingUp, HelpCircle, Image, DollarSign, CreditCard, Flame, X,
-  Grid, Users, Video, Eye, Edit3
+  Grid, Eye, Edit3
 } from 'lucide-react';
 
 import EnhancedBlogManager from '../components/custom-admin/EnhancedBlogManager';
@@ -39,7 +39,7 @@ export default function ModalAdminDashboard() {
     mediaFiles: 0,
     faqItems: 0
   });
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('custom_admin_token');

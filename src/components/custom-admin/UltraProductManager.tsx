@@ -15,7 +15,8 @@ import {
   Settings,
   Layers,
   Box,
-  X
+  X,
+  TrendingUp
 } from 'lucide-react';
 
 export default function UltraProductManager() {
