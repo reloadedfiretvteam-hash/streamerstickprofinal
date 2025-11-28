@@ -1,4 +1,4 @@
-import { XCircle, ShoppingCart, RefreshCw } from 'lucide-react';
+import { XCircle, ShoppingCart, RefreshCw, ArrowLeft } from 'lucide-react';
 import Navigation from '../components/EnhancedNavigation';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';

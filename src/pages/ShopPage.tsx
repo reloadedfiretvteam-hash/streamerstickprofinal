@@ -4,6 +4,8 @@ import { ShoppingCart, Search, Filter, Star } from 'lucide-react';
 import Footer from '../components/Footer';
 import CustomerReviewsSection from '../components/CustomerReviewsSection';
 import ValidatedImage from '../components/ValidatedImage';
+import Navigation from '../components/EnhancedNavigation';
+import { useCart } from '../context/CartContext';
 
 // Fallback images
 const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -22,23 +24,17 @@ interface Product {
   featured: boolean;
 }
 
-interface CartItem {
-  product: Product;
-  quantity: number;
-}
-
 export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const { addItem, getItemCount } = useCart();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
 
   useEffect(() => {
     loadProducts();
-    loadCart();
   }, []);
 
   useEffect(() => {
@@ -190,35 +186,25 @@ export default function ShopPage() {
     }
   ];
 
-  const loadCart = () => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
-  };
-
-  const saveCart = (newCart: CartItem[]) => {
-    setCart(newCart);
-    localStorage.setItem('cart', JSON.stringify(newCart));
-  };
-
   const addToCart = (product: Product) => {
-    const existing = cart.find(item => item.product.id === product.id);
-    let newCart;
-
-    if (existing) {
-      newCart = cart.map(item =>
-        item.product.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
-    } else {
-      newCart = [...cart, { product, quantity: 1 }];
-    }
-
-    saveCart(newCart);
-    // Redirect to checkout immediately
-    window.location.href = '/checkout';
+    // Determine product type
+    const isFirestick = product.name?.toLowerCase().includes('fire stick') || 
+                        product.name?.toLowerCase().includes('fire tv') ||
+                        product.category?.toLowerCase().includes('fire stick');
+    
+    // Convert to the format expected by CartContext
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: parseFloat(product.sale_price || product.price),
+      type: isFirestick ? 'firestick' : 'iptv',
+      image: product.main_image,
+      badge: product.featured ? 'BEST VALUE' : 'STARTER',
+      popular: product.featured,
+      features: product.description.split(',').map(f => f.trim())
+    });
+    // Redirect to cart
+    window.location.href = '/cart';
   };
 
   const filterAndSortProducts = () => {
@@ -257,7 +243,7 @@ export default function ShopPage() {
   };
 
   const categories = ['all', ...new Set(products.map(p => p.category))];
-  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartItemCount = getItemCount();
 
   if (loading) {
     return (
@@ -269,8 +255,10 @@ export default function ShopPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navigation cartItemCount={cartItemCount} onCartClick={() => window.location.href = '/cart'} />
+      
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white py-8">
+      <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white py-8 mt-16">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
@@ -278,7 +266,7 @@ export default function ShopPage() {
               <p className="text-orange-100">Browse our complete collection</p>
             </div>
             <a
-              href="/checkout"
+              href="/cart"
               className="bg-white text-orange-600 px-6 py-3 rounded-lg font-semibold hover:bg-orange-50 transition-all flex items-center gap-2"
             >
               <ShoppingCart className="w-5 h-5" />
