@@ -60,6 +60,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const updateQuantity = (id: string, quantity: number) => {
+    if (quantity <= 0) {
+      // Remove item if quantity is 0 or negative
+      setCartItems(prev => prev.filter(item => item.id !== id));
+      return;
+    }
     setCartItems(prev =>
       prev.map(item =>
         item.id === id ? { ...item, quantity } : item
