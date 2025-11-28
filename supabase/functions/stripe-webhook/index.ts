@@ -122,8 +122,18 @@ Deno.serve(async (req: Request) => {
         );
       }
     } else if (stripeWebhookSecret && !signature) {
-      // Webhook secret is configured but no signature provided
-      console.warn("Webhook signature missing, but verification is configured");
+      // Webhook secret is configured but no signature provided - reject the request
+      console.error("Webhook signature missing, verification is required");
+      return new Response(
+        JSON.stringify({ error: "Signature required" }),
+        {
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
 
     const event = JSON.parse(body);
@@ -151,8 +161,11 @@ Deno.serve(async (req: Request) => {
         }
       }
 
-      // Generate order number
-      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+      // Generate order number using crypto for better entropy
+      const randomBytes = new Uint8Array(4);
+      crypto.getRandomValues(randomBytes);
+      const randomHex = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}-${randomHex.slice(0, 6)}`;
 
       // Create order in database
       const orderPayload = {

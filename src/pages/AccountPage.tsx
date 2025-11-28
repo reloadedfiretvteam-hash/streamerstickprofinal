@@ -341,7 +341,7 @@ export default function AccountPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-xl font-bold text-orange-400">
-                            ${order.total?.toFixed(2) || '0.00'}
+                            ${(order.total ?? 0).toFixed(2)}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.payment_status || 'pending')}`}>
@@ -366,7 +366,7 @@ export default function AccountPage() {
                                   {item.product_name} x{item.quantity}
                                 </span>
                                 <span className="text-gray-400">
-                                  ${item.total_price?.toFixed(2) || '0.00'}
+                                  ${(item.total_price ?? 0).toFixed(2)}
                                 </span>
                               </div>
                             ))}
@@ -397,11 +397,11 @@ export default function AccountPage() {
                                 <div>
                                   <p className="font-medium">{item.product_name}</p>
                                   <p className="text-gray-400">
-                                    ${item.unit_price?.toFixed(2)} x {item.quantity}
+                                    ${(item.unit_price ?? 0).toFixed(2)} x {item.quantity}
                                   </p>
                                 </div>
                                 <span className="font-bold">
-                                  ${item.total_price?.toFixed(2)}
+                                  ${(item.total_price ?? 0).toFixed(2)}
                                 </span>
                               </div>
                             ))}

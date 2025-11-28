@@ -71,7 +71,7 @@ Deno.serve(async (req: Request) => {
     lineItems.forEach((item, index) => {
       bodyParams.append(`line_items[${index}][price_data][currency]`, item.price_data.currency);
       bodyParams.append(`line_items[${index}][price_data][product_data][name]`, item.price_data.product_data.name);
-      if (item.price_data.product_data.images) {
+      if (item.price_data.product_data.images && Array.isArray(item.price_data.product_data.images) && item.price_data.product_data.images.length > 0) {
         bodyParams.append(`line_items[${index}][price_data][product_data][images][0]`, item.price_data.product_data.images[0]);
       }
       bodyParams.append(`line_items[${index}][price_data][unit_amount]`, item.price_data.unit_amount.toString());
