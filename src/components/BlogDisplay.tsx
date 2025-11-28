@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Calendar, Clock, Eye, ArrowRight } from 'lucide-react';
 import { supabase, getStorageUrl } from '../lib/supabase';
 
+// Fallback image for blog posts
+const FALLBACK_BLOG_IMAGE = 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=600';
+
 interface BlogPost {
   id: string;
   title: string;
@@ -15,6 +18,7 @@ interface BlogPost {
   view_count: number;
   read_time_minutes: number;
   category_id: string;
+  tags?: string[];
 }
 
 interface Category {
@@ -104,7 +108,35 @@ export default function BlogDisplay() {
     return (
       <section className="py-20 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-white">Loading blog posts...</div>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Latest from Our Blog
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Expert guides, tips, and insights about IPTV streaming, Fire Stick setup, and cutting the cord
+            </p>
+          </div>
+          
+          {/* Loading Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-gray-800 rounded-xl overflow-hidden animate-pulse">
+                <div className="h-48 bg-gray-700"></div>
+                <div className="p-6 space-y-4">
+                  <div className="flex gap-4">
+                    <div className="h-4 bg-gray-700 rounded w-24"></div>
+                    <div className="h-4 bg-gray-700 rounded w-20"></div>
+                  </div>
+                  <div className="h-6 bg-gray-700 rounded w-3/4"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-700 rounded"></div>
+                    <div className="h-4 bg-gray-700 rounded w-5/6"></div>
+                  </div>
+                  <div className="h-4 bg-gray-700 rounded w-1/4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     );
@@ -140,8 +172,10 @@ export default function BlogDisplay() {
                   loading="lazy"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    // Fallback to IPTV subscription image if featured image fails
-                    target.src = getStorageUrl('images', 'iptv-subscription.jpg');
+                    // Use a stack of fallbacks - first try Supabase image, then external fallback
+                    if (!target.src.includes('pexels')) {
+                      target.src = FALLBACK_BLOG_IMAGE;
+                    }
                   }}
                 />
                   <div className="absolute top-4 left-4 flex flex-wrap gap-2">

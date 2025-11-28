@@ -31,8 +31,8 @@ import MoneyBackGuarantee from './components/MoneyBackGuarantee';
 import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
 import ConciergePage from './pages/ConciergePage';
-import ConciergeCheckout from './pages/ConciergeCheckout';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
+import { ToastProvider, showToast } from './components/ToastProvider';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
 
 interface CartItem {
@@ -137,7 +137,9 @@ function App() {
     if (success) {
       setEmailCaptured(true);
       localStorage.setItem('captured_email', email);
-      alert('Thank you! Check your email for exclusive offers.');
+      showToast.success('Thank you! Check your email for exclusive offers.');
+    } else {
+      showToast.error('Unable to subscribe. Please try again.');
     }
   };
 
@@ -165,6 +167,7 @@ function App() {
       }];
     });
     setIsCartOpen(true);
+    showToast.cart(product.name);
   };
 
   const handleUpdateQuantity = (id: string, quantity: number) => {
@@ -197,6 +200,7 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <ToastProvider />
       <SEOHead />
       <GoogleAnalytics />
       <StructuredData />
