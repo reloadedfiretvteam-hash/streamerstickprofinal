@@ -68,12 +68,22 @@ Deno.serve(async (req: Request) => {
       throw new Error("At least one product is required");
     }
 
-    // Fetch all product IDs from cart
-    const productIds = cartItems.map(item => item.productId);
+    // Fetch all product IDs from cart and validate/encode them
+    const productIds = cartItems.map(item => {
+      // Validate product ID format (alphanumeric, hyphens, and underscores only)
+      const sanitizedId = String(item.productId).replace(/[^a-zA-Z0-9_-]/g, '');
+      return sanitizedId;
+    }).filter(id => id.length > 0);
+
+    if (productIds.length === 0) {
+      throw new Error("No valid product IDs in cart");
+    }
 
     // Fetch products from stripe_products table (security: prices come from server, not client)
+    // Using properly encoded query parameters
+    const encodedIds = productIds.map(id => encodeURIComponent(`"${id}"`)).join(",");
     const productResponse = await fetch(
-      `${supabaseUrl}/rest/v1/stripe_products?id=in.(${productIds.map(id => `"${id}"`).join(",")})&is_active=eq.true`,
+      `${supabaseUrl}/rest/v1/stripe_products?id=in.(${encodedIds})&is_active=eq.true`,
       {
         method: "GET",
         headers: {
@@ -131,9 +141,11 @@ Deno.serve(async (req: Request) => {
       ? `Payment for ${lineItems[0]}`
       : `Payment for ${lineItems.length} items: ${lineItems.join(", ")}`;
 
-    // Truncate description if too long (Stripe limit is 1000 chars)
-    const truncatedDescription = description.length > 500
-      ? description.substring(0, 497) + "..."
+    // Truncate description if too long (Stripe limit is 1000 chars, we use a safe limit)
+    const MAX_DESCRIPTION_LENGTH = 500;
+    const ELLIPSIS = "...";
+    const truncatedDescription = description.length > MAX_DESCRIPTION_LENGTH
+      ? description.substring(0, MAX_DESCRIPTION_LENGTH - ELLIPSIS.length) + ELLIPSIS
       : description;
 
     // Create Stripe PaymentIntent

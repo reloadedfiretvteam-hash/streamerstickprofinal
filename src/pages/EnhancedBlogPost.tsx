@@ -34,9 +34,16 @@ export default function EnhancedBlogPost() {
   const [error, setError] = useState<string | null>(null);
   const [tocItems, setTocItems] = useState<{id: string; text: string}[]>([]);
 
+  /**
+   * Convert URL slug to title-case tag name
+   * Example: "fire-stick-setup" -> "Fire Stick Setup"
+   */
+  const slugToTagName = (slug: string): string => {
+    return slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
   const loadPostByTag = useCallback(async (tagSlug: string) => {
-    // Convert tag slug back to tag name
-    const tagName = tagSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const tagName = slugToTagName(tagSlug);
     
     setError(null);
     try {

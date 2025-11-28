@@ -28,7 +28,8 @@ interface Category {
 
 export default function BlogDisplay() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  // Categories are loaded but used for future filtering features
+  const [, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

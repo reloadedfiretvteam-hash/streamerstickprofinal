@@ -27,6 +27,26 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = 'streamstickpro_cart';
 
+// Validate cart item structure
+function isValidCartItem(item: unknown): item is CartItem {
+  if (typeof item !== 'object' || item === null) return false;
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.productId === 'string' &&
+    typeof obj.name === 'string' &&
+    typeof obj.price === 'number' &&
+    typeof obj.quantity === 'number' &&
+    obj.quantity > 0 &&
+    (obj.image === undefined || typeof obj.image === 'string')
+  );
+}
+
+// Validate parsed cart data
+function validateCartData(data: unknown): CartItem[] {
+  if (!Array.isArray(data)) return [];
+  return data.filter(isValidCartItem);
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(() => {
     // Load cart from localStorage on initial render
@@ -34,7 +54,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       try {
         const stored = localStorage.getItem(CART_STORAGE_KEY);
         if (stored) {
-          return JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          // Validate the parsed data matches expected structure
+          return validateCartData(parsed);
         }
       } catch {
         // If parsing fails, start with empty cart

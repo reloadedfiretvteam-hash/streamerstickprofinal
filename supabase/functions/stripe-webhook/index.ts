@@ -167,8 +167,11 @@ Deno.serve(async (req: Request) => {
       const productId = metadata.product_id || "";
       const productName = metadata.product_name || "";
 
-      // Generate order number
-      const orderNumber = `ORD-${paymentIntent.id.slice(-8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+      // Generate order number using payment intent ID suffix, timestamp, and random component for uniqueness
+      const PAYMENT_ID_SUFFIX_LENGTH = 8;
+      const randomComponent = crypto.getRandomValues(new Uint8Array(4))
+        .reduce((hex, byte) => hex + byte.toString(16).padStart(2, '0'), '');
+      const orderNumber = `ORD-${paymentIntent.id.slice(-PAYMENT_ID_SUFFIX_LENGTH).toUpperCase()}-${randomComponent.toUpperCase()}`;
 
       // Create order in Supabase
       const orderData = {
