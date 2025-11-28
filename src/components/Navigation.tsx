@@ -49,6 +49,12 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
               Blog
             </a>
             <a
+              href="/blog"
+              className="hover:text-orange-400 transition-colors font-semibold"
+            >
+              All Posts
+            </a>
+            <a
               href="/faq"
               className="hover:text-orange-400 transition-colors font-semibold"
             >
@@ -59,6 +65,12 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
               className="hover:text-orange-400 transition-colors font-semibold"
             >
               Track Order
+            </a>
+            <a
+              href="/account"
+              className="hover:text-orange-400 transition-colors font-semibold"
+            >
+              Account
             </a>
             <button
               onClick={() => onCartClick?.()}
@@ -112,6 +124,12 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
               Blog
             </a>
             <a
+              href="/blog"
+              className="block py-2 hover:text-orange-400 transition-colors font-semibold"
+            >
+              All Posts
+            </a>
+            <a
               href="/faq"
               className="block py-2 hover:text-orange-400 transition-colors font-semibold"
             >
@@ -122,6 +140,12 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
               className="block py-2 hover:text-orange-400 transition-colors font-semibold"
             >
               Track Order
+            </a>
+            <a
+              href="/account"
+              className="block py-2 hover:text-orange-400 transition-colors font-semibold"
+            >
+              Account
             </a>
             <button
               onClick={() => { onCartClick?.(); setIsMenuOpen(false); }}

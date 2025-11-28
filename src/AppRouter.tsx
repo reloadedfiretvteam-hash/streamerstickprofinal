@@ -4,6 +4,7 @@ import UnifiedAdminLogin from './pages/UnifiedAdminLogin';
 import ModalAdminDashboard from './pages/ModalAdminDashboard';
 import OrderTracking from './pages/OrderTracking';
 import FAQPage from './pages/FAQPage';
+import BlogPage from './pages/BlogPage';
 import EnhancedBlogPost from './pages/EnhancedBlogPost';
 import ShopPage from './pages/ShopPage';
 import NewCheckoutPage from './pages/NewCheckoutPage';
@@ -11,6 +12,9 @@ import FireSticksPage from './pages/FireSticksPage';
 import IPTVServicesPage from './pages/IPTVServicesPage';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import StripeSecureCheckoutPage from './pages/StripeSecureCheckoutPage';
+import OrderSuccessPage from './pages/OrderSuccessPage';
+import OrderCancelPage from './pages/OrderCancelPage';
+import AccountPage from './pages/AccountPage';
 
 // Check if current host is a Stripe payment subdomain
 function isStripePaymentHost(): boolean {
@@ -100,6 +104,11 @@ export default function AppRouter() {
     return <FAQPage />;
   }
 
+  // Blog index page
+  if (currentPath === '/blog' || currentPath === '/blog/') {
+    return <BlogPage />;
+  }
+
   // Blog post routing
   if (currentPath.startsWith('/blog/tag/') && currentPath !== '/blog/tag/') {
     // Tag page - will be handled by a new component or EnhancedBlogPost
@@ -108,6 +117,20 @@ export default function AppRouter() {
 
   if (currentPath.startsWith('/blog/') && currentPath !== '/blog/') {
     return <EnhancedBlogPost />;
+  }
+
+  // Order confirmation pages
+  if (currentPath === '/order/success' || currentPath === '/order/success/') {
+    return <OrderSuccessPage />;
+  }
+
+  if (currentPath === '/order/cancel' || currentPath === '/order/cancel/') {
+    return <OrderCancelPage />;
+  }
+
+  // Account page (protected)
+  if (currentPath === '/account' || currentPath === '/account/') {
+    return <AccountPage />;
   }
 
   return <App />;
