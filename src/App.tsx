@@ -27,7 +27,6 @@ import ReviewsCarousel from './components/ReviewsCarousel';
 import TrustBadges from './components/TrustBadges';
 import StickyBuyButton from './components/StickyBuyButton';
 import ComparisonTable from './components/ComparisonTable';
-import SocialProof from './components/SocialProof';
 import MoneyBackGuarantee from './components/MoneyBackGuarantee';
 import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
@@ -237,7 +236,6 @@ function App() {
         <LegalDisclaimer />
         <Footer />
         <StickyBuyButton />
-        <SocialProof />
 
         {showEmailPopup && !emailCaptured && (
           <EmailPopup
