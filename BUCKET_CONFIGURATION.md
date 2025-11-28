@@ -148,7 +148,7 @@ Make sure these files exist in your bucket:
 - `Movies-categories_11zon-1024x512.webp`
 - `IPTVSmarters TV IMAG.jpg`
 - `iptv3.jpg`
-- `OIP (11) websit pic copy copy.jpg`
+- `OIP (11) websit pic.jpg`
 - `c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg`
 - `BASEBALL.webp`
 - `downloadBASKET BALL.jpg`

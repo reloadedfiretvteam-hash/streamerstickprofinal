@@ -10,8 +10,7 @@ export default function WhatYouGetVideo({ videoUrl }: WhatYouGetVideoProps) {
   const [showModal, setShowModal] = useState(false);
   
   // Use video from Supabase storage bucket - user uploaded
-  // Note: bucket name is 'imiges' (not 'images')
-  const defaultVideoUrl = videoUrl || getStorageUrl('imiges', 'what-you-get-demo.mp4');
+  const defaultVideoUrl = videoUrl || getStorageUrl('images', 'what-you-get-demo.mp4');
   
   const benefits = [
     '18,000+ Live TV Channels',

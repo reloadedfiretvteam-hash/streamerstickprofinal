@@ -66,11 +66,11 @@ export default function FireSticksPage() {
           // Use Supabase storage URLs as fallback for reliability
           if (!imageUrl || imageUrl.includes('placeholder') || imageUrl.includes('pexels')) {
             if (product.name?.toLowerCase().includes('4k max')) {
-              imageUrl = getStorageUrl('imiges', 'firestick 4k max.jpg');
+              imageUrl = getStorageUrl('images', 'firestick 4k max.jpg');
             } else if (product.name?.toLowerCase().includes('4k')) {
-              imageUrl = getStorageUrl('imiges', 'firestick 4k.jpg');
+              imageUrl = getStorageUrl('images', 'firestick 4k.jpg');
             } else {
-              imageUrl = getStorageUrl('imiges', 'firestick hd.jpg');
+              imageUrl = getStorageUrl('images', 'firestick hd.jpg');
             }
           }
           
@@ -100,7 +100,7 @@ export default function FireSticksPage() {
       description: 'Brand New Amazon Fire Stick HD with 1 Year Premium IPTV. Pre-configured with 18,000+ channels, 60,000+ movies. Plug & play - ready in 5 minutes!',
       price: '140.00',
       sale_price: '140.00',
-      main_image: getStorageUrl('imiges', 'firestick hd.jpg'),
+      main_image: getStorageUrl('images', 'firestick hd.jpg'),
       category: 'Fire Stick',
       stock_quantity: 50,
       rating: 5,
@@ -112,7 +112,7 @@ export default function FireSticksPage() {
       description: 'Brand New Amazon Fire Stick 4K with 1 Year Premium IPTV. Pre-configured with 18,000+ channels, 60,000+ movies in stunning 4K quality. Best seller!',
       price: '150.00',
       sale_price: '150.00',
-      main_image: getStorageUrl('imiges', 'firestick 4k.jpg'),
+      main_image: getStorageUrl('images', 'firestick 4k.jpg'),
       category: 'Fire Stick',
       stock_quantity: 50,
       rating: 5,
@@ -124,7 +124,7 @@ export default function FireSticksPage() {
       description: 'Brand New Amazon Fire Stick 4K Max with 1 Year Premium IPTV. Fastest performance, 4K Ultra HD, pre-configured with all premium content.',
       price: '160.00',
       sale_price: '160.00',
-      main_image: getStorageUrl('imiges', 'firestick 4k max.jpg'),
+      main_image: getStorageUrl('images', 'firestick 4k max.jpg'),
       category: 'Fire Stick',
       stock_quantity: 50,
       rating: 5,
