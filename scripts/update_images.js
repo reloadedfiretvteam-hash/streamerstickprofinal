@@ -184,7 +184,7 @@ function findMatchingImage(productName) {
  */
 async function updateProductImages() {
   console.log('\n🚀 Starting Product Image URL Update\n');
-  console.log('=' .repeat(60));
+  console.log('='.repeat(60));
   
   // Validate environment
   validateEnvironment();
@@ -210,7 +210,7 @@ async function updateProductImages() {
   }
   
   console.log(`✅ Found ${products.length} products\n`);
-  console.log('=' .repeat(60));
+  console.log('='.repeat(60));
   console.log('\n📸 Processing product images...\n');
   
   let updated = 0;
@@ -261,7 +261,7 @@ async function updateProductImages() {
   }
   
   // Summary
-  console.log('=' .repeat(60));
+  console.log('='.repeat(60));
   console.log('\n📊 Summary\n');
   console.log(`   Total products:  ${products.length}`);
   console.log(`   Updated:         ${updated}`);
