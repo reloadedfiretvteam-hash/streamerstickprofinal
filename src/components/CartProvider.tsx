@@ -53,7 +53,7 @@ export function CartProvider({ children }: CartProviderProps) {
    * Adds an item to the cart. If the item already exists (by productId),
    * updates the quantity while keeping other properties unchanged.
    */
-  const addToCart = (item: CartItem) => {
+  const addToCart = useCallback((item: CartItem) => {
     setItems((prevItems) => {
       const existingIndex = prevItems.findIndex((i) => i.productId === item.productId);
       if (existingIndex !== -1) {
@@ -66,14 +66,14 @@ export function CartProvider({ children }: CartProviderProps) {
       }
       return [...prevItems, item];
     });
-  };
+  }, []);
 
   /**
    * Removes an item from the cart by productId
    */
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = useCallback((productId: string) => {
     setItems((prevItems) => prevItems.filter((item) => item.productId !== productId));
-  };
+  }, []);
 
   /**
    * Updates the quantity of an existing item in the cart.
@@ -93,9 +93,9 @@ export function CartProvider({ children }: CartProviderProps) {
   /**
    * Clears all items from the cart
    */
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setItems([]);
-  };
+  }, []);
 
   return (
     <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart }}>
