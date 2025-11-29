@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Shield, Info } from 'lucide-react';
-import SquarePaymentForm from '../components/SquarePaymentForm';
+import StripePaymentForm from '../components/StripePaymentForm';
 
 export default function ConciergeCheckout() {
   const [step, setStep] = useState(1);
@@ -12,9 +12,9 @@ export default function ConciergeCheckout() {
     description: "Complete website page design and development service."
   };
 
-  const handlePaymentSubmit = async (token: string) => {
-    // Send token to your backend (Supabase Edge Function)
-    console.log('Processing payment with token:', token);
+  const handlePaymentSubmit = async (paymentMethodId: string) => {
+    // Send payment method ID to your backend (Supabase Edge Function)
+    console.log('Processing payment with payment method:', paymentMethodId);
     
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -81,7 +81,7 @@ export default function ConciergeCheckout() {
 
         {/* Payment Form */}
         <div>
-          <SquarePaymentForm 
+          <StripePaymentForm 
             amount={product.price} 
             onSubmit={handlePaymentSubmit}
           />
@@ -90,4 +90,3 @@ export default function ConciergeCheckout() {
     </div>
   );
 }
-

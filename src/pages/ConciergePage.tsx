@@ -22,6 +22,7 @@ export default function ConciergePage() {
 
   async function loadProducts() {
     try {
+      // Load cloaked products from database (square_products table kept for backwards compatibility)
       const { data, error } = await supabase
         .from('square_products')
         .select('*')
@@ -39,7 +40,7 @@ export default function ConciergePage() {
 
   function handleCheckout(product: Product) {
     setSelectedProduct(product);
-    alert(`Square checkout would open here for: ${product.name} - $${product.price}`);
+    alert(`Stripe checkout would open here for: ${product.name} - $${product.price}`);
   }
 
   if (loading) {

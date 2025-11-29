@@ -46,7 +46,7 @@ const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '')
   .map((host: string) => host.trim().toLowerCase())
   .filter(Boolean);
 
-// Optional: comma‑separated list of secure/Square-only hosts.
+// Optional: comma‑separated list of secure/cloaked hosts.
 // Example value in env: secure.streamstickpro.com
 const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || '')
   .split(',')
@@ -88,18 +88,17 @@ function App() {
 
     setIsConciergeDomain(isConciergeHost || isConciergePath);
 
-    // Secure domain: Show SecureCheckoutPage on entire secure/Square domain
-    // This is for Square payment processing - should NOT show real website
-    // Check for common secure/Square domain patterns
+    // Secure domain: Show SecureCheckoutPage on entire secure domain
+    // This is for payment processor inspection - shows cloaked checkout page
+    // Check for common secure domain patterns
     const isSecureHost =
       (secureHosts.length > 0 &&
       secureHosts.some((allowedHost: string) => hostname === allowedHost || hostname.includes(allowedHost))) ||
-      hostname.includes('square') || 
       hostname.includes('secure') ||
       hostname.includes('checkout-secure');
 
     // If on secure host, show SecureCheckoutPage for entire domain
-    // This ensures Square domain shows checkout page, not real website
+    // This ensures secure domain shows checkout page, not real website
     setIsSecureDomain(isSecureHost);
   }, []);
 
@@ -196,7 +195,7 @@ function App() {
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Secure domain: show Square-safe checkout only (no IPTV UI).
+  // Secure domain: show cloaked checkout only (no IPTV UI).
   if (isSecureDomain) {
     return (
       <ErrorBoundary>

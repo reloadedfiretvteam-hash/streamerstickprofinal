@@ -3,7 +3,7 @@ import { X, Plus, Minus, Copy, Check, DollarSign, Wallet, ShoppingBag, CreditCar
 import { supabase } from '../lib/supabase';
 import OrderConfirmation from './OrderConfirmation';
 import LegalDisclaimer from './LegalDisclaimer';
-import SquarePaymentForm from './SquarePaymentForm';
+import StripePaymentForm from './StripePaymentForm';
 
 interface CartItem {
   productId: string;
@@ -23,7 +23,7 @@ interface Props {
 }
 
 export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, onClearCart }: Props) {
-  const [paymentMethod, setPaymentMethod] = useState<'cashapp' | 'bitcoin' | 'square'>('cashapp');
+  const [paymentMethod, setPaymentMethod] = useState<'cashapp' | 'bitcoin' | 'stripe'>('cashapp');
   const [btcPrice, setBtcPrice] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [copiedField, setCopiedField] = useState('');
@@ -524,16 +524,16 @@ Customer has been sent complete payment instructions including their unique purc
                 <h3 className="text-lg font-bold text-white mb-4">Select Payment Method</h3>
                 <div className="grid grid-cols-3 gap-4">
                   <button
-                    onClick={() => setPaymentMethod('square')}
+                    onClick={() => setPaymentMethod('stripe')}
                     className={`p-4 rounded-lg border-2 transition-all ${
-                      paymentMethod === 'square'
+                      paymentMethod === 'stripe'
                         ? 'border-blue-500 bg-blue-500/20'
                         : 'border-gray-700 hover:border-gray-600'
                     }`}
                   >
                     <CreditCard className="w-6 h-6 text-blue-400 mx-auto mb-2" />
                     <div className="text-white text-sm font-semibold">Card</div>
-                    <div className="text-gray-400 text-xs">Via Square</div>
+                    <div className="text-gray-400 text-xs">Via Stripe</div>
                   </button>
 
                   <button
@@ -564,19 +564,19 @@ Customer has been sent complete payment instructions including their unique purc
 
               {/* Payment Gateway Display */}
               <div className="bg-gray-800 rounded-lg p-6 mb-8">
-                {paymentMethod === 'square' && (
+                {paymentMethod === 'stripe' && (
                   <div>
                     <h4 className="text-white font-bold mb-4 flex items-center gap-2">
                       <CreditCard className="w-5 h-5 text-blue-400" />
                       Credit/Debit Card Payment
                     </h4>
                     <p className="text-gray-400 text-sm mb-4">
-                      Secure payment processing powered by Square
+                      Secure payment processing powered by Stripe
                     </p>
-                    <SquarePaymentForm 
+                    <StripePaymentForm 
                       amount={total}
-                      onSubmit={async (_token: string) => {
-                        // Handle Square payment - token processed by Square
+                      onSubmit={async (_paymentMethodId: string) => {
+                        // Handle Stripe payment - payment method ID processed by Stripe
                         await handleCompleteOrder();
                       }}
                     />
