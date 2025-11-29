@@ -1,0 +1,23 @@
+If the script doesn't show output, run these commands manually and tell me what you see:
+
+1. git branch --show-current
+   (What branch are you on?)
+
+2. git remote -v
+   (What remote URL shows?)
+
+3. git status
+   (Any uncommitted changes?)
+
+4. git add -A
+   (Stage everything)
+
+5. git commit -m "COMPLETE FIX: All fixes consolidated"
+   (Commit - does it say "nothing to commit" or show a commit?)
+
+6. git push origin clean-main --force
+   (What error or message do you see?)
+
+Tell me the output of each step!
+
+
