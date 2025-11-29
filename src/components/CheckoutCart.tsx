@@ -577,8 +577,9 @@ Customer has been sent complete payment instructions including their unique purc
                       amount={total}
                       customerEmail={customerEmail}
                       customerName={customerName}
-                      onSubmit={async () => {
-                        // Handle Stripe payment - paymentIntent processed by Stripe
+                      onSubmit={async (paymentIntentId: string) => {
+                        // Handle Stripe payment - store payment intent ID with order
+                        console.log('Payment completed with PaymentIntent:', paymentIntentId);
                         await handleCompleteOrder();
                       }}
                     />

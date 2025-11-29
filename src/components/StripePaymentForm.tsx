@@ -27,7 +27,6 @@ export default function StripePaymentForm({ amount, onSubmit, customerEmail, cus
   const [stripe, setStripe] = useState<Stripe | null>(null);
   const [elements, setElements] = useState<StripeElements | null>(null);
   const [clientSecret, setClientSecret] = useState<string>('');
-  const [cardComplete, setCardComplete] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'apple_pay' | 'google_pay'>('card');
   const [walletAvailable, setWalletAvailable] = useState<{ applePay: boolean; googlePay: boolean }>({ applePay: false, googlePay: false });
 
@@ -43,72 +42,82 @@ export default function StripePaymentForm({ amount, onSubmit, customerEmail, cus
       // Create payment intent
       try {
         const response = await createPaymentIntent(amount);
-        if (response.clientSecret) {
-          setClientSecret(response.clientSecret);
-          
-          // Initialize Elements
-          const elementsInstance = stripeInstance.elements({
-            clientSecret: response.clientSecret,
-            appearance: {
-              theme: 'stripe',
-              variables: {
-                colorPrimary: '#3b82f6',
-                colorBackground: '#ffffff',
-                colorText: '#1f2937',
-                colorDanger: '#dc2626',
-                fontFamily: 'system-ui, sans-serif',
-                spacingUnit: '4px',
-                borderRadius: '8px',
-              },
-            },
-          });
-          setElements(elementsInstance);
-
-          // Mount payment element
-          const paymentElement = elementsInstance.create('payment', {
-            layout: 'tabs',
-            paymentMethodOrder: ['card', 'apple_pay', 'google_pay'],
-            wallets: {
-              applePay: 'auto',
-              googlePay: 'auto',
-            },
-          });
-          
-          // Wait for element to be ready before mounting
-          setTimeout(() => {
-            const container = document.getElementById('stripe-payment-element');
-            if (container) {
-              paymentElement.mount('#stripe-payment-element');
-              
-              paymentElement.on('change', (event) => {
-                setCardComplete(event.complete);
-                // Payment element errors are shown inline by Stripe
-                setErrorMessage('');
-              });
-            }
-          }, 100);
-
-          // Check wallet availability
-          const paymentRequest = stripeInstance.paymentRequest({
-            country: 'US',
-            currency: 'usd',
-            total: {
-              label: 'Total',
-              amount: Math.round(amount * 100),
-            },
-            requestPayerName: true,
-            requestPayerEmail: true,
-          });
-
-          paymentRequest.canMakePayment().then((result) => {
-            if (result) {
-              setWalletAvailable({
-                applePay: !!result.applePay,
-                googlePay: !!result.googlePay,
-              });
-            }
-          });
+        if (!response.clientSecret) {
+          setErrorMessage('Unable to initialize payment. Please try again.');
+          return;
         }
+        
+        setClientSecret(response.clientSecret);
+        
+        // Initialize Elements
+        const elementsInstance = stripeInstance.elements({
+          clientSecret: response.clientSecret,
+          appearance: {
+            theme: 'stripe',
+            variables: {
+              colorPrimary: '#3b82f6',
+              colorBackground: '#ffffff',
+              colorText: '#1f2937',
+              colorDanger: '#dc2626',
+              fontFamily: 'system-ui, sans-serif',
+              spacingUnit: '4px',
+              borderRadius: '8px',
+            },
+          },
+        });
+        setElements(elementsInstance);
+
+        // Mount payment element - use MutationObserver to wait for container
+        const mountPaymentElement = () => {
+          const container = document.getElementById('stripe-payment-element');
+          if (container && container.childNodes.length === 0) {
+            // Mount payment element
+            const paymentElement = elementsInstance.create('payment', {
+              layout: 'tabs',
+              paymentMethodOrder: ['card', 'apple_pay', 'google_pay'],
+              wallets: {
+                applePay: 'auto',
+                googlePay: 'auto',
+              },
+            });
+            
+            paymentElement.mount('#stripe-payment-element');
+            
+            paymentElement.on('change', () => {
+              // Payment element errors are shown inline by Stripe
+              setErrorMessage('');
+            });
+          }
+        };
+        
+        // Try to mount immediately, or wait for container to be ready
+        if (document.getElementById('stripe-payment-element')) {
+          mountPaymentElement();
+        } else {
+          // Use requestAnimationFrame to wait for next paint cycle
+          requestAnimationFrame(mountPaymentElement);
+        }
+
+        // Check wallet availability
+        const paymentRequest = stripeInstance.paymentRequest({
+          country: 'US',
+          currency: 'usd',
+          total: {
+            label: 'Total',
+            amount: Math.round(amount * 100),
+          },
+          requestPayerName: true,
+          requestPayerEmail: true,
+        });
+
+        paymentRequest.canMakePayment().then((result) => {
+          if (result) {
+            setWalletAvailable({
+              applePay: !!result.applePay,
+              googlePay: !!result.googlePay,
+            });
+          }
+        });
       } catch (e) {
         console.error('Stripe initialization failed:', e);
         setErrorMessage('Failed to load secure payment form. Please try again.');
@@ -119,18 +128,7 @@ export default function StripePaymentForm({ amount, onSubmit, customerEmail, cus
   }, [amount]);
 
   const createPaymentIntent = async (paymentAmount: number): Promise<{ clientSecret: string }> => {
-    // In production, this would call your backend to create a PaymentIntent
-    // For now, we'll use a mock implementation that simulates the flow
-    // The actual implementation would be:
-    // const response = await fetch('/api/create-payment-intent', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ amount: paymentAmount }),
-    // });
-    // return response.json();
-    
-    // For demo purposes, we simulate a client secret
-    // In production, replace this with actual API call to your Supabase Edge Function
+    // Call backend to create a PaymentIntent via Supabase Edge Function
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
     
@@ -153,14 +151,18 @@ export default function StripePaymentForm({ amount, onSubmit, customerEmail, cus
         if (response.ok) {
           return response.json();
         }
+        
+        // Handle non-200 responses
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to create payment intent');
       } catch (error) {
         console.error('Error creating payment intent:', error);
+        throw error;
       }
     }
     
-    // Fallback: return empty client secret (for testing/demo only)
-    // In production, this should throw an error
-    return { clientSecret: '' };
+    // If Supabase is not configured, throw an error
+    throw new Error('Payment system not configured. Please contact support.');
   };
 
   const handlePayment = async () => {
@@ -295,7 +297,7 @@ export default function StripePaymentForm({ amount, onSubmit, customerEmail, cus
 
       <button
         onClick={handlePayment}
-        disabled={paymentStatus === 'loading' || !cardComplete || !stripe || !elements}
+        disabled={paymentStatus === 'loading' || !stripe || !elements || !clientSecret}
         className="w-full mt-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-bold text-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
       >
         {paymentStatus === 'loading' ? (

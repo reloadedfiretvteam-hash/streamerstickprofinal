@@ -29,7 +29,7 @@ export default function ConciergePage() {
         .eq('is_active', true)
         .order('price', { ascending: true });
 
-      // Fallback to square_products if stripe_products doesn't exist
+      // Fallback to square_products if stripe_products doesn't exist or has no data
       if (error || !data || data.length === 0) {
         const fallbackResult = await supabase
           .from('square_products')
@@ -37,7 +37,7 @@ export default function ConciergePage() {
           .eq('is_active', true)
           .order('price', { ascending: true });
         
-        if (!fallbackResult.error) {
+        if (!fallbackResult.error && fallbackResult.data && fallbackResult.data.length > 0) {
           data = fallbackResult.data;
         }
       }
