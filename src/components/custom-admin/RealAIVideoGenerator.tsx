@@ -1,14 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Video, Play, Download, Upload, Sparkles, User, Settings, Film, Calendar, Clock, Zap, CheckCircle, AlertCircle, Youtube, Music } from 'lucide-react';
+import { Video, Download, Sparkles, User, Settings, Film, Calendar, Zap, Youtube, Music } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
-interface VideoConfig {
-  productId: string;
-  productName: string;
-  script: string;
-  aiPerson: 'professional' | 'friendly' | 'energetic' | 'tech-expert';
-  duration: number;
-  style: 'tiktok' | 'youtube-short' | 'youtube-long';
+interface VideoProduct {
+  id: string;
+  name: string;
+  description?: string;
+  main_image?: string;
+  price?: number;
 }
 
 interface ScheduledPost {
@@ -29,7 +28,7 @@ interface AIPerson {
 }
 
 export default function RealAIVideoGenerator() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<VideoProduct[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   const [script, setScript] = useState('');
   const [aiPerson, setAiPerson] = useState<AIPerson['id']>('professional');
@@ -44,7 +43,6 @@ export default function RealAIVideoGenerator() {
   const [youtubeEnabled, setYoutubeEnabled] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
   const aiPersons: AIPerson[] = [
     {
@@ -197,6 +195,9 @@ I'll show you exactly what you get and why this is worth it. Let's dive in!`
 
     try {
       const product = products.find(p => p.id === selectedProduct);
+      if (!product) {
+        throw new Error('Product not found');
+      }
       const selectedPerson = aiPersons.find(p => p.id === aiPerson);
 
       // Step 1: Generate audio using Web Speech API (browser-based, free, no signup)
@@ -212,7 +213,7 @@ I'll show you exactly what you get and why this is worth it. Let's dive in!`
 
       // Step 4: Upload to Supabase Storage
       const videoFileName = `video-${selectedProduct}-${Date.now()}.mp4`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('videos')
         .upload(videoFileName, videoBlob, {
           contentType: 'video/mp4',
@@ -244,7 +245,7 @@ I'll show you exactly what you get and why this is worth it. Let's dive in!`
     }
   };
 
-  const generateAudioWithTTS = async (text: string, voice: string): Promise<Blob> => {
+  const generateAudioWithTTS = async (text: string, _voice: string): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(text);
@@ -311,14 +312,14 @@ I'll show you exactly what you get and why this is worth it. Let's dive in!`
       }, 500);
     };
 
-    utterance.onerror = (error) => {
+    utterance.onerror = () => {
       reject(new Error('Speech synthesis error'));
     };
   };
 
   const createVideoWithAnimations = async (
     audioBlob: Blob,
-    product: any,
+    product: VideoProduct,
     script: string,
     person: AIPerson | undefined
   ): Promise<Blob> => {
@@ -401,12 +402,12 @@ I'll show you exactly what you get and why this is worth it. Let's dive in!`
             ctx.textAlign = 'center';
             ctx.shadowColor = 'rgba(0,0,0,0.5)';
             ctx.shadowBlur = 10;
-            ctx.fillText(product.name, width / 2, height * 0.15);
+            ctx.fillText(product.name || '', width / 2, height * 0.15);
 
             // Add animated price
             ctx.font = 'bold 36px Arial';
             ctx.fillStyle = '#ff6b35';
-            ctx.fillText(`$${product.price}`, width / 2, height * 0.22);
+            ctx.fillText(`$${product.price || 0}`, width / 2, height * 0.22);
 
             // Add animated script text (typewriter effect)
             const words = script.split(' ');
@@ -493,7 +494,7 @@ I'll show you exactly what you get and why this is worth it. Let's dive in!`
     ctx.fillText(line, x, currentY);
   };
 
-  const saveVideoToDatabase = async (videoBlob: Blob, product: any, script: string, videoUrl: string) => {
+  const saveVideoToDatabase = async (_videoBlob: Blob, product: VideoProduct, script: string, videoUrl: string) => {
     try {
       await supabase.from('ai_generated_videos').insert({
         product_id: product.id,

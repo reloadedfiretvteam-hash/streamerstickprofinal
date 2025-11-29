@@ -5,23 +5,40 @@ import {
   Edit,
   Trash2,
   Search,
-  DollarSign,
   Save,
   X,
   Image as ImageIcon,
   Tag,
-  Eye,
-  EyeOff,
   TrendingUp,
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
+interface Product {
+  id?: string;
+  name: string;
+  description: string;
+  price: number;
+  sale_price?: number | null;
+  main_image: string;
+  category: string;
+  sku: string;
+  stock_quantity: number;
+  stock_status?: string;
+  is_active: boolean;
+  meta_title?: string;
+  meta_description?: string;
+  created_at?: string;
+  status?: string;
+  slug?: string;
+  featured?: boolean;
+}
+
 export default function RealProductManager() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -31,7 +48,7 @@ export default function RealProductManager() {
 
   const loadProducts = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('real_products')
       .select('*')
       .order('created_at', { ascending: false });
@@ -131,7 +148,8 @@ export default function RealProductManager() {
             featured: false,
             main_image: '',
             meta_title: '',
-            meta_description: ''
+            meta_description: '',
+            is_active: true
           })}
           className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition flex items-center gap-2"
         >
@@ -164,7 +182,16 @@ export default function RealProductManager() {
           <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p className="text-lg">No products found</p>
           <button
-            onClick={() => setEditingProduct({ name: '', price: 0 })}
+            onClick={() => setEditingProduct({
+              name: '',
+              description: '',
+              price: 0,
+              main_image: '',
+              category: 'subscriptions',
+              sku: '',
+              stock_quantity: 0,
+              is_active: true
+            })}
             className="mt-4 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition"
           >
             Add Your First Product
@@ -255,7 +282,7 @@ export default function RealProductManager() {
                     Edit
                   </button>
                   <button
-                    onClick={() => deleteProduct(product.id)}
+                    onClick={() => deleteProduct(product.id || '')}
                     className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
                   >
                     <Trash2 className="w-4 h-4" />

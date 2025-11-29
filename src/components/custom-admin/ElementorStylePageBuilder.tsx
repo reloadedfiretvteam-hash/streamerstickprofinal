@@ -10,8 +10,6 @@ import {
   Plus,
   Settings,
   Trash2,
-  Copy,
-  Move,
   Image as ImageIcon,
   Type,
   Square,
@@ -20,7 +18,6 @@ import {
   Link as LinkIcon,
   Code,
   Sparkles,
-  ChevronRight,
   X
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -91,7 +88,7 @@ export default function ElementorStylePageBuilder() {
       is_visible: true
     };
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('page_builder_elements')
       .insert([newElement])
       .select()
@@ -149,7 +146,7 @@ export default function ElementorStylePageBuilder() {
     }
   };
 
-  const getDefaultStyles = (type: string) => {
+  const getDefaultStyles = (_type: string) => {
     return {
       padding: '20px',
       margin: '0px',
@@ -225,7 +222,7 @@ export default function ElementorStylePageBuilder() {
           <div className="mt-6">
             <h4 className="text-gray-400 text-sm font-semibold mb-3">PAGE ELEMENTS</h4>
             <div className="space-y-1">
-              {elements.map((element, index) => (
+              {elements.map((element) => (
                 <div
                   key={element.id}
                   onClick={() => setSelectedElement(element)}

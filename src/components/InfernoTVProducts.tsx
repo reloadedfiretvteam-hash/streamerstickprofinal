@@ -223,8 +223,6 @@ export default function InfernoTVProducts({ onSelectProduct }: Props) {
                       target.src = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg';
                     }
                   }}
-                  alt={product.name}
-                  className="h-full object-contain transform hover:scale-110 transition-transform duration-500 p-4"
                 />
                 <div className="absolute top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm animate-pulse">
                   $70 VALUE!

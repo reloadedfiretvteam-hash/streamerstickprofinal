@@ -1,4 +1,4 @@
-import { Flame, Menu, X, ShoppingCart, Tv, Smartphone, BookOpen, HelpCircle, Package, Search } from 'lucide-react';
+import { Flame, Menu, X, ShoppingCart, Tv, Smartphone, HelpCircle, Package, Search } from 'lucide-react';
 import { useState } from 'react';
 
 interface NavigationProps {
@@ -8,20 +8,6 @@ interface NavigationProps {
 
 export default function EnhancedNavigation({ cartItemCount = 0, onCartClick }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const scrollToSection = (id: string) => {
-    // If on homepage, scroll to section
-    if (window.location.pathname === '/' || window.location.pathname === '') {
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    } else {
-      // If on another page, navigate to homepage with hash
-      window.location.href = `/#${id}`;
-    }
-    setIsMenuOpen(false);
-  };
 
   // Simple, clear navigation items with direct paths
   const navItems = [

@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 
 export default function AdvancedFormBuilder() {
-  const [forms, setForms] = useState([
+  const [forms] = useState([
     { id: '1', name: 'Contact Form', fields: 5, submissions: 143, conversion: 68 },
     { id: '2', name: 'Order Form', fields: 12, submissions: 89, conversion: 54 },
     { id: '3', name: 'Newsletter Signup', fields: 2, submissions: 847, conversion: 82 }

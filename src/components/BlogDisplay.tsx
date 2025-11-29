@@ -15,6 +15,8 @@ interface BlogPost {
   view_count: number;
   read_time_minutes: number;
   category_id: string;
+  tags?: string[];
+  keywords?: string | string[];
 }
 
 interface Category {
@@ -24,7 +26,7 @@ interface Category {
 
 export default function BlogDisplay() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,7 +54,7 @@ export default function BlogDisplay() {
         } else if (post.keywords) {
           // If keywords is a string, split by comma
           tags = typeof post.keywords === 'string' 
-            ? post.keywords.split(',').map(t => t.trim()).filter(Boolean)
+            ? post.keywords.split(',').map((t: string) => t.trim()).filter(Boolean)
             : post.keywords;
         }
         

@@ -1,21 +1,32 @@
 import { useState, useEffect } from 'react';
-import { Shield, Lock, CreditCard, AlertCircle } from 'lucide-react';
+import { Shield, Lock, AlertCircle } from 'lucide-react';
 
 interface SquarePaymentFormProps {
   amount: number;
   onSubmit: (token: string) => Promise<void>;
 }
 
+interface SquarePayments {
+  card: () => Promise<SquareCard>;
+}
+
+interface SquareCard {
+  attach: (container: string) => Promise<void>;
+  tokenize: () => Promise<{ status: string; token?: string; errors?: Array<{ message: string }> }>;
+}
+
 declare global {
   interface Window {
-    Square: any;
+    Square?: {
+      payments: (applicationId: string, locationId: string) => Promise<SquarePayments>;
+    };
   }
 }
 
 export default function SquarePaymentForm({ amount, onSubmit }: SquarePaymentFormProps) {
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const [card, setCard] = useState<any>(null);
+  const [card, setCard] = useState<SquareCard | null>(null);
 
   useEffect(() => {
     const initializeSquare = async () => {
@@ -50,15 +61,16 @@ export default function SquarePaymentForm({ amount, onSubmit }: SquarePaymentFor
 
     try {
       const result = await card.tokenize();
-      if (result.status === 'OK') {
+      if (result.status === 'OK' && result.token) {
         await onSubmit(result.token);
         setPaymentStatus('success');
       } else {
-        throw new Error(result.errors[0].message);
+        const errorMsg = result.errors?.[0]?.message || 'Tokenization failed';
+        throw new Error(errorMsg);
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       setPaymentStatus('error');
-      setErrorMessage(e.message || 'Payment failed');
+      setErrorMessage(e instanceof Error ? e.message : 'Payment failed');
     }
   };
 

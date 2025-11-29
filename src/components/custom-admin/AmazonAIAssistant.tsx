@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Bot, MessageCircle, Send, BookOpen, Zap, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { Bot, Send, BookOpen, Zap, AlertCircle, ExternalLink } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';

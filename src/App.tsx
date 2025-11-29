@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navigation from './components/EnhancedNavigation';
 import Hero from './components/Hero';
@@ -37,9 +37,9 @@ import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
 import { CartItem as SharedCartItem, Product as SharedProduct } from './lib/types';
 
-interface CartItem extends SharedCartItem {}
+type CartItem = SharedCartItem;
 
-interface Product extends SharedProduct {}
+type Product = SharedProduct;
 
 const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '')
   .split(',')

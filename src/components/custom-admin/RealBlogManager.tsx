@@ -12,7 +12,6 @@ import {
   Tag,
   Calendar,
   User,
-  BarChart3,
   CheckCircle,
   AlertCircle,
   XCircle

@@ -111,11 +111,11 @@ export default function GitHubCloudflareConfig() {
       );
 
       if (response.ok) {
-        const data = await response.json();
+        await response.json();
         alert(`Deployment triggered for ${projectName}! Check Cloudflare dashboard for status.`);
       } else {
-        const error = await response.json();
-        alert(`Failed to trigger deployment: ${error.errors?.[0]?.message || 'Unknown error'}`);
+        const errorData = await response.json();
+        alert(`Failed to trigger deployment: ${errorData.errors?.[0]?.message || 'Unknown error'}`);
       }
     } catch (error) {
       alert('Error triggering deployment');

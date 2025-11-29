@@ -16,7 +16,6 @@ export default function AdminModalWrapper({
   title,
   icon,
   children,
-  fullWidth = true
 }: AdminModalWrapperProps) {
   const [isMaximized, setIsMaximized] = useState(true);
 

@@ -8,9 +8,7 @@ import {
   Tag,
   Clock,
   Send,
-  Filter,
   BarChart3,
-  Settings,
   Play,
   Pause,
   Edit,
@@ -19,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export default function MarketingAutomation() {
-  const [workflows, setWorkflows] = useState([
+  const [workflows] = useState([
     {
       id: '1',
       name: 'Welcome Series',
