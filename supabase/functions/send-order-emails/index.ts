@@ -40,12 +40,15 @@ Deno.serve(async (req: Request) => {
   try {
     const payload: OrderEmailPayload = await req.json();
     console.log(`Processing order email for: ${payload.orderCode}`);
-    let customerEmail = payload.paymentMethod === 'Bitcoin' ? generateCustomerBitcoinEmail(payload) : generateCustomerCashAppEmail(payload);
-    const adminEmail = generateAdminNotificationEmail(payload);
-    console.log('Customer email:', payload.customerEmail);
-    console.log('Admin email:', payload.adminEmail);
+    const customerEmailContent = payload.paymentMethod === 'Bitcoin' ? generateCustomerBitcoinEmail(payload) : generateCustomerCashAppEmail(payload);
+    const adminEmailContent = generateAdminNotificationEmail(payload);
+    console.log('Customer email recipient:', payload.customerEmail);
+    console.log('Customer email content length:', customerEmailContent.length);
+    console.log('Admin email recipient:', payload.adminEmail);
+    console.log('Admin email content length:', adminEmailContent.length);
     return new Response(JSON.stringify({ success: true, orderCode: payload.orderCode }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-  } catch (error: any) {
-    return new Response(JSON.stringify({ success: false, error: error.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ success: false, error: errorMessage }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

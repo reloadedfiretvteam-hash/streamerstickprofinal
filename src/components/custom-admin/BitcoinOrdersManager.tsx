@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Bitcoin, Search, Download, RefreshCw, CheckCircle, Clock, XCircle, Eye, Mail } from 'lucide-react';
+import { Bitcoin, Search, Download, RefreshCw, CheckCircle, Clock, XCircle, Eye } from 'lucide-react';
 
 interface BitcoinOrder {
   id: string;
@@ -37,7 +37,7 @@ export default function BitcoinOrdersManager() {
   const loadOrders = async () => {
     setLoading(true);
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('bitcoin_orders')
       .select('*')
       .order('created_at', { ascending: false });

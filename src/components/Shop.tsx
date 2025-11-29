@@ -1,6 +1,7 @@
-import { Check, Flame, Star, Zap, ShoppingCart, Gift, Send, User, Mail, Phone } from 'lucide-react';
+import { Check, Flame, Star, Zap, ShoppingCart } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import { supabase, getStorageUrl } from '../lib/supabase';
+import ValidatedImage from './ValidatedImage';
 
 // Fallback images when Supabase is not configured or local images fail
 const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -43,7 +44,7 @@ const fallbackProducts: Product[] = [
     name: 'Fire Stick HD - Jailbroken & Ready',
     price: 140.00,
     type: 'firestick',
-    image: getStorageUrl('imiges', 'firestick hd.jpg'),
+    image: getStorageUrl('images', 'firestick hd.jpg'),
     badge: 'STARTER',
     popular: false,
     features: [
@@ -62,7 +63,7 @@ const fallbackProducts: Product[] = [
     name: 'Fire Stick 4K - Jailbroken & Ready',
     price: 150.00,
     type: 'firestick',
-    image: getStorageUrl('imiges', 'firestick 4k.jpg'),
+    image: getStorageUrl('images', 'firestick 4k.jpg'),
     badge: 'BEST VALUE',
     popular: true,
     features: [
@@ -82,7 +83,7 @@ const fallbackProducts: Product[] = [
     name: 'Fire Stick 4K Max - Jailbroken & Ready',
     price: 160.00,
     type: 'firestick',
-    image: getStorageUrl('imiges', 'firestick 4k max.jpg'),
+    image: getStorageUrl('images', 'firestick 4k max.jpg'),
     badge: 'PREMIUM',
     popular: false,
     features: [
@@ -104,7 +105,7 @@ const fallbackProducts: Product[] = [
     name: '1 Month IPTV Subscription',
     price: 15.00,
     type: 'iptv',
-    image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+    image: getStorageUrl('images', 'iptv-subscription.jpg'),
     badge: 'STARTER',
     popular: false,
     period: '/month',
@@ -122,7 +123,7 @@ const fallbackProducts: Product[] = [
     name: '3 Month IPTV Subscription',
     price: 30.00,
     type: 'iptv',
-    image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+    image: getStorageUrl('images', 'iptv-subscription.jpg'),
     badge: 'POPULAR',
     popular: true,
     period: '/3 months',
@@ -140,7 +141,7 @@ const fallbackProducts: Product[] = [
     name: '6 Month IPTV Subscription',
     price: 50.00,
     type: 'iptv',
-    image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+    image: getStorageUrl('images', 'iptv-subscription.jpg'),
     badge: 'GREAT VALUE',
     popular: false,
     period: '/6 months',
@@ -158,7 +159,7 @@ const fallbackProducts: Product[] = [
     name: '1 Year IPTV Subscription',
     price: 75.00,
     type: 'iptv',
-    image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+    image: getStorageUrl('images', 'iptv-subscription.jpg'),
     badge: 'BEST VALUE',
     popular: false,
     period: '/year',
@@ -177,11 +178,6 @@ const fallbackProducts: Product[] = [
 export default function Shop({ onAddToCart }: ShopProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [freeTrialName, setFreeTrialName] = useState('');
-  const [freeTrialEmail, setFreeTrialEmail] = useState('');
-  const [freeTrialPhone, setFreeTrialPhone] = useState('');
-  const [freeTrialSubmitted, setFreeTrialSubmitted] = useState(false);
-  const [freeTrialLoading, setFreeTrialLoading] = useState(false);
 
   // Memoized filtered products - must be declared before any conditional returns
   const firestickProducts = useMemo(() => products.filter(p => p.type === 'firestick'), [products]);
@@ -210,22 +206,22 @@ export default function Shop({ onAddToCart }: ShopProps) {
           // Get image - check if it's from Supabase bucket or local
           let productImage = p.main_image || '';
 
-          // If image is just a filename (no protocol), use Supabase storage with 'imiges' bucket
+          // If image is just a filename (no protocol), use Supabase storage with 'images' bucket
           if (productImage && !productImage.startsWith('http') && !productImage.startsWith('/')) {
-            productImage = getStorageUrl('imiges', productImage);
+            productImage = getStorageUrl('images', productImage);
           }
           // If no image or image is placeholder/empty, use type-specific fallback from Supabase storage
           else if (!productImage || productImage.trim() === '' || productImage.includes('placeholder') || productImage.includes('pexels')) {
             if (isFirestick) {
               if (p.name.toLowerCase().includes('4k max')) {
-                productImage = getStorageUrl('imiges', 'firestick 4k max.jpg');
+                productImage = getStorageUrl('images', 'firestick 4k max.jpg');
               } else if (p.name.toLowerCase().includes('4k')) {
-                productImage = getStorageUrl('imiges', 'firestick 4k.jpg');
+                productImage = getStorageUrl('images', 'firestick 4k.jpg');
               } else {
-                productImage = getStorageUrl('imiges', 'firestick hd.jpg');
+                productImage = getStorageUrl('images', 'firestick hd.jpg');
               }
             } else {
-              productImage = getStorageUrl('imiges', 'iptv-subscription.jpg');
+              productImage = getStorageUrl('images', 'iptv-subscription.jpg');
             }
           }
 
@@ -253,64 +249,6 @@ export default function Shop({ onAddToCart }: ShopProps) {
       setProducts(fallbackProducts);
     }
     setLoading(false);
-  };
-
-  const handleFreeTrialSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!freeTrialName || !freeTrialEmail) {
-      alert('Please enter your name and email');
-      return;
-    }
-
-    setFreeTrialLoading(true);
-
-    try {
-      await supabase
-        .from('email_captures')
-        .insert([{
-          email: freeTrialEmail,
-          name: freeTrialName,
-          phone: freeTrialPhone || null,
-          source: 'free-trial-signup',
-          metadata: { product: 'Free Trial - IPTV Subscription' }
-        }]);
-
-      const emailBody = `
-FREE TRIAL REQUEST - IPTV SUBSCRIPTION
-
-Customer Details:
-- Name: ${freeTrialName}
-- Email: ${freeTrialEmail}
-- Phone: ${freeTrialPhone || 'Not provided'}
-- Date: ${new Date().toLocaleString()}
-
-Product: Free Trial IPTV Subscription
-- 7 Days Free Access
-- All channels included
-- All features included
-
-Please process this free trial request and send activation details to the customer.
-
----
-This is an automated message from StreamStickPro.com
-      `.trim();
-
-      const mailtoLink = `mailto:reloadedfiretvteam@gmail.com?subject=Free Trial Request - ${freeTrialName}&body=${encodeURIComponent(emailBody)}`;
-      window.location.href = mailtoLink;
-
-      setFreeTrialSubmitted(true);
-
-      setTimeout(() => {
-        alert('Email opened! Please send the email to complete your free trial request. We will contact you within 24 hours.');
-      }, 500);
-
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Submission error. Please email us directly at reloadedfiretvteam@gmail.com');
-    } finally {
-      setFreeTrialLoading(false);
-    }
   };
 
   if (loading) {
@@ -363,15 +301,12 @@ This is an automated message from StreamStickPro.com
           {/* Dramatic Fire Stick Hero Banner */}
           <div className="relative rounded-3xl overflow-hidden mb-12 animate-fade-in">
             <div className="absolute inset-0">
-              <img
-                src={getStorageUrl('imiges', 'firestick 4k.jpg')}
+              <ValidatedImage
+                src={getStorageUrl('images', 'firestick 4k.jpg')}
+                fallbackSrc={FALLBACK_FIRESTICK_IMAGE}
                 alt="Fire Stick Breaking Free"
                 className="w-full h-full object-cover"
-                loading="lazy"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = FALLBACK_FIRESTICK_IMAGE;
-                }}
+                minBytes={1000}
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
             </div>
@@ -424,20 +359,12 @@ This is an automated message from StreamStickPro.com
                 )}
 
                 <div className="relative h-56 overflow-hidden">
-                  <img
+                  <ValidatedImage
                     src={product.image}
+                    fallbackSrc={product.type === 'firestick' ? FALLBACK_FIRESTICK_IMAGE : FALLBACK_IPTV_IMAGE}
                     alt={product.name}
                     className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                    loading="lazy"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      // Fallback to pexels placeholder images
-                      if (product.type === 'firestick') {
-                        target.src = FALLBACK_FIRESTICK_IMAGE;
-                      } else {
-                        target.src = FALLBACK_IPTV_IMAGE;
-                      }
-                    }}
+                    minBytes={1000}
                   />
                   <div className="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-sm">
                     {product.badge}
@@ -484,160 +411,6 @@ This is an automated message from StreamStickPro.com
           </div>
         </div>
 
-        {/* FREE TRIAL BOX */}
-        <div className="mb-16">
-          <div className="max-w-5xl mx-auto bg-gradient-to-br from-green-600 via-teal-600 to-green-600 rounded-3xl overflow-hidden shadow-2xl border-4 border-green-400">
-            <div className="bg-gradient-to-r from-green-500 to-teal-500 text-white text-center py-3 font-bold text-lg relative">
-              <Gift className="w-6 h-6 absolute left-6 top-1/2 -translate-y-1/2 animate-bounce" />
-              🎉 LIMITED TIME - 50% OFF ALL PLANS!
-              <Gift className="w-6 h-6 absolute right-6 top-1/2 -translate-y-1/2 animate-bounce" />
-            </div>
-
-            <div className="p-8 md:p-12">
-              <div className="grid md:grid-cols-2 gap-8">
-                {/* Left Side - Info */}
-                <div>
-                  <h3 className="text-4xl font-bold text-white mb-4">
-                    50% OFF
-                  </h3>
-                  <p className="text-green-100 text-lg mb-6">
-                    Get 50% off all IPTV subscription plans! Limited time offer - don't miss out on this incredible deal!
-                  </p>
-
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center gap-3">
-                      <Check className="w-6 h-6 text-white bg-green-500 rounded-full p-1" />
-                      <span className="text-white font-semibold">22,000+ Live TV Channels</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Check className="w-6 h-6 text-white bg-green-500 rounded-full p-1" />
-                      <span className="text-white font-semibold">120,000+ Movies & Shows</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Check className="w-6 h-6 text-white bg-green-500 rounded-full p-1" />
-                      <span className="text-white font-semibold">All Sports & PPV Events</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Check className="w-6 h-6 text-white bg-green-500 rounded-full p-1" />
-                      <span className="text-white font-semibold">4K Ultra HD Quality</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Check className="w-6 h-6 text-white bg-green-500 rounded-full p-1" />
-                      <span className="text-white font-semibold">Works on All Devices</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Check className="w-6 h-6 text-white bg-green-500 rounded-full p-1" />
-                      <span className="text-white font-semibold">24/7 Customer Support</span>
-                    </div>
-                  </div>
-
-                  <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30">
-                    <p className="text-white text-center font-bold text-2xl">100% FREE</p>
-                    <p className="text-green-100 text-center text-sm">for 36 hours, then $14.99/month</p>
-                  </div>
-                </div>
-
-                {/* Right Side - Form */}
-                <div>
-                  {!freeTrialSubmitted ? (
-                    <div className="bg-white rounded-2xl p-6 shadow-2xl">
-                      <h4 className="text-2xl font-bold text-gray-800 mb-4">
-                        Start Your Free Trial
-                      </h4>
-
-                      <form onSubmit={handleFreeTrialSubmit} className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Full Name *
-                          </label>
-                          <div className="relative">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="text"
-                              required
-                              value={freeTrialName}
-                              onChange={(e) => setFreeTrialName(e.target.value)}
-                              placeholder="John Doe"
-                              className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition text-gray-900"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Email Address *
-                          </label>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="email"
-                              required
-                              value={freeTrialEmail}
-                              onChange={(e) => setFreeTrialEmail(e.target.value)}
-                              placeholder="john@example.com"
-                              className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition text-gray-900"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Phone Number (Optional)
-                          </label>
-                          <div className="relative">
-                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="tel"
-                              value={freeTrialPhone}
-                              onChange={(e) => setFreeTrialPhone(e.target.value)}
-                              placeholder="(555) 123-4567"
-                              className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition text-gray-900"
-                            />
-                          </div>
-                        </div>
-
-                        <button
-                          type="submit"
-                          disabled={freeTrialLoading}
-                          className="w-full py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold rounded-lg hover:from-green-600 hover:to-teal-600 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
-                        >
-                          {freeTrialLoading ? (
-                            'Processing...'
-                          ) : (
-                            <>
-                              <Send className="w-5 h-5" />
-                              Start My Free Trial Now
-                            </>
-                          )}
-                        </button>
-
-                        <p className="text-xs text-gray-500 text-center">
-                          By clicking the button, your email client will open with a pre-filled message. Simply send it to complete your request.
-                        </p>
-                      </form>
-                    </div>
-                  ) : (
-                    <div className="bg-white rounded-2xl p-8 shadow-2xl text-center">
-                      <div className="w-20 h-20 bg-green-500 rounded-full mx-auto mb-6 flex items-center justify-center">
-                        <Check className="w-10 h-10 text-white" />
-                      </div>
-                      <h4 className="text-2xl font-bold text-gray-800 mb-4">
-                        Request Submitted!
-                      </h4>
-                      <p className="text-gray-600 mb-4">
-                        Thank you {freeTrialName}! We've opened your email client with a pre-filled message.
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        We'll send your activation details to <strong>{freeTrialEmail}</strong> within 24 hours.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div>
           <h3 className="text-3xl font-bold mb-8 text-center">
             <Zap className="inline w-8 h-8 text-blue-500 mr-2" />
@@ -661,11 +434,12 @@ This is an automated message from StreamStickPro.com
                 )}
 
                 <div className="relative h-48 overflow-hidden">
-                  <img
+                  <ValidatedImage
                     src={product.image}
+                    fallbackSrc={FALLBACK_IPTV_IMAGE}
                     alt={product.name}
                     className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                    loading="lazy"
+                    minBytes={1000}
                   />
                   <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full font-bold text-xs">
                     {product.badge}

@@ -87,7 +87,7 @@ export default function Pricing({ onSelectPlan }: PricingProps) {
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                 <div className="mb-6">
                   <span className="text-5xl font-bold text-gray-900">{formatPrice(plan.price)}</span>
-                  <span className="text-gray-600">{getBillingLabel(plan.billing_period)}</span>
+                  <span className="text-gray-600">{getBillingLabel(plan.billing_period || '')}</span>
                 </div>
 
                 <button
@@ -102,7 +102,7 @@ export default function Pricing({ onSelectPlan }: PricingProps) {
                 </button>
 
                 <div className="space-y-4">
-                  {plan.features.map((feature, index) => (
+                  {plan.features.map((feature: string, index: number) => (
                     <div key={index} className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <span className="text-gray-700">{feature}</span>

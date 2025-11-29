@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ShoppingCart, Star, Check, Zap, ArrowLeft, Gift, User, Mail, Phone, Send } from 'lucide-react';
 import { supabase, getStorageUrl } from '../lib/supabase';
 import Footer from '../components/Footer';
+import ValidatedImage from '../components/ValidatedImage';
 
 // Fallback image when all else fails
 const FALLBACK_IPTV_IMAGE = 'https://images.pexels.com/photos/5474282/pexels-photo-5474282.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -77,7 +78,7 @@ export default function IPTVServicesPage() {
           
           // Use Supabase storage as fallback for reliability
           if (!imageUrl || imageUrl.includes('placeholder') || imageUrl.includes('pexels')) {
-            imageUrl = getStorageUrl('imiges', 'iptv-subscription.jpg');
+            imageUrl = getStorageUrl('images', 'iptv-subscription.jpg');
           }
           
           return {
@@ -106,7 +107,7 @@ export default function IPTVServicesPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Instant Activation',
       price: '15.00',
       sale_price: '15.00',
-      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+      main_image: getStorageUrl('images', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -118,7 +119,7 @@ export default function IPTVServicesPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Priority Support',
       price: '30.00',
       sale_price: '30.00',
-      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+      main_image: getStorageUrl('images', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -130,7 +131,7 @@ export default function IPTVServicesPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, Priority Support',
       price: '50.00',
       sale_price: '50.00',
-      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+      main_image: getStorageUrl('images', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -142,7 +143,7 @@ export default function IPTVServicesPage() {
       description: '18,000+ Live TV Channels, 60,000+ Movies & TV Shows, All Sports & PPV Events, 4K/FHD/HD Quality, Works on Any Device, VIP Support, Best Value!',
       price: '75.00',
       sale_price: '75.00',
-      main_image: getStorageUrl('imiges', 'iptv-subscription.jpg'),
+      main_image: getStorageUrl('images', 'iptv-subscription.jpg'),
       category: 'IPTV Subscription',
       stock_quantity: 999,
       rating: 5,
@@ -440,7 +441,17 @@ Automated message from StreamStickPro.com
 
               {/* Product Image */}
               <div className="relative h-48 bg-gradient-to-br from-blue-600 to-cyan-600 overflow-hidden flex items-center justify-center">
-                <Zap className="w-20 h-20 text-white/50" />
+                {product.main_image ? (
+                  <ValidatedImage
+                    src={product.main_image}
+                    fallbackSrc={FALLBACK_IPTV_IMAGE}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    minBytes={1000}
+                  />
+                ) : (
+                  <Zap className="w-20 h-20 text-white/50" />
+                )}
                 <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full font-bold text-xs">
                   {product.name.includes('1 Month') ? 'STARTER' :
                    product.name.includes('3 Month') ? 'POPULAR' :

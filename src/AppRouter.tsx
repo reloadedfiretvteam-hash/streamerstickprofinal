@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import App from './App';
 import UnifiedAdminLogin from './pages/UnifiedAdminLogin';
-import UnifiedAdminDashboard from './pages/UnifiedAdminDashboard';
+import ModalAdminDashboard from './pages/ModalAdminDashboard';
 import OrderTracking from './pages/OrderTracking';
 import FAQPage from './pages/FAQPage';
 import EnhancedBlogPost from './pages/EnhancedBlogPost';
@@ -9,6 +9,22 @@ import ShopPage from './pages/ShopPage';
 import NewCheckoutPage from './pages/NewCheckoutPage';
 import FireSticksPage from './pages/FireSticksPage';
 import IPTVServicesPage from './pages/IPTVServicesPage';
+import SecureCheckoutPage from './pages/SecureCheckoutPage';
+import StripeSecureCheckoutPage from './pages/StripeSecureCheckoutPage';
+
+// Check if current host is a Stripe payment subdomain
+function isStripePaymentHost(): boolean {
+  const host = window.location.hostname;
+  const stripeHosts = (import.meta.env.VITE_STRIPE_HOSTS || 'pay.streamstickpro.com').split(',').map((h: string) => h.trim());
+  return stripeHosts.includes(host);
+}
+
+// Check if current host is a Square secure checkout subdomain
+function isSecureHost(): boolean {
+  const host = window.location.hostname;
+  const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || 'secure.streamstickpro.com').split(',').map((h: string) => h.trim());
+  return secureHosts.includes(host);
+}
 
 export default function AppRouter() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -25,6 +41,16 @@ export default function AppRouter() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // Handle Stripe payment subdomain (pay.streamstickpro.com)
+  if (isStripePaymentHost()) {
+    return <StripeSecureCheckoutPage />;
+  }
+
+  // Handle Square secure checkout subdomain (secure.streamstickpro.com)
+  if (isSecureHost()) {
+    return <SecureCheckoutPage />;
+  }
 
   if (currentPath === '/shop' || currentPath === '/shop/') {
     return <ShopPage />;
@@ -44,11 +70,24 @@ export default function AppRouter() {
     return <NewCheckoutPage />;
   }
 
-  // Handle all admin routes - unified to ONE admin panel
-  if (currentPath === '/admin' || currentPath === '/admin/' || currentPath === '/admin/dashboard' ||
-      currentPath === '/custom-admin' || currentPath === '/custom-admin/' || currentPath === '/custom-admin/dashboard') {
+  // Stripe checkout route - /stripe-checkout or /stripe-checkout/:productId
+  if (currentPath === '/stripe-checkout' || currentPath === '/stripe-checkout/' || currentPath.startsWith('/stripe-checkout/')) {
+    return <StripeSecureCheckoutPage />;
+  }
+
+  if (currentPath === '/custom-admin/dashboard') {
     if (isAuthenticated) {
-      return <UnifiedAdminDashboard />;
+      return <ModalAdminDashboard />;
+    }
+    window.location.href = '/';
+    return null;
+  }
+
+  // Handle all admin routes - /admin, /admin/, /admin/dashboard, /custom-admin, /custom-admin/
+  if (currentPath === '/admin' || currentPath === '/admin/' || currentPath === '/admin/dashboard' ||
+      currentPath === '/custom-admin' || currentPath === '/custom-admin/') {
+    if (isAuthenticated) {
+      return <ModalAdminDashboard />;
     }
     return <UnifiedAdminLogin />;
   }

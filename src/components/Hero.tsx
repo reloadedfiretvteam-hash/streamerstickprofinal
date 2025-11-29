@@ -3,7 +3,7 @@ import { getStorageUrl } from '../lib/supabase';
 
 export default function Hero() {
   // Get hero image from Supabase storage with fallback
-  const heroImageUrl = getStorageUrl('imiges', 'hero-firestick-breakout.jpg');
+  const heroImageUrl = getStorageUrl('images', 'hero-firestick-breakout.jpg');
   const goToShop = () => {
     window.location.href = '/shop';
   };

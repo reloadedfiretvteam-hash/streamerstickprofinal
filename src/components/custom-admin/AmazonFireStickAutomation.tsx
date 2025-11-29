@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Package, Send, CheckCircle, XCircle, ExternalLink, User, MapPin, Phone, Mail, CreditCard, AlertCircle, Zap, Bot } from 'lucide-react';
+import { ShoppingCart, Package, Send, ExternalLink, User, MapPin, Phone, Mail, CreditCard, AlertCircle, Zap } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import AmazonAIAssistant from './AmazonAIAssistant';
 
@@ -39,7 +39,7 @@ export default function AmazonFireStickAutomation() {
   const [selectedOrder, setSelectedOrder] = useState<FireStickOrder | null>(null);
   const [amazonProducts, setAmazonProducts] = useState<AmazonProduct[]>([]);
   const [amazonAffiliateId, setAmazonAffiliateId] = useState('');
-  const [autoFillEnabled, setAutoFillEnabled] = useState(true);
+  const [_autoFillEnabled, _setAutoFillEnabled] = useState(true);
 
   // Fire Stick ASINs (Amazon product identifiers)
   const fireStickProducts: AmazonProduct[] = [

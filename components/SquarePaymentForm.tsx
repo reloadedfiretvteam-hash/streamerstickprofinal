@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Lock, CreditCard, AlertCircle } from 'lucide-react';
+import { Shield, Lock, AlertCircle } from 'lucide-react';
 
 interface SquarePaymentFormProps {
   amount: number;

@@ -110,13 +110,14 @@ Inferno TV Team
         },
       }
     );
-  } catch (error: any) {
-    console.error("Error confirming payment:", error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Failed to confirm payment";
+    console.error("Error confirming payment:", errorMessage);
 
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || "Failed to confirm payment",
+        error: errorMessage,
       }),
       {
         status: 500,

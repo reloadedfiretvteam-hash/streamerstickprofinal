@@ -7,7 +7,6 @@ import {
   Search,
   Eye,
   TrendingUp,
-  TrendingDown,
   Save,
   X,
   Tag,
@@ -17,9 +16,6 @@ import {
   AlertCircle,
   XCircle,
   Upload,
-  Image as ImageIcon,
-  Video,
-  File,
   ArrowUp,
   ArrowDown,
   Minus
@@ -199,7 +195,7 @@ export default function EnhancedBlogManager() {
       // For now, we'll store metadata in database
       const fileUrl = `/uploads/${Date.now()}-${file.name}`;
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('media_files')
         .insert([{
           filename: file.name,

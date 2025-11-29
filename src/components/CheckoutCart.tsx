@@ -3,7 +3,11 @@ import { X, Plus, Minus, Copy, Check, DollarSign, Wallet, ShoppingBag, CreditCar
 import { supabase } from '../lib/supabase';
 import OrderConfirmation from './OrderConfirmation';
 import LegalDisclaimer from './LegalDisclaimer';
-import StripePaymentForm from './StripePaymentForm';
+import SquarePaymentForm from './SquarePaymentForm';
+import ValidatedImage from './ValidatedImage';
+
+// Fallback image for cart items
+const FALLBACK_CART_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=200';
 
 interface CartItem {
   productId: string;
@@ -23,7 +27,7 @@ interface Props {
 }
 
 export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, onClearCart }: Props) {
-  const [paymentMethod, setPaymentMethod] = useState<'cashapp' | 'bitcoin' | 'stripe'>('cashapp');
+  const [paymentMethod, setPaymentMethod] = useState<'cashapp' | 'bitcoin' | 'square'>('cashapp');
   const [btcPrice, setBtcPrice] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [copiedField, setCopiedField] = useState('');
@@ -489,7 +493,13 @@ Customer has been sent complete payment instructions including their unique purc
                 {items.map((item) => (
                   <div key={item.productId} className="bg-gray-800 rounded-lg p-4 flex gap-4">
                     {item.image && (
-                      <img src={item.image} alt={item.name} className="w-20 h-20 object-contain rounded" />
+                      <ValidatedImage
+                        src={item.image}
+                        fallbackSrc={FALLBACK_CART_IMAGE}
+                        alt={item.name}
+                        className="w-20 h-20 object-contain rounded"
+                        minBytes={1000}
+                      />
                     )}
                     <div className="flex-1">
                       <h3 className="text-white font-semibold mb-2 text-sm">{item.name}</h3>
@@ -524,16 +534,16 @@ Customer has been sent complete payment instructions including their unique purc
                 <h3 className="text-lg font-bold text-white mb-4">Select Payment Method</h3>
                 <div className="grid grid-cols-3 gap-4">
                   <button
-                    onClick={() => setPaymentMethod('stripe')}
+                    onClick={() => setPaymentMethod('square')}
                     className={`p-4 rounded-lg border-2 transition-all ${
-                      paymentMethod === 'stripe'
+                      paymentMethod === 'square'
                         ? 'border-blue-500 bg-blue-500/20'
                         : 'border-gray-700 hover:border-gray-600'
                     }`}
                   >
                     <CreditCard className="w-6 h-6 text-blue-400 mx-auto mb-2" />
                     <div className="text-white text-sm font-semibold">Card</div>
-                    <div className="text-gray-400 text-xs">Via Stripe</div>
+                    <div className="text-gray-400 text-xs">Via Square</div>
                   </button>
 
                   <button
@@ -564,98 +574,20 @@ Customer has been sent complete payment instructions including their unique purc
 
               {/* Payment Gateway Display */}
               <div className="bg-gray-800 rounded-lg p-6 mb-8">
-                {paymentMethod === 'stripe' && (
+                {paymentMethod === 'square' && (
                   <div>
                     <h4 className="text-white font-bold mb-4 flex items-center gap-2">
                       <CreditCard className="w-5 h-5 text-blue-400" />
                       Credit/Debit Card Payment
                     </h4>
                     <p className="text-gray-400 text-sm mb-4">
-                      Secure payment processing powered by Stripe
+                      Secure payment processing powered by Square
                     </p>
-                    <StripePaymentForm
+                    <SquarePaymentForm 
                       amount={total}
-                      customerInfo={{
-                        email: customerEmail,
-                        fullName: customerName,
-                        address: customerAddress,
-                        city: '',
-                        zipCode: ''
-                      }}
-                      onSubmit={async (paymentIntentId: string) => {
-                        // Payment succeeded, now complete the order
-                        try {
-                          const purchaseCode = await generatePurchaseCode();
-                          const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
-
-                          const orderItems = items.map(item => ({
-                            product_id: item.productId,
-                            product_name: item.name,
-                            quantity: item.quantity,
-                            unit_price: item.price,
-                            total_price: item.price * item.quantity
-                          }));
-
-                          const { error: orderError } = await supabase
-                            .from('orders')
-                            .insert({
-                              order_number: orderNumber,
-                              purchase_code: purchaseCode,
-                              customer_name: customerName,
-                              username: username,
-                              customer_email: customerEmail,
-                              customer_phone: customerPhone,
-                              shipping_address: customerAddress,
-                              payment_method: 'stripe',
-                              payment_status: 'completed',
-                              payment_intent_id: paymentIntentId,
-                              order_status: 'processing',
-                              subtotal: total,
-                              tax: 0,
-                              total: total,
-                              items: orderItems,
-                              notes: `Payment method: stripe, Payment Intent: ${paymentIntentId}`
-                            });
-
-                          if (orderError) throw orderError;
-
-                          const orderItemsForEmail = orderItems.map(item => ({
-                            product_name: item.product_name,
-                            quantity: item.quantity,
-                            total_price: item.total_price
-                          }));
-
-                          await sendCustomerEmail(purchaseCode, orderNumber, orderItemsForEmail);
-                          await sendShopOwnerEmail(purchaseCode, orderNumber, orderItemsForEmail);
-
-                          const isFirestickOrder = items.some(item =>
-                            item.name.toLowerCase().includes('fire stick') ||
-                            item.name.toLowerCase().includes('firestick') ||
-                            item.name.toLowerCase().includes('fire tv')
-                          );
-
-                          await logCredentialsEmails(orderNumber, isFirestickOrder);
-
-                          setOrderData({
-                            orderNumber,
-                            purchaseCode,
-                            items: orderItemsForEmail,
-                            total,
-                            paymentMethod: 'stripe',
-                            customerEmail,
-                            btcAmount: null,
-                            btcAddress: null,
-                            cashAppTag: null
-                          });
-
-                          setShowConfirmation(true);
-                          if (onClearCart) onClearCart();
-                        } catch (error: any) {
-                          alert(`Payment succeeded but order creation failed: ${error.message}. Please contact support with payment ID: ${paymentIntentId}`);
-                        }
-                      }}
-                      onError={(error) => {
-                        alert(`Payment failed: ${error}`);
+                      onSubmit={async (_token: string) => {
+                        // Handle Square payment - token is used by the payment form internally
+                        await handleCompleteOrder();
                       }}
                     />
                   </div>

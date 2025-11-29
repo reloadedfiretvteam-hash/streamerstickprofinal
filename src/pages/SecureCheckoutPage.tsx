@@ -144,7 +144,7 @@ export default function SecureCheckoutPage() {
   }
 
 
-  function handleOrderComplete(orderCode: string) {
+  function handleOrderComplete(_orderCode: string) {
     setStep('success');
   }
 

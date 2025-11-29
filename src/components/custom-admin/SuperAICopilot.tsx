@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bot, Send, Sparkles, Zap, Lightbulb, Command, CheckCircle, ArrowRight, X } from 'lucide-react';
+import { Bot, Send, Sparkles, Lightbulb, ArrowRight, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface Message {
@@ -215,7 +215,7 @@ What would you like to do?`;
       if (count && count > 0) {
         contextSuggestions.push(`You have ${count} pending orders to process`);
       }
-    } catch (e) {}
+    } catch (_e) { /* Ignore error */ }
 
     // Check for low stock
     try {
@@ -228,7 +228,7 @@ What would you like to do?`;
       if (data && data.length > 0) {
         contextSuggestions.push(`${data.length} products are low on stock`);
       }
-    } catch (e) {}
+    } catch (_e) { /* Ignore error */ }
 
     // Add general suggestions
     contextSuggestions.push('Create a new blog post');

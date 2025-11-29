@@ -1,17 +1,37 @@
 import { useState } from 'react';
 import { Play, Check, X } from 'lucide-react';
-import { getStorageUrl } from '../lib/supabase';
 
 interface WhatYouGetVideoProps {
   videoUrl?: string;
 }
 
+/**
+ * WhatYouGetVideo Component
+ * 
+ * Displays a preview video showing what customers get with IPTV subscription.
+ * This is the main "What You Get" section at the bottom of the homepage.
+ * 
+ * Video Configuration:
+ * - The default video URL points to Supabase Storage public bucket
+ * - To change the video, update the DEFAULT_VIDEO_URL constant below
+ * - Alternatively, pass a custom videoUrl prop to override the default
+ * 
+ * To upload a new video:
+ * 1. Go to your Supabase project dashboard
+ * 2. Navigate to Storage > imiges bucket (public bucket)
+ * 3. Upload your new MP4 video file
+ * 4. Update the DEFAULT_VIDEO_URL with the new public URL
+ */
+
+// Default video URL from Supabase Storage public bucket
+// To change the video, update this URL to point to your new video file
+const DEFAULT_VIDEO_URL = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-preview-video.mp4';
+
 export default function WhatYouGetVideo({ videoUrl }: WhatYouGetVideoProps) {
   const [showModal, setShowModal] = useState(false);
   
-  // Use video from Supabase storage bucket - user uploaded
-  // Note: bucket name is 'imiges' (not 'images')
-  const defaultVideoUrl = videoUrl || getStorageUrl('imiges', 'what-you-get-demo.mp4');
+  // Use the provided videoUrl prop if available, otherwise use the default Supabase URL
+  const videoSource = videoUrl || DEFAULT_VIDEO_URL;
   
   const benefits = [
     '18,000+ Live TV Channels',
@@ -111,20 +131,27 @@ export default function WhatYouGetVideo({ videoUrl }: WhatYouGetVideoProps) {
               <X className="w-8 h-8" />
             </button>
             <div className="aspect-video bg-black rounded-lg overflow-hidden">
+              {/* 
+                Video player for the IPTV demo
+                The src attribute uses the videoSource variable which defaults to DEFAULT_VIDEO_URL
+                To use a different video, either:
+                1. Update DEFAULT_VIDEO_URL constant at the top of this file
+                2. Pass a videoUrl prop to this component
+              */}
               <video
-                src={defaultVideoUrl}
+                src={videoSource}
                 controls
                 autoPlay
                 className="w-full h-full"
                 onError={() => {
-                  console.error('Video failed to load from:', defaultVideoUrl);
+                  console.error('Video failed to load from:', videoSource);
                 }}
               >
                 Your browser does not support the video tag.
               </video>
             </div>
             <p className="text-white text-center mt-4 text-sm">
-              Video source: Supabase Storage
+              Video source: Supabase Storage (imiges bucket)
             </p>
           </div>
         </div>
