@@ -29,6 +29,7 @@ export interface PricingPlan {
   active: boolean;
   display_order: number;
   badge?: string;
+  // Support both naming conventions for backward compatibility with existing data
   popular?: boolean;
   is_popular?: boolean;
   billing_period?: string;

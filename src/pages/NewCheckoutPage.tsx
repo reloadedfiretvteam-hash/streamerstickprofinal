@@ -566,7 +566,7 @@ export default function NewCheckoutPage() {
                             .select('id');
 
                           if (error) throw error;
-                          const orderCode = (data && data.length > 0 && data[0].id) ? String(data[0].id) : `SQ-${Date.now()}`;
+                          const orderCode = data?.[0]?.id ? String(data[0].id) : `SQ-${Date.now()}`;
                           handleOrderComplete(orderCode);
                         } catch (error) {
                           console.error('Order creation failed:', error);
