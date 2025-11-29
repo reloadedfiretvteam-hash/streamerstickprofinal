@@ -1,0 +1,82 @@
+═══════════════════════════════════════════════════════════════
+COPY-PASTE ENVIRONMENT VARIABLES FOR CLOUDFLARE PAGES
+═══════════════════════════════════════════════════════════════
+
+Go to: Cloudflare Dashboard → Your Site → Settings → Environment Variables
+
+Then add these 4 variables (copy each section below):
+
+─────────────────────────────────────────────────────────────
+VARIABLE 1 of 4:
+─────────────────────────────────────────────────────────────
+Variable Name:
+VITE_SQUARE_APP_ID
+
+Variable Value:
+[PASTE YOUR SQUARE APPLICATION ID HERE]
+(Example: sandbox-sq0idb-123456789 or sq0idb-123456789)
+
+Environments: ✓ Production  ✓ Preview  ✓ Development
+
+─────────────────────────────────────────────────────────────
+VARIABLE 2 of 4:
+─────────────────────────────────────────────────────────────
+Variable Name:
+VITE_SQUARE_LOCATION_ID
+
+Variable Value:
+[PASTE YOUR SQUARE LOCATION ID HERE]
+(Example: LOC123456789ABCDE)
+
+Environments: ✓ Production  ✓ Preview  ✓ Development
+
+─────────────────────────────────────────────────────────────
+VARIABLE 3 of 4:
+─────────────────────────────────────────────────────────────
+Variable Name:
+VITE_SUPABASE_URL
+
+Variable Value:
+[PASTE YOUR SUPABASE PROJECT URL HERE]
+(Example: https://xxxxx.supabase.co)
+
+Environments: ✓ Production  ✓ Preview  ✓ Development
+
+─────────────────────────────────────────────────────────────
+VARIABLE 4 of 4:
+─────────────────────────────────────────────────────────────
+Variable Name:
+VITE_SUPABASE_ANON_KEY
+
+Variable Value:
+[PASTE YOUR SUPABASE ANON KEY HERE]
+(Long string starting with "eyJ...")
+
+Environments: ✓ Production  ✓ Preview  ✓ Development
+
+─────────────────────────────────────────────────────────────
+HOW TO GET EACH VALUE:
+─────────────────────────────────────────────────────────────
+
+VITE_SQUARE_APP_ID:
+   → Go to https://developer.squareup.com/apps
+   → Click your application
+   → Copy "Application ID"
+
+VITE_SQUARE_LOCATION_ID:
+   → Same Square Developer Dashboard
+   → Go to "Locations" tab
+   → Copy your "Location ID"
+
+VITE_SUPABASE_URL:
+   → Go to https://supabase.com/dashboard
+   → Select your project
+   → Settings → API
+   → Copy "Project URL"
+
+VITE_SUPABASE_ANON_KEY:
+   → Same Supabase page
+   → Copy "anon public" key
+
+═══════════════════════════════════════════════════════════════
+
