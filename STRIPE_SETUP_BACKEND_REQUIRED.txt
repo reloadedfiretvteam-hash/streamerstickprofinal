@@ -1,0 +1,175 @@
+⚠️ IMPORTANT: STRIPE BACKEND SETUP REQUIRED
+
+Your Stripe integration is now REAL (not fake), but you need to create a backend endpoint to create PaymentIntents.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT WAS FIXED:
+✅ Removed all Square integration
+✅ Installed Stripe packages (@stripe/stripe-js, @stripe/react-stripe-js)
+✅ Created REAL Stripe Elements integration (not fake setTimeout)
+✅ Updated all checkout pages to use Stripe
+✅ Stripe keys are loaded from Supabase site_settings table
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT YOU NEED TO ADD:
+
+1. CREATE A SUPABASE EDGE FUNCTION
+   
+   Create: supabase/functions/create-payment-intent/index.ts
+   
+   Copy-paste this code:
+   
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   
+   import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+   import Stripe from "https://esm.sh/stripe@14.21.0?target=deno"
+   
+   const corsHeaders = {
+     'Access-Control-Allow-Origin': '*',
+     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+   }
+   
+   serve(async (req) => {
+     if (req.method === 'OPTIONS') {
+       return new Response('ok', { headers: corsHeaders })
+     }
+   
+     try {
+       // Get Stripe secret key from Supabase
+       const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
+       const supabaseClient = createClient(
+         Deno.env.get('SUPABASE_URL') ?? '',
+         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+       )
+       
+       const { data: setting } = await supabaseClient
+         .from('site_settings')
+         .select('setting_value')
+         .eq('setting_key', 'stripe_secret_key')
+         .single()
+       
+       const stripeSecretKey = setting?.setting_value || Deno.env.get('STRIPE_SECRET_KEY')
+       
+       if (!stripeSecretKey) {
+         throw new Error('Stripe secret key not configured')
+       }
+       
+       const stripe = new Stripe(stripeSecretKey, {
+         apiVersion: '2023-10-16',
+         httpClient: Stripe.createFetchHttpClient(),
+       })
+       
+       const { amount, currency = 'usd', customerInfo } = await req.json()
+       
+       // Create PaymentIntent
+       const paymentIntent = await stripe.paymentIntents.create({
+         amount: Math.round(amount), // Amount in cents
+         currency: currency.toLowerCase(),
+         automatic_payment_methods: {
+           enabled: true,
+         },
+         metadata: {
+           customer_email: customerInfo?.email || '',
+           customer_name: customerInfo?.fullName || '',
+         }
+       })
+       
+       return new Response(
+         JSON.stringify({ 
+           clientSecret: paymentIntent.client_secret,
+           paymentIntentId: paymentIntent.id 
+         }),
+         {
+           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+           status: 200,
+         },
+       )
+     } catch (error) {
+       return new Response(
+         JSON.stringify({ error: error.message }),
+         {
+           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+           status: 400,
+         },
+       )
+     }
+   })
+   
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+2. DEPLOY THE EDGE FUNCTION
+   
+   Run this command in your terminal:
+   
+   supabase functions deploy create-payment-intent
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ENVIRONMENT VARIABLES NEEDED:
+
+✅ Stripe Publishable Key → Add to Supabase site_settings table:
+   - setting_key: 'stripe_publishable_key'
+   - setting_value: 'pk_test_...' or 'pk_live_...'
+   
+✅ Stripe Secret Key → Add to Supabase site_settings table:
+   - setting_key: 'stripe_secret_key'
+   - setting_value: 'sk_test_...' or 'sk_live_...'
+
+   OR add to Cloudflare Pages environment variables:
+   - VITE_STRIPE_PUBLISHABLE_KEY
+   - VITE_STRIPE_SECRET_KEY (for edge function)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HOW TO ADD STRIPE KEYS IN ADMIN PANEL:
+
+1. Go to your admin panel: /admin
+2. Navigate to "Payment Settings" or "Simple Payment Settings"
+3. Enter your Stripe keys:
+   - Publishable Key (pk_test_... or pk_live_...)
+   - Secret Key (sk_test_... or sk_live_...)
+4. Click "Save Settings"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GET YOUR STRIPE KEYS:
+
+1. Go to: https://dashboard.stripe.com/apikeys
+2. Copy your "Publishable key" → Add to admin panel
+3. Copy your "Secret key" → Add to admin panel AND edge function env vars
+
+⚠️ Use TEST keys first to test, then switch to LIVE keys for production!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT'S WORKING NOW:
+
+✅ Stripe Elements payment form (real, secure, PCI-compliant)
+✅ Stripe integration code is complete and ready
+✅ All Square code removed
+✅ Checkout flows updated to use Stripe
+✅ Payment processing will work once backend is set up
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NEXT STEPS:
+
+1. ✅ Add Stripe keys to admin panel
+2. ⏳ Create Supabase Edge Function (code provided above)
+3. ⏳ Deploy Edge Function
+4. ⏳ Test payment with Stripe test card: 4242 4242 4242 4242
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TESTING:
+
+Use Stripe test cards:
+- Card: 4242 4242 4242 4242
+- Expiry: Any future date (e.g., 12/34)
+- CVC: Any 3 digits (e.g., 123)
+- ZIP: Any 5 digits (e.g., 12345)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+

@@ -1,0 +1,158 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STRIPE SETUP - STEP BY STEP FOR NON-TECHNICAL USERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: GET YOUR STRIPE KEYS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. You're already on Stripe Developer page - Good!
+2. Look for a toggle that says "Test mode" or "Live mode"
+   → Start with "Test mode" ON (for testing)
+3. Find "API keys" section or click "API keys" in the menu
+4. You'll see TWO keys:
+
+   KEY #1 - PUBLISHABLE KEY:
+   - Starts with: pk_test_... (test mode) or pk_live_... (live mode)
+   - This one is SAFE to copy (it's meant to be public)
+   - Click "Reveal" or "Copy" button
+   - Copy the ENTIRE key (it's very long)
+   - Save it somewhere temporarily (Notepad, etc.)
+
+   KEY #2 - SECRET KEY:
+   - Starts with: sk_test_... (test mode) or sk_live_... (live mode)
+   - Click "Reveal test key" or "Reveal live key" button
+   - Copy the ENTIRE key (it's very long)
+   - ⚠️ NEVER share this key publicly!
+   - Save it somewhere temporarily
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 2: ADD KEYS TO YOUR ADMIN PANEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Go to your website: https://yourdomain.com/admin
+2. Log in:
+   - Username: admin
+   - Password: admin
+3. Look for menu item: "Payment Settings" or "Simple Payment Settings"
+4. You'll see TWO fields:
+
+   FIELD 1 - PUBLISHABLE KEY:
+   - Paste your pk_test_... or pk_live_... key here
+   - (The one that starts with pk_)
+
+   FIELD 2 - SECRET KEY:
+   - Paste your sk_test_... or sk_live_... key here
+   - (The one that starts with sk_)
+   - This field might be hidden (shows dots) - that's normal
+
+5. Click "Save Settings" button at the top
+6. You should see "Saved!" or a success message
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 3: VERIFY KEYS ARE SAVED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Go to Supabase → SQL Editor and run this:
+
+SELECT 
+  setting_key,
+  CASE 
+    WHEN setting_value LIKE 'pk_%' OR setting_value LIKE 'sk_%' 
+    THEN '✅ VALID' 
+    ELSE '❌ INVALID' 
+  END as status,
+  LEFT(setting_value, 12) || '...' as preview
+FROM site_settings
+WHERE setting_key IN ('stripe_publishable_key', 'stripe_secret_key');
+
+You should see:
+- stripe_publishable_key → ✅ VALID
+- stripe_secret_key → ✅ VALID
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 4: DEPLOY BACKEND FUNCTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The Edge Function file is already created at:
+supabase/functions/create-payment-intent/index.ts
+
+Now you need to deploy it:
+
+1. Open terminal/command prompt
+2. Navigate to your project folder
+3. Run this command:
+
+   supabase functions deploy create-payment-intent
+
+If you get an error about not being logged in:
+   supabase login
+
+Then try the deploy command again.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 5: TEST YOUR STRIPE INTEGRATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Go to your secure checkout page (where customers pay)
+2. Add a product to cart
+3. Go to checkout
+4. Select "Credit/Debit Card" payment method
+5. Use Stripe TEST card:
+   - Card Number: 4242 4242 4242 4242
+   - Expiry: 12/34 (any future date)
+   - CVC: 123 (any 3 digits)
+   - ZIP: 12345 (any 5 digits)
+6. Click "Pay" button
+7. Payment should process successfully!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ "Stripe could not be initialized"
+   → Publishable key is missing or wrong
+   → Check Step 2 - make sure you pasted the pk_ key correctly
+
+❌ "Failed to create payment intent"
+   → Secret key is missing or wrong
+   → Edge Function not deployed
+   → Check Step 2 and Step 4
+
+❌ "Payment form not loading"
+   → Check browser console for errors
+   → Make sure publishable key starts with pk_test_ or pk_live_
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT EACH KEY DOES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PUBLISHABLE KEY (pk_test_... or pk_live_...):
+- Shows the payment form on your website
+- Safe to be public (that's why it's "publishable")
+- Goes in admin panel → Payment Settings
+
+SECRET KEY (sk_test_... or sk_live_...):
+- Actually charges the credit card
+- NEVER share this publicly!
+- Goes in admin panel → Payment Settings
+- Also needs to be accessible by Edge Function
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SWITCHING FROM TEST TO LIVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. In Stripe Dashboard, toggle "Test mode" OFF (switch to Live mode)
+2. Get your LIVE keys (pk_live_... and sk_live_...)
+3. Update them in admin panel → Payment Settings
+4. Save
+5. Deploy Edge Function again (it will use new keys from database)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+

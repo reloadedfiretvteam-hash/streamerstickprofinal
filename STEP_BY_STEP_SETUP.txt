@@ -1,0 +1,104 @@
+===========================================
+STEP-BY-STEP ADMIN LOGIN SETUP GUIDE
+===========================================
+
+✅ GOOD NEWS: Your .env file has been automatically created!
+   Location: C:\Users\rdela\Downloads\New folder\project-bolt-sb1-19o8d5ja\project\streamerstickprofinal\.env
+
+===========================================
+WHAT WAS ADDED TO YOUR .env FILE:
+===========================================
+
+VITE_ADMIN_DEFAULT_USER=admin
+VITE_ADMIN_DEFAULT_PASSWORD=admin123
+VITE_ADMIN_DEFAULT_EMAIL=reloadedfirestvteam@gmail.com
+
+===========================================
+YOUR LOGIN CREDENTIALS:
+===========================================
+
+Username: admin
+Password: admin123
+
+⚠️ CHANGE THIS PASSWORD TO SOMETHING SECURE!
+
+===========================================
+HOW TO CHANGE YOUR PASSWORD:
+===========================================
+
+1. Open the .env file in any text editor (Notepad, VS Code, etc.)
+2. Find the line: VITE_ADMIN_DEFAULT_PASSWORD=admin123
+3. Change "admin123" to your new password
+4. Save the file
+5. Restart your development server
+
+===========================================
+HOW TO LOGIN:
+===========================================
+
+OPTION 1: From Footer (Easiest)
+--------------------------------
+1. Open your website in a browser
+2. Scroll all the way down to the footer
+3. In the "Support & Admin" section, click "Admin Login"
+4. A login box will appear
+5. Enter:
+   - Username: admin
+   - Password: admin123
+6. Click "Login"
+7. You'll be redirected to the admin dashboard!
+
+OPTION 2: Direct URL
+--------------------
+1. Go to: http://localhost:5173/admin
+   (Or your website URL + /admin)
+2. Enter your username and password
+3. Click "Login"
+
+===========================================
+IF YOUR WEBSITE IS ALREADY RUNNING:
+===========================================
+
+You MUST restart your development server for the .env changes to work:
+
+1. In your terminal, press Ctrl + C to stop the server
+2. Run: npm run dev
+3. Try logging in again
+
+===========================================
+VERIFY IT WORKS:
+===========================================
+
+✅ Open your website
+✅ Scroll to footer
+✅ Click "Admin Login"
+✅ Enter username: admin
+✅ Enter password: admin123
+✅ Click "Login"
+✅ You should see the admin dashboard with 60+ tools!
+
+===========================================
+TROUBLESHOOTING:
+===========================================
+
+Problem: "Login failed" error
+→ Make sure you restarted your development server
+→ Check you're using the correct username and password
+
+Problem: Can't find the login button
+→ Scroll all the way to the bottom of the page
+→ Look in the footer under "Support & Admin"
+
+Problem: Still not working
+→ Open browser console (Press F12)
+→ Check for any error messages
+→ Make sure .env file is in the root folder
+
+===========================================
+FULL GUIDE:
+===========================================
+
+See ADMIN_LOGIN_SETUP_GUIDE.md for complete instructions
+
+===========================================
+

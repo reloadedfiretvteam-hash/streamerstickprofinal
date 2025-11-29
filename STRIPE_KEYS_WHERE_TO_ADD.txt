@@ -1,0 +1,144 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXACTLY WHERE TO ADD YOUR STRIPE KEYS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+METHOD 1: USING ADMIN PANEL (EASIEST) ✅
+
+1. Go to your website: https://yourdomain.com/admin
+2. Log in with your admin credentials
+3. Find "Payment Settings" or "Simple Payment Settings" in the menu
+4. You'll see two fields:
+   
+   📝 PUBLISHABLE KEY:
+   - Field name: "Publishable Key"
+   - Enter: pk_test_... or pk_live_...
+   - Starts with: pk_
+   
+   📝 SECRET KEY:
+   - Field name: "Secret Key"  
+   - Enter: sk_test_... or sk_live_...
+   - Starts with: sk_
+   - This field is hidden (password type) for security
+
+5. Click "Save Settings" button
+6. Done! Keys are saved to Supabase automatically
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+METHOD 2: DIRECTLY IN SUPABASE (if admin panel doesn't work)
+
+1. Go to: https://supabase.com/dashboard
+2. Select your project
+3. Click: "SQL Editor" (left sidebar)
+4. Click: "New query"
+5. Copy and paste this SQL:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+-- Add/Update Publishable Key
+INSERT INTO site_settings (setting_key, setting_value)
+VALUES ('stripe_publishable_key', 'pk_test_YOUR_ACTUAL_KEY_HERE')
+ON CONFLICT (setting_key) 
+DO UPDATE SET setting_value = EXCLUDED.setting_value;
+
+-- Add/Update Secret Key  
+INSERT INTO site_settings (setting_key, setting_value)
+VALUES ('stripe_secret_key', 'sk_test_YOUR_ACTUAL_KEY_HERE')
+ON CONFLICT (setting_key) 
+DO UPDATE SET setting_value = EXCLUDED.setting_value;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+6. Replace YOUR_ACTUAL_KEY_HERE with your real Stripe keys
+7. Click "Run" button
+8. Done!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HOW TO VERIFY KEYS ARE ADDED:
+
+Run this SQL in Supabase SQL Editor (see VERIFY_STRIPE_KEYS.sql file):
+
+SELECT 
+  setting_key,
+  CASE 
+    WHEN setting_value LIKE 'pk_%' OR setting_value LIKE 'sk_%' 
+    THEN '✅ VALID' 
+    ELSE '❌ INVALID' 
+  END as status,
+  LEFT(setting_value, 12) || '...' as preview
+FROM site_settings
+WHERE setting_key IN ('stripe_publishable_key', 'stripe_secret_key');
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT THE KEYS LOOK LIKE:
+
+✅ PUBLISHABLE KEY (pk_):
+   Example: pk_test_51AbC123...xyz789
+   Length: Usually 100+ characters
+   Format: pk_test_... or pk_live_...
+
+✅ SECRET KEY (sk_):
+   Example: sk_test_51AbC123...xyz789  
+   Length: Usually 100+ characters
+   Format: sk_test_... or sk_live_...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHERE KEYS ARE USED:
+
+PUBLISHABLE KEY (pk_):
+→ Stored in: Supabase site_settings table
+→ Used by: Frontend (StripeCheckout.tsx, StripePaymentForm.tsx)
+→ Purpose: Initialize Stripe in the browser
+→ Safe: Yes, can be public (that's why it's "publishable")
+
+SECRET KEY (sk_):
+→ Stored in: Supabase site_settings table (for admin panel)
+→ ALSO NEEDED: In Supabase Edge Function environment variables
+→ Used by: Backend (Edge Function to create PaymentIntents)
+→ Purpose: Actually charge cards
+→ Safe: NO! Never expose to frontend!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GET YOUR STRIPE KEYS:
+
+1. Go to: https://dashboard.stripe.com/apikeys
+2. If you see "Test mode" toggle → Keys start with pk_test_ / sk_test_
+3. If you see "Live mode" toggle → Keys start with pk_live_ / sk_live_
+4. Copy both keys:
+   - "Publishable key" → Add to site_settings as stripe_publishable_key
+   - "Secret key" → Add to site_settings as stripe_secret_key
+
+⚠️ IMPORTANT: 
+- Start with TEST keys (pk_test_ and sk_test_)
+- Test everything works
+- Then switch to LIVE keys (pk_live_ and sk_live_) for production
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TROUBLESHOOTING:
+
+❌ "Keys not showing in admin panel"
+   → Keys might not be in database
+   → Run the SQL INSERT commands above
+   → Refresh admin panel
+
+❌ "Can't save keys in admin panel"  
+   → Check Supabase RLS policies allow updates
+   → Or use SQL method instead
+
+❌ "Stripe not initializing"
+   → Check publishable key format (must start with pk_)
+   → Check browser console for errors
+   → Verify key is in site_settings table
+
+❌ "Payment fails to process"
+   → Check secret key format (must start with sk_)
+   → Verify Edge Function has secret key in env vars
+   → Check Edge Function logs for errors
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
