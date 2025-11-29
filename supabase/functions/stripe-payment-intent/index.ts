@@ -52,7 +52,13 @@ Deno.serve(async (req: Request) => {
     }
 
     // Sanitize product ID to prevent injection attacks
-    const sanitizedProductId = productId.replace(/[^a-zA-Z0-9-_]/g, '');
+    // Allow alphanumeric, hyphens, underscores, and dots (common in product IDs like prod_abc.123)
+    const sanitizedProductId = productId.replace(/[^a-zA-Z0-9-_.]/g, '');
+    
+    // Ensure product ID is not empty after sanitization
+    if (!sanitizedProductId) {
+      throw new Error("Invalid product ID format");
+    }
 
     // Fetch the product from stripe_products table
     const productResponse = await fetch(
@@ -86,24 +92,31 @@ Deno.serve(async (req: Request) => {
     const amountInCents = Math.round(amount * 100);
 
     // Create a Stripe PaymentIntent
+    // Build payment intent parameters
+    const paymentParams: Record<string, string> = {
+      amount: amountInCents.toString(),
+      currency: "usd",
+      "automatic_payment_methods[enabled]": "true",
+      "metadata[product_id]": sanitizedProductId,
+      "metadata[product_name]": product.name,
+      "metadata[customer_email]": customerEmail,
+      description: `Payment for ${product.name}`,
+      receipt_email: customerEmail,
+      statement_descriptor_suffix: "PRO DIGITAL",
+    };
+    
+    // Only add customer_name to metadata if provided
+    if (customerName && customerName.trim()) {
+      paymentParams["metadata[customer_name]"] = customerName.trim();
+    }
+
     const stripeResponse = await fetch("https://api.stripe.com/v1/payment_intents", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${stripeSecretKey}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({
-        amount: amountInCents.toString(),
-        currency: "usd",
-        "automatic_payment_methods[enabled]": "true",
-        "metadata[product_id]": sanitizedProductId,
-        "metadata[product_name]": product.name,
-        "metadata[customer_email]": customerEmail,
-        "metadata[customer_name]": customerName || '',
-        description: `Payment for ${product.name}`,
-        receipt_email: customerEmail,
-        statement_descriptor_suffix: "PRO DIGITAL",
-      }),
+      body: new URLSearchParams(paymentParams),
     });
 
     if (!stripeResponse.ok) {
