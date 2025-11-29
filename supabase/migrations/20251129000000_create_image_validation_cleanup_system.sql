@@ -13,7 +13,7 @@
     - Detects placeholder images (pexels, unsplash, etc.)
     - Detects corrupt/minimum-size placeholder patterns
     - Validates URL format consistency
-    - Provides SQL data volatility consistent pattern handling
+    - Provides consistent SQL data pattern handling for image cleanup
 */
 
 -- Function to validate image URLs and detect invalid patterns

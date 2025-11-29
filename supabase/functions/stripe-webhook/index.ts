@@ -297,13 +297,15 @@ Deno.serve(async (req: Request) => {
           stripe_payment_intent_id: paymentIntent.id,
           amount: paymentIntent.amount / 100, // Convert from cents
           currency: paymentIntent.currency,
-          status: "completed",
+          payment_method: "stripe",
+          payment_status: "confirmed",
           customer_email: paymentIntent.receipt_email || paymentIntent.metadata?.customer_email,
           product_id: paymentIntent.metadata?.product_id,
           product_name: paymentIntent.metadata?.product_name,
           is_live_mode: isLivePayment,
           created_at: new Date().toISOString(),
           stripe_event_id: event.id,
+          order_code: `STRIPE-${paymentIntent.id.slice(-8).toUpperCase()}`,
         };
 
         // Insert payment record
@@ -344,13 +346,15 @@ Deno.serve(async (req: Request) => {
           stripe_payment_intent_id: paymentIntent.id,
           amount: paymentIntent.amount / 100,
           currency: paymentIntent.currency,
-          status: "failed",
+          payment_method: "stripe",
+          payment_status: "failed",
           customer_email: paymentIntent.receipt_email || paymentIntent.metadata?.customer_email,
           product_id: paymentIntent.metadata?.product_id,
           product_name: paymentIntent.metadata?.product_name,
           is_live_mode: isLivePayment,
           created_at: new Date().toISOString(),
           stripe_event_id: event.id,
+          order_code: `STRIPE-${paymentIntent.id.slice(-8).toUpperCase()}`,
         };
 
         await fetch(
