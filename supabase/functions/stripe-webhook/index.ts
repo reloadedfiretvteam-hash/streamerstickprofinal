@@ -353,7 +353,7 @@ Deno.serve(async (req: Request) => {
     const body = await req.text();
     const signature = req.headers.get("stripe-signature");
 
-    // Parse the event (in production, you would verify the signature)
+    // Parse the event
     let event: StripeEvent;
     try {
       event = JSON.parse(body) as StripeEvent;
@@ -376,12 +376,99 @@ Deno.serve(async (req: Request) => {
 
     // Verify webhook signature if secret is configured
     if (stripeWebhookSecret && signature) {
-      console.log(`${prefix} Signature verification enabled`);
-      // In production, implement proper signature verification using Stripe's library
-      // For now, we log that signature was present
-      console.log(`${prefix} Signature present: ${signature.substring(0, 20)}...`);
+      console.log(`${prefix} Verifying webhook signature...`);
+      
+      // Parse the Stripe signature header
+      const signatureParts = signature.split(",").reduce((acc, part) => {
+        const [key, value] = part.split("=");
+        acc[key] = value;
+        return acc;
+      }, {} as Record<string, string>);
+
+      const timestamp = signatureParts["t"];
+      const expectedSignature = signatureParts["v1"];
+
+      if (!timestamp || !expectedSignature) {
+        console.error(`${prefix} Invalid signature format`);
+        return new Response(
+          JSON.stringify({ error: "Invalid signature format" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      // Construct the signed payload string
+      const signedPayload = `${timestamp}.${body}`;
+
+      // Compute the expected signature using HMAC-SHA256
+      const encoder = new TextEncoder();
+      const keyData = encoder.encode(stripeWebhookSecret);
+      const messageData = encoder.encode(signedPayload);
+      
+      const cryptoKey = await crypto.subtle.importKey(
+        "raw",
+        keyData,
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"]
+      );
+      
+      const signatureBytes = await crypto.subtle.sign("HMAC", cryptoKey, messageData);
+      const computedSignature = Array.from(new Uint8Array(signatureBytes))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+
+      // Compare signatures using timing-safe comparison
+      if (computedSignature.length !== expectedSignature.length) {
+        console.error(`${prefix} Signature length mismatch`);
+        return new Response(
+          JSON.stringify({ error: "Invalid signature" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      let mismatch = 0;
+      for (let i = 0; i < computedSignature.length; i++) {
+        mismatch |= computedSignature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+      }
+
+      if (mismatch !== 0) {
+        console.error(`${prefix} Signature verification failed`);
+        return new Response(
+          JSON.stringify({ error: "Invalid signature" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      // Check timestamp to prevent replay attacks (allow 5 minutes tolerance)
+      const eventTimestamp = parseInt(timestamp, 10);
+      const currentTimestamp = Math.floor(Date.now() / 1000);
+      const tolerance = 300; // 5 minutes
+
+      if (Math.abs(currentTimestamp - eventTimestamp) > tolerance) {
+        console.error(`${prefix} Webhook timestamp too old (possible replay attack)`);
+        return new Response(
+          JSON.stringify({ error: "Webhook timestamp expired" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      console.log(`${prefix} Signature verified successfully`);
     } else if (!stripeWebhookSecret) {
-      console.warn(`${prefix} WARNING: Webhook signature verification is not configured`);
+      console.warn(`${prefix} WARNING: Webhook signature verification is not configured. Set STRIPE_WEBHOOK_SECRET for production use.`);
+    } else if (!signature) {
+      console.warn(`${prefix} WARNING: No signature provided in request`);
     }
 
     // Route to appropriate handler based on event type

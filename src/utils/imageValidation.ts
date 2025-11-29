@@ -10,7 +10,9 @@
 
 import { supabase } from '../lib/supabase';
 
-// Minimum valid image size in bytes (20 bytes is placeholder/blank)
+// Minimum valid image size in bytes
+// Files under 100 bytes are typically corrupted, blank placeholders, or empty files
+// Common placeholder sizes: 0 bytes (empty), 20-30 bytes (minimal HTML/text placeholders)
 const MIN_VALID_IMAGE_SIZE = 100;
 
 // Maximum image size in bytes (5MB)
@@ -292,31 +294,50 @@ export async function checkAllProductImageHealth(): Promise<ImageHealthCheckResu
 
   console.log(`[IMAGE_HEALTH] Checking ${products.length} products...`);
 
-  for (const product of products) {
-    if (!product.image_url) {
-      results.push({
-        url: '',
-        productId: product.id,
-        productName: product.name,
-        isHealthy: false,
-        statusCode: null,
-        contentType: null,
-        contentLength: null,
-        error: 'No image URL set',
-      });
-      continue;
-    }
+  // Process in batches to avoid overwhelming the server
+  const BATCH_SIZE = 5;
+  const BATCH_DELAY_MS = 100;
 
-    const health = await checkImageHealth(product.image_url);
-    results.push({
-      url: product.image_url,
-      productId: product.id,
-      productName: product.name,
-      ...health,
-    });
+  for (let i = 0; i < products.length; i += BATCH_SIZE) {
+    const batch = products.slice(i, i + BATCH_SIZE);
+    
+    // Process batch concurrently
+    const batchResults = await Promise.all(
+      batch.map(async (product) => {
+        if (!product.image_url) {
+          return {
+            url: '',
+            productId: product.id,
+            productName: product.name,
+            isHealthy: false,
+            statusCode: null,
+            contentType: null,
+            contentLength: null,
+            error: 'No image URL set',
+          };
+        }
 
-    if (!health.isHealthy) {
-      console.warn(`[IMAGE_HEALTH] Unhealthy image for ${product.name}: ${health.error}`);
+        const health = await checkImageHealth(product.image_url);
+        const result = {
+          url: product.image_url,
+          productId: product.id,
+          productName: product.name,
+          ...health,
+        };
+
+        if (!health.isHealthy) {
+          console.warn(`[IMAGE_HEALTH] Unhealthy image for ${product.name}: ${health.error}`);
+        }
+
+        return result;
+      })
+    );
+
+    results.push(...batchResults);
+
+    // Add delay between batches to prevent rate limiting
+    if (i + BATCH_SIZE < products.length) {
+      await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
     }
   }
 
