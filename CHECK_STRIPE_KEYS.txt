@@ -1,0 +1,137 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HOW TO CHECK IF YOUR STRIPE KEYS ARE SET UP CORRECTLY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHERE EACH KEY SHOULD BE:
+
+1. PUBLISHABLE KEY (pk_test_... or pk_live_...)
+   ✅ Location: Supabase site_settings table
+   ✅ setting_key: 'stripe_publishable_key'
+   ✅ setting_value: Your publishable key (starts with pk_)
+   ✅ Used by: Frontend (browser) - SAFE to expose
+
+2. SECRET KEY (sk_test_... or sk_live_...)
+   ✅ Location: Supabase site_settings table
+   ✅ setting_key: 'stripe_secret_key'
+   ✅ setting_value: Your secret key (starts with sk_)
+   ⚠️  ALSO NEEDED: In Supabase Edge Function environment variables
+   ✅ Used by: Backend only - NEVER expose to frontend!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HOW TO VERIFY IN SUPABASE:
+
+1. Go to: https://supabase.com/dashboard
+2. Select your project
+3. Go to: Table Editor → site_settings
+4. Look for these two rows:
+
+   Row 1:
+   - setting_key: stripe_publishable_key
+   - setting_value: pk_test_... (or pk_live_...)
+
+   Row 2:
+   - setting_key: stripe_secret_key
+   - setting_value: sk_test_... (or sk_live_...)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+QUICK SQL TO CHECK YOUR KEYS:
+
+Run this in Supabase SQL Editor:
+
+SELECT setting_key, 
+       CASE 
+         WHEN setting_key = 'stripe_publishable_key' THEN 
+           CASE 
+             WHEN setting_value LIKE 'pk_%' THEN '✅ VALID FORMAT'
+             ELSE '❌ INVALID (should start with pk_)'
+           END
+         WHEN setting_key = 'stripe_secret_key' THEN 
+           CASE 
+             WHEN setting_value LIKE 'sk_%' THEN '✅ VALID FORMAT'
+             ELSE '❌ INVALID (should start with sk_)'
+           END
+       END as key_status,
+       LEFT(setting_value, 20) || '...' as key_preview,
+       LENGTH(setting_value) as key_length
+FROM site_settings
+WHERE setting_key IN ('stripe_publishable_key', 'stripe_secret_key');
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HOW TO ADD/UPDATE KEYS IN ADMIN PANEL:
+
+1. Go to: /admin (your admin panel)
+2. Navigate to: "Payment Settings" or "Simple Payment Settings"
+3. You should see two fields:
+   - "Publishable Key" → Enter: pk_test_... or pk_live_...
+   - "Secret Key" → Enter: sk_test_... or sk_live_...
+4. Click "Save Settings"
+
+The admin panel will automatically save these to Supabase site_settings table.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MANUAL SQL TO ADD KEYS (if admin panel doesn't work):
+
+Run these in Supabase SQL Editor:
+
+-- Add/Update Publishable Key
+INSERT INTO site_settings (setting_key, setting_value)
+VALUES ('stripe_publishable_key', 'pk_test_YOUR_KEY_HERE')
+ON CONFLICT (setting_key) 
+DO UPDATE SET setting_value = EXCLUDED.setting_value;
+
+-- Add/Update Secret Key
+INSERT INTO site_settings (setting_key, setting_value)
+VALUES ('stripe_secret_key', 'sk_test_YOUR_KEY_HERE')
+ON CONFLICT (setting_key) 
+DO UPDATE SET setting_value = EXCLUDED.setting_value;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT EACH KEY DOES:
+
+PUBLISHABLE KEY (Frontend):
+- Starts with: pk_test_ or pk_live_
+- Used by: Browser/client-side code
+- Safe to: Expose publicly (that's why it's "publishable")
+- Purpose: Initialize Stripe.js to collect card info
+
+SECRET KEY (Backend):
+- Starts with: sk_test_ or sk_live_
+- Used by: Server-side code (Edge Function)
+- NEVER: Expose to frontend/browser!
+- Purpose: Create PaymentIntents and charge cards
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TESTING:
+
+1. Publishable Key Test:
+   - Open browser console on your site
+   - Should see: Stripe initialized (no errors)
+   - If error: "Stripe publishable key not found" → Key missing/wrong
+
+2. Secret Key Test:
+   - Try to make a test payment
+   - If error: "Failed to create payment intent" → Secret key issue
+   - Check Edge Function logs in Supabase
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+COMMON ISSUES:
+
+❌ "Stripe could not be initialized"
+   → Publishable key missing or wrong in site_settings
+
+❌ "Failed to create payment intent"
+   → Secret key missing or wrong (check Edge Function env vars)
+
+❌ Keys not saving in admin panel
+   → Check Supabase RLS (Row Level Security) policies
+   → Make sure site_settings table allows updates
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
