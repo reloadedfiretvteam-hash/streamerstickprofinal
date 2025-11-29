@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Shield, Lock, CreditCard, Bitcoin, DollarSign, Package, CheckCircle, AlertCircle, ExternalLink, ArrowRight, Info } from 'lucide-react';
+import { Shield, Lock, CreditCard, Package, CheckCircle, AlertCircle, ArrowRight, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import SquarePaymentForm from '../components/SquarePaymentForm';
-import BitcoinPaymentFlow from '../components/BitcoinPaymentFlow';
+import StripePaymentForm from '../components/StripePaymentForm';
 
 interface Product {
   id: string;
@@ -26,9 +25,11 @@ interface CustomerInfo {
 export default function SecureCheckoutPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'square' | 'bitcoin' | 'cashapp' | ''>('');
   const [step, setStep] = useState<'select' | 'checkout' | 'success'>('select');
   const [loading, setLoading] = useState(true);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [creatingPaymentIntent, setCreatingPaymentIntent] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
     email: '',
@@ -140,18 +141,89 @@ export default function SecureCheckoutPage() {
   function handleBackToProducts() {
     setStep('select');
     setSelectedProduct(null);
-    setPaymentMethod('');
+    setClientSecret(null);
+    setPaymentError(null);
   }
 
-  async function handleSquarePayment(token: string) {
-    // Process Square payment
-    console.log('Processing Square payment with token:', token);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setStep('success');
+  async function createStripePaymentIntent() {
+    if (!selectedProduct || !customerInfo.email || !customerInfo.name) {
+      setPaymentError('Please fill in your name and email');
+      return;
+    }
+
+    setCreatingPaymentIntent(true);
+    setPaymentError(null);
+
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      
+      const response = await fetch(`${supabaseUrl}/functions/v1/stripe-checkout-intent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: parseFloat(selectedProduct.price),
+          customerEmail: customerInfo.email,
+          customerName: customerInfo.name,
+          customerPhone: customerInfo.phone,
+          orderDescription: selectedProduct.name,
+          items: [{
+            productId: selectedProduct.id,
+            productName: selectedProduct.name,
+            quantity: 1,
+            price: parseFloat(selectedProduct.price)
+          }]
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create payment intent');
+      }
+
+      setClientSecret(data.clientSecret);
+    } catch (error: unknown) {
+      console.error('Error creating payment intent:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to initialize payment. Please try again.';
+      setPaymentError(errorMessage);
+    } finally {
+      setCreatingPaymentIntent(false);
+    }
   }
 
-  function handleOrderComplete(_orderCode: string) {
-    setStep('success');
+  async function handlePaymentSuccess(paymentIntentId: string) {
+    try {
+      // Save order to Supabase
+      await supabase
+        .from('orders')
+        .insert([{
+          customer_name: customerInfo.name,
+          customer_email: customerInfo.email,
+          customer_phone: customerInfo.phone,
+          total_amount: selectedProduct?.price,
+          payment_method: 'stripe',
+          payment_intent_id: paymentIntentId,
+          status: 'paid',
+          items: selectedProduct ? [{
+            product_id: selectedProduct.id,
+            product_name: selectedProduct.name,
+            quantity: 1,
+            price: selectedProduct.price
+          }] : []
+        }]);
+
+      setStep('success');
+    } catch (error) {
+      console.error('Order creation failed:', error);
+      // Still show success since payment was processed
+      setStep('success');
+    }
+  }
+
+  function handlePaymentError(error: string) {
+    setPaymentError(error);
   }
 
   const totalAmount = selectedProduct ? parseFloat(selectedProduct.price) : 0;
@@ -436,168 +508,77 @@ export default function SecureCheckoutPage() {
             </div>
           </div>
 
-          {/* Right Column - Payment Methods */}
+          {/* Right Column - Secure Payment */}
           <div className="lg:col-span-2">
             <div className="bg-white p-6 rounded-xl shadow-md mb-6">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                 <Lock className="w-6 h-6 text-green-600" />
-                Select Payment Method
+                Secure Payment
               </h2>
 
-              {/* Payment Method Selection */}
-              <div className="grid md:grid-cols-3 gap-4 mb-8">
-                {/* Square Payment */}
-                <button
-                  onClick={() => setPaymentMethod('square')}
-                  className={`p-6 border-2 rounded-xl transition-all text-left ${
-                    paymentMethod === 'square'
-                      ? 'border-blue-600 bg-blue-50'
-                      : 'border-slate-200 hover:border-blue-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <CreditCard className={`w-6 h-6 ${paymentMethod === 'square' ? 'text-blue-600' : 'text-slate-400'}`} />
-                    <span className="font-bold text-slate-800">Credit/Debit Card</span>
-                  </div>
-                  <p className="text-sm text-slate-600">Secure payment via Square</p>
-                </button>
-
-                {/* Bitcoin Payment */}
-                <button
-                  onClick={() => setPaymentMethod('bitcoin')}
-                  className={`p-6 border-2 rounded-xl transition-all text-left ${
-                    paymentMethod === 'bitcoin'
-                      ? 'border-orange-600 bg-orange-50'
-                      : 'border-slate-200 hover:border-orange-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <Bitcoin className={`w-6 h-6 ${paymentMethod === 'bitcoin' ? 'text-orange-600' : 'text-slate-400'}`} />
-                    <span className="font-bold text-slate-800">Bitcoin (BTC)</span>
-                  </div>
-                  <p className="text-sm text-slate-600">Pay with cryptocurrency</p>
-                </button>
-
-                {/* Cash App Payment */}
-                <button
-                  onClick={() => setPaymentMethod('cashapp')}
-                  className={`p-6 border-2 rounded-xl transition-all text-left ${
-                    paymentMethod === 'cashapp'
-                      ? 'border-green-600 bg-green-50'
-                      : 'border-slate-200 hover:border-green-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <DollarSign className={`w-6 h-6 ${paymentMethod === 'cashapp' ? 'text-green-600' : 'text-slate-400'}`} />
-                    <span className="font-bold text-slate-800">Cash App</span>
-                  </div>
-                  <p className="text-sm text-slate-600">Send payment via Cash App</p>
-                </button>
-              </div>
-
-              {/* Square Payment Form */}
-              {paymentMethod === 'square' && (
-                <div className="mb-6">
-                  <SquarePaymentForm 
-                    amount={totalAmount} 
-                    onSubmit={handleSquarePayment}
-                  />
-                </div>
-              )}
-
-              {/* Bitcoin Payment Flow */}
-              {paymentMethod === 'bitcoin' && customerInfo.email && customerInfo.name && (
-                <div className="mb-6">
-                  <BitcoinPaymentFlow
-                    totalAmount={totalAmount}
-                    customerInfo={customerInfo}
-                    products={selectedProduct ? [{
-                      name: selectedProduct.name,
-                      price: totalAmount,
-                      quantity: 1
-                    }] : []}
-                    onOrderComplete={handleOrderComplete}
-                    onBack={() => setPaymentMethod('')}
-                  />
-                </div>
-              )}
-
-              {/* Cash App Payment */}
-              {paymentMethod === 'cashapp' && (
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-400 rounded-xl p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <DollarSign className="w-8 h-8 text-green-600" />
-                    <div>
-                      <h3 className="font-bold text-xl text-gray-900">Cash App Payment</h3>
-                      <p className="text-sm text-gray-600">Send payment directly via Cash App</p>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg p-4 mb-4">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Send payment to:
-                    </label>
-                    <div className="flex items-center gap-2 bg-gray-50 p-3 rounded-lg">
-                      <span className="font-mono text-lg font-bold text-green-600">$starevan11</span>
-                      <button
-                        onClick={() => navigator.clipboard.writeText('$starevan11')}
-                        className="ml-auto px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
-                      >
-                        Copy
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg p-4 mb-4">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Amount to Send:
-                    </label>
-                    <div className="text-3xl font-bold text-gray-900">${totalAmount.toFixed(2)}</div>
-                  </div>
-
-                  {/* Cash App Tutorial */}
-                  <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-2 border-green-500/40 rounded-xl p-4 mb-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="bg-green-500 rounded-full p-2">
-                        <DollarSign className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-white font-bold">How to Purchase Bitcoin on Cash App</div>
-                        <div className="text-green-400 text-xs">Step-by-Step Video Guide</div>
-                      </div>
-                    </div>
-                    <p className="text-gray-300 text-sm mb-3">Learn how to buy and send Bitcoin using Cash App</p>
-                    <a
-                      href="https://www.youtube.com/watch?v=fDjDH_WAvYI"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-all"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      Watch Tutorial
-                    </a>
-                  </div>
-
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <div className="flex items-start gap-2">
-                      <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-yellow-800">
-                        <strong>Important:</strong> After sending payment, please email your receipt to{' '}
-                        <a href={`mailto:reloadedfiretvteam@gmail.com`} className="underline font-semibold">
-                          reloadedfiretvteam@gmail.com
-                        </a>{' '}
-                        with your order details.
-                      </div>
-                    </div>
+              {paymentError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-red-800 font-medium">Payment Error</p>
+                    <p className="text-red-600 text-sm">{paymentError}</p>
                   </div>
                 </div>
               )}
 
-              {paymentMethod === '' && (
-                <div className="text-center py-8 text-slate-500">
-                  <Lock className="w-12 h-12 mx-auto mb-4 text-slate-300" />
-                  <p>Please select a payment method above</p>
+              {!clientSecret ? (
+                <div className="text-center py-8">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6 text-left">
+                    <div className="flex items-center gap-3 mb-3">
+                      <CreditCard className="w-8 h-8 text-blue-600" />
+                      <h3 className="font-bold text-xl text-blue-900">Credit/Debit Card</h3>
+                    </div>
+                    <p className="text-blue-800 text-sm mb-4">
+                      Pay securely with your credit or debit card via Stripe. Your payment information is encrypted and secure.
+                    </p>
+                    <ul className="space-y-2 text-sm text-blue-700">
+                      <li className="flex items-center gap-2">
+                        <Shield className="w-4 h-4 text-blue-500" />
+                        PCI-compliant secure payment processing
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        Instant payment confirmation
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-gray-500" />
+                        Your card details are never stored
+                      </li>
+                    </ul>
+                  </div>
+                  <p className="text-slate-600 mb-6">
+                    Fill in your contact information, then click below to proceed to payment.
+                  </p>
+                  <button
+                    onClick={createStripePaymentIntent}
+                    disabled={creatingPaymentIntent || !customerInfo.name || !customerInfo.email}
+                    className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-bold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto"
+                  >
+                    {creatingPaymentIntent ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        Initializing Payment...
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-5 h-5" />
+                        Continue to Payment
+                      </>
+                    )}
+                  </button>
                 </div>
+              ) : (
+                <StripePaymentForm
+                  amount={totalAmount}
+                  clientSecret={clientSecret}
+                  onSuccess={handlePaymentSuccess}
+                  onError={handlePaymentError}
+                />
               )}
             </div>
           </div>
@@ -606,7 +587,3 @@ export default function SecureCheckoutPage() {
     </div>
   );
 }
-
-
-
-
