@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Trash2, Plus, Minus, CreditCard, Lock, Bitcoin } from 'lucide-react';
-import BitcoinCheckout from '../components/BitcoinCheckout';
+import { Trash2, Plus, Minus, CreditCard, Lock, AlertCircle, Shield } from 'lucide-react';
+import StripePaymentForm from '../components/StripePaymentForm';
 
 interface Product {
   id: string;
@@ -27,10 +27,12 @@ export default function CheckoutPage() {
     state: '',
     zip: '',
   });
-  const [paymentMethod, setPaymentMethod] = useState('');
   const [processing, setProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState('');
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [creatingPaymentIntent, setCreatingPaymentIntent] = useState(false);
 
   useEffect(() => {
     loadCart();
@@ -80,22 +82,72 @@ export default function CheckoutPage() {
     return calculateSubtotal() + calculateTax();
   };
 
-  const handleSubmitOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setProcessing(true);
+  const createStripePaymentIntent = async () => {
+    if (!customerInfo.email || !customerInfo.name) {
+      setPaymentError('Please fill in your name and email');
+      return;
+    }
+
+    setCreatingPaymentIntent(true);
+    setPaymentError(null);
 
     try {
-      // Create order in database
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      
+      const orderDescription = cart.map(item => `${item.product.name} x${item.quantity}`).join(', ');
+      const totalAmount = calculateTotal();
+      
+      const response = await fetch(`${supabaseUrl}/functions/v1/stripe-checkout-intent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: totalAmount,
+          customerEmail: customerInfo.email,
+          customerName: customerInfo.name,
+          customerPhone: customerInfo.phone,
+          shippingAddress: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
+          orderDescription: orderDescription,
+          items: cart.map(item => ({
+            productId: item.product.id,
+            productName: item.product.name,
+            quantity: item.quantity,
+            price: parseFloat(item.product.sale_price || item.product.price)
+          }))
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create payment intent');
+      }
+
+      setClientSecret(data.clientSecret);
+    } catch (error: unknown) {
+      console.error('Error creating payment intent:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to initialize payment. Please try again.';
+      setPaymentError(errorMessage);
+    } finally {
+      setCreatingPaymentIntent(false);
+    }
+  };
+
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    setProcessing(true);
+    try {
       const orderData = {
         customer_name: customerInfo.name,
         customer_email: customerInfo.email,
         customer_phone: customerInfo.phone,
         shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
-        payment_method: paymentMethod,
+        payment_method: 'stripe',
+        payment_intent_id: paymentIntentId,
         subtotal: calculateSubtotal().toFixed(2),
         tax: calculateTax().toFixed(2),
         total: calculateTotal().toFixed(2),
-        status: 'pending',
+        status: 'paid',
         items: cart.map(item => ({
           product_id: item.product.id,
           product_name: item.product.name,
@@ -125,10 +177,21 @@ export default function CheckoutPage() {
 
     } catch (error) {
       console.error('Error submitting order:', error);
-      alert('Error processing order. Please try again.');
+      setPaymentError('Payment processed but order creation failed. Please contact support.');
     } finally {
       setProcessing(false);
     }
+  };
+
+  const handlePaymentError = (error: string) => {
+    setPaymentError(error);
+  };
+
+  const handleSubmitOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // This function is now replaced by Stripe payment flow
+    // Just create the payment intent
+    await createStripePaymentIntent();
   };
 
   if (orderComplete) {
@@ -303,72 +366,53 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-xl shadow-md p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <Lock className="w-6 h-6" />
-                Payment Method
+                Secure Payment
               </h2>
-              <div className="space-y-3">
-                <label
-                  className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    paymentMethod === 'Bitcoin'
-                      ? 'border-orange-600 bg-orange-50'
-                      : 'border-gray-200 hover:border-orange-300'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="Bitcoin"
-                    checked={paymentMethod === 'Bitcoin'}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-5 h-5 text-orange-600"
-                  />
-                  <Bitcoin className="w-6 h-6 ml-3 text-orange-500" />
-                  <div className="ml-2">
-                    <span className="font-bold text-gray-900">Bitcoin (BTC)</span>
-                    <p className="text-xs text-gray-600">Secure cryptocurrency payment</p>
+              
+              {paymentError && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-red-800 font-medium">Payment Error</p>
+                    <p className="text-red-600 text-sm">{paymentError}</p>
                   </div>
-                </label>
-                {['Cash App', 'Zelle', 'PayPal', 'Venmo', 'Cash'].map(method => (
-                  <label
-                    key={method}
-                    className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      paymentMethod === method
-                        ? 'border-orange-600 bg-orange-50'
-                        : 'border-gray-200 hover:border-orange-300'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      value={method}
-                      checked={paymentMethod === method}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-5 h-5 text-orange-600"
-                    />
-                    <span className="ml-3 font-semibold text-gray-900">{method}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
+                </div>
+              )}
 
-            {/* Bitcoin Payment Section */}
-            {paymentMethod === 'Bitcoin' && customerInfo.email && customerInfo.name && (
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <BitcoinCheckout
-                  totalAmount={calculateTotal()}
-                  customerEmail={customerInfo.email}
-                  customerName={customerInfo.name}
-                  products={cart.map(item => ({
-                    name: item.product.name,
-                    price: parseFloat(item.product.sale_price || item.product.price),
-                    quantity: item.quantity
-                  }))}
-                  onOrderCreated={(orderCode) => {
-                    setOrderId(orderCode);
-                    setOrderComplete(true);
-                  }}
+              {!clientSecret ? (
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <CreditCard className="w-6 h-6 text-blue-600" />
+                      <h3 className="font-bold text-blue-900">Credit/Debit Card</h3>
+                    </div>
+                    <p className="text-sm text-blue-800">
+                      Pay securely with your credit or debit card via Stripe.
+                    </p>
+                    <ul className="mt-2 space-y-1 text-xs text-blue-700">
+                      <li className="flex items-center gap-2">
+                        <Shield className="w-3 h-3" />
+                        PCI-compliant secure payment processing
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Shield className="w-3 h-3" />
+                        Your card details are never stored
+                      </li>
+                    </ul>
+                  </div>
+                  <p className="text-sm text-gray-600 text-center">
+                    Fill in your information above and click "Proceed to Payment" to continue.
+                  </p>
+                </div>
+              ) : (
+                <StripePaymentForm
+                  amount={calculateTotal()}
+                  clientSecret={clientSecret}
+                  onSuccess={handlePaymentSuccess}
+                  onError={handlePaymentError}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Right Column - Order Summary */}
@@ -443,20 +487,27 @@ export default function CheckoutPage() {
               </div>
 
               {/* Place Order Button */}
-              <button
-                onClick={handleSubmitOrder}
-                disabled={processing || !paymentMethod || !customerInfo.name || !customerInfo.email}
-                className="w-full bg-orange-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-orange-700 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {processing ? (
-                  'Processing...'
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5" />
-                    Place Order
-                  </>
-                )}
-              </button>
+              {!clientSecret && (
+                <button
+                  onClick={handleSubmitOrder}
+                  disabled={processing || creatingPaymentIntent || !customerInfo.name || !customerInfo.email}
+                  className="w-full bg-orange-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-orange-700 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {creatingPaymentIntent ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Initializing Payment...
+                    </>
+                  ) : processing ? (
+                    'Processing...'
+                  ) : (
+                    <>
+                      <CreditCard className="w-5 h-5" />
+                      Proceed to Payment
+                    </>
+                  )}
+                </button>
+              )}
 
               <p className="text-xs text-gray-500 mt-4 text-center">
                 By placing your order, you agree to our Terms of Service
