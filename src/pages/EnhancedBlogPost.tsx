@@ -58,7 +58,7 @@ export default function EnhancedBlogPost() {
 
       if (!error && data) {
         setPost(data);
-        loadRelatedPosts(data.id, data.category);
+        loadRelatedPosts(data.id);
         incrementViewCount(data.slug);
         setupSEO(data);
         extractTableOfContents(data.content);
@@ -83,7 +83,7 @@ export default function EnhancedBlogPost() {
 
       if (data) {
         setPost(data);
-        loadRelatedPosts(data.id, data.category);
+        loadRelatedPosts(data.id);
         incrementViewCount(slug);
         setupSEO(data);
         extractTableOfContents(data.content);
