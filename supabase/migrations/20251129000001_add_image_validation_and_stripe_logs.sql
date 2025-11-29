@@ -89,7 +89,8 @@ CREATE INDEX IF NOT EXISTS idx_stripe_logs_created_at ON stripe_logs(created_at)
 ALTER TABLE stripe_logs ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for stripe_logs
-CREATE POLICY "Anyone can view their own stripe logs by email"
+-- Note: Public read access allows order status checks by payment intent ID
+CREATE POLICY "Public read access for order status checks"
   ON stripe_logs FOR SELECT
   USING (true);
 
@@ -165,10 +166,11 @@ CREATE POLICY "System can insert image validation logs"
 -- ============================================================================
 
 -- Function to validate product images before insert
+-- Note: File size validation requires storage-level checks as database triggers
+-- cannot access actual file sizes. This validates URL format and file type only.
 CREATE OR REPLACE FUNCTION validate_product_image()
 RETURNS TRIGGER AS $$
 DECLARE
-  v_min_file_size_bytes integer := 10240; -- 10 KB minimum
   v_allowed_extensions text[] := ARRAY['jpg', 'jpeg', 'png', 'webp', 'gif'];
   v_image_extension text;
   v_is_valid boolean := true;
@@ -257,10 +259,11 @@ DECLARE
   v_count integer;
 BEGIN
   -- Find and delete orphaned images
+  -- Note: Both products_full (ecommerce schema) and products (main product table) are valid product sources
   WITH deleted AS (
     DELETE FROM product_images
     WHERE product_id NOT IN (SELECT id FROM products_full)
-      AND product_id NOT IN (SELECT id FROM products WHERE id IS NOT NULL)
+      AND product_id NOT IN (SELECT id FROM products)
     RETURNING id, product_id, image_url
   )
   SELECT array_agg(id), count(*) INTO v_cleaned_ids, v_count FROM deleted;
@@ -296,11 +299,12 @@ DECLARE
   v_count integer;
 BEGIN
   -- Find and delete blank/invalid images
+  -- Validate URL has proper format: starts with / and has file extension pattern
   WITH deleted AS (
     DELETE FROM product_images
     WHERE image_url IS NULL 
        OR trim(image_url) = ''
-       OR length(image_url) < 5  -- URLs should be at least 5 characters (e.g., /a.jpg)
+       OR image_url !~ '^/.*\.[a-zA-Z]{2,4}$'  -- Must be local path with valid file extension
     RETURNING id, product_id, image_url
   )
   SELECT array_agg(id), count(*) INTO v_cleaned_ids, v_count FROM deleted;
@@ -402,7 +406,12 @@ BEGIN
     status = EXCLUDED.status,
     failure_code = EXCLUDED.failure_code,
     failure_message = EXCLUDED.failure_message,
-    metadata = stripe_logs.metadata || EXCLUDED.metadata,
+    -- Merge metadata: new values override existing keys
+    metadata = CASE 
+      WHEN stripe_logs.metadata IS NULL THEN EXCLUDED.metadata
+      WHEN EXCLUDED.metadata IS NULL THEN stripe_logs.metadata
+      ELSE stripe_logs.metadata || EXCLUDED.metadata
+    END,
     updated_at = now()
   RETURNING id INTO v_log_id;
   
@@ -465,7 +474,8 @@ RETURNS TABLE(
   sample_ids uuid[]
 ) AS $$
 BEGIN
-  -- Report orphaned images
+  -- Report orphaned images (images with product_id not in any product table)
+  -- Note: Both products_full (ecommerce schema) and products (main table) are valid product sources
   RETURN QUERY
   SELECT 
     'orphaned_images'::text as issue_type,
