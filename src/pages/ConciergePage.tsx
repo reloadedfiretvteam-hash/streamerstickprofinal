@@ -14,7 +14,7 @@ interface Product {
 export default function ConciergePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [_selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     loadProducts();

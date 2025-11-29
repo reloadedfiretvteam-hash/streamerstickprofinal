@@ -21,6 +21,21 @@ export const supabase = createClient(
 );
 
 /**
+ * Interface for pricing plans stored in Supabase
+ */
+export interface PricingPlan {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  period?: string;
+  features: string[];
+  popular?: boolean;
+  active: boolean;
+  display_order?: number;
+}
+
+/**
  * Common bucket name typo mappings.
  * Maps commonly misspelled bucket names to canonical versions.
  */
