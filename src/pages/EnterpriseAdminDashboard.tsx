@@ -44,7 +44,7 @@ export default function EnterpriseAdminDashboard() {
   const [activeSection, setActiveSection] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [adminUser, setAdminUser] = useState<any>(null);
+  const [adminUser, setAdminUser] = useState<{ username: string; role: string } | null>(null);
 
   useEffect(() => {
     // Check authentication

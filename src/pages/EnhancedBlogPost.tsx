@@ -58,7 +58,7 @@ export default function EnhancedBlogPost() {
 
       if (!error && data) {
         setPost(data);
-        loadRelatedPosts(data.id, data.category);
+        loadRelatedPosts(data.id);
         incrementViewCount(data.slug);
         setupSEO(data);
         extractTableOfContents(data.content);
@@ -83,7 +83,7 @@ export default function EnhancedBlogPost() {
 
       if (data) {
         setPost(data);
-        loadRelatedPosts(data.id, data.category);
+        loadRelatedPosts(data.id);
         incrementViewCount(slug);
         setupSEO(data);
         extractTableOfContents(data.content);
@@ -95,7 +95,7 @@ export default function EnhancedBlogPost() {
     }
   };
 
-  const loadRelatedPosts = async (currentId: string, category?: string) => {
+  const loadRelatedPosts = async (currentId: string) => {
     try {
       const { data, error } = await supabase
         .from('real_blog_posts')
@@ -221,7 +221,7 @@ export default function EnhancedBlogPost() {
   };
 
   const generateFAQSchema = (title: string) => {
-    const faqs: {[key: string]: any} = {
+    const faqs: Record<string, object> = {
       'Fire Stick': {
         '@context': 'https://schema.org',
         '@type': 'FAQPage',

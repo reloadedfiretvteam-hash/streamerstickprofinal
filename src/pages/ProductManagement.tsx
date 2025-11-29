@@ -30,7 +30,7 @@ export default function ProductManagement() {
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [productImages, setProductImages] = useState<any[]>([]);
+  const [productImages, setProductImages] = useState<{ id: string; image_url: string; is_primary: boolean }[]>([]);
   const [formData, setFormData] = useState<Partial<Product>>({
     name: '',
     slug: '',
@@ -264,7 +264,7 @@ export default function ProductManagement() {
                     <label className="block text-sm font-medium mb-2">Status</label>
                     <select
                       value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value as 'draft' | 'published' | 'archived' })}
                       className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                     >
                       <option value="draft">Draft</option>

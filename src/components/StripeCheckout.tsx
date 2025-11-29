@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { CreditCard, Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { Lock, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface CartItem {
   productId: string;
@@ -21,7 +21,7 @@ interface StripeCheckoutProps {
   };
 }
 
-export default function StripeCheckout({ items, total, customerInfo }: StripeCheckoutProps) {
+export default function StripeCheckout({ items, total }: StripeCheckoutProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);

@@ -21,7 +21,7 @@ interface DashboardStats {
   totalRevenue: number;
   totalProducts: number;
   totalBlogPosts: number;
-  recentOrders: any[];
+  recentOrders: { id: string; order_number: string; total: number; created_at: string }[];
   bitcoinOrders: number;
 }
 

@@ -36,10 +36,12 @@ export default function VisitorTracker() {
     }
   };
 
-  const trackPageView = async (_visitorTrackingId: string, _sessionId: string) => {
+  const trackPageView = async () => {
+    // Page view tracking is handled by the main trackVisitor function
   };
 
-  const updateSessionEnd = async (_visitorTrackingId: string | undefined) => {
+  const updateSessionEnd = async () => {
+    // Session end tracking - stub for future implementation
   };
 
   const getOrCreateSessionId = (): string => {

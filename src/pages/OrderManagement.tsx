@@ -154,8 +154,9 @@ export default function OrderManagement() {
       alert('Email notification queued successfully!');
       setShowEmailForm(false);
       await loadOrderNotifications(selectedOrder.id);
-    } catch (err: any) {
-      alert('Error sending email: ' + err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      alert('Error sending email: ' + errorMessage);
     } finally {
       setSendingEmail(false);
     }

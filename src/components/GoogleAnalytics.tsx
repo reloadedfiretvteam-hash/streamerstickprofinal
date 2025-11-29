@@ -3,8 +3,8 @@ import { supabase } from '../lib/supabase';
 
 declare global {
   interface Window {
-    gtag: (...args: any[]) => void;
-    dataLayer: any[];
+    gtag: (...args: unknown[]) => void;
+    dataLayer: unknown[];
   }
 }
 
@@ -26,7 +26,7 @@ export default function GoogleAnalytics() {
       if (data && data.google_analytics_id && data.google_analytics_id !== 'G-XXXXXXXXXX') {
         setMeasurementId(data.google_analytics_id);
       }
-    } catch (error) {
+    } catch {
       console.log('SEO settings not yet configured');
     }
   };
@@ -40,7 +40,7 @@ export default function GoogleAnalytics() {
     document.head.appendChild(script1);
 
     window.dataLayer = window.dataLayer || [];
-    function gtag(...args: any[]) {
+    function gtag(...args: unknown[]) {
       window.dataLayer.push(args);
     }
     window.gtag = gtag;
@@ -66,7 +66,7 @@ export default function GoogleAnalytics() {
   return null;
 }
 
-export const trackEvent = (eventName: string, eventParams?: Record<string, any>) => {
+export const trackEvent = (eventName: string, eventParams?: Record<string, unknown>) => {
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', eventName, eventParams);
   }
@@ -80,7 +80,7 @@ export const trackPageView = (url: string) => {
   }
 };
 
-export const trackPurchase = (value: number, currency: string, transactionId: string, items: any[]) => {
+export const trackPurchase = (value: number, currency: string, transactionId: string, items: { item_name: string; price: number }[]) => {
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'purchase', {
       transaction_id: transactionId,
@@ -104,7 +104,7 @@ export const trackAddToCart = (itemName: string, price: number) => {
   }
 };
 
-export const trackBeginCheckout = (value: number, items: any[]) => {
+export const trackBeginCheckout = (value: number, items: { item_name: string; price: number }[]) => {
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'begin_checkout', {
       currency: 'USD',
