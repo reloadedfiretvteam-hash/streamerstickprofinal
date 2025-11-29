@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Shield, Lock, AlertCircle } from 'lucide-react';
-import { loadStripe, Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-js';
+import { loadStripe, Stripe, StripeCardElement } from '@stripe/stripe-js';
 
 interface StripePaymentFormProps {
   amount: number;
@@ -25,11 +25,12 @@ export default function StripePaymentForm({ amount, onSubmit }: StripePaymentFor
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [stripe, setStripe] = useState<Stripe | null>(null);
-  const [, setElements] = useState<StripeElements | null>(null);
   const [cardElement, setCardElement] = useState<StripeCardElement | null>(null);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    let card: StripeCardElement | null = null;
+
     const initializeStripe = async () => {
       const stripeInstance = await getStripe();
       
@@ -41,9 +42,8 @@ export default function StripePaymentForm({ amount, onSubmit }: StripePaymentFor
       setStripe(stripeInstance);
 
       const elementsInstance = stripeInstance.elements();
-      setElements(elementsInstance);
 
-      const card = elementsInstance.create('card', {
+      card = elementsInstance.create('card', {
         style: {
           base: {
             fontSize: '16px',
@@ -81,8 +81,8 @@ export default function StripePaymentForm({ amount, onSubmit }: StripePaymentFor
     initializeStripe();
 
     return () => {
-      if (cardElement) {
-        cardElement.destroy();
+      if (card) {
+        card.destroy();
       }
     };
   }, []);
