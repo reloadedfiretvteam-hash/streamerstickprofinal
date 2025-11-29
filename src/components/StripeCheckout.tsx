@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CreditCard, Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import { StripeLogger, logPaymentEvent } from '../utils/paymentLogging';
 
 interface CartItem {
   productId: string;
@@ -19,6 +20,25 @@ interface StripeCheckoutProps {
     city: string;
     zipCode: string;
   };
+}
+
+// Stripe test card prefixes - common test card numbers from Stripe documentation
+// https://stripe.com/docs/testing#cards
+const STRIPE_TEST_CARD_PREFIXES = [
+  '4242',     // Standard test card (Visa)
+  '4000',     // Various Visa test cards (4000 0000 0000 ...)
+  '5555',     // Mastercard test card
+  '3782',     // Amex test card
+  '6011',     // Discover test card
+  '3056',     // Diners Club test card
+  '3566',     // JCB test card
+  '6200',     // UnionPay test card
+];
+
+// Check if the card number appears to be a Stripe test card
+function isTestCard(cardNumber: string): boolean {
+  const cleaned = cardNumber.replace(/\s/g, '');
+  return STRIPE_TEST_CARD_PREFIXES.some(prefix => cleaned.startsWith(prefix));
 }
 
 export default function StripeCheckout({ items, total, customerInfo }: StripeCheckoutProps) {
@@ -90,12 +110,45 @@ export default function StripeCheckout({ items, total, customerInfo }: StripeChe
     setError('');
 
     if (!validateForm()) {
+      StripeLogger.error('Form validation failed', new Error('Invalid form data'), isTestCard(cardNumber));
       return;
     }
 
+    const isTest = isTestCard(cardNumber);
+    const paymentId = `pi_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+    // Log payment attempt
+    logPaymentEvent('info', 'payment_attempt', 'stripe',
+      `Payment attempt initiated for $${total.toFixed(2)}`,
+      { 
+        amount: total, 
+        itemCount: items.length,
+        customerEmail: customerInfo.email,
+      },
+      isTest
+    );
+
+    StripeLogger.paymentCreated(paymentId, total * 100, 'usd', isTest);
+
     setIsProcessing(true);
 
+    // Log processing state
+    StripeLogger.paymentProcessing(paymentId, isTest);
+
     setTimeout(() => {
+      // Log success
+      StripeLogger.paymentSucceeded(paymentId, total * 100, isTest);
+      
+      logPaymentEvent('info', 'payment_complete', 'stripe',
+        `Payment completed successfully`,
+        { 
+          paymentIntentId: paymentId,
+          amount: total,
+          isTestMode: isTest,
+        },
+        isTest
+      );
+
       setSuccess(true);
       setIsProcessing(false);
 

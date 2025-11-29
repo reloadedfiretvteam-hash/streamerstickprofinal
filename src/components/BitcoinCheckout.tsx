@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Bitcoin, CreditCard, Copy, Check, AlertCircle, ExternalLink, RefreshCw, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { BitcoinLogger, SupabaseLogger } from '../utils/paymentLogging';
 
 interface BitcoinCheckoutProps {
   totalAmount: number;
   customerEmail: string;
   customerName: string;
-  products: any[];
+  products: unknown[];
   onOrderCreated?: (orderCode: string) => void;
 }
 
@@ -49,11 +50,18 @@ export default function BitcoinCheckout({
   }, [btcPrice, totalAmount]);
 
   const loadGatewayConfig = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('payment_gateways')
       .select('api_key, is_enabled, config')
       .eq('gateway_name', 'nowpayments')
       .maybeSingle();
+
+    if (error) {
+      SupabaseLogger.queryError('payment_gateways', 'select', error);
+      return;
+    }
+
+    SupabaseLogger.querySuccess('payment_gateways', 'select');
 
     if (data?.is_enabled && data?.api_key) {
       setGatewayEnabled(true);
@@ -74,13 +82,16 @@ export default function BitcoinCheckout({
         setBtcPrice(parseFloat(data.data.rates.USD));
       }
     } catch (error) {
-      console.error('Error fetching BTC price:', error);
+      BitcoinLogger.error('Fetching BTC price', error);
     }
   };
 
   const generateOrderCode = async () => {
     const { data, error } = await supabase.rpc('generate_order_code');
-    if (data) return data;
+    if (error) {
+      SupabaseLogger.queryError('generate_order_code', 'rpc', error);
+    }
+    if (data) return data as string;
     return 'BTC-' + Math.random().toString(36).substring(2, 10).toUpperCase();
   };
 
@@ -115,6 +126,9 @@ export default function BitcoinCheckout({
       const paymentData = await paymentResponse.json();
 
       if (paymentData.payment_id) {
+        // Log successful payment creation
+        BitcoinLogger.orderCreated(code, totalAmount, paymentData.pay_amount || totalBtc);
+
         // Store order in database
         const expiresAt = new Date();
         expiresAt.setHours(expiresAt.getHours() + 1);
@@ -137,6 +151,7 @@ export default function BitcoinCheckout({
           });
 
         if (!error) {
+          SupabaseLogger.querySuccess('bitcoin_orders', 'insert', 1);
           setPaymentUrl(paymentData.invoice_url);
           setPaymentAddress(paymentData.pay_address);
           setPaymentAmount(paymentData.pay_amount);
@@ -147,15 +162,16 @@ export default function BitcoinCheckout({
 
           onOrderCreated?.(code);
         } else {
-          console.error('Database error:', error);
+          SupabaseLogger.queryError('bitcoin_orders', 'insert', error);
+          BitcoinLogger.error('Saving order to database', error);
           alert('Error saving order. Please try again.');
         }
       } else {
-        console.error('NOWPayments error:', paymentData);
+        BitcoinLogger.error('Creating NOWPayments payment', new Error(JSON.stringify(paymentData)));
         alert('Error creating payment. Please try again.');
       }
     } catch (error) {
-      console.error('Error:', error);
+      BitcoinLogger.error('Processing payment', error);
       alert('Error processing payment. Please try again.');
     }
 
@@ -164,6 +180,8 @@ export default function BitcoinCheckout({
 
   const sendOrderEmails = async (code: string, address: string, amount: string) => {
     try {
+      SupabaseLogger.functionInvoked('send-bitcoin-order-email');
+      
       await supabase.functions.invoke('send-bitcoin-order-email', {
         body: {
           orderCode: code,
@@ -178,15 +196,22 @@ export default function BitcoinCheckout({
       });
 
       // Mark emails as sent
-      await supabase
+      const { error } = await supabase
         .from('bitcoin_orders')
         .update({
           customer_instructions_sent: true,
           admin_notification_sent: true
         })
         .eq('order_code', code);
+
+      if (error) {
+        SupabaseLogger.queryError('bitcoin_orders', 'update', error);
+      } else {
+        SupabaseLogger.querySuccess('bitcoin_orders', 'update');
+      }
     } catch (error) {
-      console.error('Error sending emails:', error);
+      SupabaseLogger.functionError('send-bitcoin-order-email', error);
+      BitcoinLogger.error('Sending order emails', error);
     }
   };
 

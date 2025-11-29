@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, AlertTriangle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { validateImageFile, logImageOperation } from '../utils/imageValidation';
 
 interface ImageUploadProps {
   productId: string;
@@ -17,18 +18,50 @@ interface ImageUploadProps {
 export default function ImageUpload({ productId, existingImages, onImagesChange }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [validationWarnings, setValidationWarnings] = useState<string[]>([]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setUploading(true);
-    setUploadProgress('Uploading images...');
+    setUploadProgress('Validating images...');
+    setValidationErrors([]);
+    setValidationWarnings([]);
+
+    const allErrors: string[] = [];
+    const allWarnings: string[] = [];
 
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const fileExt = file.name.split('.').pop();
+        
+        // Validate file before upload
+        setUploadProgress(`Validating ${i + 1} of ${files.length}...`);
+        const validation = await validateImageFile(file);
+        
+        // Log validation
+        logImageOperation('validate', {
+          productId,
+          fileName: file.name,
+          fileSize: file.size,
+          isValid: validation.isValid,
+          errors: validation.errors,
+          warnings: validation.warnings,
+        });
+
+        // Collect warnings
+        allWarnings.push(...validation.warnings.map(w => `${file.name}: ${w}`));
+
+        // Skip invalid files
+        if (!validation.isValid) {
+          allErrors.push(...validation.errors.map(e => `${file.name}: ${e}`));
+          console.error(`[IMAGE_UPLOAD] Skipping invalid file ${file.name}:`, validation.errors);
+          continue;
+        }
+
+        const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
         const fileName = `${productId}-${Date.now()}-${i}.${fileExt}`;
         const filePath = `${fileName}`;
 
@@ -38,7 +71,15 @@ export default function ImageUpload({ productId, existingImages, onImagesChange 
           .from('product-images')
           .upload(filePath, file);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          logImageOperation('upload', {
+            productId,
+            fileName,
+            success: false,
+            error: uploadError.message,
+          });
+          throw uploadError;
+        }
 
         const { data: { publicUrl } } = supabase.storage
           .from('product-images')
@@ -54,16 +95,43 @@ export default function ImageUpload({ productId, existingImages, onImagesChange 
             is_primary: existingImages.length === 0 && i === 0
           });
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          logImageOperation('upload', {
+            productId,
+            fileName,
+            publicUrl,
+            success: false,
+            error: dbError.message,
+          });
+          throw dbError;
+        }
+
+        logImageOperation('upload', {
+          productId,
+          fileName,
+          publicUrl,
+          success: true,
+          fileSize: file.size,
+        });
       }
 
-      setUploadProgress('Upload complete!');
+      // Show validation errors/warnings if any
+      setValidationErrors(allErrors);
+      setValidationWarnings(allWarnings);
+
+      if (allErrors.length > 0) {
+        setUploadProgress(`Upload complete with ${allErrors.length} skipped file(s)`);
+      } else {
+        setUploadProgress('Upload complete!');
+      }
+      
       setTimeout(() => {
         setUploadProgress('');
         onImagesChange();
-      }, 1000);
-    } catch (error: any) {
-      alert(`Upload failed: ${error.message}`);
+      }, allErrors.length > 0 ? 3000 : 1000);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Upload failed: ${errorMessage}`);
       setUploadProgress('');
     } finally {
       setUploading(false);
@@ -79,6 +147,13 @@ export default function ImageUpload({ productId, existingImages, onImagesChange 
         await supabase.storage
           .from('product-images')
           .remove([fileName]);
+        
+        logImageOperation('delete', {
+          productId,
+          imageId,
+          fileName,
+          success: true,
+        });
       }
 
       const { error } = await supabase
@@ -89,8 +164,15 @@ export default function ImageUpload({ productId, existingImages, onImagesChange 
       if (error) throw error;
 
       onImagesChange();
-    } catch (error: any) {
-      alert(`Delete failed: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logImageOperation('delete', {
+        productId,
+        imageId,
+        success: false,
+        error: errorMessage,
+      });
+      alert(`Delete failed: ${errorMessage}`);
     }
   };
 
@@ -109,8 +191,9 @@ export default function ImageUpload({ productId, existingImages, onImagesChange 
       if (error) throw error;
 
       onImagesChange();
-    } catch (error: any) {
-      alert(`Update failed: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Update failed: ${errorMessage}`);
     }
   };
 
@@ -124,13 +207,43 @@ export default function ImageUpload({ productId, existingImages, onImagesChange 
           <input
             type="file"
             multiple
-            accept="image/*"
+            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
             onChange={handleFileUpload}
             disabled={uploading}
             className="hidden"
           />
         </label>
       </div>
+
+      {/* Validation Errors */}
+      {validationErrors.length > 0 && (
+        <div className="bg-red-500/20 border border-red-500 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="w-5 h-5 text-red-400" />
+            <span className="text-red-400 font-semibold">Validation Errors (files skipped):</span>
+          </div>
+          <ul className="text-red-300 text-sm list-disc list-inside space-y-1">
+            {validationErrors.map((error, i) => (
+              <li key={i}>{error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Validation Warnings */}
+      {validationWarnings.length > 0 && (
+        <div className="bg-yellow-500/20 border border-yellow-500 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="w-5 h-5 text-yellow-400" />
+            <span className="text-yellow-400 font-semibold">Warnings:</span>
+          </div>
+          <ul className="text-yellow-300 text-sm list-disc list-inside space-y-1">
+            {validationWarnings.map((warning, i) => (
+              <li key={i}>{warning}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {uploadProgress && (
         <div className="bg-blue-500/20 border border-blue-500 rounded-lg p-4 text-center">
