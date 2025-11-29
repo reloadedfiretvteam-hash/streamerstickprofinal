@@ -33,10 +33,13 @@ export default function SimplePaymentSettings() {
 
   const handleSave = async () => {
     for (const [key, value] of Object.entries(settings)) {
+      // Use upsert to create if doesn't exist, update if exists
       await supabase
         .from('site_settings')
-        .update({ setting_value: value })
-        .eq('setting_key', key);
+        .upsert(
+          { setting_key: key, setting_value: value },
+          { onConflict: 'setting_key' }
+        );
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);

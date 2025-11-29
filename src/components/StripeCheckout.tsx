@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react';
 import { CreditCard, Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import { loadStripe, Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-js';
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements
+} from '@stripe/react-stripe-js';
+import { supabase } from '../lib/supabase';
 
 interface CartItem {
   productId: string;
@@ -21,89 +29,253 @@ interface StripeCheckoutProps {
   };
 }
 
-export default function StripeCheckout({ items, total, customerInfo }: StripeCheckoutProps) {
+// Initialize Stripe with publishable key from Supabase
+let stripePromise: Promise<Stripe | null> | null = null;
+
+const getStripePublishableKey = async (): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('setting_value')
+      .eq('setting_key', 'stripe_publishable_key')
+      .single();
+
+    if (error || !data) {
+      // Fallback to environment variable
+      return import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || null;
+    }
+
+    return data.setting_value || import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || null;
+  } catch (error) {
+    console.error('Error fetching Stripe key:', error);
+    return import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || null;
+  }
+};
+
+const initializeStripe = async (): Promise<Stripe | null> => {
+  if (stripePromise) return stripePromise;
+  
+  stripePromise = (async () => {
+    const publishableKey = await getStripePublishableKey();
+    if (!publishableKey) {
+      console.error('Stripe publishable key not found');
+      return null;
+    }
+    return loadStripe(publishableKey);
+  })();
+  
+  return stripePromise;
+};
+
+// Inner component that uses Stripe hooks
+function StripeCheckoutForm({ items, total, customerInfo, onSuccess, onError }: StripeCheckoutProps & { onSuccess: () => void; onError: (error: string) => void }) {
+  const stripe = useStripe();
+  const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiryDate, setExpiryDate] = useState('');
-  const [cvv, setCvv] = useState('');
-  const [cardName, setCardName] = useState('');
-
-  const formatCardNumber = (value: string) => {
-    const cleaned = value.replace(/\s/g, '');
-    const chunks = cleaned.match(/.{1,4}/g);
-    return chunks ? chunks.join(' ') : cleaned;
-  };
-
-  const formatExpiryDate = (value: string) => {
-    const cleaned = value.replace(/\D/g, '');
-    if (cleaned.length >= 2) {
-      return cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
-    }
-    return cleaned;
-  };
-
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\s/g, '');
-    if (value.length <= 16 && /^\d*$/.test(value)) {
-      setCardNumber(formatCardNumber(value));
-    }
-  };
-
-  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '');
-    if (value.length <= 4) {
-      setExpiryDate(formatExpiryDate(value));
-    }
-  };
-
-  const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value.length <= 4 && /^\d*$/.test(value)) {
-      setCvv(value);
-    }
-  };
-
-  const validateForm = () => {
-    if (!cardNumber || cardNumber.replace(/\s/g, '').length !== 16) {
-      setError('Please enter a valid 16-digit card number');
-      return false;
-    }
-    if (!expiryDate || expiryDate.length !== 5) {
-      setError('Please enter a valid expiry date (MM/YY)');
-      return false;
-    }
-    if (!cvv || cvv.length < 3) {
-      setError('Please enter a valid CVV');
-      return false;
-    }
-    if (!cardName.trim()) {
-      setError('Please enter the cardholder name');
-      return false;
-    }
-    return true;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!validateForm()) {
+    if (!stripe || !elements) {
+      setError('Stripe has not loaded yet. Please wait...');
+      return;
+    }
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setError('Card element not found');
       return;
     }
 
     setIsProcessing(true);
 
-    setTimeout(() => {
-      setSuccess(true);
-      setIsProcessing(false);
+    try {
+      // Create PaymentIntent on backend
+      // For now, we'll use a Supabase Edge Function or direct API call
+      // You'll need to create a backend endpoint to create PaymentIntents
+      
+      // Option 1: Using Supabase Edge Function (recommended)
+      const { data: paymentIntentData, error: intentError } = await supabase.functions.invoke('create-payment-intent', {
+        body: {
+          amount: Math.round(total * 100), // Convert to cents
+          currency: 'usd',
+          items: items.map(item => ({
+            productId: item.productId,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity
+          })),
+          customerInfo: customerInfo
+        }
+      });
 
-      setTimeout(() => {
-        window.location.href = '/order-confirmation';
-      }, 2000);
-    }, 2000);
+      if (intentError) {
+        throw new Error(intentError.message || 'Failed to create payment intent');
+      }
+
+      const clientSecret = paymentIntentData?.clientSecret;
+
+      if (!clientSecret) {
+        throw new Error('No client secret returned from server');
+      }
+
+      // Confirm payment with Stripe
+      const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: {
+            name: customerInfo.fullName,
+            email: customerInfo.email,
+            address: {
+              line1: customerInfo.address,
+              city: customerInfo.city,
+              postal_code: customerInfo.zipCode,
+            }
+          }
+        }
+      });
+
+      if (confirmError) {
+        throw new Error(confirmError.message || 'Payment failed');
+      }
+
+      if (paymentIntent?.status === 'succeeded') {
+        // Save order to database
+        try {
+          const orderItems = items.map(item => ({
+            product_id: item.productId,
+            product_name: item.name,
+            quantity: item.quantity,
+            unit_price: item.price,
+            total_price: item.price * item.quantity
+          }));
+
+          const { error: orderError } = await supabase
+            .from('orders')
+            .insert({
+              customer_name: customerInfo.fullName,
+              customer_email: customerInfo.email,
+              shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.zipCode}`,
+              payment_method: 'stripe',
+              payment_status: 'completed',
+              payment_intent_id: paymentIntent.id,
+              order_status: 'processing',
+              subtotal: total,
+              tax: 0,
+              total: total,
+              items: orderItems
+            });
+
+          if (orderError) {
+            console.error('Order save error:', orderError);
+            // Payment succeeded but order save failed - this should be handled
+            throw new Error('Payment succeeded but order could not be saved. Please contact support.');
+          }
+        } catch (orderError: any) {
+          throw orderError;
+        }
+
+        onSuccess();
+      } else {
+        throw new Error('Payment was not successful');
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred processing your payment');
+      onError(err.message || 'Payment failed');
+    } finally {
+      setIsProcessing(false);
+    }
   };
+
+  const cardElementOptions = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#ffffff',
+        '::placeholder': {
+          color: '#aab7c4',
+        },
+        fontFamily: 'system-ui, sans-serif',
+      },
+      invalid: {
+        color: '#fa755a',
+        iconColor: '#fa755a',
+      },
+    },
+    hidePostalCode: false,
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div>
+        <label className="block text-white font-semibold mb-2">
+          Card Information
+        </label>
+        <div className="px-4 py-4 bg-white/5 border border-white/20 rounded-lg">
+          <CardElement options={cardElementOptions} />
+        </div>
+      </div>
+
+      {error && (
+        <div className="mb-6 flex items-center gap-3 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <p>{error}</p>
+        </div>
+      )}
+
+      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+        <div className="flex items-start gap-3">
+          <Lock className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-blue-200">
+            <strong>Your payment is secure:</strong> We use Stripe's secure payment processing.
+            Your card details are never stored on our servers and are processed directly by Stripe.
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        disabled={isProcessing || !stripe}
+        className="w-full py-5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold text-xl rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+      >
+        {isProcessing ? (
+          <>
+            <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+            Processing Payment...
+          </>
+        ) : (
+          <>
+            <Lock className="w-6 h-6" />
+            Pay ${total.toFixed(2)} Securely
+          </>
+        )}
+      </button>
+
+      <p className="text-center text-gray-400 text-sm">
+        By completing this purchase, you agree to our Terms of Service
+      </p>
+    </form>
+  );
+}
+
+// Main component
+export default function StripeCheckout({ items, total, customerInfo }: StripeCheckoutProps) {
+  const [stripe, setStripe] = useState<Stripe | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    initializeStripe().then(stripeInstance => {
+      setStripe(stripeInstance);
+      setLoading(false);
+      if (!stripeInstance) {
+        setError('Stripe could not be initialized. Please check your Stripe publishable key in admin settings.');
+      }
+    });
+  }, []);
 
   if (success) {
     return (
@@ -117,6 +289,36 @@ export default function StripeCheckout({ items, total, customerInfo }: StripeChe
         </div>
       </div>
     );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 max-w-md w-full text-center">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white">Loading secure payment form...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !stripe) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-red-500/50 max-w-md w-full text-center">
+          <AlertCircle className="w-20 h-20 text-red-400 mx-auto mb-6" />
+          <h2 className="text-3xl font-bold text-white mb-4">Configuration Error</h2>
+          <p className="text-red-200 mb-6">{error}</p>
+          <p className="text-gray-400 text-sm">
+            Please configure your Stripe publishable key in the admin panel under Payment Settings.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!stripe) {
+    return null;
   }
 
   return (
@@ -149,108 +351,22 @@ export default function StripeCheckout({ items, total, customerInfo }: StripeChe
             </div>
           </div>
 
-          {error && (
-            <div className="mb-6 flex items-center gap-3 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <p>{error}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-white font-semibold mb-2">
-                Card Number
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={cardNumber}
-                  onChange={handleCardNumberChange}
-                  placeholder="1234 5678 9012 3456"
-                  className="w-full px-4 py-4 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 text-lg"
-                  disabled={isProcessing}
-                />
-                <CreditCard className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-white font-semibold mb-2">
-                  Expiry Date
-                </label>
-                <input
-                  type="text"
-                  value={expiryDate}
-                  onChange={handleExpiryChange}
-                  placeholder="MM/YY"
-                  className="w-full px-4 py-4 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 text-lg"
-                  disabled={isProcessing}
-                />
-              </div>
-
-              <div>
-                <label className="block text-white font-semibold mb-2">
-                  CVV
-                </label>
-                <input
-                  type="text"
-                  value={cvv}
-                  onChange={handleCvvChange}
-                  placeholder="123"
-                  className="w-full px-4 py-4 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 text-lg"
-                  disabled={isProcessing}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-white font-semibold mb-2">
-                Cardholder Name
-              </label>
-              <input
-                type="text"
-                value={cardName}
-                onChange={(e) => setCardName(e.target.value)}
-                placeholder="John Doe"
-                className="w-full px-4 py-4 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 text-lg"
-                disabled={isProcessing}
-              />
-            </div>
-
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <Lock className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-blue-200">
-                  <strong>Your payment is secure:</strong> We use industry-standard SSL encryption
-                  and never store your full card details. All transactions are processed through
-                  our PCI-compliant payment gateway.
-                </div>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isProcessing}
-              className="w-full py-5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold text-xl rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-            >
-              {isProcessing ? (
-                <>
-                  <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Lock className="w-6 h-6" />
-                  Pay ${total.toFixed(2)} Securely
-                </>
-              )}
-            </button>
-
-            <p className="text-center text-gray-400 text-sm">
-              By completing this purchase, you agree to our Terms of Service
-            </p>
-          </form>
+          <Elements stripe={stripe}>
+            <StripeCheckoutForm
+              items={items}
+              total={total}
+              customerInfo={customerInfo}
+              onSuccess={() => {
+                setSuccess(true);
+                setTimeout(() => {
+                  window.location.href = '/order-confirmation';
+                }, 2000);
+              }}
+              onError={(err) => {
+                setError(err);
+              }}
+            />
+          </Elements>
         </div>
 
         <div className="mt-8 flex items-center justify-center gap-6 text-gray-400">

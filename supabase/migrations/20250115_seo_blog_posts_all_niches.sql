@@ -254,3 +254,4 @@ UPDATE real_blog_posts SET view_count = FLOOR(RANDOM() * 5000 + 100) WHERE statu
 
 
 
+

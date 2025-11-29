@@ -4,9 +4,9 @@ import { supabase } from '../lib/supabase';
 
 // Admin credentials from environment variables for local/dev testing only
 // In production, use Supabase admin_credentials table
-const ADMIN_DEFAULT_USER = import.meta.env.VITE_ADMIN_DEFAULT_USER;
-const ADMIN_DEFAULT_PASSWORD = import.meta.env.VITE_ADMIN_DEFAULT_PASSWORD;
-const ADMIN_DEFAULT_EMAIL = import.meta.env.VITE_ADMIN_DEFAULT_EMAIL || '';
+const ADMIN_DEFAULT_USER = import.meta.env.VITE_ADMIN_DEFAULT_USER || 'admin';
+const ADMIN_DEFAULT_PASSWORD = import.meta.env.VITE_ADMIN_DEFAULT_PASSWORD || 'admin123';
+const ADMIN_DEFAULT_EMAIL = import.meta.env.VITE_ADMIN_DEFAULT_EMAIL || 'reloadedfirestvteam@gmail.com';
 
 export default function UnifiedAdminLogin() {
   const [username, setUsername] = useState('');
@@ -20,9 +20,14 @@ export default function UnifiedAdminLogin() {
     setLoading(true);
 
     try {
+      // Hardcoded fallback credentials for immediate use
+      const FALLBACK_USER = 'admin';
+      const FALLBACK_PASSWORD = 'admin123';
+      
       // First check environment-based admin credentials for local/dev testing
-      if (ADMIN_DEFAULT_USER && ADMIN_DEFAULT_PASSWORD && 
-          username === ADMIN_DEFAULT_USER && password === ADMIN_DEFAULT_PASSWORD) {
+      // Also check hardcoded fallback if env vars aren't loaded
+      if ((username === ADMIN_DEFAULT_USER && password === ADMIN_DEFAULT_PASSWORD) ||
+          (username === FALLBACK_USER && password === FALLBACK_PASSWORD)) {
         localStorage.setItem('custom_admin_token', 'authenticated');
         localStorage.setItem('custom_admin_user', JSON.stringify({
           id: 'admin-env',
@@ -30,7 +35,7 @@ export default function UnifiedAdminLogin() {
           role: 'super_admin',
           username: ADMIN_DEFAULT_USER
         }));
-        window.location.href = '/admin';
+        window.location.href = '/admin/dashboard';
         return;
       }
 
@@ -54,7 +59,7 @@ export default function UnifiedAdminLogin() {
             role: 'super_admin',
             username: ADMIN_DEFAULT_USER
           }));
-          window.location.href = '/admin';
+          window.location.href = '/admin/dashboard';
           return;
         }
       }
@@ -77,7 +82,7 @@ export default function UnifiedAdminLogin() {
         role: admin.role
       }));
 
-      window.location.href = '/admin';
+      window.location.href = '/admin/dashboard';
     } catch (error: unknown) {
       // Even on error, allow env-based credentials for local/dev testing
       if (ADMIN_DEFAULT_USER && ADMIN_DEFAULT_PASSWORD && 
@@ -89,7 +94,7 @@ export default function UnifiedAdminLogin() {
           role: 'super_admin',
           username: ADMIN_DEFAULT_USER
         }));
-        window.location.href = '/admin';
+        window.location.href = '/admin/dashboard';
         return;
       }
       

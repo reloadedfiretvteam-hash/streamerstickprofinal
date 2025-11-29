@@ -23,7 +23,7 @@ export default function ConciergePage() {
   async function loadProducts() {
     try {
       const { data, error } = await supabase
-        .from('square_products')
+        .from('stripe_products')
         .select('*')
         .eq('is_active', true)
         .order('price', { ascending: true });

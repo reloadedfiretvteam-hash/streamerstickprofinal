@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import App from './App';
 import UnifiedAdminLogin from './pages/UnifiedAdminLogin';
-import ModalAdminDashboard from './pages/ModalAdminDashboard';
+import UnifiedAdminDashboard from './pages/UnifiedAdminDashboard';
 import OrderTracking from './pages/OrderTracking';
 import FAQPage from './pages/FAQPage';
 import EnhancedBlogPost from './pages/EnhancedBlogPost';
@@ -44,19 +44,11 @@ export default function AppRouter() {
     return <NewCheckoutPage />;
   }
 
-  if (currentPath === '/custom-admin/dashboard') {
-    if (isAuthenticated) {
-      return <ModalAdminDashboard />;
-    }
-    window.location.href = '/';
-    return null;
-  }
-
-  // Handle all admin routes - /admin, /admin/, /admin/dashboard, /custom-admin, /custom-admin/
+  // Handle all admin routes - unified to ONE admin panel
   if (currentPath === '/admin' || currentPath === '/admin/' || currentPath === '/admin/dashboard' ||
-      currentPath === '/custom-admin' || currentPath === '/custom-admin/') {
+      currentPath === '/custom-admin' || currentPath === '/custom-admin/' || currentPath === '/custom-admin/dashboard') {
     if (isAuthenticated) {
-      return <ModalAdminDashboard />;
+      return <UnifiedAdminDashboard />;
     }
     return <UnifiedAdminLogin />;
   }

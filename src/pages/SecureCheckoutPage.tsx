@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Shield, Lock, CreditCard, Bitcoin, DollarSign, Package, CheckCircle, AlertCircle, ExternalLink, ArrowRight, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import SquarePaymentForm from '../components/SquarePaymentForm';
+import StripePaymentForm from '../components/StripePaymentForm';
 import BitcoinPaymentFlow from '../components/BitcoinPaymentFlow';
 
 interface Product {
@@ -26,7 +26,7 @@ interface CustomerInfo {
 export default function SecureCheckoutPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'square' | 'bitcoin' | 'cashapp' | ''>('');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'bitcoin' | 'cashapp' | ''>('');
   const [step, setStep] = useState<'select' | 'checkout' | 'success'>('select');
   const [loading, setLoading] = useState(true);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
@@ -109,7 +109,7 @@ export default function SecureCheckoutPage() {
   async function loadProducts() {
     try {
       const { data, error } = await supabase
-        .from('square_products')
+        .from('stripe_products')
         .select('*')
         .eq('is_active', true)
         .order('price', { ascending: true });
@@ -143,12 +143,6 @@ export default function SecureCheckoutPage() {
     setPaymentMethod('');
   }
 
-  async function handleSquarePayment(token: string) {
-    // Process Square payment
-    console.log('Processing Square payment with token:', token);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setStep('success');
-  }
 
   function handleOrderComplete(orderCode: string) {
     setStep('success');
@@ -446,20 +440,20 @@ export default function SecureCheckoutPage() {
 
               {/* Payment Method Selection */}
               <div className="grid md:grid-cols-3 gap-4 mb-8">
-                {/* Square Payment */}
+                {/* Stripe Payment */}
                 <button
-                  onClick={() => setPaymentMethod('square')}
+                  onClick={() => setPaymentMethod('stripe')}
                   className={`p-6 border-2 rounded-xl transition-all text-left ${
-                    paymentMethod === 'square'
+                    paymentMethod === 'stripe'
                       ? 'border-blue-600 bg-blue-50'
                       : 'border-slate-200 hover:border-blue-300'
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <CreditCard className={`w-6 h-6 ${paymentMethod === 'square' ? 'text-blue-600' : 'text-slate-400'}`} />
+                    <CreditCard className={`w-6 h-6 ${paymentMethod === 'stripe' ? 'text-blue-600' : 'text-slate-400'}`} />
                     <span className="font-bold text-slate-800">Credit/Debit Card</span>
                   </div>
-                  <p className="text-sm text-slate-600">Secure payment via Square</p>
+                  <p className="text-sm text-slate-600">Secure payment via Stripe</p>
                 </button>
 
                 {/* Bitcoin Payment */}
@@ -495,12 +489,45 @@ export default function SecureCheckoutPage() {
                 </button>
               </div>
 
-              {/* Square Payment Form */}
-              {paymentMethod === 'square' && (
+              {/* Stripe Payment Form */}
+              {paymentMethod === 'stripe' && (
                 <div className="mb-6">
-                  <SquarePaymentForm 
-                    amount={totalAmount} 
-                    onSubmit={handleSquarePayment}
+                  <StripePaymentForm 
+                    amount={totalAmount}
+                    customerInfo={customerInfo}
+                    onSubmit={async (paymentIntentId) => {
+                      try {
+                        // Save order to Supabase
+                        const { error } = await supabase
+                          .from('orders')
+                          .insert([{
+                            customer_name: customerInfo.name,
+                            customer_email: customerInfo.email,
+                            customer_phone: customerInfo.phone,
+                            shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
+                            total_amount: totalAmount.toString(),
+                            payment_method: 'stripe',
+                            payment_intent_id: paymentIntentId,
+                            payment_status: 'completed',
+                            status: 'processing',
+                            items: selectedProduct ? [{
+                              product_id: selectedProduct.id,
+                              product_name: selectedProduct.name,
+                              quantity: 1,
+                              price: totalAmount
+                            }] : []
+                          }]);
+
+                        if (error) throw error;
+                        handleOrderComplete(paymentIntentId);
+                      } catch (error: any) {
+                        console.error('Order creation failed:', error);
+                        alert(`Payment succeeded but order creation failed: ${error.message}. Please contact support.`);
+                      }
+                    }}
+                    onError={(error) => {
+                      alert(`Payment failed: ${error}`);
+                    }}
                   />
                 </div>
               )}
@@ -606,6 +633,7 @@ export default function SecureCheckoutPage() {
     </div>
   );
 }
+
 
 
 

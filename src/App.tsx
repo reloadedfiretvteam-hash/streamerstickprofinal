@@ -31,7 +31,6 @@ import MoneyBackGuarantee from './components/MoneyBackGuarantee';
 import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
 import ConciergePage from './pages/ConciergePage';
-import ConciergeCheckout from './pages/ConciergeCheckout';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
 
@@ -58,14 +57,14 @@ interface Product {
 
 const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '')
   .split(',')
-  .map((host) => host.trim().toLowerCase())
+  .map((host: string) => host.trim().toLowerCase())
   .filter(Boolean);
 
 // Optional: comma‑separated list of secure/Square-only hosts.
 // Example value in env: secure.streamstickpro.com
 const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || '')
   .split(',')
-  .map((host) => host.trim().toLowerCase())
+  .map((host: string) => host.trim().toLowerCase())
   .filter(Boolean);
 
 function App() {
@@ -97,7 +96,7 @@ function App() {
 
     const isConciergeHost =
       conciergeHosts.length > 0 &&
-      conciergeHosts.some((allowedHost) => hostname === allowedHost);
+      conciergeHosts.some((allowedHost: string) => hostname === allowedHost);
 
     const isConciergePath = pathname.startsWith('/concierge');
 
@@ -106,7 +105,7 @@ function App() {
     // Secure domain: lock to Square-safe checkout experience.
     const isSecureHost =
       secureHosts.length > 0 &&
-      secureHosts.some((allowedHost) => hostname === allowedHost || hostname.includes(allowedHost));
+      secureHosts.some((allowedHost: string) => hostname === allowedHost || hostname.includes(allowedHost));
 
     // Also treat direct /secure path on any host as secure mode.
     const isSecurePath = pathname.startsWith('/secure') || pathname.startsWith('/checkout-secure');
