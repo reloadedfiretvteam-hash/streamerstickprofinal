@@ -239,7 +239,7 @@ export default function VisualSectionManager() {
               onChange={(e) => {
                 try {
                   setEditContent(JSON.parse(e.target.value));
-                } catch (err) {
+                } catch (_err) {
                   // Invalid JSON, ignore
                 }
               }}

@@ -61,7 +61,7 @@ export default function FrontendControlPanel() {
       if (data) {
         setSettings(data);
       }
-    } catch (error) {
+    } catch (_error) {
       console.log('No existing settings, using defaults');
     }
   };

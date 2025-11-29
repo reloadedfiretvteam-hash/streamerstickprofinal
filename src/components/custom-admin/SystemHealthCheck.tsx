@@ -103,7 +103,7 @@ export default function SystemHealthCheck() {
         message: `${count || 0} transactions tracked`,
         details: 'Payment tracking system is operational'
       };
-    } catch (error: any) {
+    } catch (_error: unknown) {
       results[results.length - 1] = {
         name: 'Payment System',
         status: 'warning',
@@ -259,7 +259,7 @@ export default function SystemHealthCheck() {
         message: response.ok ? 'Functions endpoint accessible' : 'May not be deployed',
         details: 'confirm-payment and send-order-emails should be deployed'
       };
-    } catch (error: any) {
+    } catch (_error: unknown) {
       results[results.length - 1] = {
         name: 'Edge Functions',
         status: 'warning',
@@ -282,7 +282,7 @@ export default function SystemHealthCheck() {
         message: 'Row Level Security active',
         details: 'Database security policies are enforced'
       };
-    } catch (error: any) {
+    } catch (_error: unknown) {
       results[results.length - 1] = {
         name: 'Security (RLS)',
         status: 'warning',

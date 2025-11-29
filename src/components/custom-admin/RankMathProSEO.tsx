@@ -604,7 +604,7 @@ export default function RankMathProSEO() {
                   onChange={(e) => {
                     try {
                       setEditingConfig({ ...editingConfig, schema_markup: JSON.parse(e.target.value) });
-                    } catch (err) {
+                    } catch (_err) {
                       // Invalid JSON, don't update
                     }
                   }}

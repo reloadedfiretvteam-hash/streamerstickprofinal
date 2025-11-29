@@ -30,7 +30,7 @@ export default function GitHubCloudflareConfig() {
         setGithubStatus('error');
         alert('GitHub connection failed. Check your token.');
       }
-    } catch (error) {
+    } catch (_error) {
       setGithubStatus('error');
       alert('Error testing GitHub connection');
     }
@@ -56,7 +56,7 @@ export default function GitHubCloudflareConfig() {
         setCloudflareStatus('error');
         alert('Cloudflare connection failed. Check your token.');
       }
-    } catch (error) {
+    } catch (_error) {
       setCloudflareStatus('error');
       alert('Error testing Cloudflare connection');
     }
@@ -114,10 +114,10 @@ export default function GitHubCloudflareConfig() {
         await response.json();
         alert(`Deployment triggered for ${projectName}! Check Cloudflare dashboard for status.`);
       } else {
-        const error = await response.json();
-        alert(`Failed to trigger deployment: ${error.errors?.[0]?.message || 'Unknown error'}`);
+        const errorData = await response.json();
+        alert(`Failed to trigger deployment: ${errorData.errors?.[0]?.message || 'Unknown error'}`);
       }
-    } catch (error) {
+    } catch (_error) {
       alert('Error triggering deployment');
     }
   };
@@ -132,7 +132,7 @@ export default function GitHubCloudflareConfig() {
       // This would trigger a server-side push
       // For now, show instructions
       alert('GitHub token configured! Use GitHub Desktop or command line to push:\n\ngit push origin main --force');
-    } catch (error) {
+    } catch (_error) {
       alert('Error configuring GitHub push');
     }
   };

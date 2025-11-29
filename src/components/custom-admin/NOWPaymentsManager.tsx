@@ -103,7 +103,7 @@ export default function NOWPaymentsManager() {
       } else {
         setMessage('❌ Connection failed. Please check your API key.');
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage('❌ Connection failed. Please check your API key and network.');
     }
 

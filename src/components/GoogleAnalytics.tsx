@@ -26,7 +26,7 @@ export default function GoogleAnalytics() {
       if (data && data.google_analytics_id && data.google_analytics_id !== 'G-XXXXXXXXXX') {
         setMeasurementId(data.google_analytics_id);
       }
-    } catch (error) {
+    } catch (_error) {
       console.log('SEO settings not yet configured');
     }
   };

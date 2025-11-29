@@ -38,7 +38,7 @@ export default function AdminFooterLogin({ onLogin }: AdminFooterLoginProps) {
       } else {
         setError('Invalid email or password');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);

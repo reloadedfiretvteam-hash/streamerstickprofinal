@@ -52,21 +52,23 @@ export default function BulkEmailManager() {
         recipientEmails = emails;
         break;
 
-      case 'customers':
+      case 'customers': {
         const { data: orderEmails } = await supabase
           .from('orders')
           .select('customer_email')
           .eq('payment_status', 'paid');
         recipientEmails = [...new Set(orderEmails?.map(o => o.customer_email) || [])];
         break;
+      }
 
-      case 'abandonment':
+      case 'abandonment': {
         const { data: abandonedEmails } = await supabase
           .from('cart_abandonments')
           .select('customer_email')
           .is('recovered_at', null);
         recipientEmails = [...new Set(abandonedEmails?.map(a => a.customer_email) || [])];
         break;
+      }
     }
 
     return recipientEmails;
