@@ -1,0 +1,53 @@
+╔═══════════════════════════════════════════════════════╗
+║  QUICK COPY-PASTE FOR CLOUDFLARE                       ║
+╚═══════════════════════════════════════════════════════╝
+
+Go to: Cloudflare Dashboard → Pages → Your Project → Settings → Environment Variables
+
+┌───────────────────────────────────────────────────────┐
+│ ADD VARIABLE 1                                          │
+└───────────────────────────────────────────────────────┘
+
+Name:
+VITE_ADMIN_DEFAULT_USER
+
+Value:
+admin
+
+Click "Save"
+
+┌───────────────────────────────────────────────────────┐
+│ ADD VARIABLE 2                                          │
+└───────────────────────────────────────────────────────┘
+
+Name:
+VITE_ADMIN_DEFAULT_PASSWORD
+
+Value:
+admin123
+
+Click "Save"
+
+┌───────────────────────────────────────────────────────┐
+│ ADD VARIABLE 3                                          │
+└───────────────────────────────────────────────────────┘
+
+Name:
+VITE_ADMIN_DEFAULT_EMAIL
+
+Value:
+reloadedfirestvteam@gmail.com
+
+Click "Save"
+
+┌───────────────────────────────────────────────────────┐
+│ THEN:                                                   │
+└───────────────────────────────────────────────────────┘
+
+1. Go to "Deployments" tab
+2. Click "Retry deployment"
+3. Wait 2-3 minutes
+4. Test: yourdomain.com/admin
+
+✅ DONE!
+
