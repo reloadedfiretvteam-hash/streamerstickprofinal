@@ -131,7 +131,7 @@ async function getTikTokToken(): Promise<string | null> {
       .single();
 
     return data?.value || null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -145,7 +145,7 @@ async function getYouTubeToken(): Promise<string | null> {
       .single();
 
     return data?.value || null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

@@ -16,6 +16,7 @@ interface Product {
   price: string;
   sale_price: string;
   main_image: string;
+  image_url?: string; // Fallback for backward compatibility
   category: string;
   stock_quantity: number;
   rating: number;
@@ -60,7 +61,7 @@ export default function ShopPage() {
       }
       
       // Ensure images are properly formatted from Supabase Storage
-      const productsWithImages = (data || []).map((product: any) => {
+      const productsWithImages = (data || []).map((product: Product) => {
         let imageUrl = product.main_image || product.image_url || '';
         
         // Use Supabase storage images as fallback for reliability

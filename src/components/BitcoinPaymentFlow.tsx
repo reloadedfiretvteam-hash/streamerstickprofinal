@@ -31,7 +31,11 @@ export default function BitcoinPaymentFlow({ totalAmount, customerInfo, products
   const [copiedOrderCode, setCopiedOrderCode] = useState(false);
   const [paymentCreated, setPaymentCreated] = useState(false);
   const [gatewayEnabled, setGatewayEnabled] = useState(false);
-  const [nowPaymentsConfig, setNowPaymentsConfig] = useState<any>(null);
+  const [nowPaymentsConfig, setNowPaymentsConfig] = useState<{
+    api_key: string;
+    api_url: string;
+    ipn_secret: string;
+  } | null>(null);
 
   useEffect(() => {
     loadGatewayConfig();
@@ -92,7 +96,13 @@ export default function BitcoinPaymentFlow({ totalAmount, customerInfo, products
       const code = generateOrderCode();
       setOrderCode(code);
 
-      let paymentData: any = {};
+      let paymentData: {
+        payment_id?: string;
+        pay_address?: string;
+        pay_amount?: string;
+        payment_url?: string;
+        invoice_url?: string;
+      } = {};
 
       // Try NOWPayments if configured
       if (gatewayEnabled && nowPaymentsConfig?.api_key) {
@@ -161,7 +171,7 @@ export default function BitcoinPaymentFlow({ totalAmount, customerInfo, products
         setPaymentCreated(true);
 
         // Send email notifications
-        await sendOrderEmails(code, paymentData.pay_address, paymentData.pay_amount);
+        await sendOrderEmails(code, paymentData.pay_address || '', paymentData.pay_amount || '');
       } else {
         console.error('Database error:', error);
         alert('Error creating order. Please try again.');
