@@ -1,0 +1,124 @@
+╔═══════════════════════════════════════════════════════╗
+║  ADMIN SETUP - ONE STEP AT A TIME                    ║
+║  Follow each step. Say "DONE" then move to next.     ║
+╚═══════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 1: CHECK IF .env FILE EXISTS                    │
+└───────────────────────────────────────────────────────┘
+
+WHERE: Your project folder
+FOLDER: streamerstickprofinal
+
+LOOK FOR: A file named .env
+
+IF IT EXISTS: ✅ Skip to Step 2
+IF NOT: Create a new file named .env
+
+✅ DONE - Move to Step 2
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 2: OPEN .env FILE                                │
+└───────────────────────────────────────────────────────┘
+
+WHERE: In your project folder (streamerstickprofinal)
+HOW: Right-click .env → Open with Notepad (or any text editor)
+
+YOU SHOULD SEE:
+VITE_SUPABASE_ANON_KEY=...
+VITE_SUPABASE_URL=...
+
+✅ DONE - Move to Step 3
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 3: ADD ADMIN CREDENTIALS                         │
+└───────────────────────────────────────────────────────┘
+
+WHERE: In the .env file you just opened
+
+COPY THESE 3 LINES (copy everything below this line):
+─────────────────────────────────────────────────────────
+VITE_ADMIN_DEFAULT_USER=admin
+VITE_ADMIN_DEFAULT_PASSWORD=admin123
+VITE_ADMIN_DEFAULT_EMAIL=reloadedfirestvteam@gmail.com
+─────────────────────────────────────────────────────────
+
+PASTE: Add these 3 lines to the END of your .env file
+
+YOUR .env FILE SHOULD NOW LOOK LIKE:
+VITE_SUPABASE_ANON_KEY=...
+VITE_SUPABASE_URL=...
+VITE_ADMIN_DEFAULT_USER=admin
+VITE_ADMIN_DEFAULT_PASSWORD=admin123
+VITE_ADMIN_DEFAULT_EMAIL=reloadedfirestvteam@gmail.com
+
+SAVE: Press Ctrl + S
+
+✅ DONE - Move to Step 4
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 4: RESTART YOUR SERVER                           │
+└───────────────────────────────────────────────────────┘
+
+WHERE: In your terminal/command prompt
+
+IF SERVER IS RUNNING:
+1. Press Ctrl + C to stop it
+
+THEN TYPE THIS (copy and paste):
+─────────────────────────────────────────────────────────
+npm run dev
+─────────────────────────────────────────────────────────
+
+PRESS: Enter
+
+WAIT: Until you see "Local: http://localhost:5173"
+
+✅ DONE - Move to Step 5
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 5: OPEN YOUR WEBSITE                             │
+└───────────────────────────────────────────────────────┘
+
+WHERE: In your web browser
+
+COPY AND PASTE THIS URL:
+─────────────────────────────────────────────────────────
+http://localhost:5173
+─────────────────────────────────────────────────────────
+
+PRESS: Enter
+
+✅ DONE - Move to Step 6
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 6: FIND ADMIN LOGIN BUTTON                       │
+└───────────────────────────────────────────────────────┘
+
+WHERE: On your website (http://localhost:5173)
+
+ACTION:
+1. Scroll ALL THE WAY DOWN to the bottom
+2. Look for "Support & Admin" section in the footer
+3. You should see "Admin Login" - CLICK IT
+
+✅ DONE - Move to Step 7
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 7: LOGIN                                          │
+└───────────────────────────────────────────────────────┘
+
+WHERE: In the login popup that appeared
+
+ENTER:
+Username: admin
+Password: admin123
+
+THEN: Click "Login" button
+
+✅ DONE - YOU'RE LOGGED IN!
+
+╔═══════════════════════════════════════════════════════╗
+║  ALL STEPS COMPLETE - ADMIN PANEL READY!              ║
+╚═══════════════════════════════════════════════════════╝
+

@@ -1,0 +1,117 @@
+╔═══════════════════════════════════════════════════════╗
+║  COPY & PASTE INTO SUPABASE - NO TABLE NEEDED         ║
+╚═══════════════════════════════════════════════════════╝
+
+This creates everything from scratch - no existing table needed!
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 1: GO TO SUPABASE                                │
+└───────────────────────────────────────────────────────┘
+
+1. Open: https://supabase.com/dashboard
+2. Login to your account
+3. Click on your project
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 2: OPEN SQL EDITOR                               │
+└───────────────────────────────────────────────────────┘
+
+1. Click "SQL Editor" in the left sidebar
+2. Click "New query" button (or "+ New query")
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 3: COPY & PASTE THIS ENTIRE SQL CODE             │
+└───────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════
+COPY EVERYTHING BELOW THIS LINE ↓
+═══════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS admin_credentials (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  username text UNIQUE NOT NULL,
+  password_hash text NOT NULL,
+  email text UNIQUE NOT NULL,
+  role text DEFAULT 'admin',
+  is_active boolean DEFAULT true,
+  last_login timestamptz,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE admin_credentials ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Anyone can read admin credentials for login" ON admin_credentials;
+CREATE POLICY "Anyone can read admin credentials for login"
+  ON admin_credentials FOR SELECT
+  USING (true);
+
+DROP POLICY IF EXISTS "Only authenticated admins can modify credentials" ON admin_credentials;
+CREATE POLICY "Only authenticated admins can modify credentials"
+  ON admin_credentials FOR ALL
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+INSERT INTO admin_credentials (username, password_hash, email, role)
+VALUES ('admin', 'admin', 'reloadedfirestvteam@gmail.com', 'superadmin')
+ON CONFLICT (username) DO NOTHING;
+
+CREATE OR REPLACE FUNCTION update_admin_credentials_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS update_admin_credentials_timestamp ON admin_credentials;
+CREATE TRIGGER update_admin_credentials_timestamp
+  BEFORE UPDATE ON admin_credentials
+  FOR EACH ROW
+  EXECUTE FUNCTION update_admin_credentials_timestamp();
+
+═══════════════════════════════════════════════════════
+COPY EVERYTHING ABOVE THIS LINE ↑
+═══════════════════════════════════════════════════════
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 4: PASTE & RUN                                    │
+└───────────────────────────────────────────────────────┘
+
+1. Click in the SQL Editor text box
+2. Paste the SQL code (Ctrl+V or Cmd+V)
+3. Click "Run" button (or press Ctrl+Enter)
+4. Wait for "Success" message
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 5: VERIFY IT WORKED                              │
+└───────────────────────────────────────────────────────┘
+
+1. Click "Table Editor" in left sidebar
+2. Find "admin_credentials" table
+3. You should see one row with:
+   - username: admin
+   - password_hash: admin
+   - email: reloadedfirestvteam@gmail.com
+
+┌───────────────────────────────────────────────────────┐
+│ YOUR LOGIN CREDENTIALS:                                │
+└───────────────────────────────────────────────────────┘
+
+Username: admin
+Password: admin
+
+┌───────────────────────────────────────────────────────┐
+│ NOTES:                                                 │
+└───────────────────────────────────────────────────────┘
+
+✅ Creates table from scratch - no existing table needed
+✅ Safe to run multiple times - won't create duplicates
+✅ Handles all conflicts automatically
+✅ Creates admin account automatically
+
+╔═══════════════════════════════════════════════════════╗
+║  DONE! Your admin panel can now use database login!   ║
+╚═══════════════════════════════════════════════════════╝
+
