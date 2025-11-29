@@ -4,6 +4,23 @@ import { CartContext, CartItem } from '../context/CartContext';
 const CART_STORAGE_KEY = 'cart_items';
 
 /**
+ * Validates that an object has the required CartItem properties with correct types
+ */
+function isValidCartItem(item: unknown): item is CartItem {
+  if (typeof item !== 'object' || item === null) {
+    return false;
+  }
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.productId === 'string' &&
+    typeof obj.name === 'string' &&
+    typeof obj.price === 'number' &&
+    typeof obj.quantity === 'number' &&
+    obj.quantity > 0
+  );
+}
+
+/**
  * Loads cart items from localStorage
  * @returns The stored cart items or an empty array if none exist
  */
@@ -13,7 +30,8 @@ function loadCartFromStorage(): CartItem[] {
     if (storedCart) {
       const parsed = JSON.parse(storedCart);
       if (Array.isArray(parsed)) {
-        return parsed;
+        // Validate each item has required properties
+        return parsed.filter(isValidCartItem);
       }
     }
   } catch (error) {
@@ -78,9 +96,16 @@ export function CartProvider({ children }: CartProviderProps) {
   /**
    * Updates the quantity of an existing item in the cart.
    * If quantity is 0 or less, the item is removed from the cart.
+   * If the item doesn't exist in the cart, this is a no-op (idempotent).
    */
   const updateQuantity = useCallback((productId: string, quantity: number) => {
     setItems((prevItems) => {
+      // Check if item exists in cart
+      const itemExists = prevItems.some((item) => item.productId === productId);
+      if (!itemExists) {
+        return prevItems;
+      }
+      
       if (quantity <= 0) {
         return prevItems.filter((item) => item.productId !== productId);
       }
