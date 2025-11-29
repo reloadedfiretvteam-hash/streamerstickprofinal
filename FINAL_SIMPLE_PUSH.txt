@@ -1,0 +1,20 @@
+SIMPLE PUSH - Copy and paste these ONE AT A TIME:
+
+1. git checkout clean-main
+
+2. git remote set-url origin https://github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
+
+3. git add -A
+
+4. git commit -m "All fixes"
+
+5. git push origin clean-main
+
+6. git push origin clean-main:main --force
+
+If step 5 fails, try:
+   git push origin clean-main --force
+
+Tell me which step fails and what error you see.
+
+
