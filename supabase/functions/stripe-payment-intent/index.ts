@@ -45,9 +45,18 @@ Deno.serve(async (req: Request) => {
       throw new Error("Customer email is required");
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(customerEmail)) {
+      throw new Error("Invalid email format");
+    }
+
+    // Sanitize product ID to prevent injection attacks
+    const sanitizedProductId = productId.replace(/[^a-zA-Z0-9-_]/g, '');
+
     // Fetch the product from stripe_products table
     const productResponse = await fetch(
-      `${supabaseUrl}/rest/v1/stripe_products?id=eq.${productId}&is_active=eq.true`,
+      `${supabaseUrl}/rest/v1/stripe_products?id=eq.${sanitizedProductId}&is_active=eq.true`,
       {
         method: "GET",
         headers: {
@@ -87,10 +96,10 @@ Deno.serve(async (req: Request) => {
         amount: amountInCents.toString(),
         currency: "usd",
         "automatic_payment_methods[enabled]": "true",
-        "metadata[product_id]": productId,
+        "metadata[product_id]": sanitizedProductId,
         "metadata[product_name]": product.name,
         "metadata[customer_email]": customerEmail,
-        "metadata[customer_name]": customerName,
+        "metadata[customer_name]": customerName || '',
         description: `Payment for ${product.name}`,
         receipt_email: customerEmail,
         statement_descriptor_suffix: "PRO DIGITAL",

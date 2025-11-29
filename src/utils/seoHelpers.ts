@@ -119,7 +119,7 @@ export function generateProductSchema(product: {
   rating?: number;
   reviewCount?: number;
 }): void {
-  const schema = {
+  const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
@@ -141,7 +141,7 @@ export function generateProductSchema(product: {
   };
 
   if (product.rating && product.reviewCount) {
-    (schema as any).aggregateRating = {
+    schema.aggregateRating = {
       '@type': 'AggregateRating',
       ratingValue: product.rating.toString(),
       reviewCount: product.reviewCount.toString(),

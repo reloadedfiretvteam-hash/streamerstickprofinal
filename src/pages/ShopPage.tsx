@@ -60,8 +60,8 @@ export default function ShopPage() {
       }
       
       // Ensure images are properly formatted from Supabase Storage
-      const productsWithImages = (data || []).map((product: any) => {
-        let imageUrl = product.main_image || product.image_url || '';
+      const productsWithImages = (data || []).map((product: Product) => {
+        let imageUrl = product.main_image || '';
         
         // Use Supabase storage images as fallback for reliability
         if (!imageUrl || imageUrl.includes('placeholder') || imageUrl.includes('pexels')) {
