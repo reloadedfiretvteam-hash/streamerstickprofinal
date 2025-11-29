@@ -9,24 +9,15 @@ import {
   Download,
   Upload,
   Copy,
-  Eye,
-  EyeOff,
-  Tag,
   DollarSign,
   Image as ImageIcon,
   Save,
-  BarChart3,
   TrendingUp,
-  AlertCircle,
-  CheckCircle,
   Settings,
   Layers,
-  ShoppingCart,
   Box,
-  Truck,
-  Star
+  X
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
 
 export default function UltraProductManager() {
   const [products, setProducts] = useState<any[]>([]);

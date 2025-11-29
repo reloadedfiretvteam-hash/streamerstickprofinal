@@ -575,8 +575,8 @@ Customer has been sent complete payment instructions including their unique purc
                     </p>
                     <SquarePaymentForm 
                       amount={total}
-                      onSubmit={async (token: string) => {
-                        // Handle Square payment - token is used by the payment form internally
+                      onSubmit={async (_token: string) => {
+                        // Handle Square payment - token processed by Square
                         await handleCompleteOrder();
                       }}
                     />

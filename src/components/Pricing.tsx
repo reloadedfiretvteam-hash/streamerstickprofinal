@@ -102,7 +102,7 @@ export default function Pricing({ onSelectPlan }: PricingProps) {
                 </button>
 
                 <div className="space-y-4">
-                  {plan.features.map((feature, index) => (
+                  {plan.features.map((feature: string, index: number) => (
                     <div key={index} className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <span className="text-gray-700">{feature}</span>

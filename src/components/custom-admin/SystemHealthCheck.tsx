@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { CheckCircle, XCircle, AlertCircle, RefreshCw, Database, Server, Mail, Shield } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, RefreshCw, Database, Server, Mail } from 'lucide-react';
 
 interface HealthCheck {
   name: string;
@@ -275,19 +275,20 @@ export default function SystemHealthCheck() {
 
     try {
       // Try to access without auth - should be allowed for public data
-      const { error } = await supabase.from('products').select('id').limit(1);
+      const { error: rlsError } = await supabase.from('products').select('id').limit(1);
+      if (rlsError) throw rlsError;
       results[results.length - 1] = {
         name: 'Security (RLS)',
         status: 'pass',
         message: 'Row Level Security active',
         details: 'Database security policies are enforced'
       };
-    } catch (error: any) {
+    } catch (err: unknown) {
       results[results.length - 1] = {
         name: 'Security (RLS)',
         status: 'warning',
         message: 'RLS status unknown',
-        details: 'Unable to verify RLS policies'
+        details: err instanceof Error ? err.message : 'Unable to verify RLS policies'
       };
     }
     setChecks([...results]);

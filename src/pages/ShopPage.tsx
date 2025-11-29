@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { ShoppingCart, Search, Filter, Star } from 'lucide-react';
 import Footer from '../components/Footer';

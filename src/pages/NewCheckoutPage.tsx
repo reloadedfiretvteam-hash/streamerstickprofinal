@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Lock, Bitcoin, CreditCard, Smartphone, Mail, User, Phone, MapPin, CheckCircle, AlertCircle, ArrowRight, Shield, Clock, Zap } from 'lucide-react';
+import { ShoppingCart, Lock, Bitcoin, CreditCard, Smartphone, Mail, User, CheckCircle, ArrowRight, Shield, Clock, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import BitcoinPaymentFlow from '../components/BitcoinPaymentFlow';
 import CashAppPaymentFlow from '../components/CashAppPaymentFlow';
@@ -562,10 +562,11 @@ export default function NewCheckoutPage() {
                                 quantity: item.quantity,
                                 price: item.product.price
                               }))
-                            }]);
+                            }])
+                            .select('id');
 
                           if (error) throw error;
-                          const orderCode = data?.[0]?.id || `SQ-${Date.now()}`;
+                          const orderCode = (data && data.length > 0 && data[0].id) ? String(data[0].id) : `SQ-${Date.now()}`;
                           handleOrderComplete(orderCode);
                         } catch (error) {
                           console.error('Order creation failed:', error);

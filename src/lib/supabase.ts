@@ -19,3 +19,15 @@ export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'public-anon-key-placeholder',
 );
+
+// Type definitions for database entities
+export interface PricingPlan {
+  id: string;
+  name: string;
+  price: number;
+  features: string[];
+  active: boolean;
+  display_order: number;
+  badge?: string;
+  popular?: boolean;
+}

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
-  Home, Package, FileText, ShoppingCart, Settings, LogOut,
+  Package, FileText, ShoppingCart, Settings, LogOut,
   TrendingUp, HelpCircle, Image, DollarSign, CreditCard, Flame, X,
-  Grid, Users, Video, Eye, Edit3
+  Grid, Edit3
 } from 'lucide-react';
 
 import EnhancedBlogManager from '../components/custom-admin/EnhancedBlogManager';
