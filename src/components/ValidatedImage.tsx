@@ -46,7 +46,7 @@ export default function ValidatedImage({
 }: ValidatedImageProps) {
   // Start with fallbackSrc to prevent flash of invalid image during validation
   const [currentSrc, setCurrentSrc] = useState<string>(fallbackSrc);
-  const [isValidating, setIsValidating] = useState<boolean>(true);
+  const [_isValidating, setIsValidating] = useState<boolean>(true);
   const [hasFailed, setHasFailed] = useState<boolean>(false);
 
   /**

@@ -29,8 +29,10 @@ export interface PricingPlan {
   description?: string;
   price: number;
   period?: string;
+  billing_period?: string;
   features: string[];
   popular?: boolean;
+  is_popular?: boolean;
   active: boolean;
   display_order?: number;
 }

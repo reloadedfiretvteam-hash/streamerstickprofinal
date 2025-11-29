@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { CheckCircle, XCircle, AlertCircle, RefreshCw, Database, Server, Mail, Shield } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface HealthCheck {
   name: string;
@@ -275,7 +275,7 @@ export default function SystemHealthCheck() {
 
     try {
       // Try to access without auth - should be allowed for public data
-      const { error } = await supabase.from('real_products').select('id').limit(1);
+      await supabase.from('real_products').select('id').limit(1);
       results[results.length - 1] = {
         name: 'Security (RLS)',
         status: 'pass',

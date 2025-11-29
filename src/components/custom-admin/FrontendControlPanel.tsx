@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Save, RefreshCw, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { Save, RefreshCw, Eye, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface FrontendSettings {
   show_urgency_timer: boolean;

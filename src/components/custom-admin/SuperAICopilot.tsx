@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bot, Send, Sparkles, Zap, Lightbulb, Command, CheckCircle, ArrowRight, X } from 'lucide-react';
+import { Bot, Send, Sparkles, Lightbulb, ArrowRight, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface Message {

@@ -87,7 +87,7 @@ export default function Pricing({ onSelectPlan }: PricingProps) {
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                 <div className="mb-6">
                   <span className="text-5xl font-bold text-gray-900">{formatPrice(plan.price)}</span>
-                  <span className="text-gray-600">{getBillingLabel(plan.billing_period)}</span>
+                  <span className="text-gray-600">{getBillingLabel(plan.billing_period || '')}</span>
                 </div>
 
                 <button

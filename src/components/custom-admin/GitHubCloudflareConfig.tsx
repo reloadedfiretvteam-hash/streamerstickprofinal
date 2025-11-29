@@ -111,7 +111,7 @@ export default function GitHubCloudflareConfig() {
       );
 
       if (response.ok) {
-        const data = await response.json();
+        await response.json();
         alert(`Deployment triggered for ${projectName}! Check Cloudflare dashboard for status.`);
       } else {
         const error = await response.json();

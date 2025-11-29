@@ -3,13 +3,10 @@ import {
   Maximize2,
   Plus,
   Eye,
-  Settings,
   Copy,
   Trash2,
   Edit,
   Target,
-  Clock,
-  Users,
   MousePointer,
   X,
   Save,
@@ -17,7 +14,7 @@ import {
 } from 'lucide-react';
 
 export default function PopupBuilder() {
-  const [popups, setPopups] = useState([
+  const [popups, _setPopups] = useState([
     {
       id: '1',
       name: 'Exit Intent Offer',
