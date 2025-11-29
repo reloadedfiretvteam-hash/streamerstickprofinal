@@ -1,0 +1,62 @@
+╔═══════════════════════════════════════════════════════╗
+║  ACCESS ADMIN PANEL ON YOUR LIVE WEBSITE              ║
+╚═══════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 1: GO TO YOUR LIVE WEBSITE                       │
+└───────────────────────────────────────────────────────┘
+
+Open your web browser and go to:
+─────────────────────────────────────────────────────────
+YOUR-WEBSITE-DOMAIN.com
+─────────────────────────────────────────────────────────
+
+(Replace with your actual domain name)
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 2: SCROLL TO FOOTER                              │
+└───────────────────────────────────────────────────────┘
+
+1. Scroll ALL THE WAY DOWN to the very bottom
+2. Find "Support & Admin" section in the footer
+3. Click "Admin Login"
+
+┌───────────────────────────────────────────────────────┐
+│ STEP 3: LOGIN                                          │
+└───────────────────────────────────────────────────────┘
+
+Enter these credentials:
+─────────────────────────────────────────────────────────
+Username: admin
+Password: admin123
+─────────────────────────────────────────────────────────
+
+Click "Login"
+
+✅ YOU'RE IN!
+
+┌───────────────────────────────────────────────────────┐
+│ OR GO DIRECTLY TO:                                     │
+└───────────────────────────────────────────────────────┘
+
+You can also go directly to:
+─────────────────────────────────────────────────────────
+YOUR-WEBSITE-DOMAIN.com/admin
+─────────────────────────────────────────────────────────
+
+This will show the login page directly.
+
+┌───────────────────────────────────────────────────────┐
+│ IMPORTANT: SET UP ENVIRONMENT VARIABLES                │
+└───────────────────────────────────────────────────────┘
+
+If login doesn't work, you need to add environment variables
+to your hosting platform (Cloudflare Pages, Vercel, etc.)
+
+See: SETUP_ENV_VARS_ON_LIVE.txt
+
+╔═══════════════════════════════════════════════════════╗
+║  YOUR LOGIN WORKS WITH HARDCODED FALLBACK             ║
+║  So it should work even without env vars!             ║
+╚═══════════════════════════════════════════════════════╝
+
