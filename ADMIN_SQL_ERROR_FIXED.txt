@@ -1,0 +1,68 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ADMIN CREDENTIALS SQL - ERROR-FREE VERSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ WHAT WAS WRONG:
+- Email typo: "reloadedfirestvteam" → Fixed to "reloadedfiretvteam"
+- Function/trigger conflicts → Added DROP IF EXISTS with CASCADE
+- Policy conflicts → Added DROP IF EXISTS for all policies
+
+✅ WHAT I FIXED:
+1. Email: reloadedfiretvteam@gmail.com (corrected)
+2. Function drop with CASCADE to handle dependencies
+3. All policies dropped before creating new ones
+4. ON CONFLICT now updates instead of doing nothing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HOW TO USE:
+
+1. Go to: Supabase Dashboard → SQL Editor
+2. Copy the ENTIRE contents of: COPY_PASTE_FIXED_ADMIN_SQL.sql
+3. Paste into SQL Editor
+4. Click "Run"
+5. Should see success message + verification query results
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EXPECTED RESULT AFTER RUNNING:
+
+You should see a SELECT query result showing:
+- username: admin
+- email: reloadedfiretvteam@gmail.com
+- role: superadmin
+- is_active: true
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LOGIN CREDENTIALS AFTER RUNNING:
+
+Username: admin
+Password: admin
+Email: reloadedfiretvteam@gmail.com
+
+Go to: /admin or /admin/ to log in
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+IF YOU STILL GET ERRORS:
+
+Common errors and fixes:
+
+❌ "relation already exists"
+   → Table already exists - that's OK, SQL handles it with IF NOT EXISTS
+
+❌ "policy already exists" 
+   → Should be fixed now with DROP IF EXISTS statements
+
+❌ "function already exists"
+   → Should be fixed now with DROP FUNCTION CASCADE
+
+❌ "permission denied"
+   → Check you're logged into Supabase with correct permissions
+
+❌ "syntax error"
+   → Make sure you copied the ENTIRE SQL from COPY_PASTE_FIXED_ADMIN_SQL.sql
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+

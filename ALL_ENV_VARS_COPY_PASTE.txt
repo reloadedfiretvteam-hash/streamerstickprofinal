@@ -1,0 +1,100 @@
+╔═══════════════════════════════════════════════════════╗
+║  ALL ENVIRONMENT VARIABLES - COPY & PASTE             ║
+╚═══════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────┐
+│ PART 1: ADMIN PANEL VARIABLES (REQUIRED)              │
+└───────────────────────────────────────────────────────┘
+
+Variable 1:
+─────────────────────────────────────────────────────────
+VITE_ADMIN_DEFAULT_USER
+─────────────────────────────────────────────────────────
+Value:
+admin
+─────────────────────────────────────────────────────────
+
+Variable 2:
+─────────────────────────────────────────────────────────
+VITE_ADMIN_DEFAULT_PASSWORD
+─────────────────────────────────────────────────────────
+Value:
+admin123
+─────────────────────────────────────────────────────────
+
+Variable 3:
+─────────────────────────────────────────────────────────
+VITE_ADMIN_DEFAULT_EMAIL
+─────────────────────────────────────────────────────────
+Value:
+reloadedfirestvteam@gmail.com
+─────────────────────────────────────────────────────────
+
+┌───────────────────────────────────────────────────────┐
+│ PART 2: SQUARE PAYMENT VARIABLES (REQUIRED)           │
+└───────────────────────────────────────────────────────┘
+
+Variable 4:
+─────────────────────────────────────────────────────────
+VITE_SQUARE_APP_ID
+─────────────────────────────────────────────────────────
+Value:
+YOUR_SQUARE_APPLICATION_ID_HERE
+─────────────────────────────────────────────────────────
+Get from: https://developer.squareup.com/apps
+
+Variable 5:
+─────────────────────────────────────────────────────────
+VITE_SQUARE_LOCATION_ID
+─────────────────────────────────────────────────────────
+Value:
+YOUR_SQUARE_LOCATION_ID_HERE
+─────────────────────────────────────────────────────────
+Get from: Square Dashboard → Locations → Copy Location ID
+
+Variable 6 (Optional):
+─────────────────────────────────────────────────────────
+VITE_SECURE_HOSTS
+─────────────────────────────────────────────────────────
+Value:
+secure.streamstickpro.com
+─────────────────────────────────────────────────────────
+
+┌───────────────────────────────────────────────────────┐
+│ PART 3: SUPABASE VARIABLES (ALREADY SET)              │
+└───────────────────────────────────────────────────────┘
+
+These should already be in your .env:
+─────────────────────────────────────────────────────────
+VITE_SUPABASE_URL=https://fiwkgpsvcvzitnuevqxz.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+─────────────────────────────────────────────────────────
+
+┌───────────────────────────────────────────────────────┐
+│ WHERE TO ADD THESE:                                    │
+└───────────────────────────────────────────────────────┘
+
+CLOUDFLARE PAGES:
+1. Go to: https://dash.cloudflare.com
+2. Pages → Your Project → Settings → Environment Variables
+3. Add all 6 variables above
+4. Check: Production, Preview, Development
+5. Click "Save" after each one
+6. Redeploy your site
+
+LOCAL .env FILE:
+Add all variables to your .env file in project root folder
+
+╔═══════════════════════════════════════════════════════╗
+║  YOUR COMPLETE .env FILE SHOULD LOOK LIKE:            ║
+╚═══════════════════════════════════════════════════════╝
+
+VITE_SUPABASE_URL=https://fiwkgpsvcvzitnuevqxz.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+VITE_ADMIN_DEFAULT_USER=admin
+VITE_ADMIN_DEFAULT_PASSWORD=admin123
+VITE_ADMIN_DEFAULT_EMAIL=reloadedfirestvteam@gmail.com
+VITE_SQUARE_APP_ID=your_square_app_id
+VITE_SQUARE_LOCATION_ID=your_square_location_id
+VITE_SECURE_HOSTS=secure.streamstickpro.com
+
