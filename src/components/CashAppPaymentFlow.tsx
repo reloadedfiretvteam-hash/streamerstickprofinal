@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Smartphone, Copy, Check, AlertCircle, CheckCircle, ArrowLeft, Mail, Clock, Shield, DollarSign, Send } from 'lucide-react';
+import { Smartphone, Copy, Check, CheckCircle, ArrowLeft, Mail, Clock, Shield, Send, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Props {

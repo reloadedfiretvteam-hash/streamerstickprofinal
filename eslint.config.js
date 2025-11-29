@@ -23,6 +23,14 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      // Allow unused variables with underscore prefix
+      '@typescript-eslint/no-unused-vars': ['error', { 
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_'
+      }],
+      // Allow explicit any in legacy code (to be addressed incrementally)
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
   }
 );

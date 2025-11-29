@@ -10,7 +10,6 @@ import {
   FileText,
   Image,
   DollarSign,
-  Zap,
   CheckCircle,
   XCircle,
   AlertCircle

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CreditCard, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface CartItem {
@@ -21,7 +21,7 @@ interface StripeCheckoutProps {
   };
 }
 
-export default function StripeCheckout({ items, total, customerInfo }: StripeCheckoutProps) {
+export default function StripeCheckout({ items, total, customerInfo: _customerInfo }: StripeCheckoutProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);

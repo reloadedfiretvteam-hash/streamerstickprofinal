@@ -5,13 +5,10 @@ import {
   Edit,
   Trash2,
   Search,
-  DollarSign,
   Save,
   X,
   Image as ImageIcon,
   Tag,
-  Eye,
-  EyeOff,
   TrendingUp,
   AlertCircle,
   CheckCircle
@@ -31,7 +28,7 @@ export default function RealProductManager() {
 
   const loadProducts = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('real_products')
       .select('*')
       .order('created_at', { ascending: false });

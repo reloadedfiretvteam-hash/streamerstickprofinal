@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import {
-  Package, Users, ShoppingCart, DollarSign, TrendingUp, Eye,
-  Mail, FileText, Tag, Image, Shield, Activity, CheckCircle,
-  AlertCircle, Clock, Star, Settings, Database, Zap
+  Package, Users, ShoppingCart, DollarSign, TrendingUp,
+  Mail, FileText, Tag, Activity, CheckCircle,
+  AlertCircle, Clock, Star, Zap
 } from 'lucide-react';
 
 interface Stats {

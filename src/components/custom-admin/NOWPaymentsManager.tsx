@@ -32,7 +32,7 @@ export default function NOWPaymentsManager() {
 
   const loadGateway = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('payment_gateways')
       .select('*')
       .eq('gateway_name', 'nowpayments')
@@ -103,7 +103,7 @@ export default function NOWPaymentsManager() {
       } else {
         setMessage('❌ Connection failed. Please check your API key.');
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage('❌ Connection failed. Please check your API key and network.');
     }
 

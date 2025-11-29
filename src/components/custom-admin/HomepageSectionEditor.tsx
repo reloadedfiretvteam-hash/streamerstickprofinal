@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
 import { Save, Eye, Edit3, RefreshCw, Palette, Image as ImageIcon } from 'lucide-react';
 
 interface HomepageSection {
