@@ -1,0 +1,25 @@
+===========================================
+QUICK SETUP - COPY THIS INTO .env FILE
+===========================================
+
+VITE_ADMIN_DEFAULT_USER=admin
+VITE_ADMIN_DEFAULT_PASSWORD=admin123
+VITE_ADMIN_DEFAULT_EMAIL=reloadedfirestvteam@gmail.com
+
+===========================================
+INSTRUCTIONS:
+===========================================
+
+1. Create a file named .env in your project root folder
+2. Copy the 3 lines above into that file
+3. Replace "admin123" with your own password
+4. Save the file
+5. Restart your development server (npm run dev)
+
+Project folder location:
+C:\Users\rdela\Downloads\New folder\project-bolt-sb1-19o8d5ja\project\streamerstickprofinal
+
+The .env file should be in the same folder as package.json
+
+===========================================
+

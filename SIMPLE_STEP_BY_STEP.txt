@@ -1,0 +1,77 @@
+===========================================
+STEP 1: CREATE .env FILE
+===========================================
+
+WHERE: In your project root folder
+FOLDER: C:\Users\rdela\Downloads\New folder\project-bolt-sb1-19o8d5ja\project\streamerstickprofinal
+
+ACTION: The .env file already exists! ✅
+
+✅ DONE - STEP 1 COMPLETE
+
+===========================================
+STEP 2: ADD ADMIN CREDENTIALS TO .env
+===========================================
+
+WHERE: Open the .env file (it's in your project root folder)
+
+COPY THESE 3 LINES:
+--------------------
+VITE_ADMIN_DEFAULT_USER=admin
+VITE_ADMIN_DEFAULT_PASSWORD=admin123
+VITE_ADMIN_DEFAULT_EMAIL=reloadedfirestvteam@gmail.com
+
+PASTE: Add these 3 lines to the end of your .env file
+SAVE: Press Ctrl + S
+
+✅ DONE - STEP 2 COMPLETE
+
+===========================================
+STEP 3: VERIFY .env FILE
+===========================================
+
+YOUR .env FILE SHOULD CONTAIN:
+-------------------------------
+VITE_SUPABASE_ANON_KEY=...
+VITE_SUPABASE_URL=...
+VITE_ADMIN_DEFAULT_USER=admin
+VITE_ADMIN_DEFAULT_PASSWORD=admin123
+VITE_ADMIN_DEFAULT_EMAIL=reloadedfirestvteam@gmail.com
+
+✅ DONE - STEP 3 COMPLETE
+
+===========================================
+STEP 4: RESTART YOUR SERVER
+===========================================
+
+WHERE: In your terminal/command prompt
+
+ACTION:
+1. If your server is running, press Ctrl + C to stop it
+2. Then type this command and press Enter:
+
+npm run dev
+
+WAIT: Until you see "Local: http://localhost:5173"
+
+✅ DONE - STEP 4 COMPLETE
+
+===========================================
+STEP 5: LOGIN TO ADMIN PANEL
+===========================================
+
+WHERE: In your web browser
+
+ACTION:
+1. Open: http://localhost:5173
+2. Scroll all the way down to the footer
+3. Click "Admin Login" button
+4. Enter:
+   Username: admin
+   Password: admin123
+5. Click "Login"
+
+✅ DONE - YOU'RE LOGGED IN!
+
+===========================================
+
