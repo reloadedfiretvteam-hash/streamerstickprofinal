@@ -161,7 +161,7 @@ export default function MediaLibrary() {
             key={item.id}
             className="bg-gray-900 rounded-xl overflow-hidden group relative"
           >
-            <div className="aspect-square bg-gray-800 flex items-center justify-center">
+            <div className="aspect-stripe bg-gray-800 flex items-center justify-center">
               {item.file_type === 'image' ? (
                 <img
                   src={item.file_url}

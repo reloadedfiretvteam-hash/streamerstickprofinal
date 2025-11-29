@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Shield, Info } from 'lucide-react';
-import SquarePaymentForm from '../components/SquarePaymentForm';
+import StripePaymentForm from '../components/StripePaymentForm';
 
 export default function ConciergeCheckout() {
   const [step, setStep] = useState(1);
@@ -81,7 +81,7 @@ export default function ConciergeCheckout() {
 
         {/* Payment Form */}
         <div>
-          <SquarePaymentForm 
+          <StripePaymentForm 
             amount={product.price} 
             onSubmit={handlePaymentSubmit}
           />

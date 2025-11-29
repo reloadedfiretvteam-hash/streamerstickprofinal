@@ -23,7 +23,7 @@ export default function ConciergePage() {
   async function loadProducts() {
     try {
       const { data, error } = await supabase
-        .from('square_products')
+        .from('stripe_products')
         .select('*')
         .eq('is_active', true)
         .order('price', { ascending: true });
@@ -39,7 +39,7 @@ export default function ConciergePage() {
 
   function handleCheckout(product: Product) {
     setSelectedProduct(product);
-    alert(`Square checkout would open here for: ${product.name} - $${product.price}`);
+    alert(`Stripe checkout would open here for: ${product.name} - $${product.price}`);
   }
 
   if (loading) {
