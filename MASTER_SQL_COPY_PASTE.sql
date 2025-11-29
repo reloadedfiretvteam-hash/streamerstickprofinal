@@ -31,9 +31,21 @@ CREATE TABLE IF NOT EXISTS admin_credentials (
 
 ALTER TABLE admin_credentials ENABLE ROW LEVEL SECURITY;
 
--- Insert default admin (UPDATE THIS WITH YOUR CREDENTIALS)
+/*
+  ⚠️ SECURITY WARNING: The admin_credentials table is designed to store
+  password HASHES, not plain text passwords. In production:
+  1. Use bcrypt or argon2 to hash passwords before storing
+  2. Never store plain text passwords
+  3. Update credentials through a secure admin interface
+  
+  The placeholder below is for initial setup only - update immediately after deployment!
+*/
+
+-- Insert placeholder admin (UPDATE THIS IMMEDIATELY AFTER DEPLOYMENT!)
+-- Replace 'CHANGE_THIS_USERNAME' and 'CHANGE_THIS_PASSWORD' with secure values
+-- The password should be hashed before storing in production
 INSERT INTO admin_credentials (username, email, password_hash)
-VALUES ('Starevan11$', 'reloadedfiretvteam@gmail.com', 'Starevan11$')
+VALUES ('CHANGE_THIS_USERNAME', 'your-email@example.com', 'CHANGE_THIS_PASSWORD_HASH')
 ON CONFLICT (username) DO NOTHING;
 
 -- RLS Policies for admin_credentials
