@@ -1,0 +1,43 @@
+===========================================
+YOUR .env FILE IS LOCATED HERE:
+===========================================
+
+C:\Users\rdela\Downloads\New folder\project-bolt-sb1-19o8d5ja\project\streamerstickprofinal\.env
+
+===========================================
+HOW TO FIND IT:
+===========================================
+
+Method 1: File Explorer
+1. Open File Explorer
+2. Copy and paste this path in the address bar:
+   C:\Users\rdela\Downloads\New folder\project-bolt-sb1-19o8d5ja\project\streamerstickprofinal
+3. Look for file named: .env
+
+Method 2: VS Code
+1. Open VS Code
+2. File → Open Folder
+3. Navigate to: streamerstickprofinal
+4. Look for .env file in the left sidebar
+
+===========================================
+YOUR .env FILE CURRENTLY CONTAINS:
+===========================================
+
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpd2tncHN2Y3Z6aXRudWV2cXh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3NzAzNTksImV4cCI6MjA3OTM0NjM1OX0.1FXqUCMa2FUX5ll4Q3MwWc4__MDCyD2jJLQ3yYnM8-Y
+VITE_SUPABASE_URL=https://fiwkgpsvcvzitnuevqxz.supabase.co
+VITE_ADMIN_DEFAULT_USER=admin
+VITE_ADMIN_DEFAULT_PASSWORD=admin123
+VITE_ADMIN_DEFAULT_EMAIL=reloadedfirestvteam@gmail.com
+
+✅ ALL ADMIN CREDENTIALS ARE ALREADY CONFIGURED!
+
+===========================================
+YOUR LOGIN CREDENTIALS:
+===========================================
+
+Username: admin
+Password: admin123
+
+===========================================
+
