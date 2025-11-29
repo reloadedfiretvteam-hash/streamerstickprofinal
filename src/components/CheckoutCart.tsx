@@ -43,9 +43,6 @@ export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity,
     total: number;
     paymentMethod: string;
     customerEmail: string;
-    btcAmount?: string | null;
-    btcAddress?: string | null;
-    cashAppTag?: string | null;
   } | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   
@@ -183,10 +180,7 @@ export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity,
         })),
         total,
         paymentMethod: 'Credit Card (Stripe)',
-        customerEmail,
-        btcAmount: null,
-        btcAddress: null,
-        cashAppTag: null
+        customerEmail
       });
 
       // Send email notification

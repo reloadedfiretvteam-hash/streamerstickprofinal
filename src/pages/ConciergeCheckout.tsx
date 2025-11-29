@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Info, Lock, CreditCard, AlertCircle } from 'lucide-react';
+import { Shield, Info, Lock, AlertCircle, User } from 'lucide-react';
 import StripePaymentForm from '../components/StripePaymentForm';
 
 export default function ConciergeCheckout() {
@@ -7,6 +7,9 @@ export default function ConciergeCheckout() {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [creatingPaymentIntent, setCreatingPaymentIntent] = useState(false);
+  const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   
   // This would come from your cart/session
   const product = {
@@ -15,7 +18,28 @@ export default function ConciergeCheckout() {
     description: "Complete website page design and development service."
   };
 
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+    
+    if (!customerName.trim()) {
+      errors.name = 'Name is required';
+    }
+    
+    if (!customerEmail.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+      errors.email = 'Invalid email format';
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const createStripePaymentIntent = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
     setCreatingPaymentIntent(true);
     setPaymentError(null);
 
@@ -29,8 +53,8 @@ export default function ConciergeCheckout() {
         },
         body: JSON.stringify({
           amount: product.price,
-          customerEmail: 'customer@example.com', // Would come from form
-          customerName: 'Customer', // Would come from form
+          customerEmail: customerEmail,
+          customerName: customerName,
           orderDescription: product.name,
           items: [{
             productId: 'concierge-service',
@@ -137,12 +161,40 @@ export default function ConciergeCheckout() {
           {!clientSecret ? (
             <div className="bg-white p-6 rounded-xl shadow-sm">
               <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-blue-600" />
-                Secure Payment
+                <User className="w-5 h-5 text-blue-600" />
+                Contact Information
               </h2>
-              <p className="text-gray-600 mb-6">
-                Click below to proceed to secure payment via Stripe.
-              </p>
+              
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+                  <input
+                    type="text"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      formErrors.name ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="John Doe"
+                  />
+                  {formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
+                  <input
+                    type="email"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      formErrors.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="john@example.com"
+                  />
+                  {formErrors.email && <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>}
+                </div>
+              </div>
+              
               <button
                 onClick={createStripePaymentIntent}
                 disabled={creatingPaymentIntent}
@@ -156,7 +208,7 @@ export default function ConciergeCheckout() {
                 ) : (
                   <>
                     <Lock className="w-5 h-5" />
-                    Proceed to Payment
+                    Continue to Payment
                   </>
                 )}
               </button>

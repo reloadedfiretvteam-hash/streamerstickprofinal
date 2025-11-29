@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Copy, Mail, DollarSign, Wallet } from 'lucide-react';
+import { Check, Copy, Mail, CreditCard } from 'lucide-react';
 
 interface OrderItem {
   product_name: string;
@@ -14,9 +14,6 @@ interface OrderConfirmationProps {
   total: number;
   paymentMethod: string;
   customerEmail: string;
-  btcAmount?: string | null;
-  btcAddress?: string | null;
-  cashAppTag?: string | null;
   onClose: () => void;
 }
 
@@ -27,9 +24,6 @@ export default function OrderConfirmation({
   total,
   paymentMethod,
   customerEmail,
-  btcAmount,
-  btcAddress,
-  cashAppTag,
   onClose
 }: OrderConfirmationProps) {
   const [copied, setCopied] = useState('');
@@ -113,91 +107,17 @@ export default function OrderConfirmation({
             </div>
           </div>
 
-          {/* Payment Instructions Based on Method */}
-          {paymentMethod === 'cashapp' && cashAppTag && (
-            <div className="bg-green-500/10 border-2 border-green-500/40 rounded-xl p-6 mb-6">
-              <h4 className="text-green-400 font-bold text-lg mb-4 flex items-center gap-2">
-                <DollarSign className="w-6 h-6" />
-                Cash App Payment Instructions
-              </h4>
-
-              <div className="bg-black/40 rounded-lg p-4 mb-4">
-                <div className="text-gray-400 text-sm mb-2">Send payment to:</div>
-                <div className="text-green-400 text-2xl font-bold mb-3">{cashAppTag}</div>
-                <div className="text-white text-lg mb-3">Amount: ${total.toFixed(2)}</div>
-                <button
-                  onClick={() => copyToClipboard(cashAppTag, 'cashAppTag')}
-                  className="w-full py-2 bg-green-500 hover:bg-green-600 rounded-lg transition-colors flex items-center justify-center gap-2 font-semibold"
-                >
-                  {copied === 'cashAppTag' ? (
-                    <><Check className="w-4 h-4" /><span>Copied!</span></>
-                  ) : (
-                    <><Copy className="w-4 h-4" /><span>Copy Cash App Tag</span></>
-                  )}
-                </button>
-              </div>
-
-              <ol className="text-gray-300 text-sm space-y-2 list-decimal list-inside">
-                <li>Open your Cash App</li>
-                <li>Send ${total.toFixed(2)} to {cashAppTag}</li>
-                <li><strong className="text-white">In the "What's it for" field, paste: {purchaseCode}</strong></li>
-                <li>Complete the payment</li>
-              </ol>
-              <p className="text-gray-400 text-xs mt-3">
-                💡 If needed, email a screenshot to reloadedfiretvteam@gmail.com with your purchase code.
-              </p>
-            </div>
-          )}
-
-          {paymentMethod === 'bitcoin' && btcAmount && btcAddress && (
-            <div className="bg-orange-500/10 border-2 border-orange-500/40 rounded-xl p-6 mb-6">
-              <h4 className="text-orange-400 font-bold text-lg mb-4 flex items-center gap-2">
-                <Wallet className="w-6 h-6" />
-                Bitcoin Payment Instructions
-              </h4>
-
-              <div className="space-y-4">
-                <div className="bg-black/40 rounded-lg p-4">
-                  <div className="text-gray-400 text-sm mb-2">Bitcoin Amount:</div>
-                  <div className="text-orange-400 text-xl font-bold mb-2">{btcAmount} BTC</div>
-                  <button
-                    onClick={() => copyToClipboard(btcAmount, 'btcAmount')}
-                    className="w-full py-2 bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors flex items-center justify-center gap-2 font-semibold text-sm"
-                  >
-                    {copied === 'btcAmount' ? (
-                      <><Check className="w-4 h-4" /><span>Copied!</span></>
-                    ) : (
-                      <><Copy className="w-4 h-4" /><span>Copy Amount</span></>
-                    )}
-                  </button>
-                </div>
-
-                <div className="bg-black/40 rounded-lg p-4">
-                  <div className="text-gray-400 text-sm mb-2">Bitcoin Address:</div>
-                  <div className="text-white text-xs font-mono break-all mb-2">{btcAddress}</div>
-                  <button
-                    onClick={() => copyToClipboard(btcAddress, 'btcAddress')}
-                    className="w-full py-2 bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors flex items-center justify-center gap-2 font-semibold text-sm"
-                  >
-                    {copied === 'btcAddress' ? (
-                      <><Check className="w-4 h-4" /><span>Copied!</span></>
-                    ) : (
-                      <><Copy className="w-4 h-4" /><span>Copy Address</span></>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-4 bg-red-500/10 border border-red-500/40 rounded-lg p-4">
-                <p className="text-red-400 text-sm font-semibold mb-2">⚠️ IMPORTANT STEPS:</p>
-                <ol className="text-gray-300 text-sm space-y-2 list-decimal list-inside">
-                  <li>Send {btcAmount} BTC to the address above</li>
-                  <li><strong className="text-white">Email a screenshot of your payment to reloadedfiretvteam@gmail.com</strong></li>
-                  <li><strong className="text-white">Include your purchase code in the email: {purchaseCode}</strong></li>
-                </ol>
-              </div>
-            </div>
-          )}
+          {/* Payment Confirmation */}
+          <div className="bg-green-500/10 border-2 border-green-500/40 rounded-xl p-6 mb-6">
+            <h4 className="text-green-400 font-bold text-lg mb-4 flex items-center gap-2">
+              <CreditCard className="w-6 h-6" />
+              Payment Successful
+            </h4>
+            <p className="text-gray-300 text-sm">
+              Your payment of <span className="text-white font-bold">${total.toFixed(2)}</span> has been 
+              successfully processed via {paymentMethod}. A confirmation has been sent to your email.
+            </p>
+          </div>
 
           {/* Order Items */}
           <div className="bg-gray-800 rounded-lg p-6 mb-6">
