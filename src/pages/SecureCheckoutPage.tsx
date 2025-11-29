@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Shield, Lock, CreditCard, Bitcoin, DollarSign, Package, CheckCircle, AlertCircle, ExternalLink, ArrowRight, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import SquarePaymentForm from '../components/SquarePaymentForm';
+import StripePaymentForm from '../components/StripePaymentForm';
 import BitcoinPaymentFlow from '../components/BitcoinPaymentFlow';
 
 interface Product {
@@ -26,7 +26,7 @@ interface CustomerInfo {
 export default function SecureCheckoutPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'square' | 'bitcoin' | 'cashapp' | ''>('');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'bitcoin' | 'cashapp' | ''>('');
   const [step, setStep] = useState<'select' | 'checkout' | 'success'>('select');
   const [loading, setLoading] = useState(true);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
@@ -39,9 +39,9 @@ export default function SecureCheckoutPage() {
     zip: ''
   });
 
-  // Fallback Square-safe products that map to real products
-  // These are "cloaked" versions with generic service names for Square compliance
-  const fallbackSquareProducts: Product[] = [
+  // Fallback Stripe-safe products that map to real products
+  // These are "cloaked" versions with generic service names for Stripe compliance
+  const fallbackStripeProducts: Product[] = [
     // IPTV Subscriptions → Content Management Services
     {
       id: 'content-1month',
@@ -108,24 +108,37 @@ export default function SecureCheckoutPage() {
 
   async function loadProducts() {
     try {
-      const { data, error } = await supabase
-        .from('square_products')
+      // Try stripe_products first, fall back to square_products for backward compatibility
+      let { data, error } = await supabase
+        .from('stripe_products')
         .select('*')
         .eq('is_active', true)
         .order('price', { ascending: true });
 
-      if (error) throw error;
+      // Fallback to square_products if stripe_products doesn't exist
+      if (error || !data || data.length === 0) {
+        const fallbackResult = await supabase
+          .from('square_products')
+          .select('*')
+          .eq('is_active', true)
+          .order('price', { ascending: true });
+        
+        if (!fallbackResult.error && fallbackResult.data && fallbackResult.data.length > 0) {
+          data = fallbackResult.data;
+          error = null;
+        }
+      }
       
       // Use database products if available, otherwise use fallback products
-      if (data && data.length > 0) {
+      if (!error && data && data.length > 0) {
         setProducts(data);
       } else {
-        setProducts(fallbackSquareProducts);
+        setProducts(fallbackStripeProducts);
       }
     } catch (error) {
       console.error('Error loading products:', error);
       // On error, use fallback products
-      setProducts(fallbackSquareProducts);
+      setProducts(fallbackStripeProducts);
     } finally {
       setLoading(false);
     }
@@ -143,10 +156,10 @@ export default function SecureCheckoutPage() {
     setPaymentMethod('');
   }
 
-  async function handleSquarePayment(token: string) {
-    // Process Square payment
-    console.log('Processing Square payment with token:', token);
-    await new Promise(resolve => setTimeout(resolve, 2000));
+  async function handleStripePayment(paymentIntentId: string) {
+    // Process Stripe payment
+    console.log('Processing Stripe payment with PaymentIntent:', paymentIntentId);
+    await new Promise(resolve => setTimeout(resolve, 1000));
     setStep('success');
   }
 
@@ -446,20 +459,20 @@ export default function SecureCheckoutPage() {
 
               {/* Payment Method Selection */}
               <div className="grid md:grid-cols-3 gap-4 mb-8">
-                {/* Square Payment */}
+                {/* Stripe Payment */}
                 <button
-                  onClick={() => setPaymentMethod('square')}
+                  onClick={() => setPaymentMethod('stripe')}
                   className={`p-6 border-2 rounded-xl transition-all text-left ${
-                    paymentMethod === 'square'
+                    paymentMethod === 'stripe'
                       ? 'border-blue-600 bg-blue-50'
                       : 'border-slate-200 hover:border-blue-300'
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <CreditCard className={`w-6 h-6 ${paymentMethod === 'square' ? 'text-blue-600' : 'text-slate-400'}`} />
+                    <CreditCard className={`w-6 h-6 ${paymentMethod === 'stripe' ? 'text-blue-600' : 'text-slate-400'}`} />
                     <span className="font-bold text-slate-800">Credit/Debit Card</span>
                   </div>
-                  <p className="text-sm text-slate-600">Secure payment via Square</p>
+                  <p className="text-sm text-slate-600">Secure payment via Stripe</p>
                 </button>
 
                 {/* Bitcoin Payment */}
@@ -495,12 +508,14 @@ export default function SecureCheckoutPage() {
                 </button>
               </div>
 
-              {/* Square Payment Form */}
-              {paymentMethod === 'square' && (
+              {/* Stripe Payment Form */}
+              {paymentMethod === 'stripe' && (
                 <div className="mb-6">
-                  <SquarePaymentForm 
+                  <StripePaymentForm 
                     amount={totalAmount} 
-                    onSubmit={handleSquarePayment}
+                    onSubmit={handleStripePayment}
+                    customerEmail={customerInfo.email}
+                    customerName={customerInfo.name}
                   />
                 </div>
               )}

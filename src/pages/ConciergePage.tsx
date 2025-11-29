@@ -22,13 +22,26 @@ export default function ConciergePage() {
 
   async function loadProducts() {
     try {
-      const { data, error } = await supabase
-        .from('square_products')
+      // Try stripe_products first, fall back to square_products for backward compatibility
+      let { data, error } = await supabase
+        .from('stripe_products')
         .select('*')
         .eq('is_active', true)
         .order('price', { ascending: true });
 
-      if (error) throw error;
+      // Fallback to square_products if stripe_products doesn't exist
+      if (error || !data || data.length === 0) {
+        const fallbackResult = await supabase
+          .from('square_products')
+          .select('*')
+          .eq('is_active', true)
+          .order('price', { ascending: true });
+        
+        if (!fallbackResult.error) {
+          data = fallbackResult.data;
+        }
+      }
+
       setProducts(data || []);
     } catch (error) {
       console.error('Error loading products:', error);
@@ -39,7 +52,8 @@ export default function ConciergePage() {
 
   function handleCheckout(product: Product) {
     setSelectedProduct(product);
-    alert(`Square checkout would open here for: ${product.name} - $${product.price}`);
+    // Navigate to SecureCheckoutPage with product pre-selected
+    window.location.href = `/secure-checkout?product=${encodeURIComponent(product.id)}`;
   }
 
   if (loading) {
