@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react';
 import {
   Eye,
-  Edit,
   Save,
   Settings,
   Palette,
-  Type,
   Image as ImageIcon,
-  Link as LinkIcon,
   Layout,
   ChevronDown,
   Plus,
@@ -96,7 +93,7 @@ export default function FrontendVisualEditor() {
       margin: '0px'
     };
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('frontend_containers')
       .insert([newContainer])
       .select()

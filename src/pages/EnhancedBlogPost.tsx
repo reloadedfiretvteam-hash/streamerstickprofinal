@@ -95,7 +95,7 @@ export default function EnhancedBlogPost() {
     }
   };
 
-  const loadRelatedPosts = async (currentId: string, category?: string) => {
+  const loadRelatedPosts = async (currentId: string, _category?: string) => {
     try {
       const { data, error } = await supabase
         .from('real_blog_posts')

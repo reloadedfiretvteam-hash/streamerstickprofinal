@@ -30,4 +30,6 @@ export interface PricingPlan {
   display_order: number;
   badge?: string;
   popular?: boolean;
+  is_popular?: boolean;
+  billing_period?: string;
 }

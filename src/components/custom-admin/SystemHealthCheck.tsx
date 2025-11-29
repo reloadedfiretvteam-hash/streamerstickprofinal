@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { CheckCircle, XCircle, AlertCircle, RefreshCw, Database, Server, Mail } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface HealthCheck {
   name: string;

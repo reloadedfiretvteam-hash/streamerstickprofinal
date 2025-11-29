@@ -1,17 +1,12 @@
 import { useState, useEffect } from 'react';
 import {
   TrendingUp,
-  Search,
   FileText,
   Eye,
   BarChart3,
   AlertCircle,
   CheckCircle,
   Target,
-  Link as LinkIcon,
-  Image as ImageIcon,
-  Tag,
-  Globe,
   Zap,
   Star,
   ArrowUp,

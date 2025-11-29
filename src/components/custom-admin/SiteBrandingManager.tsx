@@ -46,7 +46,7 @@ export default function SiteBrandingManager() {
   const loadSettings = async () => {
     setLoading(true);
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('site_settings')
       .select('*')
       .eq('setting_key', 'branding')

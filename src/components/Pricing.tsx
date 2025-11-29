@@ -73,10 +73,10 @@ export default function Pricing({ onSelectPlan }: PricingProps) {
             <div
               key={plan.id}
               className={`relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 ${
-                plan.is_popular ? 'ring-4 ring-blue-500 scale-105' : ''
+                (plan.is_popular || plan.popular) ? 'ring-4 ring-blue-500 scale-105' : ''
               }`}
             >
-              {plan.is_popular && (
+              {(plan.is_popular || plan.popular) && (
                 <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-2 rounded-full font-semibold shadow-lg flex items-center gap-2">
                   <Star className="w-4 h-4 fill-current" />
                   Most Popular
@@ -87,13 +87,13 @@ export default function Pricing({ onSelectPlan }: PricingProps) {
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                 <div className="mb-6">
                   <span className="text-5xl font-bold text-gray-900">{formatPrice(plan.price)}</span>
-                  <span className="text-gray-600">{getBillingLabel(plan.billing_period)}</span>
+                  <span className="text-gray-600">{getBillingLabel(plan.billing_period || '')}</span>
                 </div>
 
                 <button
                   onClick={() => onSelectPlan(plan.id, plan.price)}
                   className={`w-full py-4 rounded-xl font-semibold transition-all transform hover:scale-105 mb-6 ${
-                    plan.is_popular
+                    plan.is_popular || plan.popular
                       ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg shadow-blue-500/50'
                       : 'bg-gray-900 hover:bg-gray-800 text-white'
                   }`}
