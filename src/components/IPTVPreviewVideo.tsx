@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Play, X, Upload, AlertCircle } from 'lucide-react';
+import { Play, X, AlertCircle } from 'lucide-react';
 import { getStorageUrl } from '../lib/supabase';
 
 interface IPTVPreviewVideoProps {

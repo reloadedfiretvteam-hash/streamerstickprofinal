@@ -56,7 +56,7 @@ export default function EnterpriseAdminLogin() {
 
       // Redirect to dashboard
       window.location.href = '/admin-portal/dashboard';
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Login error:', err);
       setError('Authentication failed. Please try again.');
     } finally {

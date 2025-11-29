@@ -20,10 +20,10 @@ import { supabase } from '../lib/supabase';
 interface ModalTool {
   id: string;
   title: string;
-  icon: any;
+  icon: React.ElementType;
   color: string;
   description: string;
-  component: React.ComponentType<any>;
+  component: React.ComponentType;
 }
 
 export default function ModalAdminDashboard() {
@@ -39,7 +39,7 @@ export default function ModalAdminDashboard() {
     mediaFiles: 0,
     faqItems: 0
   });
-  const [_loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('custom_admin_token');

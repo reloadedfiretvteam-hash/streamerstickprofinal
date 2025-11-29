@@ -62,8 +62,9 @@ export default function ImageUpload({ productId, existingImages, onImagesChange 
         setUploadProgress('');
         onImagesChange();
       }, 1000);
-    } catch (error: any) {
-      alert(`Upload failed: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+      alert(`Upload failed: ${errorMessage}`);
       setUploadProgress('');
     } finally {
       setUploading(false);
@@ -89,8 +90,9 @@ export default function ImageUpload({ productId, existingImages, onImagesChange 
       if (error) throw error;
 
       onImagesChange();
-    } catch (error: any) {
-      alert(`Delete failed: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Delete failed';
+      alert(`Delete failed: ${errorMessage}`);
     }
   };
 
@@ -109,8 +111,9 @@ export default function ImageUpload({ productId, existingImages, onImagesChange 
       if (error) throw error;
 
       onImagesChange();
-    } catch (error: any) {
-      alert(`Update failed: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Update failed';
+      alert(`Update failed: ${errorMessage}`);
     }
   };
 

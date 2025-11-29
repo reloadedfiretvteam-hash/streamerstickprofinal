@@ -11,7 +11,7 @@ interface Order {
   payment_status: string;
   order_status: string;
   total: number;
-  items: any[];
+  items: { name: string; quantity: number; price: number }[];
   created_at: string;
   notes?: string;
 }
@@ -41,7 +41,7 @@ export default function OrderTracking() {
       }
 
       // First try orders table - search by email or order number
-      const { data: customerOrder, error: customerError } = await supabase
+      const { data: customerOrder } = await supabase
         .from('orders')
         .select('*')
         .or(`order_number.ilike.%${sanitizedTerm}%,customer_email.ilike.%${sanitizedTerm}%`)
@@ -55,7 +55,7 @@ export default function OrderTracking() {
       }
 
       // If not found, try bitcoin_orders
-      const { data: bitcoinOrder, error: bitcoinError } = await supabase
+      const { data: bitcoinOrder } = await supabase
         .from('bitcoin_orders')
         .select('*')
         .or(`order_code.ilike.%${sanitizedTerm}%,customer_email.ilike.%${sanitizedTerm}%`)
@@ -73,15 +73,16 @@ export default function OrderTracking() {
       } else {
         setError('Order not found. Please check your order number/code or email address.');
       }
-    } catch (err: any) {
-      setError('Error searching for order: ' + err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError('Error searching for order: ' + errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   // Determine if order contains Fire Stick products
-  const isFirestickOrder = order?.items?.some((item: any) => {
+  const isFirestickOrder = order?.items?.some((item: { product_name?: string; name?: string }) => {
     const name = (item.product_name || item.name || '').toLowerCase();
     return name.includes('fire stick') || name.includes('firestick') || name.includes('fire tv');
   });
@@ -330,7 +331,7 @@ export default function OrderTracking() {
               <div className="border-t border-gray-700 pt-6">
                 <h3 className="text-lg font-bold text-white mb-4">Order Items</h3>
                 <div className="space-y-3">
-                  {order.items?.map((item: any, index: number) => (
+                  {order.items?.map((item: { product_name?: string; name?: string; quantity: number; total_price?: number; price?: number }, index: number) => (
                     <div key={index} className="flex justify-between items-center bg-gray-900 rounded-lg p-4">
                       <div>
                         <p className="text-white font-semibold">{item.product_name || item.name}</p>

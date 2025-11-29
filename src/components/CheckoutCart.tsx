@@ -41,7 +41,11 @@ export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity,
 
   const [processing, setProcessing] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [orderData, setOrderData] = useState<any>(null);
+  const [orderData, setOrderData] = useState<{
+    purchaseCode: string;
+    orderNumber: string;
+    items: { product_name: string; quantity: number; total_price: number }[];
+  } | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Payment gateway details
@@ -111,7 +115,7 @@ export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity,
     return (prefix + suffix).slice(0, length);
   };
 
-  const sendCustomerEmail = async (purchaseCode: string, orderNumber: string, items: any[]) => {
+  const sendCustomerEmail = async (purchaseCode: string, orderNumber: string, items: { product_name: string; quantity: number; total_price: number }[]) => {
     const itemsList = items.map(item =>
       `- ${item.product_name} x${item.quantity} = $${item.total_price.toFixed(2)}`
     ).join('\n');
@@ -201,7 +205,7 @@ Need Support? Email: ${SHOP_OWNER_EMAIL}
     return emailBody;
   };
 
-  const sendShopOwnerEmail = async (purchaseCode: string, orderNumber: string, items: any[]) => {
+  const sendShopOwnerEmail = async (purchaseCode: string, orderNumber: string, items: { product_name: string; quantity: number; total_price: number }[]) => {
     const itemsList = items.map(item =>
       `- ${item.product_name} x${item.quantity} = $${item.total_price.toFixed(2)}`
     ).join('\n');
@@ -457,9 +461,10 @@ Customer has been sent complete payment instructions including their unique purc
 
       setShowConfirmation(true);
       console.log('Order created successfully with purchase code:', purchaseCode);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unable to process order. Please try again or contact support.';
       console.error('Error creating order:', error);
-      alert(`Error: ${error.message || 'Unable to process order. Please try again or contact support.'}`);
+      alert(`Error: ${errorMessage}`);
     } finally {
       setProcessing(false);
     }
@@ -585,8 +590,8 @@ Customer has been sent complete payment instructions including their unique purc
                     </p>
                     <SquarePaymentForm 
                       amount={total}
-                      onSubmit={async (token: string) => {
-                        // Handle Square payment - token is used by the payment form internally
+                      onSubmit={async () => {
+                        // Handle Square payment
                         await handleCompleteOrder();
                       }}
                     />

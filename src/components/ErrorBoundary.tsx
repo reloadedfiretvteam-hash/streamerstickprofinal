@@ -20,7 +20,7 @@ export default class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
       const errorData = {
         error: error.message,

@@ -6,7 +6,7 @@ interface BitcoinCheckoutProps {
   totalAmount: number;
   customerEmail: string;
   customerName: string;
-  products: any[];
+  products: { id: string; name: string; price: number; quantity: number }[];
   onOrderCreated?: (orderCode: string) => void;
 }
 
@@ -79,7 +79,7 @@ export default function BitcoinCheckout({
   };
 
   const generateOrderCode = async () => {
-    const { data, error } = await supabase.rpc('generate_order_code');
+    const { data } = await supabase.rpc('generate_order_code');
     if (data) return data;
     return 'BTC-' + Math.random().toString(36).substring(2, 10).toUpperCase();
   };

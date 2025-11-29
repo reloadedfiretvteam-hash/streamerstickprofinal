@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Home, Package, FileText, Users, ShoppingCart, BarChart3,
-  Settings, Eye, Layout, LogOut, Database, Mail, Tag, TrendingUp, Globe, Video, Zap, Github, Cloud
+  Settings, Eye, Layout, LogOut, Mail, Tag, TrendingUp, Globe, Video, Zap, Github
 } from 'lucide-react';
 
 // Import real managers that connect to database
@@ -19,7 +19,7 @@ import GitHubCloudflareConfig from '../components/custom-admin/GitHubCloudflareC
 
 export default function RealAdminDashboard() {
   const [activeView, setActiveView] = useState('dashboard');
-  const [adminUser, setAdminUser] = useState<any>(null);
+  const [adminUser, setAdminUser] = useState<{ username: string; role: string } | null>(null);
 
   useEffect(() => {
     // Check authentication

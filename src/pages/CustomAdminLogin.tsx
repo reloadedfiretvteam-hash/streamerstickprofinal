@@ -103,8 +103,9 @@ export default function CustomAdminLogin() {
       } else {
         setMessage('Email not found');
       }
-    } catch (error: any) {
-      setMessage('Error: ' + error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+      setMessage('Error: ' + errorMessage);
     } finally {
       setLoading(false);
     }

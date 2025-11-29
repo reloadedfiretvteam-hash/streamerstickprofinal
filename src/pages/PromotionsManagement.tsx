@@ -180,7 +180,7 @@ export default function PromotionsManagement() {
                     <label className="block text-sm font-medium mb-2">Discount Type *</label>
                     <select
                       value={formData.discount_type}
-                      onChange={(e) => setFormData({ ...formData, discount_type: e.target.value as any })}
+                      onChange={(e) => setFormData({ ...formData, discount_type: e.target.value as 'percentage' | 'fixed_amount' })}
                       className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                     >
                       <option value="percentage">Percentage (%)</option>

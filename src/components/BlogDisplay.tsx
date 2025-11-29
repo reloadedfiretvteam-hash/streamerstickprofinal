@@ -17,19 +17,12 @@ interface BlogPost {
   category_id: string;
 }
 
-interface Category {
-  id: string;
-  category_name: string;
-}
-
 export default function BlogDisplay() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadPosts();
-    loadCategories();
   }, []);
 
   const loadPosts = async () => {
@@ -70,20 +63,6 @@ export default function BlogDisplay() {
       console.error('Error loading posts:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadCategories = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('blog_categories')
-        .select('*')
-        .eq('is_active', true);
-
-      if (error) throw error;
-      setCategories(data || []);
-    } catch (error) {
-      console.error('Error loading categories:', error);
     }
   };
 

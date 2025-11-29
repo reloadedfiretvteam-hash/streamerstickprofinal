@@ -76,7 +76,6 @@ import AdminDashboardOverview from '../components/custom-admin/AdminDashboardOve
 import ElementorStylePageBuilder from '../components/custom-admin/ElementorStylePageBuilder';
 import AICopilotWidget from '../components/custom-admin/AICopilotWidget';
 import RankMathProSEOManager from '../components/custom-admin/RankMathProSEOManager';
-import AdminModalWrapper from '../components/custom-admin/AdminModalWrapper';
 import UltraProductManager from '../components/custom-admin/UltraProductManager';
 import MarketingAutomation from '../components/custom-admin/MarketingAutomation';
 import AdvancedFormBuilder from '../components/custom-admin/AdvancedFormBuilder';
@@ -93,8 +92,6 @@ import LiveVisitorStatistics from '../components/custom-admin/LiveVisitorStatist
 export default function CustomAdminDashboard() {
   const [activeSection, setActiveSection] = useState('dashboard-overview');
   const [aiMode, setAiMode] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [modalContent, setModalContent] = useState<any>(null);
   const [adminUser] = useState(() => {
     const user = localStorage.getItem('custom_admin_user');
     return user ? JSON.parse(user) : null;
@@ -113,11 +110,6 @@ export default function CustomAdminDashboard() {
     localStorage.removeItem('custom_admin_token');
     localStorage.removeItem('custom_admin_user');
     window.location.href = '/custom-admin';
-  };
-
-  const openInModal = (sectionId: string, content: any) => {
-    setModalContent({ sectionId, content });
-    setShowModal(true);
   };
 
   const menuItems = [

@@ -20,6 +20,20 @@ interface Product {
   featured: boolean;
 }
 
+interface DBProduct {
+  id: string;
+  name: string;
+  description?: string;
+  price?: string;
+  sale_price?: string;
+  main_image?: string;
+  image_url?: string;
+  category?: string;
+  stock_quantity?: number;
+  rating?: number;
+  featured?: boolean;
+}
+
 interface CartItem {
   product: Product;
   quantity: number;
@@ -51,7 +65,7 @@ export default function FireSticksPage() {
       
       // Filter and process Fire Stick products
       const fireStickProducts = (data || [])
-        .filter((product: any) => {
+        .filter((product: DBProduct) => {
           const name = (product.name || '').toLowerCase();
           const category = (product.category || '').toLowerCase();
           return name.includes('fire stick') || 
@@ -60,7 +74,7 @@ export default function FireSticksPage() {
                  category.includes('fire stick') ||
                  category === 'firestick';
         })
-        .map((product: any) => {
+        .map((product: DBProduct) => {
           let imageUrl = product.main_image || product.image_url || '';
           
           // Use Supabase storage URLs as fallback for reliability

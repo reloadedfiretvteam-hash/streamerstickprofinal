@@ -46,7 +46,6 @@ export default function ValidatedImage({
 }: ValidatedImageProps) {
   // Start with fallbackSrc to prevent flash of invalid image during validation
   const [currentSrc, setCurrentSrc] = useState<string>(fallbackSrc);
-  const [isValidating, setIsValidating] = useState<boolean>(true);
   const [hasFailed, setHasFailed] = useState<boolean>(false);
 
   /**
@@ -127,11 +126,11 @@ export default function ValidatedImage({
     if (!src || src === fallbackSrc) {
       // Already using fallback or no src
       setCurrentSrc(fallbackSrc);
-      setIsValidating(false);
+      // validation complete
       return;
     }
 
-    setIsValidating(true);
+    // validation started
 
     try {
       // Step 1: Try HEAD validation
@@ -142,7 +141,7 @@ export default function ValidatedImage({
         setCurrentSrc(fallbackSrc);
         setHasFailed(true);
         onValidationFail?.('HEAD validation failed: content-length too small or not accessible');
-        setIsValidating(false);
+        // validation complete
         return;
       }
 
@@ -154,7 +153,7 @@ export default function ValidatedImage({
         setCurrentSrc(fallbackSrc);
         setHasFailed(true);
         onValidationFail?.('Image validation failed: invalid dimensions or failed to load');
-        setIsValidating(false);
+        // validation complete
         return;
       }
 
@@ -170,7 +169,7 @@ export default function ValidatedImage({
       setHasFailed(true);
       onValidationFail?.('Validation error: ' + String(error));
     } finally {
-      setIsValidating(false);
+      // validation complete
     }
   }, [src, fallbackSrc, validateViaHead, validateViaImage, onValidationFail]);
 

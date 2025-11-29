@@ -22,7 +22,7 @@ export function useConversionTracking() {
         user_agent: navigator.userAgent,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch {
       // Fail silently in production
     }
   };
@@ -41,7 +41,7 @@ export async function trackAddToCart(productId: string, productName: string, pri
       price: price,
       timestamp: new Date().toISOString()
     });
-  } catch (error) {
+  } catch {
     // Fail silently
   }
 }
@@ -56,12 +56,12 @@ export async function trackCheckoutStart(cartTotal: number, itemCount: number) {
       item_count: itemCount,
       timestamp: new Date().toISOString()
     });
-  } catch (error) {
+  } catch {
     // Fail silently
   }
 }
 
-export async function trackPurchase(orderId: string, total: number, items: any[]) {
+export async function trackPurchase(orderId: string, total: number, items: { id: string; name: string; price: number }[]) {
   try {
     const sessionId = localStorage.getItem('session_id');
     await supabase.from('purchase_events').insert({
@@ -71,7 +71,7 @@ export async function trackPurchase(orderId: string, total: number, items: any[]
       items: JSON.stringify(items),
       timestamp: new Date().toISOString()
     });
-  } catch (error) {
+  } catch {
     // Fail silently
   }
 }
@@ -88,7 +88,7 @@ export async function trackPageView() {
       referrer: document.referrer,
       timestamp: new Date().toISOString()
     });
-  } catch (error) {
+  } catch {
     // Fail silently
   }
 }

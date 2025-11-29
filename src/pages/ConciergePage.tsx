@@ -14,7 +14,6 @@ interface Product {
 export default function ConciergePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     loadProducts();
@@ -38,7 +37,6 @@ export default function ConciergePage() {
   }
 
   function handleCheckout(product: Product) {
-    setSelectedProduct(product);
     alert(`Square checkout would open here for: ${product.name} - $${product.price}`);
   }
 

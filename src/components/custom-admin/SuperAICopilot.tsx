@@ -215,7 +215,9 @@ What would you like to do?`;
       if (count && count > 0) {
         contextSuggestions.push(`You have ${count} pending orders to process`);
       }
-    } catch (e) {}
+    } catch {
+      // Silently ignore errors when loading pending orders
+    }
 
     // Check for low stock
     try {
@@ -228,7 +230,9 @@ What would you like to do?`;
       if (data && data.length > 0) {
         contextSuggestions.push(`${data.length} products are low on stock`);
       }
-    } catch (e) {}
+    } catch {
+      // Silently ignore errors when checking stock
+    }
 
     // Add general suggestions
     contextSuggestions.push('Create a new blog post');
