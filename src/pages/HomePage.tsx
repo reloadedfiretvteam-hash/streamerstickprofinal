@@ -18,7 +18,7 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchProducts() {
       const { data, error } = await supabase
-        .from('square_products')
+        .from('stripe_products')
         .select('*')
         .eq('is_active', true)
         .order('price');

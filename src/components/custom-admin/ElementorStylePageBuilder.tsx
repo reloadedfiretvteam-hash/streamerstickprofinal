@@ -12,7 +12,7 @@ import {
   Trash2,
   Image as ImageIcon,
   Type,
-  Square,
+  Stripe,
   Layout,
   Video,
   Link as LinkIcon,
@@ -161,7 +161,7 @@ export default function ElementorStylePageBuilder() {
   const elementTools = [
     { type: 'text', icon: Type, label: 'Text', color: 'blue' },
     { type: 'heading', icon: Type, label: 'Heading', color: 'purple' },
-    { type: 'button', icon: Square, label: 'Button', color: 'green' },
+    { type: 'button', icon: Stripe, label: 'Button', color: 'green' },
     { type: 'image', icon: ImageIcon, label: 'Image', color: 'pink' },
     { type: 'video', icon: Video, label: 'Video', color: 'red' },
     { type: 'container', icon: Layout, label: 'Container', color: 'orange' },

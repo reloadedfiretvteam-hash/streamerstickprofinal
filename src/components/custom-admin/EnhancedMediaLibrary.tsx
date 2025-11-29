@@ -277,7 +277,7 @@ export default function EnhancedMediaLibrary() {
                 key={item.id}
                 className="bg-gray-700 rounded-lg overflow-hidden border border-gray-600 hover:border-purple-500 transition group"
               >
-                <div className="relative aspect-square">
+                <div className="relative aspect-stripe">
                   <img
                     src={item.file_url}
                     alt={item.alt_text || item.file_name}

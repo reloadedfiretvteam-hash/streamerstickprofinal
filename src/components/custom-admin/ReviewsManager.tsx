@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Star, MessageSquare, Check, X } from 'lucide-react';
+import { Star, MessageStripe, Check, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface Review {
@@ -175,7 +175,7 @@ export default function ReviewsManager() {
           <p className="text-gray-400">Loading reviews...</p>
         ) : reviews.length === 0 ? (
           <div className="text-center py-12">
-            <MessageSquare className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+            <MessageStripe className="w-16 h-16 mx-auto mb-4 text-gray-600" />
             <p className="text-gray-400">No reviews found</p>
           </div>
         ) : (
