@@ -11,7 +11,6 @@ import FrontendVisualEditor from '../components/custom-admin/FrontendVisualEdito
 import CompleteSEOManager from '../components/custom-admin/CompleteSEOManager';
 import RankMathProSEOManager from '../components/custom-admin/RankMathProSEOManager';
 import StripeProductManager from '../components/custom-admin/StripeProductManager';
-import SquareProductManager from '../components/custom-admin/SquareProductManager';
 import RealAIVideoGenerator from '../components/custom-admin/RealAIVideoGenerator';
 import AmazonFireStickAutomation from '../components/custom-admin/AmazonFireStickAutomation';
 import SuperAICopilot from '../components/custom-admin/SuperAICopilot';
@@ -71,8 +70,6 @@ export default function RealAdminDashboard() {
         return <RealProductManager />;
       case 'stripe-products':
         return <StripeProductManager />;
-      case 'square-products':
-        return <SquareProductManager />;
       case 'ai-video-generator':
         return <RealAIVideoGenerator />;
       case 'amazon-automation':

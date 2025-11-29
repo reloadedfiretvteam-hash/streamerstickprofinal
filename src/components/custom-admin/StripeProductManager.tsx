@@ -35,10 +35,16 @@ export default function StripeProductManager() {
 
   const loadData = async () => {
     setLoading(true);
-    const [stripeData, realData] = await Promise.all([
-      supabase.from('stripe_products').select('*').order('sort_order'),
-      supabase.from('real_products').select('id, name, price, sale_price').eq('status', 'published')
-    ]);
+    
+    // Try stripe_products first, fall back to square_products for backward compatibility
+    let stripeData = await supabase.from('stripe_products').select('*').order('sort_order');
+    
+    if (stripeData.error || !stripeData.data || stripeData.data.length === 0) {
+      // Fall back to square_products table
+      stripeData = await supabase.from('square_products').select('*').order('sort_order');
+    }
+    
+    const realData = await supabase.from('real_products').select('id, name, price, sale_price').eq('status', 'published');
 
     if (stripeData.data) setStripeProducts(stripeData.data);
     if (realData.data) setRealProducts(realData.data);
@@ -58,7 +64,8 @@ export default function StripeProductManager() {
   const handleSave = async () => {
     if (!editing) return;
 
-    const { error } = await supabase
+    // Try stripe_products first, fall back to square_products
+    let result = await supabase
       .from('stripe_products')
       .update({
         name: formData.name,
@@ -69,8 +76,22 @@ export default function StripeProductManager() {
       })
       .eq('id', editing.id);
 
-    if (error) {
-      alert('Error saving: ' + error.message);
+    if (result.error) {
+      // Fall back to square_products
+      result = await supabase
+        .from('square_products')
+        .update({
+          name: formData.name,
+          description: formData.description,
+          short_description: formData.short_description,
+          main_image: formData.main_image,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editing.id);
+    }
+
+    if (result.error) {
+      alert('Error saving: ' + result.error.message);
     } else {
       alert('Stripe product updated!');
       setEditing(null);
@@ -82,7 +103,8 @@ export default function StripeProductManager() {
     for (const stripeProduct of stripeProducts) {
       const realProduct = realProducts.find(r => r.id === stripeProduct.real_product_id);
       if (realProduct) {
-        await supabase
+        // Try stripe_products first, fall back to square_products
+        let result = await supabase
           .from('stripe_products')
           .update({
             price: realProduct.price,
@@ -90,6 +112,17 @@ export default function StripeProductManager() {
             updated_at: new Date().toISOString()
           })
           .eq('id', stripeProduct.id);
+
+        if (result.error) {
+          await supabase
+            .from('square_products')
+            .update({
+              price: realProduct.price,
+              sale_price: realProduct.sale_price,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', stripeProduct.id);
+        }
       }
     }
     alert('Prices synced with real products!');
