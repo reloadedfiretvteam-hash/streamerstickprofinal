@@ -175,9 +175,13 @@ export default function RealProductManager() {
               <div className="h-48 bg-gray-900 flex items-center justify-center overflow-hidden">
                 {product.main_image ? (
                   <img
-                    src={product.main_image}
+                    src={product.main_image.startsWith('http') ? product.main_image : getStorageUrl('images', product.main_image)}
                     alt={product.name}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'https://via.placeholder.com/400x300?text=Image+Not+Found';
+                    }}
                   />
                 ) : (
                   <ImageIcon className="w-16 h-16 text-gray-600" />
