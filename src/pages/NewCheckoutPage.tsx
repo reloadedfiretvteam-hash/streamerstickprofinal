@@ -554,15 +554,12 @@ export default function NewCheckoutPage() {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
-                                  amount: Math.round(calculateTotal() * 100), // Convert to cents
-                                  customerEmail: customerInfo.email,
-                                  customerName: customerInfo.name,
-                                  items: cart.map(item => ({
-                                    product_id: item.product.id,
-                                    product_name: item.product.name,
-                                    quantity: item.quantity,
-                                    price: parseFloat(item.product.sale_price || item.product.price)
-                                  }))
+                                  amount: calculateTotal(), // Amount in dollars (function converts to cents)
+                                  currency: 'usd',
+                                  customerInfo: {
+                                    email: customerInfo.email,
+                                    fullName: customerInfo.name
+                                  }
                                 }),
                               });
                               const data = await response.json();
