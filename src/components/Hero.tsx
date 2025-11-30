@@ -1,9 +1,37 @@
 import { ShoppingCart, Play } from 'lucide-react';
-import { getStorageUrl } from '../lib/supabase';
+import { getStorageUrl, supabase } from '../lib/supabase';
+import { useEffect, useState } from 'react';
 
 export default function Hero() {
-  // Get hero image from Supabase storage with fallback
-  const heroImageUrl = getStorageUrl('images', 'hero-firestick-breakout.jpg');
+  const [heroImageUrl, setHeroImageUrl] = useState<string>(getStorageUrl('images', 'hero-firestick-breakout.jpg'));
+
+  useEffect(() => {
+    loadHeroImage();
+  }, []);
+
+  const loadHeroImage = async () => {
+    try {
+      // Try to load from database first
+      const { data, error } = await supabase
+        .from('section_images')
+        .select('image_url')
+        .eq('section_name', 'hero')
+        .single();
+
+      if (!error && data && data.image_url) {
+        // If image_url is just a filename (no http/https), use getStorageUrl
+        if (!data.image_url.startsWith('http')) {
+          setHeroImageUrl(getStorageUrl('images', data.image_url));
+        } else {
+          setHeroImageUrl(data.image_url);
+        }
+      }
+      // If no database entry, keep the default fallback
+    } catch (error) {
+      console.error('Error loading hero image:', error);
+      // Keep default fallback on error
+    }
+  };
   const goToShop = () => {
     window.location.href = '/shop';
   };

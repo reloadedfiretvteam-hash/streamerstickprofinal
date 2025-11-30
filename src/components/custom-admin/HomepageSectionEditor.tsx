@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Save, Eye, Edit3, RefreshCw, Palette, Image as ImageIcon } from 'lucide-react';
+import { Save, Eye, Edit3, RefreshCw, Palette, Image as ImageIcon, Upload } from 'lucide-react';
+import { supabase, getStorageUrl } from '../../lib/supabase';
 
 interface HomepageSection {
   id: string;
@@ -22,10 +23,54 @@ export default function HomepageSectionEditor() {
   const [selectedSection, setSelectedSection] = useState<HomepageSection | null>(null);
   const [editedSection, setEditedSection] = useState<HomepageSection | null>(null);
   const [saving, setSaving] = useState(false);
+  const [heroImageUrl, setHeroImageUrl] = useState<string>('');
+  const [heroImageLoading, setHeroImageLoading] = useState(false);
 
   useEffect(() => {
     loadSections();
+    loadHeroImage();
   }, []);
+
+  const loadHeroImage = async () => {
+    try {
+      const { data } = await supabase
+        .from('section_images')
+        .select('image_url')
+        .eq('section_name', 'hero')
+        .single();
+      
+      if (data && data.image_url) {
+        setHeroImageUrl(data.image_url);
+      }
+    } catch (error) {
+      console.error('Error loading hero image:', error);
+    }
+  };
+
+  const updateHeroImage = async (imageFilename: string) => {
+    setHeroImageLoading(true);
+    try {
+      const { error } = await supabase
+        .from('section_images')
+        .upsert({
+          section_name: 'hero',
+          image_url: imageFilename, // Just the filename, getStorageUrl will handle the URL
+          alt_text: 'Hero background image'
+        }, {
+          onConflict: 'section_name'
+        });
+
+      if (error) throw error;
+
+      setHeroImageUrl(imageFilename);
+      alert('✅ Hero image updated successfully! Refresh your website to see the change.');
+    } catch (error) {
+      console.error('Error updating hero image:', error);
+      alert('Error updating hero image. Please try again.');
+    } finally {
+      setHeroImageLoading(false);
+    }
+  };
 
   const loadSections = async () => {
     setLoading(true);
@@ -299,13 +344,50 @@ export default function HomepageSectionEditor() {
 
     setSaving(true);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      // Save section styles to site_settings table
+      await supabase
+        .from('site_settings')
+        .upsert({
+          setting_key: `section_${editedSection.id}_bg_color`,
+          setting_value: editedSection.background_color,
+          category: 'homepage_sections'
+        });
 
-    setSections(prev =>
-      prev.map(s => s.id === editedSection.id ? editedSection : s)
-    );
+      await supabase
+        .from('site_settings')
+        .upsert({
+          setting_key: `section_${editedSection.id}_text_color`,
+          setting_value: editedSection.text_color,
+          category: 'homepage_sections'
+        });
 
-    alert(`✅ Section "${editedSection.section_name}" updated successfully!\n\nNote: This is a visual editor. To change actual content, you'll need to edit the component file: ${editedSection.component_name}`);
+      await supabase
+        .from('site_settings')
+        .upsert({
+          setting_key: `section_${editedSection.id}_padding_top`,
+          setting_value: editedSection.padding_top,
+          category: 'homepage_sections'
+        });
+
+      await supabase
+        .from('site_settings')
+        .upsert({
+          setting_key: `section_${editedSection.id}_padding_bottom`,
+          setting_value: editedSection.padding_bottom,
+          category: 'homepage_sections'
+        });
+
+      // Update local state
+      setSections(prev =>
+        prev.map(s => s.id === editedSection.id ? editedSection : s)
+      );
+
+      alert(`✅ Section "${editedSection.section_name}" updated successfully! Changes will appear on your website.`);
+    } catch (error) {
+      console.error('Error saving section:', error);
+      alert('Error saving changes. Please try again.');
+    }
 
     setSaving(false);
     setSelectedSection(null);
@@ -477,7 +559,78 @@ export default function HomepageSectionEditor() {
                 </div>
               </div>
 
-              {selectedSection.has_images && (
+              {selectedSection.id === 'hero' && (
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <ImageIcon className="w-5 h-5 text-purple-500" />
+                    Hero Background Image
+                  </h4>
+                  <div className="bg-purple-50 rounded-lg p-4 space-y-4">
+                    {heroImageUrl && (
+                      <div>
+                        <p className="text-sm text-gray-700 mb-2">Current Image:</p>
+                        <img 
+                          src={getStorageUrl('images', heroImageUrl)} 
+                          alt="Current hero" 
+                          className="w-full h-48 object-cover rounded-lg border-2 border-purple-200"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = getStorageUrl('images', 'hero-firestick-breakout.jpg');
+                          }}
+                        />
+                        <p className="text-xs text-gray-600 mt-2 font-mono bg-white px-2 py-1 rounded inline-block">
+                          {heroImageUrl}
+                        </p>
+                      </div>
+                    )}
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Change Hero Image (Enter filename from Supabase Storage)
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="e.g., hero-firestick-breakout.jpg"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const value = (e.target as HTMLInputElement).value.trim();
+                              if (value) {
+                                updateHeroImage(value);
+                                (e.target as HTMLInputElement).value = '';
+                              }
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={(e) => {
+                            const input = (e.target as HTMLElement).previousElementSibling as HTMLInputElement;
+                            if (input && input.value.trim()) {
+                              updateHeroImage(input.value.trim());
+                              input.value = '';
+                            }
+                          }}
+                          disabled={heroImageLoading}
+                          className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded font-semibold transition disabled:opacity-50 flex items-center gap-2"
+                        >
+                          {heroImageLoading ? (
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Upload className="w-4 h-4" />
+                          )}
+                          Update
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-2">
+                        💡 Enter the exact filename from your Supabase Storage bucket "images". Make sure the image is uploaded to Supabase first!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedSection.has_images && selectedSection.id !== 'hero' && (
                 <div>
                   <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
                     <ImageIcon className="w-5 h-5 text-purple-500" />
@@ -492,7 +645,7 @@ export default function HomepageSectionEditor() {
                       ))}
                     </ul>
                     <p className="text-xs text-gray-600 mt-3">
-                      💡 To change images, upload new files to the Media Library or edit the component file.
+                      💡 To change images, use the "Homepage Carousel" tool for carousel images, or "Product Manager" for product images.
                     </p>
                   </div>
                 </div>

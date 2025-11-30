@@ -13,7 +13,7 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase, getStorageUrl } from '../../lib/supabase';
 
 export default function RealProductManager() {
   const [products, setProducts] = useState<any[]>([]);
@@ -422,15 +422,32 @@ export default function RealProductManager() {
                 {/* Image URL */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-2">
-                    Main Image URL
+                    Main Image (Filename from Supabase Storage)
                   </label>
                   <input
                     type="text"
                     value={editingProduct.main_image || ''}
                     onChange={(e) => setEditingProduct({ ...editingProduct, main_image: e.target.value })}
                     className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
-                    placeholder="/path/to/image.jpg"
+                    placeholder="firestick 4k.jpg or hero-firestick-breakout.jpg"
                   />
+                  <p className="text-xs text-gray-400 mt-2">
+                    💡 Enter just the filename (e.g., "firestick hd.jpg"). Make sure the image is uploaded to Supabase Storage bucket "images" first!
+                  </p>
+                  {editingProduct.main_image && (
+                    <div className="mt-3">
+                      <p className="text-xs text-gray-400 mb-2">Preview:</p>
+                      <img 
+                        src={editingProduct.main_image.startsWith('http') ? editingProduct.main_image : getStorageUrl('images', editingProduct.main_image)}
+                        alt="Preview" 
+                        className="w-full h-48 object-cover rounded-lg border-2 border-gray-600"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'https://via.placeholder.com/400x300?text=Image+Not+Found';
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Featured Checkbox */}
