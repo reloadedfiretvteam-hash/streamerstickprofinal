@@ -1,0 +1,2 @@
+/*
+  Content-Security-Policy: script-src 'self' https://js.stripe.com https://static.cloudflareinsights.com cloudflare.com *.cloudflare.com 'unsafe-eval' 'unsafe-inline';
