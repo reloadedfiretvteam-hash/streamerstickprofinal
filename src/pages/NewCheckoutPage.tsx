@@ -627,14 +627,6 @@ export default function NewCheckoutPage() {
                     </button>
                   </div>
                 )}
-                    <button
-                      onClick={() => setCurrentStep(2)}
-                      className="mt-6 w-full bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition-all"
-                    >
-                      Back to Payment Methods
-                    </button>
-                  </div>
-                )}
                 {paymentMethod === 'bitcoin' && (
                   <BitcoinPaymentFlow
                     totalAmount={calculateTotal()}
