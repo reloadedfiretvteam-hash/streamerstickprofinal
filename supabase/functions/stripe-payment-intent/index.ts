@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
+<<<<<<< HEAD
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
@@ -7,6 +8,8 @@ const corsHeaders = {
   "Access-Control-Max-Age": "86400",
 };
 
+=======
+>>>>>>> c9a1f026abc5a1db827a512f2e69267d94070712
 interface PaymentIntentRequest {
   productId?: string;
   productIds?: string[];
@@ -17,41 +20,194 @@ interface PaymentIntentRequest {
   metadata?: Record<string, string>;
 }
 
+// Fallback product amounts (in dollars) for known product codes
+// Used when stripe_products table is unavailable or product not found
+const FALLBACK_PRODUCTS: Record<string, { amount: number; cloaked_name: string }> = {
+  "starter": { amount: 99.99, cloaked_name: "Digital Entertainment Service - Basic" },
+  "pro": { amount: 199.99, cloaked_name: "Digital Entertainment Service - Pro" },
+  "elite": { amount: 299.99, cloaked_name: "Digital Entertainment Service - Elite" },
+  "premium": { amount: 399.99, cloaked_name: "Digital Entertainment Service - Premium" },
+};
+
+/**
+ * Get CORS headers based on the request origin and ALLOWED_ORIGINS env var
+ * @param requestOrigin - The Origin header from the request
+ * @returns CORS headers object
+ */
+function getCorsHeaders(requestOrigin: string | null): Record<string, string> {
+  const allowedOriginsEnv = Deno.env.get("ALLOWED_ORIGINS") || "";
+  const allowedOrigins = allowedOriginsEnv
+    .split(",")
+    .map((o) => o.trim())
+    .filter((o) => o.length > 0);
+
+  // Default fallback origins (for development)
+  const defaultOrigins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://streamstickpro.com",
+    "https://www.streamstickpro.com",
+  ];
+
+  // Combine configured and default origins
+  const allAllowedOrigins = [...new Set([...allowedOrigins, ...defaultOrigins])];
+
+  // Check if request origin is allowed
+  let allowedOrigin = "";
+  if (requestOrigin && allAllowedOrigins.includes(requestOrigin)) {
+    allowedOrigin = requestOrigin;
+  } else if (requestOrigin && requestOrigin.endsWith(".pages.dev")) {
+    // Allow Cloudflare Pages preview deployments - only for project subdomains
+    // Match pattern: *.{project-name}.pages.dev or {hash}.{project-name}.pages.dev
+    const pagesDomain = requestOrigin.replace(/^https?:\/\//, "");
+    // Only allow if it has 2+ subdomains (hash.project.pages.dev pattern)
+    const parts = pagesDomain.split(".");
+    if (parts.length >= 3 && parts[parts.length - 1] === "dev" && parts[parts.length - 2] === "pages") {
+      allowedOrigin = requestOrigin;
+    }
+  } else if (allowedOrigins.length === 0) {
+    // If no ALLOWED_ORIGINS configured, default to * for backwards compatibility
+    allowedOrigin = "*";
+  }
+
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin || "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+    "Access-Control-Max-Age": "86400", // 24 hours
+  };
+}
+
 Deno.serve(async (req: Request) => {
-  // Handle CORS preflight
+  const requestOrigin = req.headers.get("Origin");
+  const corsHeaders = getCorsHeaders(requestOrigin);
+
+  // Handle CORS preflight with 204 No Content
   if (req.method === "OPTIONS") {
     return new Response(null, {
-      status: 200,
+      status: 204,
       headers: corsHeaders,
     });
   }
 
+  // Only allow POST method for payment intent creation
+  if (req.method !== "POST") {
+    return new Response(
+      JSON.stringify({ error: "Method not allowed" }),
+      {
+        status: 405,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+
   try {
-    const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+    // Get Stripe secret key from environment or attempt fallback to site_settings
+    let stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY") || Deno.env.get("VITE_STRIPE_SECRET_KEY");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    if (!stripeSecretKey) {
-      throw new Error("STRIPE_SECRET_KEY is not configured");
-    }
-
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error("Missing Supabase environment variables");
+      console.error("Missing Supabase environment variables");
+      return new Response(
+        JSON.stringify({ error: "Payment service configuration error. Please contact support." }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
+    // If no Stripe key in env, try to fetch from site_settings
+    if (!stripeSecretKey) {
+      try {
+        const settingsResponse = await fetch(
+          `${supabaseUrl}/rest/v1/site_settings?setting_key=eq.stripe_secret_key&select=setting_value`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseKey}`,
+              "apikey": supabaseKey,
+            },
+          }
+        );
+        if (settingsResponse.ok) {
+          const settings = await settingsResponse.json();
+          if (settings && settings.length > 0 && settings[0].setting_value) {
+            stripeSecretKey = settings[0].setting_value;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch Stripe key from site_settings:", e);
+      }
+    }
+
+    if (!stripeSecretKey) {
+      console.error("STRIPE_SECRET_KEY is not configured");
+      return new Response(
+        JSON.stringify({ error: "Payment processing is not configured. Please contact support." }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Parse request body
+    let payload: PaymentIntentRequest;
+    try {
+      payload = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid request body" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+<<<<<<< HEAD
     const payload: PaymentIntentRequest = await req.json();
     const { productId, productIds, amount, currency = 'usd', customerEmail, customerName, metadata = {} } = payload;
+=======
+    const { productId, customerEmail, customerName } = payload;
+
+    if (!productId) {
+      return new Response(
+        JSON.stringify({ error: "Product ID is required" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+>>>>>>> c9a1f026abc5a1db827a512f2e69267d94070712
 
     if (!customerEmail) {
-      throw new Error("Customer email is required");
+      return new Response(
+        JSON.stringify({ error: "Customer email is required" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(customerEmail)) {
-      throw new Error("Invalid email format");
+      return new Response(
+        JSON.stringify({ error: "Invalid email format" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
+<<<<<<< HEAD
     let amountInCents: number;
     let productName = 'Order';
     let productMetadata: Record<string, string> = { ...metadata };
@@ -155,6 +311,132 @@ Deno.serve(async (req: Request) => {
     Object.entries(productMetadata).forEach(([key, value]) => {
       paymentParams[`metadata[${key}]`] = String(value);
     });
+=======
+    // Sanitize product ID to prevent injection attacks
+    // Allow alphanumeric, hyphens, underscores, and dots (common in product IDs like prod_abc.123)
+    const sanitizedProductId = productId.replace(/[^a-zA-Z0-9-_.]/g, "");
+
+    // Ensure product ID is not empty after sanitization
+    if (!sanitizedProductId) {
+      return new Response(
+        JSON.stringify({ error: "Invalid product ID format" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Try to fetch the product from stripe_products table
+    let amount: number;
+    let currency = "usd";
+    let cloakedName: string;
+
+    try {
+      const productResponse = await fetch(
+        `${supabaseUrl}/rest/v1/stripe_products?id=eq.${encodeURIComponent(sanitizedProductId)}&is_active=eq.true`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseKey}`,
+            "apikey": supabaseKey,
+          },
+        }
+      );
+
+      if (productResponse.ok) {
+        const products = await productResponse.json();
+
+        if (products && products.length > 0) {
+          const product = products[0];
+
+          // Use sale_price if explicitly set (including 0), otherwise use regular price
+          // parseFloat returns NaN for null/undefined, so check for valid number
+          const salePrice = parseFloat(product.sale_price);
+          const regularPrice = parseFloat(product.price);
+          amount = !isNaN(salePrice) && product.sale_price !== null ? salePrice : regularPrice;
+          
+          currency = product.currency || "usd";
+
+          // Use cloaked_name if available, otherwise generate a compliant description
+          cloakedName = 
+            (product.cloaked_name && product.cloaked_name.trim()) ||
+            (product.short_description && product.short_description.trim()) ||
+            "Digital Entertainment Service";
+        } else {
+          // Product not found in database - check fallback
+          const fallback = FALLBACK_PRODUCTS[sanitizedProductId.toLowerCase()];
+          if (fallback) {
+            amount = fallback.amount;
+            cloakedName = fallback.cloaked_name;
+          } else {
+            return new Response(
+              JSON.stringify({ error: "Product not found or inactive" }),
+              {
+                status: 400,
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+              }
+            );
+          }
+        }
+      } else {
+        // Database query failed - check fallback
+        const fallback = FALLBACK_PRODUCTS[sanitizedProductId.toLowerCase()];
+        if (fallback) {
+          amount = fallback.amount;
+          cloakedName = fallback.cloaked_name;
+        } else {
+          console.error("Failed to fetch product from database");
+          return new Response(
+            JSON.stringify({ error: "Unable to retrieve product information" }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        }
+      }
+    } catch (e) {
+      // Database error - check fallback
+      console.error("Database error:", e);
+      const fallback = FALLBACK_PRODUCTS[sanitizedProductId.toLowerCase()];
+      if (fallback) {
+        amount = fallback.amount;
+        cloakedName = fallback.cloaked_name;
+      } else {
+        return new Response(
+          JSON.stringify({ error: "Unable to retrieve product information" }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+    }
+
+    // Convert to cents for Stripe (Stripe requires amounts in smallest currency unit)
+    const amountInCents = Math.round(amount * 100);
+
+    // Build payment intent parameters with CLOAKED name for Stripe
+    // Stripe will see the cloaked name, but metadata contains the real product info
+    const paymentParams: Record<string, string> = {
+      amount: amountInCents.toString(),
+      currency: currency.toLowerCase(),
+      // Enable automatic_payment_methods for Apple Pay, Google Pay, Cash App Pay, etc.
+      "automatic_payment_methods[enabled]": "true",
+      // Use CLOAKED name for Stripe description (what appears on statements)
+      description: cloakedName,
+      // Receipt email
+      receipt_email: customerEmail,
+      // Statement descriptor (max 22 chars, only appears if not overridden by Stripe account settings)
+      statement_descriptor_suffix: "PRO DIGITAL",
+      // Metadata contains CLOAKED product info (for compliance)
+      "metadata[product_id]": sanitizedProductId,
+      "metadata[product_name_cloaked]": cloakedName,
+      "metadata[customer_email]": customerEmail,
+    };
+>>>>>>> c9a1f026abc5a1db827a512f2e69267d94070712
 
     // Only add customer_name to metadata if provided
     if (customerName && customerName.trim()) {
@@ -173,14 +455,29 @@ Deno.serve(async (req: Request) => {
     if (!stripeResponse.ok) {
       const errorData = await stripeResponse.json();
       console.error("Stripe error:", errorData);
-      throw new Error(errorData.error?.message || "Failed to create payment intent");
+      return new Response(
+        JSON.stringify({
+          error: errorData.error?.message || "Failed to create payment intent",
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     const paymentIntent = await stripeResponse.json();
 
+<<<<<<< HEAD
     // Log the payment intent creation (optional - for debugging)
     const displayAmount = (amountInCents / 100).toFixed(2);
     console.log(`PaymentIntent created: ${paymentIntent.id} for ${productName}, amount: $${displayAmount}`);
+=======
+    // Log the payment intent creation (using cloaked info for compliance)
+    console.log(
+      `PaymentIntent created: ${paymentIntent.id} for product_id: ${sanitizedProductId}, description: ${cloakedName}, amount: $${amount}`
+    );
+>>>>>>> c9a1f026abc5a1db827a512f2e69267d94070712
 
     return new Response(
       JSON.stringify({
@@ -189,10 +486,8 @@ Deno.serve(async (req: Request) => {
         amount: (amountInCents / 100).toFixed(2),
       }),
       {
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   } catch (error: unknown) {
@@ -201,14 +496,11 @@ Deno.serve(async (req: Request) => {
 
     return new Response(
       JSON.stringify({
-        error: errorMessage,
+        error: "Payment processing failed. Please try again.",
       }),
       {
-        status: 400,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   }

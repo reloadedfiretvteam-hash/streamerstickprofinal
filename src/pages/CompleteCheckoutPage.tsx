@@ -5,6 +5,13 @@ import StripePaymentForm from '../components/StripePaymentForm';
 import BitcoinPaymentFlow from '../components/BitcoinPaymentFlow';
 import CashAppPaymentFlow from '../components/CashAppPaymentFlow';
 
+// Extend Window interface for Stripe
+declare global {
+  interface Window {
+    Stripe?: any;
+  }
+}
+
 interface Product {
   id: string;
   name: string;

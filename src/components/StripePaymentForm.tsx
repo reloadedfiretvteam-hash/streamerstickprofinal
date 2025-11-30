@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Shield, Lock, CreditCard, AlertCircle, Smartphone, Wallet } from 'lucide-react';
+import { Shield, Lock, CreditCard, AlertCircle, Smartphone, Wallet, RefreshCw } from 'lucide-react';
 import type { Stripe, StripeElements as StripeElementsType, StripePaymentElement, StripePaymentElementChangeEvent, Appearance } from '@stripe/stripe-js';
 
 interface StripePaymentFormProps {
   amount: number;
-  clientSecret: string;
+  clientSecret: string | null;
   onSuccess: (paymentIntentId: string) => void;
   onError: (error: string) => void;
+  onRetry?: () => void; // Optional retry callback when clientSecret is missing
 }
 
 // Stripe Payment Element appearance configuration
@@ -61,7 +62,8 @@ export default function StripePaymentForm({
   amount, 
   clientSecret, 
   onSuccess, 
-  onError 
+  onError,
+  onRetry 
 }: StripePaymentFormProps) {
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'loading' | 'ready' | 'processing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -210,6 +212,32 @@ export default function StripePaymentForm({
       onError(errorMsg);
     }
   };
+
+  // Handle missing clientSecret - display error with retry option
+  if (!clientSecret) {
+    return (
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div className="text-center py-8">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Unable to Load Payment Form</h3>
+          <p className="text-gray-600 mb-4">
+            We couldn't initialize the payment form. This may be due to a temporary issue.
+          </p>
+          {onRetry ? (
+            <button
+              onClick={onRetry}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Try Again
+            </button>
+          ) : (
+            <p className="text-sm text-gray-500">Please refresh the page and try again.</p>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
