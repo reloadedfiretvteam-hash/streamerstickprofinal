@@ -4,7 +4,13 @@ This document explains how to configure and use the Stripe payment system for St
 
 ## Overview
 
-The website uses **Stripe** for credit/debit card payments, along with **Bitcoin** and **Cash App** as alternative payment methods.
+The website uses **Stripe** as the sole credit/debit card processor, along with **Bitcoin** (via NOWPayments) and **Cash App** as alternative payment methods.
+
+### Payment Architecture
+
+- **Single unified Stripe endpoint**: `stripe-payment-intent` edge function handles all card payments
+- **Product-based checkout**: Payment amounts are determined by products in the `stripe_products` table
+- **Cloaked product names**: Products use compliant service descriptions for payment processing
 
 ---
 
@@ -247,8 +253,11 @@ CREATE TABLE payment_transactions (
 - [ ] Deploy `stripe-payment-intent` function
 - [ ] Deploy `stripe-webhook` function
 - [ ] Set `VITE_STRIPE_PUBLISHABLE_KEY` in Cloudflare
+- [ ] Set `VITE_SUPABASE_URL` in Cloudflare
+- [ ] Set `VITE_SUPABASE_ANON_KEY` in Cloudflare
 - [ ] Add publishable key to `site_settings` table (optional)
 - [ ] Configure webhook endpoint in Stripe Dashboard
+- [ ] Verify `stripe_products` table has active products
 - [ ] Test with test card: `4242 4242 4242 4242`
 - [ ] Switch to live keys when ready for production
 

@@ -29,6 +29,9 @@ export default function SecureCheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'bitcoin' | 'cashapp' | ''>('');
   const [step, setStep] = useState<'select' | 'checkout' | 'success'>('select');
   const [loading, setLoading] = useState(true);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [creatingPaymentIntent, setCreatingPaymentIntent] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
     email: '',
@@ -140,8 +143,53 @@ export default function SecureCheckoutPage() {
     setStep('select');
     setSelectedProduct(null);
     setPaymentMethod('');
+    setClientSecret(null);
+    setPaymentError(null);
   }
 
+  async function createPaymentIntent() {
+    if (!selectedProduct || !customerInfo.email || !customerInfo.name) {
+      setPaymentError('Please fill in your name and email');
+      return;
+    }
+
+    setCreatingPaymentIntent(true);
+    setPaymentError(null);
+
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      
+      if (!supabaseUrl) {
+        throw new Error('Payment service configuration error. Please contact support.');
+      }
+      
+      const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: selectedProduct.id,
+          customerEmail: customerInfo.email,
+          customerName: customerInfo.name,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to initialize payment. Please verify product is active and Stripe keys are set.');
+      }
+
+      setClientSecret(data.clientSecret);
+    } catch (error: unknown) {
+      console.error('Error creating payment intent:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unable to initialize payment. Please verify product is active and Stripe keys are set.';
+      setPaymentError(errorMessage);
+    } finally {
+      setCreatingPaymentIntent(false);
+    }
+  }
 
   function handleOrderComplete(_orderCode: string) {
     setStep('success');
@@ -491,43 +539,79 @@ export default function SecureCheckoutPage() {
               {/* Stripe Payment Form */}
               {paymentMethod === 'stripe' && (
                 <div className="mb-6">
-                  <StripePaymentForm 
-                    amount={totalAmount}
-                    customerInfo={customerInfo}
-                    onSubmit={async (paymentIntentId) => {
-                      try {
-                        // Save order to Supabase
-                        const { error } = await supabase
-                          .from('orders')
-                          .insert([{
-                            customer_name: customerInfo.name,
-                            customer_email: customerInfo.email,
-                            customer_phone: customerInfo.phone,
-                            shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
-                            total_amount: totalAmount.toString(),
-                            payment_method: 'stripe',
-                            payment_intent_id: paymentIntentId,
-                            payment_status: 'completed',
-                            status: 'processing',
-                            items: selectedProduct ? [{
-                              product_id: selectedProduct.id,
-                              product_name: selectedProduct.name,
-                              quantity: 1,
-                              price: totalAmount
-                            }] : []
-                          }]);
+                  {paymentError && (
+                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-red-800 font-medium">Payment Error</p>
+                        <p className="text-red-600 text-sm">{paymentError}</p>
+                      </div>
+                    </div>
+                  )}
 
-                        if (error) throw error;
-                        handleOrderComplete(paymentIntentId);
-                      } catch (error: any) {
-                        console.error('Order creation failed:', error);
-                        alert(`Payment succeeded but order creation failed: ${error.message}. Please contact support.`);
-                      }
-                    }}
-                    onError={(error) => {
-                      alert(`Payment failed: ${error}`);
-                    }}
-                  />
+                  {!clientSecret ? (
+                    <div className="text-center py-8">
+                      <p className="text-slate-600 mb-6">
+                        Fill in your contact information, then click below to proceed to payment.
+                      </p>
+                      <button
+                        onClick={createPaymentIntent}
+                        disabled={creatingPaymentIntent || !customerInfo.name || !customerInfo.email}
+                        className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-bold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto"
+                      >
+                        {creatingPaymentIntent ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            Initializing...
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="w-5 h-5" />
+                            Continue to Payment
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    <StripePaymentForm 
+                      amount={totalAmount}
+                      clientSecret={clientSecret}
+                      onSuccess={async (paymentIntentId) => {
+                        try {
+                          // Save order to Supabase
+                          const { error } = await supabase
+                            .from('orders')
+                            .insert([{
+                              customer_name: customerInfo.name,
+                              customer_email: customerInfo.email,
+                              customer_phone: customerInfo.phone,
+                              shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
+                              total_amount: totalAmount.toString(),
+                              payment_method: 'stripe',
+                              payment_intent_id: paymentIntentId,
+                              payment_status: 'completed',
+                              status: 'processing',
+                              items: selectedProduct ? [{
+                                product_id: selectedProduct.id,
+                                product_name: selectedProduct.name,
+                                quantity: 1,
+                                price: totalAmount
+                              }] : []
+                            }]);
+
+                          if (error) throw error;
+                          handleOrderComplete(paymentIntentId);
+                        } catch (error: unknown) {
+                          console.error('Order creation failed:', error);
+                          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+                          alert(`Payment succeeded but order creation failed: ${errorMsg}. Please contact support.`);
+                        }
+                      }}
+                      onError={(error) => {
+                        setPaymentError(error);
+                      }}
+                    />
+                  )}
                 </div>
               )}
 
