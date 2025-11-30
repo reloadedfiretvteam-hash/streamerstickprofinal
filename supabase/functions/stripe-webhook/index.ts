@@ -292,23 +292,32 @@ Deno.serve(async (req: Request) => {
       case "payment_intent.succeeded": {
         logPaymentEvent("payment_intent.succeeded", paymentIntent, isLivePayment);
 
+        const customerEmail = paymentIntent.receipt_email || paymentIntent.metadata?.customer_email || "";
+        const customerName = paymentIntent.metadata?.customer_name || "Customer";
+        const productIds = paymentIntent.metadata?.product_ids?.split(",") || [];
+        const productId = paymentIntent.metadata?.product_id || productIds[0] || "";
+        const productNameCloaked = paymentIntent.metadata?.product_name_cloaked || paymentIntent.metadata?.product_name || "Digital Entertainment Service";
+        const orderCode = `STRIPE-${paymentIntent.id.slice(-8).toUpperCase()}`;
+        const amount = paymentIntent.amount / 100;
+
         // Record the successful payment in the database
         const transactionRecord = {
           stripe_payment_intent_id: paymentIntent.id,
-          amount: paymentIntent.amount / 100, // Convert from cents
+          amount: amount,
           currency: paymentIntent.currency,
           payment_method: "stripe",
           payment_status: "confirmed",
-          customer_email: paymentIntent.receipt_email || paymentIntent.metadata?.customer_email,
-          product_id: paymentIntent.metadata?.product_id,
-          product_name: paymentIntent.metadata?.product_name,
+          customer_email: customerEmail,
+          product_id: productId,
+          product_name: productNameCloaked, // Store cloaked name for Stripe compliance
           is_live_mode: isLivePayment,
           created_at: new Date().toISOString(),
           stripe_event_id: event.id,
-          order_code: `STRIPE-${paymentIntent.id.slice(-8).toUpperCase()}`,
+          order_code: orderCode,
         };
 
         // Insert payment record
+        let orderId: string | null = null;
         const insertResponse = await fetch(
           `${supabaseUrl}/rest/v1/payment_transactions`,
           {
@@ -317,7 +326,7 @@ Deno.serve(async (req: Request) => {
               "Content-Type": "application/json",
               "Authorization": `Bearer ${supabaseKey}`,
               "apikey": supabaseKey,
-              "Prefer": "return=minimal",
+              "Prefer": "return=representation",
             },
             body: JSON.stringify(transactionRecord),
           }
@@ -333,6 +342,360 @@ Deno.serve(async (req: Request) => {
         } else {
           console.log(`[STRIPE-${isLivePayment ? "LIVE" : "TEST"}] Payment recorded: ${paymentIntent.id}`);
         }
+
+        // Create order in orders_full table
+        try {
+          const orderData = {
+            customer_name: customerName,
+            customer_email: customerEmail,
+            total_amount: amount,
+            payment_method: "stripe",
+            payment_status: "paid",
+            order_status: "processing",
+            stripe_payment_intent_id: paymentIntent.id,
+            order_code: orderCode,
+            items: paymentIntent.metadata?.cartItems ? JSON.parse(paymentIntent.metadata.cartItems) : [{
+              product_id: productId,
+              product_name: productNameCloaked,
+              quantity: 1,
+              price: amount
+            }],
+          };
+
+          const orderResponse = await fetch(
+            `${supabaseUrl}/rest/v1/orders_full`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${supabaseKey}`,
+                "apikey": supabaseKey,
+                "Prefer": "return=representation",
+              },
+              body: JSON.stringify(orderData),
+            }
+          );
+
+          if (orderResponse.ok) {
+            const orderResult = await orderResponse.json();
+            orderId = orderResult[0]?.id || null;
+          }
+        } catch (orderError) {
+          console.error("Error creating order:", orderError);
+        }
+
+        // Fetch product to get REAL name and setup video
+        let realProductName = productNameCloaked;
+        let setupVideoUrl = "";
+        let serviceUrl = "";
+        let productType = "iptv";
+
+        try {
+          // Try to fetch from real_products first (for real product name)
+          const productResponse = await fetch(
+            `${supabaseUrl}/rest/v1/real_products?select=name,setup_video_url,service_url,category&id=eq.${encodeURIComponent(productId)}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${supabaseKey}`,
+                "apikey": supabaseKey,
+              },
+            }
+          );
+
+          if (productResponse.ok) {
+            const products = await productResponse.json();
+            if (products && products.length > 0) {
+              const product = products[0];
+              realProductName = product.name || realProductName;
+              setupVideoUrl = product.setup_video_url || "";
+              serviceUrl = product.service_url || "";
+              productType = product.category?.toLowerCase().includes("fire") ? "firestick" : "iptv";
+            }
+          }
+
+          // If no setup video from product, try product_setup_videos table
+          if (!setupVideoUrl) {
+            const videoResponse = await fetch(
+              `${supabaseUrl}/rest/v1/product_setup_videos?select=video_url&product_id=eq.${encodeURIComponent(productId)}&is_active=eq.true&order=sort_order.asc&limit=1`,
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${supabaseKey}`,
+                  "apikey": supabaseKey,
+                },
+              }
+            );
+
+            if (videoResponse.ok) {
+              const videos = await videoResponse.json();
+              if (videos && videos.length > 0) {
+                setupVideoUrl = videos[0].video_url;
+              } else {
+                // Try default video for product type
+                const defaultVideoResponse = await fetch(
+                  `${supabaseUrl}/rest/v1/product_setup_videos?select=video_url&product_type=eq.${productType}&is_default=eq.true&is_active=eq.true&limit=1`,
+                  {
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "Authorization": `Bearer ${supabaseKey}`,
+                      "apikey": supabaseKey,
+                    },
+                  }
+                );
+                if (defaultVideoResponse.ok) {
+                  const defaultVideos = await defaultVideoResponse.json();
+                  if (defaultVideos && defaultVideos.length > 0) {
+                    setupVideoUrl = defaultVideos[0].video_url;
+                  }
+                }
+              }
+            }
+          }
+        } catch (productError) {
+          console.error("Error fetching product details:", productError);
+        }
+
+        // Generate username and password
+        const usernameResponse = await fetch(
+          `${supabaseUrl}/rest/v1/rpc/generate_username`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseKey}`,
+              "apikey": supabaseKey,
+            },
+            body: JSON.stringify({ customer_name: customerName }),
+          }
+        );
+
+        let username = "";
+        if (usernameResponse.ok) {
+          const usernameData = await usernameResponse.json();
+          username = usernameData || "";
+        }
+
+        // Generate password
+        const passwordResponse = await fetch(
+          `${supabaseUrl}/rest/v1/rpc/generate_password`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseKey}`,
+              "apikey": supabaseKey,
+            },
+          }
+        );
+
+        let password = "";
+        if (passwordResponse.ok) {
+          const passwordData = await passwordResponse.json();
+          password = passwordData || "";
+        }
+
+        // Create customer account
+        let accountId: string | null = null;
+        if (username && password) {
+          try {
+            const accountData = {
+              order_id: orderId,
+              order_code: orderCode,
+              customer_email: customerEmail,
+              customer_name: customerName,
+              username: username,
+              password: password,
+              service_url: serviceUrl,
+              setup_video_url: setupVideoUrl,
+              product_type: productType,
+              product_name: realProductName, // Store REAL product name
+              account_status: "active",
+            };
+
+            const accountResponse = await fetch(
+              `${supabaseUrl}/rest/v1/customer_accounts`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${supabaseKey}`,
+                  "apikey": supabaseKey,
+                  "Prefer": "return=representation",
+                },
+                body: JSON.stringify(accountData),
+              }
+            );
+
+            if (accountResponse.ok) {
+              const accountResult = await accountResponse.json();
+              accountId = accountResult[0]?.id || null;
+              
+              // Update order with account ID
+              if (orderId && accountId) {
+                await fetch(
+                  `${supabaseUrl}/rest/v1/orders_full?id=eq.${orderId}`,
+                  {
+                    method: "PATCH",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "Authorization": `Bearer ${supabaseKey}`,
+                      "apikey": supabaseKey,
+                    },
+                    body: JSON.stringify({ customer_account_id: accountId }),
+                  }
+                );
+              }
+            }
+          } catch (accountError) {
+            console.error("Error creating customer account:", accountError);
+          }
+        }
+
+        // Send emails (customer + admin)
+        try {
+          const adminEmail = Deno.env.get("ADMIN_EMAIL") || "reloadedfirestvteam@gmail.com";
+          
+          // Send customer email with credentials
+          const customerEmailData = {
+            to: customerEmail,
+            subject: `Your Stream Stick Pro Order Confirmation - ${orderCode}`,
+            html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+    .content { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; }
+    .credentials-box { background: white; border: 2px solid #3b82f6; padding: 20px; border-radius: 10px; margin: 20px 0; }
+    .credential-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
+    .credential-label { font-weight: bold; color: #1f2937; }
+    .credential-value { font-family: monospace; color: #3b82f6; font-size: 16px; }
+    .button { display: inline-block; padding: 12px 30px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔥 Stream Stick Pro</h1>
+      <h2>Order Confirmed!</h2>
+    </div>
+    <div class="content">
+      <p>Hi <strong>${customerName}</strong>,</p>
+      <p>Thank you for your order! Your payment has been confirmed.</p>
+      
+      <div class="credentials-box">
+        <h3>Your Account Credentials</h3>
+        <div class="credential-row">
+          <span class="credential-label">Username:</span>
+          <span class="credential-value">${username}</span>
+        </div>
+        <div class="credential-row">
+          <span class="credential-label">Password:</span>
+          <span class="credential-value">${password}</span>
+        </div>
+      </div>
+
+      <p><strong>Order Details:</strong></p>
+      <ul>
+        <li>Order Code: ${orderCode}</li>
+        <li>Product: ${realProductName}</li>
+        <li>Total: $${amount.toFixed(2)}</li>
+      </ul>
+
+      ${setupVideoUrl ? `
+      <p><strong>Setup Instructions:</strong></p>
+      <p>Watch our setup video to get started:</p>
+      <a href="${setupVideoUrl}" class="button">Watch Setup Video</a>
+      <p>Or visit: <a href="${setupVideoUrl}">${setupVideoUrl}</a></p>
+      ` : ""}
+
+      ${serviceUrl ? `
+      <p><strong>Service URL:</strong> <a href="${serviceUrl}">${serviceUrl}</a></p>
+      ` : ""}
+
+      <p>Need help? Reply to this email or contact support.</p>
+    </div>
+  </div>
+</body>
+</html>
+            `,
+          };
+
+          // Send admin notification
+          const adminEmailData = {
+            to: adminEmail,
+            subject: `New Order: ${orderCode} - ${customerName}`,
+            html: `
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>New Order Received</h2>
+  <p><strong>Order Code:</strong> ${orderCode}</p>
+  <p><strong>Customer:</strong> ${customerName} (${customerEmail})</p>
+  <p><strong>Product:</strong> ${realProductName}</p>
+  <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
+  <p><strong>Payment Method:</strong> Stripe</p>
+  <p><strong>Account Created:</strong></p>
+  <ul>
+    <li>Username: ${username}</li>
+    <li>Password: ${password}</li>
+  </ul>
+  ${setupVideoUrl ? `<p><strong>Setup Video:</strong> <a href="${setupVideoUrl}">${setupVideoUrl}</a></p>` : ""}
+</body>
+</html>
+            `,
+          };
+
+          // Call send-order-emails function (you may need to implement actual email sending)
+          await fetch(
+            `${supabaseUrl}/functions/v1/send-order-emails`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${supabaseKey}`,
+                "apikey": supabaseKey,
+              },
+              body: JSON.stringify({
+                orderCode,
+                customerEmail,
+                customerName,
+                totalUsd: amount,
+                paymentMethod: "Stripe",
+                products: [{ name: realProductName, price: amount, quantity: 1 }],
+                username,
+                password,
+                setupVideoUrl,
+                adminEmail,
+              }),
+            }
+          );
+
+          // Update order to mark emails sent
+          if (orderId) {
+            await fetch(
+              `${supabaseUrl}/rest/v1/orders_full?id=eq.${orderId}`,
+              {
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${supabaseKey}`,
+                  "apikey": supabaseKey,
+                },
+                body: JSON.stringify({ email_sent: true, credentials_sent: true }),
+              }
+            );
+          }
+        } catch (emailError) {
+          console.error("Error sending emails:", emailError);
+        }
+
         break;
       }
 
