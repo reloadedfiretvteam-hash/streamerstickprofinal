@@ -184,11 +184,7 @@ END $$;
 ### WHERE TO GO:
 **Supabase Dashboard → SQL Editor → New Query**
 
-### COPY & PASTE THIS (REPLACE THE URLs):
-
-**REPLACE:**
-- `YOUR_SERVICE_URL_HERE` → Your actual service URL
-- `YOUR_YOUTUBE_VIDEO_HERE` → Your actual YouTube video URL
+### COPY & PASTE THIS (YOUR URLs ARE ALREADY FILLED IN):
 
 ```sql
 -- ============================================================
@@ -198,32 +194,20 @@ END $$;
 -- Add default setup video (YouTube video that ALL customers get)
 INSERT INTO product_setup_videos (product_type, video_title, video_url, is_default, is_active) 
 VALUES 
-  ('all', 'Stream Stick Pro Setup Guide', 'YOUR_YOUTUBE_VIDEO_HERE', true, true),
-  ('firestick', 'Fire Stick Setup Guide', 'YOUR_YOUTUBE_VIDEO_HERE', true, true),
-  ('iptv', 'IPTV Subscription Setup', 'YOUR_YOUTUBE_VIDEO_HERE', true, true)
+  ('all', 'Stream Stick Pro Setup Guide', 'https://youtu.be/DYSOp6mUzDU?si=-OHqUNVXcBmjSX45', true, true),
+  ('firestick', 'Fire Stick Setup Guide', 'https://youtu.be/DYSOp6mUzDU?si=-OHqUNVXcBmjSX45', true, true),
+  ('iptv', 'IPTV Subscription Setup', 'https://youtu.be/DYSOp6mUzDU?si=-OHqUNVXcBmjSX45', true, true)
 ON CONFLICT DO NOTHING;
 
 -- Set default service URL (URL that ALL customers get)
 UPDATE real_products 
-SET service_url = 'YOUR_SERVICE_URL_HERE'
+SET service_url = 'http://ky-tv.cc'
 WHERE service_url IS NULL OR service_url = '';
 
 -- Also save in site_settings as default
 INSERT INTO site_settings (setting_key, setting_value, category, description)
-VALUES ('default_service_url', 'YOUR_SERVICE_URL_HERE', 'customer', 'Default service URL sent to all customers')
+VALUES ('default_service_url', 'http://ky-tv.cc', 'customer', 'Default service URL sent to all customers')
 ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value;
-```
-
-### EXAMPLE (don't copy this - just see format):
-```sql
--- Example:
-INSERT INTO product_setup_videos (product_type, video_title, video_url, is_default, is_active) 
-VALUES 
-  ('all', 'Stream Stick Pro Setup Guide', 'https://youtube.com/watch?v=ABC123XYZ', true, true);
-
-UPDATE real_products 
-SET service_url = 'https://streamstickpro.com/service'
-WHERE service_url IS NULL;
 ```
 
 ### CLICK: "Run" button
