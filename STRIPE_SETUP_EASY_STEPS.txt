@@ -77,7 +77,7 @@ STEP 4: DEPLOY BACKEND FUNCTION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 The Edge Function file is already created at:
-supabase/functions/create-payment-intent/index.ts
+supabase/functions/stripe-payment-intent/index.ts
 
 Now you need to deploy it:
 
@@ -85,7 +85,7 @@ Now you need to deploy it:
 2. Navigate to your project folder
 3. Run this command:
 
-   supabase functions deploy create-payment-intent
+   supabase functions deploy stripe-payment-intent
 
 If you get an error about not being logged in:
    supabase login
