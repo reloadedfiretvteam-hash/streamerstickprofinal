@@ -3,7 +3,7 @@ import { ShoppingCart, Lock, Bitcoin, CreditCard, Smartphone, Mail, User, CheckC
 import { supabase } from '../lib/supabase';
 import BitcoinPaymentFlow from '../components/BitcoinPaymentFlow';
 import CashAppPaymentFlow from '../components/CashAppPaymentFlow';
-import StripeCheckout from '../components/StripeCheckout';
+import StripePaymentForm from '../components/StripePaymentForm';
 import Footer from '../components/Footer';
 
 interface CartItem {
@@ -35,6 +35,8 @@ export default function NewCheckoutPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
+  const [creatingPaymentIntent, setCreatingPaymentIntent] = useState(false);
 
   useEffect(() => {
     loadCart();
@@ -540,25 +542,88 @@ export default function NewCheckoutPage() {
                       <CreditCard className="w-6 h-6 text-blue-600" />
                       Secure Card Payment
                     </h2>
-                    <StripeCheckout
-                      items={cart.map(item => ({
-                        productId: item.product.id,
-                        name: item.product.name,
-                        price: parseFloat(item.product.sale_price || item.product.price),
-                        quantity: item.quantity,
-                        image: item.product.image_url || ''
-                      }))}
-                      total={calculateTotal()}
-                      customerInfo={{
-                        email: customerInfo.email,
-                        fullName: customerInfo.name,
-                        address: customerInfo.address,
-                        city: customerInfo.city,
-                        zipCode: customerInfo.zip
-                      }}
-                    />
+                    {!stripeClientSecret ? (
+                      <div>
+                        <p className="text-gray-600 mb-4">Click below to initialize secure payment</p>
+                        <button
+                          onClick={async () => {
+                            setCreatingPaymentIntent(true);
+                            try {
+                              const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                              const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  amount: Math.round(calculateTotal() * 100), // Convert to cents
+                                  customerEmail: customerInfo.email,
+                                  customerName: customerInfo.name,
+                                  items: cart.map(item => ({
+                                    product_id: item.product.id,
+                                    product_name: item.product.name,
+                                    quantity: item.quantity,
+                                    price: parseFloat(item.product.sale_price || item.product.price)
+                                  }))
+                                }),
+                              });
+                              const data = await response.json();
+                              if (!response.ok) throw new Error(data.error || 'Failed to create payment intent');
+                              setStripeClientSecret(data.clientSecret);
+                            } catch (error) {
+                              alert(`Error: ${error instanceof Error ? error.message : 'Failed to initialize payment'}`);
+                            } finally {
+                              setCreatingPaymentIntent(false);
+                            }
+                          }}
+                          disabled={creatingPaymentIntent}
+                          className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-bold text-lg transition-all disabled:opacity-50"
+                        >
+                          {creatingPaymentIntent ? 'Initializing...' : 'Initialize Secure Payment'}
+                        </button>
+                      </div>
+                    ) : (
+                      <StripePaymentForm
+                        amount={calculateTotal()}
+                        clientSecret={stripeClientSecret}
+                        onSuccess={async (paymentIntentId) => {
+                          try {
+                            const { data, error } = await supabase
+                              .from('orders')
+                              .insert([{
+                                customer_name: customerInfo.name,
+                                customer_email: customerInfo.email,
+                                customer_phone: customerInfo.phone,
+                                shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
+                                total_amount: calculateTotal().toString(),
+                                payment_method: 'stripe',
+                                payment_intent_id: paymentIntentId,
+                                payment_status: 'completed',
+                                status: 'processing',
+                                items: cart.map(item => ({
+                                  product_id: item.product.id,
+                                  product_name: item.product.name,
+                                  quantity: item.quantity,
+                                  price: parseFloat(item.product.sale_price || item.product.price)
+                                }))
+                              }])
+                              .select();
+                            if (error) throw error;
+                            const orderCode = (data && data.length > 0 && data[0].id) ? String(data[0].id) : `STRIPE-${Date.now()}`;
+                            handleOrderComplete(orderCode);
+                          } catch (error) {
+                            console.error('Order creation failed:', error);
+                            alert('Payment succeeded but order creation failed. Please contact support.');
+                          }
+                        }}
+                        onError={(error) => {
+                          alert(`Payment failed: ${error}`);
+                        }}
+                      />
+                    )}
                     <button
-                      onClick={() => setCurrentStep(2)}
+                      onClick={() => {
+                        setCurrentStep(2);
+                        setStripeClientSecret(null);
+                      }}
                       className="mt-6 w-full bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition-all"
                     >
                       Back to Payment Methods
