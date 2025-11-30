@@ -1,0 +1,334 @@
+═══════════════════════════════════════════════════════════════════════════════
+                    COPY-PASTE SETUP GUIDE - EVERYTHING YOU NEED
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ SQL IS DONE - Skip Steps 1-2
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 3: SUPABASE SECRET #1 - ADMIN EMAIL
+═══════════════════════════════════════════════════════════════════════════════
+
+WHERE: Supabase → Edge Functions → Secrets → Add new secret
+
+KEY:
+ADMIN_EMAIL
+
+VALUE:
+reloadedfirestvteam@gmail.com
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 4: SUPABASE SECRET #2 - STRIPE SECRET KEY
+═══════════════════════════════════════════════════════════════════════════════
+
+WHERE: Supabase → Edge Functions → Secrets → Add new secret
+
+KEY:
+STRIPE_SECRET_KEY
+
+VALUE:
+(Get this from Stripe Dashboard → API Keys → Secret Key - starts with sk_live_ or sk_test_)
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 5: SUPABASE SECRET #3 - STRIPE WEBHOOK SECRET
+═══════════════════════════════════════════════════════════════════════════════
+
+FIRST: Create webhook in Stripe Dashboard → Webhooks → Add endpoint
+
+WEBHOOK URL:
+https://YOUR_PROJECT_ID.supabase.co/functions/v1/stripe-webhook
+(Replace YOUR_PROJECT_ID with your Supabase project ID)
+
+SELECT THESE EVENTS:
+- payment_intent.succeeded
+- payment_intent.payment_failed
+
+THEN: Copy the Signing Secret (starts with whsec_)
+
+WHERE: Supabase → Edge Functions → Secrets → Add new secret
+
+KEY:
+STRIPE_WEBHOOK_SECRET
+
+VALUE:
+(Paste the whsec_... secret from Stripe)
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 6: DEPLOY FUNCTION - stripe-payment-intent
+═══════════════════════════════════════════════════════════════════════════════
+
+WHERE: Supabase → Edge Functions → Find "stripe-payment-intent" → Click Deploy
+
+(No copy-paste needed, just click Deploy button)
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 7: DEPLOY FUNCTION - stripe-webhook
+═══════════════════════════════════════════════════════════════════════════════
+
+WHERE: Supabase → Edge Functions → Find "stripe-webhook" → Click Deploy
+
+(No copy-paste needed, just click Deploy button)
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 8: CREATE & DEPLOY FUNCTION - send-credentials-email
+═══════════════════════════════════════════════════════════════════════════════
+
+WHERE: Supabase → Edge Functions → New Function
+
+FUNCTION NAME:
+send-credentials-email
+
+CODE: (Copy everything below this line - START COPYING)
+
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+};
+
+interface CredentialsEmailPayload {
+  customerEmail: string;
+  customerName: string;
+  orderCode: string;
+  username: string;
+  password: string;
+  productName: string;
+  totalAmount: number;
+  setupVideoUrl: string;
+  serviceUrl: string;
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 200, headers: corsHeaders });
+  }
+
+  try {
+    const payload: CredentialsEmailPayload = await req.json();
+    const {
+      customerEmail,
+      customerName,
+      orderCode,
+      username,
+      password,
+      productName,
+      totalAmount,
+      setupVideoUrl,
+      serviceUrl,
+    } = payload;
+
+    // Send credentials email to customer
+    const credentialsEmail = {
+      to: customerEmail,
+      subject: `Your Login Credentials - Order ${orderCode}`,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+    .content { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; }
+    .credentials-box { background: white; border: 2px solid #3b82f6; padding: 20px; border-radius: 10px; margin: 20px 0; }
+    .credential-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
+    .credential-label { font-weight: bold; color: #1f2937; }
+    .credential-value { font-family: monospace; color: #3b82f6; font-size: 16px; }
+    .button { display: inline-block; padding: 12px 30px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔥 Stream Stick Pro</h1>
+      <h2>Your Login Credentials</h2>
+    </div>
+    <div class="content">
+      <p>Hi <strong>${customerName}</strong>,</p>
+      <p>Your account has been created! Here are your login credentials:</p>
+      
+      <div class="credentials-box">
+        <h3>Your Account Credentials</h3>
+        <div class="credential-row">
+          <span class="credential-label">Username:</span>
+          <span class="credential-value">${username}</span>
+        </div>
+        <div class="credential-row">
+          <span class="credential-label">Password:</span>
+          <span class="credential-value">${password}</span>
+        </div>
+      </div>
+
+      <p><strong>Order Details:</strong></p>
+      <ul>
+        <li>Order Code: ${orderCode}</li>
+        <li>Product: ${productName}</li>
+        <li>Total: $${totalAmount.toFixed(2)}</li>
+      </ul>
+
+      ${serviceUrl ? `
+      <p><strong>Access Your Service:</strong></p>
+      <p><a href="${serviceUrl}" class="button" style="background: #10b981;">Access Service Portal</a></p>
+      <p>Or visit: <a href="${serviceUrl}">${serviceUrl}</a></p>
+      ` : ""}
+
+      ${setupVideoUrl ? `
+      <p><strong>Setup Instructions:</strong></p>
+      <p>Watch our setup video to get started:</p>
+      <a href="${setupVideoUrl}" class="button">Watch Setup Video</a>
+      <p>Or visit: <a href="${setupVideoUrl}">${setupVideoUrl}</a></p>
+      ` : ""}
+
+      <p>Need help? Reply to this email or contact support.</p>
+    </div>
+  </div>
+</body>
+</html>
+      `,
+    };
+
+    // Call send-order-emails function (or implement actual email sending)
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (supabaseUrl && supabaseKey) {
+      await fetch(
+        `${supabaseUrl}/functions/v1/send-order-emails`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseKey}`,
+            "apikey": supabaseKey,
+          },
+          body: JSON.stringify({
+            orderCode,
+            customerEmail,
+            customerName,
+            totalUsd: totalAmount,
+            paymentMethod: "Stripe",
+            products: [{ name: productName, price: totalAmount, quantity: 1 }],
+            username,
+            password,
+            setupVideoUrl,
+            serviceUrl,
+            emailType: "credentials",
+          }),
+        }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ success: true, message: "Credentials email queued" }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return new Response(
+      JSON.stringify({ success: false, error: errorMessage }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
+
+(STOP COPYING - Paste this code into Supabase function editor)
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 9: CLOUDFLARE VARIABLE #1 - VITE_SUPABASE_URL
+═══════════════════════════════════════════════════════════════════════════════
+
+WHERE: Cloudflare Dashboard → Pages → Your Project → Settings → Environment Variables
+
+VARIABLE NAME:
+VITE_SUPABASE_URL
+
+VALUE:
+(Get from Supabase Dashboard → Settings → API → Project URL - looks like https://xxxxx.supabase.co)
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 10: CLOUDFLARE VARIABLE #2 - VITE_SUPABASE_ANON_KEY
+═══════════════════════════════════════════════════════════════════════════════
+
+WHERE: Cloudflare Dashboard → Pages → Your Project → Settings → Environment Variables
+
+VARIABLE NAME:
+VITE_SUPABASE_ANON_KEY
+
+VALUE:
+(Get from Supabase Dashboard → Settings → API → anon public key - long string)
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 11: CLOUDFLARE VARIABLE #3 - VITE_STRIPE_PUBLISHABLE_KEY
+═══════════════════════════════════════════════════════════════════════════════
+
+WHERE: Cloudflare Dashboard → Pages → Your Project → Settings → Environment Variables
+
+VARIABLE NAME:
+VITE_STRIPE_PUBLISHABLE_KEY
+
+VALUE:
+(Get from Stripe Dashboard → API Keys → Publishable Key - starts with pk_live_ or pk_test_)
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 12: CLOUDFLARE VARIABLE #4 - VITE_STORAGE_BUCKET_NAME
+═══════════════════════════════════════════════════════════════════════════════
+
+WHERE: Cloudflare Dashboard → Pages → Your Project → Settings → Environment Variables
+
+VARIABLE NAME:
+VITE_STORAGE_BUCKET_NAME
+
+VALUE:
+images
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 13: CLOUDFLARE VARIABLE #5 - VITE_STRIPE_HOSTS
+═══════════════════════════════════════════════════════════════════════════════
+
+WHERE: Cloudflare Dashboard → Pages → Your Project → Settings → Environment Variables
+
+VARIABLE NAME:
+VITE_STRIPE_HOSTS
+
+VALUE:
+pay.streamstickpro.com
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 14: CLOUDFLARE VARIABLE #6 - VITE_ADMIN_DEFAULT_USER
+═══════════════════════════════════════════════════════════════════════════════
+
+WHERE: Cloudflare Dashboard → Pages → Your Project → Settings → Environment Variables
+
+VARIABLE NAME:
+VITE_ADMIN_DEFAULT_USER
+
+VALUE:
+admin
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 15: CLOUDFLARE VARIABLE #7 - VITE_ADMIN_DEFAULT_PASSWORD
+═══════════════════════════════════════════════════════════════════════════════
+
+WHERE: Cloudflare Dashboard → Pages → Your Project → Settings → Environment Variables
+
+VARIABLE NAME:
+VITE_ADMIN_DEFAULT_PASSWORD
+
+VALUE:
+admin123
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 16: CLOUDFLARE VARIABLE #8 - VITE_ADMIN_DEFAULT_EMAIL
+═══════════════════════════════════════════════════════════════════════════════
+
+WHERE: Cloudflare Dashboard → Pages → Your Project → Settings → Environment Variables
+
+VARIABLE NAME:
+VITE_ADMIN_DEFAULT_EMAIL
+
+VALUE:
+reloadedfirestvteam@gmail.com
+
+═══════════════════════════════════════════════════════════════════════════════
+
