@@ -1,15 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-<<<<<<< HEAD
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, Accept, Origin",
-  "Access-Control-Max-Age": "86400",
-};
-
-=======
->>>>>>> c9a1f026abc5a1db827a512f2e69267d94070712
 interface PaymentIntentRequest {
   productId?: string;
   productIds?: string[];
@@ -21,7 +11,6 @@ interface PaymentIntentRequest {
 }
 
 // Fallback product amounts (in dollars) for known product codes
-// Used when stripe_products table is unavailable or product not found
 const FALLBACK_PRODUCTS: Record<string, { amount: number; cloaked_name: string }> = {
   "starter": { amount: 99.99, cloaked_name: "Digital Entertainment Service - Basic" },
   "pro": { amount: 199.99, cloaked_name: "Digital Entertainment Service - Pro" },
@@ -30,9 +19,7 @@ const FALLBACK_PRODUCTS: Record<string, { amount: number; cloaked_name: string }
 };
 
 /**
- * Get CORS headers based on the request origin and ALLOWED_ORIGINS env var
- * @param requestOrigin - The Origin header from the request
- * @returns CORS headers object
+ * Get CORS headers - supports Cloudflare Pages and all origins
  */
 function getCorsHeaders(requestOrigin: string | null): Record<string, string> {
   const allowedOriginsEnv = Deno.env.get("ALLOWED_ORIGINS") || "";
@@ -41,7 +28,6 @@ function getCorsHeaders(requestOrigin: string | null): Record<string, string> {
     .map((o) => o.trim())
     .filter((o) => o.length > 0);
 
-  // Default fallback origins (for development)
   const defaultOrigins = [
     "http://localhost:5173",
     "http://localhost:3000",
@@ -49,32 +35,26 @@ function getCorsHeaders(requestOrigin: string | null): Record<string, string> {
     "https://www.streamstickpro.com",
   ];
 
-  // Combine configured and default origins
   const allAllowedOrigins = [...new Set([...allowedOrigins, ...defaultOrigins])];
 
-  // Check if request origin is allowed
   let allowedOrigin = "";
   if (requestOrigin && allAllowedOrigins.includes(requestOrigin)) {
     allowedOrigin = requestOrigin;
   } else if (requestOrigin && requestOrigin.endsWith(".pages.dev")) {
-    // Allow Cloudflare Pages preview deployments - only for project subdomains
-    // Match pattern: *.{project-name}.pages.dev or {hash}.{project-name}.pages.dev
     const pagesDomain = requestOrigin.replace(/^https?:\/\//, "");
-    // Only allow if it has 2+ subdomains (hash.project.pages.dev pattern)
     const parts = pagesDomain.split(".");
     if (parts.length >= 3 && parts[parts.length - 1] === "dev" && parts[parts.length - 2] === "pages") {
       allowedOrigin = requestOrigin;
     }
   } else if (allowedOrigins.length === 0) {
-    // If no ALLOWED_ORIGINS configured, default to * for backwards compatibility
     allowedOrigin = "*";
   }
 
   return {
     "Access-Control-Allow-Origin": allowedOrigin || "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-    "Access-Control-Max-Age": "86400", // 24 hours
+    "Access-Control-Allow-Methods": "POST, OPTIONS, GET",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, Accept, Origin",
+    "Access-Control-Max-Age": "86400",
   };
 }
 
@@ -82,7 +62,6 @@ Deno.serve(async (req: Request) => {
   const requestOrigin = req.headers.get("Origin");
   const corsHeaders = getCorsHeaders(requestOrigin);
 
-  // Handle CORS preflight with 204 No Content
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
@@ -90,7 +69,6 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  // Only allow POST method for payment intent creation
   if (req.method !== "POST") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
@@ -102,13 +80,11 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Get Stripe secret key from environment or attempt fallback to site_settings
     let stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY") || Deno.env.get("VITE_STRIPE_SECRET_KEY");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     if (!supabaseUrl || !supabaseKey) {
-      console.error("Missing Supabase environment variables");
       return new Response(
         JSON.stringify({ error: "Payment service configuration error. Please contact support." }),
         {
@@ -118,7 +94,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // If no Stripe key in env, try to fetch from site_settings
+    // Try to fetch Stripe key from site_settings if not in env
     if (!stripeSecretKey) {
       try {
         const settingsResponse = await fetch(
@@ -144,7 +120,6 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!stripeSecretKey) {
-      console.error("STRIPE_SECRET_KEY is not configured");
       return new Response(
         JSON.stringify({ error: "Payment processing is not configured. Please contact support." }),
         {
@@ -154,7 +129,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Parse request body
     let payload: PaymentIntentRequest;
     try {
       payload = await req.json();
@@ -168,22 +142,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-<<<<<<< HEAD
-    const payload: PaymentIntentRequest = await req.json();
     const { productId, productIds, amount, currency = 'usd', customerEmail, customerName, metadata = {} } = payload;
-=======
-    const { productId, customerEmail, customerName } = payload;
-
-    if (!productId) {
-      return new Response(
-        JSON.stringify({ error: "Product ID is required" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
->>>>>>> c9a1f026abc5a1db827a512f2e69267d94070712
 
     if (!customerEmail) {
       return new Response(
@@ -195,7 +154,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(customerEmail)) {
       return new Response(
@@ -207,7 +165,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-<<<<<<< HEAD
     let amountInCents: number;
     let productName = 'Order';
     let productMetadata: Record<string, string> = { ...metadata };
@@ -221,22 +178,25 @@ Deno.serve(async (req: Request) => {
       let productIdToFetch = productId;
       let productIdsToFetch = productIds || [];
 
-      // If single productId provided, convert to array
       if (productIdToFetch && productIdsToFetch.length === 0) {
         productIdsToFetch = [productIdToFetch];
       }
 
       if (productIdsToFetch.length === 0) {
-        throw new Error("Product ID(s) or amount is required");
+        return new Response(
+          JSON.stringify({ error: "Product ID(s) or amount is required" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
       }
 
-      // Fetch products from real_products table (or stripe_products as fallback)
-      const productIdsParam = productIdsToFetch.map(id => {
-        const sanitized = id.replace(/[^a-zA-Z0-9-_.]/g, '');
-        return `id.eq.${sanitized}`;
-      }).join(',or=');
+      // Sanitize product IDs
+      const sanitizedIds = productIdsToFetch.map(id => id.replace(/[^a-zA-Z0-9-_.]/g, ''));
+      const productIdsParam = sanitizedIds.map(id => `id.eq.${id}`).join(',or=');
 
-      // Try real_products first
+      // Try real_products first, then stripe_products, then fallback
       let productResponse = await fetch(
         `${supabaseUrl}/rest/v1/real_products?select=*&or=(${productIdsParam})`,
         {
@@ -249,7 +209,12 @@ Deno.serve(async (req: Request) => {
         }
       );
 
-      if (!productResponse.ok || !(await productResponse.json()).length) {
+      let products: any[] = [];
+      if (productResponse.ok) {
+        products = await productResponse.json() || [];
+      }
+
+      if (products.length === 0) {
         // Fallback to stripe_products
         productResponse = await fetch(
           `${supabaseUrl}/rest/v1/stripe_products?select=*&or=(${productIdsParam})`,
@@ -262,183 +227,71 @@ Deno.serve(async (req: Request) => {
             },
           }
         );
-      }
 
-      if (!productResponse.ok) {
-        throw new Error("Failed to fetch products");
-      }
-
-      const products = await productResponse.json();
-
-      if (!products || products.length === 0) {
-        throw new Error("Product(s) not found or inactive");
-      }
-
-      // Calculate total from products
-      let totalAmount = 0;
-      const productNames: string[] = [];
-
-      for (const product of products) {
-        const price = product.sale_price || product.price;
-        totalAmount += parseFloat(price || 0);
-        productNames.push(product.name || 'Product');
-      }
-
-      productName = productNames.length === 1 ? productNames[0] : `${productNames.length} items`;
-      amountInCents = Math.round(totalAmount * 100);
-      productMetadata = {
-        ...productMetadata,
-        product_ids: productIdsToFetch.join(','),
-        product_names: productNames.join(', ')
-      };
-    }
-
-    // Create a Stripe PaymentIntent with ALL payment methods enabled
-    // Build payment intent parameters
-    const paymentParams: Record<string, string> = {
-      amount: amountInCents.toString(),
-      currency: currency,
-      "automatic_payment_methods[enabled]": "true",
-      // Enable all payment methods including Google Pay, Apple Pay, Cash App Pay, etc.
-      "payment_method_types[]": "card",
-      "metadata[customer_email]": customerEmail,
-      description: `Payment for ${productName}`,
-      receipt_email: customerEmail,
-      statement_descriptor_suffix: "STREAMSTICK",
-    };
-    
-    // Add all metadata
-    Object.entries(productMetadata).forEach(([key, value]) => {
-      paymentParams[`metadata[${key}]`] = String(value);
-    });
-=======
-    // Sanitize product ID to prevent injection attacks
-    // Allow alphanumeric, hyphens, underscores, and dots (common in product IDs like prod_abc.123)
-    const sanitizedProductId = productId.replace(/[^a-zA-Z0-9-_.]/g, "");
-
-    // Ensure product ID is not empty after sanitization
-    if (!sanitizedProductId) {
-      return new Response(
-        JSON.stringify({ error: "Invalid product ID format" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        if (productResponse.ok) {
+          products = await productResponse.json() || [];
         }
-      );
-    }
+      }
 
-    // Try to fetch the product from stripe_products table
-    let amount: number;
-    let currency = "usd";
-    let cloakedName: string;
-
-    try {
-      const productResponse = await fetch(
-        `${supabaseUrl}/rest/v1/stripe_products?id=eq.${encodeURIComponent(sanitizedProductId)}&is_active=eq.true`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${supabaseKey}`,
-            "apikey": supabaseKey,
-          },
-        }
-      );
-
-      if (productResponse.ok) {
-        const products = await productResponse.json();
-
-        if (products && products.length > 0) {
-          const product = products[0];
-
-          // Use sale_price if explicitly set (including 0), otherwise use regular price
-          // parseFloat returns NaN for null/undefined, so check for valid number
-          const salePrice = parseFloat(product.sale_price);
-          const regularPrice = parseFloat(product.price);
-          amount = !isNaN(salePrice) && product.sale_price !== null ? salePrice : regularPrice;
-          
-          currency = product.currency || "usd";
-
-          // Use cloaked_name if available, otherwise generate a compliant description
-          cloakedName = 
-            (product.cloaked_name && product.cloaked_name.trim()) ||
-            (product.short_description && product.short_description.trim()) ||
-            "Digital Entertainment Service";
-        } else {
-          // Product not found in database - check fallback
-          const fallback = FALLBACK_PRODUCTS[sanitizedProductId.toLowerCase()];
-          if (fallback) {
-            amount = fallback.amount;
-            cloakedName = fallback.cloaked_name;
-          } else {
-            return new Response(
-              JSON.stringify({ error: "Product not found or inactive" }),
-              {
-                status: 400,
-                headers: { ...corsHeaders, "Content-Type": "application/json" },
-              }
-            );
-          }
-        }
-      } else {
-        // Database query failed - check fallback
-        const fallback = FALLBACK_PRODUCTS[sanitizedProductId.toLowerCase()];
+      if (products.length === 0) {
+        // Try fallback products
+        const fallback = sanitizedIds.length === 1 ? FALLBACK_PRODUCTS[sanitizedIds[0].toLowerCase()] : null;
         if (fallback) {
-          amount = fallback.amount;
-          cloakedName = fallback.cloaked_name;
+          amountInCents = Math.round(fallback.amount * 100);
+          productName = fallback.cloaked_name;
+          productMetadata = {
+            ...productMetadata,
+            product_ids: sanitizedIds.join(','),
+            product_name: fallback.cloaked_name
+          };
         } else {
-          console.error("Failed to fetch product from database");
           return new Response(
-            JSON.stringify({ error: "Unable to retrieve product information" }),
+            JSON.stringify({ error: "Product(s) not found or inactive" }),
             {
-              status: 500,
+              status: 400,
               headers: { ...corsHeaders, "Content-Type": "application/json" },
             }
           );
         }
-      }
-    } catch (e) {
-      // Database error - check fallback
-      console.error("Database error:", e);
-      const fallback = FALLBACK_PRODUCTS[sanitizedProductId.toLowerCase()];
-      if (fallback) {
-        amount = fallback.amount;
-        cloakedName = fallback.cloaked_name;
       } else {
-        return new Response(
-          JSON.stringify({ error: "Unable to retrieve product information" }),
-          {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
+        // Calculate total from products
+        let totalAmount = 0;
+        const productNames: string[] = [];
+
+        for (const product of products) {
+          const salePrice = parseFloat(product.sale_price);
+          const regularPrice = parseFloat(product.price);
+          const price = !isNaN(salePrice) && product.sale_price !== null ? salePrice : regularPrice;
+          totalAmount += price;
+          productNames.push(product.cloaked_name || product.name || product.short_description || 'Product');
+        }
+
+        productName = productNames.length === 1 ? productNames[0] : `${productNames.length} items`;
+        amountInCents = Math.round(totalAmount * 100);
+        productMetadata = {
+          ...productMetadata,
+          product_ids: sanitizedIds.join(','),
+          product_names: productNames.join(', ')
+        };
       }
     }
 
-    // Convert to cents for Stripe (Stripe requires amounts in smallest currency unit)
-    const amountInCents = Math.round(amount * 100);
-
-    // Build payment intent parameters with CLOAKED name for Stripe
-    // Stripe will see the cloaked name, but metadata contains the real product info
+    // Create Stripe PaymentIntent with ALL payment methods enabled
     const paymentParams: Record<string, string> = {
       amount: amountInCents.toString(),
       currency: currency.toLowerCase(),
-      // Enable automatic_payment_methods for Apple Pay, Google Pay, Cash App Pay, etc.
       "automatic_payment_methods[enabled]": "true",
-      // Use CLOAKED name for Stripe description (what appears on statements)
-      description: cloakedName,
-      // Receipt email
-      receipt_email: customerEmail,
-      // Statement descriptor (max 22 chars, only appears if not overridden by Stripe account settings)
-      statement_descriptor_suffix: "PRO DIGITAL",
-      // Metadata contains CLOAKED product info (for compliance)
-      "metadata[product_id]": sanitizedProductId,
-      "metadata[product_name_cloaked]": cloakedName,
+      "payment_method_types[]": "card",
       "metadata[customer_email]": customerEmail,
+      description: productName,
+      receipt_email: customerEmail,
+      statement_descriptor_suffix: "STREAMSTICK",
     };
->>>>>>> c9a1f026abc5a1db827a512f2e69267d94070712
+    
+    Object.entries(productMetadata).forEach(([key, value]) => {
+      paymentParams[`metadata[${key}]`] = String(value);
+    });
 
-    // Only add customer_name to metadata if provided
     if (customerName && customerName.trim()) {
       paymentParams["metadata[customer_name]"] = customerName.trim();
     }
@@ -467,23 +320,14 @@ Deno.serve(async (req: Request) => {
     }
 
     const paymentIntent = await stripeResponse.json();
-
-<<<<<<< HEAD
-    // Log the payment intent creation (optional - for debugging)
     const displayAmount = (amountInCents / 100).toFixed(2);
     console.log(`PaymentIntent created: ${paymentIntent.id} for ${productName}, amount: $${displayAmount}`);
-=======
-    // Log the payment intent creation (using cloaked info for compliance)
-    console.log(
-      `PaymentIntent created: ${paymentIntent.id} for product_id: ${sanitizedProductId}, description: ${cloakedName}, amount: $${amount}`
-    );
->>>>>>> c9a1f026abc5a1db827a512f2e69267d94070712
 
     return new Response(
       JSON.stringify({
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
-        amount: (amountInCents / 100).toFixed(2),
+        amount: displayAmount,
       }),
       {
         status: 200,
