@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Tv, Zap, Shield, Star } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, getStorageUrl } from '../lib/supabase';
 
 interface Product {
   id: string;
@@ -24,7 +24,35 @@ export default function HomePage() {
         .order('created_at', { ascending: false });
 
       if (data && !error) {
-        setProducts(data);
+        // Fix product images - convert filenames to Supabase URLs
+        const productsWithFixedImages = data.map((product: Product) => {
+          let imageUrl = product.main_image || '';
+          
+          // Check if broken
+          const isBroken = imageUrl && (
+            imageUrl.includes('20%20bytes') ||
+            imageUrl.includes('20 bytes') ||
+            imageUrl.length < 10 ||
+            imageUrl.includes('placeholder') ||
+            imageUrl.trim() === ''
+          );
+          
+          // Convert filename to URL if needed
+          if (imageUrl && !isBroken && !imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
+            imageUrl = getStorageUrl('images', imageUrl);
+          }
+          // Use fallback if broken
+          else if (!imageUrl || isBroken) {
+            imageUrl = getStorageUrl('images', 'iptv-subscription.jpg');
+          }
+          
+          return {
+            ...product,
+            main_image: imageUrl
+          };
+        });
+        
+        setProducts(productsWithFixedImages);
       }
       setLoading(false);
     }

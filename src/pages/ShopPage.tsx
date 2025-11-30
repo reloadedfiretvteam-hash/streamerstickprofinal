@@ -66,8 +66,22 @@ export default function ShopPage() {
       const productsWithImages = (data || []).map((product: Product) => {
         let imageUrl = product.main_image || product.image_url || '';
         
-        // Use Supabase storage images as fallback for reliability
-        if (!imageUrl || imageUrl.includes('placeholder') || imageUrl.includes('pexels')) {
+        // Check if image is broken/invalid
+        const isBroken = imageUrl && (
+          imageUrl.includes('20%20bytes') ||
+          imageUrl.includes('20 bytes') ||
+          imageUrl.length < 10 ||
+          imageUrl.includes('placeholder') ||
+          imageUrl.includes('pexels') ||
+          imageUrl.trim() === ''
+        );
+        
+        // If image is a filename (no http/https), convert to Supabase URL
+        if (imageUrl && !isBroken && !imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
+          imageUrl = getStorageUrl('images', imageUrl);
+        }
+        // If broken or empty, use type-specific fallback
+        else if (!imageUrl || isBroken) {
           const isFirestick = product.name?.toLowerCase().includes('fire stick') || product.name?.toLowerCase().includes('fire tv');
           if (isFirestick) {
             if (product.name?.toLowerCase().includes('4k max')) {

@@ -65,8 +65,22 @@ export default function FireSticksPage() {
         .map((product: any) => {
           let imageUrl = product.main_image || product.image_url || '';
           
-          // Use Supabase storage URLs as fallback for reliability
-          if (!imageUrl || imageUrl.includes('placeholder') || imageUrl.includes('pexels')) {
+          // Check if image is broken/invalid
+          const isBroken = imageUrl && (
+            imageUrl.includes('20%20bytes') ||
+            imageUrl.includes('20 bytes') ||
+            imageUrl.length < 10 ||
+            imageUrl.includes('placeholder') ||
+            imageUrl.includes('pexels') ||
+            imageUrl.trim() === ''
+          );
+          
+          // If image is a filename (no http/https), convert to Supabase URL
+          if (imageUrl && !isBroken && !imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
+            imageUrl = getStorageUrl('images', imageUrl);
+          }
+          // If broken or empty, use type-specific fallback
+          else if (!imageUrl || isBroken) {
             if (product.name?.toLowerCase().includes('4k max')) {
               imageUrl = getStorageUrl('images', 'firestick 4k max.jpg');
             } else if (product.name?.toLowerCase().includes('4k')) {
