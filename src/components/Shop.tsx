@@ -209,12 +209,21 @@ export default function Shop({ onAddToCart }: ShopProps) {
           // Get image - check if it's from Supabase bucket or local
           let productImage = p.main_image || '';
 
+          // Skip broken URLs (20-byte images often have suspicious patterns)
+          const isBrokenUrl = productImage && (
+            productImage.includes('20%20bytes') ||
+            productImage.includes('20 bytes') ||
+            productImage.length < 20 || // Too short to be valid
+            (productImage.startsWith('http') && productImage.includes('placeholder')) ||
+            productImage.trim() === ''
+          );
+
           // If image is just a filename (no protocol), use Supabase storage with 'images' bucket
-          if (productImage && !productImage.startsWith('http') && !productImage.startsWith('/')) {
+          if (productImage && !isBrokenUrl && !productImage.startsWith('http') && !productImage.startsWith('/')) {
             productImage = getStorageUrl('images', productImage);
           }
-          // If no image or image is placeholder/empty, use type-specific fallback from Supabase storage
-          else if (!productImage || productImage.trim() === '' || productImage.includes('placeholder') || productImage.includes('pexels')) {
+          // If no image, broken URL, or placeholder, use type-specific fallback from Supabase storage
+          else if (!productImage || isBrokenUrl || productImage.includes('placeholder') || productImage.includes('pexels')) {
             if (isFirestick) {
               if (p.name.toLowerCase().includes('4k max')) {
                 productImage = getStorageUrl('images', 'firestick 4k max.jpg');

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 export default function Hero() {
   const [heroImageUrl, setHeroImageUrl] = useState<string>(getStorageUrl('images', 'hero-firestick-breakout.jpg'));
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     loadHeroImage();
@@ -21,17 +22,22 @@ export default function Hero() {
       if (!error && data && data.image_url) {
         // If image_url is just a filename (no http/https), use getStorageUrl
         if (!data.image_url.startsWith('http')) {
-          setHeroImageUrl(getStorageUrl('images', data.image_url));
+          const url = getStorageUrl('images', data.image_url);
+          setHeroImageUrl(url);
         } else {
           setHeroImageUrl(data.image_url);
         }
+      } else {
+        // If table doesn't exist or no data, silently use fallback
+        // This is normal if SQL hasn't been run yet
+        console.log('Hero: Using default image (section_images table may not exist yet)');
       }
-      // If no database entry, keep the default fallback
     } catch (error) {
-      console.error('Error loading hero image:', error);
-      // Keep default fallback on error
+      // Table doesn't exist - this is OK, use fallback
+      console.log('Hero: Using default image - section_images table not found');
     }
   };
+
   const goToShop = () => {
     window.location.href = '/shop';
   };
@@ -40,29 +46,33 @@ export default function Hero() {
     document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    // If image fails, hide it and show background gradient instead
+    const target = e.target as HTMLImageElement;
+    target.style.display = 'none';
+    setImageError(true);
+  };
+
   return (
     <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden min-h-[600px] flex items-center">
       {/* Background image: Fire Stick breaking out of cage */}
       <div className="absolute inset-0 overflow-hidden">
-        <img
-          src={heroImageUrl}
-          alt="Best Jailbroken Fire Stick 2025 - Premium IPTV Streaming Device"
-          className="w-full h-full object-cover object-center"
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          style={{ 
-            objectPosition: 'center center',
-            /* Scale up slightly and crop edges to remove phone screenshot borders */
-            transform: 'scale(1.15)',
-            transformOrigin: 'center center'
-          }}
-          onError={(e) => {
-            // Fallback to a gradient background if image fails
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-          }}
-        />
+        {!imageError && (
+          <img
+            src={heroImageUrl}
+            alt="Best Jailbroken Fire Stick 2025 - Premium IPTV Streaming Device"
+            className="w-full h-full object-cover object-center"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            style={{ 
+              objectPosition: 'center center',
+              transform: 'scale(1.15)',
+              transformOrigin: 'center center'
+            }}
+            onError={handleImageError}
+          />
+        )}
         {/* Dark overlay so text stays readable */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
       </div>
