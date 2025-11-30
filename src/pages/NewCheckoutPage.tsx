@@ -550,7 +550,7 @@ export default function NewCheckoutPage() {
                             setCreatingPaymentIntent(true);
                             try {
                               const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-                              const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {
+                              const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
