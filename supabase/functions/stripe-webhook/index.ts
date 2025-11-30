@@ -614,10 +614,10 @@ Deno.serve(async (req: Request) => {
         try {
           const adminEmail = Deno.env.get("ADMIN_EMAIL") || "reloadedfirestvteam@gmail.com";
           
-          // Send customer email with credentials
-          const customerEmailData = {
+          // FIRST EMAIL: Thank you for purchase (sent immediately)
+          const confirmationEmailData = {
             to: customerEmail,
-            subject: `Your Stream Stick Pro Order Confirmation - ${orderCode}`,
+            subject: `Thank You For Your Purchase - Order ${orderCode}`,
             html: `
 <!DOCTYPE html>
 <html>
@@ -627,56 +627,33 @@ Deno.serve(async (req: Request) => {
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
     .header { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
     .content { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; }
-    .credentials-box { background: white; border: 2px solid #3b82f6; padding: 20px; border-radius: 10px; margin: 20px 0; }
-    .credential-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
-    .credential-label { font-weight: bold; color: #1f2937; }
-    .credential-value { font-family: monospace; color: #3b82f6; font-size: 16px; }
-    .button { display: inline-block; padding: 12px 30px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+    .info-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h1>🔥 Stream Stick Pro</h1>
-      <h2>Order Confirmed!</h2>
+      <h2>Thank You For Your Purchase!</h2>
     </div>
     <div class="content">
       <p>Hi <strong>${customerName}</strong>,</p>
       <p>Thank you for your order! Your payment has been confirmed.</p>
       
-      <div class="credentials-box">
-        <h3>Your Account Credentials</h3>
-        <div class="credential-row">
-          <span class="credential-label">Username:</span>
-          <span class="credential-value">${username}</span>
-        </div>
-        <div class="credential-row">
-          <span class="credential-label">Password:</span>
-          <span class="credential-value">${password}</span>
-        </div>
-      </div>
-
       <p><strong>Order Details:</strong></p>
       <ul>
-        <li>Order Code: ${orderCode}</li>
+        <li>Order Code: <strong>${orderCode}</strong></li>
         <li>Product: ${realProductName}</li>
         <li>Total: $${amount.toFixed(2)}</li>
       </ul>
 
-      ${setupVideoUrl ? `
-      <p><strong>Setup Instructions:</strong></p>
-      <p>Watch our setup video to get started:</p>
-      <a href="${setupVideoUrl}" class="button">Watch Setup Video</a>
-      <p>Or visit: <a href="${setupVideoUrl}">${setupVideoUrl}</a></p>
-      ` : ""}
+      <div class="info-box">
+        <p><strong>📧 What's Next?</strong></p>
+        <p>Your login information and setup instructions will be sent to this email address momentarily. Please check your inbox in the next 5 minutes.</p>
+      </div>
 
-      ${serviceUrl ? `
-      <p><strong>Access Your Service:</strong></p>
-      <p><a href="${serviceUrl}" class="button" style="background: #10b981;">Access Service Portal</a></p>
-      <p>Or visit: <a href="${serviceUrl}">${serviceUrl}</a></p>
-      ` : ""}
-
-      <p>Need help? Reply to this email or contact support.</p>
+      <p>We appreciate your business and look forward to serving you!</p>
+      <p>If you have any questions, please reply to this email or contact support.</p>
     </div>
   </div>
 </body>
@@ -709,7 +686,7 @@ Deno.serve(async (req: Request) => {
             `,
           };
 
-          // Call send-order-emails function (you may need to implement actual email sending)
+          // Send confirmation email immediately (first email)
           await fetch(
             `${supabaseUrl}/functions/v1/send-order-emails`,
             {
@@ -726,13 +703,68 @@ Deno.serve(async (req: Request) => {
                 totalUsd: amount,
                 paymentMethod: "Stripe",
                 products: [{ name: realProductName, price: amount, quantity: 1 }],
-                username,
-                password,
-                setupVideoUrl,
+                emailType: "confirmation",
+                emailHtml: confirmationEmailData.html,
+                emailSubject: confirmationEmailData.subject,
                 adminEmail,
               }),
             }
           );
+
+          // Schedule credentials email for 5 minutes later (second email)
+          // Store credentials email data to send later
+          const credentialsEmailData = {
+            customerEmail,
+            customerName,
+            orderCode,
+            username,
+            password,
+            productName: realProductName,
+            totalAmount: amount,
+            setupVideoUrl: setupVideoUrl || "",
+            serviceUrl: serviceUrl || "",
+          };
+
+          // Save to database for delayed sending
+          try {
+            await fetch(
+              `${supabaseUrl}/rest/v1/pending_emails`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${supabaseKey}`,
+                  "apikey": supabaseKey,
+                },
+                body: JSON.stringify({
+                  customer_email: customerEmail,
+                  order_code: orderCode,
+                  email_type: "credentials",
+                  email_data: credentialsEmailData,
+                  send_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(), // 5 minutes from now
+                  status: "pending",
+                }),
+              }
+            );
+            console.log(`Credentials email scheduled for ${orderCode} - will send in 5 minutes`);
+          } catch (scheduleError) {
+            console.error("Error scheduling credentials email:", scheduleError);
+            // Fallback: send immediately if scheduling fails
+            await fetch(
+              `${supabaseUrl}/functions/v1/send-credentials-email`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${supabaseKey}`,
+                  "apikey": supabaseKey,
+                },
+                body: JSON.stringify(credentialsEmailData),
+              }
+            ).catch(() => {
+              console.error("Failed to send credentials email");
+            });
+          }
 
           // Update order to mark emails sent
           if (orderId) {
