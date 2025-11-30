@@ -3,7 +3,7 @@ import {
   Package, FileText, ShoppingCart, Settings, LogOut, TrendingUp, HelpCircle, Image,
   DollarSign, CreditCard, Flame, X, Grid, Users, Video, Eye, Edit3, Mail, Tag,
   ArrowRight, Wallet, Repeat, Star, Activity, Shield, Bot, Upload, Monitor, Globe,
-  Bitcoin, BarChart3, Layout, Database, Search, MessageCircle, Zap, Power, Lock
+  Bitcoin, BarChart3, Layout, Search, MessageCircle, Zap
 } from 'lucide-react';
 
 // Import ALL admin components
@@ -72,16 +72,21 @@ import SimplePaymentSettings from '../components/custom-admin/SimplePaymentSetti
 import StripeProductManager from '../components/custom-admin/StripeProductManager';
 import SearchEngineManager from '../components/custom-admin/SearchEngineManager';
 import GitHubCloudflareConfig from '../components/custom-admin/GitHubCloudflareConfig';
-import AICopilotWidget from '../components/custom-admin/AICopilotWidget';
 import { supabase } from '../lib/supabase';
+
+// Type for Lucide icons
+type LucideIcon = typeof Package;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AdminComponentType = React.ComponentType<any>;
 
 interface AdminTool {
   id: string;
   title: string;
-  icon: any;
+  icon: LucideIcon;
   color: string;
   description: string;
-  component: React.ComponentType<any>;
+  component: AdminComponentType;
   category: string;
   featured?: boolean;
 }

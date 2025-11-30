@@ -68,7 +68,7 @@ const initializeStripe = async (): Promise<Stripe | null> => {
 };
 
 // Inner component that uses Stripe hooks
-function StripeCheckoutForm({ items, total: _total, customerInfo, onSuccess, onError }: StripeCheckoutProps & { onSuccess: () => void; onError: (error: string) => void }) {
+function StripeCheckoutForm({ items, total, customerInfo, onSuccess, onError }: StripeCheckoutProps & { onSuccess: () => void; onError: (error: string) => void }) {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);

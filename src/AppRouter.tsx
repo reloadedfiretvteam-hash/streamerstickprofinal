@@ -10,6 +10,7 @@ import NewCheckoutPage from './pages/NewCheckoutPage';
 import FireSticksPage from './pages/FireSticksPage';
 import IPTVServicesPage from './pages/IPTVServicesPage';
 import StripeSecureCheckoutPage from './pages/StripeSecureCheckoutPage';
+import SecureCheckoutPage from './pages/SecureCheckoutPage';
 
 // Check if current host is a Stripe payment subdomain
 function isStripePaymentHost(): boolean {
@@ -55,6 +56,11 @@ export default function AppRouter() {
 
   if (currentPath === '/checkout' || currentPath === '/checkout/') {
     return <NewCheckoutPage />;
+  }
+
+  // Secure/Shadow checkout route - uses shadow products for Carnage/compliance
+  if (currentPath === '/secure-checkout' || currentPath === '/secure-checkout/') {
+    return <SecureCheckoutPage />;
   }
 
   // Stripe checkout route - /stripe-checkout or /stripe-checkout/:productId
