@@ -17,93 +17,45 @@ WHAT YOU NEED TO ADD:
 
 1. CREATE A SUPABASE EDGE FUNCTION
    
-   Create: supabase/functions/create-payment-intent/index.ts
+   The Edge Function is already created at:
+   supabase/functions/stripe-payment-intent/index.ts
    
-   Copy-paste this code:
-   
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   
-   import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-   import Stripe from "https://esm.sh/stripe@14.21.0?target=deno"
-   
-   const corsHeaders = {
-     'Access-Control-Allow-Origin': '*',
-     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-   }
-   
-   serve(async (req) => {
-     if (req.method === 'OPTIONS') {
-       return new Response('ok', { headers: corsHeaders })
-     }
-   
-     try {
-       // Get Stripe secret key from Supabase
-       const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
-       const supabaseClient = createClient(
-         Deno.env.get('SUPABASE_URL') ?? '',
-         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-       )
-       
-       const { data: setting } = await supabaseClient
-         .from('site_settings')
-         .select('setting_value')
-         .eq('setting_key', 'stripe_secret_key')
-         .single()
-       
-       const stripeSecretKey = setting?.setting_value || Deno.env.get('STRIPE_SECRET_KEY')
-       
-       if (!stripeSecretKey) {
-         throw new Error('Stripe secret key not configured')
-       }
-       
-       const stripe = new Stripe(stripeSecretKey, {
-         apiVersion: '2023-10-16',
-         httpClient: Stripe.createFetchHttpClient(),
-       })
-       
-       const { amount, currency = 'usd', customerInfo } = await req.json()
-       
-       // Create PaymentIntent
-       const paymentIntent = await stripe.paymentIntents.create({
-         amount: Math.round(amount), // Amount in cents
-         currency: currency.toLowerCase(),
-         automatic_payment_methods: {
-           enabled: true,
-         },
-         metadata: {
-           customer_email: customerInfo?.email || '',
-           customer_name: customerInfo?.fullName || '',
-         }
-       })
-       
-       return new Response(
-         JSON.stringify({ 
-           clientSecret: paymentIntent.client_secret,
-           paymentIntentId: paymentIntent.id 
-         }),
-         {
-           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-           status: 200,
-         },
-       )
-     } catch (error) {
-       return new Response(
-         JSON.stringify({ error: error.message }),
-         {
-           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-           status: 400,
-         },
-       )
-     }
-   })
-   
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   This function handles:
+   - Creating PaymentIntents with automatic_payment_methods enabled
+   - CORS handling with ALLOWED_ORIGINS support
+   - Cloaked product names for compliance
+   - Fallback product amounts if database is unavailable
 
 2. DEPLOY THE EDGE FUNCTION
    
    Run this command in your terminal:
    
-   supabase functions deploy create-payment-intent
+   supabase functions deploy stripe-payment-intent
+
+3. SET EDGE FUNCTION SECRETS
+
+   In Supabase Dashboard → Edge Functions → Secrets, add:
+   - STRIPE_SECRET_KEY: your sk_test_... or sk_live_... key
+   - ALLOWED_ORIGINS: comma-separated list of your domains (e.g., https://streamstickpro.com,https://www.streamstickpro.com)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CLOUDFLARE PAGES SETUP:
+
+1. Environment Variables (Settings → Environment variables):
+   - VITE_SUPABASE_URL: https://your-project.supabase.co
+   - VITE_SUPABASE_ANON_KEY: your anon key
+   - VITE_STRIPE_PUBLISHABLE_KEY: pk_test_... or pk_live_...
+
+2. Disable Cloudflare optimizations for checkout pages:
+   In Cloudflare Dashboard → Speed → Optimization:
+   - Disable Rocket Loader (or add Page Rule to exclude /checkout*, /secure-checkout*)
+   - Disable Auto Minify for JavaScript on checkout paths
+
+3. CSP Headers:
+   The public/_headers file already includes proper CSP for Stripe.
+   If using Cloudflare Response Headers instead, add:
+   - Content-Security-Policy with js.stripe.com, hooks.stripe.com, api.stripe.com, m.stripe.network, r.stripe.com
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -157,9 +109,11 @@ WHAT'S WORKING NOW:
 NEXT STEPS:
 
 1. ✅ Add Stripe keys to admin panel
-2. ⏳ Create Supabase Edge Function (code provided above)
-3. ⏳ Deploy Edge Function
-4. ⏳ Test payment with Stripe test card: 4242 4242 4242 4242
+2. ✅ Edge Function already exists at supabase/functions/stripe-payment-intent/
+3. ⏳ Deploy Edge Function: supabase functions deploy stripe-payment-intent
+4. ⏳ Set STRIPE_SECRET_KEY in Supabase Edge Function secrets
+5. ⏳ Set ALLOWED_ORIGINS in Supabase Edge Function secrets (optional but recommended)
+6. ⏳ Test payment with Stripe test card: 4242 4242 4242 4242
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

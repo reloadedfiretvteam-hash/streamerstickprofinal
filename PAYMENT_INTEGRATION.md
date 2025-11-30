@@ -42,7 +42,42 @@ STRIPE_SECRET_KEY=sk_live_your_secret_key_here
 
 # Required for webhook verification
 STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+
+# Optional: CORS allowed origins (comma-separated)
+ALLOWED_ORIGINS=https://streamstickpro.com,https://www.streamstickpro.com
 ```
+
+---
+
+## ☁️ Cloudflare Pages Setup
+
+### Environment Variables
+
+In Cloudflare Pages Dashboard → Settings → Environment variables:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_STRIPE_PUBLISHABLE_KEY=pk_live_your_key_here
+```
+
+### Disable Optimizations for Checkout
+
+Stripe's Payment Element can be affected by Cloudflare's JS optimizations:
+
+1. Go to **Cloudflare Dashboard** → **Speed** → **Optimization**
+2. Either disable **Rocket Loader** site-wide, or add a Page Rule:
+   - URL pattern: `*yourdomain.com/checkout*` and `*yourdomain.com/secure-checkout*`
+   - Setting: Rocket Loader = Off, Auto Minify JS = Off
+
+### CSP Headers
+
+The `public/_headers` file includes Content Security Policy for Stripe:
+- `script-src`: includes `https://js.stripe.com`
+- `frame-src`: includes `https://js.stripe.com` and `https://hooks.stripe.com`
+- `connect-src`: includes `https://api.stripe.com`, `https://m.stripe.network`, `https://r.stripe.com`
+
+If your CSP is set via Cloudflare Response Headers instead, ensure these domains are included.
 
 ---
 
@@ -209,11 +244,13 @@ Stores products with cloaked names for compliance:
 ```sql
 CREATE TABLE stripe_products (
   id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT NOT NULL,              -- Real product name (shown to customers)
   description TEXT,
   short_description TEXT,
+  cloaked_name TEXT,               -- Compliant name shown to Stripe (e.g., "Digital Entertainment Service")
   price DECIMAL(10,2) NOT NULL,
   sale_price DECIMAL(10,2),
+  currency TEXT DEFAULT 'usd',
   image_url TEXT,
   category TEXT,
   is_active BOOLEAN DEFAULT true,
@@ -221,6 +258,8 @@ CREATE TABLE stripe_products (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ```
+
+**Important**: The `cloaked_name` field is used in Stripe PaymentIntent descriptions and metadata for compliance. If not set, the edge function falls back to `short_description` or a generic "Digital Entertainment Service".
 
 ### payment_transactions
 
