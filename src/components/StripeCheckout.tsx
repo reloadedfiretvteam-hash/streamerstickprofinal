@@ -95,6 +95,11 @@ function StripeCheckoutForm({ items, total: _total, customerInfo, onSuccess, onE
       // Create PaymentIntent using the unified stripe-payment-intent function
       // For cart checkout, we use the first product ID
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      
+      if (!supabaseUrl) {
+        throw new Error('Payment service configuration error. Please contact support.');
+      }
+      
       const productId = items.length > 0 ? items[0].productId : 'cart-checkout';
       
       const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {

@@ -159,6 +159,10 @@ export default function SecureCheckoutPage() {
     try {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       
+      if (!supabaseUrl) {
+        throw new Error('Payment service configuration error. Please contact support.');
+      }
+      
       const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {
         method: 'POST',
         headers: {
