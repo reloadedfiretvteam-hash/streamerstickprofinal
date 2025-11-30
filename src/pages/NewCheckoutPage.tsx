@@ -549,44 +549,27 @@ export default function NewCheckoutPage() {
                           onClick={async () => {
                             setCreatingPaymentIntent(true);
                             try {
-                              const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-                              const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-                              
-                              if (!supabaseUrl) {
-                                throw new Error('Supabase URL not configured');
-                              }
-
-                              const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
-                                method: 'POST',
-                                headers: { 
-                                  'Content-Type': 'application/json',
-                                  'Authorization': `Bearer ${supabaseAnonKey || ''}`
-                                },
-                                body: JSON.stringify({
+                              // Use Supabase client to invoke edge function
+                              const { data, error } = await supabase.functions.invoke('create-payment-intent', {
+                                body: {
                                   amount: Math.round(calculateTotal() * 100), // Convert to cents
                                   currency: 'usd',
                                   customerInfo: {
                                     email: customerInfo.email,
                                     fullName: customerInfo.name
                                   }
-                                }),
+                                }
                               });
 
-                              if (!response.ok) {
-                                const errorText = await response.text();
-                                let errorData;
-                                try {
-                                  errorData = JSON.parse(errorText);
-                                } catch {
-                                  errorData = { error: errorText || 'Failed to create payment intent' };
-                                }
-                                throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                              if (error) {
+                                console.error('Supabase function error:', error);
+                                throw new Error(error.message || 'Failed to create payment intent');
                               }
 
-                              const data = await response.json();
-                              if (!data.clientSecret) {
+                              if (!data || !data.clientSecret) {
                                 throw new Error('No client secret returned from server');
                               }
+
                               setStripeClientSecret(data.clientSecret);
                             } catch (error) {
                               console.error('Payment intent creation error:', error);
