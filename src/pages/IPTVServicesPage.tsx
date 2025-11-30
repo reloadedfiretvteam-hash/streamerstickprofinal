@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Star, Check, Zap, ArrowLeft, Gift, User, Mail, Phone, Send } from 'lucide-react';
+import { ShoppingCart, Star, Check, Zap, ArrowLeft, Gift, User, Mail, Phone, Send, CreditCard } from 'lucide-react';
 import { supabase, getStorageUrl } from '../lib/supabase';
 import Footer from '../components/Footer';
 import ValidatedImage from '../components/ValidatedImage';
+import { handleBuyClick } from '../utils/paymentLinks';
 
 // Fallback image when all else fails
 const FALLBACK_IPTV_IMAGE = 'https://images.pexels.com/photos/5474282/pexels-photo-5474282.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -18,6 +19,7 @@ interface Product {
   stock_quantity: number;
   rating: number;
   featured: boolean;
+  stripe_payment_link?: string | null;
 }
 
 interface CartItem {
@@ -484,16 +486,25 @@ Automated message from StreamStickPro.com
                   </span>
                 </div>
 
-                {/* Add to Cart Button */}
+                {/* Buy Now Button - redirects to Stripe Payment Link or fallback */}
                 <button
-                  onClick={() => addToCart(product)}
-                  className={`w-full py-3 rounded-xl font-bold text-base transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-2 ${
+                  onClick={() => handleBuyClick(product.id, product.stripe_payment_link)}
+                  className={`w-full py-3 rounded-xl font-bold text-base transition-all transform hover:scale-105 mb-2 flex items-center justify-center gap-2 ${
                     product.featured
                       ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/50'
                       : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg'
                   }`}
                 >
-                  <ShoppingCart className="w-5 h-5" />
+                  <CreditCard className="w-5 h-5" />
+                  Buy Now
+                </button>
+
+                {/* Add to Cart Button */}
+                <button
+                  onClick={() => addToCart(product)}
+                  className="w-full py-2 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-2 bg-white/10 border border-white/20 hover:bg-white/20"
+                >
+                  <ShoppingCart className="w-4 h-4" />
                   Add to Cart
                 </button>
 

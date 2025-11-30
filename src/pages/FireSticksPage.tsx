@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Star, Check, Flame, ArrowLeft, Zap } from 'lucide-react';
+import { ShoppingCart, Star, Check, Flame, ArrowLeft, Zap, CreditCard } from 'lucide-react';
 import { supabase, getStorageUrl } from '../lib/supabase';
 import Footer from '../components/Footer';
 import ValidatedImage from '../components/ValidatedImage';
+import { handleBuyClick } from '../utils/paymentLinks';
 
 // Fallback image when all else fails
 const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -18,6 +19,7 @@ interface Product {
   stock_quantity: number;
   rating: number;
   featured: boolean;
+  stripe_payment_link?: string | null;
 }
 
 interface CartItem {
@@ -306,11 +308,11 @@ export default function FireSticksPage() {
                   )}
                 </div>
 
-                {/* Add to Cart Button */}
+                {/* Buy Now Button - redirects to Stripe Payment Link or fallback */}
                 <button
-                  onClick={() => addToCart(product)}
+                  onClick={() => handleBuyClick(product.id, product.stripe_payment_link)}
                   disabled={product.stock_quantity === 0}
-                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${
+                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 mb-3 flex items-center justify-center gap-2 ${
                     product.stock_quantity > 0
                       ? product.featured
                         ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
@@ -318,8 +320,22 @@ export default function FireSticksPage() {
                       : 'bg-gray-600 cursor-not-allowed'
                   }`}
                 >
-                  <Zap className="w-5 h-5" />
-                  {product.stock_quantity > 0 ? 'Add to Cart & Checkout' : 'Out of Stock'}
+                  <CreditCard className="w-5 h-5" />
+                  {product.stock_quantity > 0 ? 'Buy Now' : 'Out of Stock'}
+                </button>
+
+                {/* Add to Cart Button */}
+                <button
+                  onClick={() => addToCart(product)}
+                  disabled={product.stock_quantity === 0}
+                  className={`w-full py-3 rounded-xl font-semibold text-base transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${
+                    product.stock_quantity > 0
+                      ? 'bg-white/10 border border-white/20 hover:bg-white/20'
+                      : 'bg-gray-600 cursor-not-allowed opacity-50'
+                  }`}
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  {product.stock_quantity > 0 ? 'Add to Cart' : 'Unavailable'}
                 </button>
               </div>
             </div>

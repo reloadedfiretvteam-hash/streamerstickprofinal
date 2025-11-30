@@ -1,7 +1,8 @@
-import { Check, Flame, Star, Zap, ShoppingCart } from 'lucide-react';
+import { Check, Flame, Star, Zap, ShoppingCart, CreditCard } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import { supabase, getStorageUrl } from '../lib/supabase';
 import ValidatedImage from './ValidatedImage';
+import { handleBuyClick } from '../utils/paymentLinks';
 
 // Fallback images when Supabase is not configured or local images fail
 const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -17,6 +18,7 @@ interface Product {
   popular: boolean;
   period?: string;
   features: string[];
+  stripe_payment_link?: string | null;
 }
 
 interface ShopProps {
@@ -33,6 +35,7 @@ interface DBProduct {
   featured: boolean;
   status: string;
   main_image: string;
+  stripe_payment_link?: string | null;
 }
 
 // Fallback products when Supabase is not configured or returns no data
@@ -234,7 +237,8 @@ export default function Shop({ onAddToCart }: ShopProps) {
             badge: isFirestick ? 'BEST VALUE' : 'POPULAR',
             popular: p.featured,
             period: isFirestick ? undefined : '/month',
-            features: features.length > 0 ? features : ['Premium quality', '24/7 support']
+            features: features.length > 0 ? features : ['Premium quality', '24/7 support'],
+            stripe_payment_link: p.stripe_payment_link
           };
         });
 
@@ -385,13 +389,23 @@ export default function Shop({ onAddToCart }: ShopProps) {
                     </p>
                   </div>
 
+                  {/* Buy Now Button - redirects to Stripe Payment Link or fallback */}
                   <button
-                    onClick={() => onAddToCart(product)}
-                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 ${
+                    onClick={() => handleBuyClick(product.id, product.stripe_payment_link)}
+                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 mb-3 flex items-center justify-center gap-2 ${
                       product.popular
                         ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
                         : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg'
                     }`}
+                  >
+                    <CreditCard className="w-5 h-5" />
+                    Buy Now
+                  </button>
+
+                  {/* Add to Cart Button */}
+                  <button
+                    onClick={() => onAddToCart(product)}
+                    className="w-full py-3 rounded-xl font-semibold text-base transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 bg-white/10 border border-white/20 hover:bg-white/20"
                   >
                     <ShoppingCart className="w-5 h-5" />
                     Add to Cart
@@ -457,11 +471,21 @@ export default function Shop({ onAddToCart }: ShopProps) {
                     </div>
                   </div>
 
+                  {/* Buy Now Button - redirects to Stripe Payment Link or fallback */}
+                  <button
+                    onClick={() => handleBuyClick(product.id, product.stripe_payment_link)}
+                    className="w-full py-3 rounded-xl font-bold text-base transition-all transform hover:scale-105 mb-2 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg"
+                  >
+                    <CreditCard className="w-5 h-5" />
+                    Buy Now
+                  </button>
+
+                  {/* Add to Cart Button */}
                   <button
                     onClick={() => onAddToCart(product)}
-                    className="w-full py-3 rounded-xl font-bold text-base transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg"
+                    className="w-full py-2 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-2 bg-white/10 border border-white/20 hover:bg-white/20"
                   >
-                    <ShoppingCart className="w-5 h-5" />
+                    <ShoppingCart className="w-4 h-4" />
                     Add to Cart
                   </button>
 
