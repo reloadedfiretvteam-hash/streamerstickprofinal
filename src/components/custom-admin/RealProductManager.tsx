@@ -28,13 +28,24 @@ export default function RealProductManager() {
 
   const loadProducts = async () => {
     setLoading(true);
-    const { data } = await supabase
+    // Load ALL products regardless of status so admin can see everything
+    const { data, error } = await supabase
       .from('real_products')
       .select('*')
       .order('created_at', { ascending: false });
 
+    if (error) {
+      console.error('Error loading products:', error);
+      alert('Error loading products: ' + error.message);
+    }
+
     if (data) {
       setProducts(data);
+      if (data.length === 0) {
+        console.log('No products found in database. Products table may be empty.');
+      }
+    } else {
+      console.log('No products data returned from database.');
     }
     setLoading(false);
   };

@@ -55,6 +55,7 @@ import FrontendVisualEditor from '../components/custom-admin/FrontendVisualEdito
 import FrontendControlPanel from '../components/custom-admin/FrontendControlPanel';
 import VisualSectionManager from '../components/custom-admin/VisualSectionManager';
 import HomepageSectionEditor from '../components/custom-admin/HomepageSectionEditor';
+import VisualWebsiteEditor from '../components/custom-admin/VisualWebsiteEditor';
 import SimpleContentEditor from '../components/custom-admin/SimpleContentEditor';
 
 // Site Configuration
