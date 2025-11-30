@@ -549,31 +549,42 @@ export default function NewCheckoutPage() {
                           onClick={async () => {
                             setCreatingPaymentIntent(true);
                             try {
-                              // Use Supabase client to invoke edge function
-                              const { data, error } = await supabase.functions.invoke('create-payment-intent', {
-                                body: {
+                              const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                              
+                              if (!supabaseUrl) {
+                                throw new Error('Supabase URL not configured');
+                              }
+                              
+                              const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
                                   amount: Math.round(calculateTotal() * 100), // Convert to cents
                                   currency: 'usd',
                                   customerInfo: {
                                     email: customerInfo.email,
                                     fullName: customerInfo.name
                                   }
-                                }
+                                }),
                               });
 
-                              if (error) {
-                                console.error('Supabase function error:', error);
-                                throw new Error(error.message || 'Failed to create payment intent');
+                              const data = await response.json();
+
+                              if (!response.ok) {
+                                throw new Error(data.error || 'Failed to create payment intent');
                               }
 
-                              if (!data || !data.clientSecret) {
+                              if (!data.clientSecret) {
                                 throw new Error('No client secret returned from server');
                               }
 
                               setStripeClientSecret(data.clientSecret);
-                            } catch (error) {
-                              console.error('Payment intent creation error:', error);
-                              alert(`Error: ${error instanceof Error ? error.message : 'Failed to initialize payment. Please check your connection and try again.'}`);
+                            } catch (error: unknown) {
+                              console.error('Error creating payment intent:', error);
+                              const errorMessage = error instanceof Error ? error.message : 'Failed to initialize payment. Please try again.';
+                              alert(`Error: ${errorMessage}`);
                             } finally {
                               setCreatingPaymentIntent(false);
                             }
