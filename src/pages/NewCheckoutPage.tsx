@@ -565,8 +565,17 @@ export default function NewCheckoutPage() {
                                   currency: 'usd',
                                   customerInfo: {
                                     email: customerInfo.email,
-                                    fullName: customerInfo.name
-                                  }
+                                    fullName: customerInfo.name,
+                                    address: customerInfo.address,
+                                    city: customerInfo.city,
+                                    zipCode: customerInfo.zip
+                                  },
+                                  items: cart.map(item => ({
+                                    productId: item.product.id,
+                                    name: item.product.name,
+                                    price: parseFloat(item.product.sale_price || item.product.price),
+                                    quantity: item.quantity
+                                  }))
                                 }),
                               });
 

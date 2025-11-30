@@ -138,17 +138,15 @@ export default function StripePaymentForm({
       } else if (paymentIntent) {
         if (paymentIntent.status === 'succeeded') {
           setPaymentStatus('success');
-          // Extract payment intent ID - handle both string and object formats
-          const paymentIntentId = typeof paymentIntent === 'string' 
-            ? paymentIntent 
-            : (paymentIntent.id || (paymentIntent as any).paymentIntent?.id || '');
+          // Extract payment intent ID - paymentIntent should have an id property
+          const paymentIntentId = paymentIntent.id || '';
           if (paymentIntentId) {
             onSuccess(paymentIntentId);
           } else {
-            // Try to extract from clientSecret
+            // Fallback: extract from clientSecret (format: pi_xxxxx_secret_yyyyy)
             const secretParts = clientSecret.split('_secret_');
-            if (secretParts.length > 0) {
-              onSuccess(secretParts[0].replace('pi_', ''));
+            if (secretParts.length > 0 && secretParts[0].startsWith('pi_')) {
+              onSuccess(secretParts[0]);
             } else {
               onError('Payment succeeded but could not retrieve payment ID');
             }
