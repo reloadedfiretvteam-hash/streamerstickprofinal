@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase, getStorageUrl } from '../lib/supabase';
-import { ShoppingCart, Search, Filter, Star } from 'lucide-react';
+import { ShoppingCart, Search, Filter, Star, CreditCard } from 'lucide-react';
 import Footer from '../components/Footer';
 import CustomerReviewsSection from '../components/CustomerReviewsSection';
 import ValidatedImage from '../components/ValidatedImage';
+import { handleBuyClick } from '../utils/paymentLinks';
 
 // Fallback images
 const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -21,6 +22,7 @@ interface Product {
   stock_quantity: number;
   rating: number;
   featured: boolean;
+  stripe_payment_link?: string | null;
 }
 
 interface CartItem {
@@ -436,17 +438,31 @@ export default function ShopPage() {
                   )}
                 </div>
 
-                {/* Add to Cart Button */}
+                {/* Buy Now Button - redirects to Stripe Payment Link or fallback */}
                 <button
-                  onClick={() => addToCart(product)}
+                  onClick={() => handleBuyClick(product.id, product.stripe_payment_link)}
                   disabled={product.stock_quantity === 0}
-                  className={`w-full py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
+                  className={`w-full py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 mb-2 ${
                     product.stock_quantity > 0
                       ? 'bg-orange-600 text-white hover:bg-orange-700'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  <ShoppingCart className="w-5 h-5" />
+                  <CreditCard className="w-5 h-5" />
+                  Buy Now
+                </button>
+
+                {/* Add to Cart Button */}
+                <button
+                  onClick={() => addToCart(product)}
+                  disabled={product.stock_quantity === 0}
+                  className={`w-full py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                    product.stock_quantity > 0
+                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  <ShoppingCart className="w-4 h-4" />
                   Add to Cart
                 </button>
               </div>
