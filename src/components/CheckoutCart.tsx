@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { X, Plus, Minus, Copy, Check, DollarSign, Wallet, ShoppingBag, CreditCard } from 'lucide-react';
+import { X, Plus, Minus, Copy, Check, DollarSign, Wallet, ShoppingBag, CreditCard, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import OrderConfirmation from './OrderConfirmation';
 import LegalDisclaimer from './LegalDisclaimer';
-import SquarePaymentForm from './SquarePaymentForm';
+import StripePaymentForm from './StripePaymentForm';
 import ValidatedImage from './ValidatedImage';
 
 // Fallback image for cart items
@@ -27,10 +27,13 @@ interface Props {
 }
 
 export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, onClearCart }: Props) {
-  const [paymentMethod, setPaymentMethod] = useState<'cashapp' | 'bitcoin' | 'square'>('cashapp');
+  const [paymentMethod, setPaymentMethod] = useState<'cashapp' | 'bitcoin' | 'stripe'>('cashapp');
   const [btcPrice, setBtcPrice] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [copiedField, setCopiedField] = useState('');
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [creatingPaymentIntent, setCreatingPaymentIntent] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   // Customer form fields - ALL REQUIRED
   const [customerName, setCustomerName] = useState('');
@@ -534,16 +537,16 @@ Customer has been sent complete payment instructions including their unique purc
                 <h3 className="text-lg font-bold text-white mb-4">Select Payment Method</h3>
                 <div className="grid grid-cols-3 gap-4">
                   <button
-                    onClick={() => setPaymentMethod('square')}
+                    onClick={() => setPaymentMethod('stripe')}
                     className={`p-4 rounded-lg border-2 transition-all ${
-                      paymentMethod === 'square'
+                      paymentMethod === 'stripe'
                         ? 'border-blue-500 bg-blue-500/20'
                         : 'border-gray-700 hover:border-gray-600'
                     }`}
                   >
                     <CreditCard className="w-6 h-6 text-blue-400 mx-auto mb-2" />
                     <div className="text-white text-sm font-semibold">Card</div>
-                    <div className="text-gray-400 text-xs">Via Square</div>
+                    <div className="text-gray-400 text-xs">Via Stripe</div>
                   </button>
 
                   <button
@@ -574,22 +577,80 @@ Customer has been sent complete payment instructions including their unique purc
 
               {/* Payment Gateway Display */}
               <div className="bg-gray-800 rounded-lg p-6 mb-8">
-                {paymentMethod === 'square' && (
+                {paymentMethod === 'stripe' && (
                   <div>
                     <h4 className="text-white font-bold mb-4 flex items-center gap-2">
                       <CreditCard className="w-5 h-5 text-blue-400" />
                       Credit/Debit Card Payment
                     </h4>
                     <p className="text-gray-400 text-sm mb-4">
-                      Secure payment processing powered by Square
+                      Secure payment processing powered by Stripe
                     </p>
-                    <SquarePaymentForm 
-                      amount={total}
-                      onSubmit={async (_token: string) => {
-                        // Handle Square payment - token is used by the payment form internally
-                        await handleCompleteOrder();
-                      }}
-                    />
+                    
+                    {paymentError && (
+                      <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg flex items-start gap-2">
+                        <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                        <p className="text-red-200 text-sm">{paymentError}</p>
+                      </div>
+                    )}
+                    
+                    {!clientSecret ? (
+                      <button
+                        onClick={async () => {
+                          if (!customerEmail || !customerName) {
+                            setPaymentError('Please fill in your name and email above');
+                            return;
+                          }
+                          setCreatingPaymentIntent(true);
+                          setPaymentError(null);
+                          try {
+                            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                            const productId = items.length > 0 ? items[0].productId : 'cart-checkout';
+                            const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                productId: productId,
+                                customerEmail: customerEmail,
+                                customerName: customerName,
+                              }),
+                            });
+                            const data = await response.json();
+                            if (!response.ok) throw new Error(data.error || 'Failed to create payment intent');
+                            setClientSecret(data.clientSecret);
+                          } catch (error: unknown) {
+                            const errorMsg = error instanceof Error ? error.message : 'Payment initialization failed';
+                            setPaymentError(errorMsg);
+                          } finally {
+                            setCreatingPaymentIntent(false);
+                          }
+                        }}
+                        disabled={creatingPaymentIntent}
+                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {creatingPaymentIntent ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            Initializing...
+                          </>
+                        ) : (
+                          'Continue to Card Payment'
+                        )}
+                      </button>
+                    ) : (
+                      <StripePaymentForm 
+                        amount={total}
+                        clientSecret={clientSecret}
+                        onSuccess={async (paymentIntentId: string) => {
+                          await handleCompleteOrder();
+                          // Store payment intent ID if needed
+                          console.log('Payment successful:', paymentIntentId);
+                        }}
+                        onError={(error) => {
+                          setPaymentError(error);
+                        }}
+                      />
+                    )}
                   </div>
                 )}
 

@@ -39,9 +39,8 @@ export default function SecureCheckoutPage() {
     zip: ''
   });
 
-  // Fallback Square-safe products that map to real products
-  // These are "cloaked" versions with generic service names for Square compliance
-  const fallbackSquareProducts: Product[] = [
+  // Fallback products that map to real products (cloaked names for compliance)
+  const fallbackProducts: Product[] = [
     // IPTV Subscriptions → Content Management Services
     {
       id: 'content-1month',
@@ -120,12 +119,12 @@ export default function SecureCheckoutPage() {
       if (data && data.length > 0) {
         setProducts(data);
       } else {
-        setProducts(fallbackSquareProducts);
+        setProducts(fallbackProducts);
       }
     } catch (error) {
       console.error('Error loading products:', error);
       // On error, use fallback products
-      setProducts(fallbackSquareProducts);
+      setProducts(fallbackProducts);
     } finally {
       setLoading(false);
     }

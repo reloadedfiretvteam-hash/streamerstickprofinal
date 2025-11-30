@@ -39,7 +39,7 @@ export default function ConciergePage() {
 
   function handleCheckout(product: Product) {
     setSelectedProduct(product);
-    alert(`Square checkout would open here for: ${product.name} - $${product.price}`);
+    window.location.href = `/stripe-checkout?product=${product.id}`;
   }
 
   if (loading) {

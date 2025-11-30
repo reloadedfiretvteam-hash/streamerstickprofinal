@@ -1,24 +1,50 @@
 import { useState } from 'react';
-import { Shield, Info } from 'lucide-react';
-import SquarePaymentForm from '../components/SquarePaymentForm';
+import { Shield, Info, AlertCircle, Lock } from 'lucide-react';
+import StripePaymentForm from '../components/StripePaymentForm';
 
 export default function ConciergeCheckout() {
   const [step, setStep] = useState(1);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [creatingPaymentIntent, setCreatingPaymentIntent] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   
   // This would come from your cart/session
   const product = {
+    id: 'webdev-basic',
     name: "Professional Website Page Design",
     price: 149.99,
     description: "Complete website page design and development service."
   };
 
-  const handlePaymentSubmit = async (token: string) => {
-    // Send token to your backend (Supabase Edge Function)
-    console.log('Processing payment with token:', token);
+  const createPaymentIntent = async () => {
+    setCreatingPaymentIntent(true);
+    setPaymentError(null);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: product.id,
+          customerEmail: 'customer@example.com', // Would come from form
+          customerName: 'Customer', // Would come from form
+        }),
+      });
+      
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to create payment intent');
+      setClientSecret(data.clientSecret);
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : 'Payment initialization failed';
+      setPaymentError(errorMsg);
+    } finally {
+      setCreatingPaymentIntent(false);
+    }
+  };
+
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    console.log('Processing payment with intent:', paymentIntentId);
     setStep(2); // Success step
   };
 
@@ -81,10 +107,48 @@ export default function ConciergeCheckout() {
 
         {/* Payment Form */}
         <div>
-          <SquarePaymentForm 
-            amount={product.price} 
-            onSubmit={handlePaymentSubmit}
-          />
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold flex items-center gap-2">
+                <Shield className="w-5 h-5 text-green-600" />
+                Secure Payment
+              </h3>
+            </div>
+
+            {paymentError && (
+              <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg flex items-center gap-2 text-sm">
+                <AlertCircle className="w-4 h-4" />
+                {paymentError}
+              </div>
+            )}
+
+            {!clientSecret ? (
+              <button
+                onClick={createPaymentIntent}
+                disabled={creatingPaymentIntent}
+                className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-bold text-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {creatingPaymentIntent ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Initializing...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-5 h-5" />
+                    Continue to Payment
+                  </>
+                )}
+              </button>
+            ) : (
+              <StripePaymentForm 
+                amount={product.price} 
+                clientSecret={clientSecret}
+                onSuccess={handlePaymentSuccess}
+                onError={(error) => setPaymentError(error)}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
