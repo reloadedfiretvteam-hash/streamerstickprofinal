@@ -10,6 +10,9 @@ import {
   Home, Tag, Repeat
 } from 'lucide-react';
 
+// Visual Website Editor
+import VisualWebsiteEditor from '../components/custom-admin/VisualWebsiteEditor';
+
 // Content Management
 import EnhancedBlogManager from '../components/custom-admin/EnhancedBlogManager';
 import AdvancedBlogManager from '../components/custom-admin/AdvancedBlogManager';
@@ -445,6 +448,16 @@ export default function ModalAdminDashboard() {
       color: 'from-green-500 to-emerald-600',
       description: 'Manage and edit website sections visually',
       component: VisualSectionManager
+    },
+    {
+      id: 'visual-website-editor',
+      title: 'Visual Website Editor',
+      icon: Eye,
+      color: 'from-purple-600 to-pink-600',
+      description: 'Click-to-edit your ACTUAL website - See it, Click it, Edit it!',
+      component: VisualWebsiteEditor,
+      category: 'design',
+      featured: true
     },
     {
       id: 'homepage-editor',
