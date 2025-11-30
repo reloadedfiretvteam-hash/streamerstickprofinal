@@ -15,6 +15,12 @@ interface Product {
   rating?: number;
 }
 
+// Cart item type for localStorage cart
+interface CartItem {
+  product: { id: string };
+  quantity: number;
+}
+
 interface ProductDetailPageProps {
   productId?: string;
 }
@@ -76,12 +82,6 @@ export default function ProductDetailPage({ productId: propProductId }: ProductD
       },
       quantity: quantity
     };
-
-    // Cart item type for type safety
-    interface CartItem {
-      product: { id: string };
-      quantity: number;
-    }
 
     // Load existing cart
     const existingCart = localStorage.getItem('cart');

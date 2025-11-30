@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Shield, Lock, CreditCard, AlertCircle, Smartphone, Wallet } from 'lucide-react';
-import type { Stripe, StripeElements as StripeElementsType, StripePaymentElement, StripePaymentElementChangeEvent } from '@stripe/stripe-js';
+import type { Stripe, StripeElements as StripeElementsType, StripePaymentElement, StripePaymentElementChangeEvent, Appearance } from '@stripe/stripe-js';
 
 interface StripePaymentFormProps {
   amount: number;
@@ -8,6 +8,39 @@ interface StripePaymentFormProps {
   onSuccess: (paymentIntentId: string) => void;
   onError: (error: string) => void;
 }
+
+// Stripe Payment Element appearance configuration
+// These styles match the site's design system
+const STRIPE_APPEARANCE: Appearance = {
+  theme: 'stripe',
+  variables: {
+    colorPrimary: '#3b82f6',      // Blue-500 - matches site primary color
+    colorBackground: '#ffffff',   // White background
+    colorText: '#1f2937',         // Gray-800 - matches site text color
+    colorDanger: '#ef4444',       // Red-500 - for error states
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    spacingUnit: '4px',
+    borderRadius: '8px',
+  },
+  rules: {
+    '.Label': {
+      fontWeight: '600',
+      marginBottom: '8px',
+    },
+    '.Input': {
+      padding: '12px',
+      borderRadius: '8px',
+    },
+    '.Tab': {
+      borderRadius: '8px',
+      padding: '12px 16px',
+    },
+    '.Tab--selected': {
+      backgroundColor: '#eff6ff',  // Blue-50 - light blue highlight
+      borderColor: '#3b82f6',      // Blue-500 - matching primary
+    },
+  },
+};
 
 /**
  * Stripe Payment Element Form
@@ -63,36 +96,7 @@ export default function StripePaymentForm({
         // Create Elements instance with Payment Element appearance
         const elementsInstance = stripeInstance.elements({
           clientSecret,
-          appearance: {
-            theme: 'stripe',
-            variables: {
-              colorPrimary: '#3b82f6',
-              colorBackground: '#ffffff',
-              colorText: '#1f2937',
-              colorDanger: '#ef4444',
-              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-              spacingUnit: '4px',
-              borderRadius: '8px',
-            },
-            rules: {
-              '.Label': {
-                fontWeight: '600',
-                marginBottom: '8px',
-              },
-              '.Input': {
-                padding: '12px',
-                borderRadius: '8px',
-              },
-              '.Tab': {
-                borderRadius: '8px',
-                padding: '12px 16px',
-              },
-              '.Tab--selected': {
-                backgroundColor: '#eff6ff',
-                borderColor: '#3b82f6',
-              },
-            },
-          },
+          appearance: STRIPE_APPEARANCE,
         });
         setElements(elementsInstance);
 
