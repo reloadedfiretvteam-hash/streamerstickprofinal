@@ -2,19 +2,110 @@ import { useState, useEffect } from 'react';
 import {
   Package, FileText, ShoppingCart, Settings, LogOut,
   TrendingUp, HelpCircle, Image, DollarSign, CreditCard, Flame, X,
-  Grid, Eye, Edit3
+  Grid, Eye, Edit3, Users, Shield, Search, BarChart3, Mail, Zap,
+  Code, Layout, Globe, Video, Bell, Camera, FileUp, Link2, Sparkles,
+  Palette, Monitor, Smartphone, Layers, Building2, Gift, AlertCircle,
+  CheckCircle, Database, Server, Activity, MessageSquare, TrendingDown,
+  Award, Target, BookOpen, Headphones, Star, Coins, Bot, Rocket, FileCheck,
+  Home, Tag, Repeat
 } from 'lucide-react';
 
+// Content Management
 import EnhancedBlogManager from '../components/custom-admin/EnhancedBlogManager';
+import AdvancedBlogManager from '../components/custom-admin/AdvancedBlogManager';
+import RealBlogManager from '../components/custom-admin/RealBlogManager';
+
+// Product Management
 import RealProductManager from '../components/custom-admin/RealProductManager';
+import FullProductManager from '../components/custom-admin/FullProductManager';
+import FullFeaturedProductManager from '../components/custom-admin/FullFeaturedProductManager';
+import UltraProductManager from '../components/custom-admin/UltraProductManager';
+import SimpleProductManager from '../components/custom-admin/SimpleProductManager';
+import StripeProductManager from '../components/custom-admin/StripeProductManager';
+import CategoryManager from '../components/custom-admin/CategoryManager';
+
+// Orders & Customers
 import OrdersCustomersManager from '../components/custom-admin/OrdersCustomersManager';
-import EnhancedPromotionsManager from '../components/custom-admin/EnhancedPromotionsManager';
-import MathRankSEODashboard from '../components/custom-admin/MathRankSEODashboard';
-import EnhancedMediaLibrary from '../components/custom-admin/EnhancedMediaLibrary';
-import SiteSettingsManager from '../components/custom-admin/SiteSettingsManager';
+import ComprehensiveCustomerManager from '../components/custom-admin/ComprehensiveCustomerManager';
 import BitcoinOrdersManager from '../components/custom-admin/BitcoinOrdersManager';
-import FAQManager from '../components/custom-admin/FAQManager';
+import RevenueDashboard from '../components/custom-admin/RevenueDashboard';
+
+// SEO & Analytics
+import MathRankSEODashboard from '../components/custom-admin/MathRankSEODashboard';
+import RankMathProSEO from '../components/custom-admin/RankMathProSEO';
+import RankMathProSEOManager from '../components/custom-admin/RankMathProSEOManager';
+import CompleteSEOManager from '../components/custom-admin/CompleteSEOManager';
+import SimpleSEOManager from '../components/custom-admin/SimpleSEOManager';
+import SearchEngineManager from '../components/custom-admin/SearchEngineManager';
+import AdvancedAnalytics from '../components/custom-admin/AdvancedAnalytics';
+import GoogleAnalyticsManager from '../components/custom-admin/GoogleAnalyticsManager';
+
+// Media & Images
+import EnhancedMediaLibrary from '../components/custom-admin/EnhancedMediaLibrary';
+import MediaLibrary from '../components/custom-admin/MediaLibrary';
+import SimpleImageManager from '../components/custom-admin/SimpleImageManager';
+import FileUploadManager from '../components/custom-admin/FileUploadManager';
+import ImageUpload from '../components/ImageUpload';
+
+// Page Building & Design
+import VisualPageBuilder from '../components/custom-admin/VisualPageBuilder';
+import EnhancedVisualPageBuilder from '../components/custom-admin/EnhancedVisualPageBuilder';
+import ElementorStylePageBuilder from '../components/custom-admin/ElementorStylePageBuilder';
+import FrontendVisualEditor from '../components/custom-admin/FrontendVisualEditor';
+import FrontendControlPanel from '../components/custom-admin/FrontendControlPanel';
+import VisualSectionManager from '../components/custom-admin/VisualSectionManager';
+import HomepageSectionEditor from '../components/custom-admin/HomepageSectionEditor';
+import SimpleContentEditor from '../components/custom-admin/SimpleContentEditor';
+
+// Site Configuration
+import SiteSettingsManager from '../components/custom-admin/SiteSettingsManager';
+import SiteBrandingManager from '../components/custom-admin/SiteBrandingManager';
 import CarouselManager from '../components/custom-admin/CarouselManager';
+import FAQManager from '../components/custom-admin/FAQManager';
+import ReviewsManager from '../components/custom-admin/ReviewsManager';
+import TutorialBoxEditor from '../components/custom-admin/TutorialBoxEditor';
+
+// Promotions & Marketing
+import EnhancedPromotionsManager from '../components/custom-admin/EnhancedPromotionsManager';
+import SimplePricingManager from '../components/custom-admin/SimplePricingManager';
+import MarketingAutomation from '../components/custom-admin/MarketingAutomation';
+import BulkEmailManager from '../components/custom-admin/BulkEmailManager';
+import EmailTemplateManager from '../components/custom-admin/EmailTemplateManager';
+import AffiliateManager from '../components/custom-admin/AffiliateManager';
+
+// Payments
+import PaymentGatewayManager from '../components/custom-admin/PaymentGatewayManager';
+import SimplePaymentSettings from '../components/custom-admin/SimplePaymentSettings';
+import RealTimePaymentConfig from '../components/custom-admin/RealTimePaymentConfig';
+import NOWPaymentsManager from '../components/custom-admin/NOWPaymentsManager';
+import SubscriptionManager from '../components/custom-admin/SubscriptionManager';
+
+// AI & Automation
+import AICopilot from '../components/custom-admin/AICopilot';
+import AICopilotWidget from '../components/custom-admin/AICopilotWidget';
+import SuperAICopilot from '../components/custom-admin/SuperAICopilot';
+import AmazonAIAssistant from '../components/custom-admin/AmazonAIAssistant';
+import AmazonFireStickAutomation from '../components/custom-admin/AmazonFireStickAutomation';
+import RealAIVideoGenerator from '../components/custom-admin/RealAIVideoGenerator';
+
+// Forms & Popups
+import AdvancedFormBuilder from '../components/custom-admin/AdvancedFormBuilder';
+import PopupBuilder from '../components/custom-admin/PopupBuilder';
+
+// System & Security
+import SecurityManager from '../components/custom-admin/SecurityManager';
+import SystemHealthCheck from '../components/custom-admin/SystemHealthCheck';
+import RedirectsManager from '../components/custom-admin/RedirectsManager';
+import GitHubCloudflareConfig from '../components/custom-admin/GitHubCloudflareConfig';
+
+// Live Features
+import LiveVisitorStatistics from '../components/custom-admin/LiveVisitorStatistics';
+import LiveChatManager from '../components/custom-admin/LiveChatManager';
+
+// Dashboard Components
+import AdminDashboardOverview from '../components/custom-admin/AdminDashboardOverview';
+import AdminModalWrapper from '../components/custom-admin/AdminModalWrapper';
+
 import { supabase } from '../lib/supabase';
 
 interface ModalTool {
@@ -40,6 +131,8 @@ export default function ModalAdminDashboard() {
     faqItems: 0
   });
   const [_loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('custom_admin_token');
@@ -109,6 +202,7 @@ export default function ModalAdminDashboard() {
   };
 
   const tools: ModalTool[] = [
+    // === CONTENT MANAGEMENT ===
     {
       id: 'blog',
       title: 'Blog Posts Manager',
@@ -118,6 +212,24 @@ export default function ModalAdminDashboard() {
       component: EnhancedBlogManager
     },
     {
+      id: 'advanced-blog',
+      title: 'Advanced Blog Manager',
+      icon: BookOpen,
+      color: 'from-indigo-500 to-blue-600',
+      description: 'Advanced blog management with categories, tags, and scheduling',
+      component: AdvancedBlogManager
+    },
+    {
+      id: 'real-blog',
+      title: 'Real Blog Manager',
+      icon: FileCheck,
+      color: 'from-purple-500 to-pink-600',
+      description: 'Complete blog management with full editing capabilities',
+      component: RealBlogManager
+    },
+
+    // === PRODUCT MANAGEMENT ===
+    {
       id: 'products',
       title: 'Product Manager',
       icon: Package,
@@ -125,6 +237,40 @@ export default function ModalAdminDashboard() {
       description: 'Add, edit, and delete products with pricing, images, and inventory management',
       component: RealProductManager
     },
+    {
+      id: 'full-products',
+      title: 'Full Product Manager',
+      icon: Package,
+      color: 'from-emerald-500 to-teal-600',
+      description: 'Complete product management with all features and variations',
+      component: FullProductManager
+    },
+    {
+      id: 'ultra-products',
+      title: 'Ultra Product Manager',
+      icon: Package,
+      color: 'from-teal-500 to-cyan-600',
+      description: 'Advanced product management with bulk operations and advanced settings',
+      component: UltraProductManager
+    },
+    {
+      id: 'stripe-products',
+      title: 'Stripe Products',
+      icon: CreditCard,
+      color: 'from-blue-500 to-indigo-600',
+      description: 'Manage Stripe payment products and pricing',
+      component: StripeProductManager
+    },
+    {
+      id: 'categories',
+      title: 'Category Manager',
+      icon: Layers,
+      color: 'from-green-600 to-emerald-700',
+      description: 'Organize products into categories and subcategories',
+      component: CategoryManager
+    },
+
+    // === ORDERS & CUSTOMERS ===
     {
       id: 'orders',
       title: 'Orders & Customers',
@@ -134,13 +280,89 @@ export default function ModalAdminDashboard() {
       component: OrdersCustomersManager
     },
     {
+      id: 'customers',
+      title: 'Customer Manager',
+      icon: Users,
+      color: 'from-orange-600 to-red-700',
+      description: 'Comprehensive customer management and analytics',
+      component: ComprehensiveCustomerManager
+    },
+    {
+      id: 'bitcoin',
+      title: 'Bitcoin Payments',
+      icon: Coins,
+      color: 'from-amber-500 to-yellow-600',
+      description: 'Track Bitcoin and cryptocurrency payment orders',
+      component: BitcoinOrdersManager
+    },
+    {
+      id: 'revenue',
+      title: 'Revenue Dashboard',
+      icon: DollarSign,
+      color: 'from-green-600 to-emerald-700',
+      description: 'Track revenue, sales analytics, and financial reports',
+      component: RevenueDashboard
+    },
+
+    // === SEO & ANALYTICS ===
+    {
       id: 'seo',
-      title: 'SEO Manager',
+      title: 'SEO Manager (Rank Math)',
       icon: TrendingUp,
       color: 'from-cyan-500 to-blue-600',
       description: 'Optimize meta tags, keywords, sitemaps, and search engine visibility',
       component: MathRankSEODashboard
     },
+    {
+      id: 'rank-math-pro',
+      title: 'Rank Math Pro SEO',
+      icon: Target,
+      color: 'from-blue-500 to-cyan-600',
+      description: 'Advanced Rank Math Pro SEO optimization with scoring',
+      component: RankMathProSEO
+    },
+    {
+      id: 'rank-math-manager',
+      title: 'Rank Math Manager',
+      icon: Search,
+      color: 'from-cyan-600 to-teal-600',
+      description: 'Complete Rank Math SEO management suite',
+      component: RankMathProSEOManager
+    },
+    {
+      id: 'complete-seo',
+      title: 'Complete SEO Manager',
+      icon: Globe,
+      color: 'from-indigo-500 to-purple-600',
+      description: 'Full SEO management better than Rank Math Pro',
+      component: CompleteSEOManager
+    },
+    {
+      id: 'search-engine',
+      title: 'Search Engine Manager',
+      icon: Search,
+      color: 'from-purple-500 to-pink-600',
+      description: 'Manage search engine settings and visibility',
+      component: SearchEngineManager
+    },
+    {
+      id: 'analytics',
+      title: 'Advanced Analytics',
+      icon: BarChart3,
+      color: 'from-blue-600 to-indigo-700',
+      description: 'Advanced website analytics and reporting',
+      component: AdvancedAnalytics
+    },
+    {
+      id: 'google-analytics',
+      title: 'Google Analytics',
+      icon: BarChart3,
+      color: 'from-orange-500 to-red-600',
+      description: 'Configure and manage Google Analytics tracking',
+      component: GoogleAnalyticsManager
+    },
+
+    // === MEDIA & IMAGES ===
     {
       id: 'media',
       title: 'Media Library',
@@ -150,6 +372,22 @@ export default function ModalAdminDashboard() {
       component: EnhancedMediaLibrary
     },
     {
+      id: 'media-simple',
+      title: 'Simple Image Manager',
+      icon: Camera,
+      color: 'from-pink-600 to-rose-700',
+      description: 'Quick image upload and management tool',
+      component: SimpleImageManager
+    },
+    {
+      id: 'file-upload',
+      title: 'File Upload Manager',
+      icon: FileUp,
+      color: 'from-purple-500 to-pink-600',
+      description: 'Manage all file uploads and storage',
+      component: FileUploadManager
+    },
+    {
       id: 'carousel',
       title: 'Homepage Carousel',
       icon: Grid,
@@ -157,21 +395,89 @@ export default function ModalAdminDashboard() {
       description: 'Manage homepage carousel images and promotional banners',
       component: CarouselManager
     },
+
+    // === PAGE BUILDING & DESIGN ===
     {
-      id: 'promotions',
-      title: 'Promotions & Discounts',
-      icon: DollarSign,
-      color: 'from-yellow-500 to-orange-600',
-      description: 'Create and manage discount codes, sales, and promotional campaigns',
-      component: EnhancedPromotionsManager
+      id: 'page-builder',
+      title: 'Visual Page Builder',
+      icon: Layout,
+      color: 'from-purple-500 to-indigo-600',
+      description: 'Drag-and-drop page builder like Elementor',
+      component: VisualPageBuilder
     },
     {
-      id: 'bitcoin',
-      title: 'Bitcoin Payments',
-      icon: CreditCard,
-      color: 'from-amber-500 to-yellow-600',
-      description: 'Track Bitcoin and cryptocurrency payment orders',
-      component: BitcoinOrdersManager
+      id: 'enhanced-page-builder',
+      title: 'Enhanced Page Builder',
+      icon: Layout,
+      color: 'from-indigo-500 to-blue-600',
+      description: 'Advanced visual page builder with more features',
+      component: EnhancedVisualPageBuilder
+    },
+    {
+      id: 'elementor-style',
+      title: 'Elementor-Style Builder',
+      icon: Monitor,
+      color: 'from-blue-600 to-cyan-700',
+      description: 'Professional page builder matching Elementor Pro features',
+      component: ElementorStylePageBuilder
+    },
+    {
+      id: 'frontend-editor',
+      title: 'Frontend Visual Editor',
+      icon: Edit3,
+      color: 'from-cyan-500 to-teal-600',
+      description: 'Edit pages directly on the frontend with visual preview',
+      component: FrontendVisualEditor
+    },
+    {
+      id: 'frontend-control',
+      title: 'Frontend Control Panel',
+      icon: Settings,
+      color: 'from-teal-500 to-green-600',
+      description: 'Control panel for frontend editing and customization',
+      component: FrontendControlPanel
+    },
+    {
+      id: 'section-manager',
+      title: 'Visual Section Manager',
+      icon: Layers,
+      color: 'from-green-500 to-emerald-600',
+      description: 'Manage and edit website sections visually',
+      component: VisualSectionManager
+    },
+    {
+      id: 'homepage-editor',
+      title: 'Homepage Section Editor',
+      icon: Home,
+      color: 'from-orange-500 to-red-600',
+      description: 'Edit homepage sections, images, and content',
+      component: HomepageSectionEditor
+    },
+    {
+      id: 'content-editor',
+      title: 'Simple Content Editor',
+      icon: FileText,
+      color: 'from-gray-500 to-slate-600',
+      description: 'Quick content editing tool for pages',
+      component: SimpleContentEditor
+    },
+
+    // === SITE CONFIGURATION ===
+    {
+      id: 'settings',
+      title: 'Site Settings',
+      icon: Settings,
+      color: 'from-gray-500 to-slate-600',
+      description: 'Configure site-wide settings, branding, and integrations',
+      component: SiteSettingsManager
+    },
+    {
+      id: 'branding',
+      title: 'Site Branding',
+      icon: Palette,
+      color: 'from-pink-500 to-rose-600',
+      description: 'Manage logos, colors, fonts, and brand identity',
+      component: SiteBrandingManager
     },
     {
       id: 'faq',
@@ -182,12 +488,232 @@ export default function ModalAdminDashboard() {
       component: FAQManager
     },
     {
-      id: 'settings',
-      title: 'Site Settings',
-      icon: Settings,
+      id: 'reviews',
+      title: 'Reviews Manager',
+      icon: Star,
+      color: 'from-yellow-500 to-orange-600',
+      description: 'Manage customer reviews and testimonials',
+      component: ReviewsManager
+    },
+    {
+      id: 'tutorials',
+      title: 'Tutorial Box Editor',
+      icon: Video,
+      color: 'from-red-500 to-pink-600',
+      description: 'Create and manage tutorial boxes and help content',
+      component: TutorialBoxEditor
+    },
+
+    // === PROMOTIONS & MARKETING ===
+    {
+      id: 'promotions',
+      title: 'Promotions & Discounts',
+      icon: DollarSign,
+      color: 'from-yellow-500 to-orange-600',
+      description: 'Create and manage discount codes, sales, and promotional campaigns',
+      component: EnhancedPromotionsManager
+    },
+    {
+      id: 'pricing',
+      title: 'Pricing Manager',
+      icon: Tag,
+      color: 'from-green-500 to-emerald-600',
+      description: 'Manage product pricing and pricing tiers',
+      component: SimplePricingManager
+    },
+    {
+      id: 'marketing-automation',
+      title: 'Marketing Automation',
+      icon: Zap,
+      color: 'from-purple-500 to-pink-600',
+      description: 'Automated marketing campaigns and workflows',
+      component: MarketingAutomation
+    },
+    {
+      id: 'bulk-email',
+      title: 'Bulk Email Manager',
+      icon: Mail,
+      color: 'from-blue-500 to-indigo-600',
+      description: 'Send bulk emails and manage email campaigns',
+      component: BulkEmailManager
+    },
+    {
+      id: 'email-templates',
+      title: 'Email Template Manager',
+      icon: Mail,
+      color: 'from-indigo-500 to-purple-600',
+      description: 'Create and manage email templates',
+      component: EmailTemplateManager
+    },
+    {
+      id: 'affiliates',
+      title: 'Affiliate Manager',
+      icon: Users,
+      color: 'from-cyan-500 to-blue-600',
+      description: 'Manage affiliate programs and commissions',
+      component: AffiliateManager
+    },
+
+    // === PAYMENTS ===
+    {
+      id: 'payment-gateway',
+      title: 'Payment Gateway Manager',
+      icon: CreditCard,
+      color: 'from-green-500 to-emerald-600',
+      description: 'Configure payment gateways (Stripe, Square, etc.)',
+      component: PaymentGatewayManager
+    },
+    {
+      id: 'payment-settings',
+      title: 'Payment Settings',
+      icon: CreditCard,
+      color: 'from-blue-500 to-indigo-600',
+      description: 'Simple payment configuration and settings',
+      component: SimplePaymentSettings
+    },
+    {
+      id: 'payment-config',
+      title: 'Real-Time Payment Config',
+      icon: CreditCard,
+      color: 'from-indigo-500 to-purple-600',
+      description: 'Real-time payment configuration and testing',
+      component: RealTimePaymentConfig
+    },
+    {
+      id: 'nowpayments',
+      title: 'NOWPayments Manager',
+      icon: Coins,
+      color: 'from-orange-500 to-red-600',
+      description: 'Manage NOWPayments cryptocurrency payments',
+      component: NOWPaymentsManager
+    },
+    {
+      id: 'subscriptions',
+      title: 'Subscription Manager',
+      icon: Repeat,
+      color: 'from-purple-500 to-pink-600',
+      description: 'Manage recurring subscriptions and billing',
+      component: SubscriptionManager
+    },
+
+    // === AI & AUTOMATION ===
+    {
+      id: 'ai-copilot',
+      title: 'AI Copilot',
+      icon: Bot,
+      color: 'from-purple-500 to-indigo-600',
+      description: 'AI assistant for content creation and management',
+      component: AICopilot
+    },
+    {
+      id: 'super-ai-copilot',
+      title: 'Super AI Copilot',
+      icon: Sparkles,
+      color: 'from-indigo-500 to-purple-600',
+      description: 'Advanced AI copilot with enhanced capabilities',
+      component: SuperAICopilot
+    },
+    {
+      id: 'ai-copilot-widget',
+      title: 'AI Copilot Widget',
+      icon: Bot,
+      color: 'from-purple-600 to-pink-700',
+      description: 'Embeddable AI copilot widget',
+      component: AICopilotWidget
+    },
+    {
+      id: 'amazon-ai',
+      title: 'Amazon AI Assistant',
+      icon: Bot,
+      color: 'from-orange-500 to-red-600',
+      description: 'AI assistant for Amazon Fire Stick automation',
+      component: AmazonAIAssistant
+    },
+    {
+      id: 'firestick-automation',
+      title: 'Fire Stick Automation',
+      icon: Zap,
+      color: 'from-orange-600 to-red-700',
+      description: 'Automate Fire Stick setup and configuration',
+      component: AmazonFireStickAutomation
+    },
+    {
+      id: 'ai-video-generator',
+      title: 'AI Video Generator',
+      icon: Video,
+      color: 'from-red-500 to-pink-600',
+      description: 'Generate videos using AI technology',
+      component: RealAIVideoGenerator
+    },
+
+    // === FORMS & POPUPS ===
+    {
+      id: 'form-builder',
+      title: 'Advanced Form Builder',
+      icon: FileText,
+      color: 'from-blue-500 to-cyan-600',
+      description: 'Build custom forms with advanced fields and validation',
+      component: AdvancedFormBuilder
+    },
+    {
+      id: 'popup-builder',
+      title: 'Popup Builder',
+      icon: Bell,
+      color: 'from-yellow-500 to-orange-600',
+      description: 'Create and manage popup modals and announcements',
+      component: PopupBuilder
+    },
+
+    // === SYSTEM & SECURITY ===
+    {
+      id: 'security',
+      title: 'Security Manager',
+      icon: Shield,
+      color: 'from-red-500 to-orange-600',
+      description: 'Manage security settings, access control, and monitoring',
+      component: SecurityManager
+    },
+    {
+      id: 'system-health',
+      title: 'System Health Check',
+      icon: Activity,
+      color: 'from-green-500 to-emerald-600',
+      description: 'Monitor system health, performance, and diagnostics',
+      component: SystemHealthCheck
+    },
+    {
+      id: 'redirects',
+      title: 'Redirects Manager',
+      icon: Link2,
+      color: 'from-blue-500 to-indigo-600',
+      description: 'Manage URL redirects and rewrites',
+      component: RedirectsManager
+    },
+    {
+      id: 'github-cloudflare',
+      title: 'GitHub & Cloudflare Config',
+      icon: Code,
       color: 'from-gray-500 to-slate-600',
-      description: 'Configure site-wide settings, branding, and integrations',
-      component: SiteSettingsManager
+      description: 'Configure GitHub and Cloudflare deployment settings',
+      component: GitHubCloudflareConfig
+    },
+
+    // === LIVE FEATURES ===
+    {
+      id: 'live-visitors',
+      title: 'Live Visitor Statistics',
+      icon: Eye,
+      color: 'from-green-500 to-teal-600',
+      description: 'Real-time visitor tracking and analytics',
+      component: LiveVisitorStatistics
+    },
+    {
+      id: 'live-chat',
+      title: 'Live Chat Manager',
+      icon: MessageSquare,
+      color: 'from-blue-500 to-cyan-600',
+      description: 'Manage live chat widget and customer support',
+      component: LiveChatManager
     }
   ];
 
@@ -202,6 +728,45 @@ export default function ModalAdminDashboard() {
       default: return null;
     }
   };
+
+  const categories = [
+    { id: null, name: 'All Tools', icon: Grid },
+    { id: 'content', name: 'Content', icon: FileText },
+    { id: 'products', name: 'Products', icon: Package },
+    { id: 'orders', name: 'Orders & Customers', icon: ShoppingCart },
+    { id: 'seo', name: 'SEO & Analytics', icon: TrendingUp },
+    { id: 'media', name: 'Media & Images', icon: Image },
+    { id: 'design', name: 'Page Building', icon: Layout },
+    { id: 'site', name: 'Site Settings', icon: Settings },
+    { id: 'marketing', name: 'Marketing', icon: Zap },
+    { id: 'payments', name: 'Payments', icon: CreditCard },
+    { id: 'ai', name: 'AI & Automation', icon: Bot },
+    { id: 'system', name: 'System & Security', icon: Shield }
+  ];
+
+  const getCategoryForTool = (toolId: string): string => {
+    if (toolId.includes('blog')) return 'content';
+    if (toolId.includes('product') || toolId === 'categories') return 'products';
+    if (toolId.includes('order') || toolId === 'customers' || toolId === 'bitcoin' || toolId === 'revenue') return 'orders';
+    if (toolId.includes('seo') || toolId.includes('analytics') || toolId === 'search-engine') return 'seo';
+    if (toolId.includes('media') || toolId.includes('image') || toolId === 'carousel' || toolId === 'file-upload') return 'media';
+    if (toolId.includes('builder') || toolId.includes('page') || toolId.includes('editor') || toolId.includes('section')) return 'design';
+    if (toolId === 'settings' || toolId === 'branding' || toolId === 'faq' || toolId === 'reviews' || toolId === 'tutorials') return 'site';
+    if (toolId.includes('promotion') || toolId.includes('pricing') || toolId.includes('marketing') || toolId.includes('email') || toolId === 'affiliates') return 'marketing';
+    if (toolId.includes('payment') || toolId.includes('stripe') || toolId === 'nowpayments' || toolId === 'subscriptions') return 'payments';
+    if (toolId.includes('ai') || toolId.includes('copilot') || toolId.includes('automation') || toolId.includes('video-generator')) return 'ai';
+    if (toolId === 'security' || toolId === 'system-health' || toolId === 'redirects' || toolId === 'github-cloudflare') return 'system';
+    if (toolId === 'live-visitors' || toolId === 'live-chat') return 'system';
+    return 'site';
+  };
+
+  const filteredTools = tools.filter(tool => {
+    const matchesSearch = searchQuery === '' || 
+      tool.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tool.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = !selectedCategory || getCategoryForTool(tool.id) === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const renderModal = () => {
     const tool = tools.find(t => t.id === activeModal);
@@ -326,11 +891,54 @@ export default function ModalAdminDashboard() {
 
         {/* Tools Grid */}
         <div>
-          <h3 className="text-3xl font-bold text-white mb-6">Admin Tools</h3>
-          <p className="text-gray-400 mb-8">Click any tool to open it in a full-screen modal window</p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+            <div>
+              <h3 className="text-3xl font-bold text-white mb-2">Admin Tools ({filteredTools.length})</h3>
+              <p className="text-gray-400">Click any tool to open it in a full-screen modal window</p>
+            </div>
+            
+            {/* Search Bar */}
+            <div className="flex gap-3">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search tools..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Category Filter */}
+          <div className="mb-6 overflow-x-auto">
+            <div className="flex gap-2 pb-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat.id || 'all'}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all whitespace-nowrap ${
+                    selectedCategory === cat.id
+                      ? 'bg-orange-500 text-white'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  <cat.icon className="w-4 h-4" />
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tools.map((tool) => {
+            {filteredTools.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-400 text-lg">No tools found matching your search.</p>
+              </div>
+            ) : (
+              filteredTools.map((tool) => {
               const stat = getStatForTool(tool.id);
               return (
                 <button
@@ -359,7 +967,8 @@ export default function ModalAdminDashboard() {
                   </div>
                 </button>
               );
-            })}
+            })
+            )}
           </div>
         </div>
 
