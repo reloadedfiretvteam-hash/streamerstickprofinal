@@ -91,7 +91,6 @@ export default function ProductDetailPage({ productId: propProductId }: ProductD
 
     // Save cart
     localStorage.setItem('cart', JSON.stringify(cart));
-    localStorage.setItem('square_cart', JSON.stringify(cart));
 
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 3000);

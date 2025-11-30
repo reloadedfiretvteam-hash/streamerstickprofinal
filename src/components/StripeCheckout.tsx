@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { CreditCard, Lock, CheckCircle, AlertCircle } from 'lucide-react';
-import { loadStripe, Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-js';
+import { Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
 import {
   Elements,
   CardElement,
@@ -143,38 +143,34 @@ function StripeCheckoutForm({ items, total, customerInfo, onSuccess, onError }: 
 
       if (paymentIntent?.status === 'succeeded') {
         // Save order to database
-        try {
-          const orderItems = items.map(item => ({
-            product_id: item.productId,
-            product_name: item.name,
-            quantity: item.quantity,
-            unit_price: item.price,
-            total_price: item.price * item.quantity
-          }));
+        const orderItems = items.map(item => ({
+          product_id: item.productId,
+          product_name: item.name,
+          quantity: item.quantity,
+          unit_price: item.price,
+          total_price: item.price * item.quantity
+        }));
 
-          const { error: orderError } = await supabase
-            .from('orders')
-            .insert({
-              customer_name: customerInfo.fullName,
-              customer_email: customerInfo.email,
-              shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.zipCode}`,
-              payment_method: 'stripe',
-              payment_status: 'completed',
-              payment_intent_id: paymentIntent.id,
-              order_status: 'processing',
-              subtotal: total,
-              tax: 0,
-              total: total,
-              items: orderItems
-            });
+        const { error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            customer_name: customerInfo.fullName,
+            customer_email: customerInfo.email,
+            shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.zipCode}`,
+            payment_method: 'stripe',
+            payment_status: 'completed',
+            payment_intent_id: paymentIntent.id,
+            order_status: 'processing',
+            subtotal: total,
+            tax: 0,
+            total: total,
+            items: orderItems
+          });
 
-          if (orderError) {
-            console.error('Order save error:', orderError);
-            // Payment succeeded but order save failed - this should be handled
-            throw new Error('Payment succeeded but order could not be saved. Please contact support.');
-          }
-        } catch (orderError: any) {
-          throw orderError;
+        if (orderError) {
+          console.error('Order save error:', orderError);
+          // Payment succeeded but order save failed - this should be handled
+          throw new Error('Payment succeeded but order could not be saved. Please contact support.');
         }
 
         onSuccess();

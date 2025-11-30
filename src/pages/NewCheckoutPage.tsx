@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Lock, Bitcoin, CreditCard, Smartphone, Mail, User, CheckCircle, ArrowRight, Shield, Clock, Zap } from 'lucide-react';
+import { ShoppingCart, Lock, Bitcoin, CreditCard, Smartphone, Mail, User, CheckCircle, ArrowRight, Shield, Clock, Zap, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import BitcoinPaymentFlow from '../components/BitcoinPaymentFlow';
 import CashAppPaymentFlow from '../components/CashAppPaymentFlow';
-import SquarePaymentForm from '../components/SquarePaymentForm';
+import StripePaymentForm from '../components/StripePaymentForm';
 import Footer from '../components/Footer';
 
 interface CartItem {
@@ -20,9 +20,12 @@ interface CartItem {
 export default function NewCheckoutPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState<'square' | 'bitcoin' | 'cashapp' | ''>('');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'bitcoin' | 'cashapp' | ''>('');
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderCode, setOrderCode] = useState('');
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [creatingPaymentIntent, setCreatingPaymentIntent] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
@@ -74,13 +77,61 @@ export default function NewCheckoutPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     if (currentStep === 1) {
       if (validateStep1()) {
         setCurrentStep(2);
       }
     } else if (currentStep === 2 && paymentMethod) {
+      // If Stripe is selected, create payment intent before moving to step 3
+      if (paymentMethod === 'stripe') {
+        await createPaymentIntent();
+      }
       setCurrentStep(3);
+    }
+  };
+
+  const createPaymentIntent = async () => {
+    if (!customerInfo.email || !customerInfo.name) {
+      setPaymentError('Please fill in your name and email');
+      return;
+    }
+
+    setCreatingPaymentIntent(true);
+    setPaymentError(null);
+
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const total = calculateTotal();
+      
+      // Create a simple product ID for cart items
+      const productId = cart.length > 0 ? cart[0].product.id : 'cart-checkout';
+      
+      const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: productId,
+          customerEmail: customerInfo.email,
+          customerName: customerInfo.name,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create payment intent');
+      }
+
+      setClientSecret(data.clientSecret);
+    } catch (error: unknown) {
+      console.error('Error creating payment intent:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to initialize payment. Please try again.';
+      setPaymentError(errorMessage);
+    } finally {
+      setCreatingPaymentIntent(false);
     }
   };
 
@@ -359,10 +410,10 @@ export default function NewCheckoutPage() {
                 </h2>
 
                 <div className="space-y-4 mb-6">
-                  {/* Square Payment Option */}
+                  {/* Stripe Payment Option */}
                   <label
                     className={`block p-6 border-2 rounded-xl cursor-pointer transition-all hover:shadow-lg ${
-                      paymentMethod === 'square'
+                      paymentMethod === 'stripe'
                         ? 'border-blue-500 bg-blue-50 shadow-lg'
                         : 'border-gray-200 hover:border-blue-300'
                     }`}
@@ -371,9 +422,9 @@ export default function NewCheckoutPage() {
                       <input
                         type="radio"
                         name="payment"
-                        value="square"
-                        checked={paymentMethod === 'square'}
-                        onChange={(e) => setPaymentMethod(e.target.value as 'square')}
+                        value="stripe"
+                        checked={paymentMethod === 'stripe'}
+                        onChange={(e) => setPaymentMethod(e.target.value as 'stripe')}
                         className="mt-1"
                       />
                       <div className="flex-1">
@@ -381,7 +432,7 @@ export default function NewCheckoutPage() {
                           <CreditCard className="w-8 h-8 text-blue-600" />
                           <div>
                             <h3 className="font-bold text-lg text-gray-900">Credit/Debit Card</h3>
-                            <p className="text-sm text-gray-600">Secure Payment via Square</p>
+                            <p className="text-sm text-gray-600">Secure Payment via Stripe</p>
                           </div>
                         </div>
                         <div className="bg-white rounded-lg p-4 border border-blue-200">
@@ -521,11 +572,20 @@ export default function NewCheckoutPage() {
                   </button>
                   <button
                     onClick={handleNextStep}
-                    disabled={!paymentMethod}
+                    disabled={!paymentMethod || creatingPaymentIntent}
                     className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-red-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Continue to Payment
-                    <ArrowRight className="w-5 h-5" />
+                    {creatingPaymentIntent ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        Initializing...
+                      </>
+                    ) : (
+                      <>
+                        Continue to Payment
+                        <ArrowRight className="w-5 h-5" />
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -534,48 +594,76 @@ export default function NewCheckoutPage() {
             {/* Step 3: Payment Flow */}
             {currentStep === 3 && (
               <div className="animate-fade-in">
-                {paymentMethod === 'square' && (
+                {paymentMethod === 'stripe' && (
                   <div className="bg-white rounded-2xl shadow-xl p-8">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                       <CreditCard className="w-6 h-6 text-blue-600" />
                       Secure Card Payment
                     </h2>
-                    <SquarePaymentForm
-                      amount={calculateTotal()}
-                      onSubmit={async (token) => {
-                        try {
-                          // Save order to Supabase
-                          const { data, error } = await supabase
-                            .from('orders')
-                            .insert([{
-                              customer_name: customerInfo.name,
-                              customer_email: customerInfo.email,
-                              customer_phone: customerInfo.phone,
-                              shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
-                              total_amount: calculateTotal().toString(),
-                              payment_method: 'square',
-                              payment_token: token,
-                              status: 'pending',
-                              items: cart.map(item => ({
-                                product_id: item.product.id,
-                                product_name: item.product.name,
-                                quantity: item.quantity,
-                                price: item.product.price
-                              }))
-                            }])
-                            .select();
+                    
+                    {paymentError && (
+                      <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                        <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-red-800 font-medium">Payment Error</p>
+                          <p className="text-red-600 text-sm">{paymentError}</p>
+                        </div>
+                      </div>
+                    )}
 
-                          if (error) throw error;
-                          const orderCode = (data && data.length > 0 && data[0].id) ? String(data[0].id) : `SQ-${Date.now()}`;
-                          handleOrderComplete(orderCode);
-                        } catch (error) {
-                          console.error('Order creation failed:', error);
-                          alert('Payment processed but order creation failed. Please contact support.');
-                        }
-                      }}
-                    />
+                    {clientSecret ? (
+                      <StripePaymentForm
+                        amount={calculateTotal()}
+                        clientSecret={clientSecret}
+                        onSuccess={async (paymentIntentId) => {
+                          try {
+                            // Save order to Supabase
+                            const { data, error } = await supabase
+                              .from('orders')
+                              .insert([{
+                                customer_name: customerInfo.name,
+                                customer_email: customerInfo.email,
+                                customer_phone: customerInfo.phone,
+                                shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
+                                total_amount: calculateTotal().toString(),
+                                payment_method: 'stripe',
+                                payment_intent_id: paymentIntentId,
+                                payment_status: 'completed',
+                                status: 'processing',
+                                items: cart.map(item => ({
+                                  product_id: item.product.id,
+                                  product_name: item.product.name,
+                                  quantity: item.quantity,
+                                  price: item.product.price
+                                }))
+                              }])
+                              .select();
+
+                            if (error) throw error;
+                            const orderCode = (data && data.length > 0 && data[0].id) ? String(data[0].id) : `STRIPE-${Date.now()}`;
+                            handleOrderComplete(orderCode);
+                          } catch (error) {
+                            console.error('Order creation failed:', error);
+                            alert('Payment processed but order creation failed. Please contact support.');
+                          }
+                        }}
+                        onError={(error) => {
+                          setPaymentError(error);
+                        }}
+                      />
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                        <p className="text-gray-600">Loading payment form...</p>
+                      </div>
+                    )}
+                    
                     <button
-                      onClick={() => setCurrentStep(2)}
+                      onClick={() => {
+                        setCurrentStep(2);
+                        setClientSecret(null);
+                        setPaymentError(null);
+                      }}
                       className="mt-6 w-full bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition-all"
                     >
                       Back to Payment Methods
