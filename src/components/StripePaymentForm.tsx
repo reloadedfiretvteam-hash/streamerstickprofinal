@@ -25,7 +25,7 @@ interface StripeElement {
 
 interface StripePaymentResult {
   error?: { message?: string };
-  paymentIntent?: { id: string; status: string };
+  paymentIntent?: { id?: string; status: string; [key: string]: any } | string;
 }
 
 declare global {
@@ -135,12 +135,32 @@ export default function StripePaymentForm({
         setPaymentStatus('error');
         setErrorMessage(error.message || 'Payment failed');
         onError(error.message || 'Payment failed');
-      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-        setPaymentStatus('success');
-        onSuccess(paymentIntent.id);
-      } else if (paymentIntent && paymentIntent.status === 'requires_action') {
-        // Handle 3D Secure or other authentication
-        setPaymentStatus('loading');
+      } else if (paymentIntent) {
+        if (paymentIntent.status === 'succeeded') {
+          setPaymentStatus('success');
+          // Extract payment intent ID - handle both string and object formats
+          const paymentIntentId = typeof paymentIntent === 'string' 
+            ? paymentIntent 
+            : (paymentIntent.id || (paymentIntent as any).paymentIntent?.id || '');
+          if (paymentIntentId) {
+            onSuccess(paymentIntentId);
+          } else {
+            // Try to extract from clientSecret
+            const secretParts = clientSecret.split('_secret_');
+            if (secretParts.length > 0) {
+              onSuccess(secretParts[0].replace('pi_', ''));
+            } else {
+              onError('Payment succeeded but could not retrieve payment ID');
+            }
+          }
+        } else if (paymentIntent.status === 'requires_action') {
+          // Handle 3D Secure or other authentication
+          setPaymentStatus('loading');
+        } else {
+          setPaymentStatus('error');
+          setErrorMessage(`Payment status: ${paymentIntent.status}`);
+          onError(`Payment status: ${paymentIntent.status}`);
+        }
       } else {
         setPaymentStatus('error');
         setErrorMessage('Payment could not be completed');
