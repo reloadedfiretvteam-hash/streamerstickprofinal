@@ -68,7 +68,7 @@ const initializeStripe = async (): Promise<Stripe | null> => {
 };
 
 // Inner component that uses Stripe hooks
-function StripeCheckoutForm({ items, total, customerInfo, onSuccess, onError }: StripeCheckoutProps & { onSuccess: () => void; onError: (error: string) => void }) {
+function StripeCheckoutForm({ items, total: _total, customerInfo, onSuccess, onError }: StripeCheckoutProps & { onSuccess: () => void; onError: (error: string) => void }) {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -92,33 +92,33 @@ function StripeCheckoutForm({ items, total, customerInfo, onSuccess, onError }: 
     setIsProcessing(true);
 
     try {
-      // Create PaymentIntent on backend
-      // For now, we'll use a Supabase Edge Function or direct API call
-      // You'll need to create a backend endpoint to create PaymentIntents
+      // Create PaymentIntent using the unified stripe-payment-intent function
+      // For cart checkout, we use the first product ID
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const productId = items.length > 0 ? items[0].productId : 'cart-checkout';
       
-      // Option 1: Using Supabase Edge Function (recommended)
-      const { data: paymentIntentData, error: intentError } = await supabase.functions.invoke('create-payment-intent', {
-        body: {
-          amount: Math.round(total * 100), // Convert to cents
-          currency: 'usd',
-          items: items.map(item => ({
-            productId: item.productId,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity
-          })),
-          customerInfo: customerInfo
-        }
+      const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: productId,
+          customerEmail: customerInfo.email,
+          customerName: customerInfo.fullName,
+        }),
       });
 
-      if (intentError) {
-        throw new Error(intentError.message || 'Failed to create payment intent');
+      const paymentIntentData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(paymentIntentData.error || 'Unable to initialize payment. Please verify product is active and Stripe keys are set.');
       }
 
       const clientSecret = paymentIntentData?.clientSecret;
 
       if (!clientSecret) {
-        throw new Error('No client secret returned from server');
+        throw new Error('Unable to initialize payment. Please verify product is active and Stripe keys are set.');
       }
 
       // Confirm payment with Stripe
