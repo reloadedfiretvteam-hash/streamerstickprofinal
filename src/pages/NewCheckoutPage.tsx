@@ -550,11 +550,20 @@ export default function NewCheckoutPage() {
                             setCreatingPaymentIntent(true);
                             try {
                               const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                              const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+                              
+                              if (!supabaseUrl) {
+                                throw new Error('Supabase URL not configured');
+                              }
+
                               const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: { 
+                                  'Content-Type': 'application/json',
+                                  'Authorization': `Bearer ${supabaseAnonKey || ''}`
+                                },
                                 body: JSON.stringify({
-                                  amount: calculateTotal(), // Amount in dollars (function converts to cents)
+                                  amount: Math.round(calculateTotal() * 100), // Convert to cents
                                   currency: 'usd',
                                   customerInfo: {
                                     email: customerInfo.email,
@@ -562,11 +571,26 @@ export default function NewCheckoutPage() {
                                   }
                                 }),
                               });
+
+                              if (!response.ok) {
+                                const errorText = await response.text();
+                                let errorData;
+                                try {
+                                  errorData = JSON.parse(errorText);
+                                } catch {
+                                  errorData = { error: errorText || 'Failed to create payment intent' };
+                                }
+                                throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                              }
+
                               const data = await response.json();
-                              if (!response.ok) throw new Error(data.error || 'Failed to create payment intent');
+                              if (!data.clientSecret) {
+                                throw new Error('No client secret returned from server');
+                              }
                               setStripeClientSecret(data.clientSecret);
                             } catch (error) {
-                              alert(`Error: ${error instanceof Error ? error.message : 'Failed to initialize payment'}`);
+                              console.error('Payment intent creation error:', error);
+                              alert(`Error: ${error instanceof Error ? error.message : 'Failed to initialize payment. Please check your connection and try again.'}`);
                             } finally {
                               setCreatingPaymentIntent(false);
                             }
