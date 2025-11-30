@@ -77,9 +77,15 @@ export default function ProductDetailPage({ productId: propProductId }: ProductD
       quantity: quantity
     };
 
+    // Cart item type for type safety
+    interface CartItem {
+      product: { id: string };
+      quantity: number;
+    }
+
     // Load existing cart
     const existingCart = localStorage.getItem('cart');
-    let cart: any[] = existingCart ? JSON.parse(existingCart) : [];
+    const cart: CartItem[] = existingCart ? JSON.parse(existingCart) : [];
 
     // Check if product already in cart
     const existingIndex = cart.findIndex(item => item.product.id === product.id);

@@ -102,7 +102,7 @@ export default function NewCheckoutPage() {
 
     try {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const total = calculateTotal();
+      // Note: total calculated by calculateTotal() is used by the backend via productId lookup
       
       // Create a simple product ID for cart items
       const productId = cart.length > 0 ? cart[0].product.id : 'cart-checkout';
