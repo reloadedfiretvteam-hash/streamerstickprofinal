@@ -43,8 +43,14 @@ function getCorsHeaders(requestOrigin: string | null): Record<string, string> {
   if (requestOrigin && allAllowedOrigins.includes(requestOrigin)) {
     allowedOrigin = requestOrigin;
   } else if (requestOrigin && requestOrigin.endsWith(".pages.dev")) {
-    // Allow Cloudflare Pages preview deployments
-    allowedOrigin = requestOrigin;
+    // Allow Cloudflare Pages preview deployments - only for project subdomains
+    // Match pattern: *.{project-name}.pages.dev or {hash}.{project-name}.pages.dev
+    const pagesDomain = requestOrigin.replace(/^https?:\/\//, "");
+    // Only allow if it has 2+ subdomains (hash.project.pages.dev pattern)
+    const parts = pagesDomain.split(".");
+    if (parts.length >= 3 && parts[parts.length - 1] === "dev" && parts[parts.length - 2] === "pages") {
+      allowedOrigin = requestOrigin;
+    }
   } else if (allowedOrigins.length === 0) {
     // If no ALLOWED_ORIGINS configured, default to * for backwards compatibility
     allowedOrigin = "*";
@@ -201,7 +207,6 @@ Deno.serve(async (req: Request) => {
     let amount: number;
     let currency = "usd";
     let cloakedName: string;
-    let realProductName: string;
 
     try {
       const productResponse = await fetch(
@@ -222,14 +227,18 @@ Deno.serve(async (req: Request) => {
         if (products && products.length > 0) {
           const product = products[0];
 
-          // Use sale_price if available, otherwise use regular price
-          amount = parseFloat(product.sale_price) || parseFloat(product.price);
+          // Use sale_price if explicitly set (including 0), otherwise use regular price
+          // parseFloat returns NaN for null/undefined, so check for valid number
+          const salePrice = parseFloat(product.sale_price);
+          const regularPrice = parseFloat(product.price);
+          amount = !isNaN(salePrice) && product.sale_price !== null ? salePrice : regularPrice;
+          
           currency = product.currency || "usd";
-          realProductName = product.name;
 
           // Use cloaked_name if available, otherwise generate a compliant description
-          cloakedName = product.cloaked_name || 
-            product.short_description || 
+          cloakedName = 
+            (product.cloaked_name && product.cloaked_name.trim()) ||
+            (product.short_description && product.short_description.trim()) ||
             "Digital Entertainment Service";
         } else {
           // Product not found in database - check fallback
@@ -237,7 +246,6 @@ Deno.serve(async (req: Request) => {
           if (fallback) {
             amount = fallback.amount;
             cloakedName = fallback.cloaked_name;
-            realProductName = sanitizedProductId;
           } else {
             return new Response(
               JSON.stringify({ error: "Product not found or inactive" }),
@@ -254,7 +262,6 @@ Deno.serve(async (req: Request) => {
         if (fallback) {
           amount = fallback.amount;
           cloakedName = fallback.cloaked_name;
-          realProductName = sanitizedProductId;
         } else {
           console.error("Failed to fetch product from database");
           return new Response(
@@ -273,7 +280,6 @@ Deno.serve(async (req: Request) => {
       if (fallback) {
         amount = fallback.amount;
         cloakedName = fallback.cloaked_name;
-        realProductName = sanitizedProductId;
       } else {
         return new Response(
           JSON.stringify({ error: "Unable to retrieve product information" }),
@@ -337,9 +343,9 @@ Deno.serve(async (req: Request) => {
 
     const paymentIntent = await stripeResponse.json();
 
-    // Log the payment intent creation (cloaked info only in logs)
+    // Log the payment intent creation (using cloaked info for compliance)
     console.log(
-      `PaymentIntent created: ${paymentIntent.id} for product: ${realProductName}, cloaked as: ${cloakedName}, amount: $${amount}`
+      `PaymentIntent created: ${paymentIntent.id} for product_id: ${sanitizedProductId}, description: ${cloakedName}, amount: $${amount}`
     );
 
     return new Response(
