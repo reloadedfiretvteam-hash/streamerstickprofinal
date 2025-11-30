@@ -7,6 +7,7 @@ import FAQPage from './pages/FAQPage';
 import EnhancedBlogPost from './pages/EnhancedBlogPost';
 import ShopPage from './pages/ShopPage';
 import NewCheckoutPage from './pages/NewCheckoutPage';
+import CompleteCheckoutPage from './pages/CompleteCheckoutPage';
 import FireSticksPage from './pages/FireSticksPage';
 import IPTVServicesPage from './pages/IPTVServicesPage';
 import StripeSecureCheckoutPage from './pages/StripeSecureCheckoutPage';
@@ -55,6 +56,11 @@ export default function AppRouter() {
   }
 
   if (currentPath === '/checkout' || currentPath === '/checkout/') {
+    return <CompleteCheckoutPage />;
+  }
+
+  // Legacy checkout route
+  if (currentPath === '/old-checkout' || currentPath === '/old-checkout/') {
     return <NewCheckoutPage />;
   }
 

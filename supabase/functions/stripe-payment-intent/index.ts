@@ -3,13 +3,18 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, Accept, Origin",
+  "Access-Control-Max-Age": "86400",
 };
 
 interface PaymentIntentRequest {
-  productId: string;
+  productId?: string;
+  productIds?: string[];
+  amount?: number; // Amount in cents
+  currency?: string;
   customerEmail: string;
   customerName: string;
+  metadata?: Record<string, string>;
 }
 
 Deno.serve(async (req: Request) => {
@@ -35,11 +40,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const payload: PaymentIntentRequest = await req.json();
-    const { productId, customerEmail, customerName } = payload;
-
-    if (!productId) {
-      throw new Error("Product ID is required");
-    }
+    const { productId, productIds, amount, currency = 'usd', customerEmail, customerName, metadata = {} } = payload;
 
     if (!customerEmail) {
       throw new Error("Customer email is required");
@@ -51,60 +52,110 @@ Deno.serve(async (req: Request) => {
       throw new Error("Invalid email format");
     }
 
-    // Sanitize product ID to prevent injection attacks
-    // Allow alphanumeric, hyphens, underscores, and dots (common in product IDs like prod_abc.123)
-    const sanitizedProductId = productId.replace(/[^a-zA-Z0-9-_.]/g, '');
-    
-    // Ensure product ID is not empty after sanitization
-    if (!sanitizedProductId) {
-      throw new Error("Invalid product ID format");
-    }
+    let amountInCents: number;
+    let productName = 'Order';
+    let productMetadata: Record<string, string> = { ...metadata };
 
-    // Fetch the product from stripe_products table
-    const productResponse = await fetch(
-      `${supabaseUrl}/rest/v1/stripe_products?id=eq.${sanitizedProductId}&is_active=eq.true`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${supabaseKey}`,
-          "apikey": supabaseKey,
-        },
+    // If amount is directly provided (for cart checkout), use it
+    if (amount && amount > 0) {
+      amountInCents = Math.round(amount);
+    }
+    // Otherwise, fetch product(s) to calculate amount
+    else {
+      let productIdToFetch = productId;
+      let productIdsToFetch = productIds || [];
+
+      // If single productId provided, convert to array
+      if (productIdToFetch && productIdsToFetch.length === 0) {
+        productIdsToFetch = [productIdToFetch];
       }
-    );
 
-    if (!productResponse.ok) {
-      throw new Error("Failed to fetch product");
+      if (productIdsToFetch.length === 0) {
+        throw new Error("Product ID(s) or amount is required");
+      }
+
+      // Fetch products from real_products table (or stripe_products as fallback)
+      const productIdsParam = productIdsToFetch.map(id => {
+        const sanitized = id.replace(/[^a-zA-Z0-9-_.]/g, '');
+        return `id.eq.${sanitized}`;
+      }).join(',or=');
+
+      // Try real_products first
+      let productResponse = await fetch(
+        `${supabaseUrl}/rest/v1/real_products?select=*&or=(${productIdsParam})`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseKey}`,
+            "apikey": supabaseKey,
+          },
+        }
+      );
+
+      if (!productResponse.ok || !(await productResponse.json()).length) {
+        // Fallback to stripe_products
+        productResponse = await fetch(
+          `${supabaseUrl}/rest/v1/stripe_products?select=*&or=(${productIdsParam})`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseKey}`,
+              "apikey": supabaseKey,
+            },
+          }
+        );
+      }
+
+      if (!productResponse.ok) {
+        throw new Error("Failed to fetch products");
+      }
+
+      const products = await productResponse.json();
+
+      if (!products || products.length === 0) {
+        throw new Error("Product(s) not found or inactive");
+      }
+
+      // Calculate total from products
+      let totalAmount = 0;
+      const productNames: string[] = [];
+
+      for (const product of products) {
+        const price = product.sale_price || product.price;
+        totalAmount += parseFloat(price || 0);
+        productNames.push(product.name || 'Product');
+      }
+
+      productName = productNames.length === 1 ? productNames[0] : `${productNames.length} items`;
+      amountInCents = Math.round(totalAmount * 100);
+      productMetadata = {
+        ...productMetadata,
+        product_ids: productIdsToFetch.join(','),
+        product_names: productNames.join(', ')
+      };
     }
 
-    const products = await productResponse.json();
-
-    if (!products || products.length === 0) {
-      throw new Error("Product not found or inactive");
-    }
-
-    const product = products[0];
-    
-    // Use sale_price if available, otherwise use regular price
-    const amount = product.sale_price || product.price;
-    
-    // Convert to cents for Stripe (Stripe requires amounts in smallest currency unit)
-    const amountInCents = Math.round(amount * 100);
-
-    // Create a Stripe PaymentIntent
+    // Create a Stripe PaymentIntent with ALL payment methods enabled
     // Build payment intent parameters
     const paymentParams: Record<string, string> = {
       amount: amountInCents.toString(),
-      currency: "usd",
+      currency: currency,
       "automatic_payment_methods[enabled]": "true",
-      "metadata[product_id]": sanitizedProductId,
-      "metadata[product_name]": product.name,
+      // Enable all payment methods including Google Pay, Apple Pay, Cash App Pay, etc.
+      "payment_method_types[]": "card",
       "metadata[customer_email]": customerEmail,
-      description: `Payment for ${product.name}`,
+      description: `Payment for ${productName}`,
       receipt_email: customerEmail,
-      statement_descriptor_suffix: "PRO DIGITAL",
+      statement_descriptor_suffix: "STREAMSTICK",
     };
     
+    // Add all metadata
+    Object.entries(productMetadata).forEach(([key, value]) => {
+      paymentParams[`metadata[${key}]`] = String(value);
+    });
+
     // Only add customer_name to metadata if provided
     if (customerName && customerName.trim()) {
       paymentParams["metadata[customer_name]"] = customerName.trim();
@@ -128,13 +179,14 @@ Deno.serve(async (req: Request) => {
     const paymentIntent = await stripeResponse.json();
 
     // Log the payment intent creation (optional - for debugging)
-    console.log(`PaymentIntent created: ${paymentIntent.id} for product: ${product.name}, amount: $${amount}`);
+    const displayAmount = (amountInCents / 100).toFixed(2);
+    console.log(`PaymentIntent created: ${paymentIntent.id} for ${productName}, amount: $${displayAmount}`);
 
     return new Response(
       JSON.stringify({
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
-        amount: amount,
+        amount: (amountInCents / 100).toFixed(2),
       }),
       {
         headers: {
