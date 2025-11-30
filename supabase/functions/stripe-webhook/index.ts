@@ -417,6 +417,7 @@ Deno.serve(async (req: Request) => {
 
           // If no setup video from product, try product_setup_videos table
           if (!setupVideoUrl) {
+            // First try product-specific video
             const videoResponse = await fetch(
               `${supabaseUrl}/rest/v1/product_setup_videos?select=video_url&product_id=eq.${encodeURIComponent(productId)}&is_active=eq.true&order=sort_order.asc&limit=1`,
               {
@@ -433,10 +434,62 @@ Deno.serve(async (req: Request) => {
               const videos = await videoResponse.json();
               if (videos && videos.length > 0) {
                 setupVideoUrl = videos[0].video_url;
-              } else {
-                // Try default video for product type
-                const defaultVideoResponse = await fetch(
-                  `${supabaseUrl}/rest/v1/product_setup_videos?select=video_url&product_type=eq.${productType}&is_default=eq.true&is_active=eq.true&limit=1`,
+              }
+            }
+
+            // If still no video, try default video for product type
+            if (!setupVideoUrl) {
+              const defaultVideoResponse = await fetch(
+                `${supabaseUrl}/rest/v1/product_setup_videos?select=video_url&product_type=eq.${productType}&is_default=eq.true&is_active=eq.true&limit=1`,
+                {
+                  method: "GET",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${supabaseKey}`,
+                    "apikey": supabaseKey,
+                  },
+                }
+              );
+              if (defaultVideoResponse.ok) {
+                const defaultVideos = await defaultVideoResponse.json();
+                if (defaultVideos && defaultVideos.length > 0) {
+                  setupVideoUrl = defaultVideos[0].video_url;
+                }
+              }
+            }
+
+            // If STILL no video, try "all" default video
+            if (!setupVideoUrl) {
+              const allVideoResponse = await fetch(
+                `${supabaseUrl}/rest/v1/product_setup_videos?select=video_url&product_type=eq.all&is_default=eq.true&is_active=eq.true&limit=1`,
+                {
+                  method: "GET",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${supabaseKey}`,
+                    "apikey": supabaseKey,
+                  },
+                }
+              );
+              if (allVideoResponse.ok) {
+                const allVideos = await allVideoResponse.json();
+                if (allVideos && allVideos.length > 0) {
+                  setupVideoUrl = allVideos[0].video_url;
+                }
+              }
+            }
+          }
+
+          // If service URL not found, use default from environment or site_settings
+          if (!serviceUrl) {
+            const defaultServiceUrl = Deno.env.get("DEFAULT_SERVICE_URL");
+            if (defaultServiceUrl) {
+              serviceUrl = defaultServiceUrl;
+            } else {
+              // Try to get from site_settings
+              try {
+                const settingsResponse = await fetch(
+                  `${supabaseUrl}/rest/v1/site_settings?setting_key=eq.default_service_url&select=setting_value`,
                   {
                     method: "GET",
                     headers: {
@@ -446,12 +499,14 @@ Deno.serve(async (req: Request) => {
                     },
                   }
                 );
-                if (defaultVideoResponse.ok) {
-                  const defaultVideos = await defaultVideoResponse.json();
-                  if (defaultVideos && defaultVideos.length > 0) {
-                    setupVideoUrl = defaultVideos[0].video_url;
+                if (settingsResponse.ok) {
+                  const settings = await settingsResponse.json();
+                  if (settings && settings.length > 0 && settings[0].setting_value) {
+                    serviceUrl = settings[0].setting_value;
                   }
                 }
+              } catch (e) {
+                console.error("Error fetching default service URL:", e);
               }
             }
           }
@@ -616,7 +671,9 @@ Deno.serve(async (req: Request) => {
       ` : ""}
 
       ${serviceUrl ? `
-      <p><strong>Service URL:</strong> <a href="${serviceUrl}">${serviceUrl}</a></p>
+      <p><strong>Access Your Service:</strong></p>
+      <p><a href="${serviceUrl}" class="button" style="background: #10b981;">Access Service Portal</a></p>
+      <p>Or visit: <a href="${serviceUrl}">${serviceUrl}</a></p>
       ` : ""}
 
       <p>Need help? Reply to this email or contact support.</p>
