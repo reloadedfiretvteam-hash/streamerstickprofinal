@@ -23,9 +23,14 @@ interface StripeElement {
   unmount: () => void;
 }
 
+interface StripePaymentIntentResult {
+  id: string;
+  status: string;
+}
+
 interface StripePaymentResult {
   error?: { message?: string };
-  paymentIntent?: { id?: string; status: string; [key: string]: any } | string;
+  paymentIntent?: StripePaymentIntentResult;
 }
 
 declare global {
