@@ -15,6 +15,11 @@ import RealAIVideoGenerator from '../components/custom-admin/RealAIVideoGenerato
 import AmazonFireStickAutomation from '../components/custom-admin/AmazonFireStickAutomation';
 import SuperAICopilot from '../components/custom-admin/SuperAICopilot';
 import GitHubCloudflareConfig from '../components/custom-admin/GitHubCloudflareConfig';
+import OrdersCustomersManager from '../components/custom-admin/OrdersCustomersManager';
+import AdvancedAnalytics from '../components/custom-admin/AdvancedAnalytics';
+import CategoryManager from '../components/custom-admin/CategoryManager';
+import BulkEmailManager from '../components/custom-admin/BulkEmailManager';
+import SiteSettingsManager from '../components/custom-admin/SiteSettingsManager';
 
 export default function RealAdminDashboard() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -47,7 +52,6 @@ export default function RealAdminDashboard() {
     { id: 'homepage-editor', label: 'HOMEPAGE EDITOR (Click & Edit)', icon: Layout, color: 'bg-purple-500' },
     { id: 'products', label: 'PRODUCTS (Your Actual Products)', icon: Package, color: 'bg-green-500' },
     { id: 'stripe-products', label: 'STRIPE-SAFE PRODUCTS (secure.streamstickpro.com)', icon: Package, color: 'bg-blue-600' },
-    { id: 'square-products', label: 'SQUARE-SAFE PRODUCTS (secure.streamstickpro.com)', icon: Package, color: 'bg-green-600' },
     { id: 'ai-video-generator', label: '🎬 AI VIDEO GENERATOR (TikTok/YouTube)', icon: Video, color: 'bg-pink-600' },
     { id: 'amazon-automation', label: '⚡ Amazon Fire Stick Automation', icon: Zap, color: 'bg-orange-600' },
     { id: 'blog', label: 'BLOG POSTS (With SEO Scores)', icon: FileText, color: 'bg-orange-500' },
@@ -81,17 +85,17 @@ export default function RealAdminDashboard() {
       case 'seo-manager':
         return <RankMathProSEOManager />;
       case 'orders':
-        return <OrdersView />;
+        return <OrdersCustomersManager />;
       case 'analytics':
-        return <AnalyticsView />;
+        return <AdvancedAnalytics />;
       case 'categories':
-        return <CategoriesView />;
+        return <CategoryManager />;
       case 'emails':
-        return <EmailsView />;
+        return <BulkEmailManager />;
       case 'github-cloudflare':
         return <GitHubCloudflareConfig />;
       case 'settings':
-        return <SettingsView />;
+        return <SiteSettingsManager />;
       default:
         return <DashboardOverview setActiveView={setActiveView} />;
     }
