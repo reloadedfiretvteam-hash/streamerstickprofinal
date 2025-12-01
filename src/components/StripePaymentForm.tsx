@@ -132,37 +132,64 @@ export default function StripePaymentForm({ amount, onSubmit, customerEmail, cus
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
     
-    if (supabaseUrl && supabaseAnonKey) {
-      try {
-        const response = await fetch(`${supabaseUrl}/functions/v1/create-stripe-payment-intent`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabaseAnonKey}`,
-          },
-          body: JSON.stringify({
-            amount: Math.round(paymentAmount * 100), // Convert to cents
-            currency: 'usd',
-            customerEmail,
-            customerName,
-          }),
-        });
-        
-        if (response.ok) {
-          return response.json();
-        }
-        
-        // Handle non-200 responses
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to create payment intent');
-      } catch (error) {
-        console.error('Error creating payment intent:', error);
-        throw error;
-      }
+    // Check if environment variables are configured
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Supabase configuration missing. VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are required.');
+      throw new Error('Payment system configuration error. Please contact support.');
     }
     
-    // If Supabase is not configured, throw an error
-    throw new Error('Payment system not configured. Please contact support.');
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
+      const response = await fetch(`${supabaseUrl}/functions/v1/create-stripe-payment-intent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({
+          amount: Math.round(paymentAmount * 100), // Convert to cents
+          currency: 'usd',
+          customerEmail,
+          customerName,
+        }),
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (!data.clientSecret) {
+          throw new Error('Invalid response from payment server');
+        }
+        return data;
+      }
+      
+      // Handle non-200 responses
+      let errorMessage = 'Failed to initialize payment';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorData.message || errorMessage;
+      } catch {
+        // If we can't parse error JSON, use status text
+        errorMessage = `Payment server error: ${response.status} ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new Error('Payment request timed out. Please check your connection and try again.');
+        }
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          throw new Error('Unable to connect to payment server. Please check your internet connection and try again.');
+        }
+        console.error('Error creating payment intent:', error.message);
+        throw error;
+      }
+      throw new Error('An unexpected error occurred. Please try again.');
+    }
   };
 
   const handlePayment = async () => {
