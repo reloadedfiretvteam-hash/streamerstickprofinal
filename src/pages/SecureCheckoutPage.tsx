@@ -29,6 +29,8 @@ export default function SecureCheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'bitcoin' | 'cashapp' | ''>('');
   const [step, setStep] = useState<'select' | 'checkout' | 'success'>('select');
   const [loading, setLoading] = useState(true);
+  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
+  const [creatingPaymentIntent, setCreatingPaymentIntent] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
     email: '',
@@ -492,43 +494,121 @@ export default function SecureCheckoutPage() {
               {/* Stripe Payment Form */}
               {paymentMethod === 'stripe' && (
                 <div className="mb-6">
-                  <StripePaymentForm 
-                    amount={totalAmount}
-                    customerInfo={customerInfo}
-                    onSubmit={async (paymentIntentId) => {
-                      try {
-                        // Save order to Supabase
-                        const { error } = await supabase
-                          .from('orders')
-                          .insert([{
-                            customer_name: customerInfo.name,
-                            customer_email: customerInfo.email,
-                            customer_phone: customerInfo.phone,
-                            shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
-                            total_amount: totalAmount.toString(),
-                            payment_method: 'stripe',
-                            payment_intent_id: paymentIntentId,
-                            payment_status: 'completed',
-                            status: 'processing',
-                            items: selectedProduct ? [{
-                              product_id: selectedProduct.id,
-                              product_name: selectedProduct.name,
-                              quantity: 1,
-                              price: totalAmount
-                            }] : []
-                          }]);
+                  {!stripeClientSecret ? (
+                    <div className="bg-white rounded-xl p-6 border border-slate-200">
+                      <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <CreditCard className="w-5 h-5 text-blue-600" />
+                        Secure Card Payment
+                      </h3>
+                      <p className="text-slate-600 mb-4">Click below to initialize secure payment</p>
+                      <button
+                        onClick={async () => {
+                          setCreatingPaymentIntent(true);
+                          try {
+                            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                            
+                            if (!supabaseUrl) {
+                              throw new Error('Supabase URL not configured');
+                            }
+                            
+                            const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                amount: Math.round(totalAmount * 100), // Convert to cents
+                                currency: 'usd',
+                                customerInfo: {
+                                  email: customerInfo.email,
+                                  fullName: customerInfo.name,
+                                  address: customerInfo.address,
+                                  city: customerInfo.city,
+                                  zipCode: customerInfo.zip
+                                },
+                                items: selectedProduct ? [{
+                                  productId: selectedProduct.id,
+                                  name: selectedProduct.name,
+                                  price: totalAmount,
+                                  quantity: 1
+                                }] : []
+                              }),
+                            });
 
-                        if (error) throw error;
-                        handleOrderComplete(paymentIntentId);
-                      } catch (error: any) {
-                        console.error('Order creation failed:', error);
-                        alert(`Payment succeeded but order creation failed: ${error.message}. Please contact support.`);
-                      }
+                            const data = await response.json();
+
+                            if (!response.ok) {
+                              throw new Error(data.error || 'Failed to create payment intent');
+                            }
+
+                            if (!data.clientSecret) {
+                              throw new Error('No client secret returned from server');
+                            }
+
+                            setStripeClientSecret(data.clientSecret);
+                          } catch (error: unknown) {
+                            console.error('Error creating payment intent:', error);
+                            const errorMessage = error instanceof Error ? error.message : 'Failed to initialize payment. Please try again.';
+                            alert(`Error: ${errorMessage}`);
+                          } finally {
+                            setCreatingPaymentIntent(false);
+                          }
+                        }}
+                        disabled={creatingPaymentIntent}
+                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-bold text-lg transition-all disabled:opacity-50"
+                      >
+                        {creatingPaymentIntent ? 'Initializing...' : 'Initialize Secure Payment'}
+                      </button>
+                    </div>
+                  ) : (
+                    <StripePaymentForm 
+                      amount={totalAmount}
+                      clientSecret={stripeClientSecret}
+                      onSuccess={async (paymentIntentId: string) => {
+                        try {
+                          // Save order to Supabase
+                          const { error } = await supabase
+                            .from('orders')
+                            .insert([{
+                              customer_name: customerInfo.name,
+                              customer_email: customerInfo.email,
+                              customer_phone: customerInfo.phone,
+                              shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
+                              total_amount: totalAmount.toString(),
+                              payment_method: 'stripe',
+                              payment_intent_id: paymentIntentId,
+                              payment_status: 'completed',
+                              status: 'processing',
+                              items: selectedProduct ? [{
+                                product_id: selectedProduct.id,
+                                product_name: selectedProduct.name,
+                                quantity: 1,
+                                price: totalAmount
+                              }] : []
+                            }]);
+
+                          if (error) throw error;
+                          handleOrderComplete(paymentIntentId);
+                        } catch (error: unknown) {
+                          console.error('Order creation failed:', error);
+                          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                          alert(`Payment succeeded but order creation failed: ${errorMessage}. Please contact support.`);
+                        }
+                      }}
+                      onError={(error: string) => {
+                        alert(`Payment failed: ${error}`);
+                      }}
+                    />
+                  )}
+                  <button
+                    onClick={() => {
+                      setPaymentMethod('');
+                      setStripeClientSecret(null);
                     }}
-                    onError={(error) => {
-                      alert(`Payment failed: ${error}`);
-                    }}
-                  />
+                    className="mt-4 w-full bg-slate-200 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-300 transition-all"
+                  >
+                    Back to Payment Methods
+                  </button>
                 </div>
               )}
 

@@ -3,7 +3,7 @@ import {
   Package, FileText, ShoppingCart, Settings, LogOut, TrendingUp, HelpCircle, Image,
   DollarSign, CreditCard, Flame, X, Grid, Users, Video, Eye, Edit3, Mail, Tag,
   ArrowRight, Wallet, Repeat, Star, Activity, Shield, Bot, Upload, Monitor, Globe,
-  Bitcoin, BarChart3, Layout, Database, Search, MessageCircle, Zap, Power, Lock
+  Bitcoin, BarChart3, Layout, Search, MessageCircle, Zap
 } from 'lucide-react';
 
 // Import ALL admin components
@@ -72,7 +72,6 @@ import SimplePaymentSettings from '../components/custom-admin/SimplePaymentSetti
 import StripeProductManager from '../components/custom-admin/StripeProductManager';
 import SearchEngineManager from '../components/custom-admin/SearchEngineManager';
 import GitHubCloudflareConfig from '../components/custom-admin/GitHubCloudflareConfig';
-import AICopilotWidget from '../components/custom-admin/AICopilotWidget';
 import { supabase } from '../lib/supabase';
 
 interface AdminTool {

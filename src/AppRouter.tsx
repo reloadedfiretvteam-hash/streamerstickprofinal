@@ -9,7 +9,6 @@ import ShopPage from './pages/ShopPage';
 import NewCheckoutPage from './pages/NewCheckoutPage';
 import FireSticksPage from './pages/FireSticksPage';
 import IPTVServicesPage from './pages/IPTVServicesPage';
-import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import StripeSecureCheckoutPage from './pages/StripeSecureCheckoutPage';
 
 // Check if current host is a Stripe payment subdomain
