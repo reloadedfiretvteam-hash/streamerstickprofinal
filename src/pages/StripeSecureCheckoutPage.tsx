@@ -50,10 +50,10 @@ export default function StripeSecureCheckoutPage() {
   async function loadSingleProduct(productId: string) {
     try {
       const { data, error } = await supabase
-        .from('stripe_products')
+        .from('real_products')
         .select('*')
         .eq('id', productId)
-        .eq('is_active', true)
+        .eq('status', 'published')
         .single();
 
       if (error) throw error;
@@ -76,10 +76,10 @@ export default function StripeSecureCheckoutPage() {
   async function loadProducts() {
     try {
       const { data, error } = await supabase
-        .from('stripe_products')
+        .from('real_products')
         .select('*')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
+        .eq('status', 'published')
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       
@@ -124,7 +124,7 @@ export default function StripeSecureCheckoutPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          productId: selectedProduct.id,
+          realProductId: selectedProduct.id,
           customerEmail: customerInfo.email,
           customerName: customerInfo.name,
         }),
@@ -146,9 +146,65 @@ export default function StripeSecureCheckoutPage() {
     }
   }
 
-  function handlePaymentSuccess(paymentIntentId: string) {
+  async function handlePaymentSuccess(paymentIntentId: string) {
     console.log('Payment successful:', paymentIntentId);
-    setStep('success');
+    
+    if (!selectedProduct) {
+      console.error('No product selected when payment succeeded');
+      setPaymentError('Payment succeeded but order could not be created. Please contact support.');
+      return;
+    }
+
+    try {
+      // Generate order number
+      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+      
+      // Prepare order items
+      const orderItems = [{
+        product_id: selectedProduct.id,
+        product_name: selectedProduct.name,
+        quantity: 1,
+        unit_price: selectedProduct.sale_price || selectedProduct.price,
+        total_price: selectedProduct.sale_price || selectedProduct.price
+      }];
+
+      const totalAmount = selectedProduct.sale_price || selectedProduct.price;
+
+      // Save order to database
+      const { data, error } = await supabase
+        .from('orders')
+        .insert({
+          order_number: orderNumber,
+          customer_name: customerInfo.name,
+          customer_email: customerInfo.email,
+          customer_phone: customerInfo.phone || null,
+          shipping_address: null, // Digital product, no shipping needed
+          subtotal: totalAmount,
+          tax: 0,
+          total: totalAmount,
+          total_amount: totalAmount.toString(),
+          payment_method: 'stripe',
+          payment_intent_id: paymentIntentId,
+          payment_status: 'completed',
+          order_status: 'processing',
+          status: 'processing',
+          items: orderItems,
+          notes: `Payment method: stripe, Payment Intent ID: ${paymentIntentId}`
+        })
+        .select();
+
+      if (error) {
+        console.error('Order creation failed:', error);
+        throw error;
+      }
+
+      console.log('Order created successfully:', data);
+      setStep('success');
+    } catch (error) {
+      console.error('Error saving order after payment:', error);
+      setPaymentError('Payment succeeded but order could not be saved. Please contact support with your payment ID: ' + paymentIntentId);
+      // Still show success since payment went through, but warn user
+    }
   }
 
   function handlePaymentError(error: string) {

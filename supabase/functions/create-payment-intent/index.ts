@@ -36,7 +36,7 @@ serve(async (req) => {
       httpClient: Stripe.createFetchHttpClient(),
     })
     
-    const { amount, currency = 'usd', customerInfo } = await req.json()
+    const { amount, currency = 'usd', customerInfo, items } = await req.json()
     
     // Create PaymentIntent
     const paymentIntent = await stripe.paymentIntents.create({
