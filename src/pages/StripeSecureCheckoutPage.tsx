@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Shield, Lock, Package, CheckCircle, AlertCircle, ArrowRight, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import StripePaymentForm from '../components/StripePaymentForm';
+import { generateCredentials } from '../utils/credentialsGenerator';
 
 interface Product {
   id: string;
@@ -199,6 +200,80 @@ export default function StripeSecureCheckoutPage() {
       }
 
       console.log('Order created successfully:', data);
+      
+      // Generate username and password for customer
+      const credentials = generateCredentials(customerInfo.name);
+      
+      // Save credentials to order (update order with credentials)
+      if (data && data[0]) {
+        await supabase
+          .from('orders')
+          .update({
+            customer_username: credentials.username,
+            customer_password: credentials.password,
+            service_url: credentials.serviceUrl,
+            notes: `${data[0].notes || ''}\n\nCredentials Generated:\nUsername: ${credentials.username}\nPassword: ${credentials.password}\nService URL: ${credentials.serviceUrl}`
+          })
+          .eq('id', data[0].id);
+      }
+
+      // Send first email (greeting/confirmation)
+      try {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        await fetch(`${supabaseUrl}/functions/v1/send-order-emails`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            orderCode: orderNumber,
+            customerEmail: customerInfo.email,
+            customerName: customerInfo.name,
+            totalUsd: totalAmount,
+            paymentMethod: 'stripe',
+            products: orderItems.map(item => ({
+              name: item.product_name,
+              price: item.unit_price,
+              quantity: item.quantity
+            })),
+            shippingAddress: 'Digital Product - No Shipping Required',
+            adminEmail: 'reloadedfirestvteam@gmail.com',
+            orderId: data?.[0]?.id,
+            paymentIntentId: paymentIntentId
+          }),
+        });
+        console.log('First email (confirmation) sent');
+      } catch (emailError) {
+        console.error('Error sending confirmation email:', emailError);
+        // Don't fail the order if email fails
+      }
+
+      // Send second email (credentials) - can be immediate or delayed
+      try {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        await fetch(`${supabaseUrl}/functions/v1/send-credentials-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            customerEmail: customerInfo.email,
+            customerName: customerInfo.name,
+            username: credentials.username,
+            password: credentials.password,
+            serviceUrl: credentials.serviceUrl,
+            orderNumber: orderNumber,
+            productName: selectedProduct.name,
+            totalAmount: totalAmount,
+            youtubeTutorialUrl: 'https://www.youtube.com/watch?v=YOUR_TUTORIAL_VIDEO_ID' // TODO: Add actual YouTube URL
+          }),
+        });
+        console.log('Second email (credentials) sent');
+      } catch (emailError) {
+        console.error('Error sending credentials email:', emailError);
+        // Don't fail the order if email fails
+      }
+
       setStep('success');
     } catch (error) {
       console.error('Error saving order after payment:', error);
