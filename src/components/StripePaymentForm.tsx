@@ -35,7 +35,7 @@ interface StripePaymentResult {
 
 declare global {
   interface Window {
-    Stripe: (key: string) => StripeInstance;
+    Stripe: ((key: string) => StripeInstance) | undefined;
   }
 }
 
@@ -53,61 +53,86 @@ export default function StripePaymentForm({
   const cardMounted = useRef(false);
 
   useEffect(() => {
-    const initializeStripe = async () => {
-      if (!window.Stripe) {
-        setErrorMessage('Stripe.js failed to load');
-        return;
-      }
+    if (!clientSecret) return;
 
+    const initializeStripe = () => {
       const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
       if (!publishableKey) {
-        setErrorMessage('Stripe configuration missing');
+        setErrorMessage('Stripe configuration missing. Please contact support.');
         return;
       }
 
-      try {
-        const stripeInstance = window.Stripe(publishableKey);
-        setStripe(stripeInstance);
-
-        const elementsInstance = stripeInstance.elements({
-          clientSecret,
-          appearance: {
-            theme: 'stripe',
-            variables: {
-              colorPrimary: '#3b82f6',
-              colorBackground: '#ffffff',
-              colorText: '#1f2937',
-              colorDanger: '#ef4444',
-              fontFamily: 'system-ui, sans-serif',
-              spacingUnit: '4px',
-              borderRadius: '8px',
-            },
-          },
-        });
-        setElements(elementsInstance);
-
-        // Create and mount card element
-        const cardElement = elementsInstance.create('payment');
-        cardElementRef.current = cardElement;
+      // Wait for Stripe.js to load
+      if (typeof window === 'undefined' || !window.Stripe) {
+        // Retry after a short delay if Stripe hasn't loaded yet
+        let attempts = 0;
+        const maxAttempts = 50; // 5 seconds total
         
-        // Wait for the container to be in the DOM
-        setTimeout(() => {
-          const container = document.getElementById('stripe-card-element');
-          if (container && !cardMounted.current) {
-            cardElement.mount('#stripe-card-element');
-            cardMounted.current = true;
+        const checkStripe = setInterval(() => {
+          attempts++;
+          if (window.Stripe) {
+            clearInterval(checkStripe);
+            doInitialize();
+          } else if (attempts >= maxAttempts) {
+            clearInterval(checkStripe);
+            setErrorMessage('Stripe.js failed to load. Please refresh the page.');
           }
         }, 100);
-      } catch (e) {
-        console.error('Stripe initialization failed:', e);
-        setErrorMessage('Failed to load secure payment form');
+        return;
+      }
+
+      doInitialize();
+
+      function doInitialize() {
+        try {
+          if (!window.Stripe) {
+            throw new Error('Stripe.js not available');
+          }
+
+          const stripeInstance = window.Stripe(publishableKey);
+          if (!stripeInstance) {
+            throw new Error('Failed to initialize Stripe');
+          }
+          setStripe(stripeInstance);
+
+          const elementsInstance = stripeInstance.elements({
+            clientSecret,
+            appearance: {
+              theme: 'stripe',
+              variables: {
+                colorPrimary: '#3b82f6',
+                colorBackground: '#ffffff',
+                colorText: '#1f2937',
+                colorDanger: '#ef4444',
+                fontFamily: 'system-ui, sans-serif',
+                spacingUnit: '4px',
+                borderRadius: '8px',
+              },
+            },
+          });
+          setElements(elementsInstance);
+
+          // Create and mount card element
+          const cardElement = elementsInstance.create('payment');
+          cardElementRef.current = cardElement;
+          
+          // Wait for the container to be in the DOM
+          setTimeout(() => {
+            const container = document.getElementById('stripe-card-element');
+            if (container && !cardMounted.current) {
+              cardElement.mount('#stripe-card-element');
+              cardMounted.current = true;
+            }
+          }, 100);
+        } catch (e) {
+          console.error('Stripe initialization failed:', e);
+          setErrorMessage('Failed to load secure payment form. Please refresh the page.');
+        }
       }
     };
 
-    if (clientSecret) {
-      initializeStripe();
-    }
+    initializeStripe();
 
     return () => {
       if (cardElementRef.current && cardMounted.current) {
