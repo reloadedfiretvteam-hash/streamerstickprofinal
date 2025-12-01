@@ -170,8 +170,68 @@ Deno.serve(async (req: Request) => {
     let productMetadata: Record<string, string> = { ...metadata };
 
     // If amount is directly provided (for cart checkout), use it
+    // BUT we still need to fetch products to get cloaked names for Stripe
     if (amount && amount > 0) {
       amountInCents = Math.round(amount);
+      
+      // Even if amount is provided, try to fetch products for cloaked names
+      if (productIds && productIds.length > 0) {
+        const sanitizedIds = productIds.map(id => id.replace(/[^a-zA-Z0-9-_.]/g, ''));
+        const productIdsParam = sanitizedIds.map(id => `id.eq.${id}`).join(',or=');
+        
+        try {
+          let productResponse = await fetch(
+            `${supabaseUrl}/rest/v1/real_products?select=id,name,cloaked_name,category&or=(${productIdsParam})`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${supabaseKey}`,
+                "apikey": supabaseKey,
+              },
+            }
+          );
+          
+          if (productResponse.ok) {
+            const products = await productResponse.json() || [];
+            if (products.length > 0) {
+              const cloakedNames: string[] = [];
+              const realNames: string[] = [];
+              
+              for (const product of products) {
+                const realName = product.name || 'Product';
+                realNames.push(realName);
+                
+                let cloakedName = product.cloaked_name;
+                if (!cloakedName || cloakedName.trim() === '') {
+                  const category = (product.category || '').toLowerCase();
+                  if (category.includes('fire') || category.includes('stick')) {
+                    cloakedName = 'Digital Entertainment Service - Hardware Bundle';
+                  } else if (category.includes('iptv') || category.includes('subscription')) {
+                    cloakedName = 'Digital Entertainment Service - Subscription';
+                  } else {
+                    cloakedName = 'Digital Entertainment Service';
+                  }
+                }
+                cloakedNames.push(cloakedName);
+              }
+              
+              // Update product name and metadata with cloaked names
+              productName = cloakedNames.length === 1 ? cloakedNames[0] : `${cloakedNames.length} Digital Entertainment Services`;
+              productMetadata = {
+                ...productMetadata,
+                product_ids: sanitizedIds.join(','),
+                product_names: realNames.join(', '), // REAL names for customer
+                product_names_cloaked: cloakedNames.join(', ') // CLOAKED names for Stripe
+              };
+            }
+          }
+        } catch (e) {
+          console.error("Error fetching products for cloaked names:", e);
+          // Continue with default cloaked name if fetch fails
+          productName = 'Digital Entertainment Service';
+        }
+      }
     }
     // Otherwise, fetch product(s) to calculate amount
     else {
@@ -256,22 +316,46 @@ Deno.serve(async (req: Request) => {
       } else {
         // Calculate total from products
         let totalAmount = 0;
-        const productNames: string[] = [];
+        const cloakedNames: string[] = []; // For Stripe (compliance)
+        const realNames: string[] = []; // For customer emails/orders
 
         for (const product of products) {
           const salePrice = parseFloat(product.sale_price);
           const regularPrice = parseFloat(product.price);
           const price = !isNaN(salePrice) && product.sale_price !== null ? salePrice : regularPrice;
           totalAmount += price;
-          productNames.push(product.cloaked_name || product.name || product.short_description || 'Product');
+          
+          // Get real product name (what customer sees)
+          const realName = product.name || product.short_description || 'Product';
+          realNames.push(realName);
+          
+          // Get cloaked name (what Stripe sees - for compliance)
+          // If no cloaked_name exists, generate a compliant one based on category
+          let cloakedName = product.cloaked_name;
+          if (!cloakedName || cloakedName.trim() === '') {
+            // Generate compliant name based on category
+            const category = (product.category || '').toLowerCase();
+            if (category.includes('fire') || category.includes('stick')) {
+              cloakedName = 'Digital Entertainment Service - Hardware Bundle';
+            } else if (category.includes('iptv') || category.includes('subscription')) {
+              cloakedName = 'Digital Entertainment Service - Subscription';
+            } else {
+              cloakedName = 'Digital Entertainment Service';
+            }
+          }
+          cloakedNames.push(cloakedName);
         }
 
-        productName = productNames.length === 1 ? productNames[0] : `${productNames.length} items`;
+        // Use CLOAKED names for Stripe description (compliance requirement)
+        productName = cloakedNames.length === 1 ? cloakedNames[0] : `${cloakedNames.length} Digital Entertainment Services`;
         amountInCents = Math.round(totalAmount * 100);
+        
+        // Store BOTH real names (for customer) and cloaked names (for Stripe) in metadata
         productMetadata = {
           ...productMetadata,
           product_ids: sanitizedIds.join(','),
-          product_names: productNames.join(', ')
+          product_names: realNames.join(', '), // REAL names for customer emails
+          product_names_cloaked: cloakedNames.join(', ') // CLOAKED names for Stripe (compliance)
         };
       }
     }

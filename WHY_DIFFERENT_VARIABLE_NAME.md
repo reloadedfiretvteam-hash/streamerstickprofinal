@@ -69,3 +69,6 @@ You have TWO options:
 
 Your checkout will work once `VITE_STRIPE_PUBLISHABLE_KEY` exists! 🚀
 
+
+
+

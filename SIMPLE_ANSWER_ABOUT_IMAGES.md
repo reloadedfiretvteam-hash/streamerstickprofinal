@@ -67,3 +67,6 @@ Your images are stored in **Supabase Storage bucket "images"**. They're already 
 
 **You only need SQL if you want admin panel features for managing images dynamically.**
 
+
+
+

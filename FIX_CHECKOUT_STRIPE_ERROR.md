@@ -154,3 +154,6 @@ Once `VITE_STRIPE_PUBLISHABLE_KEY` is set and Cloudflare rebuilds:
 
 **The checkout page IS built - it just needs the Stripe key to function!** 🚀
 
+
+
+

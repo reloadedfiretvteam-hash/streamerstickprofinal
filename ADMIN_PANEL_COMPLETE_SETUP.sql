@@ -612,3 +612,6 @@ CREATE TRIGGER update_redirects_timestamp BEFORE UPDATE ON redirects FOR EACH RO
 -- COMPLETE! All required tables for admin panel are created.
 -- ============================================================
 
+
+
+

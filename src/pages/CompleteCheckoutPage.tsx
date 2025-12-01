@@ -237,7 +237,7 @@ export default function CompleteCheckoutPage() {
   };
 
   const handlePaymentSuccess = async (paymentIntentId?: string, orderCode?: string) => {
-    // Save order to database
+    // Save order to database with REAL product names (what customer sees)
     try {
       const orderData = {
         customer_name: customerInfo.name,
@@ -251,7 +251,8 @@ export default function CompleteCheckoutPage() {
         order_code: orderCode || generateOrderCode(),
         items: cart.map(item => ({
           product_id: item.product.id,
-          product_name: item.product.name,
+          product_name: item.product.name, // REAL name (customer sees this)
+          product_name_cloaked: item.product.cloaked_name || 'Digital Entertainment Service', // CLOAKED name (Stripe sees this)
           quantity: item.quantity,
           price: item.product.sale_price || item.product.price
         }))

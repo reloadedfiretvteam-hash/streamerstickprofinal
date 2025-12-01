@@ -139,3 +139,6 @@ Your code is already on `clean-main` branch. Cloudflare will deploy automaticall
 
 **After you run the SQL and deploy the edge function, everything will work!**
 
+
+
+

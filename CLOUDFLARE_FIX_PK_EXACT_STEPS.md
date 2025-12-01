@@ -205,3 +205,6 @@ pk_live_51SXXh4HBw27Y92Ci4r7de3JTz13uAz7EF04b2ZpW8KhtDQYaa2mh1ayE8RiCKSRxRYtn3o7
 
 **Once you add the variable, the checkout will work!** 🚀
 
+
+
+

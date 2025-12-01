@@ -822,3 +822,6 @@ CREATE POLICY "Authenticated users can read visitor data" ON website_visitors FO
 -- ALL 67 admin tools now have their required tables!
 -- ============================================================
 
+
+
+

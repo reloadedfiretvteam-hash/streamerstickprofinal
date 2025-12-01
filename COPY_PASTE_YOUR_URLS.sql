@@ -21,3 +21,6 @@ INSERT INTO site_settings (setting_key, setting_value, category, description)
 VALUES ('default_service_url', 'http://ky-tv.cc', 'customer', 'Default service URL sent to all customers')
 ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value;
 
+
+
+

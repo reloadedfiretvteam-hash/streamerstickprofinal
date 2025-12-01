@@ -242,3 +242,6 @@ Your checkout now supports:
 
 All payment methods appear automatically based on customer's device and your Stripe settings!
 
+
+
+

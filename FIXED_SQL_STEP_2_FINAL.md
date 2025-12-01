@@ -52,3 +52,6 @@ Wait for "Success" message ✅
 
 This should work now! The SQL only uses columns that exist in your `site_settings` table.
 
+
+
+

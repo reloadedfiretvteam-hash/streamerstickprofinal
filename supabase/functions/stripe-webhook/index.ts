@@ -296,7 +296,18 @@ Deno.serve(async (req: Request) => {
         const customerName = paymentIntent.metadata?.customer_name || "Customer";
         const productIds = paymentIntent.metadata?.product_ids?.split(",") || [];
         const productId = paymentIntent.metadata?.product_id || productIds[0] || "";
-        const productNameCloaked = paymentIntent.metadata?.product_name_cloaked || paymentIntent.metadata?.product_name || "Digital Entertainment Service";
+        
+        // Get REAL product names (what customer sees) from metadata
+        // This is what customers see on the website and in their emails
+        const realProductNames = paymentIntent.metadata?.product_names || "";
+        
+        // Get CLOAKED product names (what Stripe sees) from metadata
+        // This is what appears on Stripe payment records for compliance
+        const productNameCloaked = paymentIntent.metadata?.product_names_cloaked || paymentIntent.metadata?.product_name_cloaked || paymentIntent.metadata?.product_name || "Digital Entertainment Service";
+        
+        // Use first real product name for single product, or combined for multiple
+        let realProductName = realProductNames || productNameCloaked;
+        
         const orderCode = `STRIPE-${paymentIntent.id.slice(-8).toUpperCase()}`;
         const amount = paymentIntent.amount / 100;
 
@@ -384,14 +395,14 @@ Deno.serve(async (req: Request) => {
           console.error("Error creating order:", orderError);
         }
 
-        // Fetch product to get REAL name and setup video
-        let realProductName = productNameCloaked;
+        // Fetch product to get setup video and service URL
+        // Note: realProductName is already set from metadata above (what customer sees)
         let setupVideoUrl = "";
         let serviceUrl = "";
         let productType = "iptv";
 
         try {
-          // Try to fetch from real_products first (for real product name)
+          // Try to fetch from real_products for setup video and service URL
           const productResponse = await fetch(
             `${supabaseUrl}/rest/v1/real_products?select=name,setup_video_url,service_url,category&id=eq.${encodeURIComponent(productId)}`,
             {
@@ -408,7 +419,10 @@ Deno.serve(async (req: Request) => {
             const products = await productResponse.json();
             if (products && products.length > 0) {
               const product = products[0];
-              realProductName = product.name || realProductName;
+              // Only update realProductName if we don't have it from metadata
+              if (!realProductNames || realProductNames.trim() === "") {
+                realProductName = product.name || realProductName;
+              }
               setupVideoUrl = product.setup_video_url || "";
               serviceUrl = product.service_url || "";
               productType = product.category?.toLowerCase().includes("fire") ? "firestick" : "iptv";

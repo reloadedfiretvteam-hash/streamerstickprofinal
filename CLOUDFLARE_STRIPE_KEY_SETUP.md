@@ -168,3 +168,6 @@ After setting the key correctly and rebuilding:
 
 **Note:** The key you provided (`SjHgl4uSJifxbmMTwD3UVGA-DAKEe5TwM8Dm780U`) looks like it might be part of a Stripe key, but it's missing the `pk_live_` or `pk_test_` prefix. Make sure to get the FULL key from Stripe Dashboard!
 
+
+
+

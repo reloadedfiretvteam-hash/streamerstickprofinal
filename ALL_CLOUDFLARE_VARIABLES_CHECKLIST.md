@@ -115,3 +115,6 @@ Once all variables use `VITE_` prefix:
 
 **Just rename the prefix from `NEXT_PUBLIC_` to `VITE_`!** 🚀
 
+
+
+

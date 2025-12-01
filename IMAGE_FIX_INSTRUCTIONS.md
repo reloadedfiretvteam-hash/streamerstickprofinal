@@ -192,3 +192,6 @@ If you have products showing 20-byte images (broken):
 
 **Questions?** Check the admin panel - everything is now connected to Supabase and will persist!
 
+
+
+

@@ -556,3 +556,6 @@ If you get any errors, check:
 4. Stripe webhook URL is correct
 5. Environment variables match exactly (no extra spaces)
 
+
+
+

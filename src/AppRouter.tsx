@@ -12,6 +12,7 @@ import FireSticksPage from './pages/FireSticksPage';
 import IPTVServicesPage from './pages/IPTVServicesPage';
 import StripeSecureCheckoutPage from './pages/StripeSecureCheckoutPage';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
+import StripeConnectionTest from './pages/StripeConnectionTest';
 
 // Check if current host is a Stripe payment subdomain
 function isStripePaymentHost(): boolean {
@@ -97,6 +98,11 @@ export default function AppRouter() {
 
   if (currentPath === '/faq' || currentPath === '/faq/') {
     return <FAQPage />;
+  }
+
+  // Stripe connection test page
+  if (currentPath === '/test-stripe' || currentPath === '/test-stripe/') {
+    return <StripeConnectionTest />;
   }
 
   // Blog post routing

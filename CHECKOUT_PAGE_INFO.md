@@ -99,3 +99,6 @@ The checkout page code is:
 
 **Just wait for Cloudflare Pages to finish rebuilding!** (Check Cloudflare Dashboard → Pages → Deployments)
 
+
+
+

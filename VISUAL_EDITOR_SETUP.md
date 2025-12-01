@@ -111,3 +111,6 @@ To make the visual edits appear on your live website, I need to:
 
 **Next:** Connect frontend to load from database so edits appear live!
 
+
+
+

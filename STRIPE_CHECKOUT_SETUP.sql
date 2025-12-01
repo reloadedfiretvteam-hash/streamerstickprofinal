@@ -100,3 +100,6 @@ END $$;
 -- COMPLETE! All tables ready for Stripe checkout
 -- ============================================================
 
+
+
+

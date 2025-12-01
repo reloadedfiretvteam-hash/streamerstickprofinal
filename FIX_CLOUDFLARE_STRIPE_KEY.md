@@ -51,3 +51,6 @@ Now you'll have BOTH variables:
 
 The checkout will work once Cloudflare rebuilds!
 
+
+
+

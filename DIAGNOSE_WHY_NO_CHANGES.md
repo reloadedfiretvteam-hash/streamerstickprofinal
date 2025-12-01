@@ -188,3 +188,6 @@ SELECT id, name, main_image FROM real_products LIMIT 5;
 
 The deployment is working - you just need to complete the setup steps!
 
+
+
+

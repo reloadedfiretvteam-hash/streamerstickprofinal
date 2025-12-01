@@ -171,3 +171,6 @@ Endpoint details
 
 You need to go from the LOG to the CONFIGURATION page! 🚀
 
+
+
+

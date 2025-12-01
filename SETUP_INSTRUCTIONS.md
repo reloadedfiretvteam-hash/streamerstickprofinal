@@ -51,3 +51,6 @@ After running the SQL, your admin panel will be fully functional. All 67 tools a
 - Public can read active items, only authenticated users can modify
 - All tables have `updated_at` triggers for automatic timestamp updates
 
+
+
+
