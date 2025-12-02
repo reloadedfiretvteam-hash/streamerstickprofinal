@@ -8,18 +8,8 @@ const FALLBACK_CAROUSEL_IMAGE = 'https://images.pexels.com/photos/4009402/pexels
 export default function MediaCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Unique images only - use Supabase storage URLs with proper fallback
+  // SPORTS ONLY - Football, Baseball, Basketball, UFC from Supabase storage
   const mediaItems = [
-    // MOVIES
-    { type: 'movie', title: 'Action Movies 2024', image: getStorageUrl('images', 'Playback-Tile-1024x512.webp'), year: '2024' },
-    { type: 'movie', title: 'Thriller & Horror', image: getStorageUrl('images', 'Movies-categories_11zon-1024x512.webp'), year: '2024' },
-    
-    // TV SERIES
-    { type: 'series', title: 'Top US Series', image: getStorageUrl('images', 'IPTVSmarters TV IMAG.jpg'), year: '2024' },
-    { type: 'series', title: 'Trending Shows', image: getStorageUrl('images', 'iptv3.jpg'), year: '2024' },
-    { type: 'series', title: 'Binge-Worthy Series', image: getStorageUrl('images', 'OIP (11) websit pic.jpg'), year: '2024' },
-
-    // SPORTS - One image per sport (Football, Baseball, Basketball, UFC)
     { type: 'sport', title: 'NFL All Teams Live', image: getStorageUrl('images', 'c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg'), logo: '🏈' },
     { type: 'sport', title: 'MLB All 30 Teams', image: getStorageUrl('images', 'BASEBALL.webp'), logo: '⚾' },
     { type: 'sport', title: 'NBA All Games', image: getStorageUrl('images', 'downloadBASKET BALL.jpg'), logo: '🏀' },

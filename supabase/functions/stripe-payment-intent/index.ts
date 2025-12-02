@@ -38,10 +38,11 @@ Deno.serve(async (req: Request) => {
     const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get the price from real_products (NOT shadow/stripe table)
+    // Get the price and cloaked_name from real_products (NOT shadow/stripe table)
+    // Customers see real names, Stripe sees cloaked names for compliance
     const { data: product, error: prodError } = await supabase
       .from("real_products")
-      .select("price,sale_price,name")
+      .select("price,sale_price,name,cloaked_name,category")
       .eq("id", realProductId)
       .single();
       
@@ -59,14 +60,35 @@ Deno.serve(async (req: Request) => {
       throw new Error("Product price missing or invalid");
     }
 
-    // Create Stripe PaymentIntent for correct price
+    // Determine cloaked name for Stripe compliance
+    // Stripe only sees cloaked names, customers always see real names
+    let cloakedName = product.cloaked_name;
+    if (!cloakedName || cloakedName.trim() === '') {
+      // Generate compliant cloaked name based on category
+      const category = (product.category || '').toLowerCase();
+      if (category.includes('fire') || category.includes('stick')) {
+        cloakedName = 'Digital Entertainment Service - Hardware Bundle';
+      } else if (category.includes('iptv') || category.includes('subscription')) {
+        cloakedName = 'Digital Entertainment Service - Subscription';
+      } else {
+        cloakedName = 'Digital Entertainment Service';
+      }
+    }
+
+    // Create Stripe PaymentIntent with CLOAKED name (for compliance)
+    // Real product name stored in metadata for customer records
     const stripe = new Stripe(stripeSecretKey, { apiVersion: "2023-10-16" });
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(price * 100),
       currency: "usd",
       receipt_email: customerEmail,
-      description: product.name,
-      metadata: { customerName, realProductId },
+      description: cloakedName, // CLOAKED name sent to Stripe
+      metadata: { 
+        customerName, 
+        realProductId,
+        product_name: product.name, // Real name for customer records
+        product_name_cloaked: cloakedName // Cloaked name for Stripe compliance
+      },
       automatic_payment_methods: { enabled: true },
     });
     return new Response(JSON.stringify({ clientSecret: paymentIntent.client_secret }), {
