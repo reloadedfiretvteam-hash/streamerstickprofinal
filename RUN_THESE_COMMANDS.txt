@@ -1,0 +1,44 @@
+========================================
+COMPLETE SETUP - RUN THESE COMMANDS
+========================================
+
+Copy and paste these commands one by one into PowerShell or Command Prompt:
+
+1. LOGIN TO SUPABASE:
+   npx supabase login
+
+2. LINK PROJECT:
+   npx supabase link --project-ref emlqlmfzqsnqokrqvmcm
+
+3. SET SECRETS:
+   npx supabase secrets set "STRIPE_SECRET_KEY=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" --project-ref emlqlmfzqsnqokrqvmcm
+
+   npx supabase secrets set "SUPABASE_URL=https://emlqlmfzqsnqokrqvmcm.supabase.co" --project-ref emlqlmfzqsnqokrqvmcm
+
+4. DEPLOY FUNCTIONS:
+   npx supabase functions deploy stripe-payment-intent --project-ref emlqlmfzqsnqokrqvmcm
+
+   npx supabase functions deploy stripe-webhook --project-ref emlqlmfzqsnqokrqvmcm
+
+========================================
+OR USE THE BATCH FILE:
+========================================
+
+Just double-click: setup.bat
+
+========================================
+REMAINING MANUAL STEPS:
+========================================
+
+1. Set SUPABASE_SERVICE_ROLE_KEY secret (get from Dashboard)
+2. Set STRIPE_WEBHOOK_SECRET secret (get from Stripe Dashboard)
+3. Run DATABASE_SETUP_SQL.sql in Supabase SQL Editor
+4. Set Cloudflare environment variables (see AUTO_FILL_VALUES.txt)
+
+========================================
+
+
+
+
+
+
