@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import BitcoinPaymentFlow from '../components/BitcoinPaymentFlow';
 import CashAppPaymentFlow from '../components/CashAppPaymentFlow';
 import StripePaymentForm from '../components/StripePaymentForm';
+import FreeTrialCheckout from '../components/FreeTrialCheckout';
 import Footer from '../components/Footer';
 
 interface CartItem {
@@ -79,7 +80,15 @@ export default function NewCheckoutPage() {
   const handleNextStep = () => {
     if (currentStep === 1) {
       if (validateStep1()) {
-        setCurrentStep(2);
+        // Check if this is a free trial (total is $0.00)
+        const total = calculateTotal();
+        if (total === 0) {
+          // Skip payment selection and go straight to free trial activation
+          setCurrentStep(3);
+          setPaymentMethod(''); // No payment needed
+        } else {
+          setCurrentStep(2);
+        }
       }
     } else if (currentStep === 2 && paymentMethod) {
       setCurrentStep(3);
@@ -654,7 +663,9 @@ export default function NewCheckoutPage() {
                     </button>
                   </div>
                 )}
-                {paymentMethod === 'bitcoin' && (
+
+                {/* BITCOIN PAYMENT */}
+                {paymentMethod === 'bitcoin' && calculateTotal() > 0 && (
                   <BitcoinPaymentFlow
                     totalAmount={calculateTotal()}
                     customerInfo={customerInfo}
@@ -668,7 +679,8 @@ export default function NewCheckoutPage() {
                   />
                 )}
 
-                {paymentMethod === 'cashapp' && (
+                {/* CASH APP PAYMENT */}
+                {paymentMethod === 'cashapp' && calculateTotal() > 0 && (
                   <CashAppPaymentFlow
                     totalAmount={calculateTotal()}
                     customerInfo={customerInfo}
