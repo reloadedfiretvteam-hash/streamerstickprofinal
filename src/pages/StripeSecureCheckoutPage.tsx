@@ -265,7 +265,7 @@ export default function StripeSecureCheckoutPage() {
             orderNumber: orderNumber,
             productName: selectedProduct.name,
             totalAmount: totalAmount,
-            youtubeTutorialUrl: 'https://www.youtube.com/watch?v=YOUR_TUTORIAL_VIDEO_ID' // TODO: Add actual YouTube URL
+            youtubeTutorialUrl: 'https://www.youtube.com/watch?v=fDjDH_WAvYI'
           }),
         });
         console.log('Second email (credentials) sent');
