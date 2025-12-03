@@ -276,7 +276,7 @@ export default function SystemHealthCheck() {
     try {
       const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
       
-      if (!stripePublishableKey || stripePublishableKey === 'your-stripe-publishable-key') {
+      if (!stripePublishableKey || stripePublishableKey.startsWith('pk_test_') || stripePublishableKey === 'your-stripe-publishable-key') {
         results[results.length - 1] = {
           name: 'Stripe Payment Gateway',
           status: 'fail',
