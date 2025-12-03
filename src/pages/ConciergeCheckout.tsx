@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Shield, Info } from 'lucide-react';
-import SquarePaymentForm from '../components/SquarePaymentForm';
+import StripePaymentForm from '../components/StripePaymentForm'; // Changed from Square to Stripe
 
 export default function ConciergeCheckout() {
   const [step, setStep] = useState(1);
@@ -81,9 +81,11 @@ export default function ConciergeCheckout() {
 
         {/* Payment Form */}
         <div>
-          <SquarePaymentForm 
-            amount={product.price} 
-            onSubmit={handlePaymentSubmit}
+          <StripePaymentForm 
+            amount={product.price}
+            clientSecret={""} // Will be set after creating payment intent
+            onSuccess={(paymentIntentId) => handlePaymentSubmit(paymentIntentId)}
+            onError={(error) => console.error(error)}
           />
         </div>
       </div>

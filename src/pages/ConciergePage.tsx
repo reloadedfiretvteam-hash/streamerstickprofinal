@@ -23,9 +23,9 @@ export default function ConciergePage() {
   async function loadProducts() {
     try {
       const { data, error } = await supabase
-        .from('stripe_products')
+        .from('real_products')
         .select('*')
-        .eq('is_active', true)
+        .eq('status', 'published')
         .order('price', { ascending: true });
 
       if (error) throw error;
