@@ -6,15 +6,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, Stripe-Signature",
 };
 
-/**
- * Stripe Webhook Handler
- * 
- * Handles Stripe webhook events with:
- * - HMAC-SHA256 signature verification
- * - Test vs live mode detection
- * - Debug logging during failures
- */
-
 interface StripePaymentIntent {
   id: string;
   object: "payment_intent";
@@ -38,17 +29,12 @@ interface StripeEvent {
   };
 }
 
-/**
- * Verify Stripe webhook signature using HMAC-SHA256
- * Stripe uses a specific signature format: t=timestamp,v1=signature
- */
 async function verifyStripeSignature(
   payload: string,
   signature: string,
   webhookSecret: string
 ): Promise<{ valid: boolean; timestamp?: number; error?: string }> {
   try {
-    // Parse the signature header (format: t=timestamp,v1=signature,v0=signature)
     const signatureParts = signature.split(",").reduce((acc, part) => {
       const [key, value] = part.split("=");
       if (key && value) {
@@ -64,10 +50,9 @@ async function verifyStripeSignature(
       return { valid: false, error: "Missing timestamp or signature in header" };
     }
 
-    // Check timestamp tolerance (5 minutes)
     const timestampNum = parseInt(timestamp, 10);
     const currentTimestamp = Math.floor(Date.now() / 1000);
-    const tolerance = 300; // 5 minutes
+    const tolerance = 300;
 
     if (Math.abs(currentTimestamp - timestampNum) > tolerance) {
       return { 
@@ -77,10 +62,8 @@ async function verifyStripeSignature(
       };
     }
 
-    // Create the signed payload string
     const signedPayload = `${timestamp}.${payload}`;
 
-    // Compute HMAC-SHA256
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey(
       "raw",
@@ -96,12 +79,10 @@ async function verifyStripeSignature(
       encoder.encode(signedPayload)
     );
 
-    // Convert to hex string
     const computedSignature = Array.from(new Uint8Array(signatureBytes))
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    // Timing-safe comparison
     const isValid = computedSignature === expectedSignature;
 
     return { 
@@ -115,9 +96,6 @@ async function verifyStripeSignature(
   }
 }
 
-/**
- * Log payment event for debugging and audit purposes
- */
 function logPaymentEvent(
   eventType: string,
   paymentIntent: StripePaymentIntent,
@@ -141,9 +119,6 @@ function logPaymentEvent(
   console.log(`${prefix} ${eventType}:`, JSON.stringify(logData, null, 2));
 }
 
-/**
- * Log failure events with detailed debugging information
- */
 function logFailure(
   context: string,
   error: string,
@@ -160,7 +135,6 @@ function logFailure(
 }
 
 Deno.serve(async (req: Request) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 200,
@@ -168,7 +142,6 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  // Only accept POST requests
   if (req.method !== "POST") {
     logFailure("HTTP Method", "Invalid method", { method: req.method });
     return new Response(
@@ -181,7 +154,6 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Get environment variables
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -208,7 +180,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Get the Stripe signature header
     const signature = req.headers.get("Stripe-Signature");
     if (!signature) {
       logFailure("Authentication", "Missing Stripe-Signature header");
@@ -221,7 +192,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Read the raw request body
     const rawBody = await req.text();
     
     if (!rawBody) {
@@ -235,7 +205,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Verify the webhook signature
     const verificationResult = await verifyStripeSignature(rawBody, signature, webhookSecret);
     
     if (!verificationResult.valid) {
@@ -251,7 +220,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Parse the event
     let event: StripeEvent;
     try {
       event = JSON.parse(rawBody);
@@ -268,13 +236,10 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Determine if this is a live or test event
-    // Both the event and the payment intent have livemode flags
     const isLiveEvent = event.livemode === true;
     const paymentIntent = event.data?.object;
     const isLivePayment = paymentIntent?.livemode === true;
 
-    // Log mode consistency check
     if (isLiveEvent !== isLivePayment) {
       logFailure("Mode Mismatch", "Event and PaymentIntent livemode mismatch", {
         eventLivemode: isLiveEvent,
@@ -284,18 +249,15 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Log the event receipt
     console.log(`[STRIPE-WEBHOOK] Received ${event.type} event (${isLiveEvent ? "LIVE" : "TEST"}): ${event.id}`);
 
-    // Handle different event types
     switch (event.type) {
       case "payment_intent.succeeded": {
         logPaymentEvent("payment_intent.succeeded", paymentIntent, isLivePayment);
 
-        // Record the successful payment in the database
         const transactionRecord = {
           stripe_payment_intent_id: paymentIntent.id,
-          amount: paymentIntent.amount / 100, // Convert from cents
+          amount: paymentIntent.amount / 100,
           currency: paymentIntent.currency,
           payment_method: "stripe",
           payment_status: "confirmed",
@@ -308,7 +270,6 @@ Deno.serve(async (req: Request) => {
           order_code: `STRIPE-${paymentIntent.id.slice(-8).toUpperCase()}`,
         };
 
-        // Insert payment record
         const insertResponse = await fetch(
           `${supabaseUrl}/rest/v1/payment_transactions`,
           {
@@ -341,7 +302,6 @@ Deno.serve(async (req: Request) => {
           failureMessage: "Payment failed - check Stripe dashboard for details",
         });
 
-        // Record the failed payment attempt
         const failedRecord = {
           stripe_payment_intent_id: paymentIntent.id,
           amount: paymentIntent.amount / 100,
@@ -389,12 +349,10 @@ Deno.serve(async (req: Request) => {
       }
 
       default: {
-        // Log unhandled event types for debugging
         console.log(`[STRIPE-WEBHOOK] Unhandled event type: ${event.type} (${isLiveEvent ? "LIVE" : "TEST"})`);
       }
     }
 
-    // Return success response
     return new Response(
       JSON.stringify({
         received: true,
