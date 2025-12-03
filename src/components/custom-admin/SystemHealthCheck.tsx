@@ -328,32 +328,32 @@ export default function SystemHealthCheck() {
     }
     setChecks([...results]);
 
-    // Check 12: Stripe Products Table
-    results.push({ name: 'Stripe Products (Shadow)', status: 'checking', message: 'Checking...' });
+    // Check 12: Cloaked Product Names (Stripe Compliance)
+    results.push({ name: 'Cloaked Product Names', status: 'checking', message: 'Checking...' });
     setChecks([...results]);
 
     try {
       const { count, error } = await supabase
-        .from('stripe_products')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true);
+        .from('real_products')
+        .select('cloaked_name', { count: 'exact', head: true })
+        .not('cloaked_name', 'is', null);
       
       if (error) throw error;
       
       results[results.length - 1] = {
-        name: 'Stripe Products (Shadow)',
+        name: 'Cloaked Product Names',
         status: count && count > 0 ? 'pass' : 'warning',
-        message: `${count || 0} compliant products configured`,
+        message: `${count || 0} products with Stripe-compliant names`,
         details: count && count > 0 
-          ? 'Shadow products ready for Stripe compliance'
-          : 'Add compliant product descriptions for Stripe'
+          ? 'Products have cloaked names for Stripe compliance'
+          : 'Add cloaked_name values to real_products for Stripe compliance'
       };
     } catch (_error: unknown) {
       results[results.length - 1] = {
-        name: 'Stripe Products (Shadow)',
+        name: 'Cloaked Product Names',
         status: 'warning',
-        message: 'Stripe products table not found',
-        details: 'Run the stripe_products migration to enable shadow products'
+        message: 'Cloaked name column not found',
+        details: 'Run migration 20251203_add_missing_columns_to_real_products.sql'
       };
     }
     setChecks([...results]);

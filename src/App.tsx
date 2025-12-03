@@ -30,8 +30,7 @@ import ComparisonTable from './components/ComparisonTable';
 import MoneyBackGuarantee from './components/MoneyBackGuarantee';
 import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
-import ConciergePage from './pages/ConciergePage';
-import SecureCheckoutPage from './pages/SecureCheckoutPage';
+// ConciergePage and SecureCheckoutPage removed - handled by AppRouter instead
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
 
 interface CartItem {
@@ -180,19 +179,8 @@ function App() {
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Secure domain: show Stripe checkout only (no IPTV UI).
-  if (isSecureDomain) {
-    return (
-      <ErrorBoundary>
-        <SecureCheckoutPage />
-      </ErrorBoundary>
-    );
-  }
-
-  // Concierge domain: dedicated concierge landing experience.
-  if (isConciergeDomain) {
-    return <ConciergePage />;
-  }
+  // Note: Secure domain and concierge domain routing is now handled by AppRouter
+  // This App component is only for the main homepage
 
   return (
     <ErrorBoundary>
