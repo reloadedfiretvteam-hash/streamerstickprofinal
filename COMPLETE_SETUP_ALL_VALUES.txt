@@ -1,0 +1,92 @@
+========================================
+COMPLETE SETUP - ALL VALUES READY
+========================================
+
+I've prepared EVERYTHING. Just copy-paste these values:
+
+========================================
+1. DATABASE SQL
+========================================
+File: DATABASE_SETUP_SQL.sql
+URL: https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/sql/new
+
+Copy entire file and paste in SQL Editor.
+
+========================================
+2. SUPABASE SECRETS
+========================================
+URL: https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/functions/settings
+
+Add these 4 secrets:
+
+Secret 1:
+Name: STRIPE_SECRET_KEY
+Value: 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
+
+Secret 2:
+Name: SUPABASE_URL
+Value: https://emlqlmfzqsnqokrqvmcm.supabase.co
+
+Secret 3:
+Name: SUPABASE_SERVICE_ROLE_KEY
+Get from: https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/settings/api
+Look for "service_role" key and copy it
+
+Secret 4:
+Name: STRIPE_WEBHOOK_SECRET
+Get from: https://dashboard.stripe.com/webhooks
+Click on webhook we_1SYe14HBw27Y92Ci0z5p0Wkl
+Click "Reveal" on signing secret
+
+========================================
+3. DEPLOY FUNCTIONS
+========================================
+URL: https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/functions
+
+Deploy these 2 functions:
+- stripe-payment-intent
+- stripe-webhook
+
+Just click "Deploy" or "Update" on each.
+
+========================================
+4. CLOUDFLARE VARIABLES
+========================================
+Go to: Cloudflare Pages → Your Project → Settings → Environment Variables
+
+Add these 4 variables:
+
+Variable 1:
+Name: VITE_SUPABASE_URL
+Value: https://emlqlmfzqsnqokrqvmcm.supabase.co
+
+Variable 2:
+Name: VITE_SUPABASE_ANON_KEY
+Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg
+
+Variable 3:
+Name: VITE_STRIPE_PUBLISHABLE_KEY
+Value: pk_live_51SXXh4HBw27Y92Ci4r7de3JTz13uAz7EF04b2ZpW8KhtDQYaa2mh1ayE8RiCKSRxRYtn3o7VNMINWJd9f7oGYsxT002VVUcvC8
+(Or get from: https://dashboard.stripe.com/apikeys)
+
+Variable 4:
+Name: VITE_STORAGE_BUCKET_NAME
+Value: images
+
+========================================
+QUICK CHECKLIST
+========================================
+[ ] Run DATABASE_SETUP_SQL.sql
+[ ] Add 4 Supabase secrets
+[ ] Deploy 2 functions
+[ ] Add 4 Cloudflare variables
+
+========================================
+ALL VALUES ABOVE - JUST COPY AND PASTE!
+========================================
+
+
+
+
+
+
