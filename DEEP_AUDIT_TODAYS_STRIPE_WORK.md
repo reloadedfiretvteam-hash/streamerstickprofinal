@@ -113,3 +113,9 @@ if (currentPath === '/checkout') {
 4. ⚠️ Verify order saving works correctly
 5. ⚠️ Test payment flow end-to-end
 
+
+
+
+
+
+
