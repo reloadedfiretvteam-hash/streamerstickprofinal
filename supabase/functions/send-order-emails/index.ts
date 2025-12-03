@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -120,42 +121,56 @@ Deno.serve(async (req: Request) => {
     
     const adminEmailContent = generateAdminNotificationEmail(payload);
     
-    console.log('Customer email recipient:', payload.customerEmail);
-    console.log('Customer email subject:', emailSubject);
-    console.log('Customer email content length:', customerEmailContent.length);
-    console.log('Admin email recipient:', payload.adminEmail);
-    console.log('Admin email content length:', adminEmailContent.length);
+    console.log('Sending order emails for:', payload.orderCode);
+
+    // Initialize Resend with API key from environment
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
     
-    // TODO: Implement actual email sending using Supabase email service or Resend/SendGrid
-    // For now, we'll log it and return success
-    // In production, you would use:
-    // - Supabase's email service (if configured)
-    // - Resend API
-    // - SendGrid API
-    // - AWS SES
-    
-    // Placeholder: In production, actually send the emails here
-    // Example with Resend:
-    // const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-    // await resend.emails.send({
-    //   from: "noreply@streamstickpro.com",
-    //   to: payload.customerEmail,
-    //   subject: emailSubject,
-    //   html: customerEmailContent,
-    // });
-    // await resend.emails.send({
-    //   from: "noreply@streamstickpro.com",
-    //   to: payload.adminEmail,
-    //   subject: `New Order: ${payload.orderCode}`,
-    //   html: adminEmailContent,
-    // });
-    
+    if (!resendApiKey) {
+      console.error("RESEND_API_KEY not configured");
+      throw new Error("Email service not configured. Please add RESEND_API_KEY to Supabase secrets.");
+    }
+
+    const resend = new Resend(resendApiKey);
+
+    // Send email to customer
+    const { data: customerData, error: customerError } = await resend.emails.send({
+      from: "Stream Stick Pro <onboarding@resend.dev>", // Change to your verified domain
+      to: payload.customerEmail,
+      subject: emailSubject,
+      html: customerEmailContent,
+    });
+
+    if (customerError) {
+      console.error("Failed to send customer email:", customerError);
+      throw new Error(`Failed to send customer email: ${customerError.message}`);
+    }
+
+    console.log("Customer email sent successfully:", customerData?.id);
+
+    // Send notification to admin
+    const { data: adminData, error: adminError } = await resend.emails.send({
+      from: "Stream Stick Pro <onboarding@resend.dev>", // Change to your verified domain
+      to: payload.adminEmail,
+      subject: `New Order: ${payload.orderCode}`,
+      html: adminEmailContent,
+    });
+
+    if (adminError) {
+      console.error("Failed to send admin email:", adminError);
+      // Don't throw - customer email was sent successfully
+    } else {
+      console.log("Admin email sent successfully:", adminData?.id);
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         orderCode: payload.orderCode,
-        message: "Order confirmation email queued for sending",
-        customerEmail: payload.customerEmail
+        message: "Order emails sent successfully",
+        customerEmail: payload.customerEmail,
+        customerEmailId: customerData?.id,
+        adminEmailId: adminData?.id,
       }), 
       { 
         status: 200,

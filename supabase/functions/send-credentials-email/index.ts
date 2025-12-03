@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -210,34 +211,40 @@ Deno.serve(async (req: Request) => {
     const emailHtml = generateCredentialsEmail(payload);
     const emailSubject = `Your Stream Stick Pro Service Credentials - Order ${payload.orderNumber}`;
 
-    // TODO: Implement actual email sending using Supabase email service or Resend/SendGrid
-    // For now, we'll log it and return success
-    // In production, you would use:
-    // - Supabase's email service (if configured)
-    // - Resend API
-    // - SendGrid API
-    // - AWS SES
-    
-    console.log('Credentials email HTML generated:', emailHtml.length, 'characters');
-    console.log('Email subject:', emailSubject);
-    console.log('Recipient:', payload.customerEmail);
+    console.log('Sending credentials email to:', payload.customerEmail);
 
-    // Placeholder: In production, actually send the email here
-    // Example with Resend:
-    // const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-    // await resend.emails.send({
-    //   from: "noreply@streamstickpro.com",
-    //   to: payload.customerEmail,
-    //   subject: emailSubject,
-    //   html: emailHtml,
-    // });
+    // Initialize Resend with API key from environment
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    
+    if (!resendApiKey) {
+      console.error("RESEND_API_KEY not configured");
+      throw new Error("Email service not configured. Please add RESEND_API_KEY to Supabase secrets.");
+    }
+
+    const resend = new Resend(resendApiKey);
+
+    // Send credentials email to customer
+    const { data, error } = await resend.emails.send({
+      from: "Stream Stick Pro <onboarding@resend.dev>", // Change to your verified domain
+      to: payload.customerEmail,
+      subject: emailSubject,
+      html: emailHtml,
+    });
+
+    if (error) {
+      console.error("Failed to send credentials email:", error);
+      throw new Error(`Failed to send email: ${error.message}`);
+    }
+
+    console.log("Credentials email sent successfully:", data);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Credentials email queued for sending",
+        message: "Credentials email sent successfully",
         orderNumber: payload.orderNumber,
         customerEmail: payload.customerEmail,
+        emailId: data?.id,
       }),
       {
         status: 200,
