@@ -113,8 +113,9 @@ Value: sk_live_YOUR_STRIPE_SECRET_KEY_HERE
 #### Option A: Resend (Recommended)
 ```
 Name: RESEND_API_KEY
-Value: re_YOUR_RESEND_API_KEY_HERE
+Value: re_YOUR_ACTUAL_KEY_HERE
 ```
+**Note:** Resend keys start with lowercase `re_` followed by your unique key
 
 #### Option B: SendGrid
 ```
