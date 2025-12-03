@@ -5,8 +5,7 @@ import Stripe from "https://esm.sh/stripe@14?target=denonext";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Content-Type": "application/json",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
 Deno.serve(async (req: Request) => {
@@ -84,14 +83,14 @@ Deno.serve(async (req: Request) => {
     });
     return new Response(JSON.stringify({ clientSecret: paymentIntent.client_secret }), {
       status: 200,
-      headers: corsHeaders,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
     console.error("Payment intent creation error:", errorMessage);
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 400,
-      headers: corsHeaders,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
