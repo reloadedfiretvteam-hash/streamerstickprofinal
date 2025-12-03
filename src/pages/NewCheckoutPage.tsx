@@ -555,27 +555,17 @@ export default function NewCheckoutPage() {
                                 throw new Error('Supabase URL not configured');
                               }
                               
-                              const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
+                              // Use stripe-payment-intent function which properly handles cloaked names for Stripe compliance
+                              // This function queries real_products.cloaked_name and sends compliant names to Stripe
+                              const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {
                                 method: 'POST',
                                 headers: {
                                   'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify({
-                                  amount: Math.round(calculateTotal() * 100), // Convert to cents
-                                  currency: 'usd',
-                                  customerInfo: {
-                                    email: customerInfo.email,
-                                    fullName: customerInfo.name,
-                                    address: customerInfo.address,
-                                    city: customerInfo.city,
-                                    zipCode: customerInfo.zip
-                                  },
-                                  items: cart.map(item => ({
-                                    productId: item.product.id,
-                                    name: item.product.name,
-                                    price: parseFloat(item.product.sale_price || item.product.price),
-                                    quantity: item.quantity
-                                  }))
+                                  realProductId: cart[0]?.product.id, // Use first product (single product checkout)
+                                  customerEmail: customerInfo.email,
+                                  customerName: customerInfo.name
                                 }),
                               });
 
