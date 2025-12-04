@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { getBucketName } from '../utils/storage';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -91,14 +92,15 @@ export function getStorageUrl(bucket: string, path: string): string {
     return 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=800';
   }
   
-  // Allow override of bucket name via environment variable
-  // This supports cases where images are in 'imiges', 'product-images', or other bucket names
+  // Use centralized bucket name configuration
+  // This supports cases where images are in different bucket names
+  // Priority: VITE_STORAGE_BUCKET_NAME env var > provided bucket parameter
   const bucketOverride = import.meta.env.VITE_STORAGE_BUCKET_NAME;
   
-  // Determine actual bucket: use override if set, otherwise normalize the provided bucket
+  // Determine actual bucket: use centralized config if override is set, otherwise normalize the provided bucket
   let actualBucket: string;
   if (bucketOverride) {
-    actualBucket = normalizeBucketName(bucketOverride);
+    actualBucket = normalizeBucketName(getBucketName());
   } else {
     actualBucket = normalizeBucketName(bucket);
   }
