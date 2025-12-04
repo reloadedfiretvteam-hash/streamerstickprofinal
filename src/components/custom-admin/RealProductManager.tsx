@@ -22,6 +22,12 @@ export default function RealProductManager() {
   const [searchTerm, setSearchTerm] = useState('');
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     loadProducts();
@@ -43,6 +49,24 @@ export default function RealProductManager() {
   const saveProduct = async () => {
     if (!editingProduct) return;
 
+    // Validation
+    if (!editingProduct.name || editingProduct.name.trim() === '') {
+      showToast('Product name is required', 'error');
+      return;
+    }
+    if (!editingProduct.slug || editingProduct.slug.trim() === '') {
+      showToast('URL slug is required', 'error');
+      return;
+    }
+    if (!editingProduct.price || editingProduct.price <= 0) {
+      showToast('Valid price is required', 'error');
+      return;
+    }
+    if (!editingProduct.cloaked_name || editingProduct.cloaked_name.trim() === '') {
+      showToast('Cloaked name is required for Stripe compliance', 'error');
+      return;
+    }
+
     setSaving(true);
 
     const productData = {
@@ -58,11 +82,11 @@ export default function RealProductManager() {
         .eq('id', editingProduct.id);
 
       if (!error) {
-        alert('Product updated successfully!');
+        showToast('Product updated successfully!', 'success');
         loadProducts();
         setEditingProduct(null);
       } else {
-        alert('Error updating product: ' + error.message);
+        showToast('Error updating product: ' + error.message, 'error');
       }
     } else {
       // Create new
@@ -71,11 +95,11 @@ export default function RealProductManager() {
         .insert([productData]);
 
       if (!error) {
-        alert('Product created successfully!');
+        showToast('Product created successfully!', 'success');
         loadProducts();
         setEditingProduct(null);
       } else {
-        alert('Error creating product: ' + error.message);
+        showToast('Error creating product: ' + error.message, 'error');
       }
     }
 
@@ -91,10 +115,10 @@ export default function RealProductManager() {
       .eq('id', id);
 
     if (!error) {
-      alert('Product deleted successfully!');
+      showToast('Product deleted successfully!', 'success');
       loadProducts();
     } else {
-      alert('Error deleting product: ' + error.message);
+      showToast('Error deleting product: ' + error.message, 'error');
     }
   };
 
@@ -125,9 +149,9 @@ export default function RealProductManager() {
 
       // Update the editing product with the new image URL
       setEditingProduct({ ...editingProduct, main_image: publicUrl });
-      alert('Image uploaded successfully!');
+      showToast('Image uploaded successfully!', 'success');
     } catch (error: any) {
-      alert('Upload failed: ' + error.message);
+      showToast('Upload failed: ' + error.message, 'error');
     } finally {
       setUploadingImage(false);
     }
@@ -140,6 +164,20 @@ export default function RealProductManager() {
 
   return (
     <div className="p-6">
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 ${
+          toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white animate-slide-in`}>
+          {toast.type === 'success' ? (
+            <CheckCircle className="w-5 h-5" />
+          ) : (
+            <AlertCircle className="w-5 h-5" />
+          )}
+          <span className="font-semibold">{toast.message}</span>
+        </div>
+      )}
+      
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
