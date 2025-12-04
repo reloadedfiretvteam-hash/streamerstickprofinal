@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Gift, Check, Mail, User, Phone, Loader2, ExternalLink, Copy } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 
 interface FreeTrialCheckoutProps {
   productId: string;

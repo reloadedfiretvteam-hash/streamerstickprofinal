@@ -693,6 +693,14 @@ export default function NewCheckoutPage() {
                     onBack={() => setCurrentStep(2)}
                   />
                 )}
+
+                {/* FREE TRIAL - No payment needed */}
+                {calculateTotal() === 0 && cart.length > 0 && (
+                  <FreeTrialCheckout
+                    productId={cart[0].product.id}
+                    productName={cart[0].product.name}
+                  />
+                )}
               </div>
             )}
           </div>
