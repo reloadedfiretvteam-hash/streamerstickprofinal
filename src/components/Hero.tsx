@@ -1,11 +1,12 @@
 import { ShoppingCart, Play } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { getStorageUrl } from '../lib/supabase';
 import { HERO_FILENAME_CANDIDATES } from '../utils/storage';
 
 export default function Hero() {
   // Get hero image from Supabase storage with multiple fallback candidates
   const [heroImageIndex, setHeroImageIndex] = useState(0);
+  const failedImagesRef = useRef(new Set<number>()); // Track which images have failed
   const heroImageUrl = getStorageUrl('images', HERO_FILENAME_CANDIDATES[heroImageIndex]);
   const goToShop = () => {
     window.location.href = '/shop';
@@ -35,11 +36,18 @@ export default function Hero() {
           onError={(e) => {
             // Try next hero image candidate in the list
             const target = e.target as HTMLImageElement;
-            if (heroImageIndex < HERO_FILENAME_CANDIDATES.length - 1) {
-              setHeroImageIndex(heroImageIndex + 1);
-            } else {
-              // All candidates failed, fallback to gradient background
-              target.style.display = 'none';
+            
+            // Mark current index as failed to prevent retry loops
+            if (!failedImagesRef.current.has(heroImageIndex)) {
+              failedImagesRef.current.add(heroImageIndex);
+              
+              // Try next candidate
+              if (heroImageIndex < HERO_FILENAME_CANDIDATES.length - 1) {
+                setHeroImageIndex(heroImageIndex + 1);
+              } else {
+                // All candidates failed, fallback to gradient background
+                target.style.display = 'none';
+              }
             }
           }}
         />

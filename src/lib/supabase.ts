@@ -97,10 +97,10 @@ export function getStorageUrl(bucket: string, path: string): string {
   // Priority: VITE_STORAGE_BUCKET_NAME env var > provided bucket parameter
   const bucketOverride = import.meta.env.VITE_STORAGE_BUCKET_NAME;
   
-  // Determine actual bucket: use centralized config if override is set, otherwise normalize the provided bucket
+  // Determine actual bucket: use override if set, otherwise normalize the provided bucket
   let actualBucket: string;
   if (bucketOverride) {
-    actualBucket = normalizeBucketName(getBucketName());
+    actualBucket = normalizeBucketName(bucketOverride);
   } else {
     actualBucket = normalizeBucketName(bucket);
   }
