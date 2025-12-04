@@ -41,20 +41,29 @@ export default function SEOMetaTags() {
 
         // Inject Google Analytics 4 tracking
         if (data.google_analytics_id && data.google_analytics_id !== 'G-XXXXXXXXXX') {
+          // Validate GA ID format to prevent XSS
+          const gaIdPattern = /^G-[A-Z0-9]{10}$/;
+          if (!gaIdPattern.test(data.google_analytics_id)) {
+            console.warn('Invalid Google Analytics ID format. Expected format: G-XXXXXXXXXX');
+            setLoaded(true);
+            return;
+          }
+
           // Add Google Analytics script
           const gaScript = document.createElement('script');
           gaScript.async = true;
-          gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${data.google_analytics_id}`;
+          gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(data.google_analytics_id)}`;
           document.head.appendChild(gaScript);
 
-          // Add gtag initialization
+          // Add gtag initialization using safe text content
           const gaInitScript = document.createElement('script');
-          gaInitScript.innerHTML = `
+          const scriptContent = document.createTextNode(`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${data.google_analytics_id}');
-          `;
+          `);
+          gaInitScript.appendChild(scriptContent);
           document.head.appendChild(gaInitScript);
         }
       }
