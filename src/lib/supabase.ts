@@ -93,15 +93,13 @@ export function getStorageUrl(bucket: string, path: string): string {
   }
   
   // Use centralized bucket name configuration
-  // This supports cases where images are in different bucket names
   // Priority: VITE_STORAGE_BUCKET_NAME env var > provided bucket parameter
-  const bucketOverride = getBucketName();
-  
-  // Determine actual bucket: use override if VITE_STORAGE_BUCKET_NAME is set, otherwise normalize the provided bucket
   let actualBucket: string;
   if (import.meta.env.VITE_STORAGE_BUCKET_NAME) {
-    actualBucket = normalizeBucketName(bucketOverride);
+    // Use centralized config when environment variable is set
+    actualBucket = normalizeBucketName(getBucketName());
   } else {
+    // Otherwise normalize the provided bucket parameter
     actualBucket = normalizeBucketName(bucket);
   }
   
