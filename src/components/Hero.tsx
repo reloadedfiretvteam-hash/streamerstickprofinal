@@ -1,9 +1,13 @@
 import { ShoppingCart, Play } from 'lucide-react';
+import { useState } from 'react';
 import { getStorageUrl } from '../lib/supabase';
+import { HERO_FILENAME_CANDIDATES } from '../utils/storage';
 
 export default function Hero() {
-  // Get hero image from Supabase storage with fallback
-  const heroImageUrl = getStorageUrl('images', 'hero-firestick-breakout.jpg');
+  const [heroImageIndex, setHeroImageIndex] = useState(0);
+  
+  // Get hero image from Supabase storage with fallback candidates
+  const heroImageUrl = getStorageUrl('images', HERO_FILENAME_CANDIDATES[heroImageIndex]);
   const goToShop = () => {
     window.location.href = '/shop';
   };
@@ -30,9 +34,14 @@ export default function Hero() {
             transformOrigin: 'center center'
           }}
           onError={(e) => {
-            // Fallback to a gradient background if image fails
+            // Try next hero image candidate
             const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
+            if (heroImageIndex < HERO_FILENAME_CANDIDATES.length - 1) {
+              setHeroImageIndex(heroImageIndex + 1);
+            } else {
+              // All candidates failed, fallback to gradient background
+              target.style.display = 'none';
+            }
           }}
         />
         {/* Dark overlay so text stays readable */}

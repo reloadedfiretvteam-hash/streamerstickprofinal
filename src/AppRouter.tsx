@@ -26,6 +26,15 @@ function isSecureHost(): boolean {
   return secureHosts.includes(host);
 }
 
+// Check if current host is a secure domain (concierge/secure)
+// This includes both VITE_SECURE_HOSTS and VITE_CONCIERGE_HOSTS
+function isSecureDomainHost(): boolean {
+  const host = window.location.hostname;
+  const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || 'secure.streamstickpro.com').split(',').map((h: string) => h.trim());
+  const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '').split(',').map((h: string) => h.trim()).filter(Boolean);
+  return secureHosts.includes(host) || conciergeHosts.includes(host);
+}
+
 export default function AppRouter() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -48,8 +57,21 @@ export default function AppRouter() {
   }
 
   // Handle Square secure checkout subdomain (secure.streamstickpro.com)
+  // If VITE_SECURE_HOST_RENDER_FULL_APP is 'true', render full app instead of cloaked checkout
   if (isSecureHost()) {
-    return <SecureCheckoutPage />;
+    const renderFullApp = import.meta.env.VITE_SECURE_HOST_RENDER_FULL_APP === 'true';
+    if (!renderFullApp) {
+      return <SecureCheckoutPage />;
+    }
+    // If renderFullApp is true, continue to normal routing below
+  }
+  
+  // Handle concierge/secure domains with opt-in full site rendering
+  // If on a secure domain and VITE_SECURE_HOST_RENDER_FULL_APP is NOT 'true',
+  // this was already handled above. Continue to normal routing for full app render.
+  if (isSecureDomainHost() && import.meta.env.VITE_SECURE_HOST_RENDER_FULL_APP !== 'true') {
+    // This case is already handled by isSecureHost() check above
+    // Just ensuring we don't break existing behavior
   }
 
   if (currentPath === '/shop' || currentPath === '/shop/') {
