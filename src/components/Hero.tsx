@@ -11,6 +11,7 @@ export default function Hero() {
   const heroImageUrl = getStorageUrl('images', HERO_FILENAME_CANDIDATES[heroImageIndex]);
   
   // Handle image load errors with fallback logic
+  // Note: setHeroImageIndex and setShowImage are stable React state setters and don't need to be in dependencies
   const handleImageError = useCallback(() => {
     // Mark current index as failed to prevent retry loops
     if (!failedImagesRef.current.has(heroImageIndex)) {
