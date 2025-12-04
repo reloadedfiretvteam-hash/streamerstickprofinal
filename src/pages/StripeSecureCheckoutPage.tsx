@@ -268,11 +268,11 @@ export default function StripeSecureCheckoutPage() {
             customerName: customerInfo.name,
             username: credentials.username,
             password: credentials.password,
-            serviceUrl: credentials.serviceUrl,
+            serviceUrl: selectedProduct.service_url || credentials.serviceUrl,
             orderNumber: orderNumber,
             productName: selectedProduct.name,
             totalAmount: totalAmount,
-            youtubeTutorialUrl: 'https://www.youtube.com/watch?v=fDjDH_WAvYI'
+            youtubeTutorialUrl: selectedProduct.setup_video_url || 'https://www.youtube.com/watch?v=fDjDH_WAvYI'
           }),
         });
         console.log('Second email (credentials) sent');

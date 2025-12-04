@@ -37,7 +37,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: product, error: prodError } = await supabase
       .from("real_products")
-      .select("price,sale_price,name,cloaked_name,category,payment_link_url")
+      .select("price,sale_price,name,cloaked_name,category,payment_link_url,service_url,setup_video_url")
       .eq("id", realProductId)
       .single();
       
@@ -101,7 +101,9 @@ Deno.serve(async (req: Request) => {
         customerName, 
         realProductId,
         product_name: product.name,
-        product_name_cloaked: cloakedName
+        product_name_cloaked: cloakedName,
+        service_url: product.service_url || 'http://ky-tv.cc',
+        setup_video_url: product.setup_video_url || 'https://www.youtube.com/watch?v=fDjDH_WAvYI'
       },
       automatic_payment_methods: { enabled: true },
     });

@@ -10,6 +10,7 @@ import NewCheckoutPage from './pages/NewCheckoutPage';
 import FireSticksPage from './pages/FireSticksPage';
 import IPTVServicesPage from './pages/IPTVServicesPage';
 import StripeSecureCheckoutPage from './pages/StripeSecureCheckoutPage';
+import ConciergePage from './pages/ConciergePage';
 
 // Check if current host is a Stripe payment subdomain
 function isStripePaymentHost(): boolean {
@@ -18,7 +19,19 @@ function isStripePaymentHost(): boolean {
   return stripeHosts.includes(host);
 }
 
-// Note: Square integration removed - Stripe only
+// Check if current host is a concierge subdomain
+function isConciergeDomainHost(): boolean {
+  const host = window.location.hostname;
+  const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '').split(',').map((h: string) => h.trim()).filter(Boolean);
+  return conciergeHosts.length > 0 && conciergeHosts.includes(host);
+}
+
+// Check if current host is a secure checkout subdomain  
+function isSecureDomainHost(): boolean {
+  const host = window.location.hostname;
+  const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || '').split(',').map((h: string) => h.trim()).filter(Boolean);
+  return secureHosts.length > 0 && secureHosts.some((h: string) => host === h || host.includes(h));
+}
 
 export default function AppRouter() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -36,12 +49,29 @@ export default function AppRouter() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Handle Stripe payment subdomain (pay.streamstickpro.com)
+  // Handle Stripe payment subdomain (pay.streamstickpro.com) - Shadow/Carnage products
   if (isStripePaymentHost()) {
     return <StripeSecureCheckoutPage />;
   }
 
-  // Square integration removed - Stripe only
+  // Handle Concierge subdomain - Special products/services
+  if (isConciergeDomainHost()) {
+    return <ConciergePage />;
+  }
+
+  // Handle Secure checkout subdomain - Alternative payment methods
+  if (isSecureDomainHost()) {
+    return <StripeSecureCheckoutPage />;
+  }
+
+  // Handle path-based routing for concierge and secure
+  if (currentPath.startsWith('/concierge')) {
+    return <ConciergePage />;
+  }
+
+  if (currentPath.startsWith('/secure') || currentPath.startsWith('/checkout-secure')) {
+    return <StripeSecureCheckoutPage />;
+  }
 
   if (currentPath === '/shop' || currentPath === '/shop/') {
     return <ShopPage />;

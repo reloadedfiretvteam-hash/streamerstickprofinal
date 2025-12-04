@@ -203,7 +203,10 @@ export default function RealProductManager() {
             main_image: '',
             cloaked_name: 'Digital Entertainment Service',
             meta_title: '',
-            meta_description: ''
+            meta_description: '',
+            service_url: 'http://ky-tv.cc',
+            setup_video_url: '',
+            payment_link_url: ''
           })}
           className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition flex items-center gap-2"
         >
@@ -580,6 +583,38 @@ export default function RealProductManager() {
                       />
                       <p className="text-xs text-gray-500 mt-2">
                         If provided, customers will be redirected to this Stripe Payment Link instead of using PaymentIntent. Leave empty to use standard checkout.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        IPTV Service URL
+                      </label>
+                      <input
+                        type="url"
+                        value={editingProduct.service_url || 'http://ky-tv.cc'}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, service_url: e.target.value })}
+                        className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                        placeholder="http://ky-tv.cc"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        IPTV service URL sent to customers in their credentials email.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        Setup Video URL (YouTube)
+                      </label>
+                      <input
+                        type="url"
+                        value={editingProduct.setup_video_url || ''}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, setup_video_url: e.target.value })}
+                        className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        YouTube tutorial link sent to customers for product setup (especially for Fire Stick products).
                       </p>
                     </div>
                   </div>
