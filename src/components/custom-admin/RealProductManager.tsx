@@ -127,6 +127,7 @@ export default function RealProductManager() {
             status: 'publish',
             featured: false,
             main_image: '',
+            cloaked_name: 'Digital Entertainment Service',
             meta_title: '',
             meta_description: ''
           })}
@@ -431,6 +432,32 @@ export default function RealProductManager() {
                     className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
                     placeholder="/path/to/image.jpg"
                   />
+                </div>
+
+                {/* Stripe Compliance Section */}
+                <div className="border-t border-gray-700 pt-6">
+                  <h4 className="text-white font-bold mb-2 flex items-center gap-2">
+                    <Tag className="w-5 h-5 text-purple-400" />
+                    Stripe Compliance (Carnage Product Name)
+                  </h4>
+                  <p className="text-sm text-gray-400 mb-4">
+                    This is the "cloaked" product name shown to Stripe for compliance. It should be generic and not mention IPTV or Fire Stick.
+                  </p>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
+                      Cloaked Name for Stripe *
+                    </label>
+                    <input
+                      type="text"
+                      value={editingProduct.cloaked_name || 'Digital Entertainment Service'}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, cloaked_name: e.target.value })}
+                      className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                      placeholder="Digital Entertainment Service"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Recommended: "Digital Entertainment Service", "Digital Entertainment Service - Subscription", or "Digital Entertainment Service - Hardware Bundle"
+                    </p>
+                  </div>
                 </div>
 
                 {/* Featured Checkbox */}
