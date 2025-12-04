@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { getBucketName } from '../utils/storage';
+import { getBucketName, STORAGE_BUCKET } from '../utils/storage';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -92,14 +92,16 @@ export function getStorageUrl(bucket: string, path: string): string {
     return 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=800';
   }
   
-  // Use centralized bucket name configuration
-  // Priority: VITE_STORAGE_BUCKET_NAME env var > provided bucket parameter
+  // Get bucket name from centralized configuration
+  // This supports cases where images are in 'imiges', 'product-images', or other bucket names
+  const centralizedBucket = getBucketName();
+  
+  // Determine actual bucket: use centralized config if it's not the default STORAGE_BUCKET,
+  // otherwise normalize the provided bucket parameter
   let actualBucket: string;
-  if (import.meta.env.VITE_STORAGE_BUCKET_NAME) {
-    // Use centralized config when environment variable is set
-    actualBucket = normalizeBucketName(getBucketName());
+  if (centralizedBucket !== STORAGE_BUCKET) {
+    actualBucket = normalizeBucketName(centralizedBucket);
   } else {
-    // Otherwise normalize the provided bucket parameter
     actualBucket = normalizeBucketName(bucket);
   }
   
