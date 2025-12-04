@@ -48,8 +48,16 @@ export default function AppRouter() {
   }
 
   // Handle Square secure checkout subdomain (secure.streamstickpro.com)
+  // Check if full-site rendering is enabled for secure domains
+  const secureHostRenderFullApp = import.meta.env.VITE_SECURE_HOST_RENDER_FULL_APP === 'true';
+  
   if (isSecureHost()) {
-    return <SecureCheckoutPage />;
+    // If full-site rendering is enabled, allow routing to continue to full app
+    // Otherwise, show only the SecureCheckoutPage (cloaked checkout)
+    if (!secureHostRenderFullApp) {
+      return <SecureCheckoutPage />;
+    }
+    // Continue to normal routing below to render full app
   }
 
   if (currentPath === '/shop' || currentPath === '/shop/') {
