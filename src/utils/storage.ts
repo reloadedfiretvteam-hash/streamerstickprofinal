@@ -34,6 +34,10 @@ export function getBucketName(): string {
 
 /**
  * Get full storage URL for a file in the bucket
+ * 
+ * This is a lightweight utility for constructing storage URLs when you have the Supabase URL.
+ * For more complex scenarios (typo normalization, placeholder fallbacks), use getStorageUrl from lib/supabase.
+ * 
  * @param supabaseUrl - The Supabase project URL
  * @param fileName - The file name within the bucket
  * @returns Full URL to the file in storage
