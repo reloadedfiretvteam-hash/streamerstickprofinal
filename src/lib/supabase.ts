@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { getBucketName } from '../utils/storage';
+import { getBucketName, STORAGE_BUCKET } from '../utils/storage';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -96,10 +96,10 @@ export function getStorageUrl(bucket: string, path: string): string {
   // This supports cases where images are in 'imiges', 'product-images', or other bucket names
   const centralizedBucket = getBucketName();
   
-  // Determine actual bucket: use centralized config if it's not the default 'super-bass',
+  // Determine actual bucket: use centralized config if it's not the default STORAGE_BUCKET,
   // otherwise normalize the provided bucket parameter
   let actualBucket: string;
-  if (centralizedBucket !== 'super-bass') {
+  if (centralizedBucket !== STORAGE_BUCKET) {
     actualBucket = normalizeBucketName(centralizedBucket);
   } else {
     actualBucket = normalizeBucketName(bucket);

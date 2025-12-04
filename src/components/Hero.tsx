@@ -1,5 +1,5 @@
 import { ShoppingCart, Play } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { getStorageUrl } from '../lib/supabase';
 import { HERO_FILENAME_CANDIDATES } from '../utils/storage';
 
@@ -7,7 +7,11 @@ export default function Hero() {
   const [heroImageIndex, setHeroImageIndex] = useState(0);
   
   // Get hero image from Supabase storage with fallback candidates
-  const heroImageUrl = getStorageUrl('images', HERO_FILENAME_CANDIDATES[heroImageIndex]);
+  // Memoized to avoid recalculating on every render
+  const heroImageUrl = useMemo(
+    () => getStorageUrl('images', HERO_FILENAME_CANDIDATES[heroImageIndex]),
+    [heroImageIndex]
+  );
   const goToShop = () => {
     window.location.href = '/shop';
   };
