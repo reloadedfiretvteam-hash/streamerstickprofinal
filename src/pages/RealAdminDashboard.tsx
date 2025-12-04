@@ -23,6 +23,7 @@ import BulkEmailManager from '../components/custom-admin/BulkEmailManager';
 import SiteSettingsManager from '../components/custom-admin/SiteSettingsManager';
 import ProductMappingManager from '../components/custom-admin/ProductMappingManager';
 import SystemHealthCheck from '../components/custom-admin/SystemHealthCheck';
+import LiveVisitorStatistics from '../components/custom-admin/LiveVisitorStatistics';
 
 export default function RealAdminDashboard() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -296,10 +297,10 @@ function DashboardOverview({ setActiveView }: { setActiveView: (view: string) =>
         </div>
       </div>
 
-      {/* Recent Activity */}
+      {/* Live Visitor Statistics */}
       <div className="bg-white rounded-xl shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Activity</h2>
-        <p className="text-gray-600">Activity tracking coming soon...</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Live Visitor Statistics</h2>
+        <LiveVisitorStatistics />
       </div>
     </div>
   );

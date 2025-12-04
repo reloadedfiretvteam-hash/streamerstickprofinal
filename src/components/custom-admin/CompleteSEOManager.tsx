@@ -5,6 +5,7 @@ import { Save, RefreshCw, CheckCircle, AlertCircle, TrendingUp, Globe, Share2 } 
 interface SEOSettings {
   google_analytics_id: string;
   google_search_console_verification: string;
+  bing_webmaster_verification: string;
   google_tag_manager_id: string;
   site_name: string;
   site_description: string;
@@ -33,6 +34,7 @@ export default function CompleteSEOManager() {
   const [settings, setSettings] = useState<SEOSettings>({
     google_analytics_id: 'G-XXXXXXXXXX',
     google_search_console_verification: 'YOUR_GOOGLE_VERIFICATION_CODE',
+    bing_webmaster_verification: 'YOUR_BING_VERIFICATION_CODE',
     google_tag_manager_id: '',
     site_name: 'Inferno TV',
     site_description: 'Premium IPTV subscriptions with 20,000+ live channels, movies, sports & PPV.',
@@ -188,6 +190,22 @@ export default function CompleteSEOManager() {
 
             <div>
               <label className="block text-gray-300 mb-2 font-semibold">
+                Bing Webmaster Tools Verification Code
+              </label>
+              <input
+                type="text"
+                value={settings.bing_webmaster_verification}
+                onChange={(e) => setSettings({ ...settings, bing_webmaster_verification: e.target.value })}
+                placeholder="YOUR_BING_VERIFICATION_CODE"
+                className="w-full bg-gray-900 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none font-mono"
+              />
+              <p className="text-gray-400 text-sm mt-2">
+                Get this from Bing Webmaster Tools → Site verification → HTML tag method
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-gray-300 mb-2 font-semibold">
                 Google Tag Manager ID (Optional)
               </label>
               <input
@@ -207,6 +225,7 @@ export default function CompleteSEOManager() {
               <ul className="space-y-2 text-blue-100 text-sm">
                 <li>• <a href="https://analytics.google.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-300">Google Analytics 4</a></li>
                 <li>• <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" className="hover:text-blue-300">Google Search Console</a></li>
+                <li>• <a href="https://www.bing.com/webmasters" target="_blank" rel="noopener noreferrer" className="hover:text-blue-300">Bing Webmaster Tools</a></li>
                 <li>• <a href="https://tagmanager.google.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-300">Google Tag Manager</a></li>
               </ul>
             </div>

@@ -20,6 +20,7 @@ import Footer from './components/Footer';
 import EmailPopup from './components/EmailPopup';
 import CheckoutCart from './components/CheckoutCart';
 import SEOHead from './components/SEOHead';
+import SEOMetaTags from './components/SEOMetaTags';
 import VisitorTracker from './components/VisitorTracker';
 import GoogleAnalytics from './components/GoogleAnalytics';
 import StructuredData from './components/StructuredData';
@@ -184,6 +185,7 @@ function App() {
   return (
     <ErrorBoundary>
       <SEOHead />
+      <SEOMetaTags />
       <GoogleAnalytics />
       <StructuredData />
       <VisitorTracker />
