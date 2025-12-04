@@ -333,19 +333,40 @@ export default function SystemHealthCheck() {
     setChecks([...results]);
 
     try {
-      const { count, error } = await supabase
+      // Check for products with cloaked names
+      const { count: totalProducts, error: countError } = await supabase
+        .from('real_products')
+        .select('*', { count: 'exact', head: true });
+      
+      if (countError) throw countError;
+
+      const { count: cloakedCount, error: cloakedError } = await supabase
         .from('real_products')
         .select('cloaked_name', { count: 'exact', head: true })
-        .not('cloaked_name', 'is', null);
+        .not('cloaked_name', 'is', null)
+        .neq('cloaked_name', '');
       
-      if (error) throw error;
+      if (cloakedError) throw cloakedError;
+
+      // Also check for any products with missing or empty cloaked names
+      const { data: missingCloaked, error: missingError } = await supabase
+        .from('real_products')
+        .select('id, name')
+        .or('cloaked_name.is.null,cloaked_name.eq.')
+        .limit(5);
+      
+      if (missingError) throw missingError;
+
+      const hasMissing = missingCloaked && missingCloaked.length > 0;
       
       results[results.length - 1] = {
         name: 'Cloaked Product Names',
-        status: count && count > 0 ? 'pass' : 'warning',
-        message: `${count || 0} products with Stripe-compliant names`,
-        details: count && count > 0 
-          ? 'Products have cloaked names for Stripe compliance'
+        status: !hasMissing && cloakedCount && cloakedCount > 0 ? 'pass' : 'warning',
+        message: `${cloakedCount || 0}/${totalProducts || 0} products with cloaked names`,
+        details: !hasMissing && cloakedCount && cloakedCount > 0
+          ? 'All products have Stripe-compliant cloaked names'
+          : hasMissing
+          ? `${missingCloaked.length} products missing cloaked names: ${missingCloaked.map(p => p.name).join(', ')}...`
           : 'Add cloaked_name values to real_products for Stripe compliance'
       };
     } catch (_error: unknown) {
@@ -366,8 +387,8 @@ export default function SystemHealthCheck() {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       
       if (supabaseUrl) {
-        // Just check if the endpoint responds (OPTIONS request for CORS)
-        const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
+        // Check the correct stripe-payment-intent function (uses cloaked names)
+        const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {
           method: 'OPTIONS',
           headers: {
             'Content-Type': 'application/json',
@@ -378,7 +399,7 @@ export default function SystemHealthCheck() {
           name: 'Stripe Payment Intent API',
           status: response.ok || response.status === 204 ? 'pass' : 'warning',
           message: response.ok || response.status === 204 ? 'Payment intent endpoint reachable' : 'Endpoint may not be deployed',
-          details: 'Edge function create-payment-intent handles checkout payments'
+          details: 'Edge function stripe-payment-intent handles checkout payments with cloaked product names'
         };
       } else {
         throw new Error('Supabase URL not configured');
@@ -388,7 +409,7 @@ export default function SystemHealthCheck() {
         name: 'Stripe Payment Intent API',
         status: 'warning',
         message: 'Could not reach payment endpoint',
-        details: 'Deploy create-payment-intent edge function to Supabase'
+        details: 'Deploy stripe-payment-intent edge function to Supabase'
       };
     }
     setChecks([...results]);

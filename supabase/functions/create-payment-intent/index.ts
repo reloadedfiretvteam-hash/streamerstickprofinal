@@ -1,3 +1,15 @@
+/**
+ * ⚠️ DEPRECATED - DO NOT USE FOR NEW IMPLEMENTATIONS
+ * 
+ * This function does NOT use cloaked product names for Stripe compliance.
+ * Use stripe-payment-intent instead, which properly handles product name mapping.
+ * 
+ * This function is kept only for backward compatibility.
+ * All new checkout implementations should use: supabase/functions/stripe-payment-intent
+ * 
+ * See: STRIPE_PAYMENT_AUDIT.md for details on proper Stripe integration.
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno"
 

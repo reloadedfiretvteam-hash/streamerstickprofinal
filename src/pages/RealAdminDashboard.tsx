@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Home, Package, FileText, Users, ShoppingCart, BarChart3,
-  Settings, Eye, Layout, LogOut, Mail, Tag, TrendingUp, Globe, Video, Zap, Github
+  Settings, Eye, Layout, LogOut, Mail, Tag, TrendingUp, Globe, Video, Zap, Github, Shield, Activity
 } from 'lucide-react';
 
 // Import real managers that connect to database
@@ -21,6 +21,8 @@ import AdvancedAnalytics from '../components/custom-admin/AdvancedAnalytics';
 import CategoryManager from '../components/custom-admin/CategoryManager';
 import BulkEmailManager from '../components/custom-admin/BulkEmailManager';
 import SiteSettingsManager from '../components/custom-admin/SiteSettingsManager';
+import ProductMappingManager from '../components/custom-admin/ProductMappingManager';
+import SystemHealthCheck from '../components/custom-admin/SystemHealthCheck';
 
 export default function RealAdminDashboard() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -50,6 +52,8 @@ export default function RealAdminDashboard() {
   // Menu items with REAL functionality
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, color: 'bg-blue-500' },
+    { id: 'system-health', label: '🏥 System Health Check', icon: Activity, color: 'bg-green-600' },
+    { id: 'product-mapping', label: '🛡️ Stripe Product Mapping', icon: Shield, color: 'bg-purple-600' },
     { id: 'homepage-editor', label: 'HOMEPAGE EDITOR (Click & Edit)', icon: Layout, color: 'bg-purple-500' },
     { id: 'products', label: 'PRODUCTS (Manage All Products)', icon: Package, color: 'bg-green-500' },
     // 'stripe-products' menu removed - we use real_products table with cloaked_name column
@@ -69,6 +73,10 @@ export default function RealAdminDashboard() {
   // Render active view as FULL PAGE
   const renderView = () => {
     switch (activeView) {
+      case 'system-health':
+        return <SystemHealthCheck />;
+      case 'product-mapping':
+        return <ProductMappingManager />;
       case 'homepage-editor':
         return <FrontendVisualEditor />;
       case 'products':

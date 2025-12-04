@@ -68,7 +68,6 @@ const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || '')
 
 function App() {
   const [isConciergeDomain, setIsConciergeDomain] = useState(false);
-  const [isSecureDomain, setIsSecureDomain] = useState(false);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [emailCaptured, setEmailCaptured] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
