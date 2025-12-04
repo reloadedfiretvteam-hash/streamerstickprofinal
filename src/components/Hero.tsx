@@ -1,5 +1,5 @@
 import { ShoppingCart, Play } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { getStorageUrl } from '../lib/supabase';
 import { HERO_FILENAME_CANDIDATES } from '../utils/storage';
 
@@ -8,6 +8,24 @@ export default function Hero() {
   const [heroImageIndex, setHeroImageIndex] = useState(0);
   const failedImagesRef = useRef(new Set<number>()); // Track which images have failed
   const heroImageUrl = getStorageUrl('images', HERO_FILENAME_CANDIDATES[heroImageIndex]);
+  
+  // Handle image load errors with fallback logic
+  const handleImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const target = e.target as HTMLImageElement;
+    
+    // Mark current index as failed to prevent retry loops
+    if (!failedImagesRef.current.has(heroImageIndex)) {
+      failedImagesRef.current.add(heroImageIndex);
+      
+      // Try next candidate
+      if (heroImageIndex < HERO_FILENAME_CANDIDATES.length - 1) {
+        setHeroImageIndex(heroImageIndex + 1);
+      } else {
+        // All candidates failed, fallback to gradient background
+        target.style.display = 'none';
+      }
+    }
+  }, [heroImageIndex]);
   const goToShop = () => {
     window.location.href = '/shop';
   };
@@ -33,23 +51,7 @@ export default function Hero() {
             transform: 'scale(1.15)',
             transformOrigin: 'center center'
           }}
-          onError={(e) => {
-            // Try next hero image candidate in the list
-            const target = e.target as HTMLImageElement;
-            
-            // Mark current index as failed to prevent retry loops
-            if (!failedImagesRef.current.has(heroImageIndex)) {
-              failedImagesRef.current.add(heroImageIndex);
-              
-              // Try next candidate
-              if (heroImageIndex < HERO_FILENAME_CANDIDATES.length - 1) {
-                setHeroImageIndex(heroImageIndex + 1);
-              } else {
-                // All candidates failed, fallback to gradient background
-                target.style.display = 'none';
-              }
-            }
-          }}
+          onError={handleImageError}
         />
         {/* Dark overlay so text stays readable */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />

@@ -41,6 +41,13 @@ export function getBucketName(): string {
 export function getStorageFileUrl(supabaseUrl: string, fileName: string): string {
   const bucket = getBucketName();
   const cleanPath = fileName.startsWith('/') ? fileName.slice(1) : fileName;
-  const encodedPath = encodeURIComponent(cleanPath);
+  
+  // URL-encode the file path (handles spaces, special characters)
+  // Encode each path segment separately to preserve directory structure
+  const encodedPath = cleanPath
+    .split('/')
+    .map(segment => encodeURIComponent(segment))
+    .join('/');
+    
   return `${supabaseUrl}/storage/v1/object/public/${bucket}/${encodedPath}`;
 }
