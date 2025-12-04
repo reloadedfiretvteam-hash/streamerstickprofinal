@@ -604,63 +604,65 @@ export default function NewCheckoutPage() {
                         </button>
                       </div>
                     ) : (
-                      <StripePaymentForm
-                        amount={calculateTotal()}
-                        clientSecret={stripeClientSecret}
-                        onSuccess={async (paymentIntentId) => {
-                          try {
-                            const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
-                            const orderItems = cart.map(item => ({
-                              product_id: item.product.id,
-                              product_name: item.product.name,
-                              quantity: item.quantity,
-                              unit_price: parseFloat(item.product.sale_price || item.product.price),
-                              total_price: parseFloat(item.product.sale_price || item.product.price) * item.quantity
-                            }));
+                      <>
+                        <StripePaymentForm
+                          amount={calculateTotal()}
+                          clientSecret={stripeClientSecret}
+                          onSuccess={async (paymentIntentId) => {
+                            try {
+                              const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+                              const orderItems = cart.map(item => ({
+                                product_id: item.product.id,
+                                product_name: item.product.name,
+                                quantity: item.quantity,
+                                unit_price: parseFloat(item.product.sale_price || item.product.price),
+                                total_price: parseFloat(item.product.sale_price || item.product.price) * item.quantity
+                              }));
 
-                            const { data, error } = await supabase
-                              .from('orders')
-                              .insert({
-                                order_number: orderNumber,
-                                customer_name: customerInfo.name,
-                                customer_email: customerInfo.email,
-                                customer_phone: customerInfo.phone,
-                                shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
-                                subtotal: calculateTotal(),
-                                tax: 0,
-                                total: calculateTotal(),
-                                total_amount: calculateTotal().toString(),
-                                payment_method: 'stripe',
-                                payment_intent_id: paymentIntentId,
-                                payment_status: 'completed',
-                                order_status: 'processing',
-                                status: 'processing',
-                                items: orderItems,
-                                notes: `Payment method: stripe, Payment Intent ID: ${paymentIntentId}`
-                              })
-                              .select();
-                            if (error) throw error;
-                            const orderCode = (data && data.length > 0 && data[0].id) ? String(data[0].id) : `STRIPE-${Date.now()}`;
-                            handleOrderComplete(orderCode);
-                          } catch (error) {
-                            console.error('Order creation failed:', error);
-                            alert('Payment succeeded but order creation failed. Please contact support.');
-                          }
-                        }}
-                        onError={(error) => {
-                          alert(`Payment failed: ${error}`);
-                        }}
-                      />
+                              const { data, error } = await supabase
+                                .from('orders')
+                                .insert({
+                                  order_number: orderNumber,
+                                  customer_name: customerInfo.name,
+                                  customer_email: customerInfo.email,
+                                  customer_phone: customerInfo.phone,
+                                  shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
+                                  subtotal: calculateTotal(),
+                                  tax: 0,
+                                  total: calculateTotal(),
+                                  total_amount: calculateTotal().toString(),
+                                  payment_method: 'stripe',
+                                  payment_intent_id: paymentIntentId,
+                                  payment_status: 'completed',
+                                  order_status: 'processing',
+                                  status: 'processing',
+                                  items: orderItems,
+                                  notes: `Payment method: stripe, Payment Intent ID: ${paymentIntentId}`
+                                })
+                                .select();
+                              if (error) throw error;
+                              const orderCode = (data && data.length > 0 && data[0].id) ? String(data[0].id) : `STRIPE-${Date.now()}`;
+                              handleOrderComplete(orderCode);
+                            } catch (error) {
+                              console.error('Order creation failed:', error);
+                              alert('Payment succeeded but order creation failed. Please contact support.');
+                            }
+                          }}
+                          onError={(error) => {
+                            alert(`Payment failed: ${error}`);
+                          }}
+                        />
+                        <button
+                          onClick={() => {
+                            setCurrentStep(2);
+                            setStripeClientSecret(null);
+                          }}
+                          className="mt-6 w-full bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition-all"
+                        >
+                          Back to Payment Methods
+                        </button>
+                      </>
                     )}
-                    <button
-                      onClick={() => {
-                        setCurrentStep(2);
-                        setStripeClientSecret(null);
-                      }}
-                      className="mt-6 w-full bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition-all"
-                    >
-                      Back to Payment Methods
-                    </button>
                   </div>
                 )}
 

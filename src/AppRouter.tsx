@@ -10,7 +10,6 @@ import NewCheckoutPage from './pages/NewCheckoutPage';
 import FireSticksPage from './pages/FireSticksPage';
 import IPTVServicesPage from './pages/IPTVServicesPage';
 import StripeSecureCheckoutPage from './pages/StripeSecureCheckoutPage';
-import ConciergePage from './pages/ConciergePage';
 
 // Check if current host is a Stripe payment subdomain
 function isStripePaymentHost(): boolean {
@@ -19,18 +18,19 @@ function isStripePaymentHost(): boolean {
   return stripeHosts.includes(host);
 }
 
-// Check if current host is a concierge subdomain
-function isConciergeDomainHost(): boolean {
+// Check if current host is a Square secure checkout subdomain
+function isSecureHost(): boolean {
   const host = window.location.hostname;
-  const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '').split(',').map((h: string) => h.trim()).filter(Boolean);
-  return conciergeHosts.length > 0 && conciergeHosts.includes(host);
+  const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || 'secure.streamstickpro.com').split(',').map((h: string) => h.trim());
+  return secureHosts.includes(host);
 }
 
-// Check if current host is a secure checkout subdomain  
+// Check if current host is a secure domain (concierge/secure)
+// This includes both VITE_SECURE_HOSTS and VITE_CONCIERGE_HOSTS
 function isSecureDomainHost(): boolean {
   const host = window.location.hostname;
-  const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || '').split(',').map((h: string) => h.trim()).filter(Boolean);
-  return secureHosts.length > 0 && secureHosts.some((h: string) => host === h || host.includes(h));
+  const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '').split(',').map((h: string) => h.trim()).filter(Boolean);
+  return isSecureHost() || conciergeHosts.includes(host);
 }
 
 export default function AppRouter() {
@@ -49,28 +49,19 @@ export default function AppRouter() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Handle Stripe payment subdomain (pay.streamstickpro.com) - Shadow/Carnage products
+  // Handle Stripe payment subdomain (pay.streamstickpro.com)
   if (isStripePaymentHost()) {
     return <StripeSecureCheckoutPage />;
   }
 
-  // Handle Concierge subdomain - Special products/services
-  if (isConciergeDomainHost()) {
-    return <ConciergePage />;
-  }
-
-  // Handle Secure checkout subdomain - Alternative payment methods
+  // Handle secure/concierge checkout subdomains (secure.streamstickpro.com, concierge domains)
+  // If VITE_SECURE_HOST_RENDER_FULL_APP is 'true', render full app instead of cloaked checkout
   if (isSecureDomainHost()) {
-    return <StripeSecureCheckoutPage />;
-  }
-
-  // Handle path-based routing for concierge and secure
-  if (currentPath.startsWith('/concierge')) {
-    return <ConciergePage />;
-  }
-
-  if (currentPath.startsWith('/secure') || currentPath.startsWith('/checkout-secure')) {
-    return <StripeSecureCheckoutPage />;
+    const renderFullApp = import.meta.env.VITE_SECURE_HOST_RENDER_FULL_APP === 'true';
+    if (!renderFullApp) {
+      return <StripeSecureCheckoutPage />;
+    }
+    // If renderFullApp is true, continue to normal routing below for full app
   }
 
   if (currentPath === '/shop' || currentPath === '/shop/') {
