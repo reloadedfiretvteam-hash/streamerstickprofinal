@@ -206,29 +206,6 @@ export default function Shop({ onAddToCart }: ShopProps) {
           // Get image - check if it's from Supabase bucket or local
           let productImage = p.main_image || '';
 
-          // Helper function to generate filename variations (synchronous)
-          const getImageVariations = (baseFilename: string): string[] => {
-            const variations: string[] = [baseFilename]; // Original first
-            
-            // Case variations
-            variations.push(baseFilename.toLowerCase());
-            variations.push(baseFilename.toUpperCase());
-            
-            // Space variations
-            variations.push(baseFilename.replace(/\s+/g, '-'));
-            variations.push(baseFilename.replace(/\s+/g, '_'));
-            
-            // Add extensions if missing
-            if (!baseFilename.match(/\.(jpg|jpeg|png|webp)$/i)) {
-              variations.push(`${baseFilename}.jpg`);
-              variations.push(`${baseFilename}.png`);
-              variations.push(`${baseFilename.toLowerCase()}.jpg`);
-              variations.push(`${baseFilename.replace(/\s+/g, '-')}.jpg`);
-            }
-            
-            return [...new Set(variations)]; // Remove duplicates
-          };
-
           // If image is just a filename (no protocol), use Supabase storage
           if (productImage && !productImage.startsWith('http') && !productImage.startsWith('/')) {
             // Use the exact filename - ValidatedImage component will handle validation

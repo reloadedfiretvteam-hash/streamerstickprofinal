@@ -137,6 +137,13 @@ export default function StripeSecureCheckoutPage() {
         throw new Error(data.error || 'Failed to create payment intent');
       }
 
+      // Check if product uses Payment Link instead of PaymentIntent
+      if (data.usePaymentLink && data.paymentLinkUrl) {
+        console.log('Product uses Payment Link, redirecting...');
+        window.location.href = data.paymentLinkUrl;
+        return;
+      }
+
       setClientSecret(data.clientSecret);
     } catch (error: unknown) {
       console.error('Error creating payment intent:', error);

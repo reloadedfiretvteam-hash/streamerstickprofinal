@@ -21,6 +21,7 @@ export default function RealProductManager() {
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     loadProducts();
@@ -94,6 +95,41 @@ export default function RealProductManager() {
       loadProducts();
     } else {
       alert('Error deleting product: ' + error.message);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editingProduct) return;
+
+    setUploadingImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `product-${Date.now()}.${fileExt}`;
+      const bucketName = import.meta.env.VITE_STORAGE_BUCKET_NAME || 'images';
+      
+      // Upload to Supabase storage
+      const { error: uploadError } = await supabase.storage
+        .from(bucketName)
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL (permanent, not signed)
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(fileName);
+
+      // Update the editing product with the new image URL
+      setEditingProduct({ ...editingProduct, main_image: publicUrl });
+      alert('Image uploaded successfully!');
+    } catch (error: any) {
+      alert('Upload failed: ' + error.message);
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -420,17 +456,50 @@ export default function RealProductManager() {
                   </div>
                 </div>
 
-                {/* Image URL */}
+                {/* Image Upload & URL */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-2">
-                    Main Image URL
+                    Main Image
                   </label>
+                  
+                  {/* Image Preview */}
+                  {editingProduct.main_image && (
+                    <div className="mb-3 relative">
+                      <img 
+                        src={editingProduct.main_image} 
+                        alt="Product preview" 
+                        className="w-full h-48 object-cover rounded-lg border border-gray-600"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Upload Button */}
+                  <div className="mb-3">
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        disabled={uploadingImage}
+                      />
+                      <div className="flex items-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition">
+                        <ImageIcon className="w-5 h-5" />
+                        {uploadingImage ? 'Uploading...' : 'Upload New Image'}
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Manual URL Input */}
                   <input
                     type="text"
                     value={editingProduct.main_image || ''}
                     onChange={(e) => setEditingProduct({ ...editingProduct, main_image: e.target.value })}
                     className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
-                    placeholder="/path/to/image.jpg"
+                    placeholder="Or paste image URL here"
                   />
                 </div>
 
@@ -443,20 +512,38 @@ export default function RealProductManager() {
                   <p className="text-sm text-gray-400 mb-4">
                     This is the "cloaked" product name shown to Stripe for compliance. It should be generic and not mention IPTV or Fire Stick.
                   </p>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-2">
-                      Cloaked Name for Stripe *
-                    </label>
-                    <input
-                      type="text"
-                      value={editingProduct.cloaked_name || 'Digital Entertainment Service'}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, cloaked_name: e.target.value })}
-                      className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
-                      placeholder="Digital Entertainment Service"
-                    />
-                    <p className="text-xs text-gray-500 mt-2">
-                      Recommended: "Digital Entertainment Service", "Digital Entertainment Service - Subscription", or "Digital Entertainment Service - Hardware Bundle"
-                    </p>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        Cloaked Name for Stripe *
+                      </label>
+                      <input
+                        type="text"
+                        value={editingProduct.cloaked_name || 'Digital Entertainment Service'}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, cloaked_name: e.target.value })}
+                        className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                        placeholder="Digital Entertainment Service"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        Recommended: "Digital Entertainment Service", "Digital Entertainment Service - Subscription", or "Digital Entertainment Service - Hardware Bundle"
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        Stripe Payment Link URL (Optional)
+                      </label>
+                      <input
+                        type="url"
+                        value={editingProduct.payment_link_url || ''}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, payment_link_url: e.target.value })}
+                        className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                        placeholder="https://buy.stripe.com/..."
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        If provided, customers will be redirected to this Stripe Payment Link instead of using PaymentIntent. Leave empty to use standard checkout.
+                      </p>
+                    </div>
                   </div>
                 </div>
 

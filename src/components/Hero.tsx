@@ -38,7 +38,7 @@ export default function Hero() {
         setHeroImageUrl(url);
         return;
       }
-    } catch (error) {
+    } catch (_error) {
       // section_images table might not exist, continue to filename variations
       console.debug('Hero: section_images table not found, trying filename variations');
     }
