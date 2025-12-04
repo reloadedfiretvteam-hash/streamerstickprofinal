@@ -21,6 +21,13 @@ export default function RealProductManager() {
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     loadProducts();
@@ -42,6 +49,24 @@ export default function RealProductManager() {
   const saveProduct = async () => {
     if (!editingProduct) return;
 
+    // Validation
+    if (!editingProduct.name || editingProduct.name.trim() === '') {
+      showToast('Product name is required', 'error');
+      return;
+    }
+    if (!editingProduct.slug || editingProduct.slug.trim() === '') {
+      showToast('URL slug is required', 'error');
+      return;
+    }
+    if (!editingProduct.price || editingProduct.price <= 0) {
+      showToast('Valid price is required', 'error');
+      return;
+    }
+    if (!editingProduct.cloaked_name || editingProduct.cloaked_name.trim() === '') {
+      showToast('Cloaked name is required for Stripe compliance', 'error');
+      return;
+    }
+
     setSaving(true);
 
     const productData = {
@@ -57,11 +82,11 @@ export default function RealProductManager() {
         .eq('id', editingProduct.id);
 
       if (!error) {
-        alert('Product updated successfully!');
+        showToast('Product updated successfully!', 'success');
         loadProducts();
         setEditingProduct(null);
       } else {
-        alert('Error updating product: ' + error.message);
+        showToast('Error updating product: ' + error.message, 'error');
       }
     } else {
       // Create new
@@ -70,11 +95,11 @@ export default function RealProductManager() {
         .insert([productData]);
 
       if (!error) {
-        alert('Product created successfully!');
+        showToast('Product created successfully!', 'success');
         loadProducts();
         setEditingProduct(null);
       } else {
-        alert('Error creating product: ' + error.message);
+        showToast('Error creating product: ' + error.message, 'error');
       }
     }
 
@@ -90,10 +115,45 @@ export default function RealProductManager() {
       .eq('id', id);
 
     if (!error) {
-      alert('Product deleted successfully!');
+      showToast('Product deleted successfully!', 'success');
       loadProducts();
     } else {
-      alert('Error deleting product: ' + error.message);
+      showToast('Error deleting product: ' + error.message, 'error');
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editingProduct) return;
+
+    setUploadingImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `product-${Date.now()}.${fileExt}`;
+      const bucketName = import.meta.env.VITE_STORAGE_BUCKET_NAME || 'images';
+      
+      // Upload to Supabase storage
+      const { error: uploadError } = await supabase.storage
+        .from(bucketName)
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL (permanent, not signed)
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(fileName);
+
+      // Update the editing product with the new image URL
+      setEditingProduct({ ...editingProduct, main_image: publicUrl });
+      showToast('Image uploaded successfully!', 'success');
+    } catch (error: any) {
+      showToast('Upload failed: ' + error.message, 'error');
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -104,6 +164,20 @@ export default function RealProductManager() {
 
   return (
     <div className="p-6">
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 ${
+          toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white animate-slide-in`}>
+          {toast.type === 'success' ? (
+            <CheckCircle className="w-5 h-5" />
+          ) : (
+            <AlertCircle className="w-5 h-5" />
+          )}
+          <span className="font-semibold">{toast.message}</span>
+        </div>
+      )}
+      
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -129,7 +203,10 @@ export default function RealProductManager() {
             main_image: '',
             cloaked_name: 'Digital Entertainment Service',
             meta_title: '',
-            meta_description: ''
+            meta_description: '',
+            service_url: 'http://ky-tv.cc',
+            setup_video_url: '',
+            payment_link_url: ''
           })}
           className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition flex items-center gap-2"
         >
@@ -420,17 +497,50 @@ export default function RealProductManager() {
                   </div>
                 </div>
 
-                {/* Image URL */}
+                {/* Image Upload & URL */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-2">
-                    Main Image URL
+                    Main Image
                   </label>
+                  
+                  {/* Image Preview */}
+                  {editingProduct.main_image && (
+                    <div className="mb-3 relative">
+                      <img 
+                        src={editingProduct.main_image} 
+                        alt="Product preview" 
+                        className="w-full h-48 object-cover rounded-lg border border-gray-600"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Upload Button */}
+                  <div className="mb-3">
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        disabled={uploadingImage}
+                      />
+                      <div className="flex items-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition">
+                        <ImageIcon className="w-5 h-5" />
+                        {uploadingImage ? 'Uploading...' : 'Upload New Image'}
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Manual URL Input */}
                   <input
                     type="text"
                     value={editingProduct.main_image || ''}
                     onChange={(e) => setEditingProduct({ ...editingProduct, main_image: e.target.value })}
                     className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
-                    placeholder="/path/to/image.jpg"
+                    placeholder="Or paste image URL here"
                   />
                 </div>
 
@@ -443,20 +553,70 @@ export default function RealProductManager() {
                   <p className="text-sm text-gray-400 mb-4">
                     This is the "cloaked" product name shown to Stripe for compliance. It should be generic and not mention IPTV or Fire Stick.
                   </p>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-2">
-                      Cloaked Name for Stripe *
-                    </label>
-                    <input
-                      type="text"
-                      value={editingProduct.cloaked_name || 'Digital Entertainment Service'}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, cloaked_name: e.target.value })}
-                      className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
-                      placeholder="Digital Entertainment Service"
-                    />
-                    <p className="text-xs text-gray-500 mt-2">
-                      Recommended: "Digital Entertainment Service", "Digital Entertainment Service - Subscription", or "Digital Entertainment Service - Hardware Bundle"
-                    </p>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        Cloaked Name for Stripe *
+                      </label>
+                      <input
+                        type="text"
+                        value={editingProduct.cloaked_name || 'Digital Entertainment Service'}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, cloaked_name: e.target.value })}
+                        className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                        placeholder="Digital Entertainment Service"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        Recommended: "Digital Entertainment Service", "Digital Entertainment Service - Subscription", or "Digital Entertainment Service - Hardware Bundle"
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        Stripe Payment Link URL (Optional)
+                      </label>
+                      <input
+                        type="url"
+                        value={editingProduct.payment_link_url || ''}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, payment_link_url: e.target.value })}
+                        className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                        placeholder="https://buy.stripe.com/..."
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        If provided, customers will be redirected to this Stripe Payment Link instead of using PaymentIntent. Leave empty to use standard checkout.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        IPTV Service URL
+                      </label>
+                      <input
+                        type="url"
+                        value={editingProduct.service_url || 'http://ky-tv.cc'}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, service_url: e.target.value })}
+                        className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                        placeholder="http://ky-tv.cc"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        IPTV service URL sent to customers in their credentials email.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        Setup Video URL (YouTube)
+                      </label>
+                      <input
+                        type="url"
+                        value={editingProduct.setup_video_url || ''}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, setup_video_url: e.target.value })}
+                        className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        YouTube tutorial link sent to customers for product setup (especially for Fire Stick products).
+                      </p>
+                    </div>
                   </div>
                 </div>
 

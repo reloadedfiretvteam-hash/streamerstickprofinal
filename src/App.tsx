@@ -73,6 +73,7 @@ function App() {
   const [emailCaptured, setEmailCaptured] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [, setIsSecureDomain] = useState(false);
 
   useAnalytics();
 

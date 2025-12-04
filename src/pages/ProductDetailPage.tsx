@@ -117,9 +117,44 @@ export default function ProductDetailPage({ productId: propProductId }: ProductD
   const displayPrice = product.sale_price || product.price;
   const originalPrice = product.sale_price ? product.price : null;
 
+  // JSON-LD Structured Data for Product
+  const productStructuredData = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": product.name,
+    "image": product.main_image || product.image_url || '',
+    "description": product.description,
+    "sku": product.id,
+    "offers": {
+      "@type": "Offer",
+      "url": window.location.href,
+      "priceCurrency": "USD",
+      "price": parseFloat(displayPrice),
+      "priceValidUntil": new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 90 days from now
+      "availability": product.stock_quantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "itemCondition": "https://schema.org/NewCondition"
+    },
+    "aggregateRating": product.rating ? {
+      "@type": "AggregateRating",
+      "ratingValue": product.rating,
+      "reviewCount": 100
+    } : undefined,
+    "brand": {
+      "@type": "Brand",
+      "name": "Stream Stick Pro"
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8">
-      <div className="container mx-auto px-4 max-w-6xl">
+    <>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productStructuredData) }}
+      />
+      
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8">
+        <div className="container mx-auto px-4 max-w-6xl">
         {/* Back Button */}
         <button
           onClick={() => window.history.back()}
@@ -246,6 +281,7 @@ export default function ProductDetailPage({ productId: propProductId }: ProductD
         </div>
       </div>
     </div>
+    </>
   );
 }
 

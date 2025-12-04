@@ -255,6 +255,27 @@ Deno.serve(async (req: Request) => {
       case "payment_intent.succeeded": {
         logPaymentEvent("payment_intent.succeeded", paymentIntent, isLivePayment);
 
+        // Idempotency: Check if we already processed this payment intent
+        const checkResponse = await fetch(
+          `${supabaseUrl}/rest/v1/payment_transactions?stripe_payment_intent_id=eq.${paymentIntent.id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseKey}`,
+              "apikey": supabaseKey,
+            },
+          }
+        );
+
+        if (checkResponse.ok) {
+          const existing = await checkResponse.json();
+          if (existing && existing.length > 0) {
+            console.log(`[STRIPE-IDEMPOTENCY] Payment ${paymentIntent.id} already processed, skipping`);
+            break;
+          }
+        }
+
         const transactionRecord = {
           stripe_payment_intent_id: paymentIntent.id,
           amount: paymentIntent.amount / 100,

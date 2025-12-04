@@ -37,7 +37,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: product, error: prodError } = await supabase
       .from("real_products")
-      .select("price,sale_price,name,cloaked_name,category")
+      .select("price,sale_price,name,cloaked_name,category,payment_link_url,service_url,setup_video_url")
       .eq("id", realProductId)
       .single();
       
@@ -55,6 +55,20 @@ Deno.serve(async (req: Request) => {
       throw new Error("Product price missing or invalid");
     }
 
+    // Check if product has a payment_link_url - if so, redirect to Payment Link instead of PaymentIntent
+    if (product.payment_link_url && product.payment_link_url.trim() !== '') {
+      console.log(`Product ${realProductId} has payment_link_url, returning redirect`);
+      return new Response(JSON.stringify({ 
+        usePaymentLink: true,
+        paymentLinkUrl: product.payment_link_url,
+        productName: product.name,
+        price: price
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     let cloakedName = product.cloaked_name;
     if (!cloakedName || cloakedName.trim() === '') {
       const category = (product.category || '').toLowerCase();
@@ -64,6 +78,16 @@ Deno.serve(async (req: Request) => {
         cloakedName = 'Digital Entertainment Service - Subscription';
       } else {
         cloakedName = 'Digital Entertainment Service';
+      }
+    }
+
+    // Validate cloaked name doesn't contain forbidden terms
+    const forbiddenTerms = ['iptv', 'firestick', 'fire stick', 'jailbreak', 'kodi', 'piracy'];
+    const lowerCloaked = cloakedName.toLowerCase();
+    for (const term of forbiddenTerms) {
+      if (lowerCloaked.includes(term)) {
+        console.error(`Cloaked name contains forbidden term: ${term}`);
+        throw new Error(`Invalid cloaked name - contains restricted content`);
       }
     }
 
@@ -77,7 +101,9 @@ Deno.serve(async (req: Request) => {
         customerName, 
         realProductId,
         product_name: product.name,
-        product_name_cloaked: cloakedName
+        product_name_cloaked: cloakedName,
+        service_url: product.service_url || 'http://ky-tv.cc',
+        setup_video_url: product.setup_video_url || 'https://www.youtube.com/watch?v=fDjDH_WAvYI'
       },
       automatic_payment_methods: { enabled: true },
     });
