@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import App from './App';
 import UnifiedAdminLogin from './pages/UnifiedAdminLogin';
-import ModalAdminDashboard from './pages/ModalAdminDashboard';
+import RealAdminDashboard from './pages/RealAdminDashboard';
 import OrderTracking from './pages/OrderTracking';
 import FAQPage from './pages/FAQPage';
 import EnhancedBlogPost from './pages/EnhancedBlogPost';
@@ -9,7 +9,6 @@ import ShopPage from './pages/ShopPage';
 import NewCheckoutPage from './pages/NewCheckoutPage';
 import FireSticksPage from './pages/FireSticksPage';
 import IPTVServicesPage from './pages/IPTVServicesPage';
-import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import StripeSecureCheckoutPage from './pages/StripeSecureCheckoutPage';
 
 // Check if current host is a Stripe payment subdomain
@@ -60,7 +59,7 @@ export default function AppRouter() {
   if (isSecureDomainHost()) {
     const renderFullApp = import.meta.env.VITE_SECURE_HOST_RENDER_FULL_APP === 'true';
     if (!renderFullApp) {
-      return <SecureCheckoutPage />;
+      return <StripeSecureCheckoutPage />;
     }
     // If renderFullApp is true, continue to normal routing below for full app
   }
@@ -90,7 +89,7 @@ export default function AppRouter() {
 
   if (currentPath === '/custom-admin/dashboard') {
     if (isAuthenticated) {
-      return <ModalAdminDashboard />;
+      return <RealAdminDashboard />;
     }
     window.location.href = '/';
     return null;
@@ -100,7 +99,7 @@ export default function AppRouter() {
   if (currentPath === '/admin' || currentPath === '/admin/' || currentPath === '/admin/dashboard' ||
       currentPath === '/custom-admin' || currentPath === '/custom-admin/') {
     if (isAuthenticated) {
-      return <ModalAdminDashboard />;
+      return <RealAdminDashboard />;
     }
     return <UnifiedAdminLogin />;
   }
