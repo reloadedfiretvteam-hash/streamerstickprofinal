@@ -1,81 +1,31 @@
 import { ShoppingCart, Play } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { getStorageUrl } from '../lib/supabase';
-import { supabase } from '../lib/supabase';
+import { HERO_FILENAME_CANDIDATES } from '../utils/storage';
 
 export default function Hero() {
-  // Start with a default image URL to prevent blank flash
-  const [heroImageUrl, setHeroImageUrl] = useState<string>(getStorageUrl('images', 'hero-firestick-breakout.jpg'));
+  // Get hero image from Supabase storage with multiple fallback candidates
+  const [heroImageIndex, setHeroImageIndex] = useState(0);
+  const [showImage, setShowImage] = useState(true); // Control image visibility
+  const failedImagesRef = useRef(new Set<number>()); // Track which images have failed
+  const heroImageUrl = getStorageUrl('images', HERO_FILENAME_CANDIDATES[heroImageIndex]);
   
-  // Try multiple hero image filename variations
-  const heroImageVariations = [
-    'Hero Image.jpg',
-    'Hero Image.png',
-    'Hero Image',
-    'hero image.jpg',
-    'hero-image.jpg',
-    'Hero-Image.jpg',
-    'hero-firestick-breakout.jpg', // Original fallback
-  ];
-
-  useEffect(() => {
-    loadHeroImage();
-  }, []);
-
-  const loadHeroImage = async () => {
-    // First, try to get from section_images table if it exists
-    try {
-      const { data } = await supabase
-        .from('section_images')
-        .select('image_url')
-        .eq('section_name', 'hero')
-        .single();
+  // Handle image load errors with fallback logic
+  // Note: setHeroImageIndex and setShowImage are stable React state setters and don't need to be in dependencies
+  const handleImageError = useCallback(() => {
+    // Mark current index as failed to prevent retry loops
+    if (!failedImagesRef.current.has(heroImageIndex)) {
+      failedImagesRef.current.add(heroImageIndex);
       
-      if (data?.image_url) {
-        const url = data.image_url.startsWith('http') 
-          ? data.image_url 
-          : getStorageUrl('images', data.image_url);
-        setHeroImageUrl(url);
-        return;
-      }
-    } catch (_error) {
-      // section_images table might not exist, continue to filename variations
-      console.debug('Hero: section_images table not found, trying filename variations');
-    }
-
-    // Try filename variations in order
-    for (const filename of heroImageVariations) {
-      const testUrl = getStorageUrl('images', filename);
-      try {
-        const response = await fetch(testUrl, { method: 'HEAD' });
-        if (response.ok) {
-          const contentLength = response.headers.get('content-length');
-          if (contentLength && parseInt(contentLength, 10) > 1000) {
-            if (import.meta.env.DEV) {
-              console.log(`[Hero] Found valid hero image: ${filename} (${contentLength} bytes)`);
-            }
-            setHeroImageUrl(testUrl);
-            return;
-          } else if (import.meta.env.DEV) {
-            console.warn(`[Hero] Image too small: ${filename} (${contentLength} bytes)`);
-          }
-        }
-      } catch (error) {
-        if (import.meta.env.DEV) {
-          console.debug(`[Hero] Failed to load: ${filename}`, error);
-        }
-        // Continue to next variation
-        continue;
+      // Try next candidate
+      if (heroImageIndex < HERO_FILENAME_CANDIDATES.length - 1) {
+        setHeroImageIndex(heroImageIndex + 1);
+      } else {
+        // All candidates failed, hide image and fallback to gradient background
+        setShowImage(false);
       }
     }
-
-    if (import.meta.env.DEV) {
-      console.warn('[Hero] All hero image variations failed, using default fallback');
-    }
-
-    // If all variations fail, use the original as fallback
-    setHeroImageUrl(getStorageUrl('images', 'hero-firestick-breakout.jpg'));
-  };
+  }, [heroImageIndex]);
   const goToShop = () => {
     window.location.href = '/shop';
   };
@@ -88,25 +38,23 @@ export default function Hero() {
     <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden min-h-[600px] flex items-center">
       {/* Background image: Fire Stick breaking out of cage */}
       <div className="absolute inset-0 overflow-hidden">
-        <img
-          src={heroImageUrl}
-          alt="Best Jailbroken Fire Stick 2025 - Premium IPTV Streaming Device"
-          className="w-full h-full object-cover object-center"
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          style={{ 
-            objectPosition: 'center center',
-            /* Scale up slightly and crop edges to remove phone screenshot borders */
-            transform: 'scale(1.15)',
-            transformOrigin: 'center center'
-          }}
-          onError={(e) => {
-            // Fallback to a gradient background if image fails
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-          }}
-        />
+        {showImage && (
+          <img
+            src={heroImageUrl}
+            alt="Best Jailbroken Fire Stick 2025 - Premium IPTV Streaming Device"
+            className="w-full h-full object-cover object-center"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            style={{ 
+              objectPosition: 'center center',
+              /* Scale up slightly and crop edges to remove phone screenshot borders */
+              transform: 'scale(1.15)',
+              transformOrigin: 'center center'
+            }}
+            onError={handleImageError}
+          />
+        )}
         {/* Dark overlay so text stays readable */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
       </div>
