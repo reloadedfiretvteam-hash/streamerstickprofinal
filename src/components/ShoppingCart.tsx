@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { X, Minus, Plus, ShoppingBag, Trash2, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
