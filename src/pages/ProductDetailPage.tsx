@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, ShoppingCart, Star, Shield, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import ProductImage from '../components/ProductImage';
 
 interface Product {
   id: string;
@@ -167,13 +168,13 @@ export default function ProductDetailPage({ productId: propProductId }: ProductD
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Product Image */}
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <img
-              src={product.main_image || product.image_url || '/placeholder-product.jpg'}
+            <ProductImage
+              productId={product.id}
+              imagePath={product.main_image}
+              supabaseUrl={product.image_url}
+              category={product.category as any}
               alt={product.name}
               className="w-full h-96 object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/placeholder-product.jpg';
-              }}
             />
           </div>
 
