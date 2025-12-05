@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/accordion";
 import { SportsCarousel } from "@/components/SportsCarousel";
 import { ExitPopup } from "@/components/ExitPopup";
+import { DemoVideo } from "@/components/DemoVideo";
 
 import firestickImg from "@assets/stock_images/amazon_fire_tv_stick_cc445778.jpg";
 import iptvImg from "@assets/stock_images/smart_tv_interface_w_e1379ac8.jpg";
@@ -231,6 +232,9 @@ export default function MainStore() {
 
           {/* Sports Carousel Inserted Here */}
           <SportsCarousel />
+
+          {/* Demo Video Section */}
+          <DemoVideo />
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
              {products.filter(p => p.category === 'iptv').map((product) => (
