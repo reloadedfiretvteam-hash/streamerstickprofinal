@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { 
   LayoutDashboard, 
@@ -7,8 +7,26 @@ import {
   Settings, 
   Plus, 
   Search,
-  UploadCloud,
-  MoreHorizontal
+  MoreHorizontal,
+  Users,
+  Eye,
+  Clock,
+  Activity,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Globe,
+  MapPin,
+  TrendingUp,
+  Edit,
+  Trash2,
+  Save,
+  X,
+  Image as ImageIcon,
+  CheckCircle,
+  AlertCircle,
+  Flame,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,157 +41,951 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase, getStorageUrl } from "@/lib/supabase";
+
+interface VisitorStats {
+  totalVisitors: number;
+  todayVisitors: number;
+  weekVisitors: number;
+  onlineNow: number;
+  deviceBreakdown: { desktop: number; mobile: number; tablet: number };
+  recentVisitors: Array<{
+    id: string;
+    page_url: string;
+    referrer: string | null;
+    user_agent: string;
+    created_at: string;
+  }>;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  short_description?: string;
+  price: number;
+  sale_price: number | null;
+  sku: string;
+  stock_quantity: number;
+  stock_status: string;
+  category: string;
+  status: string;
+  featured: boolean;
+  main_image: string;
+  cloaked_name: string;
+  sort_order?: number;
+}
+
+const shadowProductMap: Record<string, string> = {
+  "Fire Stick HD": "Web Design Basic",
+  "Fire Stick 4K": "Web Design Pro",
+  "Fire Stick 4K Max": "Web Design Enterprise",
+  "1 Month IPTV": "SEO Basic",
+  "3 Month IPTV": "SEO Standard",
+  "6 Month IPTV": "SEO Pro",
+  "1 Year IPTV": "SEO Enterprise"
+};
 
 export default function AdminPanel() {
-  const [activeTab, setActiveTab] = useState("products");
-  const [location, setLocation] = useLocation();
+  const [activeSection, setActiveSection] = useState("dashboard");
+  const [, setLocation] = useLocation();
+  
+  const [visitorStats, setVisitorStats] = useState<VisitorStats>({
+    totalVisitors: 0,
+    todayVisitors: 0,
+    weekVisitors: 0,
+    onlineNow: 0,
+    deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
+    recentVisitors: []
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  useEffect(() => {
+    loadVisitorStats();
+    loadProducts();
+    
+    const interval = setInterval(() => {
+      loadVisitorStats();
+      setLastUpdate(new Date());
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadVisitorStats = async () => {
+    try {
+      setLoadingStats(true);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+
+      let visitorsData: any[] = [];
+
+      const { data: visitors1, error: err1 } = await supabase
+        .from('visitors')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!err1 && visitors1) {
+        visitorsData = visitors1;
+      } else {
+        const { data: visitors2 } = await supabase
+          .from('visitor_analytics')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (visitors2) {
+          visitorsData = visitors2.map(v => ({
+            ...v,
+            page_url: v.page_view || '/',
+            referrer: v.referrer || null,
+            user_agent: v.device_type || 'Unknown'
+          }));
+        }
+      }
+
+      const totalVisitors = visitorsData.length;
+      const todayVisitors = visitorsData.filter(v => new Date(v.created_at) >= today).length;
+      const weekVisitors = visitorsData.filter(v => new Date(v.created_at) >= weekAgo).length;
+      const onlineNow = visitorsData.filter(v => new Date(v.created_at) >= fiveMinutesAgo).length;
+
+      const deviceBreakdown = {
+        desktop: visitorsData.filter(v => {
+          const ua = (v.user_agent || '').toLowerCase();
+          return !ua.includes('mobile') && !ua.includes('tablet');
+        }).length,
+        mobile: visitorsData.filter(v => {
+          const ua = (v.user_agent || '').toLowerCase();
+          return ua.includes('mobile') && !ua.includes('tablet');
+        }).length,
+        tablet: visitorsData.filter(v => {
+          const ua = (v.user_agent || '').toLowerCase();
+          return ua.includes('tablet');
+        }).length
+      };
+
+      const recentVisitors = visitorsData.slice(0, 10).map(v => ({
+        id: v.id || 'unknown',
+        page_url: v.page_url || '/',
+        referrer: v.referrer || null,
+        user_agent: v.user_agent || 'Unknown',
+        created_at: v.created_at || new Date().toISOString()
+      }));
+
+      setVisitorStats({
+        totalVisitors,
+        todayVisitors,
+        weekVisitors,
+        onlineNow,
+        deviceBreakdown,
+        recentVisitors
+      });
+    } catch (error) {
+      console.error('Error loading visitor statistics:', error);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+
+  const loadProducts = async () => {
+    setLoadingProducts(true);
+    const { data } = await supabase
+      .from('real_products')
+      .select('*')
+      .order('sort_order', { ascending: true });
+
+    if (data) {
+      setProducts(data);
+    }
+    setLoadingProducts(false);
+  };
+
+  const saveProduct = async () => {
+    if (!editingProduct) return;
+
+    if (!editingProduct.name || editingProduct.name.trim() === '') {
+      showToast('Product name is required', 'error');
+      return;
+    }
+    if (!editingProduct.price || editingProduct.price <= 0) {
+      showToast('Valid price is required', 'error');
+      return;
+    }
+
+    setSaving(true);
+
+    const productData = {
+      ...editingProduct,
+      updated_at: new Date().toISOString()
+    };
+
+    if (editingProduct.id) {
+      const { error } = await supabase
+        .from('real_products')
+        .update(productData)
+        .eq('id', editingProduct.id);
+
+      if (!error) {
+        showToast('Product updated successfully!', 'success');
+        loadProducts();
+        setEditingProduct(null);
+      } else {
+        showToast('Error updating product: ' + error.message, 'error');
+      }
+    } else {
+      const { error } = await supabase
+        .from('real_products')
+        .insert([productData]);
+
+      if (!error) {
+        showToast('Product created successfully!', 'success');
+        loadProducts();
+        setEditingProduct(null);
+      } else {
+        showToast('Error creating product: ' + error.message, 'error');
+      }
+    }
+
+    setSaving(false);
+  };
+
+  const deleteProduct = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+
+    const { error } = await supabase
+      .from('real_products')
+      .delete()
+      .eq('id', id);
+
+    if (!error) {
+      showToast('Product deleted successfully!', 'success');
+      loadProducts();
+    } else {
+      showToast('Error deleting product: ' + error.message, 'error');
+    }
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  };
+
+  const getDeviceIcon = (userAgent: string) => {
+    const ua = userAgent.toLowerCase();
+    if (ua.includes('mobile')) return <Smartphone className="w-4 h-4" />;
+    if (ua.includes('tablet')) return <Tablet className="w-4 h-4" />;
+    return <Monitor className="w-4 h-4" />;
+  };
+
+  const filteredProducts = products.filter(p =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.sku?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getShadowName = (productName: string) => {
+    for (const [key, value] of Object.entries(shadowProductMap)) {
+      if (productName.toLowerCase().includes(key.toLowerCase())) {
+        return value;
+      }
+    }
+    return "Digital Service";
+  };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-white/10 bg-card flex flex-col">
+    <div className="min-h-screen bg-gray-900 text-white flex">
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 ${
+          toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white`} data-testid="toast-notification">
+          {toast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+          <span className="font-semibold">{toast.message}</span>
+        </div>
+      )}
+
+      <aside className="w-64 border-r border-white/10 bg-gray-800 flex flex-col">
         <div className="p-6 border-b border-white/10">
-          <h1 className="font-bold text-xl tracking-tight">Admin Panel</h1>
-          <p className="text-xs text-muted-foreground">v2.4.0</p>
+          <div className="flex items-center gap-2">
+            <Flame className="w-6 h-6 text-orange-500" />
+            <h1 className="font-bold text-xl tracking-tight">Admin Panel</h1>
+          </div>
+          <p className="text-xs text-gray-400 mt-1">StreamStickPro Management</p>
         </div>
         
         <nav className="flex-1 p-4 space-y-1">
-          <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-white/5">
+          <Button 
+            variant={activeSection === "dashboard" ? "secondary" : "ghost"} 
+            className="w-full justify-start"
+            onClick={() => setActiveSection("dashboard")}
+            data-testid="nav-dashboard"
+          >
             <LayoutDashboard className="w-4 h-4 mr-3" /> Dashboard
           </Button>
-          <Button variant="secondary" className="w-full justify-start">
+          <Button 
+            variant={activeSection === "products" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => setActiveSection("products")}
+            data-testid="nav-products"
+          >
             <Package className="w-4 h-4 mr-3" /> Products
           </Button>
-          <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-white/5">
+          <Button 
+            variant={activeSection === "visitors" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => setActiveSection("visitors")}
+            data-testid="nav-visitors"
+          >
+            <Users className="w-4 h-4 mr-3" /> Live Visitors
+          </Button>
+          <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5">
             <FileText className="w-4 h-4 mr-3" /> Blog Posts
           </Button>
-          <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-white/5">
+          <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5">
             <Settings className="w-4 h-4 mr-3" /> Settings
           </Button>
         </nav>
 
         <div className="p-4 border-t border-white/10">
-           <Button variant="outline" className="w-full" onClick={() => setLocation("/")}>
+           <Button variant="outline" className="w-full" onClick={() => setLocation("/")} data-testid="button-view-site">
              View Live Site
            </Button>
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 overflow-auto">
-        <header className="h-16 border-b border-white/10 bg-card flex items-center justify-between px-8">
+        <header className="h-16 border-b border-white/10 bg-gray-800 flex items-center justify-between px-8">
           <div className="relative w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Search products, orders..." className="pl-10 bg-background/50 border-white/10" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input 
+              placeholder="Search products, orders..." 
+              className="pl-10 bg-gray-700 border-gray-600 text-white" 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              data-testid="input-search"
+            />
           </div>
           <div className="flex items-center gap-4">
-             <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary flex items-center justify-center text-primary font-bold">
+            <div className="text-sm text-gray-400">
+              Last updated: {lastUpdate.toLocaleTimeString()}
+            </div>
+            <div className="w-8 h-8 rounded-full bg-orange-500/20 border border-orange-500 flex items-center justify-center text-orange-500 font-bold">
                A
              </div>
           </div>
         </header>
 
         <div className="p-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold">Products</h2>
-              <p className="text-muted-foreground">Manage your inventory and pricing.</p>
+          {activeSection === "dashboard" && (
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-3xl font-bold flex items-center gap-3">
+                  <Activity className="w-8 h-8 text-orange-500" />
+                  Dashboard Overview
+                </h2>
+                <p className="text-gray-400">Real-time statistics and quick actions</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Users className="w-8 h-8 opacity-80" />
+                    <span className="text-2xl font-bold" data-testid="text-total-visitors">{visitorStats.totalVisitors.toLocaleString()}</span>
+                  </div>
+                  <p className="text-blue-100 text-sm">Total Visitors</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Eye className="w-8 h-8 opacity-80" />
+                    <span className="text-2xl font-bold" data-testid="text-today-visitors">{visitorStats.todayVisitors.toLocaleString()}</span>
+                  </div>
+                  <p className="text-green-100 text-sm">Today</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Package className="w-8 h-8 opacity-80" />
+                    <span className="text-2xl font-bold" data-testid="text-products-count">{products.length}</span>
+                  </div>
+                  <p className="text-purple-100 text-sm">Active Products</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Activity className="w-8 h-8 opacity-80" />
+                    <span className="text-2xl font-bold" data-testid="text-online-now">{visitorStats.onlineNow.toLocaleString()}</span>
+                  </div>
+                  <p className="text-orange-100 text-sm">Online Now</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <Monitor className="w-5 h-5 text-orange-500" />
+                      Device Breakdown
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Monitor className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-300">Desktop</span>
+                      </div>
+                      <span className="font-semibold text-white">{visitorStats.deviceBreakdown.desktop}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Smartphone className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-300">Mobile</span>
+                      </div>
+                      <span className="font-semibold text-white">{visitorStats.deviceBreakdown.mobile}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Tablet className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-300">Tablet</span>
+                      </div>
+                      <span className="font-semibold text-white">{visitorStats.deviceBreakdown.tablet}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <TrendingUp className="w-5 h-5 text-orange-500" />
+                      Quick Actions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button 
+                      className="w-full bg-orange-500 hover:bg-orange-600" 
+                      onClick={() => setActiveSection("products")}
+                    >
+                      <Plus className="w-4 h-4 mr-2" /> Add New Product
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
+                      onClick={loadVisitorStats}
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" /> Refresh Stats
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-            <Button className="bg-primary hover:bg-primary/90">
-              <Plus className="w-4 h-4 mr-2" /> Add Product
-            </Button>
-          </div>
+          )}
 
-          <Tabs defaultValue="real" className="space-y-6">
-            <TabsList className="bg-card border border-white/10">
-              <TabsTrigger value="real">Real Products</TabsTrigger>
-              <TabsTrigger value="shadow">Shadow Products</TabsTrigger>
-            </TabsList>
+          {activeSection === "visitors" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold flex items-center gap-3">
+                    <Activity className="w-8 h-8 text-orange-500" />
+                    Live Visitor Statistics
+                  </h2>
+                  <p className="text-gray-400 mt-1">
+                    Last updated: {lastUpdate.toLocaleTimeString()} - Auto-refreshes every 30 seconds
+                  </p>
+                </div>
+                <Button onClick={loadVisitorStats} className="bg-orange-500 hover:bg-orange-600" data-testid="button-refresh">
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  Refresh Now
+                </Button>
+              </div>
 
-            <TabsContent value="real">
-              <Card className="bg-card border-white/10">
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-white/10 hover:bg-transparent">
-                        <TableHead>Name</TableHead>
-                        <TableHead>Price</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Stock</TableHead>
-                        <TableHead>Linked Shadow</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {[
-                        { name: "Fire Stick HD", price: 140, cat: "Hardware", stock: 45, shadow: "Web Design Basic" },
-                        { name: "Fire Stick 4K", price: 150, cat: "Hardware", stock: 32, shadow: "Web Design Pro" },
-                        { name: "Fire Stick 4K Max", price: 160, cat: "Hardware", stock: 18, shadow: "Web Design Enterprise" },
-                        { name: "IPTV Monthly", price: 15, cat: "Subscription", stock: "∞", shadow: "SEO Basic" },
-                      ].map((item, i) => (
-                        <TableRow key={i} className="border-white/10 hover:bg-white/5">
-                          <TableCell className="font-medium">{item.name}</TableCell>
-                          <TableCell>${item.price}</TableCell>
-                          <TableCell><Badge variant="outline" className="border-white/20">{item.cat}</Badge></TableCell>
-                          <TableCell>{item.stock}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{item.shadow}</TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Users className="w-8 h-8 opacity-80" />
+                    <span className="text-2xl font-bold">{visitorStats.totalVisitors.toLocaleString()}</span>
+                  </div>
+                  <p className="text-blue-100 text-sm">Total Visitors</p>
+                </div>
 
-            <TabsContent value="shadow">
-              <Card className="bg-card border-white/10">
+                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Eye className="w-8 h-8 opacity-80" />
+                    <span className="text-2xl font-bold">{visitorStats.todayVisitors.toLocaleString()}</span>
+                  </div>
+                  <p className="text-green-100 text-sm">Today</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Clock className="w-8 h-8 opacity-80" />
+                    <span className="text-2xl font-bold">{visitorStats.weekVisitors.toLocaleString()}</span>
+                  </div>
+                  <p className="text-purple-100 text-sm">This Week</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Activity className="w-8 h-8 opacity-80" />
+                    <span className="text-2xl font-bold">{visitorStats.onlineNow.toLocaleString()}</span>
+                  </div>
+                  <p className="text-orange-100 text-sm">Online Now</p>
+                </div>
+              </div>
+
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
-                  <CardTitle>Shadow Mapping</CardTitle>
-                  <CardDescription>
-                    These are the products Stripe sees. Ensure prices match exactly.
-                  </CardDescription>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Users className="w-5 h-5 text-orange-500" />
+                    Recent Visitors
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0">
+                <CardContent>
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-white/10 hover:bg-transparent">
-                        <TableHead>Shadow Name</TableHead>
-                        <TableHead>Price</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                      <TableRow className="border-gray-700">
+                        <TableHead className="text-gray-400">Device</TableHead>
+                        <TableHead className="text-gray-400">Page</TableHead>
+                        <TableHead className="text-gray-400">Referrer</TableHead>
+                        <TableHead className="text-gray-400">Time</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                       {[
-                        { name: "Web Design Basic", price: 140, desc: "5 Page Static Site" },
-                        { name: "Web Design Pro", price: 150, desc: "CMS Integration" },
-                        { name: "Web Design Enterprise", price: 160, desc: "Custom App Dev" },
-                        { name: "SEO Basic", price: 15, desc: "Monthly Report" },
-                      ].map((item, i) => (
-                        <TableRow key={i} className="border-white/10 hover:bg-white/5">
-                          <TableCell className="font-medium">{item.name}</TableCell>
-                          <TableCell>${item.price}</TableCell>
-                          <TableCell className="text-muted-foreground">{item.desc}</TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
+                      {visitorStats.recentVisitors.length > 0 ? (
+                        visitorStats.recentVisitors.map((visitor, idx) => (
+                          <TableRow key={idx} className="border-gray-700 hover:bg-gray-700/50">
+                            <TableCell className="text-gray-300">
+                              <div className="flex items-center gap-2">
+                                {getDeviceIcon(visitor.user_agent)}
+                                <span className="text-sm truncate max-w-[150px]">{visitor.user_agent.substring(0, 30)}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-gray-300">{visitor.page_url.substring(0, 40)}</TableCell>
+                            <TableCell className="text-gray-400">
+                              {visitor.referrer ? visitor.referrer.substring(0, 30) : 'Direct'}
+                            </TableCell>
+                            <TableCell className="text-gray-400">{formatTime(visitor.created_at)}</TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={4} className="py-8 text-center text-gray-400">
+                            No visitors tracked yet. Visitors will appear here as they browse your site.
                           </TableCell>
                         </TableRow>
-                      ))}
+                      )}
                     </TableBody>
                   </Table>
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
+            </div>
+          )}
+
+          {activeSection === "products" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold flex items-center gap-3">
+                    <Package className="w-8 h-8 text-orange-500" />
+                    Products Manager
+                  </h2>
+                  <p className="text-gray-400">Manage your products and pricing. Changes sync to shadow products automatically.</p>
+                </div>
+                <Button 
+                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                  onClick={() => setEditingProduct({
+                    id: '',
+                    name: '',
+                    slug: '',
+                    description: '',
+                    price: 0,
+                    sale_price: null,
+                    sku: '',
+                    stock_quantity: 100,
+                    stock_status: 'instock',
+                    category: 'subscriptions',
+                    status: 'publish',
+                    featured: false,
+                    main_image: '',
+                    cloaked_name: 'Digital Entertainment Service'
+                  })}
+                  data-testid="button-add-product"
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Add Product
+                </Button>
+              </div>
+
+              <Tabs defaultValue="all" className="space-y-6">
+                <TabsList className="bg-gray-800 border border-gray-700">
+                  <TabsTrigger value="all">All Products ({products.length})</TabsTrigger>
+                  <TabsTrigger value="devices">Devices ({products.filter(p => p.category === 'devices').length})</TabsTrigger>
+                  <TabsTrigger value="subscriptions">Subscriptions ({products.filter(p => p.category === 'subscriptions').length})</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="all">
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardContent className="p-0">
+                      {loadingProducts ? (
+                        <div className="p-8 text-center text-gray-400">Loading products...</div>
+                      ) : filteredProducts.length === 0 ? (
+                        <div className="p-8 text-center text-gray-400">
+                          <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                          <p className="text-lg">No products found</p>
+                          <Button 
+                            className="mt-4 bg-orange-500 hover:bg-orange-600"
+                            onClick={() => setEditingProduct({
+                              id: '',
+                              name: '',
+                              slug: '',
+                              description: '',
+                              price: 0,
+                              sale_price: null,
+                              sku: '',
+                              stock_quantity: 100,
+                              stock_status: 'instock',
+                              category: 'subscriptions',
+                              status: 'publish',
+                              featured: false,
+                              main_image: '',
+                              cloaked_name: 'Digital Entertainment Service'
+                            })}
+                          >
+                            Add Your First Product
+                          </Button>
+                        </div>
+                      ) : (
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="border-gray-700 hover:bg-transparent">
+                              <TableHead className="text-gray-400">Name</TableHead>
+                              <TableHead className="text-gray-400">Price</TableHead>
+                              <TableHead className="text-gray-400">Category</TableHead>
+                              <TableHead className="text-gray-400">Status</TableHead>
+                              <TableHead className="text-gray-400">Shadow Product</TableHead>
+                              <TableHead className="text-right text-gray-400">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {filteredProducts.map((product) => (
+                              <TableRow key={product.id} className="border-gray-700 hover:bg-gray-700/50">
+                                <TableCell className="font-medium text-white">
+                                  <div className="flex items-center gap-3">
+                                    {product.main_image ? (
+                                      <img src={product.main_image} alt={product.name} className="w-10 h-10 rounded object-cover" />
+                                    ) : (
+                                      <div className="w-10 h-10 bg-gray-700 rounded flex items-center justify-center">
+                                        <ImageIcon className="w-5 h-5 text-gray-500" />
+                                      </div>
+                                    )}
+                                    <div>
+                                      <div>{product.name}</div>
+                                      <div className="text-xs text-gray-400">SKU: {product.sku || 'N/A'}</div>
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <span className="text-orange-400 font-bold" data-testid={`text-price-${product.id}`}>
+                                    ${product.sale_price || product.price}
+                                  </span>
+                                  {product.sale_price && (
+                                    <span className="text-gray-500 line-through ml-2">${product.price}</span>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant="outline" className="border-gray-600 text-gray-300 capitalize">
+                                    {product.category}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge className={
+                                    product.status === 'publish' ? 'bg-green-500/20 text-green-400' :
+                                    product.status === 'draft' ? 'bg-yellow-500/20 text-yellow-400' :
+                                    'bg-gray-500/20 text-gray-400'
+                                  }>
+                                    {product.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-gray-400 text-sm">
+                                  {getShadowName(product.name)}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon"
+                                      onClick={() => setEditingProduct(product)}
+                                      data-testid={`button-edit-${product.id}`}
+                                    >
+                                      <Edit className="w-4 h-4 text-blue-400" />
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon"
+                                      onClick={() => deleteProduct(product.id)}
+                                      data-testid={`button-delete-${product.id}`}
+                                    >
+                                      <Trash2 className="w-4 h-4 text-red-400" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="devices">
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardContent className="p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {products.filter(p => p.category === 'devices').map((product) => (
+                          <div key={product.id} className="bg-gray-700 rounded-xl p-4 border border-gray-600">
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="font-bold text-white">{product.name}</h4>
+                              <Button variant="ghost" size="icon" onClick={() => setEditingProduct(product)}>
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <div className="text-2xl font-bold text-orange-400 mb-2">${product.sale_price || product.price}</div>
+                            <div className="text-sm text-gray-400">Shadow: {getShadowName(product.name)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="subscriptions">
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardContent className="p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        {products.filter(p => p.category === 'subscriptions').map((product) => (
+                          <div key={product.id} className="bg-gray-700 rounded-xl p-4 border border-gray-600">
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="font-bold text-white text-sm">{product.name}</h4>
+                              <Button variant="ghost" size="icon" onClick={() => setEditingProduct(product)}>
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <div className="text-2xl font-bold text-blue-400 mb-2">${product.sale_price || product.price}</div>
+                            <div className="text-sm text-gray-400">Shadow: {getShadowName(product.name)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
         </div>
       </main>
+
+      {editingProduct && (
+        <div className="fixed inset-0 bg-black/90 z-50 overflow-y-auto">
+          <div className="min-h-screen p-8">
+            <div className="max-w-4xl mx-auto bg-gray-800 rounded-2xl">
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 p-6 rounded-t-2xl flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-white">
+                  {editingProduct.id ? 'Edit Product' : 'Add New Product'}
+                </h3>
+                <Button variant="ghost" onClick={() => setEditingProduct(null)} className="text-white hover:bg-white/20">
+                  <X className="w-6 h-6" />
+                </Button>
+              </div>
+
+              <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Product Name *</label>
+                  <Input
+                    value={editingProduct.name}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="e.g., Fire Stick 4K - Jailbroken"
+                    data-testid="input-product-name"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">URL Slug</label>
+                    <Input
+                      value={editingProduct.slug}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, slug: e.target.value })}
+                      className="bg-gray-700 border-gray-600 text-white"
+                      placeholder="fire-stick-4k"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">SKU</label>
+                    <Input
+                      value={editingProduct.sku || ''}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, sku: e.target.value })}
+                      className="bg-gray-700 border-gray-600 text-white"
+                      placeholder="FS-4K"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Description</label>
+                  <textarea
+                    value={editingProduct.description || ''}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
+                    rows={3}
+                    className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                    placeholder="Full product description..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Regular Price * ($)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={editingProduct.price}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })}
+                      className="bg-gray-700 border-gray-600 text-white"
+                      data-testid="input-price"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Sale Price ($)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={editingProduct.sale_price || ''}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, sale_price: e.target.value ? parseFloat(e.target.value) : null })}
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Stock Quantity</label>
+                    <Input
+                      type="number"
+                      value={editingProduct.stock_quantity}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, stock_quantity: parseInt(e.target.value) || 0 })}
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Category</label>
+                    <select
+                      value={editingProduct.category}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
+                      className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                    >
+                      <option value="subscriptions">Subscriptions</option>
+                      <option value="devices">Devices</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Status</label>
+                    <select
+                      value={editingProduct.status}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, status: e.target.value })}
+                      className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                    >
+                      <option value="publish">Published</option>
+                      <option value="draft">Draft</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Main Image URL</label>
+                  {editingProduct.main_image && (
+                    <img 
+                      src={editingProduct.main_image} 
+                      alt="Product preview" 
+                      className="w-full h-32 object-cover rounded-lg border border-gray-600 mb-3"
+                    />
+                  )}
+                  <Input
+                    value={editingProduct.main_image || ''}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, main_image: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="https://..."
+                  />
+                </div>
+
+                <div className="border-t border-gray-700 pt-6">
+                  <h4 className="text-white font-bold mb-2 flex items-center gap-2">
+                    <Flame className="w-5 h-5 text-purple-400" />
+                    Stripe Compliance (Shadow Product Name)
+                  </h4>
+                  <p className="text-sm text-gray-400 mb-4">
+                    This is the "cloaked" product name shown to Stripe. It should be generic.
+                  </p>
+                  <Input
+                    value={editingProduct.cloaked_name || 'Digital Entertainment Service'}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, cloaked_name: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Digital Entertainment Service"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Will sync to: {getShadowName(editingProduct.name)}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="featured"
+                    checked={editingProduct.featured}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, featured: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="featured" className="text-gray-300">Featured Product (marked as popular)</label>
+                </div>
+              </div>
+
+              <div className="p-6 border-t border-gray-700 flex justify-end gap-4">
+                <Button variant="outline" onClick={() => setEditingProduct(null)} className="border-gray-600 text-gray-300">
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={saveProduct} 
+                  disabled={saving}
+                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                  data-testid="button-save-product"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {saving ? 'Saving...' : 'Save Product'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

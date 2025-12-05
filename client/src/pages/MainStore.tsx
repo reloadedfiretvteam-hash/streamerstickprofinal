@@ -1,11 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Monitor, ShoppingCart, Tv, Zap, MessageCircle, CheckCircle, Star, Shield } from "lucide-react";
+import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, Play } from "lucide-react";
 import { useCart } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase, getStorageUrl } from "@/lib/supabase";
 import {
   Accordion,
   AccordionContent,
@@ -19,101 +19,184 @@ import { DemoVideo } from "@/components/DemoVideo";
 import firestickImg from "@assets/stock_images/amazon_fire_tv_stick_cc445778.jpg";
 import iptvImg from "@assets/stock_images/smart_tv_interface_w_e1379ac8.jpg";
 
-const products = [
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  features: string[];
+  image: string;
+  category: "firestick" | "iptv";
+  badge: string;
+  popular?: boolean;
+  period?: string;
+}
+
+const defaultProducts: Product[] = [
   {
     id: "fs-hd",
-    name: "Fire Stick HD",
+    name: "Fire Stick HD - Jailbroken & Ready",
     price: 140,
-    description: "Perfect for standard HD TVs. Jailbroken + 1 Year IPTV included.",
-    features: ["1080p Streaming", "Jailbroken", "1 Year Service", "Plug & Play"],
+    description: "Fire TV Stick HD Streaming with 1 Year IPTV included.",
+    features: ["1080p Full HD Resolution", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Pre-configured & Ready to Use", "24/7 Customer Support"],
     image: firestickImg,
     category: "firestick",
-    badge: "Best Value"
+    badge: "STARTER"
   },
   {
     id: "fs-4k",
-    name: "Fire Stick 4K",
+    name: "Fire Stick 4K - Jailbroken & Ready",
     price: 150,
-    description: "Crystal clear 4K Ultra HD streaming. Jailbroken + 1 Year IPTV.",
-    features: ["4K Ultra HD", "Dolby Vision", "Faster Processor", "1 Year Service"],
+    description: "Fire TV Stick 4K with Dolby Vision. 1 Year IPTV included.",
+    features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Pre-configured & Ready to Use", "24/7 Customer Support"],
     image: firestickImg,
     category: "firestick",
-    badge: "Popular"
+    badge: "BEST VALUE",
+    popular: true
   },
   {
     id: "fs-max",
-    name: "Fire Stick 4K Max",
+    name: "Fire Stick 4K Max - Jailbroken & Ready",
     price: 160,
-    description: "Our most powerful stick. Wi-Fi 6 support. Jailbroken + 1 Year IPTV.",
-    features: ["Wi-Fi 6", "Fastest Streaming", "4K Ultra HD", "1 Year Service"],
+    description: "Fire TV Stick 4K Max - Fastest Model with Wi-Fi 6E. 1 Year IPTV included.",
+    features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Ambient Experience Support", "Pre-configured & Ready to Use", "24/7 Customer Support"],
     image: firestickImg,
     category: "firestick",
-    badge: "Ultimate"
+    badge: "PREMIUM"
   },
   {
     id: "iptv-1",
-    name: "IPTV Monthly",
+    name: "1 Month IPTV Subscription",
     price: 15,
-    description: "1 Month of premium channels. No contract.",
-    features: ["4000+ Channels", "Sports Packages", "VOD Library", "HD Quality"],
+    description: "1 Month of premium IPTV access.",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "24/7 Customer Support"],
     image: iptvImg,
     category: "iptv",
-    badge: "Flexible"
+    badge: "STARTER",
+    period: "/month"
   },
   {
     id: "iptv-3",
-    name: "IPTV Quarterly",
-    price: 25,
-    description: "3 Months of service. Save money.",
-    features: ["Save $20", "All Channels", "PPV Events", "Multi-device"],
+    name: "3 Month IPTV Subscription",
+    price: 30,
+    description: "3 Months of premium IPTV access. Save money!",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Priority Customer Support"],
     image: iptvImg,
     category: "iptv",
-    badge: "Saver"
+    badge: "POPULAR",
+    popular: true,
+    period: "/3 months"
+  },
+  {
+    id: "iptv-6",
+    name: "6 Month IPTV Subscription",
+    price: 50,
+    description: "6 Months of premium IPTV access. Great value!",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "VIP Customer Support"],
+    image: iptvImg,
+    category: "iptv",
+    badge: "GREAT VALUE",
+    period: "/6 months"
   },
   {
     id: "iptv-12",
-    name: "IPTV Annual",
+    name: "1 Year IPTV Subscription",
     price: 75,
-    description: "1 Full Year of service. Best deal.",
-    features: ["Best Value", "Priority Support", "4K Content", "Anti-Freeze Tech"],
+    description: "Full Year of premium IPTV access. Best deal!",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Premium VIP Support", "Free Setup Assistance"],
     image: iptvImg,
     category: "iptv",
-    badge: "Best Deal"
+    badge: "BEST VALUE",
+    period: "/year"
   }
 ];
 
 export default function MainStore() {
-  const [location, setLocation] = useLocation();
-  const { addItem, items, toggleCart, isOpen } = useCart();
+  const [, setLocation] = useLocation();
+  const { addItem, items } = useCart();
+  const [products, setProducts] = useState<Product[]>(defaultProducts);
 
-  // Force dark mode for this page
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
+    loadProducts();
   }, []);
 
+  const loadProducts = async () => {
+    try {
+      const { data: dbProducts } = await supabase
+        .from('real_products')
+        .select('*')
+        .in('status', ['published', 'publish', 'active'])
+        .order('sort_order', { ascending: true });
+
+      if (dbProducts && dbProducts.length > 0) {
+        const mappedProducts: Product[] = dbProducts.map((p: any) => {
+          const features = p.description ? p.description.split(',').map((f: string) => f.trim()) : [];
+          const isFirestick = p.name.toLowerCase().includes('fire stick') || p.name.toLowerCase().includes('fire tv');
+          const price = parseFloat(p.sale_price?.toString() || p.price?.toString() || '0');
+          
+          let productImage = p.main_image || '';
+          if (productImage && !productImage.startsWith('http') && !productImage.startsWith('/')) {
+            productImage = getStorageUrl('images', productImage);
+          } else if (!productImage) {
+            productImage = isFirestick ? firestickImg : iptvImg;
+          }
+
+          return {
+            id: p.id,
+            name: p.name,
+            price: price,
+            description: p.short_description || '',
+            features: features.length > 0 ? features : ['Premium quality', '24/7 support'],
+            image: productImage,
+            category: isFirestick ? 'firestick' : 'iptv',
+            badge: p.featured ? 'BEST VALUE' : 'POPULAR',
+            popular: p.featured,
+            period: isFirestick ? undefined : '/month'
+          };
+        });
+        setProducts(mappedProducts);
+      }
+    } catch (error) {
+      console.warn('Using default products:', error);
+    }
+  };
+
+  const scrollToShop = () => {
+    document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const scrollToAbout = () => {
+    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const firestickProducts = products.filter(p => p.category === 'firestick');
+  const iptvProducts = products.filter(p => p.category === 'iptv');
+
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-white">
+    <div className="min-h-screen bg-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur-md">
+      <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-gray-900/95 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
-            <Zap className="w-6 h-6 text-primary" />
-            <span>STREAMER<span className="text-primary">PRO</span></span>
+            <Flame className="w-7 h-7 text-orange-500" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Stream Stick Pro</span>
           </div>
           
           <div className="flex items-center gap-4">
-            <Button variant="ghost" className="hidden md:flex">How It Works</Button>
-            <Button variant="ghost" className="hidden md:flex">Channels</Button>
-            <Button variant="ghost" className="hidden md:flex">Support</Button>
+            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToAbout}>How It Works</Button>
+            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToShop}>Shop</Button>
+            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10">Support</Button>
             <Button 
               onClick={() => setLocation("/checkout")} 
-              className="relative bg-primary hover:bg-primary/90 text-white"
+              className="relative bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/30"
+              data-testid="button-cart"
             >
               <ShoppingCart className="w-5 h-5 mr-2" />
               Cart
               {items.length > 0 && (
-                <Badge className="absolute -top-2 -right-2 bg-white text-black hover:bg-gray-200">
+                <Badge className="absolute -top-2 -right-2 bg-white text-black hover:bg-gray-200" data-testid="text-cart-count">
                   {items.length}
                 </Badge>
               )}
@@ -123,189 +206,432 @@ export default function MainStore() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative py-20 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/20 to-background z-0 pointer-events-none" />
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            <div className="flex-1 space-y-6 text-center md:text-left">
-              <Badge className="bg-primary/20 text-primary hover:bg-primary/30 border-none mb-4">
-                NEW: 2025 Models Available
-              </Badge>
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
-                Unlock Your TV's <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">
-                  Full Potential
-                </span>
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto md:mx-0">
-                Get access to thousands of channels, movies, and sports events. 
-                Plug & Play ready devices with 1 Year of premium service included.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <Button size="lg" className="text-lg px-8 bg-primary hover:bg-primary/90">
-                  Shop Devices
-                </Button>
-                <Button size="lg" variant="outline" className="text-lg px-8 border-white/20 hover:bg-white/10">
-                  Get Free Trial
-                </Button>
-              </div>
-              
-              <div className="flex items-center gap-6 justify-center md:justify-start pt-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" /> 4K Support
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" /> No Contracts
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" /> 24/7 Support
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex-1 relative">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="relative z-10"
+      <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden min-h-[600px] flex items-center">
+        <div className="absolute inset-0 overflow-hidden">
+          <img
+            src={iptvImg}
+            alt="Best Jailbroken Fire Stick 2025 - Premium IPTV Streaming Device"
+            className="w-full h-full object-cover object-center"
+            loading="eager"
+            style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
+        </div>
+
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-20"></div>
+
+        <div className="container mx-auto px-4 py-16 md:py-20 relative z-10">
+          <div className="max-w-5xl mx-auto text-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-6"
+            >
+              <span className="inline-block px-6 py-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full text-sm font-semibold text-orange-300 animate-pulse">
+                🔥 #1 Premium IPTV Provider
+              </span>
+            </motion.div>
+
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight"
+            >
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-orange-400">
+                Stream Stick Pro
+              </span>
+              <br />
+              <span className="text-2xl sm:text-3xl md:text-5xl text-white">Premium IPTV Subscriptions</span>
+              <br />
+              <span className="text-xl sm:text-2xl md:text-4xl text-blue-200">& Jailbroken Fire Stick Shop</span>
+            </motion.h1>
+
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-lg sm:text-xl md:text-2xl text-orange-100 mb-8 max-w-3xl mx-auto"
+            >
+              18,000+ live channels • 60,000+ movies & shows • All sports & PPV events
+            </motion.p>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex flex-col sm:flex-row justify-center gap-4 mb-8"
+            >
+              <button
+                onClick={scrollToShop}
+                className="group px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-xl font-bold text-lg transition-all transform hover:scale-105 hover:shadow-2xl shadow-orange-500/50 inline-flex items-center justify-center gap-3"
+                data-testid="button-shop-now"
               >
-                <img 
-                  src={iptvImg} 
-                  alt="Interface" 
-                  className="rounded-xl shadow-2xl border border-white/10 w-full max-w-lg mx-auto transform rotate-[-2deg] hover:rotate-0 transition-transform duration-500"
-                />
-              </motion.div>
-              {/* Decor elements */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/30 blur-[100px] rounded-full -z-10" />
-            </div>
+                <ShoppingCart className="w-6 h-6 group-hover:animate-bounce" />
+                Shop Now
+                <span className="bg-white/20 rounded-full px-3 py-1 text-xs font-semibold">Save up to 50%</span>
+              </button>
+              <button
+                onClick={scrollToAbout}
+                className="px-8 py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 border-2 border-white/20 hover:border-white/40 rounded-xl font-bold text-lg transition-all inline-flex items-center justify-center gap-2"
+                data-testid="button-learn-more"
+              >
+                <Play className="w-5 h-5" />
+                Learn More
+              </button>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto text-sm md:text-base"
+            >
+              <div className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10">
+                <div className="text-orange-400 font-bold text-lg" data-testid="text-customers">2,700+</div>
+                <div className="text-blue-200">Happy Customers</div>
+              </div>
+              <div className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10">
+                <div className="text-orange-400 font-bold text-lg" data-testid="text-rating">4.9/5 ⭐</div>
+                <div className="text-blue-200">Customer Rating</div>
+              </div>
+              <div className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10">
+                <div className="text-orange-400 font-bold text-lg">Same Day</div>
+                <div className="text-blue-200">Shipping Available</div>
+              </div>
+            </motion.div>
           </div>
         </div>
+
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none"></div>
       </section>
 
-      {/* Products Section */}
-      <section className="py-20 bg-black/20">
+      {/* About Section */}
+      <section id="about" className="py-20 bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Choose Your Plan</h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Whether you need a new device or just the service, we have you covered.
+            <div className="inline-flex items-center gap-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full px-6 py-2 mb-6">
+              <Flame className="w-5 h-5 text-orange-400" />
+              <span className="text-sm font-medium text-orange-300">WHY CHOOSE US</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Break Free From Cable</span>
+            </h2>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+              Premium streaming at a fraction of the cost. No contracts, no hidden fees.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-            {products.filter(p => p.category === 'firestick').map((product) => (
-              <Card key={product.id} className="bg-card border-white/10 overflow-hidden relative group hover:border-primary/50 transition-colors">
-                <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-lg z-10">
-                  {product.badge}
-                </div>
-                <div className="h-48 overflow-hidden relative">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
-                </div>
-                <CardHeader>
-                  <CardTitle className="text-2xl">{product.name}</CardTitle>
-                  <CardDescription className="text-base">{product.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold mb-6">${product.price}</div>
-                  <ul className="space-y-2 mb-6">
-                    {product.features?.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <CheckCircle className="w-4 h-4 text-primary" /> {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button onClick={() => addItem(product as any)} className="w-full bg-primary hover:bg-primary/90">
-                    Add to Cart
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-orange-500/50 transition-colors">
+              <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mb-6">
+                <Zap className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-4">Plug & Play Ready</h3>
+              <p className="text-gray-400">Pre-configured devices. Just connect to your TV and start streaming immediately.</p>
+            </div>
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-orange-500/50 transition-colors">
+              <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-6">
+                <Star className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-4">Premium Content</h3>
+              <p className="text-gray-400">Access 18,000+ live channels, 60,000+ movies, and all sports & PPV events.</p>
+            </div>
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-orange-500/50 transition-colors">
+              <div className="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mb-6">
+                <Check className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-4">24/7 Support</h3>
+              <p className="text-gray-400">Our dedicated team is always available to help you with any questions or issues.</p>
+            </div>
           </div>
-
-          {/* Sports Carousel Inserted Here */}
-          <SportsCarousel />
-
-          {/* Demo Video Section */}
-          <DemoVideo />
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
-             {products.filter(p => p.category === 'iptv').map((product) => (
-              <Card key={product.id} className="bg-card border-white/10 relative group hover:border-primary/50 transition-colors">
-                 <div className="absolute top-0 right-0 bg-primary/20 text-primary text-xs font-bold px-3 py-1 rounded-bl-lg z-10">
-                  {product.badge}
-                </div>
-                <CardHeader>
-                  <CardTitle>{product.name}</CardTitle>
-                  <CardDescription>{product.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                   <div className="text-3xl font-bold mb-6">${product.price}</div>
-                   <ul className="space-y-2">
-                    {product.features?.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Zap className="w-4 h-4 text-primary" /> {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-                 <CardFooter>
-                  <Button onClick={() => addItem(product as any)} variant="secondary" className="w-full hover:bg-white/20">
-                    Subscribe Now
-                  </Button>
-                </CardFooter>
-              </Card>
-             ))}
-          </div>
-
         </div>
       </section>
 
-      {/* FAQ / Support */}
-      <section className="py-20">
+      {/* Shop Section */}
+      <section id="shop" className="py-20 bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full px-6 py-2 mb-6">
+              <Flame className="w-5 h-5 text-orange-400 animate-pulse" />
+              <span className="text-sm font-medium text-orange-300">SHOP ALL PRODUCTS</span>
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold mb-6">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Premium Products</span>
+            </h2>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+              Browse our complete collection of jailbroken Fire Sticks and IPTV subscriptions
+            </p>
+          </div>
+
+          {/* Fire Sticks */}
+          <div className="mb-16">
+            <h3 className="text-3xl font-bold mb-8 text-center flex items-center justify-center gap-3">
+              <Flame className="w-8 h-8 text-orange-500" />
+              Choose Your Fire Stick
+            </h3>
+            <div className="grid md:grid-cols-3 gap-8">
+              {firestickProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className={`relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+                    product.popular ? 'ring-4 ring-orange-500 scale-105 shadow-2xl shadow-orange-500/50' : ''
+                  }`}
+                  data-testid={`card-product-${product.id}`}
+                >
+                  {product.popular && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce">
+                        <Star className="w-4 h-4 fill-current" />
+                        MOST POPULAR
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="relative h-56 overflow-hidden">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-sm">
+                      {product.badge}
+                    </div>
+                  </div>
+
+                  <div className="p-8">
+                    <h4 className="text-2xl font-bold mb-4">{product.name}</h4>
+
+                    <div className="mb-6">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-5xl font-bold text-orange-400" data-testid={`text-price-${product.id}`}>
+                          ${product.price.toFixed(2)}
+                        </span>
+                      </div>
+                      <p className="text-blue-200 text-sm mt-2">
+                        Includes 1 Year IPTV Subscription
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => addItem(product as any)}
+                      className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 ${
+                        product.popular
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
+                          : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg'
+                      }`}
+                      data-testid={`button-add-${product.id}`}
+                    >
+                      <ShoppingCart className="w-5 h-5" />
+                      Add to Cart
+                    </button>
+
+                    <div className="space-y-3">
+                      {product.features.slice(0, 6).map((feature, idx) => (
+                        <div key={idx} className="flex items-start gap-3">
+                          <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                          <span className="text-blue-100 text-sm">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Sports Carousel */}
+          <SportsCarousel />
+
+          {/* Demo Video */}
+          <DemoVideo />
+
+          {/* IPTV Subscriptions */}
+          <div className="mt-20">
+            <h3 className="text-3xl font-bold mb-8 text-center flex items-center justify-center gap-3">
+              <Zap className="w-8 h-8 text-blue-500" />
+              IPTV Subscriptions Only
+            </h3>
+            <div className="grid md:grid-cols-4 gap-6">
+              {iptvProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className={`relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+                    product.popular ? 'ring-4 ring-blue-500 scale-105 shadow-2xl shadow-blue-500/50' : ''
+                  }`}
+                  data-testid={`card-product-${product.id}`}
+                >
+                  {product.popular && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                      <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
+                        <Star className="w-4 h-4 fill-current" />
+                        POPULAR
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full font-bold text-xs">
+                      {product.badge}
+                    </div>
+                  </div>
+
+                  <div className="p-6">
+                    <h4 className="text-xl font-bold mb-4">{product.name}</h4>
+
+                    <div className="mb-6">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold text-blue-400" data-testid={`text-price-${product.id}`}>
+                          ${product.price.toFixed(2)}
+                        </span>
+                        {product.period && <span className="text-gray-400">{product.period}</span>}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => addItem(product as any)}
+                      className="w-full py-3 rounded-xl font-bold text-base transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg"
+                      data-testid={`button-add-${product.id}`}
+                    >
+                      <ShoppingCart className="w-5 h-5" />
+                      Subscribe Now
+                    </button>
+
+                    <div className="space-y-2">
+                      {product.features.slice(0, 5).map((feature, idx) => (
+                        <div key={idx} className="flex items-start gap-2">
+                          <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                          <span className="text-blue-100 text-xs">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-gray-800/50">
         <div className="container mx-auto px-4 max-w-3xl">
-          <h2 className="text-3xl font-bold mb-8 text-center">Frequently Asked Questions</h2>
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="item-1" className="border-white/10">
-              <AccordionTrigger>Is this legal?</AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
-                We provide hardware modification services and access to public streams. It is the user's responsibility to ensure compliance with local laws.
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Frequently Asked Questions</span>
+            </h2>
+          </div>
+          <Accordion type="single" collapsible className="w-full space-y-4">
+            <AccordionItem value="item-1" className="border border-white/10 rounded-xl px-6 bg-white/5">
+              <AccordionTrigger className="text-lg font-semibold hover:text-orange-400">What's included with a Fire Stick?</AccordionTrigger>
+              <AccordionContent className="text-gray-400">
+                Every Fire Stick comes pre-configured and jailbroken with 1 Year of IPTV service included. Just plug it in and start streaming immediately!
               </AccordionContent>
             </AccordionItem>
-            <AccordionItem value="item-2" className="border-white/10">
-              <AccordionTrigger>How do I renew?</AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
+            <AccordionItem value="item-2" className="border border-white/10 rounded-xl px-6 bg-white/5">
+              <AccordionTrigger className="text-lg font-semibold hover:text-orange-400">How do I renew my subscription?</AccordionTrigger>
+              <AccordionContent className="text-gray-400">
                 Simply come back to the site and purchase a renewal package. Your credentials will be updated instantly.
               </AccordionContent>
             </AccordionItem>
-            <AccordionItem value="item-3" className="border-white/10">
-              <AccordionTrigger>Do you offer support?</AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
-                Yes, we offer 24/7 support via email and live chat for all active subscribers.
+            <AccordionItem value="item-3" className="border border-white/10 rounded-xl px-6 bg-white/5">
+              <AccordionTrigger className="text-lg font-semibold hover:text-orange-400">Do you offer support?</AccordionTrigger>
+              <AccordionContent className="text-gray-400">
+                Yes, we offer 24/7 support via email for all active subscribers. Contact us at reloadedfiretvteam@gmail.com
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-4" className="border border-white/10 rounded-xl px-6 bg-white/5">
+              <AccordionTrigger className="text-lg font-semibold hover:text-orange-400">What devices are supported?</AccordionTrigger>
+              <AccordionContent className="text-gray-400">
+                Our IPTV service works on Fire Sticks, Android boxes, Smart TVs, phones, tablets, and computers. Use up to 2 devices simultaneously!
               </AccordionContent>
             </AccordionItem>
           </Accordion>
         </div>
       </section>
 
-      {/* Floating Widget */}
+      {/* Floating Chat Widget */}
       <div className="fixed bottom-6 right-6 z-50">
-        <Button className="rounded-full w-14 h-14 shadow-lg bg-green-500 hover:bg-green-600 animate-pulse">
+        <Button className="rounded-full w-14 h-14 shadow-lg bg-green-500 hover:bg-green-600 animate-pulse" data-testid="button-chat">
           <MessageCircle className="w-6 h-6 text-white" />
         </Button>
       </div>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-white/10 bg-black">
-        <div className="container mx-auto px-4 text-center text-muted-foreground text-sm">
-          <p>&copy; 2025 StreamerPro. All rights reserved.</p>
+      <footer className="bg-gray-900 text-gray-300 border-t border-white/10">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Flame className="w-8 h-8 text-orange-500" />
+                <span className="text-xl font-bold text-white">Inferno TV</span>
+              </div>
+              <p className="text-sm text-gray-400 mb-4">
+                Premium IPTV streaming with 18,000+ channels and 60,000+ movies & series. Jailbroken Fire Sticks available.
+              </p>
+              <div className="flex gap-3">
+                <a href="mailto:reloadedfiretvteam@gmail.com" className="w-10 h-10 bg-gray-800 hover:bg-orange-600 rounded-lg flex items-center justify-center transition-colors" data-testid="link-email">
+                  <Mail className="w-5 h-5" />
+                </a>
+              </div>
+              <div className="mt-4">
+                <a href="mailto:reloadedfiretvteam@gmail.com" className="text-sm text-orange-400 hover:text-orange-300">
+                  reloadedfiretvteam@gmail.com
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-white font-semibold mb-4">Quick Links</h3>
+              <ul className="space-y-2 text-sm">
+                <li><a href="/" className="hover:text-orange-400 transition-colors cursor-pointer">Home</a></li>
+                <li><a href="#shop" className="hover:text-orange-400 transition-colors cursor-pointer">Shop All Products</a></li>
+                <li><a href="#about" className="hover:text-orange-400 transition-colors cursor-pointer">About Us</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-white font-semibold mb-4">Payment Methods</h3>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4 text-green-400" />
+                  <span>Cash App: $starevan11</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-orange-400" />
+                  <span>Bitcoin: Accepted</span>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-white font-semibold mb-4">Support</h3>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="hover:text-orange-400 transition-colors">FAQ</a></li>
+                <li><a href="mailto:reloadedfiretvteam@gmail.com" className="hover:text-orange-400 transition-colors">Contact Us</a></li>
+                <li><a href="/admin" className="text-gray-600 hover:text-gray-500 transition-colors text-xs">Admin</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+              <p className="text-gray-400">
+                © {new Date().getFullYear()} Inferno TV. All rights reserved.
+              </p>
+              <div className="flex items-center gap-6">
+                <span className="text-green-400 font-semibold">🔒 Secure Payment</span>
+                <span className="text-orange-400 font-semibold">24/7 Support</span>
+                <span className="text-blue-400 font-semibold">Money-Back Guarantee</span>
+              </div>
+            </div>
+          </div>
         </div>
       </footer>
 

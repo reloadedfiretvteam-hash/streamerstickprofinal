@@ -189,11 +189,11 @@ export default function ShadowStore() {
                 </div>
                 <div className="p-6 border rounded-xl text-center hover:border-primary transition-colors">
                   <div className="font-medium mb-2">SEO Standard</div>
-                  <div className="text-2xl font-bold">$25<span className="text-xs text-muted-foreground">/qtr</span></div>
+                  <div className="text-2xl font-bold">$30<span className="text-xs text-muted-foreground">/qtr</span></div>
                 </div>
                 <div className="p-6 border rounded-xl text-center hover:border-primary transition-colors">
                   <div className="font-medium mb-2">SEO Pro</div>
-                  <div className="text-2xl font-bold">$40<span className="text-xs text-muted-foreground">/semi</span></div>
+                  <div className="text-2xl font-bold">$50<span className="text-xs text-muted-foreground">/semi</span></div>
                 </div>
                 <div className="p-6 border rounded-xl text-center hover:border-primary transition-colors">
                   <div className="font-medium mb-2">SEO Enterprise</div>
