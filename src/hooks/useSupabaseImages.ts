@@ -90,6 +90,7 @@ export function useSupabaseImages(bucketName: string = 'images') {
 
   useEffect(() => {
     fetchAndCategorizeImages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bucketName]);
 
   const fetchAndCategorizeImages = async () => {

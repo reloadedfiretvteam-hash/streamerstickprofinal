@@ -32,12 +32,16 @@ export default function FireSticksPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   
   // Fetch images from Supabase Storage with fuzzy matching
-  const { images: supabaseImages } = useSupabaseImages();
+  const { images: supabaseImages, loading: imagesLoading } = useSupabaseImages();
 
   useEffect(() => {
-    loadProducts();
-    loadCart();
-  }, [supabaseImages]);
+    // Only load products once images are fetched
+    if (!imagesLoading) {
+      loadProducts();
+      loadCart();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imagesLoading]); // Only re-run when images finish loading
 
   const loadProducts = async () => {
     try {

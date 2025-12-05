@@ -181,15 +181,19 @@ export default function Shop({ onAddToCart }: ShopProps) {
   const [loading, setLoading] = useState(true);
   
   // Fetch images from Supabase Storage with fuzzy matching
-  const { images: supabaseImages } = useSupabaseImages();
+  const { images: supabaseImages, loading: imagesLoading } = useSupabaseImages();
 
   // Memoized filtered products - must be declared before any conditional returns
   const firestickProducts = useMemo(() => products.filter(p => p.type === 'firestick'), [products]);
   const iptvProducts = useMemo(() => products.filter(p => p.type === 'iptv'), [products]);
 
   useEffect(() => {
-    loadProducts();
-  }, [supabaseImages]);
+    // Only load products once images are fetched
+    if (!imagesLoading) {
+      loadProducts();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imagesLoading]); // Only re-run when images finish loading
 
   const loadProducts = async () => {
     try {
