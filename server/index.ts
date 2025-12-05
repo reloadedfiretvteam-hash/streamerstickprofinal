@@ -26,6 +26,12 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
+let webhookUuid: string | null = null;
+
+export function getWebhookUuid(): string | null {
+  return webhookUuid;
+}
+
 async function initStripe() {
   const databaseUrl = process.env.DATABASE_URL;
 
@@ -38,7 +44,6 @@ async function initStripe() {
     log('Initializing Stripe schema...', 'stripe');
     await runMigrations({ 
       databaseUrl,
-      schema: 'stripe'
     });
     log('Stripe schema ready', 'stripe');
 
@@ -46,6 +51,7 @@ async function initStripe() {
 
     log('Setting up managed webhook...', 'stripe');
     const webhookBaseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
+    
     const { webhook, uuid } = await stripeSync.findOrCreateManagedWebhook(
       `${webhookBaseUrl}/api/stripe/webhook`,
       {
@@ -53,6 +59,8 @@ async function initStripe() {
         description: 'Managed webhook for StreamerStickPro',
       }
     );
+    
+    webhookUuid = uuid;
     log(`Webhook configured: ${webhook.url} (UUID: ${uuid})`, 'stripe');
 
     log('Syncing Stripe data...', 'stripe');
@@ -69,7 +77,7 @@ async function initStripe() {
 }
 
 app.post(
-  '/api/stripe/webhook/:uuid',
+  '/api/stripe/webhook',
   express.raw({ type: 'application/json' }),
   async (req, res) => {
     const signature = req.headers['stripe-signature'];
@@ -86,7 +94,12 @@ app.post(
         return res.status(500).json({ error: 'Webhook processing error' });
       }
 
-      const { uuid } = req.params;
+      const uuid = getWebhookUuid();
+      if (!uuid) {
+        console.error('Webhook UUID not initialized yet');
+        return res.status(500).json({ error: 'Webhook not ready' });
+      }
+      
       await WebhookHandlers.processWebhook(req.body as Buffer, sig, uuid);
 
       res.status(200).json({ received: true });

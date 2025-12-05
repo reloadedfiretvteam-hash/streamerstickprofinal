@@ -65,3 +65,41 @@ export const insertRealProductSchema = createInsertSchema(realProducts);
 
 export type InsertRealProduct = z.infer<typeof insertRealProductSchema>;
 export type RealProduct = typeof realProducts.$inferSelect;
+
+export const checkoutRequestSchema = z.object({
+  productId: z.string().min(1, "Product ID is required"),
+  customerEmail: z.string().email("Valid email is required"),
+  customerName: z.string().optional(),
+});
+
+export type CheckoutRequest = z.infer<typeof checkoutRequestSchema>;
+
+export const createProductRequestSchema = z.object({
+  id: z.string().min(1, "Product ID is required"),
+  name: z.string().min(1, "Product name is required"),
+  description: z.string().nullable().optional(),
+  price: z.number().int().positive("Price must be a positive integer (in cents)"),
+  imageUrl: z.string().url().nullable().optional(),
+  category: z.string().nullable().optional(),
+  shadowProductId: z.string().nullable().optional(),
+  shadowPriceId: z.string().nullable().optional(),
+});
+
+export type CreateProductRequest = z.infer<typeof createProductRequestSchema>;
+
+export const updateProductRequestSchema = createProductRequestSchema.partial().omit({ id: true });
+export type UpdateProductRequest = z.infer<typeof updateProductRequestSchema>;
+
+export const mapShadowProductSchema = z.object({
+  shadowProductId: z.string().min(1, "Shadow product ID is required"),
+  shadowPriceId: z.string().min(1, "Shadow price ID is required"),
+});
+
+export type MapShadowProductRequest = z.infer<typeof mapShadowProductSchema>;
+
+export const updateOrderRequestSchema = z.object({
+  status: z.enum(['pending', 'paid', 'failed', 'refunded']).optional(),
+  credentialsSent: z.boolean().optional(),
+});
+
+export type UpdateOrderRequest = z.infer<typeof updateOrderRequestSchema>;

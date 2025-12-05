@@ -2,6 +2,14 @@ import type { Express } from "express";
 import { type Server } from "http";
 import { storage } from "./storage";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
+import { 
+  checkoutRequestSchema, 
+  createProductRequestSchema, 
+  updateProductRequestSchema,
+  mapShadowProductSchema,
+  updateOrderRequestSchema 
+} from "@shared/schema";
+import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -43,11 +51,13 @@ export async function registerRoutes(
 
   app.post("/api/checkout", async (req, res) => {
     try {
-      const { productId, customerEmail, customerName } = req.body;
-
-      if (!productId || !customerEmail) {
-        return res.status(400).json({ error: "Product ID and email are required" });
+      const parseResult = checkoutRequestSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        const validationError = fromZodError(parseResult.error);
+        return res.status(400).json({ error: validationError.message });
       }
+      
+      const { productId, customerEmail, customerName } = parseResult.data;
 
       const product = await storage.getRealProduct(productId);
       if (!product) {
