@@ -1,20 +1,37 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getStorageUrl } from '../lib/supabase';
+import { useSupabaseImages, getBestMatch } from '../hooks/useSupabaseImages';
 
 // Fallback image for carousel items
 const FALLBACK_CAROUSEL_IMAGE = 'https://images.pexels.com/photos/4009402/pexels-photo-4009402.jpeg?auto=compress&cs=tinysrgb&w=600';
 
 export default function MediaCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const { images } = useSupabaseImages();
 
-  // SPORTS ONLY - Football, Baseball, Basketball, UFC from Supabase storage
-  const mediaItems = [
-    { type: 'sport', title: 'NFL All Teams Live', image: getStorageUrl('images', 'c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg'), logo: '🏈' },
-    { type: 'sport', title: 'MLB All 30 Teams', image: getStorageUrl('images', 'BASEBALL.webp'), logo: '⚾' },
-    { type: 'sport', title: 'NBA All Games', image: getStorageUrl('images', 'downloadBASKET BALL.jpg'), logo: '🏀' },
-    { type: 'sport', title: 'UFC & Boxing PPV', image: getStorageUrl('images', 'UFC.jpg'), logo: '🥊' },
-  ];
+  // Build media items from dynamically fetched sports images
+  // Falls back to static URLs if Supabase images aren't available
+  const mediaItems = useMemo(() => {
+    const items = [];
+    
+    // Football/NFL
+    const footballImg = getBestMatch(images.sports.football, 'nfl') || FALLBACK_CAROUSEL_IMAGE;
+    items.push({ type: 'sport', title: 'NFL All Teams Live', image: footballImg, logo: '🏈' });
+    
+    // Baseball/MLB
+    const baseballImg = getBestMatch(images.sports.baseball, 'baseball') || FALLBACK_CAROUSEL_IMAGE;
+    items.push({ type: 'sport', title: 'MLB All 30 Teams', image: baseballImg, logo: '⚾' });
+    
+    // Basketball/NBA
+    const basketballImg = getBestMatch(images.sports.basketball, 'basketball') || FALLBACK_CAROUSEL_IMAGE;
+    items.push({ type: 'sport', title: 'NBA All Games', image: basketballImg, logo: '🏀' });
+    
+    // UFC/Boxing
+    const ufcImg = getBestMatch(images.sports.ufc, 'ufc') || FALLBACK_CAROUSEL_IMAGE;
+    items.push({ type: 'sport', title: 'UFC & Boxing PPV', image: ufcImg, logo: '🥊' });
+    
+    return items;
+  }, [images]);
 
   useEffect(() => {
     const interval = setInterval(() => {

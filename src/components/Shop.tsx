@@ -2,6 +2,7 @@ import { Check, Flame, Star, Zap, ShoppingCart } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import { supabase, getStorageUrl } from '../lib/supabase';
 import ValidatedImage from './ValidatedImage';
+import { useSupabaseImages, getBestMatch } from '../hooks/useSupabaseImages';
 
 // Fallback images when Supabase is not configured or local images fail
 const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -178,6 +179,9 @@ const fallbackProducts: Product[] = [
 export default function Shop({ onAddToCart }: ShopProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Fetch images from Supabase Storage with fuzzy matching
+  const { images: supabaseImages } = useSupabaseImages();
 
   // Memoized filtered products - must be declared before any conditional returns
   const firestickProducts = useMemo(() => products.filter(p => p.type === 'firestick'), [products]);
@@ -185,7 +189,7 @@ export default function Shop({ onAddToCart }: ShopProps) {
 
   useEffect(() => {
     loadProducts();
-  }, []);
+  }, [supabaseImages]);
 
   const loadProducts = async () => {
     try {
@@ -212,18 +216,20 @@ export default function Shop({ onAddToCart }: ShopProps) {
             // and try fallbacks if needed
             productImage = getStorageUrl('images', productImage);
           }
-          // If no image or image is placeholder/empty, use type-specific fallback
+          // If no image or image is placeholder/empty, use type-specific fallback with fuzzy matching
           else if (!productImage || productImage.trim() === '' || productImage.includes('placeholder') || productImage.includes('pexels')) {
             if (isFirestick) {
+              // Use fuzzy matching to find the best Fire Stick image from Supabase
               if (p.name.toLowerCase().includes('4k max')) {
-                productImage = getStorageUrl('images', 'firestick 4k max.jpg');
+                productImage = getBestMatch(supabaseImages.fireStickProducts, '4k max') || getStorageUrl('images', 'firestick 4k max.jpg');
               } else if (p.name.toLowerCase().includes('4k')) {
-                productImage = getStorageUrl('images', 'firestick 4k.jpg');
+                productImage = getBestMatch(supabaseImages.fireStickProducts, '4k') || getStorageUrl('images', 'firestick 4k.jpg');
               } else {
-                productImage = getStorageUrl('images', 'firestick hd.jpg');
+                productImage = getBestMatch(supabaseImages.fireStickProducts, 'hd') || getStorageUrl('images', 'firestick hd.jpg');
               }
             } else {
-              productImage = getStorageUrl('images', 'iptv-subscription.jpg');
+              // Use fuzzy matching to find IPTV subscription images
+              productImage = getBestMatch(supabaseImages.iptvSubscription, 'iptv') || getStorageUrl('images', 'iptv-subscription.jpg');
             }
           }
 

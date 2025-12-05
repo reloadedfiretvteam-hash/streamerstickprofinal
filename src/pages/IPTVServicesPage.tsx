@@ -3,6 +3,7 @@ import { ShoppingCart, Star, Check, Zap, ArrowLeft, Gift, User, Mail, Phone, Sen
 import { supabase, getStorageUrl } from '../lib/supabase';
 import Footer from '../components/Footer';
 import ValidatedImage from '../components/ValidatedImage';
+import { useSupabaseImages, getBestMatch } from '../hooks/useSupabaseImages';
 
 // Fallback image when all else fails
 const FALLBACK_IPTV_IMAGE = 'https://images.pexels.com/photos/5474282/pexels-photo-5474282.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -34,11 +35,14 @@ export default function IPTVServicesPage() {
   const [freeTrialPhone, setFreeTrialPhone] = useState('');
   const [freeTrialSubmitted, setFreeTrialSubmitted] = useState(false);
   const [freeTrialLoading, setFreeTrialLoading] = useState(false);
+  
+  // Fetch images from Supabase Storage with fuzzy matching
+  const { images: supabaseImages } = useSupabaseImages();
 
   useEffect(() => {
     loadProducts();
     loadCart();
-  }, []);
+  }, [supabaseImages]);
 
   const loadProducts = async () => {
     try {
@@ -76,9 +80,10 @@ export default function IPTVServicesPage() {
         .map((product: any) => {
           let imageUrl = product.main_image || product.image_url || '';
           
-          // Use Supabase storage as fallback for reliability
+          // Use Supabase storage with fuzzy matching as fallback for reliability
           if (!imageUrl || imageUrl.includes('placeholder') || imageUrl.includes('pexels')) {
-            imageUrl = getStorageUrl('images', 'iptv-subscription.jpg');
+            // Try to get IPTV subscription image from Supabase with fuzzy matching
+            imageUrl = getBestMatch(supabaseImages.iptvSubscription, 'iptv') || getStorageUrl('images', 'iptv-subscription.jpg');
           }
           
           return {
