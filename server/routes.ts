@@ -306,5 +306,109 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/free-trial", async (req, res) => {
+    try {
+      const { email, name } = req.body;
+
+      if (!email || !name) {
+        return res.status(400).json({ error: "Email and name are required" });
+      }
+
+      if (!email.includes("@")) {
+        return res.status(400).json({ error: "Please enter a valid email address" });
+      }
+
+      const { getUncachableResendClient } = await import('./resendClient');
+      const { client, fromEmail } = await getUncachableResendClient();
+
+      const timestamp = Date.now().toString(36);
+      const random = Math.random().toString(36).substring(2, 8);
+      const trialCredentials = {
+        username: `trial_${timestamp}`,
+        password: `TRIAL_${random.toUpperCase()}`,
+      };
+
+      const IPTV_PORTAL_URL = 'http://ky-tv.cc';
+      const SETUP_VIDEO_URL = 'https://www.youtube.com/watch?v=XXXXX';
+
+      await client.emails.send({
+        from: fromEmail,
+        to: email,
+        subject: 'Your FREE 36-Hour IPTV Trial Credentials - StreamStickPro',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #9333ea;">🎉 Your Free Trial is Ready!</h1>
+            
+            <p>Hi ${name},</p>
+            
+            <p>Thank you for trying StreamStickPro! Here are your <strong>36-hour free trial</strong> credentials:</p>
+            
+            <div style="background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%); padding: 25px; border-radius: 12px; margin: 20px 0; color: white;">
+              <h2 style="margin-top: 0; color: white;">Your Trial Credentials</h2>
+              <p style="font-size: 16px;"><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #fef08a;">${IPTV_PORTAL_URL}</a></p>
+              <p style="font-size: 18px;"><strong>Username:</strong> ${trialCredentials.username}</p>
+              <p style="font-size: 18px;"><strong>Password:</strong> ${trialCredentials.password}</p>
+            </div>
+            
+            <div style="background: #f3e8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #7c3aed; margin-top: 0;">Quick Setup Guide:</h3>
+              <ol style="color: #4c1d95;">
+                <li>Download IPTV Smarters or TiviMate app on your device</li>
+                <li>Enter the portal URL: ${IPTV_PORTAL_URL}</li>
+                <li>Enter your username and password above</li>
+                <li>Enjoy 18,000+ live channels for FREE!</li>
+              </ol>
+              <p><strong>Watch our setup video:</strong> <a href="${SETUP_VIDEO_URL}" style="color: #7c3aed;">${SETUP_VIDEO_URL}</a></p>
+            </div>
+            
+            <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+              <strong>⏰ Remember:</strong> Your trial expires in 36 hours. Upgrade anytime to keep streaming!
+            </div>
+            
+            <p>Love the service? <a href="https://streamstickpro.com" style="color: #9333ea; font-weight: bold;">Visit our shop</a> to get full access!</p>
+            
+            <p>Questions? Reply to this email or contact us at reloadedfiretvteam@gmail.com</p>
+            
+            <p>Happy Streaming! 🎬<br>StreamStickPro Team</p>
+          </div>
+        `,
+      });
+
+      await client.emails.send({
+        from: fromEmail,
+        to: 'reloadedfiretvteam@gmail.com',
+        subject: `🆕 New Free Trial Signup - ${name}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #9333ea;">New Free Trial Request</h1>
+            
+            <div style="background: #f3e8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h2 style="margin-top: 0; color: #7c3aed;">Customer Details</h2>
+              <p><strong>Name:</strong> ${name}</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Signed up:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+            
+            <div style="background: #e0e7ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h2 style="margin-top: 0; color: #4338ca;">Trial Credentials Sent</h2>
+              <p><strong>Username:</strong> ${trialCredentials.username}</p>
+              <p><strong>Password:</strong> ${trialCredentials.password}</p>
+              <p><strong>Expires:</strong> 36 hours from signup</p>
+            </div>
+            
+            <p>This customer may convert to a paying customer. Consider following up after their trial expires!</p>
+          </div>
+        `,
+      });
+
+      console.log(`Free trial credentials sent to ${email}, owner notified`);
+
+      res.json({ success: true, message: "Trial credentials sent" });
+    } catch (error: any) {
+      console.error("Error processing free trial:", error);
+      res.status(500).json({ error: "Failed to process trial request. Please try again." });
+    }
+  });
+
   return httpServer;
 }
