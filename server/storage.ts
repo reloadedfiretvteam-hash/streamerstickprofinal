@@ -23,6 +23,7 @@ export interface IStorage {
   getOrderByPaymentIntent(paymentIntentId: string): Promise<Order | undefined>;
   updateOrder(id: string, updates: Partial<InsertOrder>): Promise<Order | undefined>;
   getOrdersByEmail(email: string): Promise<Order[]>;
+  getAllOrders(): Promise<Order[]>;
   
   getRealProducts(): Promise<RealProduct[]>;
   getRealProduct(id: string): Promise<RealProduct | undefined>;
@@ -75,6 +76,10 @@ export class DatabaseStorage implements IStorage {
 
   async getOrdersByEmail(email: string): Promise<Order[]> {
     return db.select().from(orders).where(eq(orders.customerEmail, email));
+  }
+
+  async getAllOrders(): Promise<Order[]> {
+    return db.select().from(orders);
   }
 
   async getRealProducts(): Promise<RealProduct[]> {
