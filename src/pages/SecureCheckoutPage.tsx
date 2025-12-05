@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { loadStripe } from '@stripe/stripe-js';
 import { useToast } from '@/hooks/use-toast';
 
-const STRIPE_PUBLISHABLE_KEY = 'pk_live_51SXXh4HBw27Y92Ci4r7de3JTz13uAz7EF04b2ZpW8KhtDQYaa2mh1ayE8RiCKSRxRYtn3o7VNMINWJd9f7oGYsxT002VVUcvC8';
+const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
 const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
 interface Product {
