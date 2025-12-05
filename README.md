@@ -60,59 +60,75 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## Supabase Image Management
+## Product Image Management System
 
 ### Overview
 
-This application automatically fetches and displays images from Supabase Storage. Images are categorized and matched to components using intelligent fuzzy matching.
+This application features a comprehensive **Product Image Management System** with intelligent fallback logic and admin panel integration for seamless image uploads and management.
 
-### How Image Fetching Works
+### Image Fallback System
 
-The application uses the `useSupabaseImages` hook (located in `src/hooks/useSupabaseImages.ts`) to:
+All product images follow a **priority-based fallback logic** to ensure reliable display:
 
-1. **Fetch all images** from the Supabase Storage bucket (default: `images`)
-2. **Filter out videos** - Only image formats are used (jpg, jpeg, png, webp, svg, gif)
-3. **Categorize images** using fuzzy matching:
-   - **Hero images**: Files containing "hero" in the filename
-   - **Fire Stick products**: Files containing "firestick" or "fire stick" (handles variations)
-   - **IPTV subscriptions**: Files containing both "iptv" and "subscription"
-   - **Sports images**: Files containing sports keywords:
-     - Football: "nfl" or "football"
-     - Baseball: "mlb" or "baseball"
-     - Basketball: "nba" or "basketball"
-     - UFC/Boxing: "ufc", "mma", or "boxing"
+1. **Local `/public/images/` assets** - First priority (if present)
+2. **Supabase Storage public URL** - Second priority (if image missing locally)
+3. **Category-based placeholder** - Third priority (firestick, iptv, etc.)
+4. **Generic placeholder** - Final fallback (`/placeholder.svg`)
 
-### Fuzzy Matching
+This ensures **zero broken images** on your site, regardless of hosting or storage configuration.
 
-The fuzzy matching algorithm handles common variations:
-- Case insensitive
-- Ignores spaces, hyphens, and underscores
-- Examples:
-  - "Fire Stick" matches "firestick", "fire-stick", "FireStick", etc.
-  - "IPTV subscription" matches "iptv-subscription", "IPTVSubscription", etc.
+### Admin Panel Image Upload
 
-### Component Integration
+The admin panel provides a powerful image management interface:
 
-**Hero Component** (`src/components/Hero.tsx`)
-- Automatically fetches and displays the hero background image
-- Falls back to placeholder if no hero image is found
+#### Features:
+- **Drag-and-drop upload** - Simply drag images onto the upload area
+- **File picker support** - Click to browse and select images
+- **Batch uploads** - Upload multiple images at once
+- **Gallery preview** - See all uploaded images with thumbnails
+- **Primary image selection** - Set which image displays first
+- **Delete images** - Remove unwanted images instantly
+- **Instant updates** - Changes reflect immediately on the frontend
+- **Visual feedback** - Real-time upload progress and status
 
-**MediaCarousel Component** (`src/components/MediaCarousel.tsx`)
-- Dynamically loads sports images from Supabase
-- Uses best-match algorithm for each sport category
-- Falls back to placeholder images if sports images aren't available
+#### Using the Admin Panel:
 
-**Shop Component** (`src/components/Shop.tsx`)
-- Matches Fire Stick product images using fuzzy matching (HD, 4K, 4K Max)
-- Matches IPTV subscription images
-- Falls back to placeholder images if products don't have images
+1. **Navigate to Admin Dashboard**
+   - Login to admin panel at `/admin` or `/unified-admin-login`
+   - Go to "Products" section
 
-### Placeholder Fallbacks
+2. **Add/Edit Product**
+   - Click "Add Product" or edit existing product
+   - Scroll to the "Product Image" section
 
-If images are missing from Supabase Storage, the application uses:
-- High-quality Pexels placeholder images
-- Ensures the site never shows broken images
-- Components handle missing images gracefully
+3. **Upload Images**
+   - **Drag & Drop**: Drag image files directly onto the upload area
+   - **File Picker**: Click the upload area to browse your device
+   - **Multiple files**: Select multiple images for batch upload
+   - Wait for upload confirmation
+
+4. **Manage Images**
+   - **Set Primary**: Click the star icon to set the main product image
+   - **Delete**: Click the X button to remove an image
+   - All changes are instant and automatically saved
+
+#### Image Storage:
+
+- **Supabase Storage**: All uploads are stored in Supabase Storage bucket (`images`)
+- **Local files**: For manual local image management, place files in `/public/images/`
+  - Example: `/public/images/firestick-4k.jpg`
+  - These take priority over Supabase URLs
+
+### Frontend Image Display
+
+The application uses the `ProductImage` component which automatically:
+
+1. **Attempts local image** - Tries to load from `/public/images/` first
+2. **Falls back to Supabase** - If local fails, tries Supabase Storage URL
+3. **Uses category placeholder** - If both fail, shows category-appropriate placeholder
+4. **Shows generic placeholder** - Final fallback for unknown categories
+5. **Displays loading state** - Shows skeleton while image loads
+6. **Handles errors gracefully** - No broken image icons
 
 ### Configuration
 
@@ -123,21 +139,58 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 VITE_STORAGE_BUCKET_NAME=images
 ```
 
-### Uploading Images
+### Manual Image Upload (Advanced)
 
-To add images to Supabase Storage:
+#### Option 1: Via Supabase Dashboard
+1. Go to Supabase Dashboard → Storage → `images` bucket
+2. Navigate to `products/` folder
+3. Upload images with descriptive filenames
+4. Images are instantly available to your products
 
-1. Go to your Supabase Dashboard → Storage → `images` bucket
-2. Upload images with descriptive filenames:
-   - Hero: `hero-background.jpg`, `hero-image.png`, etc.
-   - Fire Sticks: `firestick-hd.jpg`, `firestick-4k.jpg`, `firestick-4k-max.jpg`
-   - IPTV: `iptv-subscription.jpg`
-   - Sports: `nfl-football.jpg`, `mlb-baseball.jpg`, `nba-basketball.jpg`, `ufc-boxing.jpg`
-3. Images are automatically detected and categorized by the application
+#### Option 2: Via Admin Panel (Recommended)
+- Use the built-in admin panel image uploader
+- Supports drag-and-drop and batch uploads
+- Automatically manages file naming and organization
 
-### Video Exclusion
+#### Option 3: Local Files (Development)
+1. Place images in `/public/images/` directory
+2. Use filenames like:
+   - `firestick-4k.jpg` - Fire Stick 4K
+   - `firestick-hd.jpg` - Fire Stick HD
+   - `iptv-subscription.jpg` - IPTV products
+3. These files take priority over Supabase URLs
+4. Note: On hosted platforms, local file writes may not be possible
 
-Video files (`.mp4`, `.mov`, `.avi`, `.mkv`, `.webm`, `.flv`) are automatically excluded from image fetching. Only standard image formats are used for display.
+### Supported Image Formats
+
+- JPG/JPEG
+- PNG
+- WEBP
+- GIF
+- SVG
+
+Video files (`.mp4`, `.mov`, `.avi`, `.mkv`, `.webm`, `.flv`) are automatically excluded from image operations.
+
+### Image Naming Best Practices
+
+For automatic categorization, use descriptive filenames:
+- Fire Stick products: Include "firestick" or "fire-stick"
+- IPTV products: Include "iptv" and "subscription"
+- General products: Use product name or SKU
+
+### Troubleshooting
+
+**Images not displaying?**
+1. Check Supabase Storage bucket has public access
+2. Verify image URLs are correct in product records
+3. Check browser console for loading errors
+4. Ensure image files are under 5MB (Supabase free tier limit)
+
+**Upload failing?**
+1. Check Supabase credentials in `.env`
+2. Verify Storage bucket exists and is named `images`
+3. Check file size (keep under 5MB)
+4. Ensure valid image format (JPG, PNG, WEBP, GIF)
 
 ## How can I deploy this project?
 

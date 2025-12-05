@@ -10,6 +10,7 @@ import { Plus, Pencil, Trash2, Save, Upload } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import EnhancedProductImageUpload from './EnhancedProductImageUpload';
 
 interface Product {
   id: string;
@@ -209,7 +210,15 @@ const AdminProducts = () => {
                 <div><Label>Type</Label><Select value={formData.type} onValueChange={(v) => setFormData(prev => ({ ...prev, type: v }))}><SelectTrigger className="bg-slate-700 border-slate-600"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="firestick">Fire Stick</SelectItem><SelectItem value="iptv">IPTV</SelectItem><SelectItem value="website">Website</SelectItem><SelectItem value="addon">Add-on</SelectItem></SelectContent></Select></div>
                 <div><Label>Page</Label><Select value={formData.page} onValueChange={(v) => setFormData(prev => ({ ...prev, page: v }))}><SelectTrigger className="bg-slate-700 border-slate-600"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="main">Main Page</SelectItem><SelectItem value="secure">Secure Domain</SelectItem></SelectContent></Select></div>
               </div>
-              <div><Label>Image</Label><div className="flex gap-2"><Input value={formData.image_url} onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))} placeholder="Image URL" className="bg-slate-700 border-slate-600" /><label className="cursor-pointer"><input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" /><Button type="button" variant="outline" disabled={uploading} asChild><span><Upload className="w-4 h-4" /></span></Button></label></div>{formData.image_url && <img src={formData.image_url} alt="Preview" className="mt-2 h-20 object-cover rounded" />}</div>
+              <div>
+                <Label className="mb-2 block">Product Image</Label>
+                <EnhancedProductImageUpload
+                  productId={editingProduct?.id}
+                  currentImageUrl={formData.image_url}
+                  onImageChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+                  allowMultiple={false}
+                />
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div><Label>Badge</Label><Input value={formData.badge} onChange={(e) => setFormData(prev => ({ ...prev, badge: e.target.value }))} placeholder="e.g., Popular" className="bg-slate-700 border-slate-600" /></div>
                 <div><Label>Period</Label><Input value={formData.period} onChange={(e) => setFormData(prev => ({ ...prev, period: e.target.value }))} placeholder="e.g., 1 Month" className="bg-slate-700 border-slate-600" /></div>
