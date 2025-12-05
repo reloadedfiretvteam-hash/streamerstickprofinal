@@ -1,140 +1,73 @@
-# StreamStick Pro Final
+# Welcome to your Lovable project
 
-Automated deployment pipeline from local development to production via GitHub and Cloudflare Pages.
+## Project info
 
-## Repository
+**URL**: https://lovable.dev/projects/db47acea-a5a1-486e-a7be-658390194b66
 
-**GitHub:** https://github.com/reloadedfiretvteam-hash/streamstickprofinal
+## How can I edit this code?
 
-## Quick Setup
+There are several ways of editing your application.
 
-### Step 1: Add GitHub Secrets (REQUIRED)
+**Use Lovable**
 
-The auto-deployment workflow requires secrets to be configured. Go to:
+Simply visit the [Lovable Project](https://lovable.dev/projects/db47acea-a5a1-486e-a7be-658390194b66) and start prompting.
 
-https://github.com/reloadedfiretvteam-hash/streamstickprofinal/settings/secrets/actions
+Changes made via Lovable will be committed automatically to this repo.
 
-Add these four secrets (see `SETUP_SECRETS.md` for values):
-1. `CLOUDFLARE_ACCOUNT_ID`
-2. `CLOUDFLARE_API_TOKEN`
-3. `VITE_SUPABASE_URL`
-4. `VITE_SUPABASE_ANON_KEY`
+**Use your preferred IDE**
 
-### Step 2: That's It!
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-Once secrets are added, every push to `main` will automatically:
-1. Build the project
-2. Deploy to Cloudflare Pages
-3. Update your live site
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-## Local Development
+Follow these steps:
 
-From your local AI Cursor workspace:
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-```bash
-# Make your changes
-git add .
-git commit -m "Your changes"
-git push
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
 
-# That's it! Auto-deployment handles the rest
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run dev
 ```
 
-## Project Structure
+**Edit a file directly in GitHub**
 
-```
-streamstickprofinal/
-├── .github/
-│   └── workflows/
-│       └── cloudflare-pages.yml    # Auto-deployment workflow
-├── src/
-│   ├── App.tsx                     # Main React app
-│   ├── main.tsx                    # Entry point
-│   └── index.css                   # Global styles
-├── package.json                    # Dependencies
-└── vite.config.ts                  # Vite configuration
-```
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-## Multi-Domain Setup
+**Use GitHub Codespaces**
 
-Configure these domains in Cloudflare Pages dashboard:
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-- **Main site:** `streamstickprofinal.com`
-- **Secure payment:** `payments.streamstickprofinal.com`
-- **Secure checkout:** `secure.streamstickprofinal.com`
-- **Checkout:** `checkout.streamstickprofinal.com`
-- **Payment gateway:** `pay.streamstickprofinal.com`
+## What technologies are used for this project?
 
-All subdomains will serve the same built application with SSL enabled.
+This project is built with:
 
-## Cloudflare Pages
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-Project: **streamerstickprofinal**
-Dashboard: https://dash.cloudflare.com/f1d6fdedf801e39f184a19ae201e8be1/pages/view/streamerstickprofinal
+## How can I deploy this project?
 
-Build settings (auto-configured):
-- **Build command:** `npm run build`
-- **Build output directory:** `dist`
-- **Node version:** 20
+Simply open [Lovable](https://lovable.dev/projects/db47acea-a5a1-486e-a7be-658390194b66) and click on Share -> Publish.
 
-## Environment Variables
+## Can I connect a custom domain to my Lovable project?
 
-Environment variables are managed through GitHub Secrets and automatically injected during build:
+Yes, you can!
 
-- `VITE_SUPABASE_URL` - Supabase project URL
-- `VITE_SUPABASE_ANON_KEY` - Supabase anonymous key
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
-## Development Scripts
-
-```bash
-npm run dev        # Start development server
-npm run build      # Build for production
-npm run preview    # Preview production build
-npm run lint       # Run ESLint
-npm run typecheck  # Check TypeScript types
-```
-
-## Tech Stack
-
-- **Framework:** React 18 + TypeScript
-- **Build Tool:** Vite (with optimized chunking)
-- **Styling:** Tailwind CSS
-- **Icons:** Lucide React
-- **Database:** Supabase
-- **Hosting:** Cloudflare Pages (with CDN acceleration)
-- **CI/CD:** GitHub Actions (automated deployment)
-
-## Cloudflare Optimizations
-
-This project is fully optimized for Cloudflare Pages with:
-- ✅ Vendor chunking for better caching
-- ✅ Static asset acceleration (1-year cache)
-- ✅ Image optimization (Polish)
-- ✅ Brotli compression
-- ✅ DNS prefetch & preconnect
-- ✅ Security headers (HSTS, CSP, etc.)
-- ✅ Edge caching rules
-- ✅ HTTP/3 ready
-
-**See `CLOUDFLARE_CONFIG.md` for complete configuration details.**
-**See `CLOUDFLARE_ENV_SETUP.md` for environment variables setup.**
-**See `CLOUDFLARE_OPTIMIZATION_SUMMARY.md` for optimization details.**
-
-## Security Notes
-
-- All API keys and tokens are stored as GitHub Secrets
-- SSL/TLS automatically enabled on all domains
-- Supabase handles authentication and database security
-- Payment subdomains can be configured with additional access controls
-
-## Support
-
-For issues with:
-- **Code changes:** Edit locally and push to GitHub
-- **Deployment:** Check GitHub Actions logs
-- **Domains:** Configure in Cloudflare Pages dashboard
-- **Database:** Managed through Supabase
-
----
-
-Built with automated CI/CD pipeline: Local → GitHub → Cloudflare Pages
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)

@@ -1,404 +1,125 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import Stripe from "https://esm.sh/stripe@14.21.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, Stripe-Signature, X-Client-Info, Apikey",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
 };
 
-interface StripePaymentIntent {
-  id: string;
-  object: "payment_intent";
-  amount: number;
-  currency: string;
-  status: string;
-  livemode: boolean;
-  metadata: Record<string, string>;
-  receipt_email: string | null;
-  created: number;
-}
-
-interface StripeEvent {
-  id: string;
-  object: "event";
-  type: string;
-  livemode: boolean;
-  created: number;
-  data: {
-    object: StripePaymentIntent;
-  };
-}
-
-async function verifyStripeSignature(
-  payload: string,
-  signature: string,
-  webhookSecret: string
-): Promise<{ valid: boolean; timestamp?: number; error?: string }> {
-  try {
-    const signatureParts = signature.split(",").reduce((acc, part) => {
-      const [key, value] = part.split("=");
-      if (key && value) {
-        acc[key] = value;
-      }
-      return acc;
-    }, {} as Record<string, string>);
-
-    const timestamp = signatureParts["t"];
-    const expectedSignature = signatureParts["v1"];
-
-    if (!timestamp || !expectedSignature) {
-      return { valid: false, error: "Missing timestamp or signature in header" };
-    }
-
-    const timestampNum = parseInt(timestamp, 10);
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-    const tolerance = 300;
-
-    if (Math.abs(currentTimestamp - timestampNum) > tolerance) {
-      return { 
-        valid: false, 
-        timestamp: timestampNum,
-        error: `Timestamp outside tolerance window: ${timestampNum} vs ${currentTimestamp}` 
-      };
-    }
-
-    const signedPayload = `${timestamp}.${payload}`;
-
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      "raw",
-      encoder.encode(webhookSecret),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["sign"]
-    );
-
-    const signatureBytes = await crypto.subtle.sign(
-      "HMAC",
-      key,
-      encoder.encode(signedPayload)
-    );
-
-    const computedSignature = Array.from(new Uint8Array(signatureBytes))
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-
-    const isValid = computedSignature === expectedSignature;
-
-    return { 
-      valid: isValid, 
-      timestamp: timestampNum,
-      error: isValid ? undefined : "Signature mismatch"
-    };
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error during signature verification";
-    return { valid: false, error: errorMessage };
-  }
-}
-
-function logPaymentEvent(
-  eventType: string,
-  paymentIntent: StripePaymentIntent,
-  isLive: boolean,
-  additionalInfo?: Record<string, unknown>
-) {
-  const logData = {
-    timestamp: new Date().toISOString(),
-    eventType,
-    paymentIntentId: paymentIntent.id,
-    amount: paymentIntent.amount,
-    currency: paymentIntent.currency,
-    status: paymentIntent.status,
-    mode: isLive ? "LIVE" : "TEST",
-    metadata: paymentIntent.metadata,
-    receiptEmail: paymentIntent.receipt_email,
-    ...additionalInfo,
-  };
-
-  const prefix = isLive ? "[STRIPE-LIVE]" : "[STRIPE-TEST]";
-  console.log(`${prefix} ${eventType}:`, JSON.stringify(logData, null, 2));
-}
-
-function logFailure(
-  context: string,
-  error: string,
-  details?: Record<string, unknown>
-) {
-  const logData = {
-    timestamp: new Date().toISOString(),
-    context,
-    error,
-    ...details,
-  };
-
-  console.error(`[STRIPE-ERROR] ${context}:`, JSON.stringify(logData, null, 2));
-}
-
-Deno.serve(async (req: Request) => {
+serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders,
-    });
-  }
-
-  if (req.method !== "POST") {
-    logFailure("HTTP Method", "Invalid method", { method: req.method });
-    return new Response(
-      JSON.stringify({ error: "Method not allowed" }),
-      {
-        status: 405,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-    if (!webhookSecret) {
-      logFailure("Configuration", "STRIPE_WEBHOOK_SECRET is not configured");
-      return new Response(
-        JSON.stringify({ error: "Webhook secret not configured" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    if (!supabaseUrl || !supabaseKey) {
-      logFailure("Configuration", "Missing Supabase environment variables");
-      return new Response(
-        JSON.stringify({ error: "Server configuration error" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const signature = req.headers.get("Stripe-Signature");
-    if (!signature) {
-      logFailure("Authentication", "Missing Stripe-Signature header");
-      return new Response(
-        JSON.stringify({ error: "Missing Stripe-Signature header" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const rawBody = await req.text();
     
-    if (!rawBody) {
-      logFailure("Payload", "Empty request body");
-      return new Response(
-        JSON.stringify({ error: "Empty request body" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+    if (!stripeKey) {
+      throw new Error("STRIPE_SECRET_KEY not configured");
     }
 
-    const verificationResult = await verifyStripeSignature(rawBody, signature, webhookSecret);
-    
-    if (!verificationResult.valid) {
-      logFailure("Signature Verification", verificationResult.error || "Invalid signature", {
-        timestamp: verificationResult.timestamp,
-      });
-      return new Response(
-        JSON.stringify({ error: "Invalid signature" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
+    const stripe = new Stripe(stripeKey, {
+      apiVersion: "2023-10-16",
+    });
 
-    let event: StripeEvent;
-    try {
-      event = JSON.parse(rawBody);
-    } catch (parseError) {
-      logFailure("JSON Parsing", "Failed to parse webhook payload", {
-        error: parseError instanceof Error ? parseError.message : "Unknown parse error",
-      });
-      return new Response(
-        JSON.stringify({ error: "Invalid JSON payload" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
+    const body = await req.text();
+    const signature = req.headers.get("stripe-signature");
 
-    const isLiveEvent = event.livemode === true;
-    const paymentIntent = event.data?.object;
-    const isLivePayment = paymentIntent?.livemode === true;
+    let event: Stripe.Event;
 
-    if (isLiveEvent !== isLivePayment) {
-      logFailure("Mode Mismatch", "Event and PaymentIntent livemode mismatch", {
-        eventLivemode: isLiveEvent,
-        paymentIntentLivemode: isLivePayment,
-        eventId: event.id,
-        paymentIntentId: paymentIntent?.id,
-      });
-    }
-
-    console.log(`[STRIPE-WEBHOOK] Received ${event.type} event (${isLiveEvent ? "LIVE" : "TEST"}): ${event.id}`);
-
-    switch (event.type) {
-      case "payment_intent.succeeded": {
-        logPaymentEvent("payment_intent.succeeded", paymentIntent, isLivePayment);
-
-        // Idempotency: Check if we already processed this payment intent
-        const checkResponse = await fetch(
-          `${supabaseUrl}/rest/v1/payment_transactions?stripe_payment_intent_id=eq.${paymentIntent.id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${supabaseKey}`,
-              "apikey": supabaseKey,
-            },
-          }
+    // If webhook secret is configured, verify the signature
+    if (webhookSecret && signature) {
+      try {
+        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      } catch (err: unknown) {
+        const errMessage = err instanceof Error ? err.message : "Unknown error";
+        console.error("Webhook signature verification failed:", errMessage);
+        return new Response(
+          JSON.stringify({ error: "Webhook signature verification failed" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
-
-        if (checkResponse.ok) {
-          const existing = await checkResponse.json();
-          if (existing && existing.length > 0) {
-            console.log(`[STRIPE-IDEMPOTENCY] Payment ${paymentIntent.id} already processed, skipping`);
-            break;
-          }
-        }
-
-        const transactionRecord = {
-          stripe_payment_intent_id: paymentIntent.id,
-          amount: paymentIntent.amount / 100,
-          currency: paymentIntent.currency,
-          payment_method: "stripe",
-          payment_status: "confirmed",
-          customer_email: paymentIntent.receipt_email || paymentIntent.metadata?.customer_email,
-          product_id: paymentIntent.metadata?.product_id,
-          product_name: paymentIntent.metadata?.product_name,
-          is_live_mode: isLivePayment,
-          created_at: new Date().toISOString(),
-          stripe_event_id: event.id,
-          order_code: `STRIPE-${paymentIntent.id.slice(-8).toUpperCase()}`,
-        };
-
-        const insertResponse = await fetch(
-          `${supabaseUrl}/rest/v1/payment_transactions`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${supabaseKey}`,
-              "apikey": supabaseKey,
-              "Prefer": "return=minimal",
-            },
-            body: JSON.stringify(transactionRecord),
-          }
-        );
-
-        if (!insertResponse.ok) {
-          const errorText = await insertResponse.text();
-          logFailure("Database Insert", "Failed to record payment transaction", {
-            status: insertResponse.status,
-            error: errorText,
-            paymentIntentId: paymentIntent.id,
-          });
-        } else {
-          console.log(`[STRIPE-${isLivePayment ? "LIVE" : "TEST"}] Payment recorded: ${paymentIntent.id}`);
-        }
-        break;
       }
+    } else {
+      // For testing without webhook secret
+      event = JSON.parse(body);
+    }
 
-      case "payment_intent.payment_failed": {
-        logPaymentEvent("payment_intent.payment_failed", paymentIntent, isLivePayment, {
-          failureMessage: "Payment failed - check Stripe dashboard for details",
+    console.log("Received Stripe event:", event.type);
+
+    // Handle the checkout.session.completed event
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object as Stripe.Checkout.Session;
+      
+      console.log("Checkout session completed:", {
+        sessionId: session.id,
+        customerEmail: session.customer_email,
+        amountTotal: session.amount_total,
+        metadata: session.metadata,
+      });
+
+      const supabaseUrl = Deno.env.get("SUPABASE_URL");
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+      if (supabaseUrl && supabaseServiceKey && session.customer_email) {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+        // Log the successful payment
+        console.log("Payment successful for:", {
+          email: session.customer_email,
+          amount: (session.amount_total || 0) / 100,
+          product: session.metadata?.productName,
+          customerId: session.customer,
         });
 
-        const failedRecord = {
-          stripe_payment_intent_id: paymentIntent.id,
-          amount: paymentIntent.amount / 100,
-          currency: paymentIntent.currency,
-          payment_method: "stripe",
-          payment_status: "failed",
-          customer_email: paymentIntent.receipt_email || paymentIntent.metadata?.customer_email,
-          product_id: paymentIntent.metadata?.product_id,
-          product_name: paymentIntent.metadata?.product_name,
-          is_live_mode: isLivePayment,
-          created_at: new Date().toISOString(),
-          stripe_event_id: event.id,
-          order_code: `STRIPE-${paymentIntent.id.slice(-8).toUpperCase()}`,
-        };
-
-        await fetch(
-          `${supabaseUrl}/rest/v1/payment_transactions`,
-          {
-            method: "POST",
+        // Call the send-purchase-email function to send welcome & credentials emails
+        try {
+          console.log("Triggering purchase email for:", session.customer_email);
+          
+          const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-purchase-email`, {
+            method: 'POST',
             headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${supabaseKey}`,
-              "apikey": supabaseKey,
-              "Prefer": "return=minimal",
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${supabaseServiceKey}`,
             },
-            body: JSON.stringify(failedRecord),
+            body: JSON.stringify({
+              customerEmail: session.customer_email,
+              productName: session.metadata?.productName || 'Stream Stick Pro Product',
+              amount: (session.amount_total || 0) / 100,
+              isFreeTrial: false,
+            }),
+          });
+
+          const emailResult = await emailResponse.json();
+          console.log("Email function response:", emailResult);
+
+          if (!emailResponse.ok) {
+            console.error("Failed to send purchase email:", emailResult);
+          } else {
+            console.log("Purchase emails sent successfully");
           }
-        );
-        break;
-      }
-
-      case "payment_intent.canceled": {
-        logPaymentEvent("payment_intent.canceled", paymentIntent, isLivePayment);
-        break;
-      }
-
-      case "payment_intent.processing": {
-        logPaymentEvent("payment_intent.processing", paymentIntent, isLivePayment);
-        break;
-      }
-
-      case "payment_intent.created": {
-        logPaymentEvent("payment_intent.created", paymentIntent, isLivePayment);
-        break;
-      }
-
-      default: {
-        console.log(`[STRIPE-WEBHOOK] Unhandled event type: ${event.type} (${isLiveEvent ? "LIVE" : "TEST"})`);
+        } catch (emailError) {
+          console.error("Error calling send-purchase-email:", emailError);
+        }
       }
     }
 
     return new Response(
-      JSON.stringify({
-        received: true,
-        eventId: event.id,
-        eventType: event.type,
-        mode: isLiveEvent ? "live" : "test",
-      }),
+      JSON.stringify({ received: true }),
       {
-        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
       }
     );
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    logFailure("Unhandled Exception", errorMessage, {
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-
+    console.error("Webhook error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return new Response(
-      JSON.stringify({
-        error: "Internal server error",
-      }),
+      JSON.stringify({ error: errorMessage }),
       {
-        status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
       }
     );
   }
