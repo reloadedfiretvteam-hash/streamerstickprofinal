@@ -32,13 +32,13 @@ export default function ProductImage({
   const [fallbackIndex, setFallbackIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Build fallback chain
-  const fallbackChain = [
-    imagePath, // Local path first
-    supabaseUrl, // Supabase second
-    getProductImage({ category }), // Category placeholder third
-    '/placeholder.svg', // Final fallback
-  ].filter(Boolean); // Remove undefined/null values
+  // Build fallback chain (filtered to only include valid strings)
+  const fallbackChain: string[] = [
+    imagePath, 
+    supabaseUrl,
+    category ? getProductImage({ category }) : null,
+    '/placeholder.svg',
+  ].filter((url): url is string => typeof url === 'string' && url.length > 0);
 
   useEffect(() => {
     // Start with the best available option
@@ -58,9 +58,9 @@ export default function ProductImage({
     
     if (nextIndex < fallbackChain.length) {
       setFallbackIndex(nextIndex);
-      setCurrentSrc(fallbackChain[nextIndex] as string);
+      setCurrentSrc(fallbackChain[nextIndex]);
     } else {
-      // All fallbacks exhausted, use final placeholder
+      // All fallbacks exhausted, ensure we use placeholder
       setCurrentSrc('/placeholder.svg');
     }
 

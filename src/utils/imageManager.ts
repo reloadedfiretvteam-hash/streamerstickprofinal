@@ -9,7 +9,7 @@
  * 5. Instant update notifications
  */
 
-import { supabase, getStorageUrl } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 
 // Default placeholder image
 const PLACEHOLDER_IMAGE = '/placeholder.svg';
@@ -93,7 +93,13 @@ export async function uploadImageToSupabase(
   bucketName: string = 'images'
 ): Promise<{ publicUrl: string; filePath: string } | { error: string }> {
   try {
-    const fileExt = file.name.split('.').pop();
+    // Validate file has an extension
+    const fileNameParts = file.name.split('.');
+    if (fileNameParts.length < 2) {
+      return { error: 'File must have a valid extension' };
+    }
+    
+    const fileExt = fileNameParts.pop()!;
     const timestamp = Date.now();
     const fileName = productId 
       ? `${productId}-${timestamp}.${fileExt}`
@@ -147,10 +153,16 @@ export async function uploadImageDual(
   supabaseSuccess: boolean;
   error?: string;
 }> {
-  const result = {
+  const result: {
+    supabaseUrl?: string;
+    localPath?: string;
+    localSaveSuccess: boolean;
+    supabaseSuccess: boolean;
+    error?: string;
+  } = {
     supabaseSuccess: false,
     localSaveSuccess: false,
-  } as any;
+  };
 
   // 1. Upload to Supabase (always attempt this)
   const supabaseResult = await uploadImageToSupabase(file, productId);

@@ -14,7 +14,7 @@ import { useState, useRef, DragEvent } from 'react';
 import { Upload, X, Image as ImageIcon, Star, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { uploadImagesBatch, deleteImageFromSupabase } from '@/utils/imageManager';
+import { uploadImagesBatch, deleteImageFromSupabase } from '../../utils/imageManager';
 
 interface UploadedImage {
   id: string;
