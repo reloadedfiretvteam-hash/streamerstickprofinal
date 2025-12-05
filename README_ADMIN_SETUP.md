@@ -121,6 +121,31 @@ Once logged in, you'll have access to **66 admin tools**:
 
 ---
 
+## 📋 ORDER MANAGEMENT & CUSTOMER INFORMATION
+
+### Customer Phone Numbers
+
+When viewing orders in the admin panel, you'll see customer phone numbers when provided:
+
+**Phone Number Field:**
+- **Optional for customers** - Not required during checkout
+- **Stored in database** - When provided, saved in `orders_full.customer_phone` column
+- **Available in admin** - View customer phone numbers in the Orders & Customers Manager
+- **Contact purposes** - Use for order updates, support, and delivery coordination
+
+**Customer Checkout Experience:**
+- Phone number field is clearly labeled as "(Optional)"
+- Customers can complete orders without providing a phone number
+- If provided, phone numbers are available to admin for follow-up communication
+
+**Admin Access:**
+1. Log into admin panel
+2. Navigate to "Orders & Customers Manager"
+3. View customer phone numbers in the order details (when provided)
+4. Use phone numbers for support and order communication
+
+---
+
 ## ✅ VERIFICATION CHECKLIST
 
 - [x] `.env` file created ✅
