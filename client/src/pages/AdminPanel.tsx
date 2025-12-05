@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { useLocation } from "wouter";
 import { 
   LayoutDashboard, 
@@ -26,7 +26,9 @@ import {
   CheckCircle,
   AlertCircle,
   Flame,
-  RefreshCw
+  RefreshCw,
+  Upload,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -107,6 +109,7 @@ export default function AdminPanel() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const showToast = (message: string, type: 'success' | 'error') => {
@@ -333,6 +336,60 @@ export default function AdminPanel() {
     } else {
       showToast('Error deleting product: ' + error.message, 'error');
     }
+  };
+
+  const uploadImage = async (file: File) => {
+    if (!editingProduct) return;
+    
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      showToast('Please upload a valid image (JPEG, PNG, GIF, or WebP)', 'error');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Image must be less than 5MB', 'error');
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `product_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        showToast('Failed to upload image: ' + uploadError.message, 'error');
+        return;
+      }
+
+      const imageUrl = getStorageUrl('images', filePath);
+      
+      setEditingProduct({ ...editingProduct, main_image: imageUrl });
+      showToast('Image uploaded successfully!', 'success');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      showToast('Failed to upload image: ' + (error.message || 'Unknown error'), 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadImage(file);
+    }
+    e.target.value = '';
   };
 
   const formatTime = (dateString: string) => {
@@ -976,20 +1033,69 @@ export default function AdminPanel() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-2">Main Image URL</label>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Product Image</label>
                   {editingProduct.main_image && (
-                    <img 
-                      src={editingProduct.main_image} 
-                      alt="Product preview" 
-                      className="w-full h-32 object-cover rounded-lg border border-gray-600 mb-3"
-                    />
+                    <div className="relative mb-3">
+                      <img 
+                        src={editingProduct.main_image} 
+                        alt="Product preview" 
+                        className="w-full h-40 object-cover rounded-lg border border-gray-600"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white"
+                        onClick={() => setEditingProduct({ ...editingProduct, main_image: '' })}
+                        data-testid="button-remove-image"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
                   )}
-                  <Input
-                    value={editingProduct.main_image || ''}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, main_image: e.target.value })}
-                    className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="https://..."
-                  />
+                  
+                  <div className="flex gap-3">
+                    <div className="flex-1">
+                      <Input
+                        value={editingProduct.main_image || ''}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, main_image: e.target.value })}
+                        className="bg-gray-700 border-gray-600 text-white"
+                        placeholder="Enter image URL or upload a file..."
+                        data-testid="input-image-url"
+                      />
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        onChange={handleFileSelect}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        disabled={uploading}
+                        data-testid="input-file-upload"
+                      />
+                      <Button
+                        type="button"
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        disabled={uploading}
+                        data-testid="button-upload-image"
+                      >
+                        {uploading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4 mr-2" />
+                            Upload
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Supports JPEG, PNG, GIF, WebP. Max size: 5MB
+                  </p>
                 </div>
 
                 <div className="border-t border-gray-700 pt-6">
