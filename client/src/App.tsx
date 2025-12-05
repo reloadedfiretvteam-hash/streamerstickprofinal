@@ -5,12 +5,19 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 
+// Lazy load pages to avoid circular dependencies if any
+import MainStore from "@/pages/MainStore";
+import ShadowStore from "@/pages/ShadowStore";
+import AdminPanel from "@/pages/AdminPanel";
+import Checkout from "@/pages/Checkout";
+
 function Router() {
   return (
     <Switch>
-      {/* Add pages below */}
-      {/* <Route path="/" component={Home}/> */}
-      {/* Fallback to 404 */}
+      <Route path="/" component={MainStore} />
+      <Route path="/shadow-services" component={ShadowStore} />
+      <Route path="/admin" component={AdminPanel} />
+      <Route path="/checkout" component={Checkout} />
       <Route component={NotFound} />
     </Switch>
   );

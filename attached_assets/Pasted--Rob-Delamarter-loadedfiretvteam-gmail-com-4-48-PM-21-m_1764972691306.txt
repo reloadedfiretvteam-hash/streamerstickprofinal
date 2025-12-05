@@ -1,0 +1,69 @@
+
+Rob Delamarter <loadedfiretvteam@gmail.com>
+4:48 PM (21 minutes ago)
+to me
+
+**FINAL REPLIT AGENT PROMPT - COMPLETE SOLUTION - COPY/PASTE ONE BOX**
+
+🔥 **AUDIT & FULLY IMPLEMENT** my existing website repo. **CRITICAL: CLOAKING MUST WORK PERFECTLY**
+
+**STRIPE CLOAKING - ABSOLUTE PRIORITY #1**
+CUSTOMERS SEE: Real Fire Stick/IPTV on MAIN DOMAIN (mywebsite.com)
+STRIPE SEES ONLY: Shadow "Website Design/SEO" on SECURE DOMAIN (shadow.mysite.com)
+
+**SHADOW PAGE SPECS:**
+- "Website Design Basic"=$140, "Pro"=$150, "Max"=$160
+- IPTV: "SEO Monthly"=$15, "Quarterly"=$25, "Half-Year"=$40, "Annual"=$75
+- Secure domain exists - use shadow.mysite.com
+- **CUSTOMERS NEVER SEE SHADOW PAGE**
+
+**MAIN PAGE PRODUCTS (Customer View):**
+FIRE STICKS: $140 HD, $150 4K, $160 4K Maxx (jailbroken + 1yr IPTV)
+IPTV SUBS: $15/1mo, $25/3mo, $40/6mo, $75/1yr + FREE 36HR TRIAL
+
+**PERFECT PAYMENT FLOW:**
+1. Customer "Buy Fire Stick" → Modern cart (quantity/shipping)
+2. Checkout → AUTO-REDIRECT to shadow domain (Stripe sees "Website Design")
+3. Stripe webhook → shadow endpoint → Match shadow→real product
+4. Send emails: Fire Stick (greeting → 5min → username/password + http://ky-tv.cc + YouTube video), IPTV (credentials only)
+
+**STRIPE FEATURES:**
+✅ Apple/Google Pay, cards, wallets, save payment
+✅ Abandoned cart recovery
+✅ Mobile checkout
+✅ Test keys first (sk_test_, pk_test_)
+
+**SUPABASE STORAGE FIXES:**
+✅ Fire Stick images: HD/4K/Maxx labeled correctly
+✅ IPTV: single shared image
+✅ Hero background image as page background
+✅ Carousel: football/baseball/basketball/UFC (fix disappearing)
+✅ MP4 demo video above products ONLY
+
+**ADMIN PANEL - FULLY INDEPENDENT:**
+✅ Image upload WORKS (fix blocks)
+✅ Pricing auto-syncs main+shadow pages
+✅ 50-60 SEO blog posts (tags/slugs/reroutes)
+✅ Edit shadow page separately
+✅ All functions independent
+
+**UX/UI OVERHAUL:**
+✅ Modern layout, smooth scrolling
+✅ Floating chat widget, testimonials, exit-intent popup
+✅ Sticky trial button, trust badges, progress bars
+
+**TEST PROTOCOL:**
+✅ Main page: Real products visible
+✅ Stripe dashboard: "Website Design" orders ONLY
+✅ Shadow redirect works (customer invisible)
+✅ End-to-end: Checkout→Stripe→Supabase→Email
+✅ Images/video load, admin uploads succeed
+✅ Deploy Cloudflare Pages
+
+**PROVIDE**: Screenshots (main→checkout→Stripe→shadow→admin) + live URLs
+
+**CREATE PRs**: 1) Cloaking/Stripe, 2) Images/Admin, 3) UX/Blogs
+
+**USE MY CREDENTIALS**: GitHub/Supabase/Stripe test keys provided separately
+
+**CRITICAL**: Wrong cloaking = Stripe ban. Test shadow FIRST.
