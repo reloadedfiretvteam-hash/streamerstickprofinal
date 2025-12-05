@@ -10,6 +10,7 @@ import MainStore from "@/pages/MainStore";
 import ShadowStore from "@/pages/ShadowStore";
 import AdminPanel from "@/pages/AdminPanel";
 import Checkout from "@/pages/Checkout";
+import Success from "@/pages/Success";
 
 function Router() {
   return (
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/shadow-services" component={ShadowStore} />
       <Route path="/admin" component={AdminPanel} />
       <Route path="/checkout" component={Checkout} />
+      <Route path="/success" component={Success} />
       <Route component={NotFound} />
     </Switch>
   );

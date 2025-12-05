@@ -15,15 +15,14 @@ export default function Checkout() {
 
   const handlePayment = () => {
     setIsProcessing(true);
-    // Simulate processing time and then redirect to "Shadow" page to demonstrate the concept
-    // In a real app, this would be the Stripe checkout redirect
+    // Simulate Stripe processing
     setTimeout(() => {
       setIsProcessing(false);
       clearCart();
-      // Redirecting to shadow store to simulate what Stripe "sees"
-      // Or normally you'd redirect to success. 
-      // For this demo, let's go to the shadow store to show the "Cloaked" view
-      setLocation("/shadow-services");
+      // SUCCESS STATE FOR REAL CUSTOMERS
+      // In production, the backend handles the cloaking silently.
+      // The customer just sees a success message for their Fire Stick.
+      setLocation("/success");
     }, 2000);
   };
 
