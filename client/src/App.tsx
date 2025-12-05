@@ -5,12 +5,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 
-// Lazy load pages to avoid circular dependencies if any
 import MainStore from "@/pages/MainStore";
 import ShadowStore from "@/pages/ShadowStore";
 import AdminPanel from "@/pages/AdminPanel";
 import Checkout from "@/pages/Checkout";
 import Success from "@/pages/Success";
+import Blog from "@/pages/Blog";
 
 function Router() {
   return (
@@ -20,6 +20,7 @@ function Router() {
       <Route path="/admin" component={AdminPanel} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/success" component={Success} />
+      <Route path="/blog" component={Blog} />
       <Route component={NotFound} />
     </Switch>
   );

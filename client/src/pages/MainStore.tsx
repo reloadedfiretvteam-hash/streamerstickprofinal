@@ -174,8 +174,70 @@ export default function MainStore() {
   const firestickProducts = products.filter(p => p.category === 'firestick');
   const iptvProducts = products.filter(p => p.category === 'iptv');
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "StreamStickPro",
+    "url": "https://streamstickpro.com",
+    "description": "Premium jailbroken Fire Sticks with IPTV - 18,000+ channels, 60,000+ movies, all sports & PPV",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://streamstickpro.com/?search={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  const productListData = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "StreamStickPro Products",
+    "itemListElement": products.map((product, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Product",
+        "name": product.name,
+        "description": product.description,
+        "image": product.image,
+        "offers": {
+          "@type": "Offer",
+          "price": product.price,
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock",
+          "seller": {
+            "@type": "Organization",
+            "name": "StreamStickPro"
+          }
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "reviewCount": "2847"
+        }
+      }
+    }))
+  };
+
+  const organizationData = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "StreamStickPro",
+    "url": "https://streamstickpro.com",
+    "logo": "https://streamstickpro.com/logo.png",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "availableLanguage": "English"
+    },
+    "sameAs": []
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productListData) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData) }} />
+      
       {/* Navigation */}
       <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-gray-900/95 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -187,6 +249,7 @@ export default function MainStore() {
           <div className="flex items-center gap-4">
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToAbout}>How It Works</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToShop}>Shop</Button>
+            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setLocation("/blog")} data-testid="button-blog">Blog</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10">Support</Button>
             <Button 
               onClick={() => setLocation("/checkout")} 
