@@ -192,6 +192,37 @@ For automatic categorization, use descriptive filenames:
 3. Check file size (keep under 5MB)
 4. Ensure valid image format (JPG, PNG, WEBP, GIF)
 
+## Customer Checkout Workflow
+
+### Customer Information Collection
+
+During checkout, customers are asked to provide the following information:
+
+**Required Fields:**
+- **Full Name** - Used for order identification and credentials generation
+- **Email Address** - Used for order confirmation and delivery of access credentials
+- **Shipping Address** (for physical products) - Street address, city, state, and ZIP code
+
+**Optional Fields:**
+- **Phone Number** - Customers can optionally provide a phone number for order updates and support. This field is not required and can be left blank if the customer prefers.
+
+### Phone Number Field
+
+The phone number field is **optional** in the checkout process:
+- Customers are not required to provide a phone number to complete their order
+- If provided, the phone number is stored in the `customer_phone` column of the orders table
+- Phone numbers can be used for order communication, support, and delivery updates
+- The field is clearly labeled as "(Optional)" on all checkout pages
+
+### Database Schema
+
+The `orders_full` table includes a nullable `customer_phone` column:
+```sql
+customer_phone text  -- Optional customer phone number
+```
+
+This allows orders to be created with or without a phone number, giving customers flexibility during checkout.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/db47acea-a5a1-486e-a7be-658390194b66) and click on Share -> Publish.

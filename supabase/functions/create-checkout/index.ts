@@ -22,7 +22,7 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
 
-    const { productId, productName, price, customerEmail, customerName, successUrl, cancelUrl } = await req.json();
+    const { productId, productName, price, customerEmail, customerName, customerPhone, successUrl, cancelUrl } = await req.json();
 
     if (!productId || !productName || !price) {
       throw new Error("Missing required fields: productId, productName, price");
@@ -52,6 +52,7 @@ serve(async (req) => {
         productId,
         productName,
         customerName: customerName || "",
+        customerPhone: customerPhone || "",
       },
       payment_intent_data: {
         description: "PRO DIGITAL SERVICES",

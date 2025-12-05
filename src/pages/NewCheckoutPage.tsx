@@ -67,7 +67,7 @@ export default function NewCheckoutPage() {
     if (!customerInfo.name.trim()) newErrors.name = 'Name is required';
     if (!customerInfo.email.trim()) newErrors.email = 'Email is required';
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerInfo.email)) newErrors.email = 'Invalid email format';
-    if (!customerInfo.phone.trim()) newErrors.phone = 'Phone is required';
+    // Phone is optional - no validation required
     if (!customerInfo.address.trim()) newErrors.address = 'Address is required';
     if (!customerInfo.city.trim()) newErrors.city = 'City is required';
     if (!customerInfo.state.trim()) newErrors.state = 'State is required';
@@ -272,18 +272,15 @@ export default function NewCheckoutPage() {
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Phone Number *
+                      Phone Number (Optional)
                     </label>
                     <input
                       type="tel"
                       value={customerInfo.phone}
                       onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})}
-                      className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
-                        errors.phone ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       placeholder="(555) 123-4567"
                     />
-                    {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                   </div>
 
                   <div className="md:col-span-2">
