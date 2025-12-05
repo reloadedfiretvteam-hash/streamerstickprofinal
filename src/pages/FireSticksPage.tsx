@@ -3,6 +3,7 @@ import { ShoppingCart, Star, Check, Flame, ArrowLeft, Zap } from 'lucide-react';
 import { supabase, getStorageUrl } from '../lib/supabase';
 import Footer from '../components/Footer';
 import ValidatedImage from '../components/ValidatedImage';
+import { useSupabaseImages, getBestMatch } from '../hooks/useSupabaseImages';
 
 // Fallback image when all else fails
 const FALLBACK_FIRESTICK_IMAGE = 'https://images.pexels.com/photos/5474028/pexels-photo-5474028.jpeg?auto=compress&cs=tinysrgb&w=600';
@@ -29,11 +30,18 @@ export default function FireSticksPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
+  
+  // Fetch images from Supabase Storage with fuzzy matching
+  const { images: supabaseImages, loading: imagesLoading } = useSupabaseImages();
 
   useEffect(() => {
-    loadProducts();
-    loadCart();
-  }, []);
+    // Only load products once images are fetched
+    if (!imagesLoading) {
+      loadProducts();
+      loadCart();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imagesLoading]); // Only re-run when images finish loading
 
   const loadProducts = async () => {
     try {
@@ -63,14 +71,14 @@ export default function FireSticksPage() {
         .map((product: any) => {
           let imageUrl = product.main_image || product.image_url || '';
           
-          // Use Supabase storage URLs as fallback for reliability
+          // Use Supabase storage with fuzzy matching as fallback for reliability
           if (!imageUrl || imageUrl.includes('placeholder') || imageUrl.includes('pexels')) {
             if (product.name?.toLowerCase().includes('4k max')) {
-              imageUrl = getStorageUrl('images', 'firestick 4k max.jpg');
+              imageUrl = getBestMatch(supabaseImages.fireStickProducts, '4k max') || getStorageUrl('images', 'firestick 4k max.jpg');
             } else if (product.name?.toLowerCase().includes('4k')) {
-              imageUrl = getStorageUrl('images', 'firestick 4k.jpg');
+              imageUrl = getBestMatch(supabaseImages.fireStickProducts, '4k') || getStorageUrl('images', 'firestick 4k.jpg');
             } else {
-              imageUrl = getStorageUrl('images', 'firestick hd.jpg');
+              imageUrl = getBestMatch(supabaseImages.fireStickProducts, 'hd') || getStorageUrl('images', 'firestick hd.jpg');
             }
           }
           

@@ -1,81 +1,16 @@
 import { ShoppingCart, Play } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import { getStorageUrl } from '../lib/supabase';
-import { supabase } from '../lib/supabase';
+import { useSupabaseImages } from '../hooks/useSupabaseImages';
+
+// Fallback hero image when Supabase is not configured
+const FALLBACK_HERO_IMAGE = 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=1600';
 
 export default function Hero() {
-  // Start with a default image URL to prevent blank flash
-  const [heroImageUrl, setHeroImageUrl] = useState<string>(getStorageUrl('images', 'hero-firestick-breakout.jpg'));
+  // Fetch hero image from Supabase Storage
+  const { images } = useSupabaseImages();
   
-  // Try multiple hero image filename variations
-  const heroImageVariations = [
-    'Hero Image.jpg',
-    'Hero Image.png',
-    'Hero Image',
-    'hero image.jpg',
-    'hero-image.jpg',
-    'Hero-Image.jpg',
-    'hero-firestick-breakout.jpg', // Original fallback
-  ];
-
-  useEffect(() => {
-    loadHeroImage();
-  }, []);
-
-  const loadHeroImage = async () => {
-    // First, try to get from section_images table if it exists
-    try {
-      const { data } = await supabase
-        .from('section_images')
-        .select('image_url')
-        .eq('section_name', 'hero')
-        .single();
-      
-      if (data?.image_url) {
-        const url = data.image_url.startsWith('http') 
-          ? data.image_url 
-          : getStorageUrl('images', data.image_url);
-        setHeroImageUrl(url);
-        return;
-      }
-    } catch (_error) {
-      // section_images table might not exist, continue to filename variations
-      console.debug('Hero: section_images table not found, trying filename variations');
-    }
-
-    // Try filename variations in order
-    for (const filename of heroImageVariations) {
-      const testUrl = getStorageUrl('images', filename);
-      try {
-        const response = await fetch(testUrl, { method: 'HEAD' });
-        if (response.ok) {
-          const contentLength = response.headers.get('content-length');
-          if (contentLength && parseInt(contentLength, 10) > 1000) {
-            if (import.meta.env.DEV) {
-              console.log(`[Hero] Found valid hero image: ${filename} (${contentLength} bytes)`);
-            }
-            setHeroImageUrl(testUrl);
-            return;
-          } else if (import.meta.env.DEV) {
-            console.warn(`[Hero] Image too small: ${filename} (${contentLength} bytes)`);
-          }
-        }
-      } catch (error) {
-        if (import.meta.env.DEV) {
-          console.debug(`[Hero] Failed to load: ${filename}`, error);
-        }
-        // Continue to next variation
-        continue;
-      }
-    }
-
-    if (import.meta.env.DEV) {
-      console.warn('[Hero] All hero image variations failed, using default fallback');
-    }
-
-    // If all variations fail, use the original as fallback
-    setHeroImageUrl(getStorageUrl('images', 'hero-firestick-breakout.jpg'));
-  };
+  // Use hero image from Supabase if available, otherwise use fallback
+  const heroImageUrl = images.hero || getStorageUrl('images', 'hero-firestick-breakout.jpg') || FALLBACK_HERO_IMAGE;
   const goToShop = () => {
     window.location.href = '/shop';
   };
