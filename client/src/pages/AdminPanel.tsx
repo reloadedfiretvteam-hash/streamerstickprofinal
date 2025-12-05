@@ -241,27 +241,82 @@ export default function AdminPanel() {
         .eq('id', editingProduct.id);
 
       if (!error) {
-        showToast('Product updated successfully!', 'success');
+        const synced = await syncToShadowProduct(editingProduct);
+        if (synced) {
+          showToast('Product updated successfully! Shadow product synced.', 'success');
+        } else {
+          showToast('Product updated but shadow sync failed. Please try again.', 'error');
+        }
         loadProducts();
         setEditingProduct(null);
       } else {
         showToast('Error updating product: ' + error.message, 'error');
       }
     } else {
-      const { error } = await supabase
+      const { data: newProduct, error } = await supabase
         .from('real_products')
-        .insert([productData]);
+        .insert([productData])
+        .select()
+        .single();
 
-      if (!error) {
-        showToast('Product created successfully!', 'success');
+      if (!error && newProduct) {
+        const synced = await syncToShadowProduct({ ...editingProduct, id: newProduct.id });
+        if (synced) {
+          showToast('Product created successfully! Shadow product synced.', 'success');
+        } else {
+          showToast('Product created but shadow sync failed. Please try again.', 'error');
+        }
         loadProducts();
         setEditingProduct(null);
-      } else {
+      } else if (error) {
         showToast('Error creating product: ' + error.message, 'error');
       }
     }
 
     setSaving(false);
+  };
+
+  const syncToShadowProduct = async (product: Product): Promise<boolean> => {
+    const shadowName = getShadowName(product.name);
+    if (shadowName === "Digital Service") return true;
+
+    try {
+      const shadowData = {
+        name: shadowName,
+        price: product.price,
+        sale_price: product.sale_price,
+        real_product_id: product.id,
+        real_product_name: product.name,
+        category: product.category === 'devices' ? 'web-design' : 'seo',
+        updated_at: new Date().toISOString()
+      };
+
+      const { data: existing } = await supabase
+        .from('shadow_products')
+        .select('id')
+        .eq('real_product_id', product.id)
+        .single();
+
+      if (existing) {
+        const { error } = await supabase
+          .from('shadow_products')
+          .update(shadowData)
+          .eq('id', existing.id);
+        
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('shadow_products')
+          .insert([{ ...shadowData, id: crypto.randomUUID() }]);
+        
+        if (error) throw error;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error syncing shadow product:', error);
+      return false;
+    }
   };
 
   const deleteProduct = async (id: string) => {
