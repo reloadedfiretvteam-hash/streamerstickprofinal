@@ -173,20 +173,12 @@ export async function uploadImageDual(
     result.error = supabaseResult.error;
   }
 
-  // 2. Attempt to save locally (will fail on most cloud hosting, that's OK)
-  // Note: This only works in development or with special server-side handling
-  // We'll provide instructions in the README for manual local file placement
-  try {
-    const localName = localFileName || file.name;
-    result.localPath = `${LOCAL_IMAGES_PATH}${localName}`;
-    // In a browser environment, we can't write to the file system
-    // This would need a server endpoint to handle file writes
-    // For now, we'll just return the path where it should be placed
-    result.localSaveSuccess = false; // Intentionally false for browser
-  } catch (err) {
-    console.debug('Local save not available in browser environment');
-    result.localSaveSuccess = false;
-  }
+  // 2. Local save path (for reference only - browser can't write to filesystem)
+  // In a browser environment, we can't write to the file system directly
+  // This provides the path where the image should be manually placed for local priority
+  const localName = localFileName || file.name;
+  result.localPath = `${LOCAL_IMAGES_PATH}${localName}`;
+  result.localSaveSuccess = false; // Always false in browser environment
 
   return result;
 }
@@ -249,11 +241,15 @@ export async function deleteImageFromSupabase(
     const urlParts = imageUrl.split('/');
     const bucketIndex = urlParts.findIndex(part => part === bucketName);
     
-    if (bucketIndex === -1 || bucketIndex === urlParts.length - 1) {
-      return { success: false, error: 'Invalid image URL format' };
+    if (bucketIndex === -1 || bucketIndex >= urlParts.length - 1) {
+      return { success: false, error: 'Invalid image URL format or missing file path' };
     }
 
     const filePath = urlParts.slice(bucketIndex + 1).join('/');
+    
+    if (!filePath || filePath.trim().length === 0) {
+      return { success: false, error: 'Empty file path extracted from URL' };
+    }
 
     const { error } = await supabase.storage
       .from(bucketName)

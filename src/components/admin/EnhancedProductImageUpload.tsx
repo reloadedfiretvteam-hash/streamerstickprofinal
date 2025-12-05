@@ -155,17 +155,22 @@ export default function EnhancedProductImageUpload({
       }
 
       // Remove from local state
-      const newImages = images.filter(img => img.id !== imageId);
-      setImages(newImages);
-
-      // If deleted image was primary, set first remaining image as primary
       const deletedImage = images.find(img => img.id === imageId);
-      if (deletedImage?.isPrimary && newImages.length > 0) {
-        newImages[0].isPrimary = true;
-        onImageChange(newImages[0].url);
-      } else if (newImages.length === 0) {
+      const remainingImages = images.filter(img => img.id !== imageId);
+      
+      // If deleted image was primary, create new array with first image as primary
+      let updatedImages = remainingImages;
+      if (deletedImage?.isPrimary && remainingImages.length > 0) {
+        updatedImages = remainingImages.map((img, index) => ({
+          ...img,
+          isPrimary: index === 0,
+        }));
+        onImageChange(updatedImages[0].url);
+      } else if (remainingImages.length === 0) {
         onImageChange('');
       }
+      
+      setImages(updatedImages);
 
       toast({
         title: 'Image deleted',

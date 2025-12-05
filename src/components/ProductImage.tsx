@@ -32,22 +32,21 @@ export default function ProductImage({
   const [fallbackIndex, setFallbackIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Build fallback chain (filtered to only include valid strings)
-  const fallbackChain: string[] = [
-    imagePath, 
-    supabaseUrl,
-    category ? getProductImage({ category }) : null,
-    '/placeholder.svg',
-  ].filter((url): url is string => typeof url === 'string' && url.length > 0);
+  // Helper function to build fallback chain
+  const buildFallbackChain = (): string[] => {
+    return [
+      imagePath, 
+      supabaseUrl,
+      category ? getProductImage({ category }) : null,
+      '/placeholder.svg',
+    ].filter((url): url is string => typeof url === 'string' && url.length > 0);
+  };
+
+  const fallbackChain = buildFallbackChain();
 
   useEffect(() => {
-    // Start with the best available option
-    const initialSrc = getProductImage({
-      productId,
-      imagePath,
-      supabaseUrl,
-      category,
-    });
+    // Start with the best available option from fallback chain
+    const initialSrc = fallbackChain[0] || '/placeholder.svg';
     setCurrentSrc(initialSrc);
     setFallbackIndex(0);
   }, [productId, imagePath, supabaseUrl, category]);
