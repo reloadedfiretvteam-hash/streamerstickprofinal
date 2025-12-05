@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, Play } from "lucide-react";
+import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, Play, X, Gift } from "lucide-react";
 import { useCart } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import {
 import { SportsCarousel } from "@/components/SportsCarousel";
 import { ExitPopup } from "@/components/ExitPopup";
 import { DemoVideo } from "@/components/DemoVideo";
+import { FreeTrial } from "@/components/FreeTrial";
 
 import firestickImg from "@assets/stock_images/amazon_fire_tv_stick_cc445778.jpg";
 import iptvImg from "@assets/stock_images/smart_tv_interface_w_e1379ac8.jpg";
@@ -370,6 +371,84 @@ export default function MainStore() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none"></div>
       </section>
 
+      {/* Comparison Section - StreamStickPro vs Competitors */}
+      <section className="py-16 bg-gradient-to-b from-gray-900 to-gray-800">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">The Stream Stick Pro Difference</span>
+            </h2>
+            <p className="text-gray-400 text-lg">See why customers choose us over the competition</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* Competitors - Red/Bad */}
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="bg-red-950/30 border-2 border-red-500/50 rounded-2xl p-8"
+              data-testid="comparison-competitors"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                  <X className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-red-400">Other Fire Stick Websites</h3>
+              </div>
+              <ul className="space-y-4">
+                {[
+                  "Hundreds of apps that fail on a daily basis",
+                  "Broken links and dead streams constantly",
+                  "Apps don't update themselves - manual maintenance required",
+                  "Confusing interfaces that aren't user-friendly",
+                  "Long, complicated tutorials just to get started",
+                  "Poor or no customer support when things break",
+                  "You end up frustrated with a bad product"
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-300">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* StreamStickPro - Green/Good */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-green-950/30 border-2 border-green-500/50 rounded-2xl p-8"
+              data-testid="comparison-streamstickpro"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                  <Check className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-green-400">Stream Stick Pro Experience</h3>
+              </div>
+              <ul className="space-y-4">
+                {[
+                  "ONE app does it all - no confusion, no hassle",
+                  "Daily automatic updates - always fresh content",
+                  "User-friendly interface - even grandma can use it",
+                  "No broken links - premium, stable streams",
+                  "Plug in and watch - ready in 5 minutes",
+                  "Full 24/7 customer support - we're always here",
+                  "You won't be disappointed - this is the future of streaming"
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-300">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* About Section */}
       <section id="about" className="py-20 bg-gray-900">
         <div className="container mx-auto px-4">
@@ -516,6 +595,10 @@ export default function MainStore() {
               <Zap className="w-8 h-8 text-blue-500" />
               IPTV Subscriptions Only
             </h3>
+            
+            {/* Free Trial Box */}
+            <FreeTrial />
+
             <div className="grid md:grid-cols-4 gap-6">
               {iptvProducts.map((product) => (
                 <div
