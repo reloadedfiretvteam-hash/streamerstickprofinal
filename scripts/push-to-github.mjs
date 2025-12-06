@@ -4,7 +4,7 @@ import * as path from 'path';
 
 const OWNER = 'reloadedfiretvteam-hash';
 const REPO = 'streamerstickprofinal';
-const BRANCH = 'main';
+const BRANCH = 'clean-main';
 
 const EXCLUDE_PATTERNS = [
   'node_modules',
