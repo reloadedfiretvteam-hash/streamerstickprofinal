@@ -17,14 +17,12 @@ import { ExitPopup } from "@/components/ExitPopup";
 import { DemoVideo } from "@/components/DemoVideo";
 import { FreeTrial } from "@/components/FreeTrial";
 
-import firestickImg from "@assets/stock_images/amazon_fire_tv_stick_cc445778.jpg";
-import iptvImg from "@assets/stock_images/smart_tv_interface_w_e1379ac8.jpg";
+import firestickHdImg from "@assets/OIP_(11)99_1764978938773.jpg";
+import firestick4kImg from "@assets/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg";
+import firestick4kMaxImg from "@assets/71E1te69hZL._AC_SL1500__1764978938773.jpg";
+import iptvImg from "@assets/OIF_1764979270800.jpg";
 
 const supabaseHeroImg = getStorageUrl('images', 'hero-firestick-breakout.jpg');
-const supabaseFirestickHd = getStorageUrl('images', 'firestick hd.jpg');
-const supabaseFirestick4k = getStorageUrl('images', 'firestick 4k.jpg');
-const supabaseFirestick4kMax = getStorageUrl('images', 'firestick 4k max.jpg');
-const supabaseIptvImg = getStorageUrl('images', 'iptv subcription .jpg');
 
 interface Product {
   id: string;
@@ -44,9 +42,9 @@ const defaultProducts: Product[] = [
     id: "fs-hd",
     name: "Fire Stick HD - Jailbroken & Ready",
     price: 140,
-    description: "Fire TV Stick HD Streaming with 1 Year IPTV included.",
-    features: ["1080p Full HD Resolution", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Pre-configured & Ready to Use", "24/7 Customer Support"],
-    image: supabaseFirestickHd,
+    description: "Fire TV Stick HD with 1 Year IPTV. Includes setup tutorial video, login credentials & easy step-by-step guide emailed to you!",
+    features: ["1080p Full HD Resolution", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Pre-configured & Ready to Use", "24/7 Customer Support"],
+    image: firestickHdImg,
     category: "firestick",
     badge: "STARTER"
   },
@@ -54,9 +52,9 @@ const defaultProducts: Product[] = [
     id: "fs-4k",
     name: "Fire Stick 4K - Jailbroken & Ready",
     price: 150,
-    description: "Fire TV Stick 4K with Dolby Vision. 1 Year IPTV included.",
-    features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Pre-configured & Ready to Use", "24/7 Customer Support"],
-    image: supabaseFirestick4k,
+    description: "Fire TV Stick 4K with Dolby Vision & 1 Year IPTV. Includes setup tutorial, login info & easy guide emailed to you!",
+    features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Pre-configured & Plug-n-Play", "24/7 Customer Support"],
+    image: firestick4kImg,
     category: "firestick",
     badge: "BEST VALUE",
     popular: true
@@ -65,9 +63,9 @@ const defaultProducts: Product[] = [
     id: "fs-max",
     name: "Fire Stick 4K Max - Jailbroken & Ready",
     price: 160,
-    description: "Fire TV Stick 4K Max - Fastest Model with Wi-Fi 6E. 1 Year IPTV included.",
-    features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Ambient Experience Support", "Pre-configured & Ready to Use", "24/7 Customer Support"],
-    image: supabaseFirestick4kMax,
+    description: "Fire TV Stick 4K Max - Fastest Model with Wi-Fi 6E & 1 Year IPTV. Setup tutorial, credentials & easy guide emailed!",
+    features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Ambient Experience Support", "Pre-configured & Plug-n-Play", "24/7 Customer Support"],
+    image: firestick4kMaxImg,
     category: "firestick",
     badge: "PREMIUM"
   },
@@ -75,9 +73,9 @@ const defaultProducts: Product[] = [
     id: "iptv-1",
     name: "1 Month IPTV Subscription",
     price: 15,
-    description: "1 Month of premium IPTV access.",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "24/7 Customer Support"],
-    image: supabaseIptvImg,
+    description: "1 Month premium IPTV. Login credentials & setup guide emailed instantly!",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support"],
+    image: iptvImg,
     category: "iptv",
     badge: "STARTER",
     period: "/month"
@@ -86,9 +84,9 @@ const defaultProducts: Product[] = [
     id: "iptv-3",
     name: "3 Month IPTV Subscription",
     price: 30,
-    description: "3 Months of premium IPTV access. Save money!",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Priority Customer Support"],
-    image: supabaseIptvImg,
+    description: "3 Months premium IPTV - Save 33%! Login credentials & setup guide emailed instantly!",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support"],
+    image: iptvImg,
     category: "iptv",
     badge: "POPULAR",
     popular: true,
@@ -98,9 +96,9 @@ const defaultProducts: Product[] = [
     id: "iptv-6",
     name: "6 Month IPTV Subscription",
     price: 50,
-    description: "6 Months of premium IPTV access. Great value!",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "VIP Customer Support"],
-    image: supabaseIptvImg,
+    description: "6 Months premium IPTV - Save 44%! Login credentials & setup guide emailed instantly!",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "VIP Customer Support"],
+    image: iptvImg,
     category: "iptv",
     badge: "GREAT VALUE",
     period: "/6 months"
@@ -109,9 +107,9 @@ const defaultProducts: Product[] = [
     id: "iptv-12",
     name: "1 Year IPTV Subscription",
     price: 75,
-    description: "Full Year of premium IPTV access. Best deal!",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Premium VIP Support", "Free Setup Assistance"],
-    image: supabaseIptvImg,
+    description: "Full Year premium IPTV - Best Deal, Save 58%! Login credentials & setup guide emailed instantly!",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Premium VIP Support", "Free Setup Assistance"],
+    image: iptvImg,
     category: "iptv",
     badge: "BEST VALUE",
     period: "/year"
@@ -147,7 +145,7 @@ export default function MainStore() {
           if (productImage && !productImage.startsWith('http') && !productImage.startsWith('/')) {
             productImage = getStorageUrl('images', productImage);
           } else if (!productImage) {
-            productImage = isFirestick ? firestickImg : iptvImg;
+            productImage = isFirestick ? firestick4kImg : iptvImg;
           }
 
           return {
@@ -550,8 +548,8 @@ export default function MainStore() {
                       className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        if (target.src !== firestickImg) {
-                          target.src = firestickImg;
+                        if (target.src !== firestick4kImg) {
+                          target.src = firestick4kImg;
                         }
                       }}
                     />
