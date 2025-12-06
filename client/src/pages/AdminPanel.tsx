@@ -343,6 +343,8 @@ export default function AdminPanel() {
     if (!editingCustomer) return;
     
     setSavingCustomer(true);
+    const wasSelectedCustomer = selectedCustomer?.id === editingCustomer.id;
+    
     try {
       const response = await fetch(`/api/admin/customers/${editingCustomer.id}`, {
         method: 'PUT',
@@ -351,24 +353,24 @@ export default function AdminPanel() {
           username: editingCustomer.username,
           password: editingCustomer.password,
           email: editingCustomer.email,
-          fullName: editingCustomer.fullName,
-          phone: editingCustomer.phone,
-          status: editingCustomer.status,
-          notes: editingCustomer.notes,
+          fullName: editingCustomer.fullName ?? null,
+          phone: editingCustomer.phone ?? null,
+          status: editingCustomer.status ?? 'active',
+          notes: editingCustomer.notes ?? null,
         }),
       });
 
+      const result = await response.json();
+      
       if (response.ok) {
         showToast('Customer updated successfully!', 'success');
         loadCustomers(customerSearch);
         setEditingCustomer(null);
-        if (selectedCustomer?.id === editingCustomer.id) {
-          const result = await response.json();
+        if (wasSelectedCustomer && result.data) {
           setSelectedCustomer(result.data);
         }
       } else {
-        const error = await response.json();
-        showToast(error.error || 'Failed to update customer', 'error');
+        showToast(result.error || 'Failed to update customer', 'error');
       }
     } catch (error) {
       console.error('Error updating customer:', error);

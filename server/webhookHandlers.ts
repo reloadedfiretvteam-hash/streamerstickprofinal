@@ -113,13 +113,16 @@ export class WebhookHandlers {
         updateData.generatedUsername = credentials.username;
         updateData.generatedPassword = credentials.password;
         
+        const customerPhone = session.customer_details?.phone || order.shippingPhone || updateData.shippingPhone || undefined;
+        const customerName = order.customerName || session.customer_details?.name || undefined;
+        
         try {
           const newCustomer = await storage.createCustomer({
             username: credentials.username,
             password: credentials.password,
             email: order.customerEmail,
-            fullName: order.customerName || undefined,
-            phone: order.shippingPhone || undefined,
+            fullName: customerName,
+            phone: customerPhone,
           });
           
           updateData.customerId = newCustomer.id;
