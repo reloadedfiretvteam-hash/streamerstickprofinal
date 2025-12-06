@@ -954,5 +954,117 @@ export async function registerRoutes(
     }
   });
 
+  const JWT_SECRET = process.env.JWT_SECRET || 'streamstickpro-admin-secret-2024';
+  const TOKEN_EXPIRY = 24 * 60 * 60 * 1000;
+
+  async function hashPassword(password: string): Promise<string> {
+    const crypto = await import('crypto');
+    return crypto.createHash('sha256').update(password + JWT_SECRET).digest('hex');
+  }
+
+  async function createToken(username: string): Promise<string> {
+    const payload = { sub: username, role: 'admin', exp: Date.now() + TOKEN_EXPIRY };
+    const payloadStr = JSON.stringify(payload);
+    const crypto = await import('crypto');
+    const signature = crypto.createHmac('sha256', JWT_SECRET).update(payloadStr).digest('hex');
+    return Buffer.from(payloadStr).toString('base64') + '.' + signature;
+  }
+
+  async function verifyToken(token: string): Promise<{ valid: boolean; payload?: any }> {
+    try {
+      const [payloadB64, signature] = token.split('.');
+      const payloadStr = Buffer.from(payloadB64, 'base64').toString('utf8');
+      const crypto = await import('crypto');
+      const expectedSig = crypto.createHmac('sha256', JWT_SECRET).update(payloadStr).digest('hex');
+      if (signature !== expectedSig) return { valid: false };
+      const payload = JSON.parse(payloadStr);
+      if (payload.exp && payload.exp < Date.now()) return { valid: false };
+      return { valid: true, payload };
+    } catch {
+      return { valid: false };
+    }
+  }
+
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required' });
+      }
+
+      const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+      const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
+
+      if (!adminPasswordHash) {
+        const defaultPassword = 'StreamStick2024!';
+        const defaultHash = await hashPassword(defaultPassword);
+        
+        if (username === adminUsername && password === defaultPassword) {
+          const token = await createToken(username);
+          return res.json({ 
+            success: true, 
+            token,
+            message: 'Login successful. Please set ADMIN_PASSWORD_HASH in environment for security.',
+            defaultPasswordHash: defaultHash
+          });
+        }
+      } else {
+        const inputHash = await hashPassword(password);
+        if (username === adminUsername && inputHash === adminPasswordHash) {
+          const token = await createToken(username);
+          return res.json({ success: true, token });
+        }
+      }
+
+      res.status(401).json({ error: 'Invalid username or password' });
+    } catch (error: any) {
+      console.error('Login error:', error);
+      res.status(500).json({ error: 'Login failed' });
+    }
+  });
+
+  app.post("/api/auth/verify", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ valid: false, error: 'No token provided' });
+      }
+
+      const token = authHeader.substring(7);
+      const result = await verifyToken(token);
+      
+      if (result.valid) {
+        res.json({ valid: true, user: result.payload?.sub, role: result.payload?.role });
+      } else {
+        res.status(401).json({ valid: false, error: 'Invalid or expired token' });
+      }
+    } catch (error: any) {
+      console.error('Token verification error:', error);
+      res.status(500).json({ valid: false, error: 'Verification failed' });
+    }
+  });
+
+  app.post("/api/auth/logout", async (req, res) => {
+    res.json({ success: true, message: 'Logged out successfully' });
+  });
+
+  app.post("/api/auth/generate-hash", async (req, res) => {
+    try {
+      const { password } = req.body;
+      if (!password) {
+        return res.status(400).json({ error: 'Password is required' });
+      }
+
+      const hash = await hashPassword(password);
+      res.json({ 
+        hash,
+        instructions: 'Set this hash as ADMIN_PASSWORD_HASH in your environment variables'
+      });
+    } catch (error: any) {
+      console.error('Hash generation error:', error);
+      res.status(500).json({ error: 'Failed to generate hash' });
+    }
+  });
+
   return httpServer;
 }

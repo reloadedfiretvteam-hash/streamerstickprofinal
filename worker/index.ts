@@ -9,6 +9,7 @@ import { createWebhookRoutes } from './routes/webhook';
 import { createVisitorRoutes } from './routes/visitors';
 import { createCustomerRoutes } from './routes/customers';
 import { createTrialRoutes } from './routes/trial';
+import { createAuthRoutes, authMiddleware } from './routes/auth';
 
 export interface Env {
   DATABASE_URL: string;
@@ -20,6 +21,9 @@ export interface Env {
   VITE_SUPABASE_URL: string;
   VITE_SUPABASE_ANON_KEY: string;
   SUPABASE_SERVICE_KEY?: string;
+  ADMIN_USERNAME?: string;
+  ADMIN_PASSWORD_HASH?: string;
+  JWT_SECRET?: string;
   ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
 
@@ -31,9 +35,11 @@ app.use('*', cors({
   allowHeaders: ['Content-Type', 'Authorization', 'stripe-signature'],
 }));
 
+app.route('/api/auth', createAuthRoutes());
 app.route('/api/products', createProductRoutes());
 app.route('/api/checkout', createCheckoutRoutes());
 app.route('/api/orders', createOrderRoutes());
+app.use('/api/admin/*', authMiddleware);
 app.route('/api/admin', createAdminRoutes());
 app.route('/api/stripe', createWebhookRoutes());
 app.route('/api/track', createVisitorRoutes());
