@@ -312,7 +312,7 @@ export default function ShadowStore() {
 
       <section className="relative py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 -z-10 opacity-10">
-          <img src={heroBg} className="w-full h-full object-cover" alt="Digital background" />
+          <img src={heroBg} className="w-full h-full object-cover" alt="Digital background" loading="eager" width={1920} height={600} fetchPriority="high" />
         </div>
         
         <div className="container mx-auto px-4">

@@ -139,7 +139,7 @@ export default function Checkout() {
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 rounded-lg overflow-hidden bg-white/10">
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" width={64} height={64} />
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg">{item.name}</h3>

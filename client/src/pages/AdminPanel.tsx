@@ -777,7 +777,7 @@ export default function AdminPanel() {
                                 <TableCell className="font-medium text-white">
                                   <div className="flex items-center gap-3">
                                     {product.main_image ? (
-                                      <img src={product.main_image} alt={product.name} className="w-10 h-10 rounded object-cover" />
+                                      <img src={product.main_image} alt={product.name} className="w-10 h-10 rounded object-cover" loading="lazy" width={40} height={40} />
                                     ) : (
                                       <div className="w-10 h-10 bg-gray-700 rounded flex items-center justify-center">
                                         <ImageIcon className="w-5 h-5 text-gray-500" />
@@ -1015,6 +1015,9 @@ export default function AdminPanel() {
                         src={editingProduct.main_image} 
                         alt="Product preview" 
                         className="w-full h-40 object-cover rounded-lg border border-gray-600"
+                        loading="lazy"
+                        width={400}
+                        height={160}
                       />
                       <Button
                         type="button"

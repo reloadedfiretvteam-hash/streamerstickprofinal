@@ -296,6 +296,9 @@ export default function MainStore() {
             alt="Best Jailbroken Fire Stick 2025 - Premium IPTV Streaming Device"
             className="w-full h-full object-cover object-center"
             loading="eager"
+            width={1920}
+            height={600}
+            fetchPriority="high"
             style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
@@ -567,6 +570,9 @@ export default function MainStore() {
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                      loading="lazy"
+                      width={400}
+                      height={224}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         if (target.src !== firestick4kImg) {
@@ -659,6 +665,9 @@ export default function MainStore() {
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                      loading="lazy"
+                      width={300}
+                      height={192}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         if (target.src !== iptvImg) {

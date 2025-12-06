@@ -37,6 +37,9 @@ export function SportsCarousel() {
                   src={sport.image} 
                   alt={sport.name} 
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  loading="lazy"
+                  width={400}
+                  height={256}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (sport.fallback && target.src !== sport.fallback) {
