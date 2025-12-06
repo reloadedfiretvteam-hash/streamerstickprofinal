@@ -16,6 +16,12 @@ import { SportsCarousel } from "@/components/SportsCarousel";
 import { ExitPopup } from "@/components/ExitPopup";
 import { DemoVideo } from "@/components/DemoVideo";
 import { FreeTrial } from "@/components/FreeTrial";
+import { TrustBadges, PaymentBadges, GuaranteeBadge } from "@/components/TrustBadges";
+import { TrustStats } from "@/components/SocialProof";
+import { CustomerReviews } from "@/components/CustomerReviews";
+import { ChannelLogos } from "@/components/ChannelLogos";
+import { SavingsCalculator } from "@/components/SavingsCalculator";
+import { StickyMobileCTA, ScrollToTopButton } from "@/components/StickyMobileCTA";
 
 import firestickHdImg from "@assets/OIP_(11)99_1764978938773.jpg";
 import firestick4kImg from "@assets/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg";
@@ -42,8 +48,8 @@ const defaultProducts: Product[] = [
     id: "fs-hd",
     name: "Fire Stick HD - Jailbroken & Ready",
     price: 140,
-    description: "Fire TV Stick HD with 1 Year IPTV. Includes setup tutorial video, login credentials & easy step-by-step guide emailed to you!",
-    features: ["1080p Full HD Resolution", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Pre-configured & Ready to Use", "24/7 Customer Support"],
+    description: "Premium jailbroken Fire Stick HD with 1 Year IPTV included. Stream 18,000+ live TV channels, 60,000+ movies & shows, all sports & PPV events. Setup tutorial video, login credentials & easy guide emailed instantly!",
+    features: ["1080p Full HD Resolution", "18,000+ Live TV Channels", "60,000+ Movies & Shows", "All Sports & PPV Events", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Pre-configured & Ready to Use", "24/7 Customer Support"],
     image: firestickHdImg,
     category: "firestick",
     badge: "STARTER"
@@ -52,8 +58,8 @@ const defaultProducts: Product[] = [
     id: "fs-4k",
     name: "Fire Stick 4K - Jailbroken & Ready",
     price: 150,
-    description: "Fire TV Stick 4K with Dolby Vision & 1 Year IPTV. Includes setup tutorial, login info & easy guide emailed to you!",
-    features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Pre-configured & Plug-n-Play", "24/7 Customer Support"],
+    description: "Best-selling jailbroken Fire Stick 4K with Dolby Vision & 1 Year IPTV. Access 18,000+ live channels, 60,000+ movies & TV shows, all sports including NFL, NBA, UFC, PPV events. Tutorial, login & guide emailed!",
+    features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & Shows", "All Sports & PPV Events", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Pre-configured & Plug-n-Play", "24/7 Customer Support"],
     image: firestick4kImg,
     category: "firestick",
     badge: "BEST VALUE",
@@ -63,8 +69,8 @@ const defaultProducts: Product[] = [
     id: "fs-max",
     name: "Fire Stick 4K Max - Jailbroken & Ready",
     price: 160,
-    description: "Fire TV Stick 4K Max - Fastest Model with Wi-Fi 6E & 1 Year IPTV. Setup tutorial, credentials & easy guide emailed!",
-    features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Ambient Experience Support", "Pre-configured & Plug-n-Play", "24/7 Customer Support"],
+    description: "Ultimate jailbroken Fire Stick 4K Max - Fastest Wi-Fi 6E model with 1 Year IPTV. Stream 18,000+ live channels, 60,000+ movies, all sports & PPV events in stunning 4K. Setup tutorial, credentials & easy guide emailed!",
+    features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & Shows", "All Sports & PPV Events", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Ambient Experience Support", "Pre-configured & Plug-n-Play", "24/7 Customer Support"],
     image: firestick4kMaxImg,
     category: "firestick",
     badge: "PREMIUM"
@@ -73,8 +79,8 @@ const defaultProducts: Product[] = [
     id: "iptv-1",
     name: "1 Month IPTV Subscription",
     price: 15,
-    description: "1 Month premium IPTV. Login credentials & setup guide emailed instantly!",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support"],
+    description: "Premium IPTV subscription with 18,000+ live TV channels, 60,000+ movies & TV shows, all sports leagues (NFL, NBA, UFC, MLB) & PPV events. Works on any device. Login credentials & setup guide emailed instantly!",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "NFL, NBA, UFC, MLB & More", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support"],
     image: iptvImg,
     category: "iptv",
     badge: "STARTER",
@@ -84,8 +90,8 @@ const defaultProducts: Product[] = [
     id: "iptv-3",
     name: "3 Month IPTV Subscription",
     price: 30,
-    description: "3 Months premium IPTV - Save 33%! Login credentials & setup guide emailed instantly!",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support"],
+    description: "Save 33%! Premium 3-month IPTV with 18,000+ live channels, 60,000+ movies & shows, all sports including NFL, NBA, UFC & PPV events. Works on Fire Stick, Roku, Android, iOS & more. Credentials emailed instantly!",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "NFL, NBA, UFC, MLB & More", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support"],
     image: iptvImg,
     category: "iptv",
     badge: "POPULAR",
@@ -96,8 +102,8 @@ const defaultProducts: Product[] = [
     id: "iptv-6",
     name: "6 Month IPTV Subscription",
     price: 50,
-    description: "6 Months premium IPTV - Save 44%! Login credentials & setup guide emailed instantly!",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "VIP Customer Support"],
+    description: "Save 44%! 6-month premium IPTV subscription. Stream 18,000+ live TV channels, 60,000+ movies & TV shows, all sports (NFL, NBA, UFC, Premier League) & PPV events. Works on any device. VIP support included!",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "NFL, NBA, UFC, Premier League", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "VIP Customer Support"],
     image: iptvImg,
     category: "iptv",
     badge: "GREAT VALUE",
@@ -107,8 +113,8 @@ const defaultProducts: Product[] = [
     id: "iptv-12",
     name: "1 Year IPTV Subscription",
     price: 75,
-    description: "Full Year premium IPTV - Best Deal, Save 58%! Login credentials & setup guide emailed instantly!",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Premium VIP Support", "Free Setup Assistance"],
+    description: "Best Deal - Save 58%! Full year premium IPTV with 18,000+ live TV channels, 60,000+ movies & shows, all sports leagues (NFL, NBA, UFC, MLB, NHL, Premier League) & PPV events. Premium VIP support & free setup assistance!",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "NFL, NBA, UFC, MLB, NHL & More", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Premium VIP Support", "Free Setup Assistance"],
     image: iptvImg,
     category: "iptv",
     badge: "BEST VALUE",
@@ -380,6 +386,12 @@ export default function MainStore() {
 
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none"></div>
       </section>
+
+      {/* Trust Badges */}
+      <TrustBadges />
+
+      {/* Channel Logos */}
+      <ChannelLogos />
 
       {/* Comparison Section - StreamStickPro vs Competitors */}
       <section className="py-16 bg-gradient-to-b from-gray-900 to-gray-800">
@@ -687,6 +699,12 @@ export default function MainStore() {
         </div>
       </section>
 
+      {/* Customer Reviews */}
+      <CustomerReviews />
+
+      {/* Savings Calculator */}
+      <SavingsCalculator />
+
       {/* FAQ Section */}
       <section id="faq" className="py-20 bg-gray-800/50">
         <div className="container mx-auto px-4 max-w-3xl">
@@ -805,6 +823,12 @@ export default function MainStore() {
 
       {/* Exit Intent Popup */}
       <ExitPopup />
+
+      {/* Sticky Mobile CTA */}
+      <StickyMobileCTA />
+
+      {/* Scroll to Top */}
+      <ScrollToTopButton />
     </div>
   );
 }
