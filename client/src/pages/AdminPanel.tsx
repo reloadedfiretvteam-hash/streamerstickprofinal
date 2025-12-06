@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent, useCallback } from "react";
 import { useLocation } from "wouter";
 import { 
   LayoutDashboard, 
@@ -34,7 +34,9 @@ import {
   ExternalLink,
   Truck,
   Copy,
-  ShoppingCart
+  ShoppingCart,
+  Lock,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -160,9 +162,37 @@ const shadowProductMap: Record<string, string> = {
   "1 Year IPTV": "SEO Enterprise"
 };
 
+const AUTH_TOKEN_KEY = 'admin_auth_token';
+
+function getStoredToken(): string | null {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem(AUTH_TOKEN_KEY);
+  }
+  return null;
+}
+
+function setStoredToken(token: string): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
+  }
+}
+
+function clearStoredToken(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+  }
+}
+
 export default function AdminPanel() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [, setLocation] = useLocation();
+  
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
+  const [checkingAuth, setCheckingAuth] = useState(true);
   
   const [visitorStats, setVisitorStats] = useState<VisitorStats>({
     totalVisitors: 0,
@@ -209,7 +239,94 @@ export default function AdminPanel() {
     setTimeout(() => setToast(null), 3000);
   };
 
+  const authFetch = useCallback(async (url: string, options: RequestInit = {}): Promise<Response> => {
+    const token = authToken || getStoredToken();
+    const headers = new Headers(options.headers);
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+    return fetch(url, { ...options, headers });
+  }, [authToken]);
+
+  const checkAuth = useCallback(async () => {
+    const token = getStoredToken();
+    if (!token) {
+      setCheckingAuth(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/verify', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const result = await response.json();
+      
+      if (result.valid) {
+        setAuthToken(token);
+        setIsAuthenticated(true);
+      } else {
+        clearStoredToken();
+        setAuthToken(null);
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      clearStoredToken();
+      setAuthToken(null);
+      setIsAuthenticated(false);
+    } finally {
+      setCheckingAuth(false);
+    }
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginLoading(true);
+    setLoginError(null);
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(loginForm)
+      });
+      const result = await response.json();
+
+      if (result.success && result.token) {
+        setStoredToken(result.token);
+        setAuthToken(result.token);
+        setIsAuthenticated(true);
+        setLoginForm({ username: '', password: '' });
+        showToast('Login successful!', 'success');
+      } else {
+        setLoginError(result.error || 'Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setLoginError('Connection failed. Please try again.');
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    clearStoredToken();
+    setAuthToken(null);
+    setIsAuthenticated(false);
+    showToast('Logged out successfully', 'success');
+  };
+
   useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    
     loadVisitorStats();
     loadProducts();
     loadPageEdits();
@@ -222,13 +339,13 @@ export default function AdminPanel() {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isAuthenticated]);
 
   const loadVisitorStats = async () => {
     try {
       setLoadingStats(true);
       
-      const response = await fetch('/api/admin/visitors/stats');
+      const response = await authFetch('/api/admin/visitors/stats');
       const result = await response.json();
       
       if (result.data) {
@@ -299,7 +416,7 @@ export default function AdminPanel() {
   const loadPageEdits = async () => {
     setLoadingEdits(true);
     try {
-      const response = await fetch('/api/admin/page-edits');
+      const response = await authFetch('/api/admin/page-edits');
       const result = await response.json();
       if (result.data) {
         setPageEdits(result.data);
@@ -314,7 +431,7 @@ export default function AdminPanel() {
   const loadFulfillmentOrders = async () => {
     setLoadingFulfillment(true);
     try {
-      const response = await fetch('/api/admin/fulfillment');
+      const response = await authFetch('/api/admin/fulfillment');
       const result = await response.json();
       if (result.data) {
         setFulfillmentOrders(result.data);
@@ -330,7 +447,7 @@ export default function AdminPanel() {
     setLoadingCustomers(true);
     try {
       const url = search ? `/api/admin/customers?search=${encodeURIComponent(search)}` : '/api/admin/customers';
-      const response = await fetch(url);
+      const response = await authFetch(url);
       const result = await response.json();
       if (result.data) {
         setCustomers(result.data);
@@ -345,7 +462,7 @@ export default function AdminPanel() {
   const loadCustomerOrders = async (customerId: string) => {
     setLoadingCustomerOrders(true);
     try {
-      const response = await fetch(`/api/admin/customers/${customerId}/orders`);
+      const response = await authFetch(`/api/admin/customers/${customerId}/orders`);
       const result = await response.json();
       if (result.data) {
         setCustomerOrders(result.data);
@@ -369,7 +486,7 @@ export default function AdminPanel() {
     const wasSelectedCustomer = selectedCustomer?.id === editingCustomer.id;
     
     try {
-      const response = await fetch(`/api/admin/customers/${editingCustomer.id}`, {
+      const response = await authFetch(`/api/admin/customers/${editingCustomer.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -413,7 +530,7 @@ export default function AdminPanel() {
 
     setSavingCustomer(true);
     try {
-      const response = await fetch('/api/admin/customers', {
+      const response = await authFetch('/api/admin/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newCustomerForm),
@@ -439,7 +556,7 @@ export default function AdminPanel() {
     if (!confirm('Are you sure you want to delete this customer? This action cannot be undone.')) return;
 
     try {
-      const response = await fetch(`/api/admin/customers/${customerId}`, {
+      const response = await authFetch(`/api/admin/customers/${customerId}`, {
         method: 'DELETE',
       });
 
@@ -482,7 +599,7 @@ export default function AdminPanel() {
   const updateFulfillmentOrder = async (orderId: string, updates: { fulfillmentStatus?: string; amazonOrderId?: string }) => {
     setUpdatingFulfillment(orderId);
     try {
-      const response = await fetch(`/api/admin/fulfillment/${orderId}`, {
+      const response = await authFetch(`/api/admin/fulfillment/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
@@ -541,7 +658,7 @@ export default function AdminPanel() {
 
     setSaving(true);
     try {
-      const response = await fetch('/api/admin/page-edits', {
+      const response = await authFetch('/api/admin/page-edits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingPageEdit),
@@ -567,7 +684,7 @@ export default function AdminPanel() {
     if (!confirm('Are you sure you want to delete this page edit?')) return;
 
     try {
-      const response = await fetch(`/api/admin/page-edits/${id}`, {
+      const response = await authFetch(`/api/admin/page-edits/${id}`, {
         method: 'DELETE',
       });
 
@@ -792,6 +909,88 @@ export default function AdminPanel() {
     return "Digital Service";
   };
 
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+          <p className="text-gray-400">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-gray-800 border-gray-700">
+          <CardHeader className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Flame className="w-8 h-8 text-orange-500" />
+              <span className="text-2xl font-bold text-white">StreamStickPro</span>
+            </div>
+            <CardTitle className="text-xl text-white">Admin Login</CardTitle>
+            <CardDescription className="text-gray-400">
+              Enter your credentials to access the admin panel
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              {loginError && (
+                <div className="p-3 bg-red-500/20 border border-red-500 rounded-lg text-red-400 text-sm flex items-center gap-2" data-testid="login-error">
+                  <AlertCircle className="w-4 h-4" />
+                  {loginError}
+                </div>
+              )}
+              <div className="space-y-2">
+                <label className="text-sm text-gray-300">Username</label>
+                <Input
+                  type="text"
+                  value={loginForm.username}
+                  onChange={(e) => setLoginForm(prev => ({ ...prev, username: e.target.value }))}
+                  placeholder="Enter username"
+                  className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-500"
+                  data-testid="input-username"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm text-gray-300">Password</label>
+                <Input
+                  type="password"
+                  value={loginForm.password}
+                  onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
+                  placeholder="Enter password"
+                  className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-500"
+                  data-testid="input-password"
+                  required
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                disabled={loginLoading}
+                data-testid="button-login"
+              >
+                {loginLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Logging in...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4 mr-2" />
+                    Login
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
       {toast && (
@@ -879,9 +1078,18 @@ export default function AdminPanel() {
           </Button>
         </nav>
 
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-white/10 space-y-2">
            <Button variant="outline" className="w-full" onClick={() => setLocation("/")} data-testid="button-view-site">
              View Live Site
+           </Button>
+           <Button 
+             variant="ghost" 
+             className="w-full text-red-400 hover:text-red-300 hover:bg-red-500/10"
+             onClick={handleLogout}
+             data-testid="button-logout"
+           >
+             <LogOut className="w-4 h-4 mr-2" />
+             Logout
            </Button>
         </div>
       </aside>
