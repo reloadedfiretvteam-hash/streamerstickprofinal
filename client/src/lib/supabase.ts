@@ -78,3 +78,19 @@ export function getStorageUrl(bucket: string, path: string): string {
   
   return `${supabaseUrl}/storage/v1/object/public/${actualBucket}/${encodedPath}`;
 }
+
+export function formatPrice(cents: number): string {
+  return (cents / 100).toFixed(2);
+}
+
+export function formatPriceDisplay(cents: number): string {
+  return `$${formatPrice(cents)}`;
+}
+
+export function dollarsToCents(dollars: number): number {
+  return Math.round(dollars * 100);
+}
+
+export function centsToDollars(cents: number): number {
+  return cents / 100;
+}

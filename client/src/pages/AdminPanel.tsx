@@ -43,7 +43,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase, getStorageUrl } from "@/lib/supabase";
+import { supabase, getStorageUrl, formatPriceDisplay, centsToDollars, dollarsToCents } from "@/lib/supabase";
 
 interface VisitorStats {
   totalVisitors: number;
@@ -791,10 +791,10 @@ export default function AdminPanel() {
                                 </TableCell>
                                 <TableCell>
                                   <span className="text-orange-400 font-bold" data-testid={`text-price-${product.id}`}>
-                                    ${product.sale_price || product.price}
+                                    {formatPriceDisplay(product.sale_price || product.price)}
                                   </span>
                                   {product.sale_price && (
-                                    <span className="text-gray-500 line-through ml-2">${product.price}</span>
+                                    <span className="text-gray-500 line-through ml-2">{formatPriceDisplay(product.price)}</span>
                                   )}
                                 </TableCell>
                                 <TableCell>
@@ -855,7 +855,7 @@ export default function AdminPanel() {
                                 <Edit className="w-4 h-4" />
                               </Button>
                             </div>
-                            <div className="text-2xl font-bold text-orange-400 mb-2">${product.sale_price || product.price}</div>
+                            <div className="text-2xl font-bold text-orange-400 mb-2">{formatPriceDisplay(product.sale_price || product.price)}</div>
                             <div className="text-sm text-gray-400">Shadow: {getShadowName(product.name)}</div>
                           </div>
                         ))}
@@ -876,7 +876,7 @@ export default function AdminPanel() {
                                 <Edit className="w-4 h-4" />
                               </Button>
                             </div>
-                            <div className="text-2xl font-bold text-blue-400 mb-2">${product.sale_price || product.price}</div>
+                            <div className="text-2xl font-bold text-blue-400 mb-2">{formatPriceDisplay(product.sale_price || product.price)}</div>
                             <div className="text-sm text-gray-400">Shadow: {getShadowName(product.name)}</div>
                           </div>
                         ))}
@@ -953,8 +953,9 @@ export default function AdminPanel() {
                     <Input
                       type="number"
                       step="0.01"
-                      value={editingProduct.price}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })}
+                      min="0"
+                      value={centsToDollars(editingProduct.price)}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, price: dollarsToCents(parseFloat(e.target.value) || 0) })}
                       className="bg-gray-700 border-gray-600 text-white"
                       data-testid="input-price"
                     />
@@ -964,8 +965,9 @@ export default function AdminPanel() {
                     <Input
                       type="number"
                       step="0.01"
-                      value={editingProduct.sale_price || ''}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, sale_price: e.target.value ? parseFloat(e.target.value) : null })}
+                      min="0"
+                      value={editingProduct.sale_price ? centsToDollars(editingProduct.sale_price) : ''}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, sale_price: e.target.value ? dollarsToCents(parseFloat(e.target.value)) : null })}
                       className="bg-gray-700 border-gray-600 text-white"
                     />
                   </div>
