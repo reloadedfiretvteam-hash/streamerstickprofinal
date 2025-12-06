@@ -1,7 +1,37 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, uniqueIndex, index } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, uniqueIndex, index, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+export const customers = pgTable("customers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  email: text("email").notNull(),
+  fullName: text("full_name"),
+  phone: text("phone"),
+  status: text("status").default("active"),
+  notes: text("notes"),
+  totalOrders: integer("total_orders").default(0),
+  lastOrderAt: timestamp("last_order_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  uniqueIndex("customers_username_idx").on(table.username),
+  index("customers_email_idx").on(table.email),
+  index("customers_status_idx").on(table.status),
+]);
+
+export const insertCustomerSchema = createInsertSchema(customers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  totalOrders: true,
+  lastOrderAt: true,
+});
+
+export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
+export type Customer = typeof customers.$inferSelect;
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -40,12 +70,18 @@ export const orders = pgTable("orders", {
   shippingCountry: text("shipping_country"),
   fulfillmentStatus: text("fulfillment_status").default("pending"),
   amazonOrderId: text("amazon_order_id"),
+  customerId: text("customer_id"),
+  isRenewal: boolean("is_renewal").default(false),
+  existingUsername: text("existing_username"),
+  generatedUsername: text("generated_username"),
+  generatedPassword: text("generated_password"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   uniqueIndex("orders_payment_intent_idx").on(table.stripePaymentIntentId),
   uniqueIndex("orders_checkout_session_idx").on(table.stripeCheckoutSessionId),
   index("orders_customer_email_idx").on(table.customerEmail),
   index("orders_fulfillment_status_idx").on(table.fulfillmentStatus),
+  index("orders_customer_id_idx").on(table.customerId),
 ]);
 
 export const insertOrderSchema = createInsertSchema(orders).omit({
@@ -85,10 +121,39 @@ export const checkoutRequestSchema = z.object({
   items: z.array(checkoutItemSchema).min(1, "At least one item is required"),
   customerEmail: z.string().email("Valid email is required"),
   customerName: z.string().optional(),
+  isRenewal: z.boolean().optional(),
+  existingUsername: z.string().optional(),
 });
 
 export type CheckoutItem = z.infer<typeof checkoutItemSchema>;
 export type CheckoutRequest = z.infer<typeof checkoutRequestSchema>;
+
+export const customerLookupSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+});
+
+export const createCustomerSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+  email: z.string().email("Valid email is required"),
+  fullName: z.string().optional(),
+  phone: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+export const updateCustomerSchema = z.object({
+  username: z.string().optional(),
+  password: z.string().optional(),
+  email: z.string().email().optional(),
+  fullName: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  status: z.enum(['active', 'inactive', 'suspended']).optional(),
+  notes: z.string().nullable().optional(),
+});
+
+export type CustomerLookup = z.infer<typeof customerLookupSchema>;
+export type CreateCustomer = z.infer<typeof createCustomerSchema>;
+export type UpdateCustomer = z.infer<typeof updateCustomerSchema>;
 
 export const createProductRequestSchema = z.object({
   id: z.string().min(1, "Product ID is required"),
@@ -125,6 +190,11 @@ export const updateOrderRequestSchema = z.object({
   shippingCountry: z.string().nullable().optional(),
   fulfillmentStatus: z.enum(['pending', 'ordered', 'shipped', 'delivered']).optional(),
   amazonOrderId: z.string().nullable().optional(),
+  customerId: z.string().nullable().optional(),
+  isRenewal: z.boolean().optional(),
+  existingUsername: z.string().nullable().optional(),
+  generatedUsername: z.string().nullable().optional(),
+  generatedPassword: z.string().nullable().optional(),
 });
 
 export type UpdateOrderRequest = z.infer<typeof updateOrderRequestSchema>;

@@ -98,6 +98,29 @@ interface FulfillmentOrder {
   createdAt: string | null;
 }
 
+interface Customer {
+  id: string;
+  username: string;
+  password: string;
+  email: string;
+  fullName: string | null;
+  phone: string | null;
+  status: string | null;
+  notes: string | null;
+  totalOrders: number | null;
+  lastOrderAt: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+interface CustomerOrder {
+  id: string;
+  realProductName: string | null;
+  amount: number;
+  status: string | null;
+  createdAt: string | null;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -158,6 +181,16 @@ export default function AdminPanel() {
   const [loadingFulfillment, setLoadingFulfillment] = useState(true);
   const [updatingFulfillment, setUpdatingFulfillment] = useState<string | null>(null);
 
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loadingCustomers, setLoadingCustomers] = useState(true);
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [customerOrders, setCustomerOrders] = useState<CustomerOrder[]>([]);
+  const [loadingCustomerOrders, setLoadingCustomerOrders] = useState(false);
+  const [savingCustomer, setSavingCustomer] = useState(false);
+  const [newCustomerForm, setNewCustomerForm] = useState<Partial<Customer> | null>(null);
+
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -168,6 +201,7 @@ export default function AdminPanel() {
     loadProducts();
     loadPageEdits();
     loadFulfillmentOrders();
+    loadCustomers();
     
     const interval = setInterval(() => {
       loadVisitorStats();
@@ -268,6 +302,157 @@ export default function AdminPanel() {
       setLoadingFulfillment(false);
     }
   };
+
+  const loadCustomers = async (search?: string) => {
+    setLoadingCustomers(true);
+    try {
+      const url = search ? `/api/admin/customers?search=${encodeURIComponent(search)}` : '/api/admin/customers';
+      const response = await fetch(url);
+      const result = await response.json();
+      if (result.data) {
+        setCustomers(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading customers:', error);
+    } finally {
+      setLoadingCustomers(false);
+    }
+  };
+
+  const loadCustomerOrders = async (customerId: string) => {
+    setLoadingCustomerOrders(true);
+    try {
+      const response = await fetch(`/api/admin/customers/${customerId}/orders`);
+      const result = await response.json();
+      if (result.data) {
+        setCustomerOrders(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading customer orders:', error);
+    } finally {
+      setLoadingCustomerOrders(false);
+    }
+  };
+
+  const selectCustomer = async (customer: Customer) => {
+    setSelectedCustomer(customer);
+    await loadCustomerOrders(customer.id);
+  };
+
+  const saveCustomer = async () => {
+    if (!editingCustomer) return;
+    
+    setSavingCustomer(true);
+    try {
+      const response = await fetch(`/api/admin/customers/${editingCustomer.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: editingCustomer.username,
+          password: editingCustomer.password,
+          email: editingCustomer.email,
+          fullName: editingCustomer.fullName,
+          phone: editingCustomer.phone,
+          status: editingCustomer.status,
+          notes: editingCustomer.notes,
+        }),
+      });
+
+      if (response.ok) {
+        showToast('Customer updated successfully!', 'success');
+        loadCustomers(customerSearch);
+        setEditingCustomer(null);
+        if (selectedCustomer?.id === editingCustomer.id) {
+          const result = await response.json();
+          setSelectedCustomer(result.data);
+        }
+      } else {
+        const error = await response.json();
+        showToast(error.error || 'Failed to update customer', 'error');
+      }
+    } catch (error) {
+      console.error('Error updating customer:', error);
+      showToast('Failed to update customer', 'error');
+    } finally {
+      setSavingCustomer(false);
+    }
+  };
+
+  const createNewCustomer = async () => {
+    if (!newCustomerForm) return;
+    
+    if (!newCustomerForm.username || !newCustomerForm.password || !newCustomerForm.email) {
+      showToast('Username, password, and email are required', 'error');
+      return;
+    }
+
+    setSavingCustomer(true);
+    try {
+      const response = await fetch('/api/admin/customers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newCustomerForm),
+      });
+
+      if (response.ok) {
+        showToast('Customer created successfully!', 'success');
+        loadCustomers(customerSearch);
+        setNewCustomerForm(null);
+      } else {
+        const error = await response.json();
+        showToast(error.error || 'Failed to create customer', 'error');
+      }
+    } catch (error) {
+      console.error('Error creating customer:', error);
+      showToast('Failed to create customer', 'error');
+    } finally {
+      setSavingCustomer(false);
+    }
+  };
+
+  const deleteCustomer = async (customerId: string) => {
+    if (!confirm('Are you sure you want to delete this customer? This action cannot be undone.')) return;
+
+    try {
+      const response = await fetch(`/api/admin/customers/${customerId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        showToast('Customer deleted successfully!', 'success');
+        loadCustomers(customerSearch);
+        if (selectedCustomer?.id === customerId) {
+          setSelectedCustomer(null);
+          setCustomerOrders([]);
+        }
+      } else {
+        showToast('Failed to delete customer', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting customer:', error);
+      showToast('Failed to delete customer', 'error');
+    }
+  };
+
+  const copyCredentials = async (username: string, password: string) => {
+    const text = `Username: ${username}\nPassword: ${password}`;
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Credentials copied to clipboard!', 'success');
+      } catch (error) {
+        showToast('Failed to copy credentials', 'error');
+      }
+    } else {
+      showToast('Clipboard not available', 'error');
+    }
+  };
+
+  const filteredCustomers = customers.filter(c =>
+    c.username.toLowerCase().includes(customerSearch.toLowerCase()) ||
+    c.email.toLowerCase().includes(customerSearch.toLowerCase()) ||
+    (c.fullName && c.fullName.toLowerCase().includes(customerSearch.toLowerCase()))
+  );
 
   const updateFulfillmentOrder = async (orderId: string, updates: { fulfillmentStatus?: string; amazonOrderId?: string }) => {
     setUpdatingFulfillment(orderId);
@@ -645,6 +830,19 @@ export default function AdminPanel() {
             {fulfillmentOrders.filter(o => o.fulfillmentStatus === 'pending').length > 0 && (
               <Badge className="ml-auto bg-orange-500 text-white text-xs">
                 {fulfillmentOrders.filter(o => o.fulfillmentStatus === 'pending').length}
+              </Badge>
+            )}
+          </Button>
+          <Button 
+            variant={activeSection === "customers" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => setActiveSection("customers")}
+            data-testid="nav-customers"
+          >
+            <ShoppingCart className="w-4 h-4 mr-3" /> Customers
+            {customers.length > 0 && (
+              <Badge className="ml-auto bg-purple-500 text-white text-xs">
+                {customers.length}
               </Badge>
             )}
           </Button>
@@ -1500,8 +1698,473 @@ export default function AdminPanel() {
               </Card>
             </div>
           )}
+
+          {activeSection === "customers" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold flex items-center gap-3">
+                    <ShoppingCart className="w-8 h-8 text-purple-500" />
+                    Customer Management
+                  </h2>
+                  <p className="text-gray-400">Manage IPTV customers, credentials, and order history</p>
+                </div>
+                <Button 
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  onClick={() => setNewCustomerForm({ username: '', password: '', email: '', fullName: '', phone: '', notes: '' })}
+                  data-testid="button-add-customer"
+                >
+                  <Plus className="w-4 h-4 mr-2" /> Add Customer
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-white">All Customers</CardTitle>
+                        <div className="relative w-64">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <Input
+                            placeholder="Search customers..."
+                            value={customerSearch}
+                            onChange={(e) => setCustomerSearch(e.target.value)}
+                            className="pl-10 bg-gray-700 border-gray-600 text-white text-sm"
+                            data-testid="input-customer-search"
+                          />
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {loadingCustomers ? (
+                        <div className="p-8 text-center text-gray-400">
+                          <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin" />
+                          Loading customers...
+                        </div>
+                      ) : filteredCustomers.length === 0 ? (
+                        <div className="p-8 text-center text-gray-400">
+                          <Users className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                          <p className="text-lg mb-2">No customers found</p>
+                          <p className="text-sm">Customers will appear here after completing checkout.</p>
+                        </div>
+                      ) : (
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="border-gray-700">
+                              <TableHead className="text-gray-400">Username</TableHead>
+                              <TableHead className="text-gray-400">Email</TableHead>
+                              <TableHead className="text-gray-400">Orders</TableHead>
+                              <TableHead className="text-gray-400">Status</TableHead>
+                              <TableHead className="text-right text-gray-400">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {filteredCustomers.map((customer) => (
+                              <TableRow 
+                                key={customer.id} 
+                                className={`border-gray-700 hover:bg-gray-700/50 cursor-pointer ${selectedCustomer?.id === customer.id ? 'bg-purple-500/10' : ''}`}
+                                onClick={() => selectCustomer(customer)}
+                                data-testid={`row-customer-${customer.id}`}
+                              >
+                                <TableCell className="font-medium text-white">
+                                  <div>
+                                    <div className="font-bold">{customer.username}</div>
+                                    {customer.fullName && <div className="text-xs text-gray-400">{customer.fullName}</div>}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-gray-300">{customer.email}</TableCell>
+                                <TableCell>
+                                  <Badge className="bg-purple-500/20 text-purple-400">
+                                    {customer.totalOrders || 0} orders
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge className={
+                                    customer.status === 'active' ? 'bg-green-500/20 text-green-400' :
+                                    customer.status === 'suspended' ? 'bg-red-500/20 text-red-400' :
+                                    'bg-gray-500/20 text-gray-400'
+                                  }>
+                                    {customer.status || 'active'}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon"
+                                      onClick={(e) => { e.stopPropagation(); copyCredentials(customer.username, customer.password); }}
+                                      data-testid={`button-copy-creds-${customer.id}`}
+                                    >
+                                      <Copy className="w-4 h-4 text-purple-400" />
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon"
+                                      onClick={(e) => { e.stopPropagation(); setEditingCustomer(customer); }}
+                                      data-testid={`button-edit-customer-${customer.id}`}
+                                    >
+                                      <Edit className="w-4 h-4 text-blue-400" />
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon"
+                                      onClick={(e) => { e.stopPropagation(); deleteCustomer(customer.id); }}
+                                      data-testid={`button-delete-customer-${customer.id}`}
+                                    >
+                                      <Trash2 className="w-4 h-4 text-red-400" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div>
+                  {selectedCustomer ? (
+                    <Card className="bg-gray-800 border-gray-700 sticky top-4">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Eye className="w-5 h-5 text-purple-500" />
+                          Customer Details
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg p-4 border border-purple-500/30">
+                          <h4 className="text-sm text-gray-400 mb-2">Credentials</h4>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-white font-mono text-sm">User: {selectedCustomer.username}</p>
+                              <p className="text-white font-mono text-sm">Pass: {selectedCustomer.password}</p>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => copyCredentials(selectedCustomer.username, selectedCustomer.password)}
+                              className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20"
+                              data-testid="button-copy-selected-creds"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-400">Email</span>
+                            <span className="text-white">{selectedCustomer.email}</span>
+                          </div>
+                          {selectedCustomer.fullName && (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-400">Name</span>
+                              <span className="text-white">{selectedCustomer.fullName}</span>
+                            </div>
+                          )}
+                          {selectedCustomer.phone && (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-400">Phone</span>
+                              <span className="text-white">{selectedCustomer.phone}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-400">Total Orders</span>
+                            <span className="text-purple-400 font-bold">{selectedCustomer.totalOrders || 0}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-400">Status</span>
+                            <Badge className={
+                              selectedCustomer.status === 'active' ? 'bg-green-500/20 text-green-400' :
+                              selectedCustomer.status === 'suspended' ? 'bg-red-500/20 text-red-400' :
+                              'bg-gray-500/20 text-gray-400'
+                            }>
+                              {selectedCustomer.status || 'active'}
+                            </Badge>
+                          </div>
+                          {selectedCustomer.createdAt && (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-400">Customer Since</span>
+                              <span className="text-white">{new Date(selectedCustomer.createdAt).toLocaleDateString()}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {selectedCustomer.notes && (
+                          <div className="bg-gray-700/50 rounded-lg p-3">
+                            <h4 className="text-sm text-gray-400 mb-1">Notes</h4>
+                            <p className="text-white text-sm">{selectedCustomer.notes}</p>
+                          </div>
+                        )}
+
+                        <div className="border-t border-gray-700 pt-4">
+                          <h4 className="text-sm text-gray-400 mb-3">Order History</h4>
+                          {loadingCustomerOrders ? (
+                            <div className="text-center py-4">
+                              <Loader2 className="w-6 h-6 mx-auto animate-spin text-gray-400" />
+                            </div>
+                          ) : customerOrders.length === 0 ? (
+                            <p className="text-gray-500 text-sm text-center py-4">No orders found</p>
+                          ) : (
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                              {customerOrders.map((order) => (
+                                <div key={order.id} className="bg-gray-700/50 rounded-lg p-3 text-sm">
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <p className="text-white font-medium">{order.realProductName || 'Product'}</p>
+                                      <p className="text-gray-400 text-xs">
+                                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Unknown date'}
+                                      </p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-green-400 font-bold">${((order.amount || 0) / 100).toFixed(2)}</p>
+                                      <Badge className={
+                                        order.status === 'paid' ? 'bg-green-500/20 text-green-400' :
+                                        order.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                                        'bg-gray-500/20 text-gray-400'
+                                      } variant="outline">
+                                        {order.status || 'pending'}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex gap-2 pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditingCustomer(selectedCustomer)}
+                            className="flex-1 border-gray-600 text-gray-300"
+                            data-testid="button-edit-selected"
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => { setSelectedCustomer(null); setCustomerOrders([]); }}
+                            className="border-gray-600 text-gray-300"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardContent className="p-8 text-center text-gray-400">
+                        <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p className="text-lg">Select a customer</p>
+                        <p className="text-sm mt-1">Click on a customer to view details and order history</p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
+
+      {newCustomerForm && (
+        <div className="fixed inset-0 bg-black/90 z-50 overflow-y-auto">
+          <div className="min-h-screen p-8 flex items-center justify-center">
+            <div className="w-full max-w-lg bg-gray-800 rounded-2xl">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 rounded-t-2xl flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-white">Add New Customer</h3>
+                <Button variant="ghost" onClick={() => setNewCustomerForm(null)} className="text-white hover:bg-white/20">
+                  <X className="w-6 h-6" />
+                </Button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Username *</label>
+                  <Input
+                    value={newCustomerForm.username || ''}
+                    onChange={(e) => setNewCustomerForm({ ...newCustomerForm, username: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="e.g., johndoe123"
+                    data-testid="input-new-username"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Password *</label>
+                  <Input
+                    value={newCustomerForm.password || ''}
+                    onChange={(e) => setNewCustomerForm({ ...newCustomerForm, password: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="e.g., SecurePass123"
+                    data-testid="input-new-password"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Email *</label>
+                  <Input
+                    type="email"
+                    value={newCustomerForm.email || ''}
+                    onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="e.g., john@example.com"
+                    data-testid="input-new-email"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Full Name</label>
+                  <Input
+                    value={newCustomerForm.fullName || ''}
+                    onChange={(e) => setNewCustomerForm({ ...newCustomerForm, fullName: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="e.g., John Doe"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Phone</label>
+                  <Input
+                    value={newCustomerForm.phone || ''}
+                    onChange={(e) => setNewCustomerForm({ ...newCustomerForm, phone: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="e.g., +1 555-123-4567"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Notes</label>
+                  <textarea
+                    value={newCustomerForm.notes || ''}
+                    onChange={(e) => setNewCustomerForm({ ...newCustomerForm, notes: e.target.value })}
+                    rows={2}
+                    className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                    placeholder="Any notes about this customer..."
+                  />
+                </div>
+              </div>
+
+              <div className="p-6 border-t border-gray-700 flex justify-end gap-4">
+                <Button variant="outline" onClick={() => setNewCustomerForm(null)} className="border-gray-600 text-gray-300">
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={createNewCustomer}
+                  disabled={savingCustomer}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  data-testid="button-save-new-customer"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {savingCustomer ? 'Creating...' : 'Create Customer'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingCustomer && (
+        <div className="fixed inset-0 bg-black/90 z-50 overflow-y-auto">
+          <div className="min-h-screen p-8 flex items-center justify-center">
+            <div className="w-full max-w-lg bg-gray-800 rounded-2xl">
+              <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-6 rounded-t-2xl flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-white">Edit Customer</h3>
+                <Button variant="ghost" onClick={() => setEditingCustomer(null)} className="text-white hover:bg-white/20">
+                  <X className="w-6 h-6" />
+                </Button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Username</label>
+                  <Input
+                    value={editingCustomer.username}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, username: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    data-testid="input-edit-username"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Password</label>
+                  <Input
+                    value={editingCustomer.password}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, password: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    data-testid="input-edit-password"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Email</label>
+                  <Input
+                    type="email"
+                    value={editingCustomer.email}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, email: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    data-testid="input-edit-email"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Full Name</label>
+                  <Input
+                    value={editingCustomer.fullName || ''}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, fullName: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Phone</label>
+                  <Input
+                    value={editingCustomer.phone || ''}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, phone: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Status</label>
+                  <select
+                    value={editingCustomer.status || 'active'}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, status: e.target.value })}
+                    className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                    data-testid="select-edit-status"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Notes</label>
+                  <textarea
+                    value={editingCustomer.notes || ''}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, notes: e.target.value })}
+                    rows={2}
+                    className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                    placeholder="Any notes about this customer..."
+                  />
+                </div>
+              </div>
+
+              <div className="p-6 border-t border-gray-700 flex justify-end gap-4">
+                <Button variant="outline" onClick={() => setEditingCustomer(null)} className="border-gray-600 text-gray-300">
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={saveCustomer}
+                  disabled={savingCustomer}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                  data-testid="button-save-customer"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {savingCustomer ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {editingProduct && (
         <div className="fixed inset-0 bg-black/90 z-50 overflow-y-auto">

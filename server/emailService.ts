@@ -1,10 +1,11 @@
 import { getUncachableResendClient } from './resendClient';
 import { storage } from './storage';
-import type { Order } from '@shared/schema';
+import type { Order, Customer } from '@shared/schema';
 
 const CREDENTIALS_DELAY_MS = 5 * 60 * 1000;
 const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
 const IPTV_PORTAL_URL = 'http://ky-tv.cc';
+const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
 
 export class EmailService {
   static async sendOrderConfirmation(order: Order): Promise<void> {
@@ -44,9 +45,16 @@ export class EmailService {
   }
 
   static async sendCredentialsEmail(order: Order): Promise<void> {
+    if (order.isRenewal) {
+      await EmailService.sendRenewalConfirmationEmail(order);
+      return;
+    }
+
     const { client, fromEmail } = await getUncachableResendClient();
 
-    const credentials = EmailService.generateCredentials(order);
+    const credentials = order.generatedUsername && order.generatedPassword
+      ? { username: order.generatedUsername, password: order.generatedPassword }
+      : EmailService.generateCredentials(order);
 
     const productIds = order.realProductId?.split(',') || [];
     const hasIPTV = productIds.some(id => id.trim().startsWith('iptv-'));
@@ -124,6 +132,54 @@ export class EmailService {
     console.log(`Credentials email sent to ${order.customerEmail}`);
   }
 
+  static async sendRenewalConfirmationEmail(order: Order): Promise<void> {
+    const { client, fromEmail } = await getUncachableResendClient();
+
+    const priceFormatted = (order.amount / 100).toFixed(2);
+    const existingUsername = order.existingUsername || 'your current username';
+
+    await client.emails.send({
+      from: fromEmail,
+      to: order.customerEmail,
+      subject: `Subscription Renewed! - ${order.realProductName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #1a1a1a;">🎉 Your Subscription Has Been Extended!</h1>
+          
+          <p>Hi ${order.customerName || 'Valued Customer'},</p>
+          
+          <p>Great news! Your IPTV subscription has been successfully renewed.</p>
+          
+          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 25px; border-radius: 12px; margin: 20px 0; color: white;">
+            <h2 style="margin-top: 0; color: white;">Renewal Confirmed</h2>
+            <p style="font-size: 16px;"><strong>Product:</strong> ${order.realProductName}</p>
+            <p style="font-size: 16px;"><strong>Amount Paid:</strong> $${priceFormatted}</p>
+            <p style="font-size: 16px;"><strong>Your Username:</strong> ${existingUsername}</p>
+          </div>
+          
+          <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7;">
+            <h3 style="margin-top: 0; color: #0369a1;">Your Existing Credentials Still Work!</h3>
+            <p>You can continue using your current login credentials. No changes needed!</p>
+            <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #0369a1;">${IPTV_PORTAL_URL}</a></p>
+            <p><strong>Username:</strong> ${existingUsername}</p>
+            <p><strong>Password:</strong> (same as before)</p>
+          </div>
+          
+          <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+            <strong>✅ What's Next:</strong> Your subscription is now extended. Just keep streaming - no action required!
+          </div>
+          
+          <p>Thank you for being a loyal customer! If you have any questions, please don't hesitate to reach out.</p>
+          
+          <p>Best regards,<br>StreamStickPro Team</p>
+        </div>
+      `,
+    });
+
+    await storage.updateOrder(order.id, { credentialsSent: true });
+    console.log(`Renewal confirmation email sent to ${order.customerEmail}`);
+  }
+
   static generateCredentials(order: Order): { username: string; password: string } {
     const letters = 'abcdefghkmnpqrstuvwxyz';
     const numbers = '23456789';
@@ -192,7 +248,6 @@ export class EmailService {
 
   static async sendOwnerOrderNotification(order: Order): Promise<void> {
     const { client, fromEmail } = await getUncachableResendClient();
-    const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
 
     const priceFormatted = (order.amount / 100).toFixed(2);
     const orderDate = new Date().toLocaleString();
@@ -200,19 +255,50 @@ export class EmailService {
     const hasIPTV = productIds.some(id => id.trim().startsWith('iptv-'));
     const hasFireStick = productIds.some(id => id.trim().startsWith('firestick-'));
     
-    const credentials = EmailService.generateCredentials(order);
+    const isRenewal = order.isRenewal || false;
+    const orderTypeEmoji = isRenewal ? '🔄' : '🆕';
+    const orderTypeLabel = isRenewal ? 'RENEWAL' : 'NEW CUSTOMER';
+    
+    const credentials = isRenewal 
+      ? { username: order.existingUsername || 'N/A', password: '(existing)' }
+      : (order.generatedUsername && order.generatedPassword)
+        ? { username: order.generatedUsername, password: order.generatedPassword }
+        : EmailService.generateCredentials(order);
 
     const emoji = hasFireStick ? '🔥' : '📺';
     const category = hasFireStick && hasIPTV ? '🔥📺 Fire Stick + IPTV' : hasFireStick ? '🔥 Fire Stick' : '📺 IPTV Subscription';
     
+    const headerColor = isRenewal 
+      ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+      : 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)';
+    
+    const credentialsSection = isRenewal ? `
+          <div style="background: #d1fae5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
+            <h2 style="margin-top: 0; color: #047857;">🔄 Renewal - Existing Customer</h2>
+            <p><strong>Existing Username:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${order.existingUsername || 'Not provided'}</code></p>
+            <p><strong>Action:</strong> Extend this customer's subscription in IPTV panel</p>
+            <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #047857;">${IPTV_PORTAL_URL}</a></p>
+          </div>
+    ` : `
+          <div style="background: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+            <h2 style="margin-top: 0; color: #15803d;">🔑 New Customer Credentials</h2>
+            <p><strong>Username:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${credentials.username}</code></p>
+            <p><strong>Password:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${credentials.password}</code></p>
+            <p><strong>Action:</strong> Create this account in IPTV panel</p>
+            <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #15803d;">${IPTV_PORTAL_URL}</a></p>
+            <p><strong>Setup Video:</strong> <a href="${SETUP_VIDEO_URL}" style="color: #15803d;">${SETUP_VIDEO_URL}</a></p>
+          </div>
+    `;
+    
     await client.emails.send({
       from: fromEmail,
       to: OWNER_EMAIL,
-      subject: `${emoji} NEW ORDER - $${priceFormatted} - ${order.realProductName}`,
+      subject: `${emoji} ${orderTypeEmoji} ${orderTypeLabel} - $${priceFormatted} - ${order.realProductName}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #f97316 0%, #ef4444 100%); padding: 20px; border-radius: 12px 12px 0 0;">
-            <h1 style="color: white; margin: 0;">💰 New Paid Order!</h1>
+          <div style="background: ${headerColor}; padding: 20px; border-radius: 12px 12px 0 0;">
+            <h1 style="color: white; margin: 0;">💰 ${isRenewal ? 'Subscription Renewal!' : 'New Paid Order!'}</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0;">${orderTypeLabel}</p>
           </div>
           
           <div style="background: #fef3c7; padding: 20px; border-left: 4px solid #f59e0b;">
@@ -226,15 +312,10 @@ export class EmailService {
             <p><strong>Email:</strong> ${order.customerEmail}</p>
             <p><strong>Order ID:</strong> ${order.id}</p>
             <p><strong>Order Date:</strong> ${orderDate}</p>
+            <p><strong>Customer Type:</strong> <span style="background: ${isRenewal ? '#d1fae5' : '#fef3c7'}; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${orderTypeLabel}</span></p>
           </div>
           
-          <div style="background: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
-            <h2 style="margin-top: 0; color: #15803d;">🔑 Customer Credentials (Auto-Generated)</h2>
-            <p><strong>Username:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${credentials.username}</code></p>
-            <p><strong>Password:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${credentials.password}</code></p>
-            <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #15803d;">${IPTV_PORTAL_URL}</a></p>
-            <p><strong>Setup Video:</strong> <a href="${SETUP_VIDEO_URL}" style="color: #15803d;">${SETUP_VIDEO_URL}</a></p>
-          </div>
+          ${credentialsSection}
           
           <div style="background: ${hasFireStick ? '#fef2f2' : '#eff6ff'}; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h2 style="margin-top: 0; color: ${hasFireStick ? '#dc2626' : '#2563eb'};">Product Information</h2>
@@ -250,7 +331,7 @@ export class EmailService {
           ` : ''}
           
           <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7;">
-            <strong>📧 Email Status:</strong> Order confirmation and credentials emails will be sent automatically to the customer.
+            <strong>📧 Email Status:</strong> ${isRenewal ? 'Renewal confirmation' : 'Order confirmation and credentials'} emails will be sent automatically to the customer.
           </div>
           
           <p style="color: #6b7280; font-size: 12px; text-align: center; margin-top: 20px;">
@@ -261,5 +342,28 @@ export class EmailService {
     });
 
     console.log(`Owner notification sent for order ${order.id} to ${OWNER_EMAIL}`);
+  }
+
+  static async generateUniqueCredentials(order: Order): Promise<{ username: string; password: string }> {
+    const baseCredentials = EmailService.generateCredentials(order);
+    let username = baseCredentials.username;
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    while (attempts < maxAttempts) {
+      const existingCustomer = await storage.getCustomerByUsername(username);
+      if (!existingCustomer) {
+        return { username, password: baseCredentials.password };
+      }
+      
+      attempts++;
+      const suffix = attempts.toString();
+      username = baseCredentials.username.substring(0, 10 - suffix.length) + suffix;
+    }
+    
+    const timestamp = Date.now().toString(36).substring(0, 4);
+    username = baseCredentials.username.substring(0, 6) + timestamp;
+    
+    return { username, password: baseCredentials.password };
   }
 }

@@ -7,7 +7,10 @@ import {
   createProductRequestSchema, 
   updateProductRequestSchema,
   mapShadowProductSchema,
-  updateOrderRequestSchema 
+  updateOrderRequestSchema,
+  createCustomerSchema,
+  updateCustomerSchema,
+  customerLookupSchema
 } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 
@@ -57,7 +60,17 @@ export async function registerRoutes(
         return res.status(400).json({ error: validationError.message });
       }
       
-      const { items, customerEmail, customerName } = parseResult.data;
+      const { items, customerEmail, customerName, isRenewal, existingUsername } = parseResult.data;
+
+      let existingCustomer = null;
+      if (isRenewal && existingUsername) {
+        existingCustomer = await storage.getCustomerByUsername(existingUsername);
+        if (!existingCustomer) {
+          return res.status(404).json({ 
+            error: "Username not found. Please check your username or select 'New Account' instead." 
+          });
+        }
+      }
 
       const productsWithQuantity: Array<{ product: any; quantity: number }> = [];
       
@@ -103,6 +116,9 @@ export async function registerRoutes(
           realProductIds,
           realProductNames,
           shadowProductIds,
+          isRenewal: isRenewal ? 'true' : 'false',
+          existingUsername: existingUsername || '',
+          existingCustomerId: existingCustomer?.id || '',
         },
       };
 
@@ -133,6 +149,9 @@ export async function registerRoutes(
         amount: totalAmount,
         status: 'pending',
         credentialsSent: false,
+        isRenewal: isRenewal || false,
+        existingUsername: existingUsername || null,
+        customerId: existingCustomer?.id || null,
       });
 
       res.json({ 
@@ -767,6 +786,155 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Error deleting page edit:", error);
       res.status(500).json({ error: "Failed to delete page edit" });
+    }
+  });
+
+  app.get("/api/admin/customers", async (req, res) => {
+    try {
+      const { search } = req.query;
+      let customersList;
+      
+      if (search && typeof search === 'string' && search.trim()) {
+        customersList = await storage.searchCustomers(search.trim());
+      } else {
+        customersList = await storage.getAllCustomers();
+      }
+      
+      res.json({ data: customersList });
+    } catch (error: any) {
+      console.error("Error fetching customers:", error);
+      res.status(500).json({ error: "Failed to fetch customers" });
+    }
+  });
+
+  app.get("/api/admin/customers/:id", async (req, res) => {
+    try {
+      const customer = await storage.getCustomer(req.params.id);
+      if (!customer) {
+        return res.status(404).json({ error: "Customer not found" });
+      }
+      res.json({ data: customer });
+    } catch (error: any) {
+      console.error("Error fetching customer:", error);
+      res.status(500).json({ error: "Failed to fetch customer" });
+    }
+  });
+
+  app.get("/api/admin/customers/:id/orders", async (req, res) => {
+    try {
+      const customer = await storage.getCustomer(req.params.id);
+      if (!customer) {
+        return res.status(404).json({ error: "Customer not found" });
+      }
+      
+      const customerOrders = await storage.getCustomerOrders(req.params.id);
+      res.json({ data: customerOrders });
+    } catch (error: any) {
+      console.error("Error fetching customer orders:", error);
+      res.status(500).json({ error: "Failed to fetch customer orders" });
+    }
+  });
+
+  app.post("/api/admin/customers", async (req, res) => {
+    try {
+      const parseResult = createCustomerSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        const validationError = fromZodError(parseResult.error);
+        return res.status(400).json({ error: validationError.message });
+      }
+
+      const existingByUsername = await storage.getCustomerByUsername(parseResult.data.username);
+      if (existingByUsername) {
+        return res.status(409).json({ error: "A customer with this username already exists" });
+      }
+
+      const customer = await storage.createCustomer(parseResult.data);
+      res.json({ data: customer });
+    } catch (error: any) {
+      console.error("Error creating customer:", error);
+      res.status(500).json({ error: "Failed to create customer" });
+    }
+  });
+
+  app.put("/api/admin/customers/:id", async (req, res) => {
+    try {
+      const parseResult = updateCustomerSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        const validationError = fromZodError(parseResult.error);
+        return res.status(400).json({ error: validationError.message });
+      }
+
+      const existingCustomer = await storage.getCustomer(req.params.id);
+      if (!existingCustomer) {
+        return res.status(404).json({ error: "Customer not found" });
+      }
+
+      if (parseResult.data.username && parseResult.data.username !== existingCustomer.username) {
+        const conflictingCustomer = await storage.getCustomerByUsername(parseResult.data.username);
+        if (conflictingCustomer) {
+          return res.status(409).json({ error: "A customer with this username already exists" });
+        }
+      }
+
+      const customer = await storage.updateCustomer(req.params.id, parseResult.data);
+      res.json({ data: customer });
+    } catch (error: any) {
+      console.error("Error updating customer:", error);
+      res.status(500).json({ error: "Failed to update customer" });
+    }
+  });
+
+  app.delete("/api/admin/customers/:id", async (req, res) => {
+    try {
+      const existingCustomer = await storage.getCustomer(req.params.id);
+      if (!existingCustomer) {
+        return res.status(404).json({ error: "Customer not found" });
+      }
+
+      const deleted = await storage.deleteCustomer(req.params.id);
+      
+      if (deleted) {
+        res.json({ success: true });
+      } else {
+        res.status(500).json({ error: "Failed to delete customer" });
+      }
+    } catch (error: any) {
+      console.error("Error deleting customer:", error);
+      res.status(500).json({ error: "Failed to delete customer" });
+    }
+  });
+
+  app.get("/api/customer/lookup/:username", async (req, res) => {
+    try {
+      const customer = await storage.getCustomerByUsername(req.params.username);
+      if (!customer) {
+        return res.status(404).json({ error: "Customer not found", exists: false });
+      }
+      
+      res.json({ 
+        exists: true,
+        data: {
+          id: customer.id,
+          username: customer.username,
+          email: customer.email,
+          fullName: customer.fullName,
+          status: customer.status,
+          totalOrders: customer.totalOrders,
+        }
+      });
+    } catch (error: any) {
+      console.error("Error looking up customer:", error);
+      res.status(500).json({ error: "Failed to lookup customer" });
+    }
+  });
+
+  app.get("/api/admin/iptv-customers", async (req, res) => {
+    try {
+      const iptvOrders = await storage.getIPTVOrders();
+      res.json({ data: iptvOrders });
+    } catch (error: any) {
+      console.error("Error fetching IPTV orders:", error);
+      res.status(500).json({ error: "Failed to fetch IPTV orders" });
     }
   });
 

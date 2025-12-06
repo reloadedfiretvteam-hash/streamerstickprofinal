@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Trash2, ArrowLeft, CreditCard, Lock, ShieldCheck, Zap, CheckCircle, Loader2 } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Trash2, ArrowLeft, CreditCard, Lock, ShieldCheck, Zap, CheckCircle, Loader2, RefreshCw, UserPlus } from "lucide-react";
 
 const productIdMap: Record<string, string> = {
   "fs-hd": "firestick-hd",
@@ -23,11 +24,18 @@ export default function Checkout() {
   const { items, total, removeItem, updateQuantity, clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [accountType, setAccountType] = useState<"new" | "renewal">("new");
+  const [existingUsername, setExistingUsername] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
     lastName: "",
   });
+
+  const hasIPTVProduct = items.some(item => 
+    item.id.includes('iptv') || item.name?.toLowerCase().includes('iptv') ||
+    item.name?.toLowerCase().includes('subscription') || item.name?.toLowerCase().includes('month')
+  );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -46,6 +54,11 @@ export default function Checkout() {
       return;
     }
 
+    if (accountType === "renewal" && hasIPTVProduct && !existingUsername.trim()) {
+      setError("Please enter your existing username");
+      return;
+    }
+
     setIsProcessing(true);
     setError(null);
 
@@ -55,14 +68,21 @@ export default function Checkout() {
         quantity: item.quantity,
       }));
 
+      const checkoutPayload: any = {
+        items: checkoutItems,
+        customerEmail: formData.email,
+        customerName: `${formData.firstName} ${formData.lastName}`.trim(),
+      };
+
+      if (accountType === "renewal" && hasIPTVProduct && existingUsername.trim()) {
+        checkoutPayload.isRenewal = true;
+        checkoutPayload.existingUsername = existingUsername.trim();
+      }
+
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: checkoutItems,
-          customerEmail: formData.email,
-          customerName: `${formData.firstName} ${formData.lastName}`.trim(),
-        }),
+        body: JSON.stringify(checkoutPayload),
       });
 
       const data = await response.json();
@@ -175,10 +195,88 @@ export default function Checkout() {
               </CardContent>
             </Card>
 
+            {hasIPTVProduct && (
+              <Card className="border-white/10 bg-card/50 backdrop-blur">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <RefreshCw className="w-5 h-5 text-primary" />
+                    Account Type
+                  </CardTitle>
+                  <CardDescription>Are you a new customer or renewing an existing subscription?</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <RadioGroup 
+                    value={accountType} 
+                    onValueChange={(value) => setAccountType(value as "new" | "renewal")}
+                    className="space-y-3"
+                  >
+                    <div 
+                      className={`flex items-center space-x-3 p-4 rounded-lg border transition-all cursor-pointer ${
+                        accountType === "new" 
+                          ? "border-primary bg-primary/10" 
+                          : "border-white/10 hover:border-white/20"
+                      }`}
+                      onClick={() => setAccountType("new")}
+                      data-testid="radio-new-account"
+                    >
+                      <RadioGroupItem value="new" id="new" />
+                      <div className="flex items-center gap-3 flex-1">
+                        <UserPlus className="w-5 h-5 text-green-400" />
+                        <div>
+                          <Label htmlFor="new" className="font-semibold cursor-pointer">New Account</Label>
+                          <p className="text-sm text-muted-foreground">I'm a new customer - generate new login credentials for me</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      className={`flex items-center space-x-3 p-4 rounded-lg border transition-all cursor-pointer ${
+                        accountType === "renewal" 
+                          ? "border-primary bg-primary/10" 
+                          : "border-white/10 hover:border-white/20"
+                      }`}
+                      onClick={() => setAccountType("renewal")}
+                      data-testid="radio-renewal"
+                    >
+                      <RadioGroupItem value="renewal" id="renewal" />
+                      <div className="flex items-center gap-3 flex-1">
+                        <RefreshCw className="w-5 h-5 text-blue-400" />
+                        <div>
+                          <Label htmlFor="renewal" className="font-semibold cursor-pointer">Renew Existing Account</Label>
+                          <p className="text-sm text-muted-foreground">I already have an account - extend my subscription</p>
+                        </div>
+                      </div>
+                    </div>
+                  </RadioGroup>
+
+                  {accountType === "renewal" && (
+                    <div className="space-y-2 pt-2">
+                      <Label htmlFor="existingUsername">Your Existing Username *</Label>
+                      <Input 
+                        id="existingUsername"
+                        placeholder="Enter your current IPTV username" 
+                        value={existingUsername}
+                        onChange={(e) => setExistingUsername(e.target.value)}
+                        className="bg-background/50 border-white/20 h-12"
+                        data-testid="input-existing-username"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Enter the username you currently use to access IPTV. Your subscription will be extended.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             <Card className="border-white/10 bg-card/50 backdrop-blur">
               <CardHeader className="pb-4">
                 <CardTitle className="text-xl">Contact Information</CardTitle>
-                <CardDescription>We'll send your login credentials here</CardDescription>
+                <CardDescription>
+                  {accountType === "new" && hasIPTVProduct 
+                    ? "We'll send your new login credentials here" 
+                    : "We'll send your order confirmation here"}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
