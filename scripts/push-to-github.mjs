@@ -17,7 +17,6 @@ const EXCLUDE_PATTERNS = [
   '.upm',
   '.config',
   'attached_assets',
-  'package-lock.json',
   'bun.lock',
   '.env',
   'tmp',

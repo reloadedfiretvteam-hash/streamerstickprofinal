@@ -3,7 +3,7 @@ import * as path from 'path';
 
 const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID;
 const CLOUDFLARE_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN;
-const PROJECT_NAME = 'streamerstickprofinal';
+const PROJECT_NAME = 'streamerstickpro-live';
 
 async function getFiles(dir: string, baseDir: string = dir): Promise<Array<{path: string, content: Buffer}>> {
   const files: Array<{path: string, content: Buffer}> = [];

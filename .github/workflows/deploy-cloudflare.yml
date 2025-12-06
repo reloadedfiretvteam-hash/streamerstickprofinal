@@ -37,7 +37,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=streamerstickprofinal --branch=clean-main
+          command: pages deploy dist --project-name=streamerstickpro-live --branch=clean-main
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
