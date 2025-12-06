@@ -255,7 +255,7 @@ export default function MainStore() {
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToAbout}>How It Works</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToShop}>Shop</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setLocation("/blog")} data-testid="button-blog">Blog</Button>
-            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10">Support</Button>
+            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })} data-testid="button-support">Support</Button>
             <Button 
               onClick={() => setLocation("/checkout")} 
               className="relative bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/30"
@@ -688,7 +688,7 @@ export default function MainStore() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-gray-800/50">
+      <section id="faq" className="py-20 bg-gray-800/50">
         <div className="container mx-auto px-4 max-w-3xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
