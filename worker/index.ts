@@ -58,6 +58,17 @@ app.get('/api/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+app.get('/api/debug', (c) => {
+  return c.json({
+    hasDbUrl: !!c.env.DATABASE_URL,
+    dbUrlLength: c.env.DATABASE_URL?.length || 0,
+    dbUrlPrefix: c.env.DATABASE_URL?.substring(0, 15) || 'none',
+    hasStripeKey: !!c.env.STRIPE_SECRET_KEY,
+    hasResendKey: !!c.env.RESEND_API_KEY,
+    nodeEnv: c.env.NODE_ENV || 'not set',
+  });
+});
+
 app.get('*', async (c) => {
   try {
     return await c.env.ASSETS.fetch(c.req.raw);

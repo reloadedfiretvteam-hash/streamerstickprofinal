@@ -7,12 +7,19 @@ export function createProductRoutes() {
 
   app.get('/', async (c) => {
     try {
+      if (!c.env.DATABASE_URL) {
+        return c.json({ error: "DATABASE_URL not configured" }, 500);
+      }
       const storage = createStorage(c.env.DATABASE_URL);
       const products = await storage.getRealProducts();
       return c.json({ data: products });
     } catch (error: any) {
       console.error("Error fetching products:", error);
-      return c.json({ error: "Failed to fetch products" }, 500);
+      return c.json({ 
+        error: "Failed to fetch products", 
+        details: error.message,
+        dbConfigured: !!c.env.DATABASE_URL
+      }, 500);
     }
   });
 
