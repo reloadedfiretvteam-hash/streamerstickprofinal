@@ -133,7 +133,31 @@ async function main() {
     secrets.SESSION_SECRET = process.env.SESSION_SECRET;
   }
   
+  const requiredSecrets = [
+    'CLOUDFLARE_ACCOUNT_ID',
+    'CLOUDFLARE_API_TOKEN', 
+    'DATABASE_URL',
+    'STRIPE_SECRET_KEY',
+    'STRIPE_PUBLISHABLE_KEY',
+    'RESEND_API_KEY',
+    'VITE_SUPABASE_URL',
+    'VITE_SUPABASE_ANON_KEY',
+    'SESSION_SECRET'
+  ];
+  
+  const missingSecrets = requiredSecrets.filter(name => !secrets[name]);
+  
+  if (missingSecrets.length > 0) {
+    console.error('\n❌ Missing required secrets:');
+    missingSecrets.forEach(name => console.error(`  - ${name}`));
+    console.error('\nPlease ensure all environment variables/connectors are configured.');
+    process.exit(1);
+  }
+  
   console.log(`\nSetting ${Object.keys(secrets).length} secrets...\n`);
+  
+  let successCount = 0;
+  let failCount = 0;
   
   for (const [name, value] of Object.entries(secrets)) {
     try {
@@ -148,12 +172,19 @@ async function main() {
       });
       
       console.log(`  ✅ ${name}`);
+      successCount++;
     } catch (err) {
       console.error(`  ❌ ${name}: ${err.message}`);
+      failCount++;
     }
   }
   
-  console.log('\n✅ GitHub repository secrets configured!\n');
+  if (failCount > 0) {
+    console.error(`\n❌ Failed to set ${failCount} secrets.`);
+    process.exit(1);
+  }
+  
+  console.log(`\n✅ All ${successCount} GitHub repository secrets configured successfully!\n`);
   console.log('These secrets are now available in GitHub Actions workflows.');
 }
 
