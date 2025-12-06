@@ -636,8 +636,12 @@ export async function registerRoutes(
       }
 
       const ipAddress = req.headers['x-forwarded-for']?.toString().split(',')[0] || 
+                        req.headers['cf-connecting-ip']?.toString() ||
                         req.socket.remoteAddress || 
                         'unknown';
+
+      const { getGeoLocation } = await import('./geoLocationService');
+      const geoData = await getGeoLocation(ipAddress);
 
       await storage.trackVisitor({
         sessionId,
@@ -645,6 +649,16 @@ export async function registerRoutes(
         referrer: referrer || null,
         userAgent: userAgent || req.headers['user-agent'] || null,
         ipAddress,
+        country: geoData.country,
+        countryCode: geoData.countryCode,
+        region: geoData.region,
+        regionCode: geoData.regionCode,
+        city: geoData.city,
+        latitude: geoData.latitude,
+        longitude: geoData.longitude,
+        timezone: geoData.timezone,
+        isp: geoData.isp,
+        isProxy: geoData.isProxy,
       });
 
       res.json({ success: true });
@@ -657,7 +671,9 @@ export async function registerRoutes(
   app.get("/api/admin/visitors/stats", async (req, res) => {
     try {
       const stats = await storage.getVisitorStats();
-      res.json({ data: stats });
+      const { getGeoStats } = await import('./geoLocationService');
+      const geoStats = getGeoStats(stats.recentVisitors);
+      res.json({ data: { ...stats, ...geoStats } });
     } catch (error: any) {
       console.error("Error fetching visitor stats:", error);
       res.status(500).json({ error: "Failed to fetch visitor stats" });

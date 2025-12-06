@@ -57,12 +57,22 @@ interface VisitorStats {
   weekVisitors: number;
   onlineNow: number;
   deviceBreakdown: { desktop: number; mobile: number; tablet: number };
+  topCountries: Array<{ name: string; count: number }>;
+  topRegions: Array<{ name: string; count: number }>;
+  topCities: Array<{ name: string; count: number }>;
   recentVisitors: Array<{
     id: string;
-    page_url: string;
+    pageUrl: string;
     referrer: string | null;
-    user_agent: string;
-    created_at: string;
+    userAgent: string;
+    ipAddress: string | null;
+    country: string | null;
+    countryCode: string | null;
+    region: string | null;
+    city: string | null;
+    timezone: string | null;
+    isProxy: boolean | null;
+    createdAt: string;
   }>;
 }
 
@@ -160,6 +170,9 @@ export default function AdminPanel() {
     weekVisitors: 0,
     onlineNow: 0,
     deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
+    topCountries: [],
+    topRegions: [],
+    topCities: [],
     recentVisitors: []
   });
   const [loadingStats, setLoadingStats] = useState(true);
@@ -219,7 +232,7 @@ export default function AdminPanel() {
       const result = await response.json();
       
       if (result.data) {
-        const { totalVisitors, todayVisitors, weekVisitors, onlineNow, recentVisitors } = result.data;
+        const { totalVisitors, todayVisitors, weekVisitors, onlineNow, recentVisitors, topCountries, topRegions, topCities } = result.data;
         
         const deviceBreakdown = {
           desktop: recentVisitors.filter((v: any) => {
@@ -238,10 +251,17 @@ export default function AdminPanel() {
 
         const mappedRecentVisitors = recentVisitors.map((v: any) => ({
           id: v.id || 'unknown',
-          page_url: v.pageUrl || '/',
+          pageUrl: v.pageUrl || '/',
           referrer: v.referrer || null,
-          user_agent: v.userAgent || 'Unknown',
-          created_at: v.createdAt || new Date().toISOString()
+          userAgent: v.userAgent || 'Unknown',
+          ipAddress: v.ipAddress || null,
+          country: v.country || null,
+          countryCode: v.countryCode || null,
+          region: v.region || null,
+          city: v.city || null,
+          timezone: v.timezone || null,
+          isProxy: v.isProxy || false,
+          createdAt: v.createdAt || new Date().toISOString()
         }));
 
         setVisitorStats({
@@ -250,6 +270,9 @@ export default function AdminPanel() {
           weekVisitors,
           onlineNow,
           deviceBreakdown,
+          topCountries: topCountries || [],
+          topRegions: topRegions || [],
+          topCities: topCities || [],
           recentVisitors: mappedRecentVisitors
         });
       }
@@ -1042,49 +1065,144 @@ export default function AdminPanel() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-white text-lg">
+                      <Globe className="w-5 h-5 text-blue-400" />
+                      Top Countries
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {visitorStats.topCountries.length > 0 ? (
+                      <div className="space-y-2">
+                        {visitorStats.topCountries.slice(0, 5).map((item, idx) => (
+                          <div key={idx} className="flex justify-between items-center">
+                            <span className="text-gray-300">{item.name}</span>
+                            <Badge variant="secondary" className="bg-blue-500/20 text-blue-300">{item.count}</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-sm">No location data yet</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-white text-lg">
+                      <MapPin className="w-5 h-5 text-green-400" />
+                      Top States/Regions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {visitorStats.topRegions.length > 0 ? (
+                      <div className="space-y-2">
+                        {visitorStats.topRegions.slice(0, 5).map((item, idx) => (
+                          <div key={idx} className="flex justify-between items-center">
+                            <span className="text-gray-300">{item.name}</span>
+                            <Badge variant="secondary" className="bg-green-500/20 text-green-300">{item.count}</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-sm">No location data yet</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-white text-lg">
+                      <MapPin className="w-5 h-5 text-purple-400" />
+                      Top Cities
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {visitorStats.topCities.length > 0 ? (
+                      <div className="space-y-2">
+                        {visitorStats.topCities.slice(0, 5).map((item, idx) => (
+                          <div key={idx} className="flex justify-between items-center">
+                            <span className="text-gray-300">{item.name}</span>
+                            <Badge variant="secondary" className="bg-purple-500/20 text-purple-300">{item.count}</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-sm">No location data yet</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
               <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-white">
                     <Users className="w-5 h-5 text-orange-500" />
                     Recent Visitors
                   </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Real-time visitor tracking with location data
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-gray-700">
-                        <TableHead className="text-gray-400">Device</TableHead>
-                        <TableHead className="text-gray-400">Page</TableHead>
-                        <TableHead className="text-gray-400">Referrer</TableHead>
-                        <TableHead className="text-gray-400">Time</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {visitorStats.recentVisitors.length > 0 ? (
-                        visitorStats.recentVisitors.map((visitor, idx) => (
-                          <TableRow key={idx} className="border-gray-700 hover:bg-gray-700/50">
-                            <TableCell className="text-gray-300">
-                              <div className="flex items-center gap-2">
-                                {getDeviceIcon(visitor.user_agent)}
-                                <span className="text-sm truncate max-w-[150px]">{visitor.user_agent.substring(0, 30)}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-gray-300">{visitor.page_url.substring(0, 40)}</TableCell>
-                            <TableCell className="text-gray-400">
-                              {visitor.referrer ? visitor.referrer.substring(0, 30) : 'Direct'}
-                            </TableCell>
-                            <TableCell className="text-gray-400">{formatTime(visitor.created_at)}</TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={4} className="py-8 text-center text-gray-400">
-                            No visitors tracked yet. Visitors will appear here as they browse your site.
-                          </TableCell>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-gray-700">
+                          <TableHead className="text-gray-400">Location</TableHead>
+                          <TableHead className="text-gray-400">Device</TableHead>
+                          <TableHead className="text-gray-400">Page</TableHead>
+                          <TableHead className="text-gray-400">Referrer</TableHead>
+                          <TableHead className="text-gray-400">Time</TableHead>
                         </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {visitorStats.recentVisitors.length > 0 ? (
+                          visitorStats.recentVisitors.slice(0, 20).map((visitor, idx) => (
+                            <TableRow key={idx} className="border-gray-700 hover:bg-gray-700/50">
+                              <TableCell className="text-gray-300">
+                                <div className="flex items-center gap-2">
+                                  <Globe className="w-4 h-4 text-blue-400" />
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-medium">
+                                      {visitor.city || visitor.region || 'Unknown'}
+                                      {visitor.region && visitor.city ? `, ${visitor.region}` : ''}
+                                    </span>
+                                    <span className="text-xs text-gray-500">
+                                      {visitor.country || 'Unknown Country'}
+                                      {visitor.isProxy && <Badge variant="destructive" className="ml-2 text-xs py-0">VPN</Badge>}
+                                    </span>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-gray-300">
+                                <div className="flex items-center gap-2">
+                                  {getDeviceIcon(visitor.userAgent)}
+                                  <span className="text-sm truncate max-w-[100px]">
+                                    {visitor.userAgent.includes('Mobile') ? 'Mobile' : 
+                                     visitor.userAgent.includes('Tablet') ? 'Tablet' : 'Desktop'}
+                                  </span>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-gray-300 max-w-[150px] truncate">{visitor.pageUrl}</TableCell>
+                              <TableCell className="text-gray-400 max-w-[120px] truncate">
+                                {visitor.referrer ? visitor.referrer.replace(/^https?:\/\//, '').split('/')[0] : 'Direct'}
+                              </TableCell>
+                              <TableCell className="text-gray-400 whitespace-nowrap">{formatTime(visitor.createdAt)}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5} className="py-8 text-center text-gray-400">
+                              No visitors tracked yet. Visitors will appear here as they browse your site.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
             </div>

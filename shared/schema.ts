@@ -206,10 +206,22 @@ export const visitors = pgTable("visitors", {
   referrer: text("referrer"),
   userAgent: text("user_agent"),
   ipAddress: text("ip_address"),
+  country: text("country"),
+  countryCode: text("country_code"),
+  region: text("region"),
+  regionCode: text("region_code"),
+  city: text("city"),
+  latitude: text("latitude"),
+  longitude: text("longitude"),
+  timezone: text("timezone"),
+  isp: text("isp"),
+  isProxy: boolean("is_proxy").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("visitors_session_idx").on(table.sessionId),
   index("visitors_created_at_idx").on(table.createdAt),
+  index("visitors_country_idx").on(table.country),
+  index("visitors_region_idx").on(table.region),
 ]);
 
 export const insertVisitorSchema = createInsertSchema(visitors).omit({
