@@ -12,7 +12,27 @@ import Checkout from "@/pages/Checkout";
 import Success from "@/pages/Success";
 import Blog from "@/pages/Blog";
 
+const SECURE_HOSTS = (import.meta.env.VITE_SECURE_HOSTS || 'secure.streamstickpro.com').split(',').map((h: string) => h.trim().toLowerCase());
+
+function isShadowDomain(): boolean {
+  const hostname = window.location.hostname.toLowerCase();
+  return SECURE_HOSTS.some((host: string) => hostname === host || hostname.endsWith('.' + host));
+}
+
 function Router() {
+  const isShadow = isShadowDomain();
+  
+  if (isShadow) {
+    return (
+      <Switch>
+        <Route path="/" component={ShadowStore} />
+        <Route path="/checkout" component={Checkout} />
+        <Route path="/success" component={Success} />
+        <Route component={NotFound} />
+      </Switch>
+    );
+  }
+  
   return (
     <Switch>
       <Route path="/" component={MainStore} />
