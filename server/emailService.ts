@@ -3,7 +3,7 @@ import { storage } from './storage';
 import type { Order } from '@shared/schema';
 
 const CREDENTIALS_DELAY_MS = 5 * 60 * 1000;
-const SETUP_VIDEO_URL = 'https://www.youtube.com/watch?v=XXXXX';
+const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
 const IPTV_PORTAL_URL = 'http://ky-tv.cc';
 
 export class EmailService {
@@ -121,12 +121,45 @@ export class EmailService {
   }
 
   static generateCredentials(order: Order): { username: string; password: string } {
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substring(2, 8);
+    const letters = 'abcdefghkmnpqrstuvwxyz';
+    const numbers = '23456789';
+    const symbols = '@#$%&*!';
+    const allChars = letters + letters.toUpperCase() + numbers + symbols;
+    
+    const seed = order.id.replace(/-/g, '');
+    
+    const generateChar = (index: number, charset: string): string => {
+      const charCode = seed.charCodeAt(index % seed.length) || 65;
+      return charset[(charCode + index) % charset.length];
+    };
+    
+    const customerName = order.customerName?.replace(/[^a-zA-Z]/g, '') || '';
+    const namePrefix = customerName.substring(0, 3).toLowerCase();
+    
+    let username = '';
+    if (namePrefix.length >= 2) {
+      username = namePrefix;
+      for (let i = 0; username.length < 8; i++) {
+        username += generateChar(i, numbers + letters);
+      }
+    } else {
+      for (let i = 0; username.length < 8; i++) {
+        username += generateChar(i, letters + numbers);
+      }
+    }
+    
+    let password = '';
+    password += generateChar(0, letters.toUpperCase());
+    password += generateChar(1, letters);
+    password += generateChar(2, numbers);
+    password += generateChar(3, symbols);
+    for (let i = 4; password.length < 10; i++) {
+      password += generateChar(i + 10, allChars);
+    }
     
     return {
-      username: `user_${timestamp}`,
-      password: `pass_${random.toUpperCase()}`,
+      username: username.substring(0, 10),
+      password: password.substring(0, 10),
     };
   }
 
@@ -161,6 +194,8 @@ export class EmailService {
     const orderDate = new Date().toLocaleString();
     const isIPTV = order.realProductId?.startsWith('iptv-');
     const isFireStick = !isIPTV;
+    
+    const credentials = EmailService.generateCredentials(order);
 
     await client.emails.send({
       from: fromEmail,
@@ -183,6 +218,14 @@ export class EmailService {
             <p><strong>Email:</strong> ${order.customerEmail}</p>
             <p><strong>Order ID:</strong> ${order.id}</p>
             <p><strong>Order Date:</strong> ${orderDate}</p>
+          </div>
+          
+          <div style="background: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+            <h2 style="margin-top: 0; color: #15803d;">🔑 Customer Credentials (Auto-Generated)</h2>
+            <p><strong>Username:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${credentials.username}</code></p>
+            <p><strong>Password:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${credentials.password}</code></p>
+            <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #15803d;">${IPTV_PORTAL_URL}</a></p>
+            <p><strong>Setup Video:</strong> <a href="${SETUP_VIDEO_URL}" style="color: #15803d;">${SETUP_VIDEO_URL}</a></p>
           </div>
           
           <div style="background: ${isFireStick ? '#fef2f2' : '#eff6ff'}; padding: 20px; border-radius: 8px; margin: 20px 0;">

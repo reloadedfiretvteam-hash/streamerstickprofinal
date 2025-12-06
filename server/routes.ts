@@ -321,15 +321,40 @@ export async function registerRoutes(
       const { getUncachableResendClient } = await import('./resendClient');
       const { client, fromEmail } = await getUncachableResendClient();
 
+      const letters = 'abcdefghkmnpqrstuvwxyz';
+      const numbers = '23456789';
+      const symbols = '@#$%&*!';
       const timestamp = Date.now().toString(36);
-      const random = Math.random().toString(36).substring(2, 8);
+      const seed = email.replace(/[^a-zA-Z0-9]/g, '') + timestamp;
+      
+      const generateChar = (index: number, charset: string): string => {
+        const charCode = seed.charCodeAt(index % seed.length) || 65;
+        return charset[(charCode + index) % charset.length];
+      };
+      
+      const nameClean = name.replace(/[^a-zA-Z]/g, '').toLowerCase().substring(0, 3);
+      let username = nameClean.length >= 2 ? nameClean : 'usr';
+      for (let i = 0; username.length < 8; i++) {
+        username += generateChar(i, numbers + letters);
+      }
+      username = username.substring(0, 10);
+      
+      let password = '';
+      password += generateChar(0, letters.toUpperCase());
+      password += generateChar(1, letters);
+      password += generateChar(2, numbers);
+      password += generateChar(3, symbols);
+      for (let i = 4; password.length < 10; i++) {
+        password += generateChar(i + 5, letters + letters.toUpperCase() + numbers + symbols);
+      }
+      
       const trialCredentials = {
-        username: `trial_${timestamp}`,
-        password: `TRIAL_${random.toUpperCase()}`,
+        username: username,
+        password: password.substring(0, 10),
       };
 
       const IPTV_PORTAL_URL = 'http://ky-tv.cc';
-      const SETUP_VIDEO_URL = 'https://www.youtube.com/watch?v=XXXXX';
+      const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
 
       await client.emails.send({
         from: fromEmail,
