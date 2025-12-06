@@ -47,14 +47,22 @@ function Router() {
   );
 }
 
-function App() {
+function AppContent() {
   useTracking();
   
   return (
+    <>
+      <Toaster />
+      <Router />
+    </>
+  );
+}
+
+function App() {
+  return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <AppContent />
       </TooltipProvider>
     </QueryClientProvider>
   );

@@ -300,9 +300,11 @@ export async function registerRoutes(
         shadowProductId = stripeProduct.id;
       }
 
+      const priceInCents = Math.round(price);
+
       const stripePrice = await stripe.prices.create({
         product: shadowProductId,
-        unit_amount: Math.round(price * 100),
+        unit_amount: priceInCents,
         currency: 'usd',
         metadata: {
           realProductId: existingProduct.id,
@@ -310,7 +312,7 @@ export async function registerRoutes(
       });
 
       const updatedProduct = await storage.updateRealProduct(req.params.id, {
-        price,
+        price: priceInCents,
         shadowProductId,
         shadowPriceId: stripePrice.id,
       });
@@ -345,9 +347,11 @@ export async function registerRoutes(
         },
       });
 
+      const priceInCents = Math.round(price);
+
       const stripePrice = await stripe.prices.create({
         product: stripeProduct.id,
-        unit_amount: Math.round(price * 100),
+        unit_amount: priceInCents,
         currency: 'usd',
         metadata: {
           realProductId: id,
@@ -358,7 +362,7 @@ export async function registerRoutes(
         id,
         name,
         description: description || null,
-        price,
+        price: priceInCents,
         imageUrl: imageUrl || null,
         category: category || null,
         shadowProductId: stripeProduct.id,

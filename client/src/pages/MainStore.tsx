@@ -160,16 +160,19 @@ export default function MainStore() {
           const defaultPeriod = defaultProducts.find(dp => dp.id === p.id)?.period;
           const defaultDescription = defaultProducts.find(dp => dp.id === p.id)?.description || '';
 
+          const priceInCents = parseInt(p.price?.toString() || '0', 10);
+          const priceInDollars = priceInCents / 100;
+
           return {
             id: p.id,
             name: p.name,
-            price: parseFloat(p.price?.toString() || '0'),
+            price: priceInDollars,
             description: p.description || defaultDescription,
             features: defaultFeatures,
             image: productImage,
             category: isFirestick ? 'firestick' : 'iptv',
             badge: defaultBadge,
-            popular: p.id === 'fs-4k' || p.id === 'iptv-3',
+            popular: p.id === 'fs-4k' || p.id === 'iptv-3' || p.id === 'firestick-4k' || p.id === 'iptv-3mo',
             period: isFirestick ? undefined : defaultPeriod
           };
         });
