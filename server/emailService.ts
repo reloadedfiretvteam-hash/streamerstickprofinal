@@ -152,4 +152,63 @@ export class EmailService {
       }
     }, CREDENTIALS_DELAY_MS);
   }
+
+  static async sendOwnerOrderNotification(order: Order): Promise<void> {
+    const { client, fromEmail } = await getUncachableResendClient();
+    const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
+
+    const priceFormatted = (order.amount / 100).toFixed(2);
+    const orderDate = new Date().toLocaleString();
+    const isIPTV = order.realProductId?.startsWith('iptv-');
+    const isFireStick = !isIPTV;
+
+    await client.emails.send({
+      from: fromEmail,
+      to: OWNER_EMAIL,
+      subject: `${isFireStick ? '🔥' : '📺'} NEW ORDER - $${priceFormatted} - ${order.realProductName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #f97316 0%, #ef4444 100%); padding: 20px; border-radius: 12px 12px 0 0;">
+            <h1 style="color: white; margin: 0;">💰 New Paid Order!</h1>
+          </div>
+          
+          <div style="background: #fef3c7; padding: 20px; border-left: 4px solid #f59e0b;">
+            <h2 style="margin-top: 0; color: #92400e;">Order Summary</h2>
+            <p style="font-size: 24px; color: #16a34a; font-weight: bold; margin: 10px 0;">$${priceFormatted}</p>
+          </div>
+          
+          <div style="background: #f3e8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h2 style="margin-top: 0; color: #7c3aed;">Customer Details</h2>
+            <p><strong>Name:</strong> ${order.customerName || 'Not provided'}</p>
+            <p><strong>Email:</strong> ${order.customerEmail}</p>
+            <p><strong>Order ID:</strong> ${order.id}</p>
+            <p><strong>Order Date:</strong> ${orderDate}</p>
+          </div>
+          
+          <div style="background: ${isFireStick ? '#fef2f2' : '#eff6ff'}; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h2 style="margin-top: 0; color: ${isFireStick ? '#dc2626' : '#2563eb'};">Product Information</h2>
+            <p><strong>Product:</strong> ${order.realProductName}</p>
+            <p><strong>Category:</strong> ${isFireStick ? '🔥 Fire Stick' : '📺 IPTV Subscription'}</p>
+            <p><strong>Status:</strong> ${order.status}</p>
+          </div>
+
+          ${isFireStick ? `
+          <div style="background: #fee2e2; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
+            <strong>⚠️ Action Required:</strong> This is a Fire Stick order. Ship the device to the customer!
+          </div>
+          ` : ''}
+          
+          <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7;">
+            <strong>📧 Email Status:</strong> Order confirmation and credentials emails will be sent automatically to the customer.
+          </div>
+          
+          <p style="color: #6b7280; font-size: 12px; text-align: center; margin-top: 20px;">
+            StreamStickPro Order Notification System
+          </p>
+        </div>
+      `,
+    });
+
+    console.log(`Owner notification sent for order ${order.id} to ${OWNER_EMAIL}`);
+  }
 }

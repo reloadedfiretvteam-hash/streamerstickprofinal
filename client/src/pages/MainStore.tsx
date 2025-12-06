@@ -20,6 +20,12 @@ import { FreeTrial } from "@/components/FreeTrial";
 import firestickImg from "@assets/stock_images/amazon_fire_tv_stick_cc445778.jpg";
 import iptvImg from "@assets/stock_images/smart_tv_interface_w_e1379ac8.jpg";
 
+const supabaseHeroImg = getStorageUrl('images', 'hero-firestick-breakout.jpg');
+const supabaseFirestickHd = getStorageUrl('images', 'firestick hd.jpg');
+const supabaseFirestick4k = getStorageUrl('images', 'firestick 4k.jpg');
+const supabaseFirestick4kMax = getStorageUrl('images', 'firestick 4k max.jpg');
+const supabaseIptvImg = getStorageUrl('images', 'iptv subcription .jpg');
+
 interface Product {
   id: string;
   name: string;
@@ -40,7 +46,7 @@ const defaultProducts: Product[] = [
     price: 140,
     description: "Fire TV Stick HD Streaming with 1 Year IPTV included.",
     features: ["1080p Full HD Resolution", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Pre-configured & Ready to Use", "24/7 Customer Support"],
-    image: firestickImg,
+    image: supabaseFirestickHd,
     category: "firestick",
     badge: "STARTER"
   },
@@ -50,7 +56,7 @@ const defaultProducts: Product[] = [
     price: 150,
     description: "Fire TV Stick 4K with Dolby Vision. 1 Year IPTV included.",
     features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Pre-configured & Ready to Use", "24/7 Customer Support"],
-    image: firestickImg,
+    image: supabaseFirestick4k,
     category: "firestick",
     badge: "BEST VALUE",
     popular: true
@@ -61,7 +67,7 @@ const defaultProducts: Product[] = [
     price: 160,
     description: "Fire TV Stick 4K Max - Fastest Model with Wi-Fi 6E. 1 Year IPTV included.",
     features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Ambient Experience Support", "Pre-configured & Ready to Use", "24/7 Customer Support"],
-    image: firestickImg,
+    image: supabaseFirestick4kMax,
     category: "firestick",
     badge: "PREMIUM"
   },
@@ -71,7 +77,7 @@ const defaultProducts: Product[] = [
     price: 15,
     description: "1 Month of premium IPTV access.",
     features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "24/7 Customer Support"],
-    image: iptvImg,
+    image: supabaseIptvImg,
     category: "iptv",
     badge: "STARTER",
     period: "/month"
@@ -82,7 +88,7 @@ const defaultProducts: Product[] = [
     price: 30,
     description: "3 Months of premium IPTV access. Save money!",
     features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Priority Customer Support"],
-    image: iptvImg,
+    image: supabaseIptvImg,
     category: "iptv",
     badge: "POPULAR",
     popular: true,
@@ -94,7 +100,7 @@ const defaultProducts: Product[] = [
     price: 50,
     description: "6 Months of premium IPTV access. Great value!",
     features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "VIP Customer Support"],
-    image: iptvImg,
+    image: supabaseIptvImg,
     category: "iptv",
     badge: "GREAT VALUE",
     period: "/6 months"
@@ -105,7 +111,7 @@ const defaultProducts: Product[] = [
     price: 75,
     description: "Full Year of premium IPTV access. Best deal!",
     features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Premium VIP Support", "Free Setup Assistance"],
-    image: iptvImg,
+    image: supabaseIptvImg,
     category: "iptv",
     badge: "BEST VALUE",
     period: "/year"
@@ -273,11 +279,17 @@ export default function MainStore() {
       <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden min-h-[600px] flex items-center">
         <div className="absolute inset-0 overflow-hidden">
           <img
-            src={iptvImg}
+            src={supabaseHeroImg}
             alt="Best Jailbroken Fire Stick 2025 - Premium IPTV Streaming Device"
             className="w-full h-full object-cover object-center"
             loading="eager"
             style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              if (target.src !== iptvImg) {
+                target.src = iptvImg;
+              }
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
         </div>
@@ -536,6 +548,12 @@ export default function MainStore() {
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (target.src !== firestickImg) {
+                          target.src = firestickImg;
+                        }
+                      }}
                     />
                     <div className="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-sm">
                       {product.badge}
@@ -622,6 +640,12 @@ export default function MainStore() {
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (target.src !== iptvImg) {
+                          target.src = iptvImg;
+                        }
+                      }}
                     />
                     <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full font-bold text-xs">
                       {product.badge}

@@ -71,6 +71,7 @@ export class WebhookHandlers {
     if (updatedOrder) {
       try {
         await EmailService.sendOrderConfirmation(updatedOrder);
+        await EmailService.sendOwnerOrderNotification(updatedOrder);
         await EmailService.scheduleCredentialsEmail(updatedOrder.id);
       } catch (error) {
         console.error('Error sending emails:', error);
@@ -91,6 +92,17 @@ export class WebhookHandlers {
         status: 'paid',
       });
       console.log(`Order ${order.id} marked as paid via payment_intent.succeeded`);
+
+      const updatedOrder = await storage.getOrder(order.id);
+      if (updatedOrder) {
+        try {
+          await EmailService.sendOrderConfirmation(updatedOrder);
+          await EmailService.sendOwnerOrderNotification(updatedOrder);
+          await EmailService.scheduleCredentialsEmail(updatedOrder.id);
+        } catch (error) {
+          console.error('Error sending emails:', error);
+        }
+      }
     }
   }
 

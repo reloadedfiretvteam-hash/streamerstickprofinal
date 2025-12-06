@@ -410,5 +410,70 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/admin/storage/list", async (req, res) => {
+    try {
+      const supabaseUrl = process.env.VITE_SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+      
+      if (!supabaseUrl || !serviceKey) {
+        return res.status(500).json({ error: "Supabase credentials not configured" });
+      }
+
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(supabaseUrl, serviceKey);
+
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      
+      if (bucketsError) {
+        return res.status(500).json({ error: `Failed to list buckets: ${bucketsError.message}` });
+      }
+
+      const result: any = { buckets: [] };
+
+      for (const bucket of buckets || []) {
+        const { data: files, error: filesError } = await supabase.storage
+          .from(bucket.name)
+          .list('', { limit: 100 });
+
+        const bucketData: any = {
+          name: bucket.name,
+          public: bucket.public,
+          files: [],
+          folders: []
+        };
+
+        if (!filesError && files) {
+          for (const item of files) {
+            if (item.id) {
+              bucketData.files.push({
+                name: item.name,
+                url: `${supabaseUrl}/storage/v1/object/public/${bucket.name}/${item.name}`
+              });
+            } else {
+              const { data: subFiles } = await supabase.storage
+                .from(bucket.name)
+                .list(item.name, { limit: 100 });
+              
+              bucketData.folders.push({
+                name: item.name,
+                files: (subFiles || []).filter(f => f.id).map(f => ({
+                  name: f.name,
+                  url: `${supabaseUrl}/storage/v1/object/public/${bucket.name}/${item.name}/${f.name}`
+                }))
+              });
+            }
+          }
+        }
+
+        result.buckets.push(bucketData);
+      }
+
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error listing storage:", error);
+      res.status(500).json({ error: "Failed to list storage" });
+    }
+  });
+
   return httpServer;
 }

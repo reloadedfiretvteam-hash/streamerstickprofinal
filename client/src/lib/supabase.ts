@@ -30,10 +30,10 @@ export interface PricingPlan {
 }
 
 const BUCKET_NAME_MAPPINGS: Record<string, string> = {
-  'imiges': 'images',
-  'imagees': 'images',
-  'imags': 'images',
-  'image': 'images',
+  'images': 'imiges',
+  'imagees': 'imiges',
+  'imags': 'imiges',
+  'image': 'imiges',
 };
 
 function normalizeBucketName(bucket: string): string {
