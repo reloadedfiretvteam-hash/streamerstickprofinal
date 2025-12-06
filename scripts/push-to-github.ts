@@ -59,7 +59,8 @@ const EXCLUDE_PATTERNS = [
   '.upm',
   'replit.nix',
   '.breakpoints',
-  'generated-icon.png'
+  'generated-icon.png',
+  'attached_assets'
 ];
 
 function shouldExclude(filePath: string): boolean {
@@ -166,7 +167,7 @@ async function pushToGitHub() {
   });
   
   console.log('Creating commit...');
-  const commitMessage = 'StreamStickPro - Complete codebase with 6-month IPTV and multi-item checkout';
+  const commitMessage = 'Fix video asset - use Supabase URL instead of local import for Cloudflare compatibility';
   const commitParams: any = {
     owner: REPO_OWNER,
     repo: REPO_NAME,
