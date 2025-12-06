@@ -85,6 +85,9 @@ export function FreeTrial() {
             src={iptvImg} 
             alt="4K LIVE IPTV - Free Trial" 
             className="w-full h-full object-cover"
+            loading="lazy"
+            width={300}
+            height={192}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent to-purple-900/80 md:bg-gradient-to-r md:from-transparent md:to-gray-900"></div>
           <div className="absolute bottom-4 left-4 md:hidden">
