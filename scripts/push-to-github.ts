@@ -1,0 +1,243 @@
+// Script to push code to GitHub using Octokit API
+// Uses Replit's GitHub integration for authentication
+
+import { Octokit } from '@octokit/rest';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const REPO_OWNER = 'reloadedfiretvteam-hash';
+const REPO_NAME = 'streamerstickprofinal';
+
+let connectionSettings: any;
+
+async function getAccessToken() {
+  if (connectionSettings && connectionSettings.settings.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
+    return connectionSettings.settings.access_token;
+  }
+  
+  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+  const xReplitToken = process.env.REPL_IDENTITY 
+    ? 'repl ' + process.env.REPL_IDENTITY 
+    : process.env.WEB_REPL_RENEWAL 
+    ? 'depl ' + process.env.WEB_REPL_RENEWAL 
+    : null;
+
+  if (!xReplitToken) {
+    throw new Error('X_REPLIT_TOKEN not found');
+  }
+
+  connectionSettings = await fetch(
+    'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=github',
+    {
+      headers: {
+        'Accept': 'application/json',
+        'X_REPLIT_TOKEN': xReplitToken
+      }
+    }
+  ).then(res => res.json()).then(data => data.items?.[0]);
+
+  const accessToken = connectionSettings?.settings?.access_token || connectionSettings.settings?.oauth?.credentials?.access_token;
+
+  if (!connectionSettings || !accessToken) {
+    throw new Error('GitHub not connected');
+  }
+  return accessToken;
+}
+
+async function getUncachableGitHubClient() {
+  const accessToken = await getAccessToken();
+  return new Octokit({ auth: accessToken });
+}
+
+// Files and directories to exclude
+const EXCLUDE_PATTERNS = [
+  'node_modules',
+  '.git',
+  '.replit',
+  '.local',
+  'dist',
+  '.cache',
+  '.config',
+  'scripts/push-to-github.ts',
+  '.upm',
+  'replit.nix',
+  '.breakpoints',
+  'generated-icon.png'
+];
+
+function shouldExclude(filePath: string): boolean {
+  return EXCLUDE_PATTERNS.some(pattern => 
+    filePath.includes(pattern) || filePath.startsWith(pattern)
+  );
+}
+
+function getAllFiles(dir: string, baseDir: string = ''): { path: string; content: string }[] {
+  const files: { path: string; content: string }[] = [];
+  const items = fs.readdirSync(dir);
+  
+  for (const item of items) {
+    const fullPath = path.join(dir, item);
+    const relativePath = baseDir ? path.join(baseDir, item) : item;
+    
+    if (shouldExclude(relativePath)) continue;
+    
+    const stat = fs.statSync(fullPath);
+    
+    if (stat.isDirectory()) {
+      files.push(...getAllFiles(fullPath, relativePath));
+    } else if (stat.isFile()) {
+      try {
+        const content = fs.readFileSync(fullPath, 'utf-8');
+        files.push({ path: relativePath, content });
+      } catch (e) {
+        // Skip binary files or files that can't be read as text
+        console.log(`Skipping binary/unreadable file: ${relativePath}`);
+      }
+    }
+  }
+  
+  return files;
+}
+
+async function pushToGitHub() {
+  console.log('Getting GitHub client...');
+  const octokit = await getUncachableGitHubClient();
+  
+  console.log(`Pushing to ${REPO_OWNER}/${REPO_NAME}...`);
+  
+  // Get the current commit SHA for main branch
+  let currentCommitSha: string;
+  let currentTreeSha: string;
+  
+  try {
+    const { data: ref } = await octokit.git.getRef({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      ref: 'heads/main'
+    });
+    currentCommitSha = ref.object.sha;
+    
+    const { data: commit } = await octokit.git.getCommit({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      commit_sha: currentCommitSha
+    });
+    currentTreeSha = commit.tree.sha;
+    console.log(`Current commit: ${currentCommitSha}`);
+  } catch (e: any) {
+    // Try master branch
+    try {
+      const { data: ref } = await octokit.git.getRef({
+        owner: REPO_OWNER,
+        repo: REPO_NAME,
+        ref: 'heads/master'
+      });
+      currentCommitSha = ref.object.sha;
+      
+      const { data: commit } = await octokit.git.getCommit({
+        owner: REPO_OWNER,
+        repo: REPO_NAME,
+        commit_sha: currentCommitSha
+      });
+      currentTreeSha = commit.tree.sha;
+      console.log(`Current commit (master): ${currentCommitSha}`);
+    } catch (e2) {
+      console.log('No existing commits found, creating initial commit...');
+      currentCommitSha = '';
+      currentTreeSha = '';
+    }
+  }
+  
+  // Get all files
+  console.log('Collecting files...');
+  const files = getAllFiles('.');
+  console.log(`Found ${files.length} files to push`);
+  
+  // Create blobs for each file
+  console.log('Creating blobs...');
+  const treeItems: { path: string; mode: '100644'; type: 'blob'; sha: string }[] = [];
+  
+  for (const file of files) {
+    try {
+      const { data: blob } = await octokit.git.createBlob({
+        owner: REPO_OWNER,
+        repo: REPO_NAME,
+        content: Buffer.from(file.content).toString('base64'),
+        encoding: 'base64'
+      });
+      
+      treeItems.push({
+        path: file.path,
+        mode: '100644',
+        type: 'blob',
+        sha: blob.sha
+      });
+      console.log(`  Created blob for: ${file.path}`);
+    } catch (e: any) {
+      console.error(`  Failed to create blob for ${file.path}: ${e.message}`);
+    }
+  }
+  
+  // Create tree
+  console.log('Creating tree...');
+  const { data: tree } = await octokit.git.createTree({
+    owner: REPO_OWNER,
+    repo: REPO_NAME,
+    tree: treeItems,
+    base_tree: currentTreeSha || undefined
+  });
+  
+  // Create commit
+  console.log('Creating commit...');
+  const commitMessage = 'Update StreamStickPro - Added 6-month IPTV, fixed multi-item checkout';
+  const commitParams: any = {
+    owner: REPO_OWNER,
+    repo: REPO_NAME,
+    message: commitMessage,
+    tree: tree.sha
+  };
+  
+  if (currentCommitSha) {
+    commitParams.parents = [currentCommitSha];
+  }
+  
+  const { data: newCommit } = await octokit.git.createCommit(commitParams);
+  console.log(`Created commit: ${newCommit.sha}`);
+  
+  // Update reference
+  console.log('Updating branch reference...');
+  try {
+    await octokit.git.updateRef({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      ref: 'heads/main',
+      sha: newCommit.sha,
+      force: true
+    });
+    console.log('Successfully pushed to main branch!');
+  } catch (e) {
+    try {
+      await octokit.git.updateRef({
+        owner: REPO_OWNER,
+        repo: REPO_NAME,
+        ref: 'heads/master',
+        sha: newCommit.sha,
+        force: true
+      });
+      console.log('Successfully pushed to master branch!');
+    } catch (e2) {
+      // Create main branch if it doesn't exist
+      await octokit.git.createRef({
+        owner: REPO_OWNER,
+        repo: REPO_NAME,
+        ref: 'refs/heads/main',
+        sha: newCommit.sha
+      });
+      console.log('Created and pushed to main branch!');
+    }
+  }
+  
+  console.log(`\nDone! View your code at: https://github.com/${REPO_OWNER}/${REPO_NAME}`);
+}
+
+pushToGitHub().catch(console.error);
