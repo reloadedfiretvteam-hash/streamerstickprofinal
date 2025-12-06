@@ -21,9 +21,7 @@ export function createWebhookRoutes() {
     }
 
     try {
-      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY, {
-        apiVersion: '2025-04-30.acacia',
-      });
+      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
 
       const rawBody = await c.req.text();
       const event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);

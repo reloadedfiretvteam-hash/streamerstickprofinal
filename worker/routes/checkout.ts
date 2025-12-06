@@ -19,9 +19,9 @@ export function createCheckoutRoutes() {
       
       const { items, customerEmail, customerName, isRenewal, existingUsername } = parseResult.data;
 
-      let existingCustomer = null;
+      let existingCustomer: Awaited<ReturnType<typeof storage.getCustomerByUsername>> | null = null;
       if (isRenewal && existingUsername) {
-        existingCustomer = await storage.getCustomerByUsername(existingUsername);
+        existingCustomer = await storage.getCustomerByUsername(existingUsername) ?? null;
         if (!existingCustomer) {
           return c.json({ 
             error: "Username not found. Please check your username or select 'New Account' instead." 
@@ -42,9 +42,7 @@ export function createCheckoutRoutes() {
         productsWithQuantity.push({ product, quantity: item.quantity });
       }
 
-      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY, {
-        apiVersion: '2025-04-30.acacia',
-      });
+      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
 
       const baseUrl = new URL(c.req.url).origin;
 
@@ -130,9 +128,7 @@ export function createCheckoutRoutes() {
         return c.json({ error: "Order not found" }, 404);
       }
       
-      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY, {
-        apiVersion: '2025-04-30.acacia',
-      });
+      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
       const session = await stripe.checkout.sessions.retrieve(c.req.param('sessionId'));
       
       return c.json({ 
