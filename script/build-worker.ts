@@ -18,7 +18,7 @@ async function buildWorker() {
   console.log("Building Cloudflare Worker...");
   await esbuild({
     entryPoints: ["worker/index.ts"],
-    platform: "node",
+    platform: "browser",
     target: "esnext",
     bundle: true,
     format: "esm",
@@ -31,6 +31,7 @@ async function buildWorker() {
     conditions: ["workerd", "worker", "browser"],
     mainFields: ["browser", "module", "main"],
     logLevel: "info",
+    external: ["node:*"],
   });
 
   console.log("Creating _routes.json for Cloudflare Pages...");
