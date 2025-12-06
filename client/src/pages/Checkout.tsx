@@ -14,6 +14,7 @@ const productIdMap: Record<string, string> = {
   "fs-max": "firestick-4k-max",
   "iptv-1": "iptv-1mo",
   "iptv-3": "iptv-3mo",
+  "iptv-6": "iptv-6mo",
   "iptv-12": "iptv-1yr",
 };
 
