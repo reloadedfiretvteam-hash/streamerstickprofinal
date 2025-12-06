@@ -31,11 +31,21 @@ export const orders = pgTable("orders", {
   amount: integer("amount").notNull(),
   status: text("status").default("pending"),
   credentialsSent: boolean("credentials_sent").default(false),
+  shippingName: text("shipping_name"),
+  shippingPhone: text("shipping_phone"),
+  shippingStreet: text("shipping_street"),
+  shippingCity: text("shipping_city"),
+  shippingState: text("shipping_state"),
+  shippingZip: text("shipping_zip"),
+  shippingCountry: text("shipping_country"),
+  fulfillmentStatus: text("fulfillment_status").default("pending"),
+  amazonOrderId: text("amazon_order_id"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   uniqueIndex("orders_payment_intent_idx").on(table.stripePaymentIntentId),
   uniqueIndex("orders_checkout_session_idx").on(table.stripeCheckoutSessionId),
   index("orders_customer_email_idx").on(table.customerEmail),
+  index("orders_fulfillment_status_idx").on(table.fulfillmentStatus),
 ]);
 
 export const insertOrderSchema = createInsertSchema(orders).omit({
@@ -106,6 +116,15 @@ export type MapShadowProductRequest = z.infer<typeof mapShadowProductSchema>;
 export const updateOrderRequestSchema = z.object({
   status: z.enum(['pending', 'paid', 'failed', 'refunded']).optional(),
   credentialsSent: z.boolean().optional(),
+  shippingName: z.string().nullable().optional(),
+  shippingPhone: z.string().nullable().optional(),
+  shippingStreet: z.string().nullable().optional(),
+  shippingCity: z.string().nullable().optional(),
+  shippingState: z.string().nullable().optional(),
+  shippingZip: z.string().nullable().optional(),
+  shippingCountry: z.string().nullable().optional(),
+  fulfillmentStatus: z.enum(['pending', 'ordered', 'shipped', 'delivered']).optional(),
+  amazonOrderId: z.string().nullable().optional(),
 });
 
 export type UpdateOrderRequest = z.infer<typeof updateOrderRequestSchema>;

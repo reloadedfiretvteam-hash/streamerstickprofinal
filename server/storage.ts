@@ -30,6 +30,7 @@ export interface IStorage {
   updateOrder(id: string, updates: Partial<InsertOrder>): Promise<Order | undefined>;
   getOrdersByEmail(email: string): Promise<Order[]>;
   getAllOrders(): Promise<Order[]>;
+  getFireStickOrdersForFulfillment(): Promise<Order[]>;
   
   getRealProducts(): Promise<RealProduct[]>;
   getRealProduct(id: string): Promise<RealProduct | undefined>;
@@ -101,7 +102,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllOrders(): Promise<Order[]> {
-    return db.select().from(orders);
+    return db.select().from(orders).orderBy(desc(orders.createdAt));
+  }
+
+  async getFireStickOrdersForFulfillment(): Promise<Order[]> {
+    const allOrders = await db.select().from(orders)
+      .where(eq(orders.status, 'paid'))
+      .orderBy(desc(orders.createdAt));
+    
+    return allOrders.filter(order => {
+      const productName = (order.realProductName || '').toLowerCase();
+      return productName.includes('fire') || productName.includes('stick') || productName.includes('firestick');
+    });
   }
 
   async getRealProducts(): Promise<RealProduct[]> {

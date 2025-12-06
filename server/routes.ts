@@ -87,7 +87,12 @@ export async function registerRoutes(
       const realProductNames = productsWithQuantity.map(p => p.product.name).join(', ');
       const shadowProductIds = productsWithQuantity.map(p => p.product.shadowProductId || '').join(',');
 
-      const session = await stripe.checkout.sessions.create({
+      const hasFireStickProduct = productsWithQuantity.some(({ product }) => {
+        const name = (product.name || '').toLowerCase();
+        return name.includes('fire') || name.includes('stick') || name.includes('firestick');
+      });
+
+      const sessionConfig: any = {
         payment_method_types: ['card'],
         line_items: lineItems,
         mode: 'payment',
@@ -99,7 +104,18 @@ export async function registerRoutes(
           realProductNames,
           shadowProductIds,
         },
-      });
+      };
+
+      if (hasFireStickProduct) {
+        sessionConfig.shipping_address_collection = {
+          allowed_countries: ['US', 'CA'],
+        };
+        sessionConfig.phone_number_collection = {
+          enabled: true,
+        };
+      }
+
+      const session = await stripe.checkout.sessions.create(sessionConfig);
 
       const totalAmount = productsWithQuantity.reduce(
         (sum, { product, quantity }) => sum + product.price * quantity, 
@@ -425,6 +441,41 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Error resending credentials:", error);
       res.status(500).json({ error: "Failed to resend credentials" });
+    }
+  });
+
+  app.get("/api/admin/fulfillment", async (req, res) => {
+    try {
+      const orders = await storage.getFireStickOrdersForFulfillment();
+      res.json({ data: orders });
+    } catch (error: any) {
+      console.error("Error fetching fulfillment orders:", error);
+      res.status(500).json({ error: "Failed to fetch fulfillment orders" });
+    }
+  });
+
+  app.put("/api/admin/fulfillment/:id", async (req, res) => {
+    try {
+      const { fulfillmentStatus, amazonOrderId } = req.body;
+
+      const existingOrder = await storage.getOrder(req.params.id);
+      if (!existingOrder) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      const updates: any = {};
+      if (fulfillmentStatus !== undefined) {
+        updates.fulfillmentStatus = fulfillmentStatus;
+      }
+      if (amazonOrderId !== undefined) {
+        updates.amazonOrderId = amazonOrderId;
+      }
+
+      const order = await storage.updateOrder(req.params.id, updates);
+      res.json({ data: order });
+    } catch (error: any) {
+      console.error("Error updating fulfillment:", error);
+      res.status(500).json({ error: "Failed to update fulfillment" });
     }
   });
 

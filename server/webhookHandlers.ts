@@ -59,11 +59,31 @@ export class WebhookHandlers {
       return;
     }
 
-    await storage.updateOrder(order.id, {
+    const updateData: any = {
       status: 'paid',
       stripePaymentIntentId: session.payment_intent,
       stripeCustomerId: session.customer,
-    });
+    };
+
+    if (session.shipping_details) {
+      const shipping = session.shipping_details;
+      updateData.shippingName = shipping.name || null;
+      updateData.shippingPhone = session.customer_details?.phone || null;
+      
+      if (shipping.address) {
+        const line1 = shipping.address.line1 || '';
+        const line2 = shipping.address.line2 || '';
+        updateData.shippingStreet = line2 ? `${line1}, ${line2}` : line1;
+        updateData.shippingCity = shipping.address.city || null;
+        updateData.shippingState = shipping.address.state || null;
+        updateData.shippingZip = shipping.address.postal_code || null;
+        updateData.shippingCountry = shipping.address.country || null;
+      }
+      
+      console.log(`Shipping address captured for order ${order.id}`);
+    }
+
+    await storage.updateOrder(order.id, updateData);
 
     console.log(`Order ${order.id} marked as paid`);
 
