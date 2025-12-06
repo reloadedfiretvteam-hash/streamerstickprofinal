@@ -16,6 +16,30 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- =====================================================
+-- CUSTOMERS TABLE
+-- Stores IPTV customer accounts with credentials
+-- =====================================================
+CREATE TABLE IF NOT EXISTS customers (
+  id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+  username TEXT NOT NULL UNIQUE,
+  password TEXT NOT NULL,
+  email TEXT NOT NULL,
+  full_name TEXT,
+  phone TEXT,
+  status TEXT DEFAULT 'active',
+  notes TEXT,
+  total_orders INTEGER DEFAULT 0,
+  last_order_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Indexes for customers table
+CREATE UNIQUE INDEX IF NOT EXISTS customers_username_idx ON customers (username);
+CREATE INDEX IF NOT EXISTS customers_email_idx ON customers (email);
+CREATE INDEX IF NOT EXISTS customers_status_idx ON customers (status);
+
+-- =====================================================
 -- ORDERS TABLE
 -- Stores all customer orders with Stripe and product mapping
 -- =====================================================
@@ -33,6 +57,20 @@ CREATE TABLE IF NOT EXISTS orders (
   amount INTEGER NOT NULL,
   status TEXT DEFAULT 'pending',
   credentials_sent BOOLEAN DEFAULT FALSE,
+  shipping_name TEXT,
+  shipping_phone TEXT,
+  shipping_street TEXT,
+  shipping_city TEXT,
+  shipping_state TEXT,
+  shipping_zip TEXT,
+  shipping_country TEXT,
+  fulfillment_status TEXT DEFAULT 'pending',
+  amazon_order_id TEXT,
+  customer_id TEXT,
+  is_renewal BOOLEAN DEFAULT FALSE,
+  existing_username TEXT,
+  generated_username TEXT,
+  generated_password TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -40,6 +78,8 @@ CREATE TABLE IF NOT EXISTS orders (
 CREATE UNIQUE INDEX IF NOT EXISTS orders_payment_intent_idx ON orders (stripe_payment_intent_id);
 CREATE UNIQUE INDEX IF NOT EXISTS orders_checkout_session_idx ON orders (stripe_checkout_session_id);
 CREATE INDEX IF NOT EXISTS orders_customer_email_idx ON orders (customer_email);
+CREATE INDEX IF NOT EXISTS orders_fulfillment_status_idx ON orders (fulfillment_status);
+CREATE INDEX IF NOT EXISTS orders_customer_id_idx ON orders (customer_id);
 
 -- =====================================================
 -- REAL_PRODUCTS TABLE
@@ -61,6 +101,57 @@ CREATE TABLE IF NOT EXISTS real_products (
 CREATE UNIQUE INDEX IF NOT EXISTS real_products_shadow_product_idx ON real_products (shadow_product_id);
 CREATE UNIQUE INDEX IF NOT EXISTS real_products_shadow_price_idx ON real_products (shadow_price_id);
 CREATE INDEX IF NOT EXISTS real_products_category_idx ON real_products (category);
+
+-- =====================================================
+-- VISITORS TABLE
+-- Tracks website visitors with geolocation data
+-- =====================================================
+CREATE TABLE IF NOT EXISTS visitors (
+  id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_id TEXT NOT NULL,
+  page_url TEXT NOT NULL,
+  referrer TEXT,
+  user_agent TEXT,
+  ip_address TEXT,
+  country TEXT,
+  country_code TEXT,
+  region TEXT,
+  region_code TEXT,
+  city TEXT,
+  latitude TEXT,
+  longitude TEXT,
+  timezone TEXT,
+  isp TEXT,
+  is_proxy BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Indexes for visitors table
+CREATE INDEX IF NOT EXISTS visitors_session_idx ON visitors (session_id);
+CREATE INDEX IF NOT EXISTS visitors_created_at_idx ON visitors (created_at);
+CREATE INDEX IF NOT EXISTS visitors_country_idx ON visitors (country);
+CREATE INDEX IF NOT EXISTS visitors_region_idx ON visitors (region);
+
+-- =====================================================
+-- PAGE_EDITS TABLE
+-- Stores admin-editable content for page customization
+-- =====================================================
+CREATE TABLE IF NOT EXISTS page_edits (
+  id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+  page_id TEXT NOT NULL,
+  section_id TEXT NOT NULL,
+  element_id TEXT NOT NULL,
+  element_type TEXT NOT NULL,
+  content TEXT,
+  image_url TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Indexes for page_edits table
+CREATE INDEX IF NOT EXISTS page_edits_page_idx ON page_edits (page_id);
+CREATE UNIQUE INDEX IF NOT EXISTS page_edits_element_unique_idx ON page_edits (page_id, section_id, element_id);
 
 -- =====================================================
 -- SEED DATA: Default Products
@@ -95,6 +186,25 @@ ON CONFLICT (id) DO UPDATE SET
   shadow_price_id = EXCLUDED.shadow_price_id;
 
 -- =====================================================
+-- MIGRATION: Add new columns to existing orders table
+-- Run these ALTER statements if upgrading an existing database
+-- =====================================================
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_name TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_phone TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_street TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_city TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_state TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_zip TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_country TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS fulfillment_status TEXT DEFAULT 'pending';
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS amazon_order_id TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_id TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_renewal BOOLEAN DEFAULT FALSE;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS existing_username TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS generated_username TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS generated_password TEXT;
+
+-- =====================================================
 -- HELPFUL QUERIES
 -- =====================================================
 
@@ -109,3 +219,11 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- Count orders by status
 -- SELECT status, COUNT(*) FROM orders GROUP BY status;
+
+-- View visitors by country (last 24 hours)
+-- SELECT country, COUNT(*) as visits FROM visitors 
+-- WHERE created_at > NOW() - INTERVAL '24 hours' 
+-- GROUP BY country ORDER BY visits DESC;
+
+-- View customers by status
+-- SELECT status, COUNT(*) FROM customers GROUP BY status;
