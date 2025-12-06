@@ -1,4 +1,4 @@
-import { eq, desc, gte } from "drizzle-orm";
+import { eq, desc, gte, and } from "drizzle-orm";
 import { db } from "./db";
 import {
   type User,
@@ -9,10 +9,13 @@ import {
   type InsertRealProduct,
   type Visitor,
   type InsertVisitor,
+  type PageEdit,
+  type InsertPageEdit,
   users,
   orders,
   realProducts,
   visitors,
+  pageEdits,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -44,6 +47,12 @@ export interface IStorage {
     onlineNow: number;
     recentVisitors: Visitor[];
   }>;
+  
+  getPageEdits(pageId: string): Promise<PageEdit[]>;
+  getPageEdit(pageId: string, sectionId: string, elementId: string): Promise<PageEdit | undefined>;
+  upsertPageEdit(edit: InsertPageEdit): Promise<PageEdit>;
+  deletePageEdit(id: string): Promise<boolean>;
+  getAllPageEdits(): Promise<PageEdit[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -163,6 +172,47 @@ export class DatabaseStorage implements IStorage {
       onlineNow,
       recentVisitors,
     };
+  }
+
+  async getPageEdits(pageId: string): Promise<PageEdit[]> {
+    return db.select().from(pageEdits).where(
+      and(eq(pageEdits.pageId, pageId), eq(pageEdits.isActive, true))
+    );
+  }
+
+  async getPageEdit(pageId: string, sectionId: string, elementId: string): Promise<PageEdit | undefined> {
+    const [edit] = await db.select().from(pageEdits).where(
+      and(
+        eq(pageEdits.pageId, pageId),
+        eq(pageEdits.sectionId, sectionId),
+        eq(pageEdits.elementId, elementId)
+      )
+    );
+    return edit;
+  }
+
+  async upsertPageEdit(edit: InsertPageEdit): Promise<PageEdit> {
+    const existing = await this.getPageEdit(edit.pageId, edit.sectionId, edit.elementId);
+    
+    if (existing) {
+      const [updated] = await db.update(pageEdits)
+        .set({ ...edit, updatedAt: new Date() })
+        .where(eq(pageEdits.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      const [newEdit] = await db.insert(pageEdits).values(edit).returning();
+      return newEdit;
+    }
+  }
+
+  async deletePageEdit(id: string): Promise<boolean> {
+    const result = await db.delete(pageEdits).where(eq(pageEdits.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async getAllPageEdits(): Promise<PageEdit[]> {
+    return db.select().from(pageEdits).where(eq(pageEdits.isActive, true));
   }
 }
 

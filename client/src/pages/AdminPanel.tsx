@@ -28,7 +28,10 @@ import {
   Flame,
   RefreshCw,
   Upload,
-  Loader2
+  Loader2,
+  Palette,
+  Type,
+  ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +61,19 @@ interface VisitorStats {
     user_agent: string;
     created_at: string;
   }>;
+}
+
+interface PageEdit {
+  id: string;
+  pageId: string;
+  sectionId: string;
+  elementId: string;
+  elementType: string;
+  content: string | null;
+  imageUrl: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Product {
@@ -112,6 +128,10 @@ export default function AdminPanel() {
   const [uploading, setUploading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
+  const [pageEdits, setPageEdits] = useState<PageEdit[]>([]);
+  const [loadingEdits, setLoadingEdits] = useState(true);
+  const [editingPageEdit, setEditingPageEdit] = useState<Partial<PageEdit> | null>(null);
+
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -120,6 +140,7 @@ export default function AdminPanel() {
   useEffect(() => {
     loadVisitorStats();
     loadProducts();
+    loadPageEdits();
     
     const interval = setInterval(() => {
       loadVisitorStats();
@@ -189,6 +210,73 @@ export default function AdminPanel() {
       setProducts(data);
     }
     setLoadingProducts(false);
+  };
+
+  const loadPageEdits = async () => {
+    setLoadingEdits(true);
+    try {
+      const response = await fetch('/api/admin/page-edits');
+      const result = await response.json();
+      if (result.data) {
+        setPageEdits(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading page edits:', error);
+    } finally {
+      setLoadingEdits(false);
+    }
+  };
+
+  const savePageEdit = async () => {
+    if (!editingPageEdit) return;
+
+    if (!editingPageEdit.pageId || !editingPageEdit.sectionId || !editingPageEdit.elementId || !editingPageEdit.elementType) {
+      showToast('Please fill in all required fields', 'error');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await fetch('/api/admin/page-edits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingPageEdit),
+      });
+
+      if (response.ok) {
+        showToast('Page edit saved successfully!', 'success');
+        loadPageEdits();
+        setEditingPageEdit(null);
+      } else {
+        const error = await response.json();
+        showToast(error.error || 'Failed to save page edit', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving page edit:', error);
+      showToast('Failed to save page edit', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deletePageEdit = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this page edit?')) return;
+
+    try {
+      const response = await fetch(`/api/admin/page-edits/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        showToast('Page edit deleted successfully!', 'success');
+        loadPageEdits();
+      } else {
+        showToast('Failed to delete page edit', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting page edit:', error);
+      showToast('Failed to delete page edit', 'error');
+    }
   };
 
   const saveProduct = async () => {
@@ -444,6 +532,14 @@ export default function AdminPanel() {
             data-testid="nav-visitors"
           >
             <Users className="w-4 h-4 mr-3" /> Live Visitors
+          </Button>
+          <Button 
+            variant={activeSection === "visual-editor" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => setActiveSection("visual-editor")}
+            data-testid="nav-visual-editor"
+          >
+            <Palette className="w-4 h-4 mr-3" /> Visual Editor
           </Button>
           <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5">
             <FileText className="w-4 h-4 mr-3" /> Blog Posts
@@ -887,6 +983,208 @@ export default function AdminPanel() {
               </Tabs>
             </div>
           )}
+
+          {activeSection === "visual-editor" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold flex items-center gap-3">
+                    <Palette className="w-8 h-8 text-orange-500" />
+                    Visual Editor
+                  </h2>
+                  <p className="text-gray-400">Edit text and images on any page in real-time. Changes are saved to the database.</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline"
+                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    onClick={() => window.open('/?edit=true', '_blank')}
+                    data-testid="button-preview-edit-mode"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" /> Open Live Editor
+                  </Button>
+                  <Button 
+                    className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                    onClick={() => setEditingPageEdit({
+                      pageId: 'main',
+                      sectionId: '',
+                      elementId: '',
+                      elementType: 'text',
+                      content: '',
+                      imageUrl: null,
+                      isActive: true,
+                    })}
+                    data-testid="button-add-edit"
+                  >
+                    <Plus className="w-4 h-4 mr-2" /> Add Content Edit
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card className="bg-gradient-to-br from-blue-600 to-blue-700 border-0">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <Type className="w-8 h-8 text-white/80" />
+                      <span className="text-3xl font-bold text-white">{pageEdits.filter(e => e.elementType !== 'image').length}</span>
+                    </div>
+                    <p className="text-blue-100">Text Edits</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-purple-600 to-purple-700 border-0">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <ImageIcon className="w-8 h-8 text-white/80" />
+                      <span className="text-3xl font-bold text-white">{pageEdits.filter(e => e.elementType === 'image').length}</span>
+                    </div>
+                    <p className="text-purple-100">Image Edits</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-green-600 to-green-700 border-0">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <CheckCircle className="w-8 h-8 text-white/80" />
+                      <span className="text-3xl font-bold text-white">{pageEdits.filter(e => e.isActive).length}</span>
+                    </div>
+                    <p className="text-green-100">Active Edits</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Edit className="w-5 h-5 text-orange-500" />
+                    All Page Edits
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Manage content overrides for your website. Edits are applied when pages load.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {loadingEdits ? (
+                    <div className="p-8 text-center text-gray-400">
+                      <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin" />
+                      Loading page edits...
+                    </div>
+                  ) : pageEdits.length === 0 ? (
+                    <div className="p-8 text-center text-gray-400">
+                      <Palette className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg mb-2">No page edits yet</p>
+                      <p className="text-sm mb-4">Create your first content edit to customize your site.</p>
+                      <Button 
+                        className="bg-orange-500 hover:bg-orange-600"
+                        onClick={() => setEditingPageEdit({
+                          pageId: 'main',
+                          sectionId: 'hero',
+                          elementId: 'headline',
+                          elementType: 'heading',
+                          content: '',
+                          isActive: true,
+                        })}
+                      >
+                        <Plus className="w-4 h-4 mr-2" /> Add First Edit
+                      </Button>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-gray-700">
+                          <TableHead className="text-gray-400">Page</TableHead>
+                          <TableHead className="text-gray-400">Section</TableHead>
+                          <TableHead className="text-gray-400">Element</TableHead>
+                          <TableHead className="text-gray-400">Type</TableHead>
+                          <TableHead className="text-gray-400">Content</TableHead>
+                          <TableHead className="text-gray-400">Status</TableHead>
+                          <TableHead className="text-right text-gray-400">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pageEdits.map((edit) => (
+                          <TableRow key={edit.id} className="border-gray-700 hover:bg-gray-700/50">
+                            <TableCell className="font-medium text-white">{edit.pageId}</TableCell>
+                            <TableCell className="text-gray-300">{edit.sectionId}</TableCell>
+                            <TableCell className="text-gray-300">{edit.elementId}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="border-gray-600 text-gray-300">
+                                {edit.elementType === 'image' ? <ImageIcon className="w-3 h-3 mr-1" /> : <Type className="w-3 h-3 mr-1" />}
+                                {edit.elementType}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-gray-400 max-w-[200px] truncate">
+                              {edit.elementType === 'image' ? (
+                                edit.imageUrl ? (
+                                  <img src={edit.imageUrl} alt="Preview" className="w-10 h-10 object-cover rounded" />
+                                ) : 'No image'
+                              ) : (
+                                edit.content?.substring(0, 50) || 'No content'
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={edit.isActive ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}>
+                                {edit.isActive ? 'Active' : 'Inactive'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => setEditingPageEdit(edit)}
+                                  data-testid={`button-edit-page-${edit.id}`}
+                                >
+                                  <Edit className="w-4 h-4 text-blue-400" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => deletePageEdit(edit.id)}
+                                  data-testid={`button-delete-page-${edit.id}`}
+                                >
+                                  <Trash2 className="w-4 h-4 text-red-400" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-white">How to Use Visual Editing</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-gray-700/50 rounded-lg p-4">
+                      <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center mb-3">
+                        <span className="text-orange-400 font-bold">1</span>
+                      </div>
+                      <h4 className="font-semibold text-white mb-2">Create an Edit</h4>
+                      <p className="text-sm text-gray-400">Click "Add Content Edit" and specify the page, section, and element you want to modify.</p>
+                    </div>
+                    <div className="bg-gray-700/50 rounded-lg p-4">
+                      <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center mb-3">
+                        <span className="text-orange-400 font-bold">2</span>
+                      </div>
+                      <h4 className="font-semibold text-white mb-2">Set Content</h4>
+                      <p className="text-sm text-gray-400">Enter the new text content or image URL that should replace the original element.</p>
+                    </div>
+                    <div className="bg-gray-700/50 rounded-lg p-4">
+                      <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center mb-3">
+                        <span className="text-orange-400 font-bold">3</span>
+                      </div>
+                      <h4 className="font-semibold text-white mb-2">Preview Changes</h4>
+                      <p className="text-sm text-gray-400">Open the live site to see your changes applied in real-time.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </main>
 
@@ -1119,6 +1417,152 @@ export default function AdminPanel() {
                 >
                   <Save className="w-4 h-4 mr-2" />
                   {saving ? 'Saving...' : 'Save Product'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingPageEdit && (
+        <div className="fixed inset-0 bg-black/90 z-50 overflow-y-auto">
+          <div className="min-h-screen p-8">
+            <div className="max-w-2xl mx-auto bg-gray-800 rounded-2xl">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 rounded-t-2xl flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-white">
+                  {editingPageEdit.id ? 'Edit Content' : 'Add Content Edit'}
+                </h3>
+                <Button variant="ghost" onClick={() => setEditingPageEdit(null)} className="text-white hover:bg-white/20">
+                  <X className="w-6 h-6" />
+                </Button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Page ID *</label>
+                    <select
+                      value={editingPageEdit.pageId || 'main'}
+                      onChange={(e) => setEditingPageEdit({ ...editingPageEdit, pageId: e.target.value })}
+                      className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                      data-testid="select-page-id"
+                    >
+                      <option value="main">Main Store</option>
+                      <option value="checkout">Checkout</option>
+                      <option value="blog">Blog</option>
+                      <option value="success">Success Page</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Section ID *</label>
+                    <Input
+                      value={editingPageEdit.sectionId || ''}
+                      onChange={(e) => setEditingPageEdit({ ...editingPageEdit, sectionId: e.target.value })}
+                      className="bg-gray-700 border-gray-600 text-white"
+                      placeholder="e.g., hero, products, faq"
+                      data-testid="input-section-id"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Element ID *</label>
+                    <Input
+                      value={editingPageEdit.elementId || ''}
+                      onChange={(e) => setEditingPageEdit({ ...editingPageEdit, elementId: e.target.value })}
+                      className="bg-gray-700 border-gray-600 text-white"
+                      placeholder="e.g., headline, subheadline, image"
+                      data-testid="input-element-id"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Element Type *</label>
+                    <select
+                      value={editingPageEdit.elementType || 'text'}
+                      onChange={(e) => setEditingPageEdit({ ...editingPageEdit, elementType: e.target.value })}
+                      className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                      data-testid="select-element-type"
+                    >
+                      <option value="text">Text</option>
+                      <option value="heading">Heading</option>
+                      <option value="paragraph">Paragraph</option>
+                      <option value="button">Button</option>
+                      <option value="image">Image</option>
+                    </select>
+                  </div>
+                </div>
+
+                {editingPageEdit.elementType === 'image' ? (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Image URL</label>
+                    <Input
+                      value={editingPageEdit.imageUrl || ''}
+                      onChange={(e) => setEditingPageEdit({ ...editingPageEdit, imageUrl: e.target.value })}
+                      className="bg-gray-700 border-gray-600 text-white"
+                      placeholder="https://example.com/image.jpg"
+                      data-testid="input-image-url-edit"
+                    />
+                    {editingPageEdit.imageUrl && (
+                      <div className="mt-3">
+                        <img 
+                          src={editingPageEdit.imageUrl} 
+                          alt="Preview" 
+                          className="w-full h-40 object-cover rounded-lg border border-gray-600"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Content</label>
+                    <textarea
+                      value={editingPageEdit.content || ''}
+                      onChange={(e) => setEditingPageEdit({ ...editingPageEdit, content: e.target.value })}
+                      className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 min-h-[120px]"
+                      placeholder="Enter the new text content..."
+                      data-testid="input-content"
+                    />
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="isActive"
+                    checked={editingPageEdit.isActive !== false}
+                    onChange={(e) => setEditingPageEdit({ ...editingPageEdit, isActive: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="isActive" className="text-gray-300">Active (apply this edit to the live site)</label>
+                </div>
+
+                <div className="bg-gray-700/50 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold text-gray-300 mb-2">Element Identifier</h4>
+                  <code className="text-xs text-orange-400 bg-gray-900 px-2 py-1 rounded">
+                    data-edit="{editingPageEdit.pageId || 'main'}/{editingPageEdit.sectionId || 'section'}/{editingPageEdit.elementId || 'element'}"
+                  </code>
+                  <p className="text-xs text-gray-400 mt-2">
+                    Add this attribute to any element in your code to make it editable.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-6 border-t border-gray-700 flex justify-end gap-4">
+                <Button variant="outline" onClick={() => setEditingPageEdit(null)} className="border-gray-600 text-gray-300">
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={savePageEdit} 
+                  disabled={saving}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  data-testid="button-save-page-edit"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {saving ? 'Saving...' : 'Save Edit'}
                 </Button>
               </div>
             </div>

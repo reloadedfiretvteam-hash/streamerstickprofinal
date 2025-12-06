@@ -659,5 +659,65 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/page-edits/:pageId", async (req, res) => {
+    try {
+      const edits = await storage.getPageEdits(req.params.pageId);
+      res.json({ data: edits });
+    } catch (error: any) {
+      console.error("Error fetching page edits:", error);
+      res.status(500).json({ error: "Failed to fetch page edits" });
+    }
+  });
+
+  app.get("/api/admin/page-edits", async (req, res) => {
+    try {
+      const edits = await storage.getAllPageEdits();
+      res.json({ data: edits });
+    } catch (error: any) {
+      console.error("Error fetching all page edits:", error);
+      res.status(500).json({ error: "Failed to fetch page edits" });
+    }
+  });
+
+  app.post("/api/admin/page-edits", async (req, res) => {
+    try {
+      const { pageId, sectionId, elementId, elementType, content, imageUrl, isActive } = req.body;
+
+      if (!pageId || !sectionId || !elementId || !elementType) {
+        return res.status(400).json({ error: "Page ID, section ID, element ID, and element type are required" });
+      }
+
+      const edit = await storage.upsertPageEdit({
+        pageId,
+        sectionId,
+        elementId,
+        elementType,
+        content: content || null,
+        imageUrl: imageUrl || null,
+        isActive: isActive !== undefined ? isActive : true,
+      });
+
+      res.json({ data: edit });
+    } catch (error: any) {
+      console.error("Error saving page edit:", error);
+      res.status(500).json({ error: "Failed to save page edit" });
+    }
+  });
+
+  app.delete("/api/admin/page-edits/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deletePageEdit(req.params.id);
+      
+      if (deleted) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: "Page edit not found" });
+      }
+    } catch (error: any) {
+      console.error("Error deleting page edit:", error);
+      res.status(500).json({ error: "Failed to delete page edit" });
+    }
+  });
+
   return httpServer;
 }

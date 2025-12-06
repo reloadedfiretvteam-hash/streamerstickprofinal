@@ -130,3 +130,40 @@ export const insertVisitorSchema = createInsertSchema(visitors).omit({
 
 export type InsertVisitor = z.infer<typeof insertVisitorSchema>;
 export type Visitor = typeof visitors.$inferSelect;
+
+export const pageEdits = pgTable("page_edits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageId: text("page_id").notNull(),
+  sectionId: text("section_id").notNull(),
+  elementId: text("element_id").notNull(),
+  elementType: text("element_type").notNull(),
+  content: text("content"),
+  imageUrl: text("image_url"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("page_edits_page_idx").on(table.pageId),
+  uniqueIndex("page_edits_element_unique_idx").on(table.pageId, table.sectionId, table.elementId),
+]);
+
+export const insertPageEditSchema = createInsertSchema(pageEdits).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPageEdit = z.infer<typeof insertPageEditSchema>;
+export type PageEdit = typeof pageEdits.$inferSelect;
+
+export const upsertPageEditSchema = z.object({
+  pageId: z.string().min(1, "Page ID is required"),
+  sectionId: z.string().min(1, "Section ID is required"),
+  elementId: z.string().min(1, "Element ID is required"),
+  elementType: z.enum(["text", "image", "heading", "paragraph", "button"]),
+  content: z.string().nullable().optional(),
+  imageUrl: z.string().url().nullable().optional(),
+  isActive: z.boolean().optional(),
+});
+
+export type UpsertPageEditRequest = z.infer<typeof upsertPageEditSchema>;
