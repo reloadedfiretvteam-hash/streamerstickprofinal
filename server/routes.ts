@@ -57,15 +57,19 @@ export async function registerRoutes(
         return res.status(400).json({ error: validationError.message });
       }
       
-      const { productId, customerEmail, customerName } = parseResult.data;
+      const { items, customerEmail, customerName } = parseResult.data;
 
-      const product = await storage.getRealProduct(productId);
-      if (!product) {
-        return res.status(404).json({ error: "Product not found" });
-      }
-
-      if (!product.shadowPriceId) {
-        return res.status(400).json({ error: "Product not configured for checkout" });
+      const productsWithQuantity: Array<{ product: any; quantity: number }> = [];
+      
+      for (const item of items) {
+        const product = await storage.getRealProduct(item.productId);
+        if (!product) {
+          return res.status(404).json({ error: `Product not found: ${item.productId}` });
+        }
+        if (!product.shadowPriceId) {
+          return res.status(400).json({ error: `Product not configured for checkout: ${item.productId}` });
+        }
+        productsWithQuantity.push({ product, quantity: item.quantity });
       }
 
       const stripe = await getUncachableStripeClient();
@@ -74,34 +78,43 @@ export async function registerRoutes(
         ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`
         : 'http://localhost:5000';
 
+      const lineItems = productsWithQuantity.map(({ product, quantity }) => ({
+        price: product.shadowPriceId,
+        quantity,
+      }));
+
+      const realProductIds = productsWithQuantity.map(p => p.product.id).join(',');
+      const realProductNames = productsWithQuantity.map(p => p.product.name).join(', ');
+      const shadowProductIds = productsWithQuantity.map(p => p.product.shadowProductId || '').join(',');
+
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
-        line_items: [
-          {
-            price: product.shadowPriceId,
-            quantity: 1,
-          },
-        ],
+        line_items: lineItems,
         mode: 'payment',
         success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${baseUrl}/cancel`,
         customer_email: customerEmail,
         metadata: {
-          realProductId: product.id,
-          realProductName: product.name,
-          shadowProductId: product.shadowProductId || '',
+          realProductIds,
+          realProductNames,
+          shadowProductIds,
         },
       });
+
+      const totalAmount = productsWithQuantity.reduce(
+        (sum, { product, quantity }) => sum + product.price * quantity, 
+        0
+      );
 
       const order = await storage.createOrder({
         customerEmail,
         customerName: customerName || null,
         stripeCheckoutSessionId: session.id,
-        shadowProductId: product.shadowProductId || null,
-        shadowPriceId: product.shadowPriceId,
-        realProductId: product.id,
-        realProductName: product.name,
-        amount: product.price,
+        shadowProductId: shadowProductIds,
+        shadowPriceId: productsWithQuantity.map(p => p.product.shadowPriceId).join(','),
+        realProductId: realProductIds,
+        realProductName: realProductNames,
+        amount: totalAmount,
         status: 'pending',
         credentialsSent: false,
       });

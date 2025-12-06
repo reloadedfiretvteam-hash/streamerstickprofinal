@@ -66,12 +66,18 @@ export const insertRealProductSchema = createInsertSchema(realProducts);
 export type InsertRealProduct = z.infer<typeof insertRealProductSchema>;
 export type RealProduct = typeof realProducts.$inferSelect;
 
-export const checkoutRequestSchema = z.object({
+export const checkoutItemSchema = z.object({
   productId: z.string().min(1, "Product ID is required"),
+  quantity: z.number().int().positive("Quantity must be a positive integer"),
+});
+
+export const checkoutRequestSchema = z.object({
+  items: z.array(checkoutItemSchema).min(1, "At least one item is required"),
   customerEmail: z.string().email("Valid email is required"),
   customerName: z.string().optional(),
 });
 
+export type CheckoutItem = z.infer<typeof checkoutItemSchema>;
 export type CheckoutRequest = z.infer<typeof checkoutRequestSchema>;
 
 export const createProductRequestSchema = z.object({

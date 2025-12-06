@@ -48,10 +48,12 @@ export class EmailService {
 
     const credentials = EmailService.generateCredentials(order);
 
-    const isIPTV = order.realProductId?.startsWith('iptv-');
+    const productIds = order.realProductId?.split(',') || [];
+    const hasIPTV = productIds.some(id => id.trim().startsWith('iptv-'));
+    const hasFireStick = productIds.some(id => id.trim().startsWith('firestick-'));
 
     let productInstructions = '';
-    if (isIPTV) {
+    if (hasIPTV) {
       productInstructions = `
         <div style="background: #e8f4fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h2 style="margin-top: 0; color: #0066cc;">IPTV Setup Instructions</h2>
@@ -70,15 +72,17 @@ export class EmailService {
           <p><strong>Watch our setup video:</strong> <a href="${SETUP_VIDEO_URL}">${SETUP_VIDEO_URL}</a></p>
         </div>
       `;
-    } else {
-      productInstructions = `
-        <div style="background: #e8f4fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h2 style="margin-top: 0; color: #0066cc;">Fire Stick Setup Instructions</h2>
+    }
+    
+    if (hasFireStick) {
+      productInstructions += `
+        <div style="background: #fff7ed; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h2 style="margin-top: 0; color: #ea580c;">Fire Stick Setup Instructions</h2>
           <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}">${IPTV_PORTAL_URL}</a></p>
           <p><strong>Username:</strong> ${credentials.username}</p>
           <p><strong>Password:</strong> ${credentials.password}</p>
           
-          <h3 style="color: #0066cc;">How to Setup Your Device:</h3>
+          <h3 style="color: #ea580c;">How to Setup Your Device:</h3>
           <ol>
             <li>Your Fire Stick will arrive pre-configured</li>
             <li>Simply plug it into your TV</li>
@@ -192,15 +196,19 @@ export class EmailService {
 
     const priceFormatted = (order.amount / 100).toFixed(2);
     const orderDate = new Date().toLocaleString();
-    const isIPTV = order.realProductId?.startsWith('iptv-');
-    const isFireStick = !isIPTV;
+    const productIds = order.realProductId?.split(',') || [];
+    const hasIPTV = productIds.some(id => id.trim().startsWith('iptv-'));
+    const hasFireStick = productIds.some(id => id.trim().startsWith('firestick-'));
     
     const credentials = EmailService.generateCredentials(order);
 
+    const emoji = hasFireStick ? '🔥' : '📺';
+    const category = hasFireStick && hasIPTV ? '🔥📺 Fire Stick + IPTV' : hasFireStick ? '🔥 Fire Stick' : '📺 IPTV Subscription';
+    
     await client.emails.send({
       from: fromEmail,
       to: OWNER_EMAIL,
-      subject: `${isFireStick ? '🔥' : '📺'} NEW ORDER - $${priceFormatted} - ${order.realProductName}`,
+      subject: `${emoji} NEW ORDER - $${priceFormatted} - ${order.realProductName}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #f97316 0%, #ef4444 100%); padding: 20px; border-radius: 12px 12px 0 0;">
@@ -228,14 +236,14 @@ export class EmailService {
             <p><strong>Setup Video:</strong> <a href="${SETUP_VIDEO_URL}" style="color: #15803d;">${SETUP_VIDEO_URL}</a></p>
           </div>
           
-          <div style="background: ${isFireStick ? '#fef2f2' : '#eff6ff'}; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h2 style="margin-top: 0; color: ${isFireStick ? '#dc2626' : '#2563eb'};">Product Information</h2>
+          <div style="background: ${hasFireStick ? '#fef2f2' : '#eff6ff'}; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h2 style="margin-top: 0; color: ${hasFireStick ? '#dc2626' : '#2563eb'};">Product Information</h2>
             <p><strong>Product:</strong> ${order.realProductName}</p>
-            <p><strong>Category:</strong> ${isFireStick ? '🔥 Fire Stick' : '📺 IPTV Subscription'}</p>
+            <p><strong>Category:</strong> ${category}</p>
             <p><strong>Status:</strong> ${order.status}</p>
           </div>
 
-          ${isFireStick ? `
+          ${hasFireStick ? `
           <div style="background: #fee2e2; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
             <strong>⚠️ Action Required:</strong> This is a Fire Stick order. Ship the device to the customer!
           </div>

@@ -50,14 +50,16 @@ export default function Checkout() {
     setError(null);
 
     try {
-      const item = items[0];
-      const realProductId = productIdMap[item.id] || item.id;
+      const checkoutItems = items.map(item => ({
+        productId: productIdMap[item.id] || item.id,
+        quantity: item.quantity,
+      }));
 
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          productId: realProductId,
+          items: checkoutItems,
           customerEmail: formData.email,
           customerName: `${formData.firstName} ${formData.lastName}`.trim(),
         }),
