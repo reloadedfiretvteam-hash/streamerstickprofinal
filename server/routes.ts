@@ -7,7 +7,10 @@ import {
   createProductRequestSchema, 
   updateProductRequestSchema,
   mapShadowProductSchema,
-  updateOrderRequestSchema 
+  updateOrderRequestSchema,
+  createCustomerSchema,
+  updateCustomerSchema,
+  customerLookupSchema
 } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 
@@ -57,7 +60,17 @@ export async function registerRoutes(
         return res.status(400).json({ error: validationError.message });
       }
       
-      const { items, customerEmail, customerName } = parseResult.data;
+      const { items, customerEmail, customerName, isRenewal, existingUsername } = parseResult.data;
+
+      let existingCustomer = null;
+      if (isRenewal && existingUsername) {
+        existingCustomer = await storage.getCustomerByUsername(existingUsername);
+        if (!existingCustomer) {
+          return res.status(404).json({ 
+            error: "Username not found. Please check your username or select 'New Account' instead." 
+          });
+        }
+      }
 
       const productsWithQuantity: Array<{ product: any; quantity: number }> = [];
       
@@ -87,7 +100,12 @@ export async function registerRoutes(
       const realProductNames = productsWithQuantity.map(p => p.product.name).join(', ');
       const shadowProductIds = productsWithQuantity.map(p => p.product.shadowProductId || '').join(',');
 
-      const session = await stripe.checkout.sessions.create({
+      const hasFireStickProduct = productsWithQuantity.some(({ product }) => {
+        const name = (product.name || '').toLowerCase();
+        return name.includes('fire') || name.includes('stick') || name.includes('firestick');
+      });
+
+      const sessionConfig: any = {
         payment_method_types: ['card'],
         line_items: lineItems,
         mode: 'payment',
@@ -98,8 +116,22 @@ export async function registerRoutes(
           realProductIds,
           realProductNames,
           shadowProductIds,
+          isRenewal: isRenewal ? 'true' : 'false',
+          existingUsername: existingUsername || '',
+          existingCustomerId: existingCustomer?.id || '',
         },
-      });
+      };
+
+      if (hasFireStickProduct) {
+        sessionConfig.shipping_address_collection = {
+          allowed_countries: ['US', 'CA'],
+        };
+        sessionConfig.phone_number_collection = {
+          enabled: true,
+        };
+      }
+
+      const session = await stripe.checkout.sessions.create(sessionConfig);
 
       const totalAmount = productsWithQuantity.reduce(
         (sum, { product, quantity }) => sum + product.price * quantity, 
@@ -117,6 +149,9 @@ export async function registerRoutes(
         amount: totalAmount,
         status: 'pending',
         credentialsSent: false,
+        isRenewal: isRenewal || false,
+        existingUsername: existingUsername || null,
+        customerId: existingCustomer?.id || null,
       });
 
       res.json({ 
@@ -271,6 +306,115 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/admin/products/:id/sync-stripe-price", async (req, res) => {
+    try {
+      const { price, shadowName } = req.body;
+
+      if (!price || price <= 0) {
+        return res.status(400).json({ error: "Valid price is required" });
+      }
+
+      const existingProduct = await storage.getRealProduct(req.params.id);
+      if (!existingProduct) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+
+      let shadowProductId = existingProduct.shadowProductId;
+      
+      if (!shadowProductId) {
+        const productName = shadowName || `Service ${existingProduct.id}`;
+        const stripeProduct = await stripe.products.create({
+          name: productName,
+          description: `Shadow product for ${existingProduct.name}`,
+          metadata: {
+            realProductId: existingProduct.id,
+          },
+        });
+        shadowProductId = stripeProduct.id;
+      }
+
+      const priceInCents = Math.round(price);
+
+      const stripePrice = await stripe.prices.create({
+        product: shadowProductId,
+        unit_amount: priceInCents,
+        currency: 'usd',
+        metadata: {
+          realProductId: existingProduct.id,
+        },
+      });
+
+      const updatedProduct = await storage.updateRealProduct(req.params.id, {
+        price: priceInCents,
+        shadowProductId,
+        shadowPriceId: stripePrice.id,
+      });
+
+      res.json({ 
+        data: updatedProduct,
+        stripeProductId: shadowProductId,
+        stripePriceId: stripePrice.id,
+      });
+    } catch (error: any) {
+      console.error("Error syncing Stripe price:", error);
+      res.status(500).json({ error: `Failed to sync Stripe price: ${error.message}` });
+    }
+  });
+
+  app.post("/api/admin/products/create-with-stripe", async (req, res) => {
+    try {
+      const { id, name, description, price, imageUrl, category, shadowName } = req.body;
+
+      if (!id || !name || !price) {
+        return res.status(400).json({ error: "ID, name, and price are required" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+
+      const productName = shadowName || `Service ${id}`;
+      const stripeProduct = await stripe.products.create({
+        name: productName,
+        description: `Shadow product`,
+        metadata: {
+          realProductId: id,
+        },
+      });
+
+      const priceInCents = Math.round(price);
+
+      const stripePrice = await stripe.prices.create({
+        product: stripeProduct.id,
+        unit_amount: priceInCents,
+        currency: 'usd',
+        metadata: {
+          realProductId: id,
+        },
+      });
+
+      const product = await storage.createRealProduct({
+        id,
+        name,
+        description: description || null,
+        price: priceInCents,
+        imageUrl: imageUrl || null,
+        category: category || null,
+        shadowProductId: stripeProduct.id,
+        shadowPriceId: stripePrice.id,
+      });
+
+      res.json({ 
+        data: product,
+        stripeProductId: stripeProduct.id,
+        stripePriceId: stripePrice.id,
+      });
+    } catch (error: any) {
+      console.error("Error creating product with Stripe:", error);
+      res.status(500).json({ error: `Failed to create product: ${error.message}` });
+    }
+  });
+
   app.get("/api/admin/orders", async (req, res) => {
     try {
       const orders = await storage.getAllOrders();
@@ -316,6 +460,41 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Error resending credentials:", error);
       res.status(500).json({ error: "Failed to resend credentials" });
+    }
+  });
+
+  app.get("/api/admin/fulfillment", async (req, res) => {
+    try {
+      const orders = await storage.getFireStickOrdersForFulfillment();
+      res.json({ data: orders });
+    } catch (error: any) {
+      console.error("Error fetching fulfillment orders:", error);
+      res.status(500).json({ error: "Failed to fetch fulfillment orders" });
+    }
+  });
+
+  app.put("/api/admin/fulfillment/:id", async (req, res) => {
+    try {
+      const { fulfillmentStatus, amazonOrderId } = req.body;
+
+      const existingOrder = await storage.getOrder(req.params.id);
+      if (!existingOrder) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      const updates: any = {};
+      if (fulfillmentStatus !== undefined) {
+        updates.fulfillmentStatus = fulfillmentStatus;
+      }
+      if (amazonOrderId !== undefined) {
+        updates.amazonOrderId = amazonOrderId;
+      }
+
+      const order = await storage.updateOrder(req.params.id, updates);
+      res.json({ data: order });
+    } catch (error: any) {
+      console.error("Error updating fulfillment:", error);
+      res.status(500).json({ error: "Failed to update fulfillment" });
     }
   });
 
@@ -448,6 +627,59 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/track", async (req, res) => {
+    try {
+      const { sessionId, pageUrl, referrer, userAgent } = req.body;
+
+      if (!sessionId || !pageUrl) {
+        return res.status(400).json({ error: "Session ID and page URL are required" });
+      }
+
+      const ipAddress = req.headers['x-forwarded-for']?.toString().split(',')[0] || 
+                        req.headers['cf-connecting-ip']?.toString() ||
+                        req.socket.remoteAddress || 
+                        'unknown';
+
+      const { getGeoLocation } = await import('./geoLocationService');
+      const geoData = await getGeoLocation(ipAddress);
+
+      await storage.trackVisitor({
+        sessionId,
+        pageUrl,
+        referrer: referrer || null,
+        userAgent: userAgent || req.headers['user-agent'] || null,
+        ipAddress,
+        country: geoData.country,
+        countryCode: geoData.countryCode,
+        region: geoData.region,
+        regionCode: geoData.regionCode,
+        city: geoData.city,
+        latitude: geoData.latitude,
+        longitude: geoData.longitude,
+        timezone: geoData.timezone,
+        isp: geoData.isp,
+        isProxy: geoData.isProxy,
+      });
+
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error tracking visitor:", error);
+      res.status(500).json({ error: "Failed to track visitor" });
+    }
+  });
+
+  app.get("/api/admin/visitors/stats", async (req, res) => {
+    try {
+      const stats = await storage.getVisitorStats();
+      const { getGeoStats } = await import('./geoLocationService');
+      const geoStats = getGeoStats(stats.recentVisitors);
+      res.json({ data: { ...stats, ...geoStats } });
+    } catch (error: any) {
+      console.error("Error fetching visitor stats:", error);
+      res.status(500).json({ error: "Failed to fetch visitor stats" });
+    }
+  });
+
   app.get("/api/admin/storage/list", async (req, res) => {
     try {
       const supabaseUrl = process.env.VITE_SUPABASE_URL;
@@ -510,6 +742,215 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Error listing storage:", error);
       res.status(500).json({ error: "Failed to list storage" });
+    }
+  });
+
+  app.get("/api/page-edits/:pageId", async (req, res) => {
+    try {
+      const edits = await storage.getPageEdits(req.params.pageId);
+      res.json({ data: edits });
+    } catch (error: any) {
+      console.error("Error fetching page edits:", error);
+      res.status(500).json({ error: "Failed to fetch page edits" });
+    }
+  });
+
+  app.get("/api/admin/page-edits", async (req, res) => {
+    try {
+      const edits = await storage.getAllPageEdits();
+      res.json({ data: edits });
+    } catch (error: any) {
+      console.error("Error fetching all page edits:", error);
+      res.status(500).json({ error: "Failed to fetch page edits" });
+    }
+  });
+
+  app.post("/api/admin/page-edits", async (req, res) => {
+    try {
+      const { pageId, sectionId, elementId, elementType, content, imageUrl, isActive } = req.body;
+
+      if (!pageId || !sectionId || !elementId || !elementType) {
+        return res.status(400).json({ error: "Page ID, section ID, element ID, and element type are required" });
+      }
+
+      const edit = await storage.upsertPageEdit({
+        pageId,
+        sectionId,
+        elementId,
+        elementType,
+        content: content || null,
+        imageUrl: imageUrl || null,
+        isActive: isActive !== undefined ? isActive : true,
+      });
+
+      res.json({ data: edit });
+    } catch (error: any) {
+      console.error("Error saving page edit:", error);
+      res.status(500).json({ error: "Failed to save page edit" });
+    }
+  });
+
+  app.delete("/api/admin/page-edits/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deletePageEdit(req.params.id);
+      
+      if (deleted) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: "Page edit not found" });
+      }
+    } catch (error: any) {
+      console.error("Error deleting page edit:", error);
+      res.status(500).json({ error: "Failed to delete page edit" });
+    }
+  });
+
+  app.get("/api/admin/customers", async (req, res) => {
+    try {
+      const { search } = req.query;
+      let customersList;
+      
+      if (search && typeof search === 'string' && search.trim()) {
+        customersList = await storage.searchCustomers(search.trim());
+      } else {
+        customersList = await storage.getAllCustomers();
+      }
+      
+      res.json({ data: customersList });
+    } catch (error: any) {
+      console.error("Error fetching customers:", error);
+      res.status(500).json({ error: "Failed to fetch customers" });
+    }
+  });
+
+  app.get("/api/admin/customers/:id", async (req, res) => {
+    try {
+      const customer = await storage.getCustomer(req.params.id);
+      if (!customer) {
+        return res.status(404).json({ error: "Customer not found" });
+      }
+      res.json({ data: customer });
+    } catch (error: any) {
+      console.error("Error fetching customer:", error);
+      res.status(500).json({ error: "Failed to fetch customer" });
+    }
+  });
+
+  app.get("/api/admin/customers/:id/orders", async (req, res) => {
+    try {
+      const customer = await storage.getCustomer(req.params.id);
+      if (!customer) {
+        return res.status(404).json({ error: "Customer not found" });
+      }
+      
+      const customerOrders = await storage.getCustomerOrders(req.params.id);
+      res.json({ data: customerOrders });
+    } catch (error: any) {
+      console.error("Error fetching customer orders:", error);
+      res.status(500).json({ error: "Failed to fetch customer orders" });
+    }
+  });
+
+  app.post("/api/admin/customers", async (req, res) => {
+    try {
+      const parseResult = createCustomerSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        const validationError = fromZodError(parseResult.error);
+        return res.status(400).json({ error: validationError.message });
+      }
+
+      const existingByUsername = await storage.getCustomerByUsername(parseResult.data.username);
+      if (existingByUsername) {
+        return res.status(409).json({ error: "A customer with this username already exists" });
+      }
+
+      const customer = await storage.createCustomer(parseResult.data);
+      res.json({ data: customer });
+    } catch (error: any) {
+      console.error("Error creating customer:", error);
+      res.status(500).json({ error: "Failed to create customer" });
+    }
+  });
+
+  app.put("/api/admin/customers/:id", async (req, res) => {
+    try {
+      const parseResult = updateCustomerSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        const validationError = fromZodError(parseResult.error);
+        return res.status(400).json({ error: validationError.message });
+      }
+
+      const existingCustomer = await storage.getCustomer(req.params.id);
+      if (!existingCustomer) {
+        return res.status(404).json({ error: "Customer not found" });
+      }
+
+      if (parseResult.data.username && parseResult.data.username !== existingCustomer.username) {
+        const conflictingCustomer = await storage.getCustomerByUsername(parseResult.data.username);
+        if (conflictingCustomer) {
+          return res.status(409).json({ error: "A customer with this username already exists" });
+        }
+      }
+
+      const customer = await storage.updateCustomer(req.params.id, parseResult.data);
+      res.json({ data: customer });
+    } catch (error: any) {
+      console.error("Error updating customer:", error);
+      res.status(500).json({ error: "Failed to update customer" });
+    }
+  });
+
+  app.delete("/api/admin/customers/:id", async (req, res) => {
+    try {
+      const existingCustomer = await storage.getCustomer(req.params.id);
+      if (!existingCustomer) {
+        return res.status(404).json({ error: "Customer not found" });
+      }
+
+      const deleted = await storage.deleteCustomer(req.params.id);
+      
+      if (deleted) {
+        res.json({ success: true });
+      } else {
+        res.status(500).json({ error: "Failed to delete customer" });
+      }
+    } catch (error: any) {
+      console.error("Error deleting customer:", error);
+      res.status(500).json({ error: "Failed to delete customer" });
+    }
+  });
+
+  app.get("/api/customer/lookup/:username", async (req, res) => {
+    try {
+      const customer = await storage.getCustomerByUsername(req.params.username);
+      if (!customer) {
+        return res.status(404).json({ error: "Customer not found", exists: false });
+      }
+      
+      res.json({ 
+        exists: true,
+        data: {
+          id: customer.id,
+          username: customer.username,
+          email: customer.email,
+          fullName: customer.fullName,
+          status: customer.status,
+          totalOrders: customer.totalOrders,
+        }
+      });
+    } catch (error: any) {
+      console.error("Error looking up customer:", error);
+      res.status(500).json({ error: "Failed to lookup customer" });
+    }
+  });
+
+  app.get("/api/admin/iptv-customers", async (req, res) => {
+    try {
+      const iptvOrders = await storage.getIPTVOrders();
+      res.json({ data: iptvOrders });
+    } catch (error: any) {
+      console.error("Error fetching IPTV orders:", error);
+      res.status(500).json({ error: "Failed to fetch IPTV orders" });
     }
   });
 

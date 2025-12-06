@@ -2,7 +2,12 @@ import Stripe from 'stripe';
 
 let connectionSettings: any;
 
-async function getCredentials() {
+function isReplitEnvironment(): boolean {
+  return !!(process.env.REPLIT_CONNECTORS_HOSTNAME && 
+    (process.env.REPL_IDENTITY || process.env.WEB_REPL_RENEWAL));
+}
+
+async function getReplitCredentials() {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? 'repl ' + process.env.REPL_IDENTITY
@@ -44,6 +49,27 @@ async function getCredentials() {
   };
 }
 
+function getEnvCredentials() {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  const publishableKey = process.env.STRIPE_PUBLISHABLE_KEY || process.env.VITE_STRIPE_PUBLISHABLE_KEY;
+  
+  if (!secretKey) {
+    throw new Error('STRIPE_SECRET_KEY environment variable is required');
+  }
+  if (!publishableKey) {
+    throw new Error('STRIPE_PUBLISHABLE_KEY environment variable is required');
+  }
+  
+  return { secretKey, publishableKey };
+}
+
+async function getCredentials() {
+  if (isReplitEnvironment()) {
+    return getReplitCredentials();
+  }
+  return getEnvCredentials();
+}
+
 export async function getUncachableStripeClient() {
   const { secretKey } = await getCredentials();
 
@@ -62,6 +88,14 @@ export async function getStripeSecretKey() {
   return secretKey;
 }
 
+export function getStripeWebhookSecret() {
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.warn('STRIPE_WEBHOOK_SECRET not set - webhook signature verification will fail');
+  }
+  return webhookSecret;
+}
+
 let stripeSync: any = null;
 
 export async function getStripeSync() {
@@ -73,6 +107,7 @@ export async function getStripeSync() {
       poolConfig: {
         connectionString: process.env.DATABASE_URL!,
         max: 2,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
       },
       stripeSecretKey: secretKey,
     });
