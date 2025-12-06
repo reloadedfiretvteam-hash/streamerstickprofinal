@@ -59,10 +59,21 @@ app.get('/api/health', (c) => {
 });
 
 app.get('/api/debug', (c) => {
+  const url = c.env.DATABASE_URL || '';
+  const hasPort5432 = url.includes(':5432');
+  const hasPort6543 = url.includes(':6543');
+  const hasPooler = url.includes('pooler.supabase.com');
+  const hasBrackets = url.includes('[') || url.includes(']');
+  
   return c.json({
     hasDbUrl: !!c.env.DATABASE_URL,
-    dbUrlLength: c.env.DATABASE_URL?.length || 0,
-    dbUrlPrefix: c.env.DATABASE_URL?.substring(0, 15) || 'none',
+    dbUrlLength: url.length,
+    dbUrlPrefix: url.substring(0, 20) || 'none',
+    dbUrlSuffix: url.substring(url.length - 20) || 'none',
+    hasPort5432,
+    hasPort6543,
+    hasPooler,
+    hasBrackets,
     hasStripeKey: !!c.env.STRIPE_SECRET_KEY,
     hasResendKey: !!c.env.RESEND_API_KEY,
     nodeEnv: c.env.NODE_ENV || 'not set',
