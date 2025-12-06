@@ -1,12 +1,10 @@
-// Script to push code to GitHub using Octokit API
-// Uses Replit's GitHub integration for authentication
-
 import { Octokit } from '@octokit/rest';
 import * as fs from 'fs';
 import * as path from 'path';
 
 const REPO_OWNER = 'reloadedfiretvteam-hash';
 const REPO_NAME = 'streamerstickprofinal';
+const TARGET_BRANCH = 'clean-main';
 
 let connectionSettings: any;
 
@@ -49,7 +47,6 @@ async function getUncachableGitHubClient() {
   return new Octokit({ auth: accessToken });
 }
 
-// Files and directories to exclude
 const EXCLUDE_PATTERNS = [
   'node_modules',
   '.git',
@@ -90,8 +87,7 @@ function getAllFiles(dir: string, baseDir: string = ''): { path: string; content
         const content = fs.readFileSync(fullPath, 'utf-8');
         files.push({ path: relativePath, content });
       } catch (e) {
-        // Skip binary files or files that can't be read as text
-        console.log(`Skipping binary/unreadable file: ${relativePath}`);
+        console.log('Skipping binary/unreadable file: ' + relativePath);
       }
     }
   }
@@ -103,17 +99,23 @@ async function pushToGitHub() {
   console.log('Getting GitHub client...');
   const octokit = await getUncachableGitHubClient();
   
-  console.log(`Pushing to ${REPO_OWNER}/${REPO_NAME}...`);
+  console.log('Listing branches...');
+  const { data: branches } = await octokit.repos.listBranches({
+    owner: REPO_OWNER,
+    repo: REPO_NAME
+  });
+  console.log('Available branches: ' + branches.map(b => b.name).join(', '));
   
-  // Get the current commit SHA for main branch
-  let currentCommitSha: string;
-  let currentTreeSha: string;
+  console.log('\nPushing to ' + REPO_OWNER + '/' + REPO_NAME + ' branch: ' + TARGET_BRANCH + '...');
+  
+  let currentCommitSha: string = '';
+  let currentTreeSha: string = '';
   
   try {
     const { data: ref } = await octokit.git.getRef({
       owner: REPO_OWNER,
       repo: REPO_NAME,
-      ref: 'heads/main'
+      ref: 'heads/' + TARGET_BRANCH
     });
     currentCommitSha = ref.object.sha;
     
@@ -123,37 +125,15 @@ async function pushToGitHub() {
       commit_sha: currentCommitSha
     });
     currentTreeSha = commit.tree.sha;
-    console.log(`Current commit: ${currentCommitSha}`);
+    console.log('Current commit on ' + TARGET_BRANCH + ': ' + currentCommitSha);
   } catch (e: any) {
-    // Try master branch
-    try {
-      const { data: ref } = await octokit.git.getRef({
-        owner: REPO_OWNER,
-        repo: REPO_NAME,
-        ref: 'heads/master'
-      });
-      currentCommitSha = ref.object.sha;
-      
-      const { data: commit } = await octokit.git.getCommit({
-        owner: REPO_OWNER,
-        repo: REPO_NAME,
-        commit_sha: currentCommitSha
-      });
-      currentTreeSha = commit.tree.sha;
-      console.log(`Current commit (master): ${currentCommitSha}`);
-    } catch (e2) {
-      console.log('No existing commits found, creating initial commit...');
-      currentCommitSha = '';
-      currentTreeSha = '';
-    }
+    console.log('Branch ' + TARGET_BRANCH + ' not found, will create it...');
   }
   
-  // Get all files
   console.log('Collecting files...');
   const files = getAllFiles('.');
-  console.log(`Found ${files.length} files to push`);
+  console.log('Found ' + files.length + ' files to push');
   
-  // Create blobs for each file
   console.log('Creating blobs...');
   const treeItems: { path: string; mode: '100644'; type: 'blob'; sha: string }[] = [];
   
@@ -172,24 +152,21 @@ async function pushToGitHub() {
         type: 'blob',
         sha: blob.sha
       });
-      console.log(`  Created blob for: ${file.path}`);
+      console.log('  Created blob for: ' + file.path);
     } catch (e: any) {
-      console.error(`  Failed to create blob for ${file.path}: ${e.message}`);
+      console.error('  Failed to create blob for ' + file.path + ': ' + e.message);
     }
   }
   
-  // Create tree
   console.log('Creating tree...');
   const { data: tree } = await octokit.git.createTree({
     owner: REPO_OWNER,
     repo: REPO_NAME,
-    tree: treeItems,
-    base_tree: currentTreeSha || undefined
+    tree: treeItems
   });
   
-  // Create commit
   console.log('Creating commit...');
-  const commitMessage = 'Update StreamStickPro - Added 6-month IPTV, fixed multi-item checkout';
+  const commitMessage = 'StreamStickPro - Complete codebase with 6-month IPTV and multi-item checkout';
   const commitParams: any = {
     owner: REPO_OWNER,
     repo: REPO_NAME,
@@ -202,42 +179,29 @@ async function pushToGitHub() {
   }
   
   const { data: newCommit } = await octokit.git.createCommit(commitParams);
-  console.log(`Created commit: ${newCommit.sha}`);
+  console.log('Created commit: ' + newCommit.sha);
   
-  // Update reference
-  console.log('Updating branch reference...');
+  console.log('Updating branch ' + TARGET_BRANCH + '...');
   try {
     await octokit.git.updateRef({
       owner: REPO_OWNER,
       repo: REPO_NAME,
-      ref: 'heads/main',
+      ref: 'heads/' + TARGET_BRANCH,
       sha: newCommit.sha,
       force: true
     });
-    console.log('Successfully pushed to main branch!');
+    console.log('Successfully pushed to ' + TARGET_BRANCH + ' branch!');
   } catch (e) {
-    try {
-      await octokit.git.updateRef({
-        owner: REPO_OWNER,
-        repo: REPO_NAME,
-        ref: 'heads/master',
-        sha: newCommit.sha,
-        force: true
-      });
-      console.log('Successfully pushed to master branch!');
-    } catch (e2) {
-      // Create main branch if it doesn't exist
-      await octokit.git.createRef({
-        owner: REPO_OWNER,
-        repo: REPO_NAME,
-        ref: 'refs/heads/main',
-        sha: newCommit.sha
-      });
-      console.log('Created and pushed to main branch!');
-    }
+    await octokit.git.createRef({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      ref: 'refs/heads/' + TARGET_BRANCH,
+      sha: newCommit.sha
+    });
+    console.log('Created and pushed to ' + TARGET_BRANCH + ' branch!');
   }
   
-  console.log(`\nDone! View your code at: https://github.com/${REPO_OWNER}/${REPO_NAME}`);
+  console.log('\nDone! View your code at: https://github.com/' + REPO_OWNER + '/' + REPO_NAME + '/tree/' + TARGET_BRANCH);
 }
 
 pushToGitHub().catch(console.error);
