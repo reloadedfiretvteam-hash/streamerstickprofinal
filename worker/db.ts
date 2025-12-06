@@ -5,7 +5,15 @@ import * as schema from '../shared/schema';
 neonConfig.pipelineConnect = false;
 
 export function createDb(databaseUrl: string) {
-  const pool = new Pool({ connectionString: databaseUrl });
+  const cleanUrl = databaseUrl.trim().replace(/[\r\n]/g, '');
+  
+  try {
+    new URL(cleanUrl);
+  } catch (urlError: any) {
+    throw new Error(`Invalid database URL format: ${urlError.message}. URL length: ${cleanUrl.length}, starts with: ${cleanUrl.substring(0, 20)}`);
+  }
+  
+  const pool = new Pool({ connectionString: cleanUrl });
   return drizzle(pool, { schema });
 }
 
