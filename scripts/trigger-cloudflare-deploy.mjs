@@ -9,7 +9,7 @@ async function main() {
     process.exit(1);
   }
   
-  const projectName = 'streamerstickprofinal';
+  const projectName = 'streamerstickpro-live';
   
   console.log(`Getting latest deployment for project: ${projectName}\n`);
   
@@ -73,7 +73,7 @@ async function main() {
   console.log(`  URL: ${retryData.result.url}`);
   
   console.log('\n📝 Note: Wait 2-5 minutes for the deployment to complete.');
-  console.log('   Then verify at: https://streamstickpro.pages.dev');
+  console.log('   Then verify at: https://streamerstickpro-live.pages.dev');
 }
 
 main().catch(err => {
