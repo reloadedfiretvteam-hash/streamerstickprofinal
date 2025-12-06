@@ -1,20 +1,13 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
+import { neon, neonConfig } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from '../shared/schema';
 
-neonConfig.pipelineConnect = false;
+neonConfig.fetchConnectionCache = true;
 
 export function createDb(databaseUrl: string) {
-  const cleanUrl = databaseUrl.trim().replace(/[\r\n]/g, '');
-  
-  try {
-    new URL(cleanUrl);
-  } catch (urlError: any) {
-    throw new Error(`Invalid database URL format: ${urlError.message}. URL length: ${cleanUrl.length}, starts with: ${cleanUrl.substring(0, 20)}`);
-  }
-  
-  const pool = new Pool({ connectionString: cleanUrl });
-  return drizzle(pool, { schema });
+  const cleanUrl = databaseUrl.trim().replace(/[\r\n\s]/g, '');
+  const sql = neon(cleanUrl);
+  return drizzle(sql, { schema });
 }
 
 export { schema };
