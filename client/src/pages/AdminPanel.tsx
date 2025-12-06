@@ -31,7 +31,10 @@ import {
   Loader2,
   Palette,
   Type,
-  ExternalLink
+  ExternalLink,
+  Truck,
+  Copy,
+  ShoppingCart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,6 +77,25 @@ interface PageEdit {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+interface FulfillmentOrder {
+  id: string;
+  customerEmail: string;
+  customerName: string | null;
+  realProductName: string | null;
+  amount: number;
+  status: string | null;
+  shippingName: string | null;
+  shippingPhone: string | null;
+  shippingStreet: string | null;
+  shippingCity: string | null;
+  shippingState: string | null;
+  shippingZip: string | null;
+  shippingCountry: string | null;
+  fulfillmentStatus: string | null;
+  amazonOrderId: string | null;
+  createdAt: string | null;
 }
 
 interface Product {
@@ -132,6 +154,10 @@ export default function AdminPanel() {
   const [loadingEdits, setLoadingEdits] = useState(true);
   const [editingPageEdit, setEditingPageEdit] = useState<Partial<PageEdit> | null>(null);
 
+  const [fulfillmentOrders, setFulfillmentOrders] = useState<FulfillmentOrder[]>([]);
+  const [loadingFulfillment, setLoadingFulfillment] = useState(true);
+  const [updatingFulfillment, setUpdatingFulfillment] = useState<string | null>(null);
+
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -141,6 +167,7 @@ export default function AdminPanel() {
     loadVisitorStats();
     loadProducts();
     loadPageEdits();
+    loadFulfillmentOrders();
     
     const interval = setInterval(() => {
       loadVisitorStats();
@@ -224,6 +251,73 @@ export default function AdminPanel() {
       console.error('Error loading page edits:', error);
     } finally {
       setLoadingEdits(false);
+    }
+  };
+
+  const loadFulfillmentOrders = async () => {
+    setLoadingFulfillment(true);
+    try {
+      const response = await fetch('/api/admin/fulfillment');
+      const result = await response.json();
+      if (result.data) {
+        setFulfillmentOrders(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading fulfillment orders:', error);
+    } finally {
+      setLoadingFulfillment(false);
+    }
+  };
+
+  const updateFulfillmentOrder = async (orderId: string, updates: { fulfillmentStatus?: string; amazonOrderId?: string }) => {
+    setUpdatingFulfillment(orderId);
+    try {
+      const response = await fetch(`/api/admin/fulfillment/${orderId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+
+      if (response.ok) {
+        showToast('Fulfillment updated successfully!', 'success');
+        loadFulfillmentOrders();
+      } else {
+        showToast('Failed to update fulfillment', 'error');
+      }
+    } catch (error) {
+      console.error('Error updating fulfillment:', error);
+      showToast('Failed to update fulfillment', 'error');
+    } finally {
+      setUpdatingFulfillment(null);
+    }
+  };
+
+  const copyShippingAddress = async (order: FulfillmentOrder) => {
+    const addressParts = [
+      order.shippingName,
+      order.shippingStreet,
+      `${order.shippingCity}, ${order.shippingState} ${order.shippingZip}`,
+      order.shippingCountry
+    ].filter(Boolean);
+    
+    const address = addressParts.join('\n');
+    
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(address);
+        showToast('Address copied to clipboard!', 'success');
+      } catch (error) {
+        console.error('Failed to copy address:', error);
+        showToast('Failed to copy address', 'error');
+      }
+    } else {
+      showToast('Clipboard not available', 'error');
+    }
+  };
+
+  const openAmazonFireStick = () => {
+    if (typeof window !== 'undefined') {
+      window.open('https://www.amazon.com/s?k=fire+tv+stick+4k', '_blank');
     }
   };
 
@@ -540,6 +634,19 @@ export default function AdminPanel() {
             data-testid="nav-visual-editor"
           >
             <Palette className="w-4 h-4 mr-3" /> Visual Editor
+          </Button>
+          <Button 
+            variant={activeSection === "fulfillment" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => setActiveSection("fulfillment")}
+            data-testid="nav-fulfillment"
+          >
+            <Truck className="w-4 h-4 mr-3" /> Fulfillment
+            {fulfillmentOrders.filter(o => o.fulfillmentStatus === 'pending').length > 0 && (
+              <Badge className="ml-auto bg-orange-500 text-white text-xs">
+                {fulfillmentOrders.filter(o => o.fulfillmentStatus === 'pending').length}
+              </Badge>
+            )}
           </Button>
           <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5">
             <FileText className="w-4 h-4 mr-3" /> Blog Posts
@@ -1181,6 +1288,214 @@ export default function AdminPanel() {
                       <p className="text-sm text-gray-400">Open the live site to see your changes applied in real-time.</p>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeSection === "fulfillment" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold flex items-center gap-3">
+                    <Truck className="w-8 h-8 text-orange-500" />
+                    Fire Stick Fulfillment
+                  </h2>
+                  <p className="text-gray-400">Manage and ship Fire Stick orders to customers</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={loadFulfillmentOrders} 
+                    className="bg-gray-700 hover:bg-gray-600"
+                    data-testid="button-refresh-fulfillment"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Refresh
+                  </Button>
+                  <Button 
+                    onClick={openAmazonFireStick}
+                    className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600"
+                    data-testid="button-order-amazon"
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    Order on Amazon
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Clock className="w-8 h-8 opacity-80" />
+                    <span className="text-2xl font-bold" data-testid="text-pending-count">
+                      {fulfillmentOrders.filter(o => o.fulfillmentStatus === 'pending').length}
+                    </span>
+                  </div>
+                  <p className="text-yellow-100 text-sm">Pending Orders</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <ShoppingCart className="w-8 h-8 opacity-80" />
+                    <span className="text-2xl font-bold" data-testid="text-ordered-count">
+                      {fulfillmentOrders.filter(o => o.fulfillmentStatus === 'ordered').length}
+                    </span>
+                  </div>
+                  <p className="text-blue-100 text-sm">Ordered on Amazon</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Truck className="w-8 h-8 opacity-80" />
+                    <span className="text-2xl font-bold" data-testid="text-shipped-count">
+                      {fulfillmentOrders.filter(o => o.fulfillmentStatus === 'shipped').length}
+                    </span>
+                  </div>
+                  <p className="text-purple-100 text-sm">Shipped</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <CheckCircle className="w-8 h-8 opacity-80" />
+                    <span className="text-2xl font-bold" data-testid="text-delivered-count">
+                      {fulfillmentOrders.filter(o => o.fulfillmentStatus === 'delivered').length}
+                    </span>
+                  </div>
+                  <p className="text-green-100 text-sm">Delivered</p>
+                </div>
+              </div>
+
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Package className="w-5 h-5 text-orange-500" />
+                    Order Queue
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Fire Stick orders requiring fulfillment. Copy addresses and track Amazon orders.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {loadingFulfillment ? (
+                    <div className="p-8 text-center text-gray-400">
+                      <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin" />
+                      Loading fulfillment orders...
+                    </div>
+                  ) : fulfillmentOrders.length === 0 ? (
+                    <div className="p-8 text-center text-gray-400">
+                      <Truck className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg mb-2">No Fire Stick orders to fulfill</p>
+                      <p className="text-sm">Orders with Fire Stick products will appear here once paid.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {fulfillmentOrders.map((order) => (
+                        <div 
+                          key={order.id} 
+                          className="bg-gray-700/50 rounded-xl p-5 border border-gray-600"
+                          data-testid={`fulfillment-order-${order.id}`}
+                        >
+                          <div className="flex items-start justify-between mb-4">
+                            <div>
+                              <div className="flex items-center gap-3">
+                                <h4 className="font-bold text-white text-lg">
+                                  {order.customerName || order.customerEmail}
+                                </h4>
+                                <Badge className={
+                                  order.fulfillmentStatus === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                                  order.fulfillmentStatus === 'ordered' ? 'bg-blue-500/20 text-blue-400' :
+                                  order.fulfillmentStatus === 'shipped' ? 'bg-purple-500/20 text-purple-400' :
+                                  order.fulfillmentStatus === 'delivered' ? 'bg-green-500/20 text-green-400' :
+                                  'bg-gray-500/20 text-gray-400'
+                                }>
+                                  {order.fulfillmentStatus || 'pending'}
+                                </Badge>
+                              </div>
+                              <p className="text-gray-400 text-sm">{order.customerEmail}</p>
+                              <p className="text-orange-400 font-semibold mt-1">{order.realProductName}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-green-400">
+                                ${(order.amount / 100).toFixed(2)}
+                              </p>
+                              <p className="text-gray-400 text-sm">
+                                {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Unknown date'}
+                              </p>
+                            </div>
+                          </div>
+
+                          {order.shippingStreet && (
+                            <div className="bg-gray-800 rounded-lg p-4 mb-4">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <p className="text-sm text-gray-400 mb-1">Shipping Address</p>
+                                  <p className="text-white font-medium">{order.shippingName}</p>
+                                  <p className="text-gray-300">{order.shippingStreet}</p>
+                                  <p className="text-gray-300">
+                                    {order.shippingCity}, {order.shippingState} {order.shippingZip}
+                                  </p>
+                                  <p className="text-gray-300">{order.shippingCountry}</p>
+                                  {order.shippingPhone && (
+                                    <p className="text-gray-400 mt-1">Phone: {order.shippingPhone}</p>
+                                  )}
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => copyShippingAddress(order)}
+                                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                                  data-testid={`button-copy-address-${order.id}`}
+                                >
+                                  <Copy className="w-4 h-4 mr-2" />
+                                  Copy Address
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-4">
+                            <div className="flex-1">
+                              <label className="block text-xs text-gray-400 mb-1">Status</label>
+                              <select
+                                value={order.fulfillmentStatus || 'pending'}
+                                onChange={(e) => updateFulfillmentOrder(order.id, { fulfillmentStatus: e.target.value })}
+                                disabled={updatingFulfillment === order.id}
+                                className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 text-sm"
+                                data-testid={`select-status-${order.id}`}
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="ordered">Ordered on Amazon</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                              </select>
+                            </div>
+                            <div className="flex-1">
+                              <label className="block text-xs text-gray-400 mb-1">Amazon Order ID</label>
+                              <Input
+                                placeholder="Enter Amazon order ID..."
+                                value={order.amazonOrderId || ''}
+                                onChange={(e) => updateFulfillmentOrder(order.id, { amazonOrderId: e.target.value })}
+                                disabled={updatingFulfillment === order.id}
+                                className="bg-gray-700 border-gray-600 text-white text-sm"
+                                data-testid={`input-amazon-id-${order.id}`}
+                              />
+                            </div>
+                            <div className="pt-5">
+                              <Button
+                                onClick={openAmazonFireStick}
+                                className="bg-orange-500 hover:bg-orange-600"
+                                size="sm"
+                                data-testid={`button-amazon-${order.id}`}
+                              >
+                                <ExternalLink className="w-4 h-4 mr-2" />
+                                Amazon
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
