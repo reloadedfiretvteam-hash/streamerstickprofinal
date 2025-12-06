@@ -109,3 +109,24 @@ export const updateOrderRequestSchema = z.object({
 });
 
 export type UpdateOrderRequest = z.infer<typeof updateOrderRequestSchema>;
+
+export const visitors = pgTable("visitors", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: text("session_id").notNull(),
+  pageUrl: text("page_url").notNull(),
+  referrer: text("referrer"),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("visitors_session_idx").on(table.sessionId),
+  index("visitors_created_at_idx").on(table.createdAt),
+]);
+
+export const insertVisitorSchema = createInsertSchema(visitors).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertVisitor = z.infer<typeof insertVisitorSchema>;
+export type Visitor = typeof visitors.$inferSelect;

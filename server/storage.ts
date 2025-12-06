@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, desc, gte } from "drizzle-orm";
 import { db } from "./db";
 import {
   type User,
@@ -7,9 +7,12 @@ import {
   type InsertOrder,
   type RealProduct,
   type InsertRealProduct,
+  type Visitor,
+  type InsertVisitor,
   users,
   orders,
   realProducts,
+  visitors,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -31,6 +34,16 @@ export interface IStorage {
   createRealProduct(product: InsertRealProduct): Promise<RealProduct>;
   updateRealProduct(id: string, updates: Partial<InsertRealProduct>): Promise<RealProduct | undefined>;
   deleteRealProduct(id: string): Promise<boolean>;
+  
+  trackVisitor(visitor: InsertVisitor): Promise<Visitor>;
+  getVisitors(since?: Date): Promise<Visitor[]>;
+  getVisitorStats(): Promise<{
+    totalVisitors: number;
+    todayVisitors: number;
+    weekVisitors: number;
+    onlineNow: number;
+    recentVisitors: Visitor[];
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -109,6 +122,47 @@ export class DatabaseStorage implements IStorage {
   async deleteRealProduct(id: string): Promise<boolean> {
     const result = await db.delete(realProducts).where(eq(realProducts.id, id)).returning();
     return result.length > 0;
+  }
+
+  async trackVisitor(visitor: InsertVisitor): Promise<Visitor> {
+    const [newVisitor] = await db.insert(visitors).values(visitor).returning();
+    return newVisitor;
+  }
+
+  async getVisitors(since?: Date): Promise<Visitor[]> {
+    if (since) {
+      return db.select().from(visitors).where(gte(visitors.createdAt, since)).orderBy(desc(visitors.createdAt));
+    }
+    return db.select().from(visitors).orderBy(desc(visitors.createdAt)).limit(1000);
+  }
+
+  async getVisitorStats(): Promise<{
+    totalVisitors: number;
+    todayVisitors: number;
+    weekVisitors: number;
+    onlineNow: number;
+    recentVisitors: Visitor[];
+  }> {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+
+    const allVisitors = await db.select().from(visitors).orderBy(desc(visitors.createdAt));
+    
+    const totalVisitors = allVisitors.length;
+    const todayVisitors = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= today).length;
+    const weekVisitors = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= weekAgo).length;
+    const onlineNow = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= fiveMinutesAgo).length;
+    const recentVisitors = allVisitors.slice(0, 10);
+
+    return {
+      totalVisitors,
+      todayVisitors,
+      weekVisitors,
+      onlineNow,
+      recentVisitors,
+    };
   }
 }
 

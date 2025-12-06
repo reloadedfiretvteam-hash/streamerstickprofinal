@@ -271,6 +271,111 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/admin/products/:id/sync-stripe-price", async (req, res) => {
+    try {
+      const { price, shadowName } = req.body;
+
+      if (!price || price <= 0) {
+        return res.status(400).json({ error: "Valid price is required" });
+      }
+
+      const existingProduct = await storage.getRealProduct(req.params.id);
+      if (!existingProduct) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+
+      let shadowProductId = existingProduct.shadowProductId;
+      
+      if (!shadowProductId) {
+        const productName = shadowName || `Service ${existingProduct.id}`;
+        const stripeProduct = await stripe.products.create({
+          name: productName,
+          description: `Shadow product for ${existingProduct.name}`,
+          metadata: {
+            realProductId: existingProduct.id,
+          },
+        });
+        shadowProductId = stripeProduct.id;
+      }
+
+      const stripePrice = await stripe.prices.create({
+        product: shadowProductId,
+        unit_amount: Math.round(price * 100),
+        currency: 'usd',
+        metadata: {
+          realProductId: existingProduct.id,
+        },
+      });
+
+      const updatedProduct = await storage.updateRealProduct(req.params.id, {
+        price,
+        shadowProductId,
+        shadowPriceId: stripePrice.id,
+      });
+
+      res.json({ 
+        data: updatedProduct,
+        stripeProductId: shadowProductId,
+        stripePriceId: stripePrice.id,
+      });
+    } catch (error: any) {
+      console.error("Error syncing Stripe price:", error);
+      res.status(500).json({ error: `Failed to sync Stripe price: ${error.message}` });
+    }
+  });
+
+  app.post("/api/admin/products/create-with-stripe", async (req, res) => {
+    try {
+      const { id, name, description, price, imageUrl, category, shadowName } = req.body;
+
+      if (!id || !name || !price) {
+        return res.status(400).json({ error: "ID, name, and price are required" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+
+      const productName = shadowName || `Service ${id}`;
+      const stripeProduct = await stripe.products.create({
+        name: productName,
+        description: `Shadow product`,
+        metadata: {
+          realProductId: id,
+        },
+      });
+
+      const stripePrice = await stripe.prices.create({
+        product: stripeProduct.id,
+        unit_amount: Math.round(price * 100),
+        currency: 'usd',
+        metadata: {
+          realProductId: id,
+        },
+      });
+
+      const product = await storage.createRealProduct({
+        id,
+        name,
+        description: description || null,
+        price,
+        imageUrl: imageUrl || null,
+        category: category || null,
+        shadowProductId: stripeProduct.id,
+        shadowPriceId: stripePrice.id,
+      });
+
+      res.json({ 
+        data: product,
+        stripeProductId: stripeProduct.id,
+        stripePriceId: stripePrice.id,
+      });
+    } catch (error: any) {
+      console.error("Error creating product with Stripe:", error);
+      res.status(500).json({ error: `Failed to create product: ${error.message}` });
+    }
+  });
+
   app.get("/api/admin/orders", async (req, res) => {
     try {
       const orders = await storage.getAllOrders();
@@ -445,6 +550,43 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Error processing free trial:", error);
       res.status(500).json({ error: "Failed to process trial request. Please try again." });
+    }
+  });
+
+  app.post("/api/track", async (req, res) => {
+    try {
+      const { sessionId, pageUrl, referrer, userAgent } = req.body;
+
+      if (!sessionId || !pageUrl) {
+        return res.status(400).json({ error: "Session ID and page URL are required" });
+      }
+
+      const ipAddress = req.headers['x-forwarded-for']?.toString().split(',')[0] || 
+                        req.socket.remoteAddress || 
+                        'unknown';
+
+      await storage.trackVisitor({
+        sessionId,
+        pageUrl,
+        referrer: referrer || null,
+        userAgent: userAgent || req.headers['user-agent'] || null,
+        ipAddress,
+      });
+
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error tracking visitor:", error);
+      res.status(500).json({ error: "Failed to track visitor" });
+    }
+  });
+
+  app.get("/api/admin/visitors/stats", async (req, res) => {
+    try {
+      const stats = await storage.getVisitorStats();
+      res.json({ data: stats });
+    } catch (error: any) {
+      console.error("Error fetching visitor stats:", error);
+      res.status(500).json({ error: "Failed to fetch visitor stats" });
     }
   });
 

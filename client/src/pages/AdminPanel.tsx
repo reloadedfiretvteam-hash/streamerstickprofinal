@@ -132,72 +132,45 @@ export default function AdminPanel() {
   const loadVisitorStats = async () => {
     try {
       setLoadingStats(true);
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+      
+      const response = await fetch('/api/admin/visitors/stats');
+      const result = await response.json();
+      
+      if (result.data) {
+        const { totalVisitors, todayVisitors, weekVisitors, onlineNow, recentVisitors } = result.data;
+        
+        const deviceBreakdown = {
+          desktop: recentVisitors.filter((v: any) => {
+            const ua = (v.userAgent || '').toLowerCase();
+            return !ua.includes('mobile') && !ua.includes('tablet');
+          }).length,
+          mobile: recentVisitors.filter((v: any) => {
+            const ua = (v.userAgent || '').toLowerCase();
+            return ua.includes('mobile') && !ua.includes('tablet');
+          }).length,
+          tablet: recentVisitors.filter((v: any) => {
+            const ua = (v.userAgent || '').toLowerCase();
+            return ua.includes('tablet');
+          }).length
+        };
 
-      let visitorsData: any[] = [];
+        const mappedRecentVisitors = recentVisitors.map((v: any) => ({
+          id: v.id || 'unknown',
+          page_url: v.pageUrl || '/',
+          referrer: v.referrer || null,
+          user_agent: v.userAgent || 'Unknown',
+          created_at: v.createdAt || new Date().toISOString()
+        }));
 
-      const { data: visitors1, error: err1 } = await supabase
-        .from('visitors')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!err1 && visitors1) {
-        visitorsData = visitors1;
-      } else {
-        const { data: visitors2 } = await supabase
-          .from('visitor_analytics')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (visitors2) {
-          visitorsData = visitors2.map(v => ({
-            ...v,
-            page_url: v.page_view || '/',
-            referrer: v.referrer || null,
-            user_agent: v.device_type || 'Unknown'
-          }));
-        }
+        setVisitorStats({
+          totalVisitors,
+          todayVisitors,
+          weekVisitors,
+          onlineNow,
+          deviceBreakdown,
+          recentVisitors: mappedRecentVisitors
+        });
       }
-
-      const totalVisitors = visitorsData.length;
-      const todayVisitors = visitorsData.filter(v => new Date(v.created_at) >= today).length;
-      const weekVisitors = visitorsData.filter(v => new Date(v.created_at) >= weekAgo).length;
-      const onlineNow = visitorsData.filter(v => new Date(v.created_at) >= fiveMinutesAgo).length;
-
-      const deviceBreakdown = {
-        desktop: visitorsData.filter(v => {
-          const ua = (v.user_agent || '').toLowerCase();
-          return !ua.includes('mobile') && !ua.includes('tablet');
-        }).length,
-        mobile: visitorsData.filter(v => {
-          const ua = (v.user_agent || '').toLowerCase();
-          return ua.includes('mobile') && !ua.includes('tablet');
-        }).length,
-        tablet: visitorsData.filter(v => {
-          const ua = (v.user_agent || '').toLowerCase();
-          return ua.includes('tablet');
-        }).length
-      };
-
-      const recentVisitors = visitorsData.slice(0, 10).map(v => ({
-        id: v.id || 'unknown',
-        page_url: v.page_url || '/',
-        referrer: v.referrer || null,
-        user_agent: v.user_agent || 'Unknown',
-        created_at: v.created_at || new Date().toISOString()
-      }));
-
-      setVisitorStats({
-        totalVisitors,
-        todayVisitors,
-        weekVisitors,
-        onlineNow,
-        deviceBreakdown,
-        recentVisitors
-      });
     } catch (error) {
       console.error('Error loading visitor statistics:', error);
     } finally {

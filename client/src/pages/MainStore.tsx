@@ -5,7 +5,7 @@ import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, Me
 import { useCart } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { supabase, getStorageUrl } from "@/lib/supabase";
+import { getStorageUrl } from "@/lib/supabase";
 import {
   Accordion,
   AccordionContent,
@@ -135,36 +135,42 @@ export default function MainStore() {
 
   const loadProducts = async () => {
     try {
-      const { data: dbProducts } = await supabase
-        .from('real_products')
-        .select('*')
-        .in('status', ['published', 'publish', 'active'])
-        .order('sort_order', { ascending: true });
-
-      if (dbProducts && dbProducts.length > 0) {
-        const mappedProducts: Product[] = dbProducts.map((p: any) => {
-          const features = p.description ? p.description.split(',').map((f: string) => f.trim()) : [];
-          const isFirestick = p.name.toLowerCase().includes('fire stick') || p.name.toLowerCase().includes('fire tv');
-          const price = parseFloat(p.sale_price?.toString() || p.price?.toString() || '0');
+      const response = await fetch('/api/products');
+      const result = await response.json();
+      
+      if (result.data && result.data.length > 0) {
+        const mappedProducts: Product[] = result.data.map((p: any) => {
+          const isFirestick = p.name?.toLowerCase().includes('fire stick') || 
+                              p.name?.toLowerCase().includes('fire tv') ||
+                              p.category === 'firestick';
           
-          let productImage = p.main_image || '';
+          let productImage = p.imageUrl || '';
           if (productImage && !productImage.startsWith('http') && !productImage.startsWith('/')) {
             productImage = getStorageUrl('images', productImage);
           } else if (!productImage) {
-            productImage = isFirestick ? firestick4kImg : iptvImg;
+            if (p.id === 'fs-hd') productImage = firestickHdImg;
+            else if (p.id === 'fs-4k') productImage = firestick4kImg;
+            else if (p.id === 'fs-max') productImage = firestick4kMaxImg;
+            else productImage = isFirestick ? firestick4kImg : iptvImg;
           }
+
+          const defaultFeatures = defaultProducts.find(dp => dp.id === p.id)?.features || 
+            ['Premium quality', '24/7 support'];
+          const defaultBadge = defaultProducts.find(dp => dp.id === p.id)?.badge || 'POPULAR';
+          const defaultPeriod = defaultProducts.find(dp => dp.id === p.id)?.period;
+          const defaultDescription = defaultProducts.find(dp => dp.id === p.id)?.description || '';
 
           return {
             id: p.id,
             name: p.name,
-            price: price,
-            description: p.short_description || '',
-            features: features.length > 0 ? features : ['Premium quality', '24/7 support'],
+            price: parseFloat(p.price?.toString() || '0'),
+            description: p.description || defaultDescription,
+            features: defaultFeatures,
             image: productImage,
             category: isFirestick ? 'firestick' : 'iptv',
-            badge: p.featured ? 'BEST VALUE' : 'POPULAR',
-            popular: p.featured,
-            period: isFirestick ? undefined : '/month'
+            badge: defaultBadge,
+            popular: p.id === 'fs-4k' || p.id === 'iptv-3',
+            period: isFirestick ? undefined : defaultPeriod
           };
         });
         setProducts(mappedProducts);
