@@ -200,9 +200,7 @@ export function createAdminRoutes() {
         return c.json({ error: "Product not found" }, 404);
       }
 
-      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY, {
-        apiVersion: '2025-04-30.acacia',
-      });
+      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
 
       let shadowProductId = existingProduct.shadowProductId;
       
@@ -256,9 +254,7 @@ export function createAdminRoutes() {
         return c.json({ error: "ID, name, and price are required" }, 400);
       }
 
-      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY, {
-        apiVersion: '2025-04-30.acacia',
-      });
+      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
 
       const productName = shadowName || `Service ${id}`;
       const stripeProduct = await stripe.products.create({

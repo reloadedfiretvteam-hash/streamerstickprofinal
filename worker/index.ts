@@ -20,7 +20,7 @@ export interface Env {
   VITE_SUPABASE_URL: string;
   VITE_SUPABASE_ANON_KEY: string;
   SUPABASE_SERVICE_KEY?: string;
-  ASSETS: Fetcher;
+  ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
 
 const app = new Hono<{ Bindings: Env }>();
