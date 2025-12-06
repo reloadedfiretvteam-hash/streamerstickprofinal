@@ -149,16 +149,9 @@ async function handleCheckoutComplete(session: any, storage: ReturnType<typeof c
       await sendOrderConfirmation(updatedOrder, env);
       await sendOwnerOrderNotification(updatedOrder, env);
       
-      setTimeout(async () => {
-        try {
-          const freshOrder = await storage.getOrder(order.id);
-          if (freshOrder && !freshOrder.credentialsSent) {
-            await sendCredentialsEmail(freshOrder, env, storage);
-          }
-        } catch (error) {
-          console.error('Error sending delayed credentials email:', error);
-        }
-      }, 5 * 60 * 1000);
+      if (!updatedOrder.credentialsSent) {
+        await sendCredentialsEmail(updatedOrder, env, storage);
+      }
     } catch (error) {
       console.error('Error sending emails:', error);
     }

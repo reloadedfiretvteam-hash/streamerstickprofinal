@@ -1,4 +1,4 @@
-import { eq, desc, gte, and, ilike, or } from "drizzle-orm";
+import { eq, desc, gte, and, ilike, or, sql } from "drizzle-orm";
 import { createDb, schema } from "./db";
 import type {
   User,
@@ -58,7 +58,7 @@ export function createStorage(databaseUrl: string) {
 
     async updateCustomer(id: string, updates: Partial<InsertCustomer>): Promise<Customer | undefined> {
       const [customer] = await db.update(customers)
-        .set({ ...updates, updatedAt: new Date() })
+        .set({ ...updates, updatedAt: sql`now()` })
         .where(eq(customers.id, id))
         .returning();
       return customer;
@@ -91,8 +91,8 @@ export function createStorage(databaseUrl: string) {
       const [updated] = await db.update(customers)
         .set({ 
           totalOrders: (customer.totalOrders || 0) + 1,
-          lastOrderAt: new Date(),
-          updatedAt: new Date()
+          lastOrderAt: sql`now()`,
+          updatedAt: sql`now()`
         })
         .where(eq(customers.id, id))
         .returning();
@@ -253,7 +253,7 @@ export function createStorage(databaseUrl: string) {
       
       if (existing) {
         const [updated] = await db.update(pageEdits)
-          .set({ ...edit, updatedAt: new Date() })
+          .set({ ...edit, updatedAt: sql`now()` })
           .where(eq(pageEdits.id, existing.id))
           .returning();
         return updated;
