@@ -1,24 +1,18 @@
-import { Octokit } from '@octokit/rest'
+import { Octokit } from '@octokit/rest';
 
-let connectionSettings: any;
-
-async function getAccessToken() {
-  if (connectionSettings && connectionSettings.settings.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
-    return connectionSettings.settings.access_token;
-  }
-  
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME
-  const xReplitToken = process.env.REPL_IDENTITY 
-    ? 'repl ' + process.env.REPL_IDENTITY 
-    : process.env.WEB_REPL_RENEWAL 
-    ? 'depl ' + process.env.WEB_REPL_RENEWAL 
-    : null;
+async function getCredentials() {
+  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+  const xReplitToken = process.env.REPL_IDENTITY
+    ? 'repl ' + process.env.REPL_IDENTITY
+    : process.env.WEB_REPL_RENEWAL
+      ? 'depl ' + process.env.WEB_REPL_RENEWAL
+      : null;
 
   if (!xReplitToken) {
     throw new Error('X_REPLIT_TOKEN not found for repl/depl');
   }
 
-  connectionSettings = await fetch(
+  const response = await fetch(
     'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=github',
     {
       headers: {
@@ -26,20 +20,41 @@ async function getAccessToken() {
         'X_REPLIT_TOKEN': xReplitToken
       }
     }
-  ).then(res => res.json()).then(data => data.items?.[0]);
+  );
 
-  const accessToken = connectionSettings?.settings?.access_token || connectionSettings.settings?.oauth?.credentials?.access_token;
+  const data = await response.json();
+  const connectionSettings = data.items?.[0];
+
+  const accessToken = connectionSettings?.settings?.access_token || 
+                      connectionSettings?.settings?.oauth?.credentials?.access_token;
 
   if (!connectionSettings || !accessToken) {
     throw new Error('GitHub not connected');
   }
-  return accessToken;
+
+  return {
+    accessToken
+  };
 }
 
 // WARNING: Never cache this client.
 // Access tokens expire, so a new client must be created each time.
 // Always call this function again to get a fresh client.
 export async function getUncachableGitHubClient() {
-  const accessToken = await getAccessToken();
+  const { accessToken } = await getCredentials();
   return new Octokit({ auth: accessToken });
+}
+
+// Helper to get the authenticated user info
+export async function getGitHubUser() {
+  const octokit = await getUncachableGitHubClient();
+  const { data: user } = await octokit.users.getAuthenticated();
+  return user;
+}
+
+// Helper to list user repositories
+export async function listGitHubRepos(perPage: number = 30) {
+  const octokit = await getUncachableGitHubClient();
+  const { data: repos } = await octokit.repos.listForAuthenticatedUser({ per_page: perPage });
+  return repos;
 }
