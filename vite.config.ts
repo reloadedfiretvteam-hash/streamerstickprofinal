@@ -2,26 +2,38 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { metaImagesPlugin } from "./vite-plugin-meta-images";
+
+async function getReplitPlugins() {
+  if (process.env.NODE_ENV === "production" || !process.env.REPL_ID) {
+    return [];
+  }
+  
+  try {
+    const plugins = [];
+    
+    const runtimeErrorModal = await import("@replit/vite-plugin-runtime-error-modal");
+    plugins.push(runtimeErrorModal.default());
+    
+    const cartographer = await import("@replit/vite-plugin-cartographer");
+    plugins.push(cartographer.cartographer());
+    
+    const devBanner = await import("@replit/vite-plugin-dev-banner");
+    plugins.push(devBanner.devBanner());
+    
+    return plugins;
+  } catch (e) {
+    console.log("Replit plugins not available, skipping...");
+    return [];
+  }
+}
 
 export default defineConfig({
   plugins: [
     react(),
-    runtimeErrorOverlay(),
     tailwindcss(),
     metaImagesPlugin(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
-          ),
-          await import("@replit/vite-plugin-dev-banner").then((m) =>
-            m.devBanner(),
-          ),
-        ]
-      : []),
+    ...(await getReplitPlugins()),
   ],
   resolve: {
     alias: {
