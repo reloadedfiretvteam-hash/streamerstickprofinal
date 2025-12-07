@@ -1,0 +1,164 @@
+Discover what your real users are experiencing
+No Data
+
+Diagnose performance issues
+67
+Performance
+77
+Accessibility
+96
+Best Practices
+92
+SEO
+67
+FCP
++4
+LCP
++1
+TBT
++29
+CLS
++25
+SI
++7
+Performance
+Values are estimated and may vary. The performance score is calculated directly from these metrics.See calculator.
+0–49
+50–89
+90–100
+Final Screenshot
+
+Metrics
+Expand view
+First Contentful Paint
+3.2 s
+Largest Contentful Paint
+7.3 s
+Total Blocking Time
+100 ms
+Cumulative Layout Shift
+0
+Speed Index
+4.7 s
+Captured at Dec 6, 2025, 10:47 PM EST
+Emulated Moto G Power with Lighthouse 13.0.1
+Single page session
+Initial page load
+Slow 4G throttling
+Using HeadlessChromium 137.0.7151.119 with lr
+View Treemap
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Show audits relevant to:
+
+All
+
+FCP
+
+LCP
+
+TBT
+Insights
+Improve image delivery Est savings of 722 KiB
+Use efficient cache lifetimes Est savings of 630 KiB
+Render blocking requests Est savings of 470 ms
+Forced reflow
+LCP request discovery
+Network dependency tree
+Optimize DOM size
+LCP breakdown
+3rd parties
+These insights are also available in the Chrome DevTools Performance Panel - record a trace to view more detailed information.
+Diagnostics
+Reduce unused JavaScript Est savings of 155 KiB
+Avoid long main-thread tasks 2 long tasks found
+More information about the performance of your application. These numbers don't directly affect the Performance score.
+Passed audits (16)
+Show
+77
+Accessibility
+These checks highlight opportunities to improve the accessibility of your web app. Automatic detection can only detect a subset of issues and does not guarantee the accessibility of your web app, so manual testing is also encouraged.
+Names and labels
+Buttons do not have an accessible name
+Form elements do not have associated labels
+Links do not have a discernible name
+These are opportunities to improve the semantics of the controls in your application. This may enhance the experience for users of assistive technology, like a screen reader.
+Best practices
+[user-scalable="no"] is used in the <meta name="viewport"> element or the [maximum-scale] attribute is less than 5.
+These items highlight common accessibility best practices.
+Contrast
+Background and foreground colors do not have a sufficient contrast ratio.
+These are opportunities to improve the legibility of your content.
+Audio and video
+<video> elements contain a <track> element with [kind="captions"]
+These are opportunities to provide alternative content for audio and video. This may improve the experience for users with hearing or vision impairments.
+Additional items to manually check (10)
+Show
+These items address areas which an automated testing tool cannot cover. Learn more in our guide on conducting an accessibility review.
+Passed audits (20)
+Show
+Not applicable (34)
+Show
+96
+Best Practices
+General
+Browser errors were logged to the console
+Errors logged to the console indicate unresolved problems. They can come from network request failures and other browser concerns. Learn more about this errors in console diagnostic audit
+Source
+Description
+supabase.co
+…imiges/demo-video.mp4:1:0(emlqlmfzqsnqokrqvmcm.supabase.co)
+Failed to load resource: the server responded with a status of 400 (Bad Request)
+streamstickpro.com 1st party
+/api/products:1:0(streamstickpro.com)
+Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+/api/track:1:0(streamstickpro.com)
+Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+Missing source maps for large first-party JavaScript
+Trust and Safety
+Ensure CSP is effective against XSS attacks
+Use a strong HSTS policy
+Ensure proper origin isolation with COOP
+Mitigate clickjacking with XFO or CSP
+Mitigate DOM-based XSS with Trusted Types
+Passed audits (11)
+Show
+Not applicable (2)
+Show
+92
+SEO
+These checks ensure that your page is following basic search engine optimization advice. There are many additional factors Lighthouse does not score here that may affect your search ranking, including performance on Core Web Vitals. Learn more about Google Search Essentials.
+Crawling and Indexing
+robots.txt is not valid 1 error found
+To appear in search results, crawlers need access to your app.
+Additional items to manually check (1)
+Show
+Run these additional validators on your site to check additional SEO best practices.
+Passed audits (9)
+Show
+More on PageSpeed Insights
+What's new
+Documentation
+Learn about Web Performance
+Ask questions on Stack Overflow
+Mailing list
+Related Content
+Updates
+Web Fundamentals
+Case Studies
+Podcasts
+Connect
+Twitter
+Youtube
+Google Developers Logo
+Chrome
+Firebase
+All products
+Terms and Privacy Policy
+For details, see the Google Developers Site Policies.

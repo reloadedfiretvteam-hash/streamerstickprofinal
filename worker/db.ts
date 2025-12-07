@@ -1,13 +1,13 @@
-import { neon, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
-import * as schema from '../shared/schema';
+import { createClient } from '@supabase/supabase-js';
 
-neonConfig.fetchConnectionCache = true;
-
-export function createDb(databaseUrl: string) {
-  const cleanUrl = databaseUrl.trim().replace(/[\r\n\s]/g, '');
-  const sql = neon(cleanUrl);
-  return drizzle(sql, { schema });
+export interface DbConfig {
+  supabaseUrl: string;
+  supabaseKey: string;
 }
 
-export { schema };
+export function createDb(config: DbConfig) {
+  const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+  return supabase;
+}
+
+export type DbClient = ReturnType<typeof createDb>;
