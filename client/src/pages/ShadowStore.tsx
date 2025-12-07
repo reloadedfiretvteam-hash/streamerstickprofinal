@@ -139,9 +139,11 @@ export default function ShadowStore() {
   useEffect(() => {
     document.documentElement.classList.remove("dark");
     document.documentElement.classList.add("shadow-theme");
+    document.title = "Digital Solutions Agency | Web Design & SEO Services";
     return () => {
        document.documentElement.classList.remove("shadow-theme");
        document.documentElement.classList.add("dark");
+       document.title = "StreamStickPro - Jailbroken Fire Sticks & IPTV";
     }
   }, []);
 

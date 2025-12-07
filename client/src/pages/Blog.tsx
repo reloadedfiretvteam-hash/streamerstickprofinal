@@ -4967,12 +4967,19 @@ export default function Blog() {
       const postFromSlug = blogPosts.find(p => p.slug === params.slug);
       if (postFromSlug) {
         setSelectedPost(postFromSlug);
+        document.title = `${postFromSlug.title} | StreamStickPro Blog`;
       } else {
         setSelectedPost(null);
+        document.title = "Blog | StreamStickPro - Cord Cutting Guides & Tips";
       }
     } else {
       setSelectedPost(null);
+      document.title = "Blog | StreamStickPro - Cord Cutting Guides & Tips";
     }
+    
+    return () => {
+      document.title = "StreamStickPro - Jailbroken Fire Sticks & IPTV";
+    };
   }, [params.slug]);
 
   const filteredPosts = blogPosts.filter(post => {

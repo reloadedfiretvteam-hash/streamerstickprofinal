@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useCart } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,10 @@ export default function Checkout() {
     firstName: "",
     lastName: "",
   });
+
+  useEffect(() => {
+    document.title = "Checkout | StreamStickPro";
+  }, []);
 
   const hasIPTVProduct = items.some(item => 
     item.id.includes('iptv') || item.name?.toLowerCase().includes('iptv') ||

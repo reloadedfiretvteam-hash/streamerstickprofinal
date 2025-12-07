@@ -132,6 +132,7 @@ export default function MainStore() {
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
+    document.title = "StreamStickPro - Jailbroken Fire Sticks & IPTV | 18,000+ Channels";
     loadProducts();
   }, []);
 
