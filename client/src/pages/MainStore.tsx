@@ -28,7 +28,9 @@ import firestickHdImg from "@assets/OIP_(11)99_1764978938773.jpg";
 import firestick4kImg from "@assets/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg";
 import firestick4kMaxImg from "@assets/71E1te69hZL._AC_SL1500__1764978938773.jpg";
 import iptvImg from "@assets/OIF_1764979270800.jpg";
-import heroImg from "@assets/stock_images/amazon_fire_tv_stick_cc445778.jpg";
+import fallbackHeroImg from "@assets/stock_images/amazon_fire_tv_stick_cc445778.jpg";
+
+const heroImg = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/hero-firestick-breakout.jpg";
 
 interface Product {
   id: string;
@@ -309,6 +311,12 @@ export default function MainStore() {
             height={600}
             fetchPriority="high"
             style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              if (target.src !== fallbackHeroImg) {
+                target.src = fallbackHeroImg;
+              }
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
         </div>
