@@ -77,12 +77,15 @@ async function initStripe() {
 }
 
 app.post(
-  '/api/stripe/webhook',
+  '/api/stripe/webhook/:uuid?',
   express.raw({ type: 'application/json' }),
   async (req, res) => {
+    log('Received Stripe webhook', 'stripe');
+    
     const signature = req.headers['stripe-signature'];
 
     if (!signature) {
+      log('Missing stripe-signature header', 'stripe');
       return res.status(400).json({ error: 'Missing stripe-signature' });
     }
 
@@ -94,14 +97,17 @@ app.post(
         return res.status(500).json({ error: 'Webhook processing error' });
       }
 
-      const uuid = getWebhookUuid();
+      const urlUuid = req.params.uuid;
+      const uuid = urlUuid || getWebhookUuid();
       if (!uuid) {
         console.error('Webhook UUID not initialized yet');
         return res.status(500).json({ error: 'Webhook not ready' });
       }
       
+      log(`Processing webhook with UUID: ${uuid}`, 'stripe');
       await WebhookHandlers.processWebhook(req.body as Buffer, sig, uuid);
 
+      log('Webhook processed successfully', 'stripe');
       res.status(200).json({ received: true });
     } catch (error: any) {
       console.error('Webhook error:', error.message);

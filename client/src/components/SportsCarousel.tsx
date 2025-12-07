@@ -1,25 +1,20 @@
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
 import { Card, CardContent } from "@/components/ui/card"
-import { getStorageUrl } from "@/lib/supabase"
 
-import ufcImg from "@assets/stock_images/ufc_mma_fighter_in_o_3625dd6b.jpg";
-import nflImg from "@assets/stock_images/american_football_pl_1dce3698.jpg";
-import nbaImg from "@assets/stock_images/basketball_player_du_c74298fe.jpg";
-import mlbImg from "@assets/stock_images/baseball_batter_hitt_88195588.jpg";
+import ufcFallback from "@assets/stock_images/ufc_mma_fighter_in_o_3625dd6b.jpg";
+import nflFallback from "@assets/stock_images/american_football_pl_1dce3698.jpg";
+import nbaFallback from "@assets/stock_images/basketball_player_du_c74298fe.jpg";
+import mlbFallback from "@assets/stock_images/baseball_batter_hitt_88195588.jpg";
 
-const supabaseUfc = getStorageUrl('images', 'UFC.jpg');
-const supabaseNfl = getStorageUrl('images', 'c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg');
-const supabaseNba = getStorageUrl('images', 'downloadBASKET BALL.jpg');
-const supabaseMlb = getStorageUrl('images', 'BASEBALL.webp');
-const supabaseSoccer = getStorageUrl('images', 'downloadSOCCER.jpg');
+const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
 
 const sports = [
-  { name: "UFC & MMA", image: supabaseUfc, fallback: ufcImg, desc: "Every PPV Event Live" },
-  { name: "NFL Sunday Ticket", image: supabaseNfl, fallback: nflImg, desc: "Every Game, Every Sunday" },
-  { name: "NBA League Pass", image: supabaseNba, fallback: nbaImg, desc: "Follow Your Team" },
-  { name: "MLB Extra Innings", image: supabaseMlb, fallback: mlbImg, desc: "Home Run Action" },
-  { name: "Soccer & World Cup", image: supabaseSoccer, fallback: nbaImg, desc: "Global Football Action" },
+  { name: "UFC & MMA", image: `${SUPABASE_BASE}/UFC.jpg`, fallback: ufcFallback, desc: "Every PPV Event Live" },
+  { name: "NFL Sunday Ticket", image: `${SUPABASE_BASE}/c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg`, fallback: nflFallback, desc: "Every Game, Every Sunday" },
+  { name: "NBA League Pass", image: `${SUPABASE_BASE}/downloadBASKET%20BALL.jpg`, fallback: nbaFallback, desc: "Follow Your Team" },
+  { name: "MLB Extra Innings", image: `${SUPABASE_BASE}/BASEBALL.webp`, fallback: mlbFallback, desc: "Home Run Action" },
+  { name: "Soccer & World Cup", image: `${SUPABASE_BASE}/downloadSOCCER.jpg`, fallback: nbaFallback, desc: "Global Football Action" },
 ]
 
 export function SportsCarousel() {

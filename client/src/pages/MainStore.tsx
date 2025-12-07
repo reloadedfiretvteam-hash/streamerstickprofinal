@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, Play, X, Gift } from "lucide-react";
+import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, Play, X, Gift, ChevronRight } from "lucide-react";
 import { useCart } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,13 +22,15 @@ import { CustomerReviews } from "@/components/CustomerReviews";
 import { ChannelLogos } from "@/components/ChannelLogos";
 import { SavingsCalculator } from "@/components/SavingsCalculator";
 import { StickyMobileCTA, ScrollToTopButton } from "@/components/StickyMobileCTA";
+import { SEOSchema } from "@/components/SEOSchema";
 
 import firestickHdImg from "@assets/OIP_(11)99_1764978938773.jpg";
 import firestick4kImg from "@assets/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg";
 import firestick4kMaxImg from "@assets/71E1te69hZL._AC_SL1500__1764978938773.jpg";
 import iptvImg from "@assets/OIF_1764979270800.jpg";
+import fallbackHeroImg from "@assets/stock_images/amazon_fire_tv_stick_cc445778.jpg";
 
-const supabaseHeroImg = getStorageUrl('images', 'hero-firestick-breakout.jpg');
+const heroImg = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/hero-firestick-breakout.jpg";
 
 interface Product {
   id: string;
@@ -258,6 +260,15 @@ export default function MainStore() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productListData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData) }} />
       
+      <SEOSchema 
+        faq={[
+          { question: "What's included with a Fire Stick?", answer: "Every Fire Stick comes pre-configured and jailbroken with 1 Year of IPTV service included. Just plug it in and start streaming immediately!" },
+          { question: "How do I renew my subscription?", answer: "Simply come back to the site and purchase a renewal package. Your credentials will be updated instantly." },
+          { question: "Do you offer support?", answer: "Yes, we offer 24/7 support via email for all active subscribers. Contact us at reloadedfiretvteam@gmail.com" },
+          { question: "What devices are supported?", answer: "Our IPTV service works on Fire Sticks, Android boxes, Smart TVs, phones, tablets, and computers. Use up to 2 devices simultaneously!" }
+        ]}
+      />
+      
       {/* Navigation */}
       <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-gray-900/95 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -292,7 +303,7 @@ export default function MainStore() {
       <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden min-h-[600px] flex items-center">
         <div className="absolute inset-0 overflow-hidden">
           <img
-            src={supabaseHeroImg}
+            src={heroImg}
             alt="Best Jailbroken Fire Stick 2025 - Premium IPTV Streaming Device"
             className="w-full h-full object-cover object-center"
             loading="eager"
@@ -302,8 +313,8 @@ export default function MainStore() {
             style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              if (target.src !== iptvImg) {
-                target.src = iptvImg;
+              if (target.src !== fallbackHeroImg) {
+                target.src = fallbackHeroImg;
               }
             }}
           />
@@ -723,6 +734,85 @@ export default function MainStore() {
       {/* Savings Calculator */}
       <SavingsCalculator />
 
+      {/* From Our Blog Section */}
+      <section className="py-16 bg-gradient-to-b from-gray-900 to-gray-800/50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Learn More</span>
+            </h2>
+            <p className="text-gray-400 text-lg">Helpful guides to get the most out of your streaming experience</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <a href="/blog/what-is-jailbroken-fire-stick" className="block" data-testid="blog-card-1">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="bg-gray-800 border border-gray-700 rounded-2xl p-6 hover:border-orange-500/50 transition-all cursor-pointer h-full"
+              >
+                <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mb-4">
+                  <Flame className="w-6 h-6 text-orange-500" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">What is a Jailbroken Fire Stick?</h3>
+                <p className="text-gray-400 text-sm mb-4">Learn everything about jailbroken Fire Sticks, how they work, and what you can stream.</p>
+                <span className="text-orange-400 text-sm font-semibold flex items-center gap-1">
+                  Read More <ChevronRight className="w-4 h-4" />
+                </span>
+              </motion.div>
+            </a>
+
+            <a href="/blog/fire-stick-vs-cable-cost-comparison" className="block" data-testid="blog-card-2">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="bg-gray-800 border border-gray-700 rounded-2xl p-6 hover:border-orange-500/50 transition-all cursor-pointer h-full"
+              >
+                <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4">
+                  <DollarSign className="w-6 h-6 text-green-500" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Fire Stick vs Cable: Cost Comparison</h3>
+                <p className="text-gray-400 text-sm mb-4">See how much you can save by switching from cable TV to streaming with IPTV.</p>
+                <span className="text-orange-400 text-sm font-semibold flex items-center gap-1">
+                  Read More <ChevronRight className="w-4 h-4" />
+                </span>
+              </motion.div>
+            </a>
+
+            <a href="/blog/best-iptv-sports-channels-2025" className="block" data-testid="blog-card-3">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                className="bg-gray-800 border border-gray-700 rounded-2xl p-6 hover:border-orange-500/50 transition-all cursor-pointer h-full"
+              >
+                <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4">
+                  <Star className="w-6 h-6 text-blue-500" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Best IPTV Sports Channels 2025</h3>
+                <p className="text-gray-400 text-sm mb-4">Discover all the sports channels available including NFL, NBA, UFC, and more.</p>
+                <span className="text-orange-400 text-sm font-semibold flex items-center gap-1">
+                  Read More <ChevronRight className="w-4 h-4" />
+                </span>
+              </motion.div>
+            </a>
+          </div>
+
+          <div className="text-center mt-8">
+            <Button
+              variant="outline"
+              onClick={() => setLocation("/blog")}
+              className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10"
+              data-testid="button-view-all-articles"
+            >
+              View All Articles <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section id="faq" className="py-20 bg-gray-800/50">
         <div className="container mx-auto px-4 max-w-3xl">
@@ -796,6 +886,7 @@ export default function MainStore() {
               <ul className="space-y-2 text-sm">
                 <li><a href="/" className="hover:text-orange-400 transition-colors cursor-pointer">Home</a></li>
                 <li><a href="#shop" className="hover:text-orange-400 transition-colors cursor-pointer">Shop All Products</a></li>
+                <li><a href="/blog" className="hover:text-orange-400 transition-colors cursor-pointer">Blog & Guides</a></li>
                 <li><a href="#about" className="hover:text-orange-400 transition-colors cursor-pointer">About Us</a></li>
               </ul>
             </div>
