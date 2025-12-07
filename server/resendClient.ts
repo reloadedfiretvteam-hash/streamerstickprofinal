@@ -44,7 +44,7 @@ async function getReplitCredentials() {
   
   if (fromEmail && (fromEmail.includes('@gmail.com') || fromEmail.includes('@resend.dev'))) {
     console.log('Resend: Using verified streamstickpro.com domain for sending.');
-    fromEmail = 'StreamStickPro <noreply@send.streamstickpro.com>';
+    fromEmail = 'StreamStickPro <noreply@streamstickpro.com>';
   }
   
   console.log('Resend: Successfully retrieved credentials, from_email:', fromEmail);
