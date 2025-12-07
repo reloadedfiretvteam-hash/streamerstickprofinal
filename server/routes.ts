@@ -1059,7 +1059,7 @@ export async function registerRoutes(
       const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
 
       if (!adminPasswordHash) {
-        const defaultPassword = 'StreamStick2024!';
+        const defaultPassword = 'admin123';
         const defaultHash = await hashPassword(defaultPassword);
         
         if (username === adminUsername && password === defaultPassword) {

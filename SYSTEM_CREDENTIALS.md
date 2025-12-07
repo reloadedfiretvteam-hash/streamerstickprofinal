@@ -4,7 +4,7 @@
 
 **URL:** https://your-domain.com/admin  
 **Username:** `admin`  
-**Password:** `StreamStick2024!`
+**Password:** `admin123`
 
 ---
 
