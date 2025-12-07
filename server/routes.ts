@@ -211,6 +211,16 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/admin/products", async (req, res) => {
+    try {
+      const products = await storage.getRealProducts();
+      res.json({ data: products });
+    } catch (error: any) {
+      console.error("Error fetching admin products:", error);
+      res.status(500).json({ error: "Failed to fetch products" });
+    }
+  });
+
   app.post("/api/admin/products", async (req, res) => {
     try {
       const { id, name, description, price, imageUrl, category, shadowProductId, shadowPriceId } = req.body;

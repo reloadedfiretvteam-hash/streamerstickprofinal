@@ -456,13 +456,30 @@ export default function AdminPanel() {
 
   const loadProducts = async () => {
     setLoadingProducts(true);
-    const { data } = await supabase
-      .from('real_products')
-      .select('*')
-      .order('sort_order', { ascending: true });
-
-    if (data) {
-      setProducts(data);
+    try {
+      const response = await fetch('/api/admin/products');
+      const result = await response.json();
+      if (result.data) {
+        setProducts(result.data.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          slug: p.id,
+          description: p.description || '',
+          price: p.price,
+          sale_price: null,
+          sku: p.id,
+          stock_quantity: 100,
+          stock_status: 'instock',
+          category: p.category === 'firestick' ? 'devices' : 'subscriptions',
+          status: 'publish',
+          featured: false,
+          main_image: p.imageUrl || '',
+          cloaked_name: p.shadowProductId || '',
+          sort_order: 0
+        })));
+      }
+    } catch (error) {
+      console.error('Error loading products:', error);
     }
     setLoadingProducts(false);
   };
