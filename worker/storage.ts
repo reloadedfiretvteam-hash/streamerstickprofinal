@@ -41,32 +41,51 @@ export function createStorage(config: StorageConfig) {
 
     async getCustomer(id: string): Promise<Customer | undefined> {
       const { data } = await supabase.from('customers').select('*').eq('id', id).single();
-      return data || undefined;
+      return data ? this.mapCustomerFromDb(data) : undefined;
     },
 
     async getCustomerByUsername(username: string): Promise<Customer | undefined> {
       const { data } = await supabase.from('customers').select('*').eq('username', username).single();
-      return data || undefined;
+      return data ? this.mapCustomerFromDb(data) : undefined;
     },
 
     async getCustomerByEmail(email: string): Promise<Customer | undefined> {
       const { data } = await supabase.from('customers').select('*').eq('email', email).single();
-      return data || undefined;
+      return data ? this.mapCustomerFromDb(data) : undefined;
     },
 
     async createCustomer(customer: InsertCustomer): Promise<Customer> {
-      const { data, error } = await supabase.from('customers').insert(customer).select().single();
+      const dbCustomer = {
+        username: customer.username,
+        password: customer.password,
+        email: customer.email,
+        full_name: customer.fullName,
+        phone: customer.phone,
+        status: customer.status,
+        notes: customer.notes,
+      };
+      const { data, error } = await supabase.from('customers').insert(dbCustomer).select().single();
       if (error) throw error;
-      return data;
+      return this.mapCustomerFromDb(data);
     },
 
     async updateCustomer(id: string, updates: Partial<InsertCustomer>): Promise<Customer | undefined> {
+      const dbUpdates: any = {};
+      if (updates.username !== undefined) dbUpdates.username = updates.username;
+      if (updates.password !== undefined) dbUpdates.password = updates.password;
+      if (updates.email !== undefined) dbUpdates.email = updates.email;
+      if (updates.fullName !== undefined) dbUpdates.full_name = updates.fullName;
+      if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
+      if (updates.status !== undefined) dbUpdates.status = updates.status;
+      if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+      dbUpdates.updated_at = new Date().toISOString();
+      
       const { data } = await supabase.from('customers')
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update(dbUpdates)
         .eq('id', id)
         .select()
         .single();
-      return data || undefined;
+      return data ? this.mapCustomerFromDb(data) : undefined;
     },
 
     async deleteCustomer(id: string): Promise<boolean> {
@@ -76,7 +95,7 @@ export function createStorage(config: StorageConfig) {
 
     async getAllCustomers(): Promise<Customer[]> {
       const { data } = await supabase.from('customers').select('*').order('created_at', { ascending: false });
-      return data || [];
+      return (data || []).map((d: any) => this.mapCustomerFromDb(d));
     },
 
     async searchCustomers(query: string): Promise<Customer[]> {
@@ -84,7 +103,7 @@ export function createStorage(config: StorageConfig) {
         .select('*')
         .or(`username.ilike.%${query}%,email.ilike.%${query}%,full_name.ilike.%${query}%`)
         .order('created_at', { ascending: false });
-      return data || [];
+      return (data || []).map((d: any) => this.mapCustomerFromDb(d));
     },
 
     async incrementCustomerOrders(id: string): Promise<Customer | undefined> {
@@ -100,7 +119,7 @@ export function createStorage(config: StorageConfig) {
         .eq('id', id)
         .select()
         .single();
-      return data || undefined;
+      return data ? this.mapCustomerFromDb(data) : undefined;
     },
 
     async getCustomerOrders(customerId: string): Promise<Order[]> {
@@ -108,12 +127,11 @@ export function createStorage(config: StorageConfig) {
         .select('*')
         .eq('customer_id', customerId)
         .order('created_at', { ascending: false });
-      return data || [];
+      return (data || []).map((d: any) => this.mapOrderFromDb(d));
     },
 
     async createOrder(order: InsertOrder): Promise<Order> {
       const dbOrder = {
-        id: order.id,
         customer_email: order.customerEmail,
         customer_name: order.customerName,
         customer_id: order.customerId,
@@ -127,6 +145,20 @@ export function createStorage(config: StorageConfig) {
         amount: order.amount,
         status: order.status,
         credentials_sent: order.credentialsSent,
+        shipping_name: order.shippingName,
+        shipping_phone: order.shippingPhone,
+        shipping_street: order.shippingStreet,
+        shipping_city: order.shippingCity,
+        shipping_state: order.shippingState,
+        shipping_zip: order.shippingZip,
+        shipping_country: order.shippingCountry,
+        fulfillment_status: order.fulfillmentStatus,
+        amazon_order_id: order.amazonOrderId,
+        is_renewal: order.isRenewal,
+        existing_username: order.existingUsername,
+        generated_username: order.generatedUsername,
+        generated_password: order.generatedPassword,
+        country_preference: order.countryPreference,
       };
       const { data, error } = await supabase.from('orders').insert(dbOrder).select().single();
       if (error) throw error;
@@ -163,6 +195,20 @@ export function createStorage(config: StorageConfig) {
       if (updates.amount !== undefined) dbUpdates.amount = updates.amount;
       if (updates.status !== undefined) dbUpdates.status = updates.status;
       if (updates.credentialsSent !== undefined) dbUpdates.credentials_sent = updates.credentialsSent;
+      if (updates.shippingName !== undefined) dbUpdates.shipping_name = updates.shippingName;
+      if (updates.shippingPhone !== undefined) dbUpdates.shipping_phone = updates.shippingPhone;
+      if (updates.shippingStreet !== undefined) dbUpdates.shipping_street = updates.shippingStreet;
+      if (updates.shippingCity !== undefined) dbUpdates.shipping_city = updates.shippingCity;
+      if (updates.shippingState !== undefined) dbUpdates.shipping_state = updates.shippingState;
+      if (updates.shippingZip !== undefined) dbUpdates.shipping_zip = updates.shippingZip;
+      if (updates.shippingCountry !== undefined) dbUpdates.shipping_country = updates.shippingCountry;
+      if (updates.fulfillmentStatus !== undefined) dbUpdates.fulfillment_status = updates.fulfillmentStatus;
+      if (updates.amazonOrderId !== undefined) dbUpdates.amazon_order_id = updates.amazonOrderId;
+      if (updates.isRenewal !== undefined) dbUpdates.is_renewal = updates.isRenewal;
+      if (updates.existingUsername !== undefined) dbUpdates.existing_username = updates.existingUsername;
+      if (updates.generatedUsername !== undefined) dbUpdates.generated_username = updates.generatedUsername;
+      if (updates.generatedPassword !== undefined) dbUpdates.generated_password = updates.generatedPassword;
+      if (updates.countryPreference !== undefined) dbUpdates.country_preference = updates.countryPreference;
       
       const { data } = await supabase.from('orders').update(dbUpdates).eq('id', id).select().single();
       return data ? this.mapOrderFromDb(data) : undefined;
@@ -170,12 +216,12 @@ export function createStorage(config: StorageConfig) {
 
     async getOrdersByEmail(email: string): Promise<Order[]> {
       const { data } = await supabase.from('orders').select('*').eq('customer_email', email);
-      return (data || []).map(this.mapOrderFromDb);
+      return (data || []).map((d: any) => this.mapOrderFromDb(d));
     },
 
     async getAllOrders(): Promise<Order[]> {
       const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-      return (data || []).map(this.mapOrderFromDb);
+      return (data || []).map((d: any) => this.mapOrderFromDb(d));
     },
 
     async getFireStickOrdersForFulfillment(): Promise<Order[]> {
@@ -185,8 +231,8 @@ export function createStorage(config: StorageConfig) {
         .order('created_at', { ascending: false });
       
       return (data || [])
-        .map(this.mapOrderFromDb)
-        .filter(order => {
+        .map((d: any) => this.mapOrderFromDb(d))
+        .filter((order: Order) => {
           const productName = (order.realProductName || '').toLowerCase();
           return productName.includes('fire') || productName.includes('stick') || productName.includes('firestick');
         });
@@ -199,8 +245,8 @@ export function createStorage(config: StorageConfig) {
         .order('created_at', { ascending: false });
       
       return (data || [])
-        .map(this.mapOrderFromDb)
-        .filter(order => {
+        .map((d: any) => this.mapOrderFromDb(d))
+        .filter((order: Order) => {
           const productName = (order.realProductName || '').toLowerCase();
           return productName.includes('iptv') || productName.includes('subscription') || 
                  productName.includes('month') || productName.includes('year');
@@ -209,7 +255,7 @@ export function createStorage(config: StorageConfig) {
 
     async getRealProducts(): Promise<RealProduct[]> {
       const { data } = await supabase.from('real_products').select('*');
-      return (data || []).map(this.mapProductFromDb);
+      return (data || []).map((d: any) => this.mapProductFromDb(d));
     },
 
     async getRealProduct(id: string): Promise<RealProduct | undefined> {
@@ -229,11 +275,9 @@ export function createStorage(config: StorageConfig) {
         description: product.description,
         price: product.price,
         category: product.category,
-        features: product.features,
         image_url: product.imageUrl,
         shadow_product_id: product.shadowProductId,
         shadow_price_id: product.shadowPriceId,
-        is_active: product.isActive ?? true,
       };
       const { data, error } = await supabase.from('real_products').insert(dbProduct).select().single();
       if (error) throw error;
@@ -246,11 +290,9 @@ export function createStorage(config: StorageConfig) {
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.price !== undefined) dbUpdates.price = updates.price;
       if (updates.category !== undefined) dbUpdates.category = updates.category;
-      if (updates.features !== undefined) dbUpdates.features = updates.features;
       if (updates.imageUrl !== undefined) dbUpdates.image_url = updates.imageUrl;
       if (updates.shadowProductId !== undefined) dbUpdates.shadow_product_id = updates.shadowProductId;
       if (updates.shadowPriceId !== undefined) dbUpdates.shadow_price_id = updates.shadowPriceId;
-      if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive;
       
       const { data } = await supabase.from('real_products').update(dbUpdates).eq('id', id).select().single();
       return data ? this.mapProductFromDb(data) : undefined;
@@ -263,13 +305,21 @@ export function createStorage(config: StorageConfig) {
 
     async trackVisitor(visitor: InsertVisitor): Promise<Visitor> {
       const dbVisitor = {
-        id: visitor.id,
-        ip_address: visitor.ipAddress,
-        user_agent: visitor.userAgent,
-        page: visitor.page,
+        session_id: visitor.sessionId,
+        page_url: visitor.pageUrl,
         referrer: visitor.referrer,
+        user_agent: visitor.userAgent,
+        ip_address: visitor.ipAddress,
         country: visitor.country,
+        country_code: visitor.countryCode,
+        region: visitor.region,
+        region_code: visitor.regionCode,
         city: visitor.city,
+        latitude: visitor.latitude,
+        longitude: visitor.longitude,
+        timezone: visitor.timezone,
+        isp: visitor.isp,
+        is_proxy: visitor.isProxy,
       };
       const { data, error } = await supabase.from('visitors').insert(dbVisitor).select().single();
       if (error) throw error;
@@ -284,7 +334,7 @@ export function createStorage(config: StorageConfig) {
         query = query.limit(1000);
       }
       const { data } = await query;
-      return (data || []).map(this.mapVisitorFromDb);
+      return (data || []).map((d: any) => this.mapVisitorFromDb(d));
     },
 
     async getVisitorStats(): Promise<{
@@ -304,12 +354,12 @@ export function createStorage(config: StorageConfig) {
         .order('created_at', { ascending: false })
         .limit(5000);
       
-      const visitors = (allVisitors || []).map(this.mapVisitorFromDb);
+      const visitors = (allVisitors || []).map((d: any) => this.mapVisitorFromDb(d));
       
       const totalVisitors = visitors.length;
-      const todayVisitors = visitors.filter(v => v.createdAt && new Date(v.createdAt) >= today).length;
-      const weekVisitors = visitors.filter(v => v.createdAt && new Date(v.createdAt) >= weekAgo).length;
-      const onlineNow = visitors.filter(v => v.createdAt && new Date(v.createdAt) >= fiveMinutesAgo).length;
+      const todayVisitors = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= today).length;
+      const weekVisitors = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= weekAgo).length;
+      const onlineNow = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= fiveMinutesAgo).length;
       const recentVisitors = visitors.slice(0, 50);
 
       return {
@@ -326,7 +376,7 @@ export function createStorage(config: StorageConfig) {
         .select('*')
         .eq('page_id', pageId)
         .eq('is_active', true);
-      return (data || []).map(this.mapPageEditFromDb);
+      return (data || []).map((d: any) => this.mapPageEditFromDb(d));
     },
 
     async getPageEdit(pageId: string, sectionId: string, elementId: string): Promise<PageEdit | undefined> {
@@ -343,11 +393,11 @@ export function createStorage(config: StorageConfig) {
       const existing = await this.getPageEdit(edit.pageId, edit.sectionId, edit.elementId);
       
       const dbEdit = {
-        id: edit.id || existing?.id,
         page_id: edit.pageId,
         section_id: edit.sectionId,
         element_id: edit.elementId,
         content: edit.content,
+        image_url: edit.imageUrl,
         element_type: edit.elementType,
         is_active: edit.isActive ?? true,
         updated_at: new Date().toISOString(),
@@ -375,7 +425,24 @@ export function createStorage(config: StorageConfig) {
 
     async getAllPageEdits(): Promise<PageEdit[]> {
       const { data } = await supabase.from('page_edits').select('*').eq('is_active', true);
-      return (data || []).map(this.mapPageEditFromDb);
+      return (data || []).map((d: any) => this.mapPageEditFromDb(d));
+    },
+
+    mapCustomerFromDb(data: any): Customer {
+      return {
+        id: data.id,
+        username: data.username,
+        password: data.password,
+        email: data.email,
+        fullName: data.full_name,
+        phone: data.phone,
+        status: data.status,
+        notes: data.notes,
+        totalOrders: data.total_orders,
+        lastOrderAt: data.last_order_at ? new Date(data.last_order_at) : null,
+        createdAt: data.created_at ? new Date(data.created_at) : null,
+        updatedAt: data.updated_at ? new Date(data.updated_at) : null,
+      };
     },
 
     mapOrderFromDb(data: any): Order {
@@ -394,6 +461,20 @@ export function createStorage(config: StorageConfig) {
         amount: data.amount,
         status: data.status,
         credentialsSent: data.credentials_sent,
+        shippingName: data.shipping_name,
+        shippingPhone: data.shipping_phone,
+        shippingStreet: data.shipping_street,
+        shippingCity: data.shipping_city,
+        shippingState: data.shipping_state,
+        shippingZip: data.shipping_zip,
+        shippingCountry: data.shipping_country,
+        fulfillmentStatus: data.fulfillment_status,
+        amazonOrderId: data.amazon_order_id,
+        isRenewal: data.is_renewal,
+        existingUsername: data.existing_username,
+        generatedUsername: data.generated_username,
+        generatedPassword: data.generated_password,
+        countryPreference: data.country_preference,
         createdAt: data.created_at ? new Date(data.created_at) : null,
       };
     },
@@ -405,24 +486,30 @@ export function createStorage(config: StorageConfig) {
         description: data.description,
         price: data.price,
         category: data.category,
-        features: data.features,
         imageUrl: data.image_url,
         shadowProductId: data.shadow_product_id,
         shadowPriceId: data.shadow_price_id,
-        isActive: data.is_active,
-        createdAt: data.created_at ? new Date(data.created_at) : null,
       };
     },
 
     mapVisitorFromDb(data: any): Visitor {
       return {
         id: data.id,
-        ipAddress: data.ip_address,
-        userAgent: data.user_agent,
-        page: data.page,
+        sessionId: data.session_id,
+        pageUrl: data.page_url,
         referrer: data.referrer,
+        userAgent: data.user_agent,
+        ipAddress: data.ip_address,
         country: data.country,
+        countryCode: data.country_code,
+        region: data.region,
+        regionCode: data.region_code,
         city: data.city,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        timezone: data.timezone,
+        isp: data.isp,
+        isProxy: data.is_proxy,
         createdAt: data.created_at ? new Date(data.created_at) : null,
       };
     },
@@ -434,6 +521,7 @@ export function createStorage(config: StorageConfig) {
         sectionId: data.section_id,
         elementId: data.element_id,
         content: data.content,
+        imageUrl: data.image_url,
         elementType: data.element_type,
         isActive: data.is_active,
         createdAt: data.created_at ? new Date(data.created_at) : null,
