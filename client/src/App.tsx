@@ -42,6 +42,7 @@ function Router() {
       <Route path="/checkout" component={Checkout} />
       <Route path="/success" component={Success} />
       <Route path="/blog" component={Blog} />
+      <Route path="/blog/:slug" component={Blog} />
       <Route component={NotFound} />
     </Switch>
   );

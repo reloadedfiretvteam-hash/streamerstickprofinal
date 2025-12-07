@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { motion } from "framer-motion";
 import { 
   Flame, 
@@ -4954,6 +4954,7 @@ const categories = ["All", "Guides", "Savings", "How-To", "Sports", "Reviews", "
 
 export default function Blog() {
   const [, setLocation] = useLocation();
+  const params = useParams<{ slug?: string }>();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
@@ -4961,7 +4962,18 @@ export default function Blog() {
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
-  }, []);
+    
+    if (params.slug) {
+      const postFromSlug = blogPosts.find(p => p.slug === params.slug);
+      if (postFromSlug) {
+        setSelectedPost(postFromSlug);
+      } else {
+        setSelectedPost(null);
+      }
+    } else {
+      setSelectedPost(null);
+    }
+  }, [params.slug]);
 
   const filteredPosts = blogPosts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -5011,7 +5023,7 @@ export default function Blog() {
             <div className="flex items-center gap-4">
               <Button 
                 variant="ghost" 
-                onClick={() => setSelectedPost(null)}
+                onClick={() => setLocation("/blog")}
                 className="text-gray-300 hover:text-white"
                 data-testid="button-back-to-blog"
               >
@@ -5081,6 +5093,45 @@ export default function Blog() {
             >
               Shop Now <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
+          </div>
+
+          {/* Related Posts Section */}
+          <div className="mt-12">
+            <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <Tag className="w-6 h-6 text-orange-500" />
+              Related Articles
+            </h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              {blogPosts
+                .filter(p => p.id !== selectedPost.id && (p.category === selectedPost.category || p.featured))
+                .slice(0, 3)
+                .map(post => (
+                  <a 
+                    key={post.id}
+                    href={`/blog/${post.slug}`}
+                    onClick={(e) => { e.preventDefault(); setLocation(`/blog/${post.slug}`); }}
+                    className="block"
+                    data-testid={`card-related-${post.id}`}
+                  >
+                    <Card className="bg-gray-800 border-gray-700 hover:border-orange-500/50 transition-all cursor-pointer h-full">
+                      <CardHeader className="pb-2">
+                        <Badge className="w-fit bg-gray-700 text-gray-300 mb-2 text-xs">{post.category}</Badge>
+                        <CardTitle className="text-base text-white hover:text-orange-400 transition-colors line-clamp-2">
+                          {post.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center gap-3 text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {post.readTime}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </a>
+                ))}
+            </div>
           </div>
         </article>
       </div>
@@ -5174,31 +5225,37 @@ export default function Blog() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <Card 
-                    className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border-orange-500/30 hover:border-orange-500/50 transition-all cursor-pointer h-full"
-                    onClick={() => setSelectedPost(post)}
-                    data-testid={`card-featured-${post.id}`}
+                  <a 
+                    href={`/blog/${post.slug}`}
+                    onClick={(e) => { e.preventDefault(); setLocation(`/blog/${post.slug}`); }}
+                    className="block h-full"
+                    data-testid={`link-featured-${post.id}`}
                   >
-                    <CardHeader>
-                      <Badge className="w-fit bg-orange-500/20 text-orange-400 mb-2">{post.category}</Badge>
-                      <CardTitle className="text-xl text-white hover:text-orange-400 transition-colors">
-                        {post.title}
-                      </CardTitle>
-                      <CardDescription className="text-gray-400">{post.excerpt}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {post.readTime}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <Card 
+                      className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border-orange-500/30 hover:border-orange-500/50 transition-all cursor-pointer h-full"
+                      data-testid={`card-featured-${post.id}`}
+                    >
+                      <CardHeader>
+                        <Badge className="w-fit bg-orange-500/20 text-orange-400 mb-2">{post.category}</Badge>
+                        <CardTitle className="text-xl text-white hover:text-orange-400 transition-colors">
+                          {post.title}
+                        </CardTitle>
+                        <CardDescription className="text-gray-400">{post.excerpt}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {post.readTime}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </a>
                 </motion.div>
               ))}
             </div>
@@ -5223,31 +5280,37 @@ export default function Blog() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                 >
-                  <Card 
-                    className="bg-gray-800 border-gray-700 hover:border-orange-500/50 transition-all cursor-pointer h-full"
-                    onClick={() => setSelectedPost(post)}
-                    data-testid={`card-post-${post.id}`}
+                  <a 
+                    href={`/blog/${post.slug}`}
+                    onClick={(e) => { e.preventDefault(); setLocation(`/blog/${post.slug}`); }}
+                    className="block h-full"
+                    data-testid={`link-post-${post.id}`}
                   >
-                    <CardHeader>
-                      <Badge className="w-fit bg-gray-700 text-gray-300 mb-2">{post.category}</Badge>
-                      <CardTitle className="text-lg text-white hover:text-orange-400 transition-colors line-clamp-2">
-                        {post.title}
-                      </CardTitle>
-                      <CardDescription className="text-gray-400 line-clamp-3">{post.excerpt}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {post.readTime}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <Card 
+                      className="bg-gray-800 border-gray-700 hover:border-orange-500/50 transition-all cursor-pointer h-full"
+                      data-testid={`card-post-${post.id}`}
+                    >
+                      <CardHeader>
+                        <Badge className="w-fit bg-gray-700 text-gray-300 mb-2">{post.category}</Badge>
+                        <CardTitle className="text-lg text-white hover:text-orange-400 transition-colors line-clamp-2">
+                          {post.title}
+                        </CardTitle>
+                        <CardDescription className="text-gray-400 line-clamp-3">{post.excerpt}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {post.readTime}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </a>
                 </motion.div>
               ))}
             </div>
