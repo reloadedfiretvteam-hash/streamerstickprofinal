@@ -591,14 +591,32 @@ export default function MainStore() {
               Choose Your Fire Stick
             </h3>
             <div className="grid md:grid-cols-3 gap-8">
-              {firestickProducts.map((product) => (
+              {firestickProducts.map((product, index) => {
+                const cardGradients = [
+                  'from-slate-800 via-slate-900 to-gray-900',
+                  'from-orange-950/50 via-slate-900 to-gray-900',
+                  'from-blue-950/50 via-slate-900 to-gray-900'
+                ];
+                const borderColors = [
+                  'border-slate-700/50 hover:border-orange-500/50',
+                  'border-orange-500/30 hover:border-orange-500',
+                  'border-blue-500/30 hover:border-blue-500/70'
+                ];
+                
+                return (
                 <div
                   key={product.id}
-                  className={`relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
-                    product.popular ? 'ring-4 ring-orange-500 scale-105 shadow-2xl shadow-orange-500/50' : ''
+                  className={`relative rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 group ${
+                    product.popular 
+                      ? 'ring-4 ring-orange-500 scale-105 shadow-2xl shadow-orange-500/50' 
+                      : 'hover:shadow-2xl hover:shadow-orange-500/20'
                   }`}
                   data-testid={`card-product-${product.id}`}
                 >
+                  <div className={`absolute inset-0 bg-gradient-to-b ${cardGradients[index]} opacity-95`} />
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-500/10 via-transparent to-transparent opacity-50" />
+                  <div className={`absolute inset-0 border-2 ${borderColors[index]} rounded-2xl transition-colors duration-300`} />
+                  
                   {product.popular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
                       <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce">
@@ -608,64 +626,80 @@ export default function MainStore() {
                     </div>
                   )}
 
-                  <div className="relative h-56 overflow-hidden">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                      loading="lazy"
-                      width={400}
-                      height={224}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        if (target.src !== firestick4kImg) {
-                          target.src = firestick4kImg;
-                        }
-                      }}
-                    />
-                    <div className="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-sm">
-                      {product.badge}
-                    </div>
-                  </div>
-
-                  <div className="p-8">
-                    <h4 className="text-2xl font-bold mb-4">{product.name}</h4>
-
-                    <div className="mb-6">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-5xl font-bold text-orange-400" data-testid={`text-price-${product.id}`}>
-                          ${product.price.toFixed(2)}
-                        </span>
+                  <div className="relative z-10">
+                    <div className="relative h-56 overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-60" />
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                        loading="lazy"
+                        width={400}
+                        height={224}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          if (target.src !== firestick4kImg) {
+                            target.src = firestick4kImg;
+                          }
+                        }}
+                      />
+                      <div className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-full font-bold text-sm shadow-lg ${
+                        product.id === 'fs-max' 
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' 
+                          : product.popular 
+                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                            : 'bg-blue-500 text-white'
+                      }`}>
+                        {product.badge}
                       </div>
-                      <p className="text-blue-200 text-sm mt-2">
-                        Includes 1 Year IPTV Subscription
-                      </p>
+                      {product.id === 'fs-4k' && (
+                        <div className="absolute top-4 left-4 z-20 bg-green-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-lg">
+                          1 YEAR INCLUDED
+                        </div>
+                      )}
                     </div>
 
-                    <button
-                      onClick={() => addItem(product as any)}
-                      className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 ${
-                        product.popular
-                          ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
-                          : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg'
-                      }`}
-                      data-testid={`button-add-${product.id}`}
-                    >
-                      <ShoppingCart className="w-5 h-5" />
-                      Add to Cart
-                    </button>
+                    <div className="p-8 relative">
+                      <h4 className="text-2xl font-bold mb-4 text-white">{product.name}</h4>
 
-                    <div className="space-y-3">
-                      {product.features.slice(0, 6).map((feature, idx) => (
-                        <div key={idx} className="flex items-start gap-3">
-                          <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                          <span className="text-blue-100 text-sm">{feature}</span>
+                      <div className="mb-6">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400" data-testid={`text-price-${product.id}`}>
+                            ${product.price.toFixed(2)}
+                          </span>
                         </div>
-                      ))}
+                        <p className="text-blue-200 text-sm mt-2 flex items-center gap-2">
+                          <Gift className="w-4 h-4 text-green-400" />
+                          Includes 1 Year IPTV Subscription
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => addItem(product as any)}
+                        className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 ${
+                          product.popular
+                            ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
+                            : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg'
+                        }`}
+                        data-testid={`button-add-${product.id}`}
+                      >
+                        <ShoppingCart className="w-5 h-5" />
+                        Add to Cart
+                      </button>
+
+                      <div className="space-y-3">
+                        {product.features.slice(0, 6).map((feature, idx) => (
+                          <div key={idx} className="flex items-start gap-3">
+                            <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                            <span className="text-blue-100 text-sm">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -689,20 +723,38 @@ export default function MainStore() {
             <FreeTrial />
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {iptvPricingMatrix.map((plan) => {
+              {iptvPricingMatrix.map((plan, index) => {
                 const deviceCount = selectedDevices[plan.duration];
                 const selectedPrice = plan.prices.find(p => p.devices === deviceCount) || plan.prices[0];
+                const cardGradients = [
+                  'from-slate-800 via-slate-900 to-gray-900',
+                  'from-blue-950/50 via-slate-900 to-gray-900',
+                  'from-cyan-950/50 via-slate-900 to-gray-900',
+                  'from-emerald-950/50 via-slate-900 to-gray-900'
+                ];
                 
                 return (
                   <div
                     key={plan.duration}
-                    className={`relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden transform transition-all duration-300 hover:shadow-2xl ${
-                      plan.popular ? 'ring-4 ring-blue-500 shadow-2xl shadow-blue-500/50' : ''
+                    className={`relative rounded-2xl overflow-hidden transform transition-all duration-300 group ${
+                      plan.popular 
+                        ? 'ring-4 ring-blue-500 shadow-2xl shadow-blue-500/50 scale-105' 
+                        : 'hover:shadow-2xl hover:shadow-blue-500/20'
                     }`}
                     data-testid={`card-product-iptv-${plan.duration}`}
                   >
+                    <div className={`absolute inset-0 bg-gradient-to-b ${cardGradients[index]} opacity-95`} />
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent opacity-50" />
+                    <div className={`absolute inset-0 border-2 ${
+                      plan.popular 
+                        ? 'border-blue-500/50' 
+                        : plan.duration === '1yr' 
+                          ? 'border-green-500/30 hover:border-green-500/60' 
+                          : 'border-slate-700/50 hover:border-blue-500/50'
+                    } rounded-2xl transition-colors duration-300`} />
+                    
                     {plan.popular && (
-                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
                         <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
                           <Star className="w-4 h-4 fill-current" />
                           POPULAR
@@ -710,89 +762,97 @@ export default function MainStore() {
                       </div>
                     )}
 
-                    <div className="relative h-40 overflow-hidden">
-                      <img
-                        src={iptvImg}
-                        alt={`IPTV ${plan.durationLabel} Subscription`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        width={300}
-                        height={160}
-                      />
-                      <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full font-bold text-xs">
-                        {plan.badge}
-                      </div>
-                      {(plan.duration === "6mo" || plan.duration === "1yr") && (
-                        <div className="absolute top-4 left-4 bg-green-500 text-white px-2 py-1 rounded-full font-bold text-xs">
-                          10% OFF
+                    <div className="relative z-10">
+                      <div className="relative h-40 overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-60" />
+                        <img
+                          src={iptvImg}
+                          alt={`IPTV ${plan.durationLabel} Subscription`}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          loading="lazy"
+                          width={300}
+                          height={160}
+                        />
+                        <div className={`absolute top-4 right-4 z-20 px-3 py-1 rounded-full font-bold text-xs shadow-lg ${
+                          plan.duration === '1yr' 
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' 
+                            : plan.popular 
+                              ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
+                              : 'bg-orange-500 text-white'
+                        }`}>
+                          {plan.badge}
                         </div>
-                      )}
-                    </div>
+                        {(plan.duration === "6mo" || plan.duration === "1yr") && (
+                          <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs shadow-lg">
+                            SAVE 10%
+                          </div>
+                        )}
+                      </div>
 
-                    <div className="p-5">
-                      <h4 className="text-xl font-bold mb-2">{plan.durationLabel} IPTV</h4>
-                      <p className="text-gray-400 text-xs mb-4 line-clamp-2">{plan.description}</p>
+                      <div className="p-5">
+                        <h4 className="text-xl font-bold mb-2 text-white">{plan.durationLabel} IPTV</h4>
+                        <p className="text-gray-400 text-xs mb-4 line-clamp-2">{plan.description}</p>
 
-                      {/* Device Selector */}
-                      <div className="mb-4">
-                        <label className="text-sm text-gray-300 mb-2 block">Number of Devices:</label>
-                        <div className="flex gap-1">
-                          {[1, 2, 3, 4, 5].map((num) => (
-                            <button
-                              key={num}
-                              onClick={() => setSelectedDevices(prev => ({ ...prev, [plan.duration]: num }))}
-                              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-                                deviceCount === num
-                                  ? 'bg-blue-500 text-white shadow-lg'
-                                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                              }`}
-                              data-testid={`button-device-${plan.duration}-${num}`}
-                            >
-                              {num}
-                            </button>
+                        <div className="mb-4">
+                          <label className="text-sm text-gray-300 mb-2 block">Number of Devices:</label>
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map((num) => (
+                              <button
+                                key={num}
+                                onClick={() => setSelectedDevices(prev => ({ ...prev, [plan.duration]: num }))}
+                                className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                                  deviceCount === num
+                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
+                                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                }`}
+                                data-testid={`button-device-${plan.duration}-${num}`}
+                              >
+                                {num}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="mb-4">
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400" data-testid={`text-price-iptv-${plan.duration}`}>
+                              ${selectedPrice.price}
+                            </span>
+                            <span className="text-gray-400 text-sm">
+                              / {plan.durationLabel.toLowerCase()}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {deviceCount} device{deviceCount > 1 ? 's' : ''} included
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => addItem({
+                            id: selectedPrice.productId,
+                            name: `IPTV ${plan.durationLabel} - ${deviceCount} Device${deviceCount > 1 ? 's' : ''}`,
+                            price: selectedPrice.price,
+                            image: iptvImg,
+                            description: plan.description,
+                            features: plan.features,
+                            category: 'iptv',
+                            badge: plan.badge,
+                          } as Product)}
+                          className="w-full py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/30"
+                          data-testid={`button-add-iptv-${plan.duration}`}
+                        >
+                          <ShoppingCart className="w-4 h-4" />
+                          Subscribe Now
+                        </button>
+
+                        <div className="space-y-1.5">
+                          {plan.features.slice(0, 4).map((feature, idx) => (
+                            <div key={idx} className="flex items-start gap-2">
+                              <Check className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
+                              <span className="text-blue-100 text-xs">{feature}</span>
+                            </div>
                           ))}
                         </div>
-                      </div>
-
-                      <div className="mb-4">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-3xl font-bold text-blue-400" data-testid={`text-price-iptv-${plan.duration}`}>
-                            ${selectedPrice.price}
-                          </span>
-                          <span className="text-gray-400 text-sm">
-                            / {plan.durationLabel.toLowerCase()}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {deviceCount} device{deviceCount > 1 ? 's' : ''} included
-                        </p>
-                      </div>
-
-                      <button
-                        onClick={() => addItem({
-                          id: selectedPrice.productId,
-                          name: `IPTV ${plan.durationLabel} - ${deviceCount} Device${deviceCount > 1 ? 's' : ''}`,
-                          price: selectedPrice.price,
-                          image: iptvImg,
-                          description: plan.description,
-                          features: plan.features,
-                          category: 'iptv',
-                          badge: plan.badge,
-                        } as Product)}
-                        className="w-full py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg"
-                        data-testid={`button-add-iptv-${plan.duration}`}
-                      >
-                        <ShoppingCart className="w-4 h-4" />
-                        Subscribe Now
-                      </button>
-
-                      <div className="space-y-1.5">
-                        {plan.features.slice(0, 4).map((feature, idx) => (
-                          <div key={idx} className="flex items-start gap-2">
-                            <Check className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
-                            <span className="text-blue-100 text-xs">{feature}</span>
-                          </div>
-                        ))}
                       </div>
                     </div>
                   </div>
