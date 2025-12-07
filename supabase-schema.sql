@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS orders (
   existing_username TEXT,
   generated_username TEXT,
   generated_password TEXT,
+  country_preference TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -203,6 +204,7 @@ ON CONFLICT (id) DO UPDATE SET
 -- ALTER TABLE orders ADD COLUMN IF NOT EXISTS existing_username TEXT;
 -- ALTER TABLE orders ADD COLUMN IF NOT EXISTS generated_username TEXT;
 -- ALTER TABLE orders ADD COLUMN IF NOT EXISTS generated_password TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS country_preference TEXT;
 
 -- =====================================================
 -- HELPFUL QUERIES
