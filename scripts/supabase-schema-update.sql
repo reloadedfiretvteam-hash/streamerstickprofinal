@@ -1,15 +1,15 @@
 -- StreamStickPro Supabase Schema Update
 -- Run this SQL in your Supabase Dashboard > SQL Editor
 
--- Step 1: Add missing columns to real_products table
-ALTER TABLE real_products ADD COLUMN IF NOT EXISTS shadow_product_id TEXT;
-ALTER TABLE real_products ADD COLUMN IF NOT EXISTS shadow_price_id TEXT;
-ALTER TABLE real_products ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
-ALTER TABLE real_products ADD COLUMN IF NOT EXISTS features TEXT[];
+-- Step 1: Drop dependent tables first (they can be recreated if needed)
+DROP TABLE IF EXISTS square_products CASCADE;
+DROP TABLE IF EXISTS stripe_products CASCADE;
 
--- Step 2: Change id column to TEXT type (required for slug-based IDs)
--- First backup and recreate the table
-CREATE TABLE IF NOT EXISTS real_products_new (
+-- Step 2: Drop the old real_products table
+DROP TABLE IF EXISTS real_products CASCADE;
+
+-- Step 3: Create new real_products table with TEXT IDs
+CREATE TABLE real_products (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
@@ -23,19 +23,12 @@ CREATE TABLE IF NOT EXISTS real_products_new (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Step 3: Copy existing data (if any valid)
--- Skip this if table is empty or has incompatible data
+-- Step 4: Create indexes for performance
+CREATE INDEX idx_real_products_category ON real_products(category);
+CREATE INDEX idx_real_products_shadow_product ON real_products(shadow_product_id);
+CREATE INDEX idx_real_products_shadow_price ON real_products(shadow_price_id);
 
--- Step 4: Drop old table and rename new one
-DROP TABLE IF EXISTS real_products;
-ALTER TABLE real_products_new RENAME TO real_products;
-
--- Step 5: Create indexes for performance
-CREATE INDEX IF NOT EXISTS idx_real_products_category ON real_products(category);
-CREATE INDEX IF NOT EXISTS idx_real_products_shadow_product ON real_products(shadow_product_id);
-CREATE INDEX IF NOT EXISTS idx_real_products_shadow_price ON real_products(shadow_price_id);
-
--- Step 6: Insert all products with Stripe mappings
+-- Step 5: Insert all products with Stripe mappings
 INSERT INTO real_products (id, name, description, price, image_url, category, shadow_product_id, shadow_price_id, is_active) VALUES
 ('firestick-hd', 'Fire Stick HD', 'Real product mapped to Web Design Basic', 11900, 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%20hd.jpg', 'firestick', 'prod_TYEEobMjXf5B3d', 'price_1SbmlQHBw27Y92CikC7hKknE', true),
 ('firestick-4k', 'Fire Stick 4K', 'Real product mapped to Web Design Pro', 12750, 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/firestick%204k.jpg', 'firestick', 'prod_TYEEFruD8obUE7', 'price_1SbmlRHBw27Y92CiuZhoRKCY', true),
@@ -63,16 +56,7 @@ INSERT INTO real_products (id, name, description, price, image_url, category, sh
 ('iptv-1yr-2d', 'IPTV 1 Year - 2 Devices', 'Real product mapped to Digital Marketing Duo Annual', 10000, NULL, 'iptv', 'prod_TYuaA7Ctu6QzEA', 'price_1SbmldHBw27Y92CiV83j4QzU', true),
 ('iptv-1yr-3d', 'IPTV 1 Year - 3 Devices', 'Real product mapped to Digital Marketing Team Annual', 14000, NULL, 'iptv', 'prod_TYuaXyIp7sEbF0', 'price_1SbmleHBw27Y92Ci1asKdkPq', true),
 ('iptv-1yr-4d', 'IPTV 1 Year - 4 Devices', 'Real product mapped to Digital Marketing Business Annual', 19000, NULL, 'iptv', 'prod_TYua1nl7rkDUFc', 'price_1SbmleHBw27Y92CiB8gWsIOn', true),
-('iptv-1yr-5d', 'IPTV 1 Year - 5 Devices', 'Real product mapped to Digital Marketing Enterprise Annual', 22000, NULL, 'iptv', 'prod_TYuaZVC0JtfIk0', 'price_1SbmlfHBw27Y92CiTlrzgkoI', true)
-ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name,
-  description = EXCLUDED.description,
-  price = EXCLUDED.price,
-  image_url = EXCLUDED.image_url,
-  category = EXCLUDED.category,
-  shadow_product_id = EXCLUDED.shadow_product_id,
-  shadow_price_id = EXCLUDED.shadow_price_id,
-  is_active = EXCLUDED.is_active;
+('iptv-1yr-5d', 'IPTV 1 Year - 5 Devices', 'Real product mapped to Digital Marketing Enterprise Annual', 22000, NULL, 'iptv', 'prod_TYuaZVC0JtfIk0', 'price_1SbmlfHBw27Y92CiTlrzgkoI', true);
 
--- Step 7: Verify the update
+-- Step 6: Verify the update
 SELECT id, name, price, shadow_product_id, shadow_price_id FROM real_products ORDER BY category, id;

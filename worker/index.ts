@@ -60,23 +60,32 @@ app.get('/api/health', (c) => {
 });
 
 app.get('/api/debug', (c) => {
-  const url = c.env.DATABASE_URL || '';
-  const hasPort5432 = url.includes(':5432');
-  const hasPort6543 = url.includes(':6543');
-  const hasPooler = url.includes('pooler.supabase.com');
-  const hasBrackets = url.includes('[') || url.includes(']');
+  const supabaseUrl = c.env.VITE_SUPABASE_URL || '';
+  const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY || '';
   
   return c.json({
-    hasDbUrl: !!c.env.DATABASE_URL,
-    dbUrlLength: url.length,
-    dbUrlPrefix: url.substring(0, 20) || 'none',
-    dbUrlSuffix: url.substring(url.length - 20) || 'none',
-    hasPort5432,
-    hasPort6543,
-    hasPooler,
-    hasBrackets,
-    hasStripeKey: !!c.env.STRIPE_SECRET_KEY,
-    hasResendKey: !!c.env.RESEND_API_KEY,
+    supabase: {
+      hasUrl: !!supabaseUrl,
+      urlPrefix: supabaseUrl.substring(0, 30) || 'none',
+      hasKey: !!supabaseKey,
+      keyLength: supabaseKey.length,
+      keyPrefix: supabaseKey.substring(0, 10) || 'none',
+    },
+    stripe: {
+      hasSecretKey: !!c.env.STRIPE_SECRET_KEY,
+      hasPublishableKey: !!c.env.STRIPE_PUBLISHABLE_KEY,
+      hasWebhookSecret: !!c.env.STRIPE_WEBHOOK_SECRET,
+      secretKeyPrefix: c.env.STRIPE_SECRET_KEY?.substring(0, 7) || 'none',
+    },
+    email: {
+      hasResendKey: !!c.env.RESEND_API_KEY,
+      hasFromEmail: !!c.env.RESEND_FROM_EMAIL,
+      fromEmail: c.env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com',
+    },
+    auth: {
+      hasAdminPasswordHash: !!c.env.ADMIN_PASSWORD_HASH,
+      hasJwtSecret: !!c.env.JWT_SECRET,
+    },
     nodeEnv: c.env.NODE_ENV || 'not set',
   });
 });
