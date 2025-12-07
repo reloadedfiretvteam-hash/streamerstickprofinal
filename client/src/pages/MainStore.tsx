@@ -121,7 +121,7 @@ const defaultProducts: Product[] = [
   {
     id: "fs-hd",
     name: "Fire Stick HD - Jailbroken & Ready",
-    price: 140,
+    price: 119,
     description: "Premium jailbroken Fire Stick HD with 1 Year IPTV included. Stream 18,000+ live TV channels, 60,000+ movies & shows, all sports & PPV events. Setup tutorial video, login credentials & easy guide emailed instantly!",
     features: ["1080p Full HD Resolution", "18,000+ Live TV Channels", "60,000+ Movies & Shows", "All Sports & PPV Events", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Pre-configured & Ready to Use", "24/7 Customer Support"],
     image: firestickHdImg,
@@ -131,7 +131,7 @@ const defaultProducts: Product[] = [
   {
     id: "fs-4k",
     name: "Fire Stick 4K - Jailbroken & Ready",
-    price: 150,
+    price: 127.50,
     description: "Best-selling jailbroken Fire Stick 4K with Dolby Vision & 1 Year IPTV. Access 18,000+ live channels, 60,000+ movies & TV shows, all sports including NFL, NBA, UFC, PPV events. Tutorial, login & guide emailed!",
     features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & Shows", "All Sports & PPV Events", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Pre-configured & Plug-n-Play", "24/7 Customer Support"],
     image: firestick4kImg,
@@ -142,7 +142,7 @@ const defaultProducts: Product[] = [
   {
     id: "fs-max",
     name: "Fire Stick 4K Max - Jailbroken & Ready",
-    price: 160,
+    price: 136,
     description: "Ultimate jailbroken Fire Stick 4K Max - Fastest Wi-Fi 6E model with 1 Year IPTV. Stream 18,000+ live channels, 60,000+ movies, all sports & PPV events in stunning 4K. Setup tutorial, credentials & easy guide emailed!",
     features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & Shows", "All Sports & PPV Events", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Ambient Experience Support", "Pre-configured & Plug-n-Play", "24/7 Customer Support"],
     image: firestick4kMaxImg,
@@ -631,6 +631,104 @@ export default function MainStore() {
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
               Browse our complete collection of jailbroken Fire Sticks and IPTV subscriptions
+            </p>
+          </div>
+
+          {/* Fire Stick Tier Comparison Table */}
+          <div className="mb-12 overflow-x-auto">
+            <div className="text-center mb-8">
+              <h3 className="text-3xl font-bold mb-4 flex items-center justify-center gap-3">
+                <Flame className="w-8 h-8 text-orange-500" />
+                Fire Stick Comparison
+              </h3>
+              <p className="text-gray-400 max-w-2xl mx-auto">
+                All Fire Sticks come pre-loaded and ready to use with 1 Year IPTV subscription included!
+              </p>
+            </div>
+            <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl border border-slate-700/50 overflow-hidden" data-testid="tier-comparison-table">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-700/50">
+                    <th className="text-left p-4 text-gray-400 font-medium">Features</th>
+                    <th className="text-center p-4">
+                      <div className="text-lg font-bold text-white">HD</div>
+                      <div className="text-2xl font-bold text-orange-400">$119</div>
+                      <div className="text-xs text-gray-400 line-through">$140</div>
+                    </th>
+                    <th className="text-center p-4 bg-orange-500/10 relative">
+                      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-b">BEST VALUE</div>
+                      <div className="text-lg font-bold text-white pt-4">4K</div>
+                      <div className="text-2xl font-bold text-orange-400">$127.50</div>
+                      <div className="text-xs text-gray-400 line-through">$150</div>
+                    </th>
+                    <th className="text-center p-4">
+                      <div className="text-lg font-bold text-white">4K Max</div>
+                      <div className="text-2xl font-bold text-orange-400">$136</div>
+                      <div className="text-xs text-gray-400 line-through">$160</div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  <tr className="border-b border-slate-700/30">
+                    <td className="p-4 text-gray-300">Resolution</td>
+                    <td className="text-center p-4 text-white">1080p Full HD</td>
+                    <td className="text-center p-4 text-white bg-orange-500/5">4K Ultra HD</td>
+                    <td className="text-center p-4 text-white">4K Ultra HD</td>
+                  </tr>
+                  <tr className="border-b border-slate-700/30">
+                    <td className="p-4 text-gray-300">HDR Support</td>
+                    <td className="text-center p-4"><X className="w-5 h-5 text-gray-500 mx-auto" /></td>
+                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                  </tr>
+                  <tr className="border-b border-slate-700/30">
+                    <td className="p-4 text-gray-300">Dolby Vision & Atmos</td>
+                    <td className="text-center p-4"><X className="w-5 h-5 text-gray-500 mx-auto" /></td>
+                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                  </tr>
+                  <tr className="border-b border-slate-700/30">
+                    <td className="p-4 text-gray-300">Wi-Fi 6E (Fastest)</td>
+                    <td className="text-center p-4"><X className="w-5 h-5 text-gray-500 mx-auto" /></td>
+                    <td className="text-center p-4 bg-orange-500/5"><X className="w-5 h-5 text-gray-500 mx-auto" /></td>
+                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                  </tr>
+                  <tr className="border-b border-slate-700/30">
+                    <td className="p-4 text-gray-300">1 Year IPTV Included</td>
+                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                  </tr>
+                  <tr className="border-b border-slate-700/30">
+                    <td className="p-4 text-gray-300">18,000+ Live Channels</td>
+                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                  </tr>
+                  <tr className="border-b border-slate-700/30">
+                    <td className="p-4 text-gray-300">60,000+ Movies & Shows</td>
+                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                  </tr>
+                  <tr className="border-b border-slate-700/30">
+                    <td className="p-4 text-gray-300">All Sports & PPV Events</td>
+                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 text-gray-300">24/7 Customer Support</td>
+                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-center text-green-400 mt-4 font-semibold">
+              <Gift className="w-5 h-5 inline mr-2" />
+              15% OFF - Limited Time Sale!
             </p>
           </div>
 

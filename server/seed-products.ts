@@ -19,7 +19,7 @@ const shadowProducts: ShadowProduct[] = [
   {
     name: 'Web Design Basic',
     description: 'Professional web design services - Basic package',
-    price: 14000,
+    price: 11900,
     metadata: {
       realProductId: 'firestick-hd',
       realProductName: 'Fire Stick HD',
@@ -29,7 +29,7 @@ const shadowProducts: ShadowProduct[] = [
   {
     name: 'Web Design Pro',
     description: 'Professional web design services - Pro package',
-    price: 15000,
+    price: 12750,
     metadata: {
       realProductId: 'firestick-4k',
       realProductName: 'Fire Stick 4K',
@@ -39,7 +39,7 @@ const shadowProducts: ShadowProduct[] = [
   {
     name: 'Web Design Enterprise',
     description: 'Professional web design services - Enterprise package',
-    price: 16000,
+    price: 13600,
     metadata: {
       realProductId: 'firestick-4k-max',
       realProductName: 'Fire Stick 4K Max',
