@@ -189,12 +189,24 @@ Updates:
   console.log(`New commit SHA: ${newCommit.sha}`);
   console.log('Updating branch reference...\n');
   
-  await octokit.git.updateRef({
-    owner: OWNER,
-    repo: REPO,
-    ref: `heads/${BRANCH}`,
-    sha: newCommit.sha
-  });
+  try {
+    await octokit.git.updateRef({
+      owner: OWNER,
+      repo: REPO,
+      ref: `heads/${BRANCH}`,
+      sha: newCommit.sha,
+      force: true
+    });
+  } catch (updateError) {
+    console.log('Standard update failed, retrying with force...');
+    await octokit.git.updateRef({
+      owner: OWNER,
+      repo: REPO,
+      ref: `heads/${BRANCH}`,
+      sha: newCommit.sha,
+      force: true
+    });
+  }
   
   console.log('=== Push Complete! ===\n');
   console.log(`Successfully pushed ${treeItems.length} files to ${OWNER}/${REPO}@${BRANCH}`);
