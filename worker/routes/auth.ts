@@ -36,44 +36,19 @@ export function createAuthRoutes() {
 
       const jwtSecret = getJwtSecret(c.env);
       const adminUsername = c.env.ADMIN_USERNAME || 'admin';
-      const adminPasswordHash = c.env.ADMIN_PASSWORD_HASH;
+      const adminPassword = c.env.ADMIN_PASSWORD || 'admin123';
 
-      if (!adminPasswordHash) {
-        const defaultPassword = 'StreamStick2024!';
-        const defaultHash = await hashPassword(defaultPassword, jwtSecret);
+      if (username === adminUsername && password === adminPassword) {
+        const token = await sign(
+          { 
+            sub: username, 
+            role: 'admin',
+            exp: Math.floor(Date.now() / 1000) + TOKEN_EXPIRY 
+          }, 
+          jwtSecret
+        );
         
-        if (username === adminUsername && password === defaultPassword) {
-          const token = await sign(
-            { 
-              sub: username, 
-              role: 'admin',
-              exp: Math.floor(Date.now() / 1000) + TOKEN_EXPIRY 
-            }, 
-            jwtSecret
-          );
-          
-          return c.json({ 
-            success: true, 
-            token,
-            message: 'Login successful. Please set ADMIN_PASSWORD_HASH in environment for security.',
-            defaultPasswordHash: defaultHash
-          });
-        }
-      } else {
-        const isValid = await verifyPassword(password, adminPasswordHash, jwtSecret);
-        
-        if (username === adminUsername && isValid) {
-          const token = await sign(
-            { 
-              sub: username, 
-              role: 'admin',
-              exp: Math.floor(Date.now() / 1000) + TOKEN_EXPIRY 
-            }, 
-            jwtSecret
-          );
-          
-          return c.json({ success: true, token });
-        }
+        return c.json({ success: true, token });
       }
 
       return c.json({ error: 'Invalid username or password' }, 401);

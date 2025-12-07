@@ -22,7 +22,7 @@ export interface Env {
   VITE_SUPABASE_ANON_KEY: string;
   SUPABASE_SERVICE_KEY?: string;
   ADMIN_USERNAME?: string;
-  ADMIN_PASSWORD_HASH?: string;
+  ADMIN_PASSWORD?: string;
   JWT_SECRET?: string;
   NODE_ENV?: string;
   ASSETS: { fetch: (request: Request) => Promise<Response> };
