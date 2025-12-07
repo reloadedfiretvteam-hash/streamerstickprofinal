@@ -24,6 +24,7 @@ import { SavingsCalculator } from "@/components/SavingsCalculator";
 import { StickyMobileCTA, ScrollToTopButton } from "@/components/StickyMobileCTA";
 import { SEOSchema } from "@/components/SEOSchema";
 import { ProductQuickView, QuickViewButton } from "@/components/ProductQuickView";
+import { MobileNav } from "@/components/MobileNav";
 
 import firestickHdImg from "@assets/OIP_(11)99_1764978938773.jpg";
 import firestick4kImg from "@assets/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg";
@@ -238,6 +239,10 @@ export default function MainStore() {
     document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const scrollToFaq = () => {
+    document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const firestickProducts = products.filter(p => p.category === 'firestick');
   const iptvProducts = products.filter(p => p.category === 'iptv');
 
@@ -317,23 +322,26 @@ export default function MainStore() {
       {/* Navigation */}
       <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-gray-900/95 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
-            <Flame className="w-7 h-7 text-orange-500" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Stream Stick Pro</span>
+          <div className="flex items-center gap-3">
+            <MobileNav scrollToShop={scrollToShop} scrollToAbout={scrollToAbout} scrollToFaq={scrollToFaq} />
+            <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
+              <Flame className="w-7 h-7 text-orange-500" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Stream Stick Pro</span>
+            </div>
           </div>
           
           <div className="flex items-center gap-4">
-            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToAbout}>How It Works</Button>
-            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToShop}>Shop</Button>
+            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToAbout} data-testid="nav-how-it-works">How It Works</Button>
+            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToShop} data-testid="nav-shop">Shop</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setLocation("/blog")} data-testid="button-blog">Blog</Button>
-            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })} data-testid="button-support">Support</Button>
+            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToFaq} data-testid="button-support">Support</Button>
             <Button 
               onClick={openCart} 
               className="relative bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/30"
               data-testid="button-cart"
             >
               <ShoppingCart className="w-5 h-5 mr-2" />
-              Cart
+              <span className="hidden sm:inline">Cart</span>
               {items.length > 0 && (
                 <Badge className="absolute -top-2 -right-2 bg-white text-black hover:bg-gray-200" data-testid="text-cart-count">
                   {items.length}
