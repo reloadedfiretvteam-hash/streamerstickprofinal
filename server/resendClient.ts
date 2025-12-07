@@ -40,11 +40,18 @@ async function getReplitCredentials() {
     throw new Error('Resend not connected - check integration setup');
   }
   
-  console.log('Resend: Successfully retrieved credentials, from_email:', connectionSettings.settings.from_email);
+  let fromEmail = connectionSettings.settings.from_email;
+  
+  if (fromEmail && fromEmail.includes('@gmail.com')) {
+    console.warn('Resend: Gmail addresses cannot be used as sender. Using Resend test domain instead.');
+    fromEmail = 'StreamStickPro <onboarding@resend.dev>';
+  }
+  
+  console.log('Resend: Successfully retrieved credentials, from_email:', fromEmail);
   
   return {
     apiKey: connectionSettings.settings.api_key,
-    fromEmail: connectionSettings.settings.from_email
+    fromEmail: fromEmail
   };
 }
 
