@@ -9,6 +9,7 @@ async function buildWorker() {
 
   console.log("Building client with Vite...");
   await viteBuild({
+    configFile: path.resolve(process.cwd(), "vite.config.cloudflare.ts"),
     build: {
       outDir: path.resolve(process.cwd(), "dist"),
       emptyOutDir: false,
