@@ -22,6 +22,7 @@ import { CustomerReviews } from "@/components/CustomerReviews";
 import { ChannelLogos } from "@/components/ChannelLogos";
 import { SavingsCalculator } from "@/components/SavingsCalculator";
 import { StickyMobileCTA, ScrollToTopButton } from "@/components/StickyMobileCTA";
+import { SEOSchema } from "@/components/SEOSchema";
 
 import firestickHdImg from "@assets/OIP_(11)99_1764978938773.jpg";
 import firestick4kImg from "@assets/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg";
@@ -257,6 +258,15 @@ export default function MainStore() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productListData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData) }} />
+      
+      <SEOSchema 
+        faq={[
+          { question: "What's included with a Fire Stick?", answer: "Every Fire Stick comes pre-configured and jailbroken with 1 Year of IPTV service included. Just plug it in and start streaming immediately!" },
+          { question: "How do I renew my subscription?", answer: "Simply come back to the site and purchase a renewal package. Your credentials will be updated instantly." },
+          { question: "Do you offer support?", answer: "Yes, we offer 24/7 support via email for all active subscribers. Contact us at reloadedfiretvteam@gmail.com" },
+          { question: "What devices are supported?", answer: "Our IPTV service works on Fire Sticks, Android boxes, Smart TVs, phones, tablets, and computers. Use up to 2 devices simultaneously!" }
+        ]}
+      />
       
       {/* Navigation */}
       <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-gray-900/95 backdrop-blur-md">
