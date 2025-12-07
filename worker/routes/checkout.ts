@@ -9,15 +9,19 @@ export function createCheckoutRoutes() {
 
   app.post('/', async (c) => {
     try {
+      console.log("Checkout: Starting checkout process");
       const storage = getStorage(c.env);
       const body = await c.req.json();
+      console.log("Checkout: Received body:", JSON.stringify(body));
       
       const parseResult = checkoutRequestSchema.safeParse(body);
       if (!parseResult.success) {
+        console.log("Checkout: Validation failed:", parseResult.error.message);
         return c.json({ error: parseResult.error.message }, 400);
       }
       
       const { items, customerEmail, customerName, isRenewal, existingUsername } = parseResult.data;
+      console.log("Checkout: Parsed data - items:", items.length, "email:", customerEmail);
 
       let existingCustomer: Awaited<ReturnType<typeof storage.getCustomerByUsername>> | null = null;
       if (isRenewal && existingUsername) {
@@ -32,16 +36,21 @@ export function createCheckoutRoutes() {
       const productsWithQuantity: Array<{ product: any; quantity: number }> = [];
       
       for (const item of items) {
+        console.log("Checkout: Looking up product:", item.productId);
         const product = await storage.getRealProduct(item.productId);
         if (!product) {
+          console.log("Checkout: Product not found:", item.productId);
           return c.json({ error: `Product not found: ${item.productId}` }, 404);
         }
         if (!product.shadowPriceId) {
+          console.log("Checkout: Product not configured:", item.productId);
           return c.json({ error: `Product not configured for checkout: ${item.productId}` }, 400);
         }
+        console.log("Checkout: Found product:", product.name, "shadowPriceId:", product.shadowPriceId);
         productsWithQuantity.push({ product, quantity: item.quantity });
       }
 
+      console.log("Checkout: Creating Stripe session");
       const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
 
       const baseUrl = new URL(c.req.url).origin;
@@ -86,13 +95,16 @@ export function createCheckoutRoutes() {
         };
       }
 
+      console.log("Checkout: Calling stripe.checkout.sessions.create with lineItems:", JSON.stringify(lineItems));
       const session = await stripe.checkout.sessions.create(sessionConfig);
+      console.log("Checkout: Stripe session created:", session.id);
 
       const totalAmount = productsWithQuantity.reduce(
         (sum, { product, quantity }) => sum + product.price * quantity, 
         0
       );
 
+      console.log("Checkout: Creating order in database");
       const order = await storage.createOrder({
         customerEmail,
         customerName: customerName || null,
@@ -108,6 +120,7 @@ export function createCheckoutRoutes() {
         existingUsername: existingUsername || null,
         customerId: existingCustomer?.id || null,
       });
+      console.log("Checkout: Order created:", order.id);
 
       return c.json({ 
         sessionId: session.id,
@@ -115,8 +128,9 @@ export function createCheckoutRoutes() {
         orderId: order.id,
       });
     } catch (error: any) {
-      console.error("Error creating checkout session:", error);
-      return c.json({ error: "Failed to create checkout session" }, 500);
+      console.error("Error creating checkout session:", error.message || error);
+      console.error("Error stack:", error.stack);
+      return c.json({ error: "Failed to create checkout session", details: error.message }, 500);
     }
   });
 
