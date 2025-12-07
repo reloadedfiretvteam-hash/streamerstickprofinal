@@ -45,6 +45,76 @@ interface Product {
   period?: string;
 }
 
+interface IPTVPricing {
+  duration: string;
+  durationLabel: string;
+  badge: string;
+  popular?: boolean;
+  description: string;
+  features: string[];
+  prices: { devices: number; price: number; productId: string }[];
+}
+
+const iptvPricingMatrix: IPTVPricing[] = [
+  {
+    duration: "1mo",
+    durationLabel: "1 Month",
+    badge: "STARTER",
+    description: "Premium IPTV subscription with 18,000+ live TV channels, 60,000+ movies & TV shows, all sports leagues & PPV events.",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support"],
+    prices: [
+      { devices: 1, price: 15, productId: "iptv-1mo-1d" },
+      { devices: 2, price: 26, productId: "iptv-1mo-2d" },
+      { devices: 3, price: 35, productId: "iptv-1mo-3d" },
+      { devices: 4, price: 42, productId: "iptv-1mo-4d" },
+      { devices: 5, price: 50, productId: "iptv-1mo-5d" },
+    ],
+  },
+  {
+    duration: "3mo",
+    durationLabel: "3 Months",
+    badge: "POPULAR",
+    popular: true,
+    description: "Save more with 3 months! Premium IPTV with 18,000+ live channels, 60,000+ movies & shows, all sports & PPV events.",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support"],
+    prices: [
+      { devices: 1, price: 30, productId: "iptv-3mo-1d" },
+      { devices: 2, price: 51, productId: "iptv-3mo-2d" },
+      { devices: 3, price: 69, productId: "iptv-3mo-3d" },
+      { devices: 4, price: 84, productId: "iptv-3mo-4d" },
+      { devices: 5, price: 99, productId: "iptv-3mo-5d" },
+    ],
+  },
+  {
+    duration: "6mo",
+    durationLabel: "6 Months",
+    badge: "GREAT VALUE",
+    description: "10% OFF! 6-month premium IPTV subscription with 18,000+ live TV channels, 60,000+ movies & shows, all sports & PPV.",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "VIP Customer Support"],
+    prices: [
+      { devices: 1, price: 45, productId: "iptv-6mo-1d" },
+      { devices: 2, price: 77, productId: "iptv-6mo-2d" },
+      { devices: 3, price: 104, productId: "iptv-6mo-3d" },
+      { devices: 4, price: 126, productId: "iptv-6mo-4d" },
+      { devices: 5, price: 149, productId: "iptv-6mo-5d" },
+    ],
+  },
+  {
+    duration: "1yr",
+    durationLabel: "1 Year",
+    badge: "BEST VALUE",
+    description: "10% OFF! Best deal - Full year premium IPTV with 18,000+ live channels, 60,000+ movies & shows, all sports & PPV events!",
+    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Premium VIP Support", "Free Setup Assistance"],
+    prices: [
+      { devices: 1, price: 68, productId: "iptv-1yr-1d" },
+      { devices: 2, price: 116, productId: "iptv-1yr-2d" },
+      { devices: 3, price: 156, productId: "iptv-1yr-3d" },
+      { devices: 4, price: 190, productId: "iptv-1yr-4d" },
+      { devices: 5, price: 224, productId: "iptv-1yr-5d" },
+    ],
+  },
+];
+
 const defaultProducts: Product[] = [
   {
     id: "fs-hd",
@@ -76,51 +146,6 @@ const defaultProducts: Product[] = [
     image: firestick4kMaxImg,
     category: "firestick",
     badge: "PREMIUM"
-  },
-  {
-    id: "iptv-1",
-    name: "1 Month IPTV Subscription",
-    price: 15,
-    description: "Premium IPTV subscription with 18,000+ live TV channels, 60,000+ movies & TV shows, all sports leagues (NFL, NBA, UFC, MLB) & PPV events. Works on any device. Login credentials & setup guide emailed instantly!",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "NFL, NBA, UFC, MLB & More", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support"],
-    image: iptvImg,
-    category: "iptv",
-    badge: "STARTER",
-    period: "/month"
-  },
-  {
-    id: "iptv-3",
-    name: "3 Month IPTV Subscription",
-    price: 30,
-    description: "Save 33%! Premium 3-month IPTV with 18,000+ live channels, 60,000+ movies & shows, all sports including NFL, NBA, UFC & PPV events. Works on Fire Stick, Roku, Android, iOS & more. Credentials emailed instantly!",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "NFL, NBA, UFC, MLB & More", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support"],
-    image: iptvImg,
-    category: "iptv",
-    badge: "POPULAR",
-    popular: true,
-    period: "/3 months"
-  },
-  {
-    id: "iptv-6",
-    name: "6 Month IPTV Subscription",
-    price: 50,
-    description: "Save 44%! 6-month premium IPTV subscription. Stream 18,000+ live TV channels, 60,000+ movies & TV shows, all sports (NFL, NBA, UFC, Premier League) & PPV events. Works on any device. VIP support included!",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "NFL, NBA, UFC, Premier League", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "VIP Customer Support"],
-    image: iptvImg,
-    category: "iptv",
-    badge: "GREAT VALUE",
-    period: "/6 months"
-  },
-  {
-    id: "iptv-12",
-    name: "1 Year IPTV Subscription",
-    price: 75,
-    description: "Best Deal - Save 58%! Full year premium IPTV with 18,000+ live TV channels, 60,000+ movies & shows, all sports leagues (NFL, NBA, UFC, MLB, NHL, Premier League) & PPV events. Premium VIP support & free setup assistance!",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "NFL, NBA, UFC, MLB, NHL & More", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Premium VIP Support", "Free Setup Assistance"],
-    image: iptvImg,
-    category: "iptv",
-    badge: "BEST VALUE",
-    period: "/year"
   }
 ];
 
@@ -128,6 +153,12 @@ export default function MainStore() {
   const [, setLocation] = useLocation();
   const { addItem, items } = useCart();
   const [products, setProducts] = useState<Product[]>(defaultProducts);
+  const [selectedDevices, setSelectedDevices] = useState<Record<string, number>>({
+    "1mo": 1,
+    "3mo": 1,
+    "6mo": 1,
+    "1yr": 1,
+  });
 
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
@@ -646,84 +677,127 @@ export default function MainStore() {
 
           {/* IPTV Subscriptions */}
           <div className="mt-20">
-            <h3 className="text-3xl font-bold mb-8 text-center flex items-center justify-center gap-3">
+            <h3 className="text-3xl font-bold mb-4 text-center flex items-center justify-center gap-3">
               <Zap className="w-8 h-8 text-blue-500" />
               IPTV Subscriptions Only
             </h3>
+            <p className="text-center text-gray-400 mb-8 max-w-2xl mx-auto">
+              Choose your subscription length and number of devices. Multi-device plans let you stream on multiple TVs, phones, or tablets at the same time!
+            </p>
             
             {/* Free Trial Box */}
             <FreeTrial />
 
-            <div className="grid md:grid-cols-4 gap-6">
-              {iptvProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className={`relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
-                    product.popular ? 'ring-4 ring-blue-500 scale-105 shadow-2xl shadow-blue-500/50' : ''
-                  }`}
-                  data-testid={`card-product-${product.id}`}
-                >
-                  {product.popular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                      <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
-                        <Star className="w-4 h-4 fill-current" />
-                        POPULAR
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                      loading="lazy"
-                      width={300}
-                      height={192}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        if (target.src !== iptvImg) {
-                          target.src = iptvImg;
-                        }
-                      }}
-                    />
-                    <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full font-bold text-xs">
-                      {product.badge}
-                    </div>
-                  </div>
-
-                  <div className="p-6">
-                    <h4 className="text-xl font-bold mb-4">{product.name}</h4>
-
-                    <div className="mb-6">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-bold text-blue-400" data-testid={`text-price-${product.id}`}>
-                          ${product.price.toFixed(2)}
-                        </span>
-                        {product.period && <span className="text-gray-400">{product.period}</span>}
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => addItem(product as any)}
-                      className="w-full py-3 rounded-xl font-bold text-base transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg"
-                      data-testid={`button-add-${product.id}`}
-                    >
-                      <ShoppingCart className="w-5 h-5" />
-                      Subscribe Now
-                    </button>
-
-                    <div className="space-y-2">
-                      {product.features.slice(0, 5).map((feature, idx) => (
-                        <div key={idx} className="flex items-start gap-2">
-                          <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                          <span className="text-blue-100 text-xs">{feature}</span>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {iptvPricingMatrix.map((plan) => {
+                const deviceCount = selectedDevices[plan.duration];
+                const selectedPrice = plan.prices.find(p => p.devices === deviceCount) || plan.prices[0];
+                
+                return (
+                  <div
+                    key={plan.duration}
+                    className={`relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden transform transition-all duration-300 hover:shadow-2xl ${
+                      plan.popular ? 'ring-4 ring-blue-500 shadow-2xl shadow-blue-500/50' : ''
+                    }`}
+                    data-testid={`card-product-iptv-${plan.duration}`}
+                  >
+                    {plan.popular && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
+                          <Star className="w-4 h-4 fill-current" />
+                          POPULAR
                         </div>
-                      ))}
+                      </div>
+                    )}
+
+                    <div className="relative h-40 overflow-hidden">
+                      <img
+                        src={iptvImg}
+                        alt={`IPTV ${plan.durationLabel} Subscription`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        width={300}
+                        height={160}
+                      />
+                      <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full font-bold text-xs">
+                        {plan.badge}
+                      </div>
+                      {(plan.duration === "6mo" || plan.duration === "1yr") && (
+                        <div className="absolute top-4 left-4 bg-green-500 text-white px-2 py-1 rounded-full font-bold text-xs">
+                          10% OFF
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-5">
+                      <h4 className="text-xl font-bold mb-2">{plan.durationLabel} IPTV</h4>
+                      <p className="text-gray-400 text-xs mb-4 line-clamp-2">{plan.description}</p>
+
+                      {/* Device Selector */}
+                      <div className="mb-4">
+                        <label className="text-sm text-gray-300 mb-2 block">Number of Devices:</label>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map((num) => (
+                            <button
+                              key={num}
+                              onClick={() => setSelectedDevices(prev => ({ ...prev, [plan.duration]: num }))}
+                              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                                deviceCount === num
+                                  ? 'bg-blue-500 text-white shadow-lg'
+                                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                              }`}
+                              data-testid={`button-device-${plan.duration}-${num}`}
+                            >
+                              {num}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="mb-4">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl font-bold text-blue-400" data-testid={`text-price-iptv-${plan.duration}`}>
+                            ${selectedPrice.price}
+                          </span>
+                          <span className="text-gray-400 text-sm">
+                            / {plan.durationLabel.toLowerCase()}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {deviceCount} device{deviceCount > 1 ? 's' : ''} included
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => addItem({
+                          id: selectedPrice.productId,
+                          name: `IPTV ${plan.durationLabel} - ${deviceCount} Device${deviceCount > 1 ? 's' : ''}`,
+                          price: selectedPrice.price,
+                          image: iptvImg,
+                          description: plan.description,
+                          features: plan.features,
+                          category: 'iptv',
+                          badge: plan.badge,
+                        } as Product)}
+                        className="w-full py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg"
+                        data-testid={`button-add-iptv-${plan.duration}`}
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                        Subscribe Now
+                      </button>
+
+                      <div className="space-y-1.5">
+                        {plan.features.slice(0, 4).map((feature, idx) => (
+                          <div key={idx} className="flex items-start gap-2">
+                            <Check className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
+                            <span className="text-blue-100 text-xs">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

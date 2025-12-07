@@ -22,6 +22,71 @@ interface ShadowProduct {
   period?: string;
 }
 
+interface SEOPricingTier {
+  duration: string;
+  durationLabel: string;
+  description: string;
+  features: string[];
+  popular?: boolean;
+  prices: { tier: string; tierLabel: string; price: number; productId: string }[];
+}
+
+const seoPricingMatrix: SEOPricingTier[] = [
+  {
+    duration: "1mo",
+    durationLabel: "Monthly",
+    description: "Monthly SEO maintenance package with keyword tracking and optimization.",
+    features: ["Keyword Tracking", "Monthly Report", "Basic Optimization", "Analytics Setup"],
+    prices: [
+      { tier: "starter", tierLabel: "Starter", price: 15, productId: "iptv-1mo-1d" },
+      { tier: "duo", tierLabel: "Duo", price: 26, productId: "iptv-1mo-2d" },
+      { tier: "team", tierLabel: "Team", price: 35, productId: "iptv-1mo-3d" },
+      { tier: "business", tierLabel: "Business", price: 42, productId: "iptv-1mo-4d" },
+      { tier: "enterprise", tierLabel: "Enterprise", price: 50, productId: "iptv-1mo-5d" },
+    ],
+  },
+  {
+    duration: "3mo",
+    durationLabel: "Quarterly",
+    description: "Quarterly SEO package with competitor analysis and content recommendations.",
+    features: ["Extended Tracking", "Competitor Analysis", "Content Strategy", "Strategy Calls"],
+    popular: true,
+    prices: [
+      { tier: "starter", tierLabel: "Starter", price: 30, productId: "iptv-3mo-1d" },
+      { tier: "duo", tierLabel: "Duo", price: 51, productId: "iptv-3mo-2d" },
+      { tier: "team", tierLabel: "Team", price: 69, productId: "iptv-3mo-3d" },
+      { tier: "business", tierLabel: "Business", price: 84, productId: "iptv-3mo-4d" },
+      { tier: "enterprise", tierLabel: "Enterprise", price: 99, productId: "iptv-3mo-5d" },
+    ],
+  },
+  {
+    duration: "6mo",
+    durationLabel: "Semi-Annual",
+    description: "6-month content marketing program with strategy and link building.",
+    features: ["Content Marketing", "Link Building", "Technical Audit", "Bi-Monthly Calls"],
+    prices: [
+      { tier: "starter", tierLabel: "Starter", price: 45, productId: "iptv-6mo-1d" },
+      { tier: "duo", tierLabel: "Duo", price: 77, productId: "iptv-6mo-2d" },
+      { tier: "team", tierLabel: "Team", price: 104, productId: "iptv-6mo-3d" },
+      { tier: "business", tierLabel: "Business", price: 126, productId: "iptv-6mo-4d" },
+      { tier: "enterprise", tierLabel: "Enterprise", price: 149, productId: "iptv-6mo-5d" },
+    ],
+  },
+  {
+    duration: "1yr",
+    durationLabel: "Annual",
+    description: "Full-year digital marketing partnership with dedicated account manager.",
+    features: ["Comprehensive Strategy", "Dedicated Manager", "Full Audit", "Priority Support"],
+    prices: [
+      { tier: "starter", tierLabel: "Starter", price: 68, productId: "iptv-1yr-1d" },
+      { tier: "duo", tierLabel: "Duo", price: 116, productId: "iptv-1yr-2d" },
+      { tier: "team", tierLabel: "Team", price: 156, productId: "iptv-1yr-3d" },
+      { tier: "business", tierLabel: "Business", price: 190, productId: "iptv-1yr-4d" },
+      { tier: "enterprise", tierLabel: "Enterprise", price: 224, productId: "iptv-1yr-5d" },
+    ],
+  },
+];
+
 const shadowProducts: ShadowProduct[] = [
   {
     id: "fs-hd",
@@ -54,46 +119,6 @@ const shadowProducts: ShadowProduct[] = [
     category: 'design',
     period: "/project"
   },
-  {
-    id: "iptv-1",
-    name: "SEO Starter",
-    shadowName: "SEO Monthly",
-    price: 15,
-    description: "Monthly SEO maintenance for small websites. Keyword tracking and basic optimization.",
-    features: ["5 Keywords Tracked", "Monthly Report", "Basic Optimization", "Google Analytics Setup"],
-    category: 'seo',
-    period: "/month"
-  },
-  {
-    id: "iptv-3",
-    name: "SEO Growth",
-    shadowName: "SEO Quarterly",
-    price: 30,
-    description: "Quarterly SEO package for businesses looking to improve their search rankings.",
-    features: ["15 Keywords Tracked", "Competitor Analysis", "Content Recommendations", "Quarterly Strategy Call"],
-    category: 'seo',
-    period: "/quarter"
-  },
-  {
-    id: "iptv-6",
-    name: "SEO Professional",
-    shadowName: "SEO Semi-Annual",
-    price: 50,
-    description: "6-month comprehensive SEO program with content strategy and link building.",
-    features: ["30 Keywords Tracked", "Content Strategy", "Link Building", "Technical SEO Audit", "Bi-Monthly Calls"],
-    category: 'seo',
-    period: "/6 months"
-  },
-  {
-    id: "iptv-12",
-    name: "SEO Enterprise",
-    shadowName: "SEO Annual",
-    price: 75,
-    description: "Full-year SEO partnership with dedicated account manager and comprehensive strategy.",
-    features: ["Unlimited Keywords", "Dedicated Manager", "Full Technical Audit", "Monthly Strategy Calls", "Priority Support", "Custom Reporting"],
-    category: 'seo',
-    period: "/year"
-  }
 ];
 
 const testimonials = [
@@ -127,14 +152,29 @@ const portfolioItems = [
   { name: "Real Estate Portal", category: "Web Application", description: "Property listing platform with search" },
 ];
 
+interface SelectedSEOProduct {
+  productId: string;
+  name: string;
+  price: number;
+  duration: string;
+  tier: string;
+}
+
 export default function ShadowStore() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [selectedProduct, setSelectedProduct] = useState<ShadowProduct | null>(null);
+  const [selectedSEOProduct, setSelectedSEOProduct] = useState<SelectedSEOProduct | null>(null);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [showCheckout, setShowCheckout] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedTiers, setSelectedTiers] = useState<Record<string, string>>({
+    "1mo": "starter",
+    "3mo": "starter",
+    "6mo": "starter",
+    "1yr": "starter",
+  });
 
   useEffect(() => {
     document.documentElement.classList.remove("dark");
@@ -154,7 +194,8 @@ export default function ShadowStore() {
   };
 
   const handleCheckout = async () => {
-    if (!selectedProduct || !email || !name) {
+    const productId = selectedProduct?.id || selectedSEOProduct?.productId;
+    if (!productId || !email || !name) {
       toast({
         title: "Missing Information",
         description: "Please enter your name and email to continue.",
@@ -169,7 +210,7 @@ export default function ShadowStore() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: [{ productId: selectedProduct.id, quantity: 1 }],
+          items: [{ productId, quantity: 1 }],
           customerEmail: email,
           customerName: name
         })
@@ -192,15 +233,33 @@ export default function ShadowStore() {
     }
   };
 
-  const designProducts = shadowProducts.filter(p => p.category === 'design');
-  const seoProducts = shadowProducts.filter(p => p.category === 'seo');
+  const handleSelectSEOPlan = (plan: SEOPricingTier) => {
+    const tier = selectedTiers[plan.duration];
+    const priceInfo = plan.prices.find(p => p.tier === tier) || plan.prices[0];
+    setSelectedSEOProduct({
+      productId: priceInfo.productId,
+      name: `SEO ${priceInfo.tierLabel} ${plan.durationLabel}`,
+      price: priceInfo.price,
+      duration: plan.duration,
+      tier: priceInfo.tier,
+    });
+    setSelectedProduct(null);
+    setShowCheckout(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-  if (showCheckout && selectedProduct) {
+  const designProducts = shadowProducts.filter(p => p.category === 'design');
+
+  if (showCheckout && (selectedProduct || selectedSEOProduct)) {
+    const productName = selectedProduct?.name || selectedSEOProduct?.name || "";
+    const productSubtitle = selectedProduct?.shadowName || `${selectedSEOProduct?.tier} tier - ${selectedSEOProduct?.duration}`;
+    const productPrice = selectedProduct?.price || selectedSEOProduct?.price || 0;
+
     return (
       <div className="min-h-screen bg-background text-foreground font-sans">
         <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-xl text-primary cursor-pointer" onClick={() => { setShowCheckout(false); setSelectedProduct(null); }}>
+            <div className="flex items-center gap-2 font-semibold text-xl text-primary cursor-pointer" onClick={() => { setShowCheckout(false); setSelectedProduct(null); setSelectedSEOProduct(null); }}>
               <LayoutGrid className="w-6 h-6" />
               <span>WebFlow Design</span>
             </div>
@@ -215,7 +274,7 @@ export default function ShadowStore() {
           >
             <div className="text-center">
               <h1 className="text-3xl font-bold mb-2">Complete Your Order</h1>
-              <p className="text-muted-foreground">You're one step away from your new website</p>
+              <p className="text-muted-foreground">You're one step away from your new {selectedSEOProduct ? 'SEO package' : 'website'}</p>
             </div>
 
             <Card className="border-2 border-primary/20">
@@ -225,10 +284,10 @@ export default function ShadowStore() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center py-4 border-b">
                   <div>
-                    <h3 className="font-semibold">{selectedProduct.name}</h3>
-                    <p className="text-sm text-muted-foreground">{selectedProduct.shadowName}</p>
+                    <h3 className="font-semibold">{productName}</h3>
+                    <p className="text-sm text-muted-foreground">{productSubtitle}</p>
                   </div>
-                  <div className="text-2xl font-bold">${selectedProduct.price}</div>
+                  <div className="text-2xl font-bold">${productPrice}</div>
                 </div>
                 
                 <div className="space-y-4 pt-4">
@@ -260,12 +319,12 @@ export default function ShadowStore() {
                     disabled={isProcessing}
                     data-testid="button-checkout-submit"
                   >
-                    {isProcessing ? "Processing..." : `Pay $${selectedProduct.price}`}
+                    {isProcessing ? "Processing..." : `Pay $${productPrice}`}
                   </Button>
                   <Button 
                     variant="ghost" 
                     className="w-full"
-                    onClick={() => { setShowCheckout(false); setSelectedProduct(null); }}
+                    onClick={() => { setShowCheckout(false); setSelectedProduct(null); setSelectedSEOProduct(null); }}
                   >
                     ← Back to Packages
                   </Button>
@@ -506,27 +565,84 @@ export default function ShadowStore() {
             ))}
           </div>
           
-          <h3 className="text-xl font-semibold mb-6 text-center">SEO & Marketing Retainers</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            {seoProducts.map((product) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                className="p-6 border rounded-xl text-center hover:border-primary bg-background transition-colors cursor-pointer"
-                onClick={() => handleSelectPlan(product)}
-                data-testid={`card-product-${product.id}`}
-              >
-                <div className="font-medium mb-2">{product.name}</div>
-                <div className="text-2xl font-bold mb-2">
-                  ${product.price}
-                  <span className="text-xs text-muted-foreground">{product.period}</span>
-                </div>
-                <Button size="sm" variant="ghost" className="text-xs" data-testid={`button-select-${product.id}`}>
-                  Learn More
-                </Button>
-              </motion.div>
-            ))}
+          <h3 className="text-xl font-semibold mb-6 text-center">SEO & Marketing Packages</h3>
+          <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Choose your package duration and tier. Higher tiers include more keywords, pages, and dedicated support.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {seoPricingMatrix.map((plan) => {
+              const currentTier = selectedTiers[plan.duration];
+              const currentPrice = plan.prices.find(p => p.tier === currentTier)?.price || plan.prices[0].price;
+              
+              return (
+                <motion.div
+                  key={plan.duration}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  className={`border rounded-2xl p-6 bg-background relative ${
+                    plan.popular ? 'border-primary ring-2 ring-primary/20' : ''
+                  }`}
+                  data-testid={`card-seo-${plan.duration}`}
+                >
+                  {plan.popular && (
+                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-2xl">
+                      POPULAR
+                    </div>
+                  )}
+                  <h4 className="text-lg font-semibold mb-1">{plan.durationLabel}</h4>
+                  <p className="text-sm text-muted-foreground mb-4">{plan.description}</p>
+                  
+                  <div className="mb-4">
+                    <div className="text-3xl font-bold mb-2">
+                      ${currentPrice}
+                      <span className="text-sm font-normal text-muted-foreground">/{plan.duration === "1mo" ? "mo" : plan.duration}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <label className="text-xs font-medium text-muted-foreground block mb-2">Select Tier</label>
+                    <div className="grid grid-cols-5 gap-1">
+                      {plan.prices.map((priceInfo) => (
+                        <button
+                          key={priceInfo.tier}
+                          onClick={() => setSelectedTiers(prev => ({ ...prev, [plan.duration]: priceInfo.tier }))}
+                          className={`py-2 px-1 text-xs rounded-md transition-all ${
+                            currentTier === priceInfo.tier
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted hover:bg-muted/80'
+                          }`}
+                          title={`${priceInfo.tierLabel} - $${priceInfo.price}`}
+                          data-testid={`button-tier-${plan.duration}-${priceInfo.tier}`}
+                        >
+                          {priceInfo.tierLabel.slice(0, 3)}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="text-xs text-center text-muted-foreground mt-2">
+                      {plan.prices.find(p => p.tier === currentTier)?.tierLabel} tier
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    className="w-full mb-4"
+                    variant={plan.popular ? 'default' : 'outline'}
+                    onClick={() => handleSelectSEOPlan(plan)}
+                    data-testid={`button-select-seo-${plan.duration}`}
+                  >
+                    Select Plan <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                  
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex gap-2">
+                        <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
