@@ -42,9 +42,9 @@ async function getReplitCredentials() {
   
   let fromEmail = connectionSettings.settings.from_email;
   
-  if (fromEmail && fromEmail.includes('@gmail.com')) {
-    console.warn('Resend: Gmail addresses cannot be used as sender. Using Resend test domain instead.');
-    fromEmail = 'StreamStickPro <onboarding@resend.dev>';
+  if (fromEmail && (fromEmail.includes('@gmail.com') || fromEmail.includes('@resend.dev'))) {
+    console.log('Resend: Using verified streamstickpro.com domain for sending.');
+    fromEmail = 'StreamStickPro <noreply@send.streamstickpro.com>';
   }
   
   console.log('Resend: Successfully retrieved credentials, from_email:', fromEmail);
