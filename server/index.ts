@@ -50,7 +50,11 @@ async function initStripe() {
     const stripeSync = await getStripeSync();
 
     log('Setting up managed webhook...', 'stripe');
-    const webhookBaseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
+    // Use custom domain for webhook (user's secure domain) instead of Replit domains
+    const customDomain = process.env.WEBHOOK_PUBLIC_BASE_URL || 
+                         (process.env.VITE_SECURE_HOSTS ? `https://${process.env.VITE_SECURE_HOSTS.split(',')[0]}` : null) ||
+                         `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
+    const webhookBaseUrl = customDomain;
     
     const { webhook, uuid } = await stripeSync.findOrCreateManagedWebhook(
       `${webhookBaseUrl}/api/stripe/webhook`,
