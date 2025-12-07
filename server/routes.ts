@@ -1056,27 +1056,11 @@ export async function registerRoutes(
       }
 
       const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-      const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
+      const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
 
-      if (!adminPasswordHash) {
-        const defaultPassword = 'admin123';
-        const defaultHash = await hashPassword(defaultPassword);
-        
-        if (username === adminUsername && password === defaultPassword) {
-          const token = await createToken(username);
-          return res.json({ 
-            success: true, 
-            token,
-            message: 'Login successful. Please set ADMIN_PASSWORD_HASH in environment for security.',
-            defaultPasswordHash: defaultHash
-          });
-        }
-      } else {
-        const inputHash = await hashPassword(password);
-        if (username === adminUsername && inputHash === adminPasswordHash) {
-          const token = await createToken(username);
-          return res.json({ success: true, token });
-        }
+      if (username === adminUsername && password === adminPassword) {
+        const token = await createToken(username);
+        return res.json({ success: true, token });
       }
 
       res.status(401).json({ error: 'Invalid username or password' });
