@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Trash2, ArrowLeft, CreditCard, Lock, ShieldCheck, Zap, CheckCircle, Loader2, RefreshCw, UserPlus } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Trash2, ArrowLeft, CreditCard, Lock, ShieldCheck, Zap, CheckCircle, Loader2, RefreshCw, UserPlus, Globe } from "lucide-react";
 
 const productIdMap: Record<string, string> = {
   "fs-hd": "firestick-hd",
@@ -42,6 +43,12 @@ export default function Checkout() {
   const [error, setError] = useState<string | null>(null);
   const [accountType, setAccountType] = useState<"new" | "renewal">("new");
   const [existingUsername, setExistingUsername] = useState("");
+  const [countryOptions, setCountryOptions] = useState({
+    usaOnly: false,
+    usaCanadaUk: false,
+    allCountries: true,
+  });
+  const [customCountries, setCustomCountries] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -61,6 +68,19 @@ export default function Checkout() {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     setError(null);
+  };
+
+  const buildCountryPreference = () => {
+    const preferences: string[] = [];
+    if (countryOptions.usaOnly) preferences.push("USA Only");
+    if (countryOptions.usaCanadaUk) preferences.push("USA, Canada, UK");
+    if (countryOptions.allCountries) preferences.push("All Countries");
+    if (customCountries.trim()) preferences.push(`Custom: ${customCountries.trim()}`);
+    return preferences.join("; ") || "All Countries";
+  };
+
+  const handleCountryOptionChange = (option: keyof typeof countryOptions, checked: boolean) => {
+    setCountryOptions(prev => ({ ...prev, [option]: checked }));
   };
 
   const handlePayment = async () => {
@@ -97,6 +117,10 @@ export default function Checkout() {
       if (accountType === "renewal" && hasIPTVProduct && existingUsername.trim()) {
         checkoutPayload.isRenewal = true;
         checkoutPayload.existingUsername = existingUsername.trim();
+      }
+
+      if (hasIPTVProduct) {
+        checkoutPayload.countryPreference = buildCountryPreference();
       }
 
       const response = await fetch("/api/checkout", {
@@ -285,6 +309,96 @@ export default function Checkout() {
                       </p>
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            )}
+
+            {hasIPTVProduct && (
+              <Card className="border-white/10 bg-card/50 backdrop-blur">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <Globe className="w-5 h-5 text-primary" />
+                    Channel Preferences
+                  </CardTitle>
+                  <CardDescription>Which regions/countries would you like channels from?</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div 
+                      className={`flex items-center space-x-3 p-4 rounded-lg border transition-all cursor-pointer ${
+                        countryOptions.usaOnly 
+                          ? "border-primary bg-primary/10" 
+                          : "border-white/10 hover:border-white/20"
+                      }`}
+                      onClick={() => handleCountryOptionChange("usaOnly", !countryOptions.usaOnly)}
+                      data-testid="checkbox-usa-only"
+                    >
+                      <Checkbox 
+                        checked={countryOptions.usaOnly}
+                        onCheckedChange={(checked) => handleCountryOptionChange("usaOnly", !!checked)}
+                        id="usa-only"
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor="usa-only" className="font-semibold cursor-pointer">USA Only</Label>
+                        <p className="text-sm text-muted-foreground">Only US-based channels</p>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      className={`flex items-center space-x-3 p-4 rounded-lg border transition-all cursor-pointer ${
+                        countryOptions.usaCanadaUk 
+                          ? "border-primary bg-primary/10" 
+                          : "border-white/10 hover:border-white/20"
+                      }`}
+                      onClick={() => handleCountryOptionChange("usaCanadaUk", !countryOptions.usaCanadaUk)}
+                      data-testid="checkbox-usa-canada-uk"
+                    >
+                      <Checkbox 
+                        checked={countryOptions.usaCanadaUk}
+                        onCheckedChange={(checked) => handleCountryOptionChange("usaCanadaUk", !!checked)}
+                        id="usa-canada-uk"
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor="usa-canada-uk" className="font-semibold cursor-pointer">USA + Canada + UK</Label>
+                        <p className="text-sm text-muted-foreground">English-speaking countries</p>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      className={`flex items-center space-x-3 p-4 rounded-lg border transition-all cursor-pointer ${
+                        countryOptions.allCountries 
+                          ? "border-primary bg-primary/10" 
+                          : "border-white/10 hover:border-white/20"
+                      }`}
+                      onClick={() => handleCountryOptionChange("allCountries", !countryOptions.allCountries)}
+                      data-testid="checkbox-all-countries"
+                    >
+                      <Checkbox 
+                        checked={countryOptions.allCountries}
+                        onCheckedChange={(checked) => handleCountryOptionChange("allCountries", !!checked)}
+                        id="all-countries"
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor="all-countries" className="font-semibold cursor-pointer">All Countries</Label>
+                        <p className="text-sm text-muted-foreground">Full international channel package</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-2">
+                    <Label htmlFor="customCountries">Other Countries/Languages (Optional)</Label>
+                    <Input 
+                      id="customCountries"
+                      placeholder="e.g., Spanish, Portuguese, Arabic channels..." 
+                      value={customCountries}
+                      onChange={(e) => setCustomCountries(e.target.value)}
+                      className="bg-background/50 border-white/20 h-12"
+                      data-testid="input-custom-countries"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Tell us any specific countries or language channels you'd like
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             )}

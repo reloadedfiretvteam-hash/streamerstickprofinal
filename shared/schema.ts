@@ -75,6 +75,7 @@ export const orders = pgTable("orders", {
   existingUsername: text("existing_username"),
   generatedUsername: text("generated_username"),
   generatedPassword: text("generated_password"),
+  countryPreference: text("country_preference"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   uniqueIndex("orders_payment_intent_idx").on(table.stripePaymentIntentId),
@@ -123,6 +124,7 @@ export const checkoutRequestSchema = z.object({
   customerName: z.string().optional(),
   isRenewal: z.boolean().optional(),
   existingUsername: z.string().optional(),
+  countryPreference: z.string().optional(),
 });
 
 export type CheckoutItem = z.infer<typeof checkoutItemSchema>;
@@ -195,6 +197,7 @@ export const updateOrderRequestSchema = z.object({
   existingUsername: z.string().nullable().optional(),
   generatedUsername: z.string().nullable().optional(),
   generatedPassword: z.string().nullable().optional(),
+  countryPreference: z.string().nullable().optional(),
 });
 
 export type UpdateOrderRequest = z.infer<typeof updateOrderRequestSchema>;

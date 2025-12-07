@@ -30,6 +30,7 @@ export class EmailService {
             <p><strong>Order ID:</strong> ${order.id}</p>
             <p><strong>Product:</strong> ${order.realProductName}</p>
             <p><strong>Amount:</strong> $${priceFormatted}</p>
+            ${order.countryPreference ? `<p><strong>Channel Preferences:</strong> ${order.countryPreference}</p>` : ''}
           </div>
           
           <p>You will receive your login credentials in a separate email within the next 5 minutes.</p>
@@ -322,6 +323,7 @@ export class EmailService {
             <p><strong>Product:</strong> ${order.realProductName}</p>
             <p><strong>Category:</strong> ${category}</p>
             <p><strong>Status:</strong> ${order.status}</p>
+            ${order.countryPreference ? `<p><strong>🌍 Channel Preferences:</strong> <span style="background: #dbeafe; padding: 2px 8px; border-radius: 4px;">${order.countryPreference}</span></p>` : ''}
           </div>
 
           ${hasFireStick ? `

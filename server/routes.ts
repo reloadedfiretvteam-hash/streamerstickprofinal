@@ -60,7 +60,7 @@ export async function registerRoutes(
         return res.status(400).json({ error: validationError.message });
       }
       
-      const { items, customerEmail, customerName, isRenewal, existingUsername } = parseResult.data;
+      const { items, customerEmail, customerName, isRenewal, existingUsername, countryPreference } = parseResult.data;
 
       let existingCustomer = null;
       if (isRenewal && existingUsername) {
@@ -119,6 +119,7 @@ export async function registerRoutes(
           isRenewal: isRenewal ? 'true' : 'false',
           existingUsername: existingUsername || '',
           existingCustomerId: existingCustomer?.id || '',
+          countryPreference: countryPreference || 'All Countries',
         },
       };
 
@@ -152,6 +153,7 @@ export async function registerRoutes(
         isRenewal: isRenewal || false,
         existingUsername: existingUsername || null,
         customerId: existingCustomer?.id || null,
+        countryPreference: countryPreference || null,
       });
 
       res.json({ 
