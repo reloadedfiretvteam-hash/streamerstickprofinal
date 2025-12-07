@@ -24,6 +24,7 @@ export interface Env {
   ADMIN_USERNAME?: string;
   ADMIN_PASSWORD_HASH?: string;
   JWT_SECRET?: string;
+  NODE_ENV?: string;
   ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
 
