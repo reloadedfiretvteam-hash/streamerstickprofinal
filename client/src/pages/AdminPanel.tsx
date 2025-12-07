@@ -133,6 +133,28 @@ interface CustomerOrder {
   createdAt: string | null;
 }
 
+interface OrderStats {
+  totalOrders: number;
+  ordersToday: number;
+  ordersThisWeek: number;
+  ordersThisMonth: number;
+  totalRevenue: number;
+  revenueToday: number;
+  revenueThisWeek: number;
+  revenueThisMonth: number;
+  pendingFulfillments: number;
+  recentOrders: Array<{
+    id: string;
+    customerEmail: string;
+    customerName: string | null;
+    productName: string | null;
+    amount: number;
+    status: string | null;
+    fulfillmentStatus: string | null;
+    createdAt: string | null;
+  }>;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -234,6 +256,20 @@ export default function AdminPanel() {
   const [savingCustomer, setSavingCustomer] = useState(false);
   const [newCustomerForm, setNewCustomerForm] = useState<Partial<Customer> | null>(null);
 
+  const [orderStats, setOrderStats] = useState<OrderStats>({
+    totalOrders: 0,
+    ordersToday: 0,
+    ordersThisWeek: 0,
+    ordersThisMonth: 0,
+    totalRevenue: 0,
+    revenueToday: 0,
+    revenueThisWeek: 0,
+    revenueThisMonth: 0,
+    pendingFulfillments: 0,
+    recentOrders: []
+  });
+  const [loadingOrderStats, setLoadingOrderStats] = useState(true);
+
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -328,6 +364,7 @@ export default function AdminPanel() {
     if (!isAuthenticated) return;
     
     loadVisitorStats();
+    loadOrderStats();
     loadProducts();
     loadPageEdits();
     loadFulfillmentOrders();
@@ -335,11 +372,28 @@ export default function AdminPanel() {
     
     const interval = setInterval(() => {
       loadVisitorStats();
+      loadOrderStats();
       setLastUpdate(new Date());
     }, 30000);
 
     return () => clearInterval(interval);
   }, [isAuthenticated]);
+
+  const loadOrderStats = async () => {
+    try {
+      setLoadingOrderStats(true);
+      const response = await authFetch('/api/admin/orders/stats');
+      const result = await response.json();
+      
+      if (result.data) {
+        setOrderStats(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading order statistics:', error);
+    } finally {
+      setLoadingOrderStats(false);
+    }
+  };
 
   const loadVisitorStats = async () => {
     try {
@@ -1127,41 +1181,87 @@ export default function AdminPanel() {
                 <p className="text-gray-400">Real-time statistics and quick actions</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white shadow-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <Users className="w-8 h-8 opacity-80" />
-                    <span className="text-2xl font-bold" data-testid="text-total-visitors">{visitorStats.totalVisitors.toLocaleString()}</span>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-green-500" />
+                  Revenue & Orders
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg p-6 text-white shadow-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <TrendingUp className="w-8 h-8 opacity-80" />
+                      <span className="text-2xl font-bold" data-testid="text-total-revenue">${(orderStats.totalRevenue / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <p className="text-emerald-100 text-sm">Total Revenue</p>
                   </div>
-                  <p className="text-blue-100 text-sm">Total Visitors</p>
-                </div>
 
-                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white shadow-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <Eye className="w-8 h-8 opacity-80" />
-                    <span className="text-2xl font-bold" data-testid="text-today-visitors">{visitorStats.todayVisitors.toLocaleString()}</span>
+                  <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg p-6 text-white shadow-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <TrendingUp className="w-8 h-8 opacity-80" />
+                      <span className="text-2xl font-bold" data-testid="text-revenue-today">${(orderStats.revenueToday / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <p className="text-teal-100 text-sm">Today's Revenue</p>
                   </div>
-                  <p className="text-green-100 text-sm">Today</p>
-                </div>
 
-                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white shadow-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <Package className="w-8 h-8 opacity-80" />
-                    <span className="text-2xl font-bold" data-testid="text-products-count">{products.length}</span>
+                  <div className="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg p-6 text-white shadow-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <ShoppingCart className="w-8 h-8 opacity-80" />
+                      <span className="text-2xl font-bold" data-testid="text-total-orders">{orderStats.totalOrders.toLocaleString()}</span>
+                    </div>
+                    <p className="text-cyan-100 text-sm">Total Orders</p>
                   </div>
-                  <p className="text-purple-100 text-sm">Active Products</p>
-                </div>
 
-                <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-lg p-6 text-white shadow-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <Activity className="w-8 h-8 opacity-80" />
-                    <span className="text-2xl font-bold" data-testid="text-online-now">{visitorStats.onlineNow.toLocaleString()}</span>
+                  <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg p-6 text-white shadow-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <Truck className="w-8 h-8 opacity-80" />
+                      <span className="text-2xl font-bold" data-testid="text-pending-fulfillments">{orderStats.pendingFulfillments}</span>
+                    </div>
+                    <p className="text-amber-100 text-sm">Pending Fulfillments</p>
                   </div>
-                  <p className="text-orange-100 text-sm">Online Now</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-blue-500" />
+                  Visitor Stats
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white shadow-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <Users className="w-8 h-8 opacity-80" />
+                      <span className="text-2xl font-bold" data-testid="text-total-visitors">{visitorStats.totalVisitors.toLocaleString()}</span>
+                    </div>
+                    <p className="text-blue-100 text-sm">Total Visitors</p>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg p-6 text-white shadow-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <Eye className="w-8 h-8 opacity-80" />
+                      <span className="text-2xl font-bold" data-testid="text-today-visitors">{visitorStats.todayVisitors.toLocaleString()}</span>
+                    </div>
+                    <p className="text-indigo-100 text-sm">Today's Visitors</p>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white shadow-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <Package className="w-8 h-8 opacity-80" />
+                      <span className="text-2xl font-bold" data-testid="text-products-count">{products.length}</span>
+                    </div>
+                    <p className="text-purple-100 text-sm">Active Products</p>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-rose-500 to-red-500 rounded-lg p-6 text-white shadow-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <Activity className="w-8 h-8 opacity-80" />
+                      <span className="text-2xl font-bold" data-testid="text-online-now">{visitorStats.onlineNow.toLocaleString()}</span>
+                    </div>
+                    <p className="text-rose-100 text-sm">Online Now</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card className="bg-gray-800 border-gray-700">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-white">
@@ -1197,6 +1297,33 @@ export default function AdminPanel() {
                 <Card className="bg-gray-800 border-gray-700">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-white">
+                      <ShoppingCart className="w-5 h-5 text-orange-500" />
+                      Order Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300">Orders Today</span>
+                      <Badge className="bg-green-500/20 text-green-300">{orderStats.ordersToday}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300">This Week</span>
+                      <Badge className="bg-blue-500/20 text-blue-300">{orderStats.ordersThisWeek}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300">This Month</span>
+                      <Badge className="bg-purple-500/20 text-purple-300">{orderStats.ordersThisMonth}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-700">
+                      <span className="text-gray-300">Monthly Revenue</span>
+                      <span className="font-semibold text-emerald-400">${(orderStats.revenueThisMonth / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-white">
                       <TrendingUp className="w-5 h-5 text-orange-500" />
                       Quick Actions
                     </CardTitle>
@@ -1211,13 +1338,80 @@ export default function AdminPanel() {
                     <Button 
                       variant="outline" 
                       className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
-                      onClick={loadVisitorStats}
+                      onClick={() => setActiveSection("fulfillment")}
+                    >
+                      <Truck className="w-4 h-4 mr-2" /> View Fulfillments
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
+                      onClick={() => { loadVisitorStats(); loadOrderStats(); }}
                     >
                       <RefreshCw className="w-4 h-4 mr-2" /> Refresh Stats
                     </Button>
                   </CardContent>
                 </Card>
               </div>
+
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <ShoppingCart className="w-5 h-5 text-orange-500" />
+                    Recent Orders
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">Latest 10 orders across all products</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-gray-700">
+                          <TableHead className="text-gray-400">Customer</TableHead>
+                          <TableHead className="text-gray-400">Product</TableHead>
+                          <TableHead className="text-gray-400">Amount</TableHead>
+                          <TableHead className="text-gray-400">Status</TableHead>
+                          <TableHead className="text-gray-400">Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {orderStats.recentOrders.length > 0 ? (
+                          orderStats.recentOrders.map((order) => (
+                            <TableRow key={order.id} className="border-gray-700 hover:bg-gray-700/50">
+                              <TableCell className="text-gray-300">
+                                <div>
+                                  <p className="font-medium">{order.customerName || 'N/A'}</p>
+                                  <p className="text-xs text-gray-500">{order.customerEmail}</p>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-gray-300 max-w-[150px] truncate">{order.productName || 'Unknown'}</TableCell>
+                              <TableCell className="text-emerald-400 font-medium">${(order.amount / 100).toFixed(2)}</TableCell>
+                              <TableCell>
+                                <Badge className={
+                                  order.status === 'paid' ? 'bg-green-500/20 text-green-300' :
+                                  order.status === 'pending' ? 'bg-yellow-500/20 text-yellow-300' :
+                                  order.status === 'failed' ? 'bg-red-500/20 text-red-300' :
+                                  'bg-gray-500/20 text-gray-300'
+                                }>
+                                  {order.status || 'unknown'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-gray-400 whitespace-nowrap">
+                                {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5} className="py-8 text-center text-gray-400">
+                              No orders yet. Orders will appear here as customers make purchases.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
 

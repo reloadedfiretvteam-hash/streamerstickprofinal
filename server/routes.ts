@@ -427,6 +427,67 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/admin/orders/stats", async (req, res) => {
+    try {
+      const allOrders = await storage.getAllOrders();
+      
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekStart = new Date(todayStart);
+      weekStart.setDate(weekStart.getDate() - 7);
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      
+      const ordersToday = allOrders.filter(o => o.createdAt && new Date(o.createdAt) >= todayStart);
+      const ordersThisWeek = allOrders.filter(o => o.createdAt && new Date(o.createdAt) >= weekStart);
+      const ordersThisMonth = allOrders.filter(o => o.createdAt && new Date(o.createdAt) >= monthStart);
+      
+      const paidOrders = allOrders.filter(o => o.status === 'paid');
+      const paidOrdersToday = ordersToday.filter(o => o.status === 'paid');
+      const paidOrdersThisWeek = ordersThisWeek.filter(o => o.status === 'paid');
+      const paidOrdersThisMonth = ordersThisMonth.filter(o => o.status === 'paid');
+      
+      const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+      const revenueToday = paidOrdersToday.reduce((sum, o) => sum + (o.amount || 0), 0);
+      const revenueThisWeek = paidOrdersThisWeek.reduce((sum, o) => sum + (o.amount || 0), 0);
+      const revenueThisMonth = paidOrdersThisMonth.reduce((sum, o) => sum + (o.amount || 0), 0);
+      
+      const pendingFulfillments = allOrders.filter(o => 
+        o.status === 'paid' && 
+        o.fulfillmentStatus === 'pending' &&
+        (o.realProductName?.toLowerCase().includes('fire') || o.realProductName?.toLowerCase().includes('stick'))
+      ).length;
+      
+      const recentOrders = allOrders.slice(0, 10).map(o => ({
+        id: o.id,
+        customerEmail: o.customerEmail,
+        customerName: o.customerName,
+        productName: o.realProductName,
+        amount: o.amount,
+        status: o.status,
+        fulfillmentStatus: o.fulfillmentStatus,
+        createdAt: o.createdAt,
+      }));
+      
+      res.json({
+        data: {
+          totalOrders: allOrders.length,
+          ordersToday: ordersToday.length,
+          ordersThisWeek: ordersThisWeek.length,
+          ordersThisMonth: ordersThisMonth.length,
+          totalRevenue,
+          revenueToday,
+          revenueThisWeek,
+          revenueThisMonth,
+          pendingFulfillments,
+          recentOrders,
+        }
+      });
+    } catch (error: any) {
+      console.error("Error fetching order stats:", error);
+      res.status(500).json({ error: "Failed to fetch order statistics" });
+    }
+  });
+
   app.put("/api/admin/orders/:id", async (req, res) => {
     try {
       const { status, credentialsSent } = req.body;
