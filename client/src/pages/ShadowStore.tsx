@@ -39,10 +39,10 @@ const seoPricingMatrix: SEOPricingTier[] = [
     features: ["Keyword Tracking", "Monthly Report", "Basic Optimization", "Analytics Setup"],
     prices: [
       { tier: "starter", tierLabel: "Starter", price: 15, productId: "iptv-1mo-1d" },
-      { tier: "duo", tierLabel: "Duo", price: 24, productId: "iptv-1mo-2d" },
-      { tier: "team", tierLabel: "Team", price: 32, productId: "iptv-1mo-3d" },
-      { tier: "business", tierLabel: "Business", price: 38, productId: "iptv-1mo-4d" },
-      { tier: "enterprise", tierLabel: "Enterprise", price: 44, productId: "iptv-1mo-5d" },
+      { tier: "duo", tierLabel: "Duo", price: 25, productId: "iptv-1mo-2d" },
+      { tier: "team", tierLabel: "Team", price: 35, productId: "iptv-1mo-3d" },
+      { tier: "business", tierLabel: "Business", price: 40, productId: "iptv-1mo-4d" },
+      { tier: "enterprise", tierLabel: "Enterprise", price: 45, productId: "iptv-1mo-5d" },
     ],
   },
   {
@@ -52,11 +52,11 @@ const seoPricingMatrix: SEOPricingTier[] = [
     features: ["Extended Tracking", "Competitor Analysis", "Content Strategy", "Strategy Calls"],
     popular: true,
     prices: [
-      { tier: "starter", tierLabel: "Starter", price: 45, productId: "iptv-3mo-1d" },
-      { tier: "duo", tierLabel: "Duo", price: 72, productId: "iptv-3mo-2d" },
-      { tier: "team", tierLabel: "Team", price: 95, productId: "iptv-3mo-3d" },
-      { tier: "business", tierLabel: "Business", price: 113, productId: "iptv-3mo-4d" },
-      { tier: "enterprise", tierLabel: "Enterprise", price: 131, productId: "iptv-3mo-5d" },
+      { tier: "starter", tierLabel: "Starter", price: 25, productId: "iptv-3mo-1d" },
+      { tier: "duo", tierLabel: "Duo", price: 40, productId: "iptv-3mo-2d" },
+      { tier: "team", tierLabel: "Team", price: 55, productId: "iptv-3mo-3d" },
+      { tier: "business", tierLabel: "Business", price: 65, productId: "iptv-3mo-4d" },
+      { tier: "enterprise", tierLabel: "Enterprise", price: 75, productId: "iptv-3mo-5d" },
     ],
   },
   {
@@ -65,11 +65,11 @@ const seoPricingMatrix: SEOPricingTier[] = [
     description: "6-month content marketing program with strategy and link building.",
     features: ["Content Marketing", "Link Building", "Technical Audit", "Bi-Monthly Calls"],
     prices: [
-      { tier: "starter", tierLabel: "Starter", price: 81, productId: "iptv-6mo-1d" },
-      { tier: "duo", tierLabel: "Duo", price: 130, productId: "iptv-6mo-2d" },
-      { tier: "team", tierLabel: "Team", price: 171, productId: "iptv-6mo-3d" },
-      { tier: "business", tierLabel: "Business", price: 203, productId: "iptv-6mo-4d" },
-      { tier: "enterprise", tierLabel: "Enterprise", price: 235, productId: "iptv-6mo-5d" },
+      { tier: "starter", tierLabel: "Starter", price: 40, productId: "iptv-6mo-1d" },
+      { tier: "duo", tierLabel: "Duo", price: 65, productId: "iptv-6mo-2d" },
+      { tier: "team", tierLabel: "Team", price: 85, productId: "iptv-6mo-3d" },
+      { tier: "business", tierLabel: "Business", price: 100, productId: "iptv-6mo-4d" },
+      { tier: "enterprise", tierLabel: "Enterprise", price: 125, productId: "iptv-6mo-5d" },
     ],
   },
   {
@@ -79,10 +79,10 @@ const seoPricingMatrix: SEOPricingTier[] = [
     features: ["Comprehensive Strategy", "Dedicated Manager", "Full Audit", "Priority Support"],
     prices: [
       { tier: "starter", tierLabel: "Starter", price: 65, productId: "iptv-1yr-1d" },
-      { tier: "duo", tierLabel: "Duo", price: 104, productId: "iptv-1yr-2d" },
-      { tier: "team", tierLabel: "Team", price: 137, productId: "iptv-1yr-3d" },
-      { tier: "business", tierLabel: "Business", price: 163, productId: "iptv-1yr-4d" },
-      { tier: "enterprise", tierLabel: "Enterprise", price: 189, productId: "iptv-1yr-5d" },
+      { tier: "duo", tierLabel: "Duo", price: 100, productId: "iptv-1yr-2d" },
+      { tier: "team", tierLabel: "Team", price: 140, productId: "iptv-1yr-3d" },
+      { tier: "business", tierLabel: "Business", price: 190, productId: "iptv-1yr-4d" },
+      { tier: "enterprise", tierLabel: "Enterprise", price: 220, productId: "iptv-1yr-5d" },
     ],
   },
 ];

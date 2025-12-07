@@ -64,10 +64,10 @@ const iptvPricingMatrix: IPTVPricing[] = [
     features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support"],
     prices: [
       { devices: 1, price: 15, productId: "iptv-1mo-1d" },
-      { devices: 2, price: 24, productId: "iptv-1mo-2d" },
-      { devices: 3, price: 32, productId: "iptv-1mo-3d" },
-      { devices: 4, price: 38, productId: "iptv-1mo-4d" },
-      { devices: 5, price: 44, productId: "iptv-1mo-5d" },
+      { devices: 2, price: 25, productId: "iptv-1mo-2d" },
+      { devices: 3, price: 35, productId: "iptv-1mo-3d" },
+      { devices: 4, price: 40, productId: "iptv-1mo-4d" },
+      { devices: 5, price: 45, productId: "iptv-1mo-5d" },
     ],
   },
   {
@@ -78,11 +78,11 @@ const iptvPricingMatrix: IPTVPricing[] = [
     description: "Save more with 3 months! Premium IPTV with 18,000+ live channels, 60,000+ movies & shows, all sports & PPV events.",
     features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support"],
     prices: [
-      { devices: 1, price: 45, productId: "iptv-3mo-1d" },
-      { devices: 2, price: 72, productId: "iptv-3mo-2d" },
-      { devices: 3, price: 95, productId: "iptv-3mo-3d" },
-      { devices: 4, price: 113, productId: "iptv-3mo-4d" },
-      { devices: 5, price: 131, productId: "iptv-3mo-5d" },
+      { devices: 1, price: 25, productId: "iptv-3mo-1d" },
+      { devices: 2, price: 40, productId: "iptv-3mo-2d" },
+      { devices: 3, price: 55, productId: "iptv-3mo-3d" },
+      { devices: 4, price: 65, productId: "iptv-3mo-4d" },
+      { devices: 5, price: 75, productId: "iptv-3mo-5d" },
     ],
   },
   {
@@ -92,11 +92,11 @@ const iptvPricingMatrix: IPTVPricing[] = [
     description: "10% OFF! 6-month premium IPTV subscription with 18,000+ live TV channels, 60,000+ movies & shows, all sports & PPV.",
     features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "VIP Customer Support"],
     prices: [
-      { devices: 1, price: 81, productId: "iptv-6mo-1d" },
-      { devices: 2, price: 130, productId: "iptv-6mo-2d" },
-      { devices: 3, price: 171, productId: "iptv-6mo-3d" },
-      { devices: 4, price: 203, productId: "iptv-6mo-4d" },
-      { devices: 5, price: 235, productId: "iptv-6mo-5d" },
+      { devices: 1, price: 40, productId: "iptv-6mo-1d" },
+      { devices: 2, price: 65, productId: "iptv-6mo-2d" },
+      { devices: 3, price: 85, productId: "iptv-6mo-3d" },
+      { devices: 4, price: 100, productId: "iptv-6mo-4d" },
+      { devices: 5, price: 125, productId: "iptv-6mo-5d" },
     ],
   },
   {
@@ -107,10 +107,10 @@ const iptvPricingMatrix: IPTVPricing[] = [
     features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Premium VIP Support", "Free Setup Assistance"],
     prices: [
       { devices: 1, price: 65, productId: "iptv-1yr-1d" },
-      { devices: 2, price: 104, productId: "iptv-1yr-2d" },
-      { devices: 3, price: 137, productId: "iptv-1yr-3d" },
-      { devices: 4, price: 163, productId: "iptv-1yr-4d" },
-      { devices: 5, price: 189, productId: "iptv-1yr-5d" },
+      { devices: 2, price: 100, productId: "iptv-1yr-2d" },
+      { devices: 3, price: 140, productId: "iptv-1yr-3d" },
+      { devices: 4, price: 190, productId: "iptv-1yr-4d" },
+      { devices: 5, price: 220, productId: "iptv-1yr-5d" },
     ],
   },
 ];
