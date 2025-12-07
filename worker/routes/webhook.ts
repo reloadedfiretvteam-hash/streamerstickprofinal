@@ -1,8 +1,10 @@
 import { Hono } from 'hono';
 import Stripe from 'stripe';
-import { createStorage } from '../storage';
+import { getStorage } from '../helpers';
 import { sendOrderConfirmation, sendCredentialsEmail, sendOwnerOrderNotification, generateCredentials, generateUniqueCredentials } from '../email';
 import type { Env } from '../index';
+
+type Storage = ReturnType<typeof getStorage>;
 
 export function createWebhookRoutes() {
   const app = new Hono<{ Bindings: Env }>();
@@ -28,7 +30,7 @@ export function createWebhookRoutes() {
 
       console.log(`Processing webhook event: ${event.type}`);
 
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
 
       switch (event.type) {
         case 'checkout.session.completed':
@@ -54,7 +56,7 @@ export function createWebhookRoutes() {
   return app;
 }
 
-async function handleCheckoutComplete(session: any, storage: ReturnType<typeof createStorage>, env: Env) {
+async function handleCheckoutComplete(session: any, storage: Storage, env: Env) {
   console.log(`Checkout completed: ${session.id}`);
   
   const order = await storage.getOrderByCheckoutSession(session.id);
@@ -156,7 +158,7 @@ async function handleCheckoutComplete(session: any, storage: ReturnType<typeof c
   }
 }
 
-async function handlePaymentSucceeded(paymentIntent: any, storage: ReturnType<typeof createStorage>, env: Env) {
+async function handlePaymentSucceeded(paymentIntent: any, storage: Storage, env: Env) {
   console.log(`Payment succeeded: ${paymentIntent.id}`);
   
   const order = await storage.getOrderByPaymentIntent(paymentIntent.id);
@@ -182,7 +184,7 @@ async function handlePaymentSucceeded(paymentIntent: any, storage: ReturnType<ty
   }
 }
 
-async function handlePaymentFailed(paymentIntent: any, storage: ReturnType<typeof createStorage>) {
+async function handlePaymentFailed(paymentIntent: any, storage: Storage) {
   console.log(`Payment failed: ${paymentIntent.id}`);
   
   const order = await storage.getOrderByPaymentIntent(paymentIntent.id);

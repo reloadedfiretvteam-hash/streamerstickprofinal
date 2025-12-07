@@ -7,10 +7,13 @@ export function createProductRoutes() {
 
   app.get('/', async (c) => {
     try {
-      if (!c.env.DATABASE_URL) {
-        return c.json({ error: "DATABASE_URL not configured" }, 500);
+      if (!c.env.VITE_SUPABASE_URL || !c.env.SUPABASE_SERVICE_KEY) {
+        return c.json({ error: "Supabase not configured" }, 500);
       }
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = createStorage({
+        supabaseUrl: c.env.VITE_SUPABASE_URL,
+        supabaseKey: c.env.SUPABASE_SERVICE_KEY
+      });
       const products = await storage.getRealProducts();
       return c.json({ data: products });
     } catch (error: any) {
@@ -18,14 +21,17 @@ export function createProductRoutes() {
       return c.json({ 
         error: "Failed to fetch products", 
         details: error.message,
-        dbConfigured: !!c.env.DATABASE_URL
+        supabaseConfigured: !!(c.env.VITE_SUPABASE_URL && c.env.SUPABASE_SERVICE_KEY)
       }, 500);
     }
   });
 
   app.get('/:id', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = createStorage({
+        supabaseUrl: c.env.VITE_SUPABASE_URL,
+        supabaseKey: c.env.SUPABASE_SERVICE_KEY
+      });
       const product = await storage.getRealProduct(c.req.param('id'));
       if (!product) {
         return c.json({ error: "Product not found" }, 404);

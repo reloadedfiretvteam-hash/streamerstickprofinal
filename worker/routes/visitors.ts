@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createStorage } from '../storage';
+import { getStorage } from '../helpers';
 import type { Env } from '../index';
 
 export function createVisitorRoutes() {
@@ -7,7 +7,7 @@ export function createVisitorRoutes() {
 
   app.post('/', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const body = await c.req.json();
       const { sessionId, pageUrl, referrer, userAgent } = body;
 

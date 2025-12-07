@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createStorage } from '../storage';
+import { getStorage } from '../helpers';
 import type { Env } from '../index';
 
 export function createOrderRoutes() {
@@ -7,7 +7,7 @@ export function createOrderRoutes() {
 
   app.get('/:email', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const orders = await storage.getOrdersByEmail(c.req.param('email'));
       return c.json({ data: orders });
     } catch (error: any) {

@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import Stripe from 'stripe';
-import { createStorage } from '../storage';
+import { getStorage } from '../helpers';
 import { sendCredentialsEmail } from '../email';
 import { createCustomerSchema, updateCustomerSchema } from '../../shared/schema';
 import type { Env } from '../index';
@@ -10,7 +10,7 @@ export function createAdminRoutes() {
 
   app.get('/orders', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const orders = await storage.getAllOrders();
       return c.json({ data: orders });
     } catch (error: any) {
@@ -21,7 +21,7 @@ export function createAdminRoutes() {
 
   app.put('/orders/:id', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const body = await c.req.json();
       const { status, credentialsSent } = body;
 
@@ -44,7 +44,7 @@ export function createAdminRoutes() {
 
   app.post('/orders/:id/resend-credentials', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const order = await storage.getOrder(c.req.param('id'));
       if (!order) {
         return c.json({ error: "Order not found" }, 404);
@@ -61,7 +61,7 @@ export function createAdminRoutes() {
 
   app.get('/fulfillment', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const orders = await storage.getFireStickOrdersForFulfillment();
       return c.json({ data: orders });
     } catch (error: any) {
@@ -72,7 +72,7 @@ export function createAdminRoutes() {
 
   app.put('/fulfillment/:id', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const body = await c.req.json();
       const { fulfillmentStatus, amazonOrderId } = body;
 
@@ -99,7 +99,7 @@ export function createAdminRoutes() {
 
   app.get('/products', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const products = await storage.getRealProducts();
       return c.json({ data: products });
     } catch (error: any) {
@@ -110,7 +110,7 @@ export function createAdminRoutes() {
 
   app.post('/products', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const body = await c.req.json();
       const { id, name, description, price, imageUrl, category, shadowProductId, shadowPriceId } = body;
 
@@ -138,7 +138,7 @@ export function createAdminRoutes() {
 
   app.put('/products/:id', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const body = await c.req.json();
       const { name, description, price, imageUrl, category, shadowProductId, shadowPriceId } = body;
 
@@ -166,7 +166,7 @@ export function createAdminRoutes() {
 
   app.delete('/products/:id', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const existingProduct = await storage.getRealProduct(c.req.param('id'));
       if (!existingProduct) {
         return c.json({ error: "Product not found" }, 404);
@@ -187,7 +187,7 @@ export function createAdminRoutes() {
 
   app.post('/products/:id/sync-stripe-price', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const body = await c.req.json();
       const { price, shadowName } = body;
 
@@ -246,7 +246,7 @@ export function createAdminRoutes() {
 
   app.post('/products/create-with-stripe', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const body = await c.req.json();
       const { id, name, description, price, imageUrl, category, shadowName } = body;
 
@@ -300,7 +300,7 @@ export function createAdminRoutes() {
 
   app.get('/visitors/stats', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const stats = await storage.getVisitorStats();
       return c.json({ data: stats });
     } catch (error: any) {
@@ -311,7 +311,7 @@ export function createAdminRoutes() {
 
   app.get('/page-edits', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const edits = await storage.getAllPageEdits();
       return c.json({ data: edits });
     } catch (error: any) {
@@ -322,7 +322,7 @@ export function createAdminRoutes() {
 
   app.post('/page-edits', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const body = await c.req.json();
       const { pageId, sectionId, elementId, elementType, content, imageUrl, isActive } = body;
 
@@ -349,7 +349,7 @@ export function createAdminRoutes() {
 
   app.delete('/page-edits/:id', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const deleted = await storage.deletePageEdit(c.req.param('id'));
       
       if (deleted) {
@@ -365,7 +365,7 @@ export function createAdminRoutes() {
 
   app.get('/customers', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const search = c.req.query('search');
       let customersList;
       
@@ -384,7 +384,7 @@ export function createAdminRoutes() {
 
   app.get('/customers/:id', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const customer = await storage.getCustomer(c.req.param('id'));
       if (!customer) {
         return c.json({ error: "Customer not found" }, 404);
@@ -398,7 +398,7 @@ export function createAdminRoutes() {
 
   app.get('/customers/:id/orders', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const customer = await storage.getCustomer(c.req.param('id'));
       if (!customer) {
         return c.json({ error: "Customer not found" }, 404);
@@ -414,7 +414,7 @@ export function createAdminRoutes() {
 
   app.post('/customers', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const body = await c.req.json();
       const parseResult = createCustomerSchema.safeParse(body);
       if (!parseResult.success) {
@@ -436,7 +436,7 @@ export function createAdminRoutes() {
 
   app.put('/customers/:id', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const body = await c.req.json();
       const parseResult = updateCustomerSchema.safeParse(body);
       if (!parseResult.success) {
@@ -465,7 +465,7 @@ export function createAdminRoutes() {
 
   app.delete('/customers/:id', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const existingCustomer = await storage.getCustomer(c.req.param('id'));
       if (!existingCustomer) {
         return c.json({ error: "Customer not found" }, 404);
@@ -486,7 +486,7 @@ export function createAdminRoutes() {
 
   app.get('/iptv-customers', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const iptvOrders = await storage.getIPTVOrders();
       return c.json({ data: iptvOrders });
     } catch (error: any) {

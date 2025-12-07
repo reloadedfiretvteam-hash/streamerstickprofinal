@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import Stripe from 'stripe';
-import { createStorage } from '../storage';
+import { getStorage } from '../helpers';
 import { checkoutRequestSchema } from '../../shared/schema';
 import type { Env } from '../index';
 
@@ -9,7 +9,7 @@ export function createCheckoutRoutes() {
 
   app.post('/', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const body = await c.req.json();
       
       const parseResult = checkoutRequestSchema.safeParse(body);
@@ -122,7 +122,7 @@ export function createCheckoutRoutes() {
 
   app.get('/session/:sessionId', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const order = await storage.getOrderByCheckoutSession(c.req.param('sessionId'));
       if (!order) {
         return c.json({ error: "Order not found" }, 404);

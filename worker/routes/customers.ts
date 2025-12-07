@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createStorage } from '../storage';
+import { getStorage } from '../helpers';
 import type { Env } from '../index';
 
 export function createCustomerRoutes() {
@@ -7,7 +7,7 @@ export function createCustomerRoutes() {
 
   app.get('/lookup/:username', async (c) => {
     try {
-      const storage = createStorage(c.env.DATABASE_URL);
+      const storage = getStorage(c.env);
       const customer = await storage.getCustomerByUsername(c.req.param('username'));
       if (!customer) {
         return c.json({ error: "Customer not found", exists: false }, 404);
