@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, Play, X, Gift, ChevronRight } from "lucide-react";
-import { useCart } from "@/lib/store";
+import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, Play, X, Gift, ChevronRight, Heart } from "lucide-react";
+import { useCart, useWishlist } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getStorageUrl } from "@/lib/supabase";
@@ -154,6 +154,7 @@ const defaultProducts: Product[] = [
 export default function MainStore() {
   const [, setLocation] = useLocation();
   const { addItem, items, openCart } = useCart();
+  const { items: wishlistItems, addToWishlist, removeFromWishlist, isInWishlist, openWishlist } = useWishlist();
   const [products, setProducts] = useState<Product[]>(defaultProducts);
   const [selectedDevices, setSelectedDevices] = useState<Record<string, number>>({
     "1mo": 1,
@@ -163,6 +164,21 @@ export default function MainStore() {
   });
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const toggleWishlistItem = (product: Product) => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        category: product.category,
+        description: product.description,
+      });
+    }
+  };
 
   const openQuickView = (product: Product) => {
     setQuickViewProduct(product);
@@ -335,6 +351,19 @@ export default function MainStore() {
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToShop} data-testid="nav-shop">Shop</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setLocation("/blog")} data-testid="button-blog">Blog</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToFaq} data-testid="button-support">Support</Button>
+            <Button 
+              onClick={openWishlist} 
+              variant="ghost"
+              className="relative text-gray-300 hover:text-white hover:bg-white/10"
+              data-testid="button-wishlist"
+            >
+              <Heart className={`w-5 h-5 ${wishlistItems.length > 0 ? 'fill-red-500 text-red-500' : ''}`} />
+              {wishlistItems.length > 0 && (
+                <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs h-5 w-5 flex items-center justify-center p-0" data-testid="text-wishlist-count">
+                  {wishlistItems.length}
+                </Badge>
+              )}
+            </Button>
             <Button 
               onClick={openCart} 
               className="relative bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/30"
@@ -679,6 +708,18 @@ export default function MainStore() {
                         </div>
                       )}
                       <QuickViewButton onClick={() => openQuickView(product)} />
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleWishlistItem(product); }}
+                        className={`absolute bottom-4 left-4 z-20 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                          isInWishlist(product.id) 
+                            ? 'bg-red-500 text-white shadow-lg shadow-red-500/50' 
+                            : 'bg-white/90 text-gray-700 hover:bg-red-500 hover:text-white'
+                        }`}
+                        data-testid={`button-wishlist-${product.id}`}
+                        aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                      >
+                        <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                      </button>
                     </div>
 
                     <div className="p-8 relative">
@@ -696,18 +737,20 @@ export default function MainStore() {
                         </p>
                       </div>
 
-                      <button
-                        onClick={() => addItem(product as any)}
-                        className={`w-full py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 mb-6 flex items-center justify-center gap-2 ${
-                          product.popular
-                            ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
-                            : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg'
-                        }`}
-                        data-testid={`button-add-${product.id}`}
-                      >
-                        <ShoppingCart className="w-5 h-5" />
-                        Add to Cart
-                      </button>
+                      <div className="flex gap-2 mb-6">
+                        <button
+                          onClick={() => addItem(product as any)}
+                          className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${
+                            product.popular
+                              ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
+                              : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg'
+                          }`}
+                          data-testid={`button-add-${product.id}`}
+                        >
+                          <ShoppingCart className="w-5 h-5" />
+                          Add to Cart
+                        </button>
+                      </div>
 
                       <div className="space-y-3">
                         {product.features.slice(0, 6).map((feature, idx) => (

@@ -13,6 +13,7 @@ import Checkout from "@/pages/Checkout";
 import Success from "@/pages/Success";
 import Blog from "@/pages/Blog";
 import { CartDrawer } from "@/components/CartDrawer";
+import { WishlistDrawer } from "@/components/WishlistDrawer";
 
 const SECURE_HOSTS = (import.meta.env.VITE_SECURE_HOSTS || 'secure.streamstickpro.com').split(',').map((h: string) => h.trim().toLowerCase());
 
@@ -56,6 +57,7 @@ function AppContent() {
     <>
       <Toaster />
       <CartDrawer />
+      <WishlistDrawer />
       <Router />
     </>
   );

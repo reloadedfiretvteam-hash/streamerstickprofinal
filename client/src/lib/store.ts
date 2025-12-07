@@ -29,9 +29,13 @@ interface CartState {
 
 interface WishlistState {
   items: Product[];
+  isOpen: boolean;
   addToWishlist: (product: Product) => void;
   removeFromWishlist: (productId: string) => void;
   isInWishlist: (productId: string) => boolean;
+  toggleWishlist: () => void;
+  openWishlist: () => void;
+  closeWishlist: () => void;
   clearWishlist: () => void;
 }
 
@@ -79,6 +83,7 @@ export const useWishlist = create<WishlistState>()(
   persist(
     (set, get) => ({
       items: [],
+      isOpen: false,
       addToWishlist: (product) => set((state) => {
         const existing = state.items.find(i => i.id === product.id);
         if (existing) return state;
@@ -90,10 +95,14 @@ export const useWishlist = create<WishlistState>()(
       isInWishlist: (id) => {
         return get().items.some(i => i.id === id);
       },
+      toggleWishlist: () => set((state) => ({ isOpen: !state.isOpen })),
+      openWishlist: () => set({ isOpen: true }),
+      closeWishlist: () => set({ isOpen: false }),
       clearWishlist: () => set({ items: [] }),
     }),
     {
       name: 'wishlist-storage',
+      partialize: (state) => ({ items: state.items }),
     }
   )
 );

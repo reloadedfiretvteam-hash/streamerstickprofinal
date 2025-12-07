@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShoppingCart, Check, Zap, Star, Package, Eye } from "lucide-react";
-import { useCart } from "@/lib/store";
+import { X, ShoppingCart, Check, Zap, Star, Package, Eye, Heart } from "lucide-react";
+import { useCart, useWishlist } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -33,6 +33,7 @@ interface ProductQuickViewProps {
 
 export function ProductQuickView({ product, isOpen, onClose }: ProductQuickViewProps) {
   const { addItem, openCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   if (!product) return null;
 
@@ -47,6 +48,23 @@ export function ProductQuickView({ product, isOpen, onClose }: ProductQuickViewP
     });
     onClose();
   };
+
+  const toggleWishlist = () => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        category: product.category as 'firestick' | 'iptv' | 'design',
+        description: product.description,
+      });
+    }
+  };
+
+  const inWishlist = isInWishlist(product.id);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -144,6 +162,19 @@ export function ProductQuickView({ product, isOpen, onClose }: ProductQuickViewP
             >
               <ShoppingCart className="w-5 h-5 mr-2" />
               Add to Cart
+            </Button>
+            <Button
+              variant="outline"
+              onClick={toggleWishlist}
+              className={`py-6 transition-all ${
+                inWishlist 
+                  ? 'border-red-500 text-red-500 hover:bg-red-500/10' 
+                  : 'border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`}
+              data-testid="quick-view-wishlist"
+              aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+            >
+              <Heart className={`w-5 h-5 ${inWishlist ? 'fill-current' : ''}`} />
             </Button>
             <Button
               variant="outline"
