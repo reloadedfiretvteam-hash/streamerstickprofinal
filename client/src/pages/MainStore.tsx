@@ -153,7 +153,7 @@ const defaultProducts: Product[] = [
 
 export default function MainStore() {
   const [, setLocation] = useLocation();
-  const { addItem, items, openCart } = useCart();
+  const { addItem, addItemWithQuantity, items, openCart } = useCart();
   const { items: wishlistItems, addToWishlist, removeFromWishlist, isInWishlist, openWishlist } = useWishlist();
   const [products, setProducts] = useState<Product[]>(defaultProducts);
   const [selectedDevices, setSelectedDevices] = useState<Record<string, number>>({
@@ -161,6 +161,11 @@ export default function MainStore() {
     "3mo": 1,
     "6mo": 1,
     "1yr": 1,
+  });
+  const [firestickQuantities, setFirestickQuantities] = useState<Record<string, number>>({
+    "fs-hd": 1,
+    "fs-4k": 1,
+    "fs-max": 1,
   });
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -247,6 +252,20 @@ export default function MainStore() {
     }
   };
 
+  const getFirestickDiscount = (quantity: number): { discount: number; label: string } => {
+    if (quantity >= 3) return { discount: 0.15, label: "15% OFF" };
+    if (quantity >= 2) return { discount: 0.10, label: "10% OFF" };
+    return { discount: 0, label: "" };
+  };
+
+  const calculateFirestickPrice = (basePrice: number, quantity: number): { unitPrice: number; totalPrice: number; savings: number } => {
+    const { discount } = getFirestickDiscount(quantity);
+    const discountedUnitPrice = basePrice * (1 - discount);
+    const totalPrice = discountedUnitPrice * quantity;
+    const savings = (basePrice * quantity) - totalPrice;
+    return { unitPrice: discountedUnitPrice, totalPrice, savings };
+  };
+
   const scrollToShop = () => {
     document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -326,6 +345,21 @@ export default function MainStore() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productListData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData) }} />
       
+      {/* Sticky Sale Banner */}
+      <div className="bg-gradient-to-r from-green-600 via-green-500 to-emerald-500 text-white py-2 px-4 text-center font-bold animate-pulse" data-testid="banner-sale">
+        <div className="container mx-auto flex items-center justify-center gap-3 flex-wrap">
+          <Gift className="w-5 h-5" />
+          <span className="text-sm md:text-base">🔥 LIMITED TIME SALE: Buy 2+ Fire Sticks Save 10% • Buy 3+ Save 15%! 🔥</span>
+          <button 
+            onClick={scrollToShop}
+            className="bg-white text-green-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-green-100 transition-colors"
+            data-testid="button-shop-sale"
+          >
+            Shop Now →
+          </button>
+        </div>
+      </div>
+
       <SEOSchema 
         faq={[
           { question: "What's included with a Fire Stick?", answer: "Every Fire Stick comes pre-configured and jailbroken with 1 Year of IPTV service included. Just plug it in and start streaming immediately!" },
@@ -726,10 +760,36 @@ export default function MainStore() {
                 </tbody>
               </table>
             </div>
-            <p className="text-center text-green-400 mt-4 font-semibold">
-              <Gift className="w-5 h-5 inline mr-2" />
-              15% OFF - Limited Time Sale!
-            </p>
+            {/* Quantity Discount Tiers */}
+            <div className="mt-8 max-w-2xl mx-auto">
+              <div className="bg-gradient-to-r from-green-900/50 to-emerald-900/50 rounded-2xl p-6 border border-green-500/30" data-testid="discount-tiers">
+                <h4 className="text-xl font-bold text-center mb-4 text-green-400 flex items-center justify-center gap-2">
+                  <Gift className="w-6 h-6" />
+                  Multi-Buy Discount Tiers
+                </h4>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <div className="text-2xl font-bold text-white">1</div>
+                    <div className="text-gray-400 text-sm">Fire Stick</div>
+                    <div className="text-orange-400 font-semibold mt-2">Regular Price</div>
+                  </div>
+                  <div className="bg-green-500/10 rounded-xl p-4 border border-green-500/30 transform hover:scale-105 transition-transform">
+                    <div className="text-2xl font-bold text-white">2+</div>
+                    <div className="text-gray-400 text-sm">Fire Sticks</div>
+                    <div className="text-green-400 font-bold mt-2">SAVE 10%</div>
+                  </div>
+                  <div className="bg-green-500/20 rounded-xl p-4 border border-green-500/50 ring-2 ring-green-500/30 transform hover:scale-105 transition-transform">
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold hidden md:block">BEST DEAL</div>
+                    <div className="text-2xl font-bold text-white">3+</div>
+                    <div className="text-gray-400 text-sm">Fire Sticks</div>
+                    <div className="text-green-400 font-bold mt-2">SAVE 15%</div>
+                  </div>
+                </div>
+                <p className="text-center text-green-300 mt-4 text-sm">
+                  Perfect for families! Get Fire Sticks for multiple TVs and save big.
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Fire Sticks */}
@@ -823,21 +883,79 @@ export default function MainStore() {
                     <div className="p-8 relative">
                       <h4 className="text-2xl font-bold mb-4 text-white">{product.name}</h4>
 
-                      <div className="mb-6">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400" data-testid={`text-price-${product.id}`}>
-                            ${product.price.toFixed(2)}
-                          </span>
+                      {/* Quantity Selector */}
+                      <div className="mb-4">
+                        <label className="text-sm text-gray-300 mb-2 block">Quantity (Buy More & Save!):</label>
+                        <div className="flex gap-2 mb-2">
+                          {[1, 2, 3, 4, 5].map((qty) => {
+                            const discountInfo = getFirestickDiscount(qty);
+                            return (
+                              <button
+                                key={qty}
+                                onClick={() => setFirestickQuantities(prev => ({ ...prev, [product.id]: qty }))}
+                                className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all relative ${
+                                  firestickQuantities[product.id] === qty
+                                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
+                                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                }`}
+                                data-testid={`button-qty-${product.id}-${qty}`}
+                              >
+                                {qty}
+                                {discountInfo.label && (
+                                  <span className="absolute -top-2 -right-1 bg-green-500 text-white text-[8px] px-1 rounded">
+                                    {discountInfo.label}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
                         </div>
-                        <p className="text-blue-200 text-sm mt-2 flex items-center gap-2">
-                          <Gift className="w-4 h-4 text-green-400" />
-                          Includes 1 Year IPTV Subscription
+                        <p className="text-xs text-green-400 flex items-center gap-1">
+                          <Gift className="w-3 h-3" />
+                          Buy 2+ save 10% • Buy 3+ save 15%
                         </p>
+                      </div>
+
+                      {/* Pricing */}
+                      <div className="mb-6">
+                        {(() => {
+                          const qty = firestickQuantities[product.id] || 1;
+                          const { unitPrice, totalPrice, savings } = calculateFirestickPrice(product.price, qty);
+                          const discountInfo = getFirestickDiscount(qty);
+                          return (
+                            <>
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400" data-testid={`text-price-${product.id}`}>
+                                  ${totalPrice.toFixed(2)}
+                                </span>
+                                {qty > 1 && (
+                                  <span className="text-sm text-gray-400">
+                                    (${unitPrice.toFixed(2)} each)
+                                  </span>
+                                )}
+                              </div>
+                              {savings > 0 && (
+                                <p className="text-green-400 text-sm mt-1 font-semibold flex items-center gap-1">
+                                  <DollarSign className="w-4 h-4" />
+                                  You save ${savings.toFixed(2)} with {discountInfo.label}!
+                                </p>
+                              )}
+                              <p className="text-blue-200 text-sm mt-2 flex items-center gap-2">
+                                <Gift className="w-4 h-4 text-green-400" />
+                                Each includes 1 Year IPTV Subscription
+                              </p>
+                            </>
+                          );
+                        })()}
                       </div>
 
                       <div className="flex gap-2 mb-6">
                         <button
-                          onClick={() => addItem(product as any)}
+                          onClick={() => {
+                            const qty = firestickQuantities[product.id] || 1;
+                            const { unitPrice } = calculateFirestickPrice(product.price, qty);
+                            addItemWithQuantity(product as any, qty, unitPrice);
+                          }}
                           className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${
                             product.popular
                               ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
@@ -846,7 +964,7 @@ export default function MainStore() {
                           data-testid={`button-add-${product.id}`}
                         >
                           <ShoppingCart className="w-5 h-5" />
-                          Add to Cart
+                          Add {firestickQuantities[product.id] > 1 ? `${firestickQuantities[product.id]} ` : ''}to Cart
                         </button>
                       </div>
 

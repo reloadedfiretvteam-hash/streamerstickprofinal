@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+const isFirestickProduct = (id: string): boolean => {
+  return id.startsWith('fs-') || id.includes('firestick');
+};
+
+const calculateFirestickDiscount = (basePrice: number, quantity: number): number => {
+  if (quantity >= 3) return basePrice * 0.85;
+  if (quantity >= 2) return basePrice * 0.90;
+  return basePrice;
+};
+
 export interface Product {
   id: string;
   name: string;
@@ -12,12 +22,14 @@ export interface Product {
 
 interface CartItem extends Product {
   quantity: number;
+  basePrice?: number;
 }
 
 interface CartState {
   items: CartItem[];
   isOpen: boolean;
   addItem: (product: Product) => void;
+  addItemWithQuantity: (product: Product, quantity: number, discountedPrice?: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   toggleCart: () => void;
@@ -56,13 +68,41 @@ export const useCart = create<CartState>()(
         }
         return { items: [...state.items, { ...product, quantity: 1 }], isOpen: true };
       }),
+      addItemWithQuantity: (product, quantity, discountedPrice) => set((state) => {
+        const priceToUse = discountedPrice ?? product.price;
+        const isFirestick = isFirestickProduct(product.id);
+        const productToAdd = isFirestick 
+          ? { ...product, price: priceToUse, basePrice: product.price }
+          : { ...product, price: priceToUse };
+        const existing = state.items.find(i => i.id === product.id);
+        if (existing) {
+          const newQuantity = existing.quantity + quantity;
+          const recalculatedPrice = isFirestick && existing.basePrice
+            ? calculateFirestickDiscount(existing.basePrice, newQuantity)
+            : priceToUse;
+          return {
+            items: state.items.map(i => 
+              i.id === product.id ? { ...i, quantity: newQuantity, price: recalculatedPrice } : i
+            ),
+            isOpen: true
+          };
+        }
+        return { items: [...state.items, { ...productToAdd, quantity }], isOpen: true };
+      }),
       removeItem: (id) => set((state) => ({
         items: state.items.filter(i => i.id !== id)
       })),
       updateQuantity: (id, quantity) => set((state) => ({
-        items: state.items.map(i => 
-          i.id === id ? { ...i, quantity } : i
-        )
+        items: state.items.map(i => {
+          if (i.id === id) {
+            if (isFirestickProduct(i.id) && i.basePrice) {
+              const newPrice = calculateFirestickDiscount(i.basePrice, quantity);
+              return { ...i, quantity, price: newPrice };
+            }
+            return { ...i, quantity };
+          }
+          return i;
+        })
       })),
       toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
       openCart: () => set({ isOpen: true }),
