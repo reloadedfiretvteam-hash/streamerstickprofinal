@@ -56,12 +56,34 @@ app.get('/api/stripe/config', async (c) => {
 });
 
 app.get('/api/health', (c) => {
-  return c.json({ status: 'ok', timestamp: new Date().toISOString() });
+  return c.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.0.1' });
 });
 
-app.get('/api/debug', (c) => {
+app.get('/api/debug', async (c) => {
   const supabaseUrl = c.env.VITE_SUPABASE_URL || '';
   const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY || '';
+  
+  // Test Supabase connection
+  let supabaseTest = { connected: false, error: '', productCount: 0 };
+  try {
+    const { getStorage } = await import('./helpers');
+    const storage = getStorage(c.env);
+    const products = await storage.getRealProducts();
+    supabaseTest = { connected: true, error: '', productCount: products.length };
+  } catch (err: any) {
+    supabaseTest = { connected: false, error: err.message || String(err), productCount: 0 };
+  }
+  
+  // Test Stripe connection
+  let stripeTest = { connected: false, error: '' };
+  try {
+    const Stripe = (await import('stripe')).default;
+    const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
+    await stripe.products.list({ limit: 1 });
+    stripeTest = { connected: true, error: '' };
+  } catch (err: any) {
+    stripeTest = { connected: false, error: err.message || String(err) };
+  }
   
   return c.json({
     supabase: {
@@ -70,12 +92,14 @@ app.get('/api/debug', (c) => {
       hasKey: !!supabaseKey,
       keyLength: supabaseKey.length,
       keyPrefix: supabaseKey.substring(0, 10) || 'none',
+      test: supabaseTest,
     },
     stripe: {
       hasSecretKey: !!c.env.STRIPE_SECRET_KEY,
       hasPublishableKey: !!c.env.STRIPE_PUBLISHABLE_KEY,
       hasWebhookSecret: !!c.env.STRIPE_WEBHOOK_SECRET,
       secretKeyPrefix: c.env.STRIPE_SECRET_KEY?.substring(0, 7) || 'none',
+      test: stripeTest,
     },
     email: {
       hasResendKey: !!c.env.RESEND_API_KEY,
