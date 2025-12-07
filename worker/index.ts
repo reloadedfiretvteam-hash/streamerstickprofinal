@@ -107,7 +107,8 @@ app.get('/api/debug', async (c) => {
       fromEmail: c.env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com',
     },
     auth: {
-      hasAdminPasswordHash: !!c.env.ADMIN_PASSWORD_HASH,
+      hasAdminUsername: !!c.env.ADMIN_USERNAME,
+      hasAdminPassword: !!c.env.ADMIN_PASSWORD,
       hasJwtSecret: !!c.env.JWT_SECRET,
     },
     nodeEnv: c.env.NODE_ENV || 'not set',
