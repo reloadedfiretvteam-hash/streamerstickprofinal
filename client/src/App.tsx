@@ -12,6 +12,7 @@ import AdminPanel from "@/pages/AdminPanel";
 import Checkout from "@/pages/Checkout";
 import Success from "@/pages/Success";
 import Blog from "@/pages/Blog";
+import { CartDrawer } from "@/components/CartDrawer";
 
 const SECURE_HOSTS = (import.meta.env.VITE_SECURE_HOSTS || 'secure.streamstickpro.com').split(',').map((h: string) => h.trim().toLowerCase());
 
@@ -54,6 +55,7 @@ function AppContent() {
   return (
     <>
       <Toaster />
+      <CartDrawer />
       <Router />
     </>
   );

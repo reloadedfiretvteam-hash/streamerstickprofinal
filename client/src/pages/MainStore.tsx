@@ -23,6 +23,7 @@ import { ChannelLogos } from "@/components/ChannelLogos";
 import { SavingsCalculator } from "@/components/SavingsCalculator";
 import { StickyMobileCTA, ScrollToTopButton } from "@/components/StickyMobileCTA";
 import { SEOSchema } from "@/components/SEOSchema";
+import { ProductQuickView, QuickViewButton } from "@/components/ProductQuickView";
 
 import firestickHdImg from "@assets/OIP_(11)99_1764978938773.jpg";
 import firestick4kImg from "@assets/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg";
@@ -151,7 +152,7 @@ const defaultProducts: Product[] = [
 
 export default function MainStore() {
   const [, setLocation] = useLocation();
-  const { addItem, items } = useCart();
+  const { addItem, items, openCart } = useCart();
   const [products, setProducts] = useState<Product[]>(defaultProducts);
   const [selectedDevices, setSelectedDevices] = useState<Record<string, number>>({
     "1mo": 1,
@@ -159,6 +160,18 @@ export default function MainStore() {
     "6mo": 1,
     "1yr": 1,
   });
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const openQuickView = (product: Product) => {
+    setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+  };
+
+  const closeQuickView = () => {
+    setIsQuickViewOpen(false);
+    setQuickViewProduct(null);
+  };
 
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
@@ -315,7 +328,7 @@ export default function MainStore() {
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setLocation("/blog")} data-testid="button-blog">Blog</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })} data-testid="button-support">Support</Button>
             <Button 
-              onClick={() => setLocation("/checkout")} 
+              onClick={openCart} 
               className="relative bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/30"
               data-testid="button-cart"
             >
@@ -657,6 +670,7 @@ export default function MainStore() {
                           1 YEAR INCLUDED
                         </div>
                       )}
+                      <QuickViewButton onClick={() => openQuickView(product)} />
                     </div>
 
                     <div className="p-8 relative">
@@ -1073,6 +1087,13 @@ export default function MainStore() {
 
       {/* Scroll to Top */}
       <ScrollToTopButton />
+
+      {/* Product Quick View Modal */}
+      <ProductQuickView 
+        product={quickViewProduct} 
+        isOpen={isQuickViewOpen} 
+        onClose={closeQuickView} 
+      />
     </div>
   );
 }
