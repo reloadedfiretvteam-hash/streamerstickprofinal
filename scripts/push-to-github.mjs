@@ -168,15 +168,15 @@ async function main() {
   console.log(`New tree SHA: ${newTree.sha}`);
   console.log('Creating commit...\n');
   
-  const commitMessage = `Full sync from Replit - ${new Date().toISOString()}
+  const commitMessage = `Enhanced Fire Stick product cards - ${new Date().toISOString()}
 
-Includes:
-- Visitor geolocation tracking
-- Admin panel updates
-- SEO optimizations
-- Free trial flow
-- Customer management
-- All latest features`;
+Updates:
+- Multi-layer gradient backgrounds with depth
+- Tech grid pattern overlays
+- Accent glow effects at card tops
+- Corner decorations with gradients
+- Animated border glow on hover
+- Unique color themes per product tier`;
   
   const { data: newCommit } = await octokit.git.createCommit({
     owner: OWNER,
