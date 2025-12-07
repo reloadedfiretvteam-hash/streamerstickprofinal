@@ -28,8 +28,7 @@ import firestickHdImg from "@assets/OIP_(11)99_1764978938773.jpg";
 import firestick4kImg from "@assets/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg";
 import firestick4kMaxImg from "@assets/71E1te69hZL._AC_SL1500__1764978938773.jpg";
 import iptvImg from "@assets/OIF_1764979270800.jpg";
-
-const supabaseHeroImg = getStorageUrl('images', 'hero-firestick-breakout.jpg');
+import heroImg from "@assets/stock_images/amazon_fire_tv_stick_cc445778.jpg";
 
 interface Product {
   id: string;
@@ -302,7 +301,7 @@ export default function MainStore() {
       <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden min-h-[600px] flex items-center">
         <div className="absolute inset-0 overflow-hidden">
           <img
-            src={supabaseHeroImg}
+            src={heroImg}
             alt="Best Jailbroken Fire Stick 2025 - Premium IPTV Streaming Device"
             className="w-full h-full object-cover object-center"
             loading="eager"
@@ -310,12 +309,6 @@ export default function MainStore() {
             height={600}
             fetchPriority="high"
             style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              if (target.src !== iptvImg) {
-                target.src = iptvImg;
-              }
-            }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
         </div>
