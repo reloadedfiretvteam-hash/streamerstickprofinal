@@ -802,28 +802,56 @@ export default function MainStore() {
               {firestickProducts.map((product, index) => {
                 const cardGradients = [
                   'from-slate-800 via-slate-900 to-gray-900',
-                  'from-orange-950/50 via-slate-900 to-gray-900',
-                  'from-blue-950/50 via-slate-900 to-gray-900'
+                  'from-orange-950/60 via-slate-900 to-gray-900',
+                  'from-indigo-950/60 via-slate-900 to-gray-900'
                 ];
                 const borderColors = [
-                  'border-slate-700/50 hover:border-orange-500/50',
-                  'border-orange-500/30 hover:border-orange-500',
-                  'border-blue-500/30 hover:border-blue-500/70'
+                  'border-slate-600/60 hover:border-orange-500/70',
+                  'border-orange-500/40 hover:border-orange-400',
+                  'border-indigo-500/40 hover:border-indigo-400'
+                ];
+                const glowColors = [
+                  'shadow-slate-500/20',
+                  'shadow-orange-500/40',
+                  'shadow-indigo-500/30'
+                ];
+                const accentGradients = [
+                  'from-slate-400/20 via-slate-500/10 to-transparent',
+                  'from-orange-400/30 via-amber-500/15 to-transparent',
+                  'from-indigo-400/25 via-purple-500/15 to-transparent'
                 ];
                 
                 return (
                 <div
                   key={product.id}
-                  className={`relative rounded-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 group ${
+                  className={`relative rounded-2xl overflow-hidden transform transition-all duration-500 hover:scale-105 group ${
                     product.popular 
                       ? 'ring-4 ring-orange-500 scale-105 shadow-2xl shadow-orange-500/50' 
-                      : 'hover:shadow-2xl hover:shadow-orange-500/20'
+                      : `hover:shadow-2xl ${glowColors[index]}`
                   }`}
                   data-testid={`card-product-${product.id}`}
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-b ${cardGradients[index]} opacity-95`} />
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-500/10 via-transparent to-transparent opacity-50" />
-                  <div className={`absolute inset-0 border-2 ${borderColors[index]} rounded-2xl transition-colors duration-300`} />
+                  {/* Multi-layer background for depth */}
+                  <div className={`absolute inset-0 bg-gradient-to-b ${cardGradients[index]}`} />
+                  
+                  {/* Decorative tech grid pattern */}
+                  <div className="absolute inset-0 opacity-[0.03]" style={{
+                    backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+                    backgroundSize: '20px 20px'
+                  }} />
+                  
+                  {/* Accent glow at top */}
+                  <div className={`absolute inset-0 bg-gradient-to-b ${accentGradients[index]} opacity-80`} />
+                  
+                  {/* Radial highlight effect */}
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-500/15 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+                  
+                  {/* Corner accent decorations */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-500/10 to-transparent rounded-bl-full" />
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-tr-full" />
+                  
+                  {/* Animated border glow on hover */}
+                  <div className={`absolute inset-0 border-2 ${borderColors[index]} rounded-2xl transition-all duration-500 group-hover:shadow-[inset_0_0_20px_rgba(249,115,22,0.1)]`} />
                   
                   {product.popular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
