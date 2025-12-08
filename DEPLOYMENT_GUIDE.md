@@ -86,21 +86,7 @@ These are ALL the secrets you need to configure in Cloudflare Pages:
 
 ### Example Values Format
 
-```env
-STRIPE_SECRET_KEY=sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
-STRIPE_PUBLISHABLE_KEY=pk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
-STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
-RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
-RESEND_FROM_EMAIL=noreply@streamstickpro.com
-DATABASE_URL=postgresql://postgres.xxxxx:password@aws-0-us-east-1.pooler.supabase.com:6543/postgres
-VITE_SUPABASE_URL=https://xxxxx.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6...
-SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6...
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD_HASH=$2b$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-JWT_SECRET=your-64-character-random-string-here-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-SESSION_SECRET=another-64-character-random-string-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
+See `.env.example` in the repository for environment variable templates. Never commit actual secrets to the repository. All sensitive values must be configured via Cloudflare Pages environment settings.
 
 ### Generate Password Hash
 
