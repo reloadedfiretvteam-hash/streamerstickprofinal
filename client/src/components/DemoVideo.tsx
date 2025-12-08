@@ -2,9 +2,8 @@ import { useState, useRef } from "react";
 import { Play, Pause, Volume2, VolumeX, Maximize, Tv, Zap, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import iptvCoverImg from "@assets/OIF_1764979270800.jpg";
-import demoVideoFile from "@assets/reloadedfiretv-online-video-cutter.com__1765165273781.mp4";
 
-const demoVideoSrc = demoVideoFile;
+const demoVideoSrc = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/demo-video.mp4";
 
 export function DemoVideo() {
   const [isPlaying, setIsPlaying] = useState(false);
