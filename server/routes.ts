@@ -1,7 +1,18 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { type Server } from "http";
 import { storage } from "./storage";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
+import { analyzeSeo } from "./seoAnalyzer";
+import { 
+  generateContentOutline, 
+  generateFullContent, 
+  improveContent, 
+  generateSEOSuggestions, 
+  expandSection,
+  generateFAQ,
+  type ContentGenerationRequest,
+  type GeneratedContent 
+} from "./aiContentService";
 import { 
   checkoutRequestSchema, 
   createProductRequestSchema, 
@@ -13,11 +24,60 @@ import {
   customerLookupSchema
 } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
+import * as crypto from "crypto";
+
+const JWT_SECRET = process.env.JWT_SECRET || 'streamstickpro-admin-secret-2024';
+const TOKEN_EXPIRY = 24 * 60 * 60 * 1000;
+
+function hashPassword(password: string): string {
+  return crypto.createHash('sha256').update(password + JWT_SECRET).digest('hex');
+}
+
+function createToken(username: string): string {
+  const payload = { sub: username, role: 'admin', exp: Date.now() + TOKEN_EXPIRY };
+  const payloadStr = JSON.stringify(payload);
+  const signature = crypto.createHmac('sha256', JWT_SECRET).update(payloadStr).digest('hex');
+  return Buffer.from(payloadStr).toString('base64') + '.' + signature;
+}
+
+function verifyToken(token: string): { valid: boolean; payload?: any } {
+  try {
+    const [payloadB64, signature] = token.split('.');
+    const payloadStr = Buffer.from(payloadB64, 'base64').toString('utf8');
+    const expectedSig = crypto.createHmac('sha256', JWT_SECRET).update(payloadStr).digest('hex');
+    if (signature !== expectedSig) return { valid: false };
+    const payload = JSON.parse(payloadStr);
+    if (payload.exp && payload.exp < Date.now()) return { valid: false };
+    return { valid: true, payload };
+  } catch {
+    return { valid: false };
+  }
+}
+
+function adminAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'Authentication required' });
+    return;
+  }
+  
+  const token = authHeader.substring(7);
+  const result = verifyToken(token);
+  
+  if (!result.valid) {
+    res.status(401).json({ error: 'Invalid or expired token' });
+    return;
+  }
+  
+  next();
+}
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  
+  app.use('/api/admin', adminAuthMiddleware);
   
   app.get("/api/products", async (req, res) => {
     try {
@@ -546,6 +606,17 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/admin/seed-blog", async (req, res) => {
+    try {
+      const { seedBlogPosts } = await import('./seedBlog');
+      const result = await seedBlogPosts();
+      res.json({ success: true, message: `Seeded ${result.seededCount} blog posts` });
+    } catch (error: any) {
+      console.error("Error seeding blog posts:", error);
+      res.status(500).json({ error: "Failed to seed blog posts" });
+    }
+  });
+
   app.put("/api/admin/fulfillment/:id", async (req, res) => {
     try {
       const { fulfillmentStatus, amazonOrderId } = req.body;
@@ -1027,36 +1098,339 @@ export async function registerRoutes(
     }
   });
 
-  const JWT_SECRET = process.env.JWT_SECRET || 'streamstickpro-admin-secret-2024';
-  const TOKEN_EXPIRY = 24 * 60 * 60 * 1000;
-
-  async function hashPassword(password: string): Promise<string> {
-    const crypto = await import('crypto');
-    return crypto.createHash('sha256').update(password + JWT_SECRET).digest('hex');
-  }
-
-  async function createToken(username: string): Promise<string> {
-    const payload = { sub: username, role: 'admin', exp: Date.now() + TOKEN_EXPIRY };
-    const payloadStr = JSON.stringify(payload);
-    const crypto = await import('crypto');
-    const signature = crypto.createHmac('sha256', JWT_SECRET).update(payloadStr).digest('hex');
-    return Buffer.from(payloadStr).toString('base64') + '.' + signature;
-  }
-
-  async function verifyToken(token: string): Promise<{ valid: boolean; payload?: any }> {
+  // ===== BLOG API ROUTES =====
+  
+  // Public blog routes
+  app.get("/api/blog/posts", async (req, res) => {
     try {
-      const [payloadB64, signature] = token.split('.');
-      const payloadStr = Buffer.from(payloadB64, 'base64').toString('utf8');
-      const crypto = await import('crypto');
-      const expectedSig = crypto.createHmac('sha256', JWT_SECRET).update(payloadStr).digest('hex');
-      if (signature !== expectedSig) return { valid: false };
-      const payload = JSON.parse(payloadStr);
-      if (payload.exp && payload.exp < Date.now()) return { valid: false };
-      return { valid: true, payload };
-    } catch {
-      return { valid: false };
+      const posts = await storage.getBlogPostsPublished();
+      res.json({ data: posts });
+    } catch (error: any) {
+      console.error("Error fetching blog posts:", error);
+      res.status(500).json({ error: "Failed to fetch blog posts" });
     }
-  }
+  });
+
+  app.get("/api/blog/posts/featured", async (req, res) => {
+    try {
+      const posts = await storage.getFeaturedBlogPosts();
+      res.json({ data: posts });
+    } catch (error: any) {
+      console.error("Error fetching featured blog posts:", error);
+      res.status(500).json({ error: "Failed to fetch featured blog posts" });
+    }
+  });
+
+  app.get("/api/blog/search", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query || query.trim().length === 0) {
+        return res.status(400).json({ error: "Search query is required" });
+      }
+      const posts = await storage.searchBlogPosts(query);
+      res.json({ data: posts });
+    } catch (error: any) {
+      console.error("Error searching blog posts:", error);
+      res.status(500).json({ error: "Failed to search blog posts" });
+    }
+  });
+
+  app.get("/api/blog/:slug", async (req, res) => {
+    try {
+      const post = await storage.getBlogPostBySlug(req.params.slug);
+      if (!post) {
+        return res.status(404).json({ error: "Blog post not found" });
+      }
+      res.json({ data: post });
+    } catch (error: any) {
+      console.error("Error fetching blog post:", error);
+      res.status(500).json({ error: "Failed to fetch blog post" });
+    }
+  });
+
+  // Admin blog routes
+  app.get("/api/admin/blog/posts", async (req, res) => {
+    try {
+      const posts = await storage.getAllBlogPosts();
+      res.json({ data: posts });
+    } catch (error: any) {
+      console.error("Error fetching admin blog posts:", error);
+      res.status(500).json({ error: "Failed to fetch blog posts" });
+    }
+  });
+
+  app.post("/api/admin/blog/posts", async (req, res) => {
+    try {
+      const { title, slug, excerpt, content, category, imageUrl, metaTitle, metaDescription, keywords, featured, published, linkedProductIds } = req.body;
+
+      if (!title || !slug || !excerpt || !content || !category) {
+        return res.status(400).json({ error: "Title, slug, excerpt, content, and category are required" });
+      }
+
+      const seoResult = analyzeSeo({
+        title,
+        content,
+        excerpt,
+        metaTitle,
+        metaDescription,
+        keywords,
+      });
+
+      const post = await storage.createBlogPost({
+        title,
+        slug,
+        excerpt,
+        content,
+        category,
+        imageUrl: imageUrl || null,
+        metaTitle: metaTitle || null,
+        metaDescription: metaDescription || null,
+        keywords: keywords || [],
+        readTime: seoResult.readTime,
+        featured: featured || false,
+        published: published || false,
+        publishedAt: published ? new Date() : null,
+        linkedProductIds: linkedProductIds || [],
+      });
+
+      const updatedPost = await storage.updateBlogPost(post.id, {
+        wordCount: seoResult.wordCount,
+        headingScore: seoResult.headingScore,
+        keywordDensityScore: seoResult.keywordDensityScore,
+        contentLengthScore: seoResult.contentLengthScore,
+        metaScore: seoResult.metaScore,
+        structureScore: seoResult.structureScore,
+        overallSeoScore: seoResult.overallSeoScore,
+        seoAnalysis: seoResult.seoAnalysis,
+      });
+
+      res.json({ data: updatedPost, seoAnalysis: seoResult });
+    } catch (error: any) {
+      console.error("Error creating blog post:", error);
+      res.status(500).json({ error: "Failed to create blog post" });
+    }
+  });
+
+  app.get("/api/admin/blog/posts/:id", async (req, res) => {
+    try {
+      const post = await storage.getBlogPost(req.params.id);
+      if (!post) {
+        return res.status(404).json({ error: "Blog post not found" });
+      }
+      res.json({ data: post });
+    } catch (error: any) {
+      console.error("Error fetching blog post:", error);
+      res.status(500).json({ error: "Failed to fetch blog post" });
+    }
+  });
+
+  app.put("/api/admin/blog/posts/:id", async (req, res) => {
+    try {
+      const existingPost = await storage.getBlogPost(req.params.id);
+      if (!existingPost) {
+        return res.status(404).json({ error: "Blog post not found" });
+      }
+
+      const { title, slug, excerpt, content, category, imageUrl, metaTitle, metaDescription, keywords, featured, published, linkedProductIds } = req.body;
+
+      const finalTitle = title ?? existingPost.title;
+      const finalContent = content ?? existingPost.content;
+      const finalExcerpt = excerpt ?? existingPost.excerpt;
+      const finalMetaTitle = metaTitle ?? existingPost.metaTitle;
+      const finalMetaDescription = metaDescription ?? existingPost.metaDescription;
+      const finalKeywords = keywords ?? existingPost.keywords;
+
+      const seoResult = analyzeSeo({
+        title: finalTitle,
+        content: finalContent,
+        excerpt: finalExcerpt,
+        metaTitle: finalMetaTitle,
+        metaDescription: finalMetaDescription,
+        keywords: finalKeywords,
+      });
+
+      const post = await storage.updateBlogPost(req.params.id, {
+        title,
+        slug,
+        excerpt,
+        content,
+        category,
+        imageUrl,
+        metaTitle,
+        metaDescription,
+        keywords,
+        readTime: seoResult.readTime,
+        featured,
+        published,
+        publishedAt: published && !existingPost.publishedAt ? new Date() : existingPost.publishedAt,
+        linkedProductIds,
+        wordCount: seoResult.wordCount,
+        headingScore: seoResult.headingScore,
+        keywordDensityScore: seoResult.keywordDensityScore,
+        contentLengthScore: seoResult.contentLengthScore,
+        metaScore: seoResult.metaScore,
+        structureScore: seoResult.structureScore,
+        overallSeoScore: seoResult.overallSeoScore,
+        seoAnalysis: seoResult.seoAnalysis,
+      });
+
+      res.json({ data: post, seoAnalysis: seoResult });
+    } catch (error: any) {
+      console.error("Error updating blog post:", error);
+      res.status(500).json({ error: "Failed to update blog post" });
+    }
+  });
+
+  app.delete("/api/admin/blog/posts/:id", async (req, res) => {
+    try {
+      const existingPost = await storage.getBlogPost(req.params.id);
+      if (!existingPost) {
+        return res.status(404).json({ error: "Blog post not found" });
+      }
+
+      const deleted = await storage.deleteBlogPost(req.params.id);
+
+      if (deleted) {
+        res.json({ success: true });
+      } else {
+        res.status(500).json({ error: "Failed to delete blog post" });
+      }
+    } catch (error: any) {
+      console.error("Error deleting blog post:", error);
+      res.status(500).json({ error: "Failed to delete blog post" });
+    }
+  });
+
+  app.get("/api/admin/blog/posts/category/:category", async (req, res) => {
+    try {
+      const posts = await storage.getBlogPostsByCategory(req.params.category);
+      res.json({ data: posts });
+    } catch (error: any) {
+      console.error("Error fetching posts by category:", error);
+      res.status(500).json({ error: "Failed to fetch posts by category" });
+    }
+  });
+
+  app.post("/api/admin/blog/analyze-seo", async (req, res) => {
+    try {
+      const { title, content, excerpt, metaTitle, metaDescription, keywords } = req.body;
+
+      if (!title || !content || !excerpt) {
+        return res.status(400).json({ error: "Title, content, and excerpt are required for SEO analysis" });
+      }
+
+      const seoResult = analyzeSeo({
+        title,
+        content,
+        excerpt,
+        metaTitle,
+        metaDescription,
+        keywords,
+      });
+
+      res.json({ data: seoResult });
+    } catch (error: any) {
+      console.error("Error analyzing SEO:", error);
+      res.status(500).json({ error: "Failed to analyze SEO" });
+    }
+  });
+
+  // AI Content Generation Routes
+  app.post("/api/admin/blog/ai/outline", async (req, res) => {
+    try {
+      const request: ContentGenerationRequest = req.body;
+      
+      if (!request.topic) {
+        return res.status(400).json({ error: "Topic is required" });
+      }
+
+      const outline = await generateContentOutline(request);
+      res.json({ data: outline });
+    } catch (error: any) {
+      console.error("Error generating outline:", error);
+      res.status(500).json({ error: `Failed to generate outline: ${error.message}` });
+    }
+  });
+
+  app.post("/api/admin/blog/ai/generate", async (req, res) => {
+    try {
+      const request: ContentGenerationRequest = req.body;
+      
+      if (!request.topic) {
+        return res.status(400).json({ error: "Topic is required" });
+      }
+
+      const content = await generateFullContent(request);
+      res.json({ data: content });
+    } catch (error: any) {
+      console.error("Error generating content:", error);
+      res.status(500).json({ error: `Failed to generate content: ${error.message}` });
+    }
+  });
+
+  app.post("/api/admin/blog/ai/improve", async (req, res) => {
+    try {
+      const { content, instructions } = req.body;
+      
+      if (!content || !instructions) {
+        return res.status(400).json({ error: "Content and instructions are required" });
+      }
+
+      const improved = await improveContent(content, instructions);
+      res.json({ data: improved });
+    } catch (error: any) {
+      console.error("Error improving content:", error);
+      res.status(500).json({ error: `Failed to improve content: ${error.message}` });
+    }
+  });
+
+  app.post("/api/admin/blog/ai/seo-suggestions", async (req, res) => {
+    try {
+      const { title, content, keywords } = req.body;
+      
+      if (!title || !content) {
+        return res.status(400).json({ error: "Title and content are required" });
+      }
+
+      const suggestions = await generateSEOSuggestions(title, content, keywords || []);
+      res.json({ data: suggestions });
+    } catch (error: any) {
+      console.error("Error generating SEO suggestions:", error);
+      res.status(500).json({ error: `Failed to generate suggestions: ${error.message}` });
+    }
+  });
+
+  app.post("/api/admin/blog/ai/expand-section", async (req, res) => {
+    try {
+      const { content, context, targetWords } = req.body;
+      
+      if (!content || !context) {
+        return res.status(400).json({ error: "Content and context are required" });
+      }
+
+      const expanded = await expandSection(content, context, targetWords || 300);
+      res.json({ data: { content: expanded } });
+    } catch (error: any) {
+      console.error("Error expanding section:", error);
+      res.status(500).json({ error: `Failed to expand section: ${error.message}` });
+    }
+  });
+
+  app.post("/api/admin/blog/ai/generate-faq", async (req, res) => {
+    try {
+      const { topic, content, count } = req.body;
+      
+      if (!topic || !content) {
+        return res.status(400).json({ error: "Topic and content are required" });
+      }
+
+      const faq = await generateFAQ(topic, content, count || 5);
+      res.json({ data: { faq } });
+    } catch (error: any) {
+      console.error("Error generating FAQ:", error);
+      res.status(500).json({ error: `Failed to generate FAQ: ${error.message}` });
+    }
+  });
 
   app.post("/api/auth/login", async (req, res) => {
     try {
@@ -1069,7 +1443,7 @@ export async function registerRoutes(
       const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
 
       if (username === adminUsername && password === adminPassword) {
-        const token = await createToken(username);
+        const token = createToken(username);
         return res.json({ success: true, token });
       }
 
@@ -1088,7 +1462,7 @@ export async function registerRoutes(
       }
 
       const token = authHeader.substring(7);
-      const result = await verifyToken(token);
+      const result = verifyToken(token);
       
       if (result.valid) {
         res.json({ valid: true, user: result.payload?.sub, role: result.payload?.role });
@@ -1103,6 +1477,87 @@ export async function registerRoutes(
 
   app.post("/api/auth/logout", async (req, res) => {
     res.json({ success: true, message: 'Logged out successfully' });
+  });
+
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      const baseUrl = "https://streamstickpro.com";
+      const blogPosts = await storage.getAllBlogPosts();
+      const products = await storage.getRealProducts();
+      
+      const staticPages = [
+        { url: "/", priority: "1.0", changefreq: "daily" },
+        { url: "/blog", priority: "0.9", changefreq: "daily" },
+        { url: "/checkout", priority: "0.7", changefreq: "weekly" },
+      ];
+
+      let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+`;
+      
+      for (const page of staticPages) {
+        sitemap += `  <url>
+    <loc>${baseUrl}${page.url}</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>${page.changefreq}</changefreq>
+    <priority>${page.priority}</priority>
+  </url>
+`;
+      }
+
+      for (const post of blogPosts) {
+        if (post.published) {
+          const lastmod = post.updatedAt ? new Date(post.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+          sitemap += `  <url>
+    <loc>${baseUrl}/blog/${post.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+`;
+        }
+      }
+
+      for (const product of products) {
+        sitemap += `  <url>
+    <loc>${baseUrl}/#product-${product.id}</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+`;
+      }
+
+      sitemap += `</urlset>`;
+
+      res.set('Content-Type', 'application/xml');
+      res.send(sitemap);
+    } catch (error: any) {
+      console.error("Error generating sitemap:", error);
+      res.status(500).send("Error generating sitemap");
+    }
+  });
+
+  app.get("/robots.txt", (req, res) => {
+    const robotsTxt = `User-agent: *
+Allow: /
+Allow: /blog
+Allow: /blog/*
+
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/
+Disallow: /shadow-services
+Disallow: /checkout
+
+Sitemap: https://streamstickpro.com/sitemap.xml
+
+# Crawl-delay: 1
+# Allow search engines to index all public content
+`;
+    res.set('Content-Type', 'text/plain');
+    res.send(robotsTxt);
   });
 
   app.post("/api/auth/generate-hash", async (req, res) => {
@@ -1120,6 +1575,198 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error('Hash generation error:', error);
       res.status(500).json({ error: 'Failed to generate hash' });
+    }
+  });
+
+  app.get("/api/admin/github/status", async (req, res) => {
+    try {
+      const { getUncachableGitHubClient, getGitHubUser } = await import('./github');
+      const user = await getGitHubUser();
+      res.json({ 
+        connected: true, 
+        username: user.login,
+        avatarUrl: user.avatar_url 
+      });
+    } catch (error: any) {
+      console.error('GitHub status check error:', error);
+      res.json({ connected: false, error: error.message });
+    }
+  });
+
+  app.get("/api/admin/github/repos", async (req, res) => {
+    try {
+      const { listGitHubRepos } = await import('./github');
+      const repos = await listGitHubRepos(50);
+      res.json({ 
+        data: repos.map(r => ({
+          id: r.id,
+          name: r.name,
+          fullName: r.full_name,
+          private: r.private,
+          defaultBranch: r.default_branch,
+          htmlUrl: r.html_url
+        }))
+      });
+    } catch (error: any) {
+      console.error('GitHub repos fetch error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/admin/github/push", async (req, res) => {
+    try {
+      const { owner, repo, branch, message } = req.body;
+      
+      if (!owner || !repo) {
+        return res.status(400).json({ error: 'Repository owner and name are required' });
+      }
+
+      const { getUncachableGitHubClient } = await import('./github');
+      const octokit = await getUncachableGitHubClient();
+      
+      const targetBranch = branch || 'main';
+      const commitMessage = message || `Deploy from StreamStickPro Admin - ${new Date().toISOString()}`;
+
+      let baseSha: string;
+      try {
+        const { data: ref } = await octokit.git.getRef({
+          owner,
+          repo,
+          ref: `heads/${targetBranch}`
+        });
+        baseSha = ref.object.sha;
+      } catch (error: any) {
+        if (error.status === 404) {
+          const { data: defaultRef } = await octokit.git.getRef({
+            owner,
+            repo,
+            ref: 'heads/main'
+          });
+          baseSha = defaultRef.object.sha;
+        } else {
+          throw error;
+        }
+      }
+
+      const { data: baseCommit } = await octokit.git.getCommit({
+        owner,
+        repo,
+        commit_sha: baseSha
+      });
+
+      const fs = await import('fs');
+      const path = await import('path');
+
+      const filesToInclude = [
+        'package.json',
+        'package-lock.json',
+        'tsconfig.json',
+        'vite.config.ts',
+        'tailwind.config.ts',
+        'drizzle.config.ts',
+        'replit.md'
+      ];
+
+      const dirsToInclude = ['client', 'server', 'shared'];
+
+      const getAllFiles = (dir: string, base: string = ''): { path: string; content: string }[] => {
+        const files: { path: string; content: string }[] = [];
+        const items = fs.readdirSync(dir);
+        
+        for (const item of items) {
+          if (item === 'node_modules' || item === '.git' || item === 'dist' || item === '.local') continue;
+          
+          const fullPath = path.join(dir, item);
+          const relativePath = base ? `${base}/${item}` : item;
+          const stat = fs.statSync(fullPath);
+          
+          if (stat.isDirectory()) {
+            files.push(...getAllFiles(fullPath, relativePath));
+          } else {
+            try {
+              const content = fs.readFileSync(fullPath, 'utf-8');
+              files.push({ path: relativePath, content });
+            } catch (e) {
+            }
+          }
+        }
+        return files;
+      };
+
+      const treeItems: Array<{ path: string; mode: '100644'; type: 'blob'; sha: string }> = [];
+
+      for (const file of filesToInclude) {
+        const fullPath = path.join(process.cwd(), file);
+        if (fs.existsSync(fullPath)) {
+          const content = fs.readFileSync(fullPath, 'utf-8');
+          const { data: blob } = await octokit.git.createBlob({
+            owner,
+            repo,
+            content: Buffer.from(content).toString('base64'),
+            encoding: 'base64'
+          });
+          treeItems.push({
+            path: file,
+            mode: '100644',
+            type: 'blob',
+            sha: blob.sha
+          });
+        }
+      }
+
+      for (const dir of dirsToInclude) {
+        const dirPath = path.join(process.cwd(), dir);
+        if (fs.existsSync(dirPath)) {
+          const files = getAllFiles(dirPath, dir);
+          for (const file of files) {
+            const { data: blob } = await octokit.git.createBlob({
+              owner,
+              repo,
+              content: Buffer.from(file.content).toString('base64'),
+              encoding: 'base64'
+            });
+            treeItems.push({
+              path: file.path,
+              mode: '100644',
+              type: 'blob',
+              sha: blob.sha
+            });
+          }
+        }
+      }
+
+      const { data: tree } = await octokit.git.createTree({
+        owner,
+        repo,
+        base_tree: baseCommit.tree.sha,
+        tree: treeItems
+      });
+
+      const { data: newCommit } = await octokit.git.createCommit({
+        owner,
+        repo,
+        message: commitMessage,
+        tree: tree.sha,
+        parents: [baseSha]
+      });
+
+      await octokit.git.updateRef({
+        owner,
+        repo,
+        ref: `heads/${targetBranch}`,
+        sha: newCommit.sha
+      });
+
+      res.json({ 
+        success: true, 
+        message: `Successfully pushed ${treeItems.length} files to ${owner}/${repo}`,
+        commitSha: newCommit.sha,
+        commitUrl: `https://github.com/${owner}/${repo}/commit/${newCommit.sha}`,
+        filesCount: treeItems.length
+      });
+    } catch (error: any) {
+      console.error('GitHub push error:', error);
+      res.status(500).json({ error: `Failed to push to GitHub: ${error.message}` });
     }
   });
 

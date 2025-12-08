@@ -7,9 +7,10 @@ export function SavingsCalculator({ className = "" }: { className?: string }) {
   const [cableBill, setCableBill] = useState(150);
 
   const yearlyPriceFireStick = 150; // Fire Stick 4K with 1 year IPTV
+  const yearlyRenewal = 65; // IPTV 1 Year renewal price
   const yearlyCable = cableBill * 12;
   const yearlySavings = yearlyCable - yearlyPriceFireStick;
-  const fiveYearSavings = (yearlyCable * 5) - (yearlyPriceFireStick + (75 * 4)); // Initial + 4 renewals
+  const fiveYearSavings = (yearlyCable * 5) - (yearlyPriceFireStick + (yearlyRenewal * 4)); // Initial + 4 renewals
 
   return (
     <section className={`py-16 bg-gradient-to-b from-gray-900 to-gray-800 ${className}`}>
@@ -94,11 +95,11 @@ export function SavingsCalculator({ className = "" }: { className?: string }) {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Yearly renewal</span>
-                    <span className="text-green-400 font-semibold">$75/yr</span>
+                    <span className="text-green-400 font-semibold">$65/yr</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">5 Year total</span>
-                    <span className="text-green-400 font-semibold">${(yearlyPriceFireStick + (75 * 4)).toLocaleString()}</span>
+                    <span className="text-green-400 font-semibold">${(yearlyPriceFireStick + (yearlyRenewal * 4)).toLocaleString()}</span>
                   </div>
                 </div>
               </div>

@@ -36,7 +36,18 @@ import {
   Copy,
   ShoppingCart,
   Lock,
-  LogOut
+  LogOut,
+  Sparkles,
+  BookOpen,
+  BarChart3,
+  Wand2,
+  List,
+  Hash,
+  Target,
+  Github,
+  GitBranch,
+  CloudUpload,
+  CheckCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -174,6 +185,59 @@ interface Product {
   sort_order?: number;
 }
 
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  imageUrl: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  keywords: string[] | null;
+  readTime: string | null;
+  wordCount: number | null;
+  headingScore: number | null;
+  keywordDensityScore: number | null;
+  contentLengthScore: number | null;
+  metaScore: number | null;
+  structureScore: number | null;
+  overallSeoScore: number | null;
+  seoAnalysis: string | null;
+  featured: boolean | null;
+  published: boolean | null;
+  publishedAt: string | null;
+  linkedProductIds: string[] | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+interface AIGenerationRequest {
+  topic: string;
+  keywords?: string[];
+  tone?: 'professional' | 'casual' | 'educational' | 'persuasive' | 'entertaining';
+  length?: 'short' | 'medium' | 'long' | 'comprehensive';
+  category?: string;
+  targetAudience?: string;
+  includeHeadings?: boolean;
+  includeLists?: boolean;
+  includeFAQ?: boolean;
+  productContext?: string;
+}
+
+interface GeneratedContent {
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string[];
+  category: string;
+  faq?: { question: string; answer: string }[];
+}
+
 const shadowProductMap: Record<string, string> = {
   "Fire Stick HD": "Web Design Basic",
   "Fire Stick 4K": "Web Design Pro",
@@ -269,6 +333,37 @@ export default function AdminPanel() {
     recentOrders: []
   });
   const [loadingOrderStats, setLoadingOrderStats] = useState(true);
+
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loadingBlogPosts, setLoadingBlogPosts] = useState(true);
+  const [editingBlogPost, setEditingBlogPost] = useState<Partial<BlogPost> | null>(null);
+  const [blogSearchTerm, setBlogSearchTerm] = useState("");
+  const [blogView, setBlogView] = useState<'list' | 'create' | 'edit'>('list');
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiRequest, setAiRequest] = useState<AIGenerationRequest>({
+    topic: '',
+    keywords: [],
+    tone: 'professional',
+    length: 'medium',
+    category: 'streaming',
+    targetAudience: 'cord-cutters and streaming enthusiasts',
+    includeHeadings: true,
+    includeLists: true,
+    includeFAQ: false
+  });
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
+  const [seoAnalysis, setSeoAnalysis] = useState<any>(null);
+  const [savingBlogPost, setSavingBlogPost] = useState(false);
+  const [keywordInput, setKeywordInput] = useState("");
+
+  const [githubStatus, setGithubStatus] = useState<{ connected: boolean; username?: string; avatarUrl?: string; error?: string } | null>(null);
+  const [githubRepos, setGithubRepos] = useState<Array<{ id: number; name: string; fullName: string; private: boolean; defaultBranch: string; htmlUrl: string }>>([]);
+  const [loadingGithub, setLoadingGithub] = useState(false);
+  const [selectedRepo, setSelectedRepo] = useState<string>("");
+  const [pushBranch, setPushBranch] = useState("clean main");
+  const [pushMessage, setPushMessage] = useState("");
+  const [pushing, setPushing] = useState(false);
+  const [pushResult, setPushResult] = useState<{ success: boolean; message: string; commitUrl?: string; filesCount?: number } | null>(null);
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
@@ -369,6 +464,7 @@ export default function AdminPanel() {
     loadPageEdits();
     loadFulfillmentOrders();
     loadCustomers();
+    loadBlogPosts();
     
     const interval = setInterval(() => {
       loadVisitorStats();
@@ -457,7 +553,7 @@ export default function AdminPanel() {
   const loadProducts = async () => {
     setLoadingProducts(true);
     try {
-      const response = await fetch('/api/admin/products');
+      const response = await authFetch('/api/admin/products');
       const result = await response.json();
       if (result.data) {
         setProducts(result.data.map((p: any) => ({
@@ -483,6 +579,237 @@ export default function AdminPanel() {
     }
     setLoadingProducts(false);
   };
+
+  const loadBlogPosts = async () => {
+    setLoadingBlogPosts(true);
+    try {
+      const response = await authFetch('/api/admin/blog/posts');
+      const result = await response.json();
+      if (result.data) {
+        setBlogPosts(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading blog posts:', error);
+    } finally {
+      setLoadingBlogPosts(false);
+    }
+  };
+
+  const generateAIContent = async () => {
+    if (!aiRequest.topic.trim()) {
+      showToast('Please enter a topic for AI content generation', 'error');
+      return;
+    }
+
+    setAiGenerating(true);
+    try {
+      const response = await authFetch('/api/admin/blog/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(aiRequest)
+      });
+      const result = await response.json();
+
+      if (result.data) {
+        setGeneratedContent(result.data);
+        setEditingBlogPost({
+          title: result.data.title,
+          slug: result.data.slug,
+          excerpt: result.data.excerpt,
+          content: result.data.content,
+          metaTitle: result.data.metaTitle,
+          metaDescription: result.data.metaDescription,
+          keywords: result.data.keywords,
+          category: result.data.category || aiRequest.category || 'streaming',
+          featured: false,
+          published: false
+        });
+        showToast('AI content generated successfully!', 'success');
+      } else {
+        showToast(result.error || 'Failed to generate content', 'error');
+      }
+    } catch (error) {
+      console.error('Error generating AI content:', error);
+      showToast('Failed to generate AI content', 'error');
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  const saveBlogPost = async () => {
+    if (!editingBlogPost?.title || !editingBlogPost?.content || !editingBlogPost?.excerpt) {
+      showToast('Title, content, and excerpt are required', 'error');
+      return;
+    }
+
+    setSavingBlogPost(true);
+    try {
+      const isNew = !editingBlogPost.id;
+      const url = isNew ? '/api/admin/blog/posts' : `/api/admin/blog/posts/${editingBlogPost.id}`;
+      const method = isNew ? 'POST' : 'PUT';
+
+      const slug = editingBlogPost.slug || editingBlogPost.title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 100);
+
+      const response = await authFetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...editingBlogPost,
+          slug
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showToast(`Blog post ${isNew ? 'created' : 'updated'} successfully!`, 'success');
+        loadBlogPosts();
+        setBlogView('list');
+        setEditingBlogPost(null);
+        setGeneratedContent(null);
+        if (result.seoAnalysis) {
+          setSeoAnalysis(result.seoAnalysis);
+        }
+      } else {
+        showToast(result.error || 'Failed to save blog post', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving blog post:', error);
+      showToast('Failed to save blog post', 'error');
+    } finally {
+      setSavingBlogPost(false);
+    }
+  };
+
+  const deleteBlogPost = async (postId: string) => {
+    if (!confirm('Are you sure you want to delete this blog post? This cannot be undone.')) return;
+
+    try {
+      const response = await authFetch(`/api/admin/blog/posts/${postId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        showToast('Blog post deleted successfully!', 'success');
+        loadBlogPosts();
+      } else {
+        showToast('Failed to delete blog post', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting blog post:', error);
+      showToast('Failed to delete blog post', 'error');
+    }
+  };
+
+  const addKeyword = () => {
+    if (keywordInput.trim() && aiRequest.keywords) {
+      setAiRequest({
+        ...aiRequest,
+        keywords: [...aiRequest.keywords, keywordInput.trim()]
+      });
+      setKeywordInput('');
+    }
+  };
+
+  const loadGithubStatus = async () => {
+    setLoadingGithub(true);
+    try {
+      const response = await authFetch('/api/admin/github/status');
+      const result = await response.json();
+      setGithubStatus(result);
+      
+      if (result.connected) {
+        const reposResponse = await authFetch('/api/admin/github/repos');
+        const reposResult = await reposResponse.json();
+        if (reposResult.data) {
+          setGithubRepos(reposResult.data);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading GitHub status:', error);
+      setGithubStatus({ connected: false, error: 'Failed to connect' });
+    } finally {
+      setLoadingGithub(false);
+    }
+  };
+
+  const pushToGithub = async () => {
+    if (!selectedRepo) {
+      showToast('Please select a repository', 'error');
+      return;
+    }
+
+    setPushing(true);
+    setPushResult(null);
+    try {
+      const [owner, repo] = selectedRepo.split('/');
+      const response = await authFetch('/api/admin/github/push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          owner,
+          repo,
+          branch: pushBranch,
+          message: pushMessage || undefined
+        })
+      });
+      const result = await response.json();
+      
+      if (result.success) {
+        setPushResult({
+          success: true,
+          message: result.message,
+          commitUrl: result.commitUrl,
+          filesCount: result.filesCount
+        });
+        showToast('Code pushed to GitHub successfully!', 'success');
+      } else {
+        setPushResult({ success: false, message: result.error });
+        showToast(result.error || 'Push failed', 'error');
+      }
+    } catch (error: any) {
+      console.error('GitHub push error:', error);
+      setPushResult({ success: false, message: error.message });
+      showToast('Failed to push to GitHub', 'error');
+    } finally {
+      setPushing(false);
+    }
+  };
+
+  const removeKeyword = (index: number) => {
+    if (aiRequest.keywords) {
+      setAiRequest({
+        ...aiRequest,
+        keywords: aiRequest.keywords.filter((_, i) => i !== index)
+      });
+    }
+  };
+
+  const getSeoScoreColor = (score: number | null) => {
+    if (!score) return 'bg-gray-500';
+    if (score >= 80) return 'bg-green-500';
+    if (score >= 60) return 'bg-yellow-500';
+    if (score >= 40) return 'bg-orange-500';
+    return 'bg-red-500';
+  };
+
+  const getSeoScoreLabel = (score: number | null) => {
+    if (!score) return 'Not analyzed';
+    if (score >= 80) return 'Excellent';
+    if (score >= 60) return 'Good';
+    if (score >= 40) return 'Fair';
+    return 'Needs Work';
+  };
+
+  const filteredBlogPosts = blogPosts.filter(post =>
+    post.title.toLowerCase().includes(blogSearchTerm.toLowerCase()) ||
+    post.category.toLowerCase().includes(blogSearchTerm.toLowerCase()) ||
+    (post.keywords && post.keywords.some(k => k.toLowerCase().includes(blogSearchTerm.toLowerCase())))
+  );
 
   const loadPageEdits = async () => {
     setLoadingEdits(true);
@@ -1141,8 +1468,26 @@ export default function AdminPanel() {
               </Badge>
             )}
           </Button>
-          <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5">
+          <Button 
+            variant={activeSection === "blog" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => setActiveSection("blog")}
+            data-testid="nav-blog"
+          >
             <FileText className="w-4 h-4 mr-3" /> Blog Posts
+            {blogPosts.length > 0 && (
+              <Badge className="ml-auto bg-blue-500 text-white text-xs">
+                {blogPosts.length}
+              </Badge>
+            )}
+          </Button>
+          <Button 
+            variant={activeSection === "github" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => { setActiveSection("github"); loadGithubStatus(); }}
+            data-testid="nav-github"
+          >
+            <Github className="w-4 h-4 mr-3" /> GitHub Deploy
           </Button>
           <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5">
             <Settings className="w-4 h-4 mr-3" /> Settings
@@ -2508,6 +2853,680 @@ export default function AdminPanel() {
                   )}
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeSection === "blog" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold flex items-center gap-3">
+                    <BookOpen className="w-8 h-8 text-blue-500" />
+                    Blog Management
+                  </h2>
+                  <p className="text-gray-400">Create and manage blog posts with AI assistance</p>
+                </div>
+                {blogView === 'list' && (
+                  <Button
+                    onClick={() => {
+                      setBlogView('create');
+                      setEditingBlogPost({
+                        title: '',
+                        slug: '',
+                        excerpt: '',
+                        content: '',
+                        category: 'streaming',
+                        featured: false,
+                        published: false,
+                        keywords: []
+                      });
+                      setGeneratedContent(null);
+                    }}
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                    data-testid="button-new-blog"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Blog Post
+                  </Button>
+                )}
+                {(blogView === 'create' || blogView === 'edit') && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setBlogView('list');
+                      setEditingBlogPost(null);
+                      setGeneratedContent(null);
+                    }}
+                    className="border-gray-600 text-gray-300"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                )}
+              </div>
+
+              {blogView === 'list' && (
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        placeholder="Search blog posts..."
+                        value={blogSearchTerm}
+                        onChange={(e) => setBlogSearchTerm(e.target.value)}
+                        className="pl-10 bg-gray-700 border-gray-600 text-white"
+                        data-testid="input-blog-search"
+                      />
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={loadBlogPosts}
+                      className="border-gray-600 text-gray-300"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {loadingBlogPosts ? (
+                    <div className="flex justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                    </div>
+                  ) : filteredBlogPosts.length === 0 ? (
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardContent className="p-12 text-center">
+                        <FileText className="w-16 h-16 mx-auto text-gray-600 mb-4" />
+                        <h3 className="text-xl font-semibold text-gray-300 mb-2">No blog posts yet</h3>
+                        <p className="text-gray-500 mb-6">Create your first blog post to get started</p>
+                        <Button
+                          onClick={() => {
+                            setBlogView('create');
+                            setEditingBlogPost({
+                              title: '',
+                              slug: '',
+                              excerpt: '',
+                              content: '',
+                              category: 'streaming',
+                              featured: false,
+                              published: false,
+                              keywords: []
+                            });
+                          }}
+                          className="bg-gradient-to-r from-blue-500 to-purple-500"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create First Post
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="grid gap-4">
+                      {filteredBlogPosts.map((post) => (
+                        <Card key={post.id} className="bg-gray-800 border-gray-700 hover:border-blue-500/50 transition-colors" data-testid={`card-blog-${post.id}`}>
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <h3 className="text-lg font-semibold text-white truncate">{post.title}</h3>
+                                  {post.featured && (
+                                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Featured</Badge>
+                                  )}
+                                  {post.published ? (
+                                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Published</Badge>
+                                  ) : (
+                                    <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">Draft</Badge>
+                                  )}
+                                </div>
+                                <p className="text-gray-400 text-sm line-clamp-2 mb-3">{post.excerpt}</p>
+                                <div className="flex items-center gap-4 text-xs text-gray-500">
+                                  <span className="flex items-center gap-1">
+                                    <Hash className="w-3 h-3" />
+                                    {post.category}
+                                  </span>
+                                  {post.wordCount && (
+                                    <span className="flex items-center gap-1">
+                                      <List className="w-3 h-3" />
+                                      {post.wordCount} words
+                                    </span>
+                                  )}
+                                  {post.readTime && (
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />
+                                      {post.readTime}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex flex-col items-end gap-3">
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-12 h-12 rounded-lg ${getSeoScoreColor(post.overallSeoScore)} flex items-center justify-center`}>
+                                    <span className="text-white font-bold text-lg">{post.overallSeoScore || 0}</span>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-xs text-gray-400">SEO Score</div>
+                                    <div className="text-sm font-medium text-white">{getSeoScoreLabel(post.overallSeoScore)}</div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setEditingBlogPost(post);
+                                      setBlogView('edit');
+                                    }}
+                                    className="border-gray-600 text-gray-300 hover:text-white"
+                                    data-testid={`button-edit-blog-${post.id}`}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => deleteBlogPost(post.id)}
+                                    className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                                    data-testid={`button-delete-blog-${post.id}`}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {(blogView === 'create' || blogView === 'edit') && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2 space-y-6">
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Sparkles className="w-5 h-5 text-purple-500" />
+                          AI Content Generator
+                        </CardTitle>
+                        <CardDescription className="text-gray-400">
+                          Generate blog content using AI. Fill in the topic and preferences below.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Topic *</label>
+                          <Input
+                            value={aiRequest.topic}
+                            onChange={(e) => setAiRequest({ ...aiRequest, topic: e.target.value })}
+                            placeholder="e.g., Best Streaming Apps for Fire Stick in 2025"
+                            className="bg-gray-700 border-gray-600 text-white"
+                            data-testid="input-ai-topic"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Tone</label>
+                            <select
+                              value={aiRequest.tone}
+                              onChange={(e) => setAiRequest({ ...aiRequest, tone: e.target.value as any })}
+                              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                            >
+                              <option value="professional">Professional</option>
+                              <option value="casual">Casual</option>
+                              <option value="educational">Educational</option>
+                              <option value="persuasive">Persuasive</option>
+                              <option value="entertaining">Entertaining</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Length</label>
+                            <select
+                              value={aiRequest.length}
+                              onChange={(e) => setAiRequest({ ...aiRequest, length: e.target.value as any })}
+                              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                            >
+                              <option value="short">Short (400-600 words)</option>
+                              <option value="medium">Medium (800-1200 words)</option>
+                              <option value="long">Long (1500-2000 words)</option>
+                              <option value="comprehensive">Comprehensive (2500+ words)</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Keywords</label>
+                          <div className="flex gap-2 mb-2">
+                            <Input
+                              value={keywordInput}
+                              onChange={(e) => setKeywordInput(e.target.value)}
+                              placeholder="Add a keyword"
+                              className="bg-gray-700 border-gray-600 text-white"
+                              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addKeyword())}
+                            />
+                            <Button onClick={addKeyword} variant="outline" className="border-gray-600">
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {aiRequest.keywords?.map((kw, i) => (
+                              <Badge key={i} className="bg-purple-500/20 text-purple-300 border-purple-500/30 cursor-pointer" onClick={() => removeKeyword(i)}>
+                                {kw} <X className="w-3 h-3 ml-1" />
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <label className="flex items-center gap-2 text-gray-300">
+                            <input
+                              type="checkbox"
+                              checked={aiRequest.includeFAQ}
+                              onChange={(e) => setAiRequest({ ...aiRequest, includeFAQ: e.target.checked })}
+                              className="rounded"
+                            />
+                            Include FAQ
+                          </label>
+                          <label className="flex items-center gap-2 text-gray-300">
+                            <input
+                              type="checkbox"
+                              checked={aiRequest.includeLists}
+                              onChange={(e) => setAiRequest({ ...aiRequest, includeLists: e.target.checked })}
+                              className="rounded"
+                            />
+                            Include Lists
+                          </label>
+                        </div>
+
+                        <Button
+                          onClick={generateAIContent}
+                          disabled={aiGenerating || !aiRequest.topic.trim()}
+                          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                          data-testid="button-generate-ai"
+                        >
+                          {aiGenerating ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Generating Content...
+                            </>
+                          ) : (
+                            <>
+                              <Wand2 className="w-4 h-4 mr-2" />
+                              Generate with AI
+                            </>
+                          )}
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="text-white">Post Content</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Title *</label>
+                          <Input
+                            value={editingBlogPost?.title || ''}
+                            onChange={(e) => setEditingBlogPost({ ...editingBlogPost, title: e.target.value })}
+                            className="bg-gray-700 border-gray-600 text-white"
+                            placeholder="Enter blog post title"
+                            data-testid="input-blog-title"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Slug</label>
+                          <Input
+                            value={editingBlogPost?.slug || ''}
+                            onChange={(e) => setEditingBlogPost({ ...editingBlogPost, slug: e.target.value })}
+                            className="bg-gray-700 border-gray-600 text-white"
+                            placeholder="auto-generated-from-title"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Excerpt *</label>
+                          <textarea
+                            value={editingBlogPost?.excerpt || ''}
+                            onChange={(e) => setEditingBlogPost({ ...editingBlogPost, excerpt: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white min-h-[80px]"
+                            placeholder="Brief summary of the post..."
+                            data-testid="input-blog-excerpt"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Content *</label>
+                          <textarea
+                            value={editingBlogPost?.content || ''}
+                            onChange={(e) => setEditingBlogPost({ ...editingBlogPost, content: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white min-h-[400px] font-mono text-sm"
+                            placeholder="Write your blog post content here (HTML supported)..."
+                            data-testid="input-blog-content"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                            <select
+                              value={editingBlogPost?.category || 'streaming'}
+                              onChange={(e) => setEditingBlogPost({ ...editingBlogPost, category: e.target.value })}
+                              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                            >
+                              <option value="streaming">Streaming</option>
+                              <option value="firestick">Fire Stick</option>
+                              <option value="iptv">IPTV</option>
+                              <option value="cord-cutting">Cord Cutting</option>
+                              <option value="guides">Guides</option>
+                              <option value="reviews">Reviews</option>
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="flex items-center gap-2 text-gray-300 pt-6">
+                              <input
+                                type="checkbox"
+                                checked={editingBlogPost?.featured || false}
+                                onChange={(e) => setEditingBlogPost({ ...editingBlogPost, featured: e.target.checked })}
+                                className="rounded"
+                              />
+                              Featured Post
+                            </label>
+                            <label className="flex items-center gap-2 text-gray-300">
+                              <input
+                                type="checkbox"
+                                checked={editingBlogPost?.published || false}
+                                onChange={(e) => setEditingBlogPost({ ...editingBlogPost, published: e.target.checked })}
+                                className="rounded"
+                              />
+                              Published
+                            </label>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div className="space-y-6">
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Target className="w-5 h-5 text-green-500" />
+                          SEO Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Meta Title</label>
+                          <Input
+                            value={editingBlogPost?.metaTitle || ''}
+                            onChange={(e) => setEditingBlogPost({ ...editingBlogPost, metaTitle: e.target.value })}
+                            className="bg-gray-700 border-gray-600 text-white"
+                            placeholder="SEO optimized title"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">{(editingBlogPost?.metaTitle || '').length}/60 characters</p>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Meta Description</label>
+                          <textarea
+                            value={editingBlogPost?.metaDescription || ''}
+                            onChange={(e) => setEditingBlogPost({ ...editingBlogPost, metaDescription: e.target.value })}
+                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white min-h-[80px]"
+                            placeholder="Brief SEO description"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">{(editingBlogPost?.metaDescription || '').length}/160 characters</p>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Keywords</label>
+                          <div className="flex flex-wrap gap-1">
+                            {editingBlogPost?.keywords?.map((kw, i) => (
+                              <Badge key={i} className="bg-blue-500/20 text-blue-300 text-xs">{kw}</Badge>
+                            )) || <span className="text-gray-500 text-sm">No keywords set</span>}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <BarChart3 className="w-5 h-5 text-blue-500" />
+                          SEO Score Preview
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {editingBlogPost?.overallSeoScore ? (
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-center">
+                              <div className={`w-20 h-20 rounded-full ${getSeoScoreColor(editingBlogPost.overallSeoScore)} flex items-center justify-center`}>
+                                <span className="text-white font-bold text-2xl">{editingBlogPost.overallSeoScore}</span>
+                              </div>
+                            </div>
+                            <p className="text-center text-gray-400">{getSeoScoreLabel(editingBlogPost.overallSeoScore)}</p>
+                          </div>
+                        ) : (
+                          <p className="text-center text-gray-500 py-4">Score calculated on save</p>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Button
+                      onClick={saveBlogPost}
+                      disabled={savingBlogPost}
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                      data-testid="button-save-blog"
+                    >
+                      {savingBlogPost ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          {blogView === 'create' ? 'Create Post' : 'Update Post'}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeSection === "github" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold flex items-center gap-3">
+                  <Github className="w-8 h-8 text-purple-500" />
+                  GitHub Deploy
+                </h2>
+                <p className="text-gray-400">Push your code to GitHub repositories</p>
+              </div>
+
+              {loadingGithub ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+                  <span className="ml-3 text-gray-400">Checking GitHub connection...</span>
+                </div>
+              ) : !githubStatus?.connected ? (
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardContent className="p-8 text-center">
+                    <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-white mb-2">GitHub Not Connected</h3>
+                    <p className="text-gray-400 mb-4">
+                      {githubStatus?.error || 'Please set up your GitHub integration to push code.'}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Make sure your GitHub token is configured in the integrations.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2 space-y-6">
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                          Connected to GitHub
+                        </CardTitle>
+                        <CardDescription className="text-gray-400">
+                          Logged in as <span className="text-white font-semibold">{githubStatus.username}</span>
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {githubStatus.avatarUrl && (
+                          <img 
+                            src={githubStatus.avatarUrl} 
+                            alt="GitHub avatar" 
+                            className="w-16 h-16 rounded-full border-2 border-purple-500"
+                          />
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <CloudUpload className="w-5 h-5 text-blue-500" />
+                          Push to Repository
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Repository</label>
+                          <select
+                            value={selectedRepo}
+                            onChange={(e) => setSelectedRepo(e.target.value)}
+                            className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
+                            data-testid="select-github-repo"
+                          >
+                            <option value="">Select a repository...</option>
+                            {githubRepos.map(repo => (
+                              <option key={repo.id} value={repo.fullName}>
+                                {repo.fullName} {repo.private ? '(Private)' : '(Public)'}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Branch</label>
+                          <div className="flex items-center gap-2">
+                            <GitBranch className="w-5 h-5 text-gray-400" />
+                            <Input
+                              value={pushBranch}
+                              onChange={(e) => setPushBranch(e.target.value)}
+                              className="bg-gray-700 border-gray-600 text-white"
+                              placeholder="clean main"
+                              data-testid="input-github-branch"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">Commit Message (optional)</label>
+                          <Input
+                            value={pushMessage}
+                            onChange={(e) => setPushMessage(e.target.value)}
+                            className="bg-gray-700 border-gray-600 text-white"
+                            placeholder="Deploy from StreamStickPro Admin"
+                            data-testid="input-github-message"
+                          />
+                        </div>
+
+                        <Button
+                          onClick={pushToGithub}
+                          disabled={pushing || !selectedRepo}
+                          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                          data-testid="button-push-github"
+                        >
+                          {pushing ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Pushing to GitHub...
+                            </>
+                          ) : (
+                            <>
+                              <CloudUpload className="w-4 h-4 mr-2" />
+                              Push Code to GitHub
+                            </>
+                          )}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div className="space-y-6">
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="text-white text-lg">What Gets Pushed</CardTitle>
+                      </CardHeader>
+                      <CardContent className="text-sm text-gray-400 space-y-2">
+                        <p className="flex items-center gap-2">
+                          <CheckCheck className="w-4 h-4 text-green-500" />
+                          client/ folder (React frontend)
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <CheckCheck className="w-4 h-4 text-green-500" />
+                          server/ folder (Express backend)
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <CheckCheck className="w-4 h-4 text-green-500" />
+                          shared/ folder (Types & schemas)
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <CheckCheck className="w-4 h-4 text-green-500" />
+                          Config files (package.json, etc.)
+                        </p>
+                        <p className="flex items-center gap-2 text-yellow-500 mt-4">
+                          <AlertCircle className="w-4 h-4" />
+                          Excludes: node_modules, .git, dist
+                        </p>
+                      </CardContent>
+                    </Card>
+
+                    {pushResult && (
+                      <Card className={`border ${pushResult.success ? 'bg-green-900/20 border-green-500' : 'bg-red-900/20 border-red-500'}`}>
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            {pushResult.success ? (
+                              <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />
+                            ) : (
+                              <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
+                            )}
+                            <div>
+                              <p className={`font-medium ${pushResult.success ? 'text-green-400' : 'text-red-400'}`}>
+                                {pushResult.success ? 'Push Successful!' : 'Push Failed'}
+                              </p>
+                              <p className="text-sm text-gray-400 mt-1">{pushResult.message}</p>
+                              {pushResult.filesCount && (
+                                <p className="text-sm text-gray-500 mt-1">{pushResult.filesCount} files pushed</p>
+                              )}
+                              {pushResult.commitUrl && (
+                                <a 
+                                  href={pushResult.commitUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-purple-400 hover:text-purple-300 text-sm flex items-center gap-1 mt-2"
+                                >
+                                  <ExternalLink className="w-4 h-4" />
+                                  View Commit on GitHub
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

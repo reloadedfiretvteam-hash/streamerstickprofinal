@@ -13,12 +13,16 @@ import {
   type InsertPageEdit,
   type Customer,
   type InsertCustomer,
+  type BlogPost,
+  type InsertBlogPost,
+  type UpdateBlogPost,
   users,
   orders,
   realProducts,
   visitors,
   pageEdits,
   customers,
+  blogPosts,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -69,6 +73,17 @@ export interface IStorage {
   upsertPageEdit(edit: InsertPageEdit): Promise<PageEdit>;
   deletePageEdit(id: string): Promise<boolean>;
   getAllPageEdits(): Promise<PageEdit[]>;
+  
+  getBlogPost(id: string): Promise<BlogPost | undefined>;
+  getBlogPostBySlug(slug: string): Promise<BlogPost | undefined>;
+  getBlogPostsPublished(): Promise<BlogPost[]>;
+  createBlogPost(post: InsertBlogPost): Promise<BlogPost>;
+  updateBlogPost(id: string, updates: UpdateBlogPost): Promise<BlogPost | undefined>;
+  deleteBlogPost(id: string): Promise<boolean>;
+  getAllBlogPosts(): Promise<BlogPost[]>;
+  getBlogPostsByCategory(category: string): Promise<BlogPost[]>;
+  getFeaturedBlogPosts(): Promise<BlogPost[]>;
+  searchBlogPosts(query: string): Promise<BlogPost[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -321,6 +336,67 @@ export class DatabaseStorage implements IStorage {
 
   async getAllPageEdits(): Promise<PageEdit[]> {
     return db.select().from(pageEdits).where(eq(pageEdits.isActive, true));
+  }
+
+  async getBlogPost(id: string): Promise<BlogPost | undefined> {
+    const [post] = await db.select().from(blogPosts).where(eq(blogPosts.id, id));
+    return post;
+  }
+
+  async getBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
+    const [post] = await db.select().from(blogPosts).where(eq(blogPosts.slug, slug));
+    return post;
+  }
+
+  async getBlogPostsPublished(): Promise<BlogPost[]> {
+    return db.select().from(blogPosts)
+      .where(eq(blogPosts.published, true))
+      .orderBy(desc(blogPosts.publishedAt));
+  }
+
+  async createBlogPost(post: InsertBlogPost): Promise<BlogPost> {
+    const [newPost] = await db.insert(blogPosts).values(post).returning();
+    return newPost;
+  }
+
+  async updateBlogPost(id: string, updates: UpdateBlogPost): Promise<BlogPost | undefined> {
+    const [post] = await db.update(blogPosts)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(blogPosts.id, id))
+      .returning();
+    return post;
+  }
+
+  async deleteBlogPost(id: string): Promise<boolean> {
+    const result = await db.delete(blogPosts).where(eq(blogPosts.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async getAllBlogPosts(): Promise<BlogPost[]> {
+    return db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt));
+  }
+
+  async getBlogPostsByCategory(category: string): Promise<BlogPost[]> {
+    return db.select().from(blogPosts)
+      .where(eq(blogPosts.category, category))
+      .orderBy(desc(blogPosts.createdAt));
+  }
+
+  async getFeaturedBlogPosts(): Promise<BlogPost[]> {
+    return db.select().from(blogPosts)
+      .where(and(eq(blogPosts.featured, true), eq(blogPosts.published, true)))
+      .orderBy(desc(blogPosts.publishedAt));
+  }
+
+  async searchBlogPosts(query: string): Promise<BlogPost[]> {
+    const searchTerm = `%${query}%`;
+    return db.select().from(blogPosts).where(
+      or(
+        ilike(blogPosts.title, searchTerm),
+        ilike(blogPosts.excerpt, searchTerm),
+        ilike(blogPosts.content, searchTerm)
+      )
+    ).orderBy(desc(blogPosts.createdAt));
   }
 }
 

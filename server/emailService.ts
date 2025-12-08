@@ -118,6 +118,10 @@ export class EmailService {
           
           ${productInstructions}
           
+          <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7;">
+            <strong>⏱️ Activation Time:</strong> Please allow 1-4 hours (typically 15 minutes) for your activation to be active. You will be able to log in once your account is activated.
+          </div>
+          
           <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
             <strong>Important:</strong> Please save these credentials in a safe place. Do not share them with anyone.
           </div>

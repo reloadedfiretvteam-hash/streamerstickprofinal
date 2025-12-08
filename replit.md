@@ -69,6 +69,12 @@ The application maintains two separate product catalogs to comply with payment p
    - Shadow product mapping (shadowProductId)
    - Images stored via URL references (Supabase Storage)
 
+4. `blogPosts` - Blog content system
+   - Full SEO optimization (keywords, meta tags, SEO scores)
+   - Real-time scoring (heading score, keyword density, content length, meta, structure)
+   - Publishing controls (featured, published, publishedAt)
+   - Product linking (linkedProductIds array)
+
 **Design Decisions:**
 - Using PostgreSQL for relational integrity between products and orders
 - Drizzle ORM chosen for type-safe queries and schema management
@@ -203,9 +209,11 @@ Shadcn/ui provides 40+ pre-built components (buttons, cards, dialogs, forms, etc
 - Customer information display
 
 **Blog/SEO:**
-- 50-60 pre-seeded blog posts (Fire Stick guides, cord-cutting tips)
+- 49+ seeded blog posts (Fire Stick guides, cord-cutting tips, sports streaming)
+- SEO-optimized with real scoring system
 - Slug-based routing for SEO
 - Featured posts and categories
+- Seed endpoint: POST /api/admin/seed-blog populates database
 
 **Design Decision:**
 Admin panel is intentionally simple - no complex dashboards or charts. Focus on core operations: managing products and viewing orders. Analytics are basic (visitor counts) as main goal is e-commerce, not metrics.
