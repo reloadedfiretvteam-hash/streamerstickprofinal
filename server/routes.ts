@@ -25,16 +25,27 @@ import {
 } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import * as crypto from "crypto";
+import * as bcrypt from "bcryptjs";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'streamstickpro-admin-secret-2024';
 const TOKEN_EXPIRY = 24 * 60 * 60 * 1000;
+const CUSTOMER_TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000;
 
-function hashPassword(password: string): string {
+function hashPasswordLegacy(password: string): string {
   return crypto.createHash('sha256').update(password + JWT_SECRET).digest('hex');
 }
 
-function createToken(username: string): string {
-  const payload = { sub: username, role: 'admin', exp: Date.now() + TOKEN_EXPIRY };
+async function hashCustomerPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10);
+}
+
+async function verifyCustomerPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
+
+function createToken(username: string, role: 'admin' | 'customer' = 'admin'): string {
+  const expiry = role === 'customer' ? CUSTOMER_TOKEN_EXPIRY : TOKEN_EXPIRY;
+  const payload = { sub: username, role, exp: Date.now() + expiry };
   const payloadStr = JSON.stringify(payload);
   const signature = crypto.createHmac('sha256', JWT_SECRET).update(payloadStr).digest('hex');
   return Buffer.from(payloadStr).toString('base64') + '.' + signature;
@@ -69,6 +80,25 @@ function adminAuthMiddleware(req: Request, res: Response, next: NextFunction): v
     return;
   }
   
+  next();
+}
+
+function customerAuthMiddleware(req: Request & { customer?: any }, res: Response, next: NextFunction): void {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'Authentication required' });
+    return;
+  }
+  
+  const token = authHeader.substring(7);
+  const result = verifyToken(token);
+  
+  if (!result.valid || result.payload?.role !== 'customer') {
+    res.status(401).json({ error: 'Invalid or expired token' });
+    return;
+  }
+  
+  req.customer = result.payload;
   next();
 }
 
@@ -1477,6 +1507,249 @@ export async function registerRoutes(
 
   app.post("/api/auth/logout", async (req, res) => {
     res.json({ success: true, message: 'Logged out successfully' });
+  });
+
+  // ===== CUSTOMER AUTH ROUTES =====
+  
+  app.post("/api/customer/register", async (req, res) => {
+    try {
+      const { username, password, email, fullName } = req.body;
+      
+      if (!username || !password || !email) {
+        return res.status(400).json({ error: 'Username, password, and email are required' });
+      }
+
+      if (password.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters' });
+      }
+
+      const existingByUsername = await storage.getCustomerByUsername(username);
+      if (existingByUsername) {
+        return res.status(409).json({ error: 'Username already taken' });
+      }
+
+      const existingByEmail = await storage.getCustomerByEmail(email);
+      if (existingByEmail) {
+        return res.status(409).json({ error: 'Email already registered. Please login instead.' });
+      }
+
+      const hashedPassword = await hashCustomerPassword(password);
+
+      const customer = await storage.createCustomer({
+        username,
+        password: hashedPassword,
+        email,
+        fullName: fullName || null,
+      });
+
+      const token = createToken(customer.id, 'customer');
+
+      res.json({ 
+        success: true, 
+        token,
+        customer: {
+          id: customer.id,
+          username: customer.username,
+          email: customer.email,
+          fullName: customer.fullName,
+        }
+      });
+    } catch (error: any) {
+      console.error('Customer registration error:', error);
+      res.status(500).json({ error: 'Registration failed' });
+    }
+  });
+
+  app.post("/api/customer/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required' });
+      }
+
+      const customer = await storage.getCustomerByUsername(username);
+      if (!customer) {
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
+
+      if (customer.status !== 'active') {
+        return res.status(403).json({ error: 'Account is not active. Please contact support.' });
+      }
+
+      const isValidPassword = await verifyCustomerPassword(password, customer.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
+
+      const token = createToken(customer.id, 'customer');
+
+      res.json({ 
+        success: true, 
+        token,
+        customer: {
+          id: customer.id,
+          username: customer.username,
+          email: customer.email,
+          fullName: customer.fullName,
+        }
+      });
+    } catch (error: any) {
+      console.error('Customer login error:', error);
+      res.status(500).json({ error: 'Login failed' });
+    }
+  });
+
+  app.get("/api/customer/me", customerAuthMiddleware, async (req: Request & { customer?: any }, res) => {
+    try {
+      const customerId = req.customer?.sub;
+      if (!customerId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const customer = await storage.getCustomer(customerId);
+      if (!customer) {
+        return res.status(404).json({ error: 'Customer not found' });
+      }
+
+      res.json({ 
+        data: {
+          id: customer.id,
+          username: customer.username,
+          email: customer.email,
+          fullName: customer.fullName,
+          totalOrders: customer.totalOrders,
+          lastOrderAt: customer.lastOrderAt,
+          createdAt: customer.createdAt,
+        }
+      });
+    } catch (error: any) {
+      console.error('Error fetching customer profile:', error);
+      res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+  });
+
+  app.get("/api/customer/orders", customerAuthMiddleware, async (req: Request & { customer?: any }, res) => {
+    try {
+      const customerId = req.customer?.sub;
+      if (!customerId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const customer = await storage.getCustomer(customerId);
+      if (!customer) {
+        return res.status(404).json({ error: 'Customer not found' });
+      }
+
+      const customerOrders = await storage.getCustomerOrders(customerId);
+      
+      const ordersByEmail = await storage.getOrdersByEmail(customer.email);
+      
+      const allOrderIds = new Set<string>();
+      const allOrders: any[] = [];
+      
+      for (const order of customerOrders) {
+        if (!allOrderIds.has(order.id)) {
+          allOrderIds.add(order.id);
+          allOrders.push(order);
+        }
+      }
+      
+      for (const order of ordersByEmail) {
+        if (!allOrderIds.has(order.id)) {
+          allOrderIds.add(order.id);
+          allOrders.push(order);
+        }
+      }
+      
+      allOrders.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
+
+      res.json({ data: allOrders });
+    } catch (error: any) {
+      console.error('Error fetching customer orders:', error);
+      res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+  });
+
+  app.put("/api/customer/profile", customerAuthMiddleware, async (req: Request & { customer?: any }, res) => {
+    try {
+      const customerId = req.customer?.sub;
+      if (!customerId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const { fullName, email } = req.body;
+
+      const customer = await storage.getCustomer(customerId);
+      if (!customer) {
+        return res.status(404).json({ error: 'Customer not found' });
+      }
+
+      if (email && email !== customer.email) {
+        const existingByEmail = await storage.getCustomerByEmail(email);
+        if (existingByEmail) {
+          return res.status(409).json({ error: 'Email already in use' });
+        }
+      }
+
+      const updated = await storage.updateCustomer(customerId, {
+        fullName: fullName !== undefined ? fullName : customer.fullName,
+        email: email !== undefined ? email : customer.email,
+      });
+
+      res.json({ 
+        data: {
+          id: updated?.id,
+          username: updated?.username,
+          email: updated?.email,
+          fullName: updated?.fullName,
+        }
+      });
+    } catch (error: any) {
+      console.error('Error updating customer profile:', error);
+      res.status(500).json({ error: 'Failed to update profile' });
+    }
+  });
+
+  app.put("/api/customer/password", customerAuthMiddleware, async (req: Request & { customer?: any }, res) => {
+    try {
+      const customerId = req.customer?.sub;
+      if (!customerId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const { currentPassword, newPassword } = req.body;
+
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: 'Current and new password are required' });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: 'New password must be at least 6 characters' });
+      }
+
+      const customer = await storage.getCustomer(customerId);
+      if (!customer) {
+        return res.status(404).json({ error: 'Customer not found' });
+      }
+
+      const isValidPassword = await verifyCustomerPassword(currentPassword, customer.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ error: 'Current password is incorrect' });
+      }
+
+      const hashedPassword = await hashCustomerPassword(newPassword);
+      await storage.updateCustomer(customerId, { password: hashedPassword });
+
+      res.json({ success: true, message: 'Password updated successfully' });
+    } catch (error: any) {
+      console.error('Error updating password:', error);
+      res.status(500).json({ error: 'Failed to update password' });
+    }
   });
 
   app.get("/sitemap.xml", async (req, res) => {
