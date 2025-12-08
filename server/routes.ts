@@ -1812,24 +1812,203 @@ export async function registerRoutes(
   });
 
   app.get("/robots.txt", (req, res) => {
-    const robotsTxt = `User-agent: *
+    const robotsTxt = `# StreamStickPro Robots.txt - Optimized for 2024/2025 SEO
+
+# Standard search engine crawlers
+User-agent: *
 Allow: /
 Allow: /blog
 Allow: /blog/*
-
 Disallow: /admin
 Disallow: /admin/*
 Disallow: /api/
 Disallow: /shadow-services
 Disallow: /checkout
+Disallow: /cancel
+Disallow: /success
 
+# Google crawlers
+User-agent: Googlebot
+Allow: /
+Allow: /blog
+Crawl-delay: 1
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Googlebot-News
+Allow: /blog
+
+# Bing and Microsoft crawlers
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: msnbot
+Allow: /
+
+# AI Search Crawlers - Allow for AI-powered search results
+User-agent: GPTBot
+Allow: /
+Allow: /blog
+Disallow: /admin
+Disallow: /api/
+Disallow: /shadow-services
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /blog
+Disallow: /admin
+Disallow: /shadow-services
+
+User-agent: Claude-Web
+Allow: /
+Allow: /blog
+Disallow: /admin
+Disallow: /shadow-services
+
+User-agent: Anthropic-AI
+Allow: /
+Allow: /blog
+Disallow: /admin
+Disallow: /shadow-services
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /blog
+Disallow: /admin
+Disallow: /shadow-services
+
+User-agent: Bytespider
+Allow: /
+Disallow: /admin
+Disallow: /shadow-services
+
+# Social media crawlers
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Pinterest
+Allow: /
+
+# Yandex
+User-agent: Yandex
+Allow: /
+Crawl-delay: 2
+
+# DuckDuckGo
+User-agent: DuckDuckBot
+Allow: /
+
+# Block bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Sitemaps
 Sitemap: https://streamstickpro.com/sitemap.xml
 
-# Crawl-delay: 1
-# Allow search engines to index all public content
+# Host directive for Yandex
+Host: https://streamstickpro.com
 `;
     res.set('Content-Type', 'text/plain');
+    res.set('Cache-Control', 'public, max-age=86400');
     res.send(robotsTxt);
+  });
+
+  // IndexNow API for instant Bing/Yandex indexing
+  // Use stable key from env var or default stable key for verification consistency
+  const INDEXNOW_KEY = process.env.INDEXNOW_KEY || 'streamstickpro2024seokey';
+  
+  // Serve the IndexNow key file for verification (must be stable URL)
+  app.get("/streamstickpro2024seokey.txt", (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(INDEXNOW_KEY);
+  });
+
+  app.post("/api/admin/indexnow", async (req, res) => {
+    try {
+      const { urls } = req.body;
+      
+      if (!urls || !Array.isArray(urls) || urls.length === 0) {
+        return res.status(400).json({ error: "URLs array is required" });
+      }
+
+      const baseUrl = process.env.REPLIT_DOMAINS?.split(',')[0] 
+        ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`
+        : 'https://streamstickpro.com';
+
+      const indexNowPayload = {
+        host: new URL(baseUrl).host,
+        key: INDEXNOW_KEY,
+        keyLocation: `${baseUrl}/streamstickpro2024seokey.txt`,
+        urlList: urls.map(url => url.startsWith('http') ? url : `${baseUrl}${url}`)
+      };
+
+      // Submit to Bing IndexNow
+      const bingResponse = await fetch('https://api.indexnow.org/indexnow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(indexNowPayload)
+      });
+
+      res.json({
+        success: true,
+        message: `Submitted ${urls.length} URLs to IndexNow`,
+        bingStatus: bingResponse.status,
+        key: INDEXNOW_KEY
+      });
+    } catch (error: any) {
+      console.error("IndexNow submission error:", error);
+      res.status(500).json({ error: `IndexNow submission failed: ${error.message}` });
+    }
+  });
+
+  // Sitemap ping endpoint to notify search engines
+  app.post("/api/admin/ping-sitemap", async (req, res) => {
+    try {
+      const baseUrl = 'https://streamstickpro.com';
+      const sitemapUrl = `${baseUrl}/sitemap.xml`;
+
+      const pingUrls = [
+        `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`,
+        `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`
+      ];
+
+      const results = await Promise.allSettled(
+        pingUrls.map(async (url) => {
+          const response = await fetch(url);
+          return { url, status: response.status };
+        })
+      );
+
+      res.json({
+        success: true,
+        message: "Sitemap ping sent to search engines",
+        results: results.map((r, i) => ({
+          engine: i === 0 ? 'Google' : 'Bing',
+          status: r.status === 'fulfilled' ? r.value.status : 'failed'
+        }))
+      });
+    } catch (error: any) {
+      console.error("Sitemap ping error:", error);
+      res.status(500).json({ error: `Sitemap ping failed: ${error.message}` });
+    }
   });
 
   app.post("/api/auth/generate-hash", async (req, res) => {
