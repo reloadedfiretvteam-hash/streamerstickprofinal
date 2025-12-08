@@ -196,7 +196,6 @@ export async function registerRoutes(
       });
 
       const sessionConfig: any = {
-        payment_method_types: ['card'],
         line_items: lineItems,
         mode: 'payment',
         success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
