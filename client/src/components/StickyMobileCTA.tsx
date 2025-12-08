@@ -2,12 +2,10 @@ import { useState, useEffect } from "react";
 import { ShoppingCart, ArrowUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/lib/store";
-import { useLocation } from "wouter";
 
 export function StickyMobileCTA() {
   const [visible, setVisible] = useState(false);
-  const [, setLocation] = useLocation();
-  const { items } = useCart();
+  const { items, openCart } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,7 +43,7 @@ export function StickyMobileCTA() {
               </button>
               {items.length > 0 && (
                 <button
-                  onClick={() => setLocation("/checkout")}
+                  onClick={openCart}
                   className="bg-white text-black font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2"
                   data-testid="sticky-cart-button"
                 >

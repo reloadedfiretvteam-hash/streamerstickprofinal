@@ -21,6 +21,8 @@ export default function Success() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = "Order Confirmed | StreamStickPro";
+    
     const params = new URLSearchParams(search);
     const sessionId = params.get("session_id");
     

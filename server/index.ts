@@ -50,7 +50,11 @@ async function initStripe() {
     const stripeSync = await getStripeSync();
 
     log('Setting up managed webhook...', 'stripe');
-    const webhookBaseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
+    // Use custom domain for webhook (user's secure domain) instead of Replit domains
+    const customDomain = process.env.WEBHOOK_PUBLIC_BASE_URL || 
+                         (process.env.VITE_SECURE_HOSTS ? `https://${process.env.VITE_SECURE_HOSTS.split(',')[0]}` : null) ||
+                         `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
+    const webhookBaseUrl = customDomain;
     
     const { webhook, uuid } = await stripeSync.findOrCreateManagedWebhook(
       `${webhookBaseUrl}/api/stripe/webhook`,
@@ -125,6 +129,19 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false }));
+
+// Enable CORS for visitor tracking from all origins
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
+  next();
+});
 
 app.use((req, res, next) => {
   const start = Date.now();

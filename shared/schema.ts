@@ -75,6 +75,7 @@ export const orders = pgTable("orders", {
   existingUsername: text("existing_username"),
   generatedUsername: text("generated_username"),
   generatedPassword: text("generated_password"),
+  countryPreference: text("country_preference"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   uniqueIndex("orders_payment_intent_idx").on(table.stripePaymentIntentId),
@@ -123,6 +124,7 @@ export const checkoutRequestSchema = z.object({
   customerName: z.string().optional(),
   isRenewal: z.boolean().optional(),
   existingUsername: z.string().optional(),
+  countryPreference: z.string().optional(),
 });
 
 export type CheckoutItem = z.infer<typeof checkoutItemSchema>;
@@ -195,6 +197,7 @@ export const updateOrderRequestSchema = z.object({
   existingUsername: z.string().nullable().optional(),
   generatedUsername: z.string().nullable().optional(),
   generatedPassword: z.string().nullable().optional(),
+  countryPreference: z.string().nullable().optional(),
 });
 
 export type UpdateOrderRequest = z.infer<typeof updateOrderRequestSchema>;
@@ -268,3 +271,71 @@ export const upsertPageEditSchema = z.object({
 });
 
 export type UpsertPageEditRequest = z.infer<typeof upsertPageEditSchema>;
+
+export const blogPosts = pgTable("blog_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  excerpt: text("excerpt").notNull(),
+  content: text("content").notNull(),
+  category: text("category").notNull(),
+  imageUrl: text("image_url"),
+  
+  // SEO Fields
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  keywords: text("keywords").array(),
+  readTime: text("read_time"),
+  wordCount: integer("word_count"),
+  
+  // SEO Scores
+  headingScore: integer("heading_score").default(0),
+  keywordDensityScore: integer("keyword_density_score").default(0),
+  contentLengthScore: integer("content_length_score").default(0),
+  metaScore: integer("meta_score").default(0),
+  structureScore: integer("structure_score").default(0),
+  overallSeoScore: integer("overall_seo_score").default(0),
+  seoAnalysis: text("seo_analysis"),
+  
+  // Publishing
+  featured: boolean("featured").default(false),
+  published: boolean("published").default(false),
+  publishedAt: timestamp("published_at"),
+  
+  // Product Linking
+  linkedProductIds: text("linked_product_ids").array(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  uniqueIndex("blog_posts_slug_idx").on(table.slug),
+  index("blog_posts_category_idx").on(table.category),
+  index("blog_posts_published_idx").on(table.published),
+  index("blog_posts_featured_idx").on(table.featured),
+  index("blog_posts_seo_score_idx").on(table.overallSeoScore),
+  index("blog_posts_created_at_idx").on(table.createdAt),
+]);
+
+export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  wordCount: true,
+  headingScore: true,
+  keywordDensityScore: true,
+  contentLengthScore: true,
+  metaScore: true,
+  structureScore: true,
+  overallSeoScore: true,
+  seoAnalysis: true,
+});
+
+export const updateBlogPostSchema = createInsertSchema(blogPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).partial();
+
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type UpdateBlogPost = z.infer<typeof updateBlogPostSchema>;
+export type BlogPost = typeof blogPosts.$inferSelect;

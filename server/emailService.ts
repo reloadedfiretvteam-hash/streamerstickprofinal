@@ -30,6 +30,7 @@ export class EmailService {
             <p><strong>Order ID:</strong> ${order.id}</p>
             <p><strong>Product:</strong> ${order.realProductName}</p>
             <p><strong>Amount:</strong> $${priceFormatted}</p>
+            ${order.countryPreference ? `<p><strong>Channel Preferences:</strong> ${order.countryPreference}</p>` : ''}
           </div>
           
           <p>You will receive your login credentials in a separate email within the next 5 minutes.</p>
@@ -116,6 +117,10 @@ export class EmailService {
           <p>Here are your login credentials for ${order.realProductName}:</p>
           
           ${productInstructions}
+          
+          <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7;">
+            <strong>⏱️ Activation Time:</strong> Please allow 1-4 hours (typically 15 minutes) for your activation to be active. You will be able to log in once your account is activated.
+          </div>
           
           <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
             <strong>Important:</strong> Please save these credentials in a safe place. Do not share them with anyone.
@@ -322,6 +327,7 @@ export class EmailService {
             <p><strong>Product:</strong> ${order.realProductName}</p>
             <p><strong>Category:</strong> ${category}</p>
             <p><strong>Status:</strong> ${order.status}</p>
+            ${order.countryPreference ? `<p><strong>🌍 Channel Preferences:</strong> <span style="background: #dbeafe; padding: 2px 8px; border-radius: 4px;">${order.countryPreference}</span></p>` : ''}
           </div>
 
           ${hasFireStick ? `

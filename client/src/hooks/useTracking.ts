@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "wouter";
+import { apiCall } from "@/lib/api";
 
 function getSessionId(): string {
   let sessionId = sessionStorage.getItem('visitor_session_id');
@@ -26,7 +27,7 @@ export function useTracking() {
         const referrer = document.referrer || null;
         const userAgent = navigator.userAgent;
 
-        await fetch('/api/track', {
+        await apiCall('/api/track', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

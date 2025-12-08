@@ -12,6 +12,10 @@ import AdminPanel from "@/pages/AdminPanel";
 import Checkout from "@/pages/Checkout";
 import Success from "@/pages/Success";
 import Blog from "@/pages/Blog";
+import CustomerLogin from "@/pages/CustomerLogin";
+import CustomerPortal from "@/pages/CustomerPortal";
+import { CartDrawer } from "@/components/CartDrawer";
+import { WishlistDrawer } from "@/components/WishlistDrawer";
 
 const SECURE_HOSTS = (import.meta.env.VITE_SECURE_HOSTS || 'secure.streamstickpro.com').split(',').map((h: string) => h.trim().toLowerCase());
 
@@ -43,6 +47,8 @@ function Router() {
       <Route path="/success" component={Success} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={Blog} />
+      <Route path="/customer-login" component={CustomerLogin} />
+      <Route path="/my-account" component={CustomerPortal} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -54,6 +60,8 @@ function AppContent() {
   return (
     <>
       <Toaster />
+      <CartDrawer />
+      <WishlistDrawer />
       <Router />
     </>
   );

@@ -6,18 +6,24 @@ interface ShadowProduct {
   name: string;
   description: string;
   price: number;
+  imageUrl: string;
   metadata: {
     realProductId: string;
     realProductName: string;
     category: string;
+    deviceCount?: number;
+    duration?: string;
   };
 }
+
+const SUPABASE_URL = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges';
 
 const shadowProducts: ShadowProduct[] = [
   {
     name: 'Web Design Basic',
     description: 'Professional web design services - Basic package',
-    price: 14000,
+    price: 11900,
+    imageUrl: `${SUPABASE_URL}/firestick%20hd.jpg`,
     metadata: {
       realProductId: 'firestick-hd',
       realProductName: 'Fire Stick HD',
@@ -27,7 +33,8 @@ const shadowProducts: ShadowProduct[] = [
   {
     name: 'Web Design Pro',
     description: 'Professional web design services - Pro package',
-    price: 15000,
+    price: 12750,
+    imageUrl: `${SUPABASE_URL}/firestick%204k.jpg`,
     metadata: {
       realProductId: 'firestick-4k',
       realProductName: 'Fire Stick 4K',
@@ -37,47 +44,287 @@ const shadowProducts: ShadowProduct[] = [
   {
     name: 'Web Design Enterprise',
     description: 'Professional web design services - Enterprise package',
-    price: 16000,
+    price: 13600,
+    imageUrl: `${SUPABASE_URL}/firestick%204k%20max.jpg`,
     metadata: {
       realProductId: 'firestick-4k-max',
       realProductName: 'Fire Stick 4K Max',
       category: 'firestick',
     },
   },
+
+  // 1 MONTH IPTV - $15 base, scaling for devices
   {
-    name: 'SEO Monthly',
-    description: 'Search engine optimization - Monthly service',
+    name: 'SEO Starter Monthly',
+    description: 'Search engine optimization - Monthly starter package for single site',
     price: 1500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
-      realProductId: 'iptv-1mo',
-      realProductName: 'IPTV Monthly',
+      realProductId: 'iptv-1mo-1d',
+      realProductName: 'IPTV 1 Month - 1 Device',
       category: 'iptv',
+      deviceCount: 1,
+      duration: '1mo',
     },
   },
   {
-    name: 'SEO Quarterly',
-    description: 'Search engine optimization - Quarterly service',
+    name: 'SEO Duo Monthly',
+    description: 'Search engine optimization - Monthly package for two sites',
     price: 2500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
-      realProductId: 'iptv-3mo',
-      realProductName: 'IPTV Quarterly',
+      realProductId: 'iptv-1mo-2d',
+      realProductName: 'IPTV 1 Month - 2 Devices',
       category: 'iptv',
+      deviceCount: 2,
+      duration: '1mo',
     },
   },
   {
-    name: 'SEO Annual',
-    description: 'Search engine optimization - Annual service',
-    price: 7500,
+    name: 'SEO Team Monthly',
+    description: 'Search engine optimization - Monthly package for three sites',
+    price: 3500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
-      realProductId: 'iptv-1yr',
-      realProductName: 'IPTV Annual',
+      realProductId: 'iptv-1mo-3d',
+      realProductName: 'IPTV 1 Month - 3 Devices',
       category: 'iptv',
+      deviceCount: 3,
+      duration: '1mo',
+    },
+  },
+  {
+    name: 'SEO Business Monthly',
+    description: 'Search engine optimization - Monthly package for four sites',
+    price: 4000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-1mo-4d',
+      realProductName: 'IPTV 1 Month - 4 Devices',
+      category: 'iptv',
+      deviceCount: 4,
+      duration: '1mo',
+    },
+  },
+  {
+    name: 'SEO Enterprise Monthly',
+    description: 'Search engine optimization - Monthly package for five sites',
+    price: 4500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-1mo-5d',
+      realProductName: 'IPTV 1 Month - 5 Devices',
+      category: 'iptv',
+      deviceCount: 5,
+      duration: '1mo',
+    },
+  },
+
+  // 3 MONTH IPTV - $25 base, scaling for devices
+  {
+    name: 'SEO Starter Quarterly',
+    description: 'Search engine optimization - Quarterly starter package for single site',
+    price: 2500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-3mo-1d',
+      realProductName: 'IPTV 3 Month - 1 Device',
+      category: 'iptv',
+      deviceCount: 1,
+      duration: '3mo',
+    },
+  },
+  {
+    name: 'SEO Duo Quarterly',
+    description: 'Search engine optimization - Quarterly package for two sites',
+    price: 4000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-3mo-2d',
+      realProductName: 'IPTV 3 Month - 2 Devices',
+      category: 'iptv',
+      deviceCount: 2,
+      duration: '3mo',
+    },
+  },
+  {
+    name: 'SEO Team Quarterly',
+    description: 'Search engine optimization - Quarterly package for three sites',
+    price: 5500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-3mo-3d',
+      realProductName: 'IPTV 3 Month - 3 Devices',
+      category: 'iptv',
+      deviceCount: 3,
+      duration: '3mo',
+    },
+  },
+  {
+    name: 'SEO Business Quarterly',
+    description: 'Search engine optimization - Quarterly package for four sites',
+    price: 6500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-3mo-4d',
+      realProductName: 'IPTV 3 Month - 4 Devices',
+      category: 'iptv',
+      deviceCount: 4,
+      duration: '3mo',
+    },
+  },
+  {
+    name: 'SEO Enterprise Quarterly',
+    description: 'Search engine optimization - Quarterly package for five sites',
+    price: 7500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-3mo-5d',
+      realProductName: 'IPTV 3 Month - 5 Devices',
+      category: 'iptv',
+      deviceCount: 5,
+      duration: '3mo',
+    },
+  },
+
+  // 6 MONTH IPTV - $40 base, scaling for devices
+  {
+    name: 'Content Marketing Semi-Annual',
+    description: 'Content marketing services - 6-month package for single site',
+    price: 4000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-6mo-1d',
+      realProductName: 'IPTV 6 Month - 1 Device',
+      category: 'iptv',
+      deviceCount: 1,
+      duration: '6mo',
+    },
+  },
+  {
+    name: 'Content Marketing Duo Semi-Annual',
+    description: 'Content marketing services - 6-month package for two sites',
+    price: 6500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-6mo-2d',
+      realProductName: 'IPTV 6 Month - 2 Devices',
+      category: 'iptv',
+      deviceCount: 2,
+      duration: '6mo',
+    },
+  },
+  {
+    name: 'Content Marketing Team Semi-Annual',
+    description: 'Content marketing services - 6-month package for three sites',
+    price: 8500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-6mo-3d',
+      realProductName: 'IPTV 6 Month - 3 Devices',
+      category: 'iptv',
+      deviceCount: 3,
+      duration: '6mo',
+    },
+  },
+  {
+    name: 'Content Marketing Business Semi-Annual',
+    description: 'Content marketing services - 6-month package for four sites',
+    price: 10000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-6mo-4d',
+      realProductName: 'IPTV 6 Month - 4 Devices',
+      category: 'iptv',
+      deviceCount: 4,
+      duration: '6mo',
+    },
+  },
+  {
+    name: 'Content Marketing Enterprise Semi-Annual',
+    description: 'Content marketing services - 6-month package for five sites',
+    price: 12500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-6mo-5d',
+      realProductName: 'IPTV 6 Month - 5 Devices',
+      category: 'iptv',
+      deviceCount: 5,
+      duration: '6mo',
+    },
+  },
+
+  // 1 YEAR IPTV - $65 base, scaling for devices
+  {
+    name: 'Digital Marketing Annual',
+    description: 'Comprehensive digital marketing - Annual package for single site',
+    price: 6500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-1yr-1d',
+      realProductName: 'IPTV 1 Year - 1 Device',
+      category: 'iptv',
+      deviceCount: 1,
+      duration: '1yr',
+    },
+  },
+  {
+    name: 'Digital Marketing Duo Annual',
+    description: 'Comprehensive digital marketing - Annual package for two sites',
+    price: 10000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-1yr-2d',
+      realProductName: 'IPTV 1 Year - 2 Devices',
+      category: 'iptv',
+      deviceCount: 2,
+      duration: '1yr',
+    },
+  },
+  {
+    name: 'Digital Marketing Team Annual',
+    description: 'Comprehensive digital marketing - Annual package for three sites',
+    price: 14000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-1yr-3d',
+      realProductName: 'IPTV 1 Year - 3 Devices',
+      category: 'iptv',
+      deviceCount: 3,
+      duration: '1yr',
+    },
+  },
+  {
+    name: 'Digital Marketing Business Annual',
+    description: 'Comprehensive digital marketing - Annual package for four sites',
+    price: 19000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-1yr-4d',
+      realProductName: 'IPTV 1 Year - 4 Devices',
+      category: 'iptv',
+      deviceCount: 4,
+      duration: '1yr',
+    },
+  },
+  {
+    name: 'Digital Marketing Enterprise Annual',
+    description: 'Comprehensive digital marketing - Annual package for five sites',
+    price: 22000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
+    metadata: {
+      realProductId: 'iptv-1yr-5d',
+      realProductName: 'IPTV 1 Year - 5 Devices',
+      category: 'iptv',
+      deviceCount: 5,
+      duration: '1yr',
     },
   },
 ];
 
 async function seedProducts() {
   console.log('Starting product seeding...');
+  console.log(`Total products to seed: ${shadowProducts.length}`);
   
   const stripe = await getUncachableStripeClient();
   
@@ -115,7 +362,7 @@ async function seedProducts() {
         product = await stripe.products.create({
           name: shadowProduct.name,
           description: shadowProduct.description,
-          metadata: shadowProduct.metadata,
+          metadata: shadowProduct.metadata as any,
         });
         console.log(`Created product "${shadowProduct.name}": ${product.id}`);
         
@@ -132,6 +379,7 @@ async function seedProducts() {
         name: shadowProduct.metadata.realProductName,
         description: `Real product mapped to ${shadowProduct.name}`,
         price: shadowProduct.price,
+        imageUrl: shadowProduct.imageUrl,
         category: shadowProduct.metadata.category,
         shadowProductId: product.id,
         shadowPriceId: price.id,
@@ -141,6 +389,8 @@ async function seedProducts() {
           shadowProductId: product.id,
           shadowPriceId: price.id,
           name: shadowProduct.metadata.realProductName,
+          price: shadowProduct.price,
+          imageUrl: shadowProduct.imageUrl,
           category: shadowProduct.metadata.category,
         },
       });

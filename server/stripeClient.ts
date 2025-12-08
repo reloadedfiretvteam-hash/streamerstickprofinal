@@ -53,21 +53,26 @@ function getEnvCredentials() {
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const publishableKey = process.env.STRIPE_PUBLISHABLE_KEY || process.env.VITE_STRIPE_PUBLISHABLE_KEY;
   
-  if (!secretKey) {
-    throw new Error('STRIPE_SECRET_KEY environment variable is required');
-  }
-  if (!publishableKey) {
-    throw new Error('STRIPE_PUBLISHABLE_KEY environment variable is required');
+  if (!secretKey || !publishableKey) {
+    return null;
   }
   
   return { secretKey, publishableKey };
 }
 
 async function getCredentials() {
+  const envCreds = getEnvCredentials();
+  if (envCreds) {
+    console.log('[stripe] Using environment variable credentials');
+    return envCreds;
+  }
+  
   if (isReplitEnvironment()) {
+    console.log('[stripe] Using Replit connector credentials');
     return getReplitCredentials();
   }
-  return getEnvCredentials();
+  
+  throw new Error('STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY environment variables are required');
 }
 
 export async function getUncachableStripeClient() {
