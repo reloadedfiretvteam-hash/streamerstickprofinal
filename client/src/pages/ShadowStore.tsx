@@ -10,6 +10,16 @@ import { useToast } from "@/hooks/use-toast";
 
 import heroBg from "@assets/stock_images/modern_abstract_digi_3506c264.jpg";
 
+const SUPABASE_URL = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/shadow-store";
+
+const productImages = {
+  basic: `${SUPABASE_URL}/professional_web_des_bf1b8ff3.jpg`,
+  pro: `${SUPABASE_URL}/professional_web_des_596ca65d.jpg`,
+  enterprise: `${SUPABASE_URL}/professional_web_des_a7242567.jpg`,
+  seo: `${SUPABASE_URL}/seo_digital_marketin_96956a51.jpg`,
+  dev: `${SUPABASE_URL}/web_development_codi_7a6c5037.jpg`,
+};
+
 interface ShadowProduct {
   id: string;
   name: string;
@@ -20,6 +30,7 @@ interface ShadowProduct {
   popular?: boolean;
   category: 'design' | 'seo';
   period?: string;
+  image?: string;
 }
 
 interface SEOPricingTier {
@@ -96,7 +107,8 @@ const shadowProducts: ShadowProduct[] = [
     description: "Perfect for personal blogs, portfolios, and small business landing pages. Includes responsive design and basic SEO setup.",
     features: ["5 Custom Pages", "Mobile Responsive", "Contact Form Integration", "Basic SEO Setup", "1 Round of Revisions", "2 Week Delivery"],
     category: 'design',
-    period: "/project"
+    period: "/project",
+    image: productImages.basic
   },
   {
     id: "fs-4k",
@@ -107,7 +119,8 @@ const shadowProducts: ShadowProduct[] = [
     features: ["10 Custom Pages", "CMS Integration", "Advanced SEO Package", "Social Media Integration", "Analytics Dashboard", "3 Rounds of Revisions", "Priority Support"],
     category: 'design',
     popular: true,
-    period: "/project"
+    period: "/project",
+    image: productImages.pro
   },
   {
     id: "fs-max",
@@ -117,7 +130,8 @@ const shadowProducts: ShadowProduct[] = [
     description: "Full-scale custom web application for enterprises. Includes e-commerce capabilities, custom integrations, and dedicated support.",
     features: ["Unlimited Pages", "E-commerce Ready", "Custom API Integration", "Database Design", "Cloud Architecture", "Ongoing Support", "Source Code Ownership"],
     category: 'design',
-    period: "/project"
+    period: "/project",
+    image: productImages.enterprise
   },
 ];
 
@@ -538,6 +552,11 @@ export default function ShadowStore() {
                 {product.popular && (
                   <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-2xl">
                     MOST POPULAR
+                  </div>
+                )}
+                {product.image && (
+                  <div className="aspect-video rounded-lg overflow-hidden mb-4 -mx-2">
+                    <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                   </div>
                 )}
                 <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
