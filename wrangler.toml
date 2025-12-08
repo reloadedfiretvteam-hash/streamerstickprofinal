@@ -3,8 +3,5 @@ pages_build_output_dir = "./dist"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-[env.production]
-name = "streamerstickpro-live"
-routes = [
-  { pattern = "streamstickpro.com/*", zone_name = "streamstickpro.com" }
-]
+[vars]
+NODE_ENV = "production"
