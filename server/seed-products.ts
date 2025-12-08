@@ -6,6 +6,7 @@ interface ShadowProduct {
   name: string;
   description: string;
   price: number;
+  imageUrl: string;
   metadata: {
     realProductId: string;
     realProductName: string;
@@ -15,11 +16,14 @@ interface ShadowProduct {
   };
 }
 
+const SUPABASE_URL = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges';
+
 const shadowProducts: ShadowProduct[] = [
   {
     name: 'Web Design Basic',
     description: 'Professional web design services - Basic package',
     price: 11900,
+    imageUrl: `${SUPABASE_URL}/firestick%20hd.jpg`,
     metadata: {
       realProductId: 'firestick-hd',
       realProductName: 'Fire Stick HD',
@@ -30,6 +34,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'Web Design Pro',
     description: 'Professional web design services - Pro package',
     price: 12750,
+    imageUrl: `${SUPABASE_URL}/firestick%204k.jpg`,
     metadata: {
       realProductId: 'firestick-4k',
       realProductName: 'Fire Stick 4K',
@@ -40,6 +45,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'Web Design Enterprise',
     description: 'Professional web design services - Enterprise package',
     price: 13600,
+    imageUrl: `${SUPABASE_URL}/firestick%204k%20max.jpg`,
     metadata: {
       realProductId: 'firestick-4k-max',
       realProductName: 'Fire Stick 4K Max',
@@ -52,6 +58,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'SEO Starter Monthly',
     description: 'Search engine optimization - Monthly starter package for single site',
     price: 1500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1mo-1d',
       realProductName: 'IPTV 1 Month - 1 Device',
@@ -64,6 +71,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'SEO Duo Monthly',
     description: 'Search engine optimization - Monthly package for two sites',
     price: 2500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1mo-2d',
       realProductName: 'IPTV 1 Month - 2 Devices',
@@ -76,6 +84,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'SEO Team Monthly',
     description: 'Search engine optimization - Monthly package for three sites',
     price: 3500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1mo-3d',
       realProductName: 'IPTV 1 Month - 3 Devices',
@@ -88,6 +97,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'SEO Business Monthly',
     description: 'Search engine optimization - Monthly package for four sites',
     price: 4000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1mo-4d',
       realProductName: 'IPTV 1 Month - 4 Devices',
@@ -100,6 +110,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'SEO Enterprise Monthly',
     description: 'Search engine optimization - Monthly package for five sites',
     price: 4500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1mo-5d',
       realProductName: 'IPTV 1 Month - 5 Devices',
@@ -114,6 +125,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'SEO Starter Quarterly',
     description: 'Search engine optimization - Quarterly starter package for single site',
     price: 2500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-3mo-1d',
       realProductName: 'IPTV 3 Month - 1 Device',
@@ -126,6 +138,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'SEO Duo Quarterly',
     description: 'Search engine optimization - Quarterly package for two sites',
     price: 4000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-3mo-2d',
       realProductName: 'IPTV 3 Month - 2 Devices',
@@ -138,6 +151,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'SEO Team Quarterly',
     description: 'Search engine optimization - Quarterly package for three sites',
     price: 5500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-3mo-3d',
       realProductName: 'IPTV 3 Month - 3 Devices',
@@ -150,6 +164,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'SEO Business Quarterly',
     description: 'Search engine optimization - Quarterly package for four sites',
     price: 6500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-3mo-4d',
       realProductName: 'IPTV 3 Month - 4 Devices',
@@ -162,6 +177,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'SEO Enterprise Quarterly',
     description: 'Search engine optimization - Quarterly package for five sites',
     price: 7500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-3mo-5d',
       realProductName: 'IPTV 3 Month - 5 Devices',
@@ -176,6 +192,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'Content Marketing Semi-Annual',
     description: 'Content marketing services - 6-month package for single site',
     price: 4000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-6mo-1d',
       realProductName: 'IPTV 6 Month - 1 Device',
@@ -188,6 +205,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'Content Marketing Duo Semi-Annual',
     description: 'Content marketing services - 6-month package for two sites',
     price: 6500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-6mo-2d',
       realProductName: 'IPTV 6 Month - 2 Devices',
@@ -200,6 +218,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'Content Marketing Team Semi-Annual',
     description: 'Content marketing services - 6-month package for three sites',
     price: 8500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-6mo-3d',
       realProductName: 'IPTV 6 Month - 3 Devices',
@@ -212,6 +231,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'Content Marketing Business Semi-Annual',
     description: 'Content marketing services - 6-month package for four sites',
     price: 10000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-6mo-4d',
       realProductName: 'IPTV 6 Month - 4 Devices',
@@ -224,6 +244,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'Content Marketing Enterprise Semi-Annual',
     description: 'Content marketing services - 6-month package for five sites',
     price: 12500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-6mo-5d',
       realProductName: 'IPTV 6 Month - 5 Devices',
@@ -238,6 +259,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'Digital Marketing Annual',
     description: 'Comprehensive digital marketing - Annual package for single site',
     price: 6500,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1yr-1d',
       realProductName: 'IPTV 1 Year - 1 Device',
@@ -250,6 +272,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'Digital Marketing Duo Annual',
     description: 'Comprehensive digital marketing - Annual package for two sites',
     price: 10000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1yr-2d',
       realProductName: 'IPTV 1 Year - 2 Devices',
@@ -262,6 +285,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'Digital Marketing Team Annual',
     description: 'Comprehensive digital marketing - Annual package for three sites',
     price: 14000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1yr-3d',
       realProductName: 'IPTV 1 Year - 3 Devices',
@@ -274,6 +298,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'Digital Marketing Business Annual',
     description: 'Comprehensive digital marketing - Annual package for four sites',
     price: 19000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1yr-4d',
       realProductName: 'IPTV 1 Year - 4 Devices',
@@ -286,6 +311,7 @@ const shadowProducts: ShadowProduct[] = [
     name: 'Digital Marketing Enterprise Annual',
     description: 'Comprehensive digital marketing - Annual package for five sites',
     price: 22000,
+    imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1yr-5d',
       realProductName: 'IPTV 1 Year - 5 Devices',
@@ -353,6 +379,7 @@ async function seedProducts() {
         name: shadowProduct.metadata.realProductName,
         description: `Real product mapped to ${shadowProduct.name}`,
         price: shadowProduct.price,
+        imageUrl: shadowProduct.imageUrl,
         category: shadowProduct.metadata.category,
         shadowProductId: product.id,
         shadowPriceId: price.id,
@@ -363,6 +390,7 @@ async function seedProducts() {
           shadowPriceId: price.id,
           name: shadowProduct.metadata.realProductName,
           price: shadowProduct.price,
+          imageUrl: shadowProduct.imageUrl,
           category: shadowProduct.metadata.category,
         },
       });
