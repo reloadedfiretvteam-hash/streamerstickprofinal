@@ -254,7 +254,7 @@ export default function Blog() {
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div>
                       <h3 className="text-xl font-bold text-white mb-1">Ready to Cut the Cord?</h3>
-                      <p className="text-gray-300">Get started with our pre-configured streaming devices today.</p>
+                      <p className="text-gray-300">Get started with our fully configured Fire Sticks and IPTV subscriptions. Everything you need is included—login credentials, quick setup tutorial, and 24/7 support.</p>
                     </div>
                     <Button 
                       size="lg" 

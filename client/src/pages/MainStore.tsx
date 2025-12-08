@@ -126,8 +126,8 @@ const defaultProducts: Product[] = [
     id: "fs-hd",
     name: "Fire Stick HD - Jailbroken & Ready",
     price: 119,
-    description: "Premium jailbroken Fire Stick HD with 1 Year IPTV included. Stream 18,000+ live TV channels, 60,000+ movies & shows, all sports & PPV events. Setup tutorial video, login credentials & easy guide emailed instantly!",
-    features: ["1080p Full HD Resolution", "18,000+ Live TV Channels", "60,000+ Movies & Shows", "All Sports & PPV Events", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Pre-configured & Ready to Use", "24/7 Customer Support"],
+    description: "Premium jailbroken Fire Stick HD with 1 Year IPTV included. Get instant access to 18,000+ live TV channels, 60,000+ movies & TV shows, and all sports leagues including NFL, NBA, UFC, and PPV events. Fully configured & ready to use - you'll receive your login credentials, an easy 10-minute setup tutorial, and 24/7 customer support.",
+    features: ["1080p Full HD Resolution", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "Fully Pre-Configured & Ready", "24/7 Customer Support"],
     image: firestickHdImg,
     category: "firestick",
     badge: "STARTER"
@@ -136,8 +136,8 @@ const defaultProducts: Product[] = [
     id: "fs-4k",
     name: "Fire Stick 4K - Jailbroken & Ready",
     price: 127.50,
-    description: "Best-selling jailbroken Fire Stick 4K with Dolby Vision & 1 Year IPTV. Access 18,000+ live channels, 60,000+ movies & TV shows, all sports including NFL, NBA, UFC, PPV events. Tutorial, login & guide emailed!",
-    features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & Shows", "All Sports & PPV Events", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Pre-configured & Plug-n-Play", "24/7 Customer Support"],
+    description: "Best-selling jailbroken Fire Stick 4K with Dolby Vision & 1 Year premium IPTV subscription included. Enjoy 18,000+ live TV channels, 60,000+ movies & TV shows in stunning 4K quality. Watch all major sports - NFL, NBA, UFC, and PPV events. Fully configured & ready to use with instant credentials, easy setup, and 24/7 support.",
+    features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Premium IPTV Included", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "24/7 Customer Support"],
     image: firestick4kImg,
     category: "firestick",
     badge: "BEST VALUE",
@@ -147,8 +147,8 @@ const defaultProducts: Product[] = [
     id: "fs-max",
     name: "Fire Stick 4K Max - Jailbroken & Ready",
     price: 136,
-    description: "Ultimate jailbroken Fire Stick 4K Max - Fastest Wi-Fi 6E model with 1 Year IPTV. Stream 18,000+ live channels, 60,000+ movies, all sports & PPV events in stunning 4K. Setup tutorial, credentials & easy guide emailed!",
-    features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & Shows", "All Sports & PPV Events", "1 Year IPTV Subscription Included", "Setup Tutorial Video Emailed", "Login Credentials Delivered Instantly", "Ambient Experience Support", "Pre-configured & Plug-n-Play", "24/7 Customer Support"],
+    description: "Ultimate jailbroken Fire Stick 4K Max with Wi-Fi 6E and 1 Year premium IPTV subscription. Experience 18,000+ live TV channels, 60,000+ movies & TV shows, and all major sports in breathtaking 4K with Dolby Atmos sound. Fully configured & ready to use - includes login credentials, quick setup guide, and priority 24/7 customer support.",
+    features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Premium IPTV Included", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "Priority 24/7 Support"],
     image: firestick4kMaxImg,
     category: "firestick",
     badge: "PREMIUM"
@@ -405,7 +405,7 @@ export default function MainStore() {
 
       <SEOSchema 
         faq={[
-          { question: "What's included with a Fire Stick?", answer: "Every Fire Stick comes pre-configured and jailbroken with 1 Year of IPTV service included. Just plug it in and start streaming immediately!" },
+          { question: "What's included with a Fire Stick?", answer: "Every Fire Stick comes fully configured and ready to use with 1 Year of IPTV service included. You'll receive your login credentials instantly, a quick setup tutorial (10 minutes), and access to 24/7 customer support whenever you need assistance. Just plug it in and start streaming!" },
           { question: "How do I renew my subscription?", answer: "Simply come back to the site and purchase a renewal package. Your credentials will be updated instantly." },
           { question: "Do you offer support?", answer: "Yes, we offer 24/7 support via email for all active subscribers. Contact us at reloadedfiretvteam@gmail.com" },
           { question: "What devices are supported?", answer: "Our IPTV service works on Fire Sticks, Android boxes, Smart TVs, phones, tablets, and computers. Use up to 2 devices simultaneously!" }
@@ -711,8 +711,8 @@ export default function MainStore() {
               <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mb-6">
                 <Zap className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Plug & Play Ready</h3>
-              <p className="text-gray-400">Pre-configured devices. Just connect to your TV and start streaming immediately.</p>
+              <h3 className="text-xl font-bold mb-4">Fully Configured & Ready</h3>
+              <p className="text-gray-400">Every Fire Stick arrives fully configured with login credentials and a quick 10-minute setup tutorial. 24/7 customer support is available anytime if you need help.</p>
             </motion.div>
             <motion.div 
               variants={fadeInUp}
@@ -773,7 +773,7 @@ export default function MainStore() {
                 Fire Stick Comparison
               </h3>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                All Fire Sticks come pre-loaded and ready to use with 1 Year IPTV subscription included!
+                All Fire Sticks come fully configured and ready to use with 1 Year IPTV subscription included, login credentials, quick setup tutorial, and 24/7 support!
               </p>
             </div>
             <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl border border-slate-700/50 overflow-hidden" data-testid="tier-comparison-table">
