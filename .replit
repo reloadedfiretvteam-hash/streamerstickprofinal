@@ -28,10 +28,6 @@ localPort = 39937
 externalPort = 3001
 
 [[ports]]
-localPort = 44089
-externalPort = 4200
-
-[[ports]]
 localPort = 45415
 externalPort = 3000
 
@@ -72,3 +68,4 @@ VITE_SECURE_HOSTS = "secure.streamstickpro.com"
 VITE_STORAGE_BUCKET_NAME = "imiges"
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin123"
+VITE_API_BASE_URL = "https://secure.streamstickpro.com"
