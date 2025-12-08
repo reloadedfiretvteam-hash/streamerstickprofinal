@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "wouter";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, Play, X, Gift, ChevronRight, Heart } from "lucide-react";
 import { useCart, useWishlist } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,10 @@ import { StickyMobileCTA, ScrollToTopButton } from "@/components/StickyMobileCTA
 import { SEOSchema } from "@/components/SEOSchema";
 import { ProductQuickView, QuickViewButton } from "@/components/ProductQuickView";
 import { MobileNav } from "@/components/MobileNav";
+import { CountdownTimer } from "@/components/CountdownTimer";
+import { ComparisonTable } from "@/components/ComparisonTable";
+import { FloatingCTA } from "@/components/FloatingCTA";
+import { AnimatedCounter } from "@/components/AnimatedCounter";
 
 import firestickHdImg from "@assets/OIP_(11)99_1764978938773.jpg";
 import firestick4kImg from "@assets/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg";
@@ -169,6 +173,45 @@ export default function MainStore() {
   });
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const heroRef = useRef<HTMLDivElement>(null);
+  const aboutRef = useRef<HTMLDivElement>(null);
+  const shopRef = useRef<HTMLDivElement>(null);
+  const isAboutInView = useInView(aboutRef, { once: true, margin: "-100px" });
+  const isShopInView = useInView(shopRef, { once: true, margin: "-100px" });
+  
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.3]);
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+    }
+  };
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { duration: 0.5, ease: "easeOut" } 
+    }
+  };
+
+  const scaleIn = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: { 
+      opacity: 1, 
+      scale: 1, 
+      transition: { duration: 0.4, ease: "easeOut" } 
+    }
+  };
 
   const toggleWishlistItem = (product: Product) => {
     if (isInWishlist(product.id)) {
@@ -416,8 +459,11 @@ export default function MainStore() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden min-h-[600px] flex items-center">
-        <div className="absolute inset-0 overflow-hidden">
+      <section ref={heroRef} className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden min-h-[600px] flex items-center">
+        <motion.div 
+          className="absolute inset-0 overflow-hidden"
+          style={{ y: heroY, opacity: heroOpacity }}
+        >
           <img
             src={heroImg}
             alt="Best Jailbroken Fire Stick 2025 - Premium IPTV Streaming Device"
@@ -426,7 +472,7 @@ export default function MainStore() {
             width={1920}
             height={600}
             fetchPriority="high"
-            style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}
+            style={{ transform: 'scale(1.25)', transformOrigin: 'center center' }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               if (target.src !== fallbackHeroImg) {
@@ -435,7 +481,7 @@ export default function MainStore() {
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
-        </div>
+        </motion.div>
 
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-20"></div>
 
@@ -507,24 +553,45 @@ export default function MainStore() {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto text-sm md:text-base"
             >
-              <div className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10">
-                <div className="text-orange-400 font-bold text-lg" data-testid="text-customers">2,700+</div>
+              <motion.div 
+                className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10"
+                whileHover={{ scale: 1.05, borderColor: "rgba(249, 115, 22, 0.5)" }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <div className="text-orange-400 font-bold text-lg" data-testid="text-customers">
+                  <AnimatedCounter end={2700} suffix="+" className="text-orange-400 font-bold text-lg" />
+                </div>
                 <div className="text-blue-200">Happy Customers</div>
-              </div>
-              <div className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10">
-                <div className="text-orange-400 font-bold text-lg" data-testid="text-rating">4.9/5 ⭐</div>
+              </motion.div>
+              <motion.div 
+                className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10"
+                whileHover={{ scale: 1.05, borderColor: "rgba(249, 115, 22, 0.5)" }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <div className="text-orange-400 font-bold text-lg" data-testid="text-rating">
+                  <AnimatedCounter end={4.9} duration={1.5} decimals={1} className="text-orange-400 font-bold text-lg" />/5 ⭐
+                </div>
                 <div className="text-blue-200">Customer Rating</div>
-              </div>
-              <div className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10">
-                <div className="text-orange-400 font-bold text-lg">Same Day</div>
-                <div className="text-blue-200">Shipping Available</div>
-              </div>
+              </motion.div>
+              <motion.div 
+                className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10"
+                whileHover={{ scale: 1.05, borderColor: "rgba(249, 115, 22, 0.5)" }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <div className="text-orange-400 font-bold text-lg">
+                  <AnimatedCounter end={18000} suffix="+" className="text-orange-400 font-bold text-lg" />
+                </div>
+                <div className="text-blue-200">Channels Available</div>
+              </motion.div>
             </motion.div>
           </div>
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none"></div>
       </section>
+
+      {/* Countdown Timer */}
+      <CountdownTimer />
 
       {/* Trust Badges */}
       <TrustBadges />
@@ -611,9 +678,14 @@ export default function MainStore() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20 bg-gray-900">
+      <section id="about" ref={aboutRef} className="py-20 bg-gray-900">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            animate={isAboutInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+          >
             <div className="inline-flex items-center gap-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full px-6 py-2 mb-6">
               <Flame className="w-5 h-5 text-orange-400" />
               <span className="text-sm font-medium text-orange-300">WHY CHOOSE US</span>
@@ -624,38 +696,57 @@ export default function MainStore() {
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
               Premium streaming at a fraction of the cost. No contracts, no hidden fees.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-orange-500/50 transition-colors">
+          <motion.div 
+            className="grid md:grid-cols-3 gap-8"
+            variants={staggerContainer}
+            initial="hidden"
+            animate={isAboutInView ? "visible" : "hidden"}
+          >
+            <motion.div 
+              variants={fadeInUp}
+              className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-orange-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-orange-500/10"
+            >
               <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mb-6">
                 <Zap className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-4">Plug & Play Ready</h3>
               <p className="text-gray-400">Pre-configured devices. Just connect to your TV and start streaming immediately.</p>
-            </div>
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-orange-500/50 transition-colors">
+            </motion.div>
+            <motion.div 
+              variants={fadeInUp}
+              className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-orange-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/10"
+            >
               <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-6">
                 <Star className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-4">Premium Content</h3>
               <p className="text-gray-400">Access 18,000+ live channels, 60,000+ movies, and all sports & PPV events.</p>
-            </div>
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-orange-500/50 transition-colors">
+            </motion.div>
+            <motion.div 
+              variants={fadeInUp}
+              className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-orange-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-green-500/10"
+            >
               <div className="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mb-6">
                 <Check className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-4">24/7 Support</h3>
               <p className="text-gray-400">Our dedicated team is always available to help you with any questions or issues.</p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Shop Section */}
-      <section id="shop" className="py-20 bg-gray-900">
+      <section id="shop" ref={shopRef} className="py-20 bg-gray-900">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            animate={isShopInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+          >
             <div className="inline-flex items-center gap-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full px-6 py-2 mb-6">
               <Flame className="w-5 h-5 text-orange-400 animate-pulse" />
               <span className="text-sm font-medium text-orange-300">SHOP ALL PRODUCTS</span>
@@ -666,10 +757,16 @@ export default function MainStore() {
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
               Browse our complete collection of jailbroken Fire Sticks and IPTV subscriptions
             </p>
-          </div>
+          </motion.div>
 
           {/* Fire Stick Tier Comparison Table */}
-          <div className="mb-12 overflow-x-auto">
+          <motion.div 
+            className="mb-12 overflow-x-auto"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             <div className="text-center mb-8">
               <h3 className="text-3xl font-bold mb-4 flex items-center justify-center gap-3">
                 <Flame className="w-8 h-8 text-orange-500" />
@@ -790,7 +887,7 @@ export default function MainStore() {
                 </p>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Fire Sticks */}
           <div className="mb-16">
@@ -1376,6 +1473,9 @@ export default function MainStore() {
 
       {/* Exit Intent Popup */}
       <ExitPopup />
+
+      {/* Floating CTA */}
+      <FloatingCTA />
 
       {/* Sticky Mobile CTA */}
       <StickyMobileCTA />

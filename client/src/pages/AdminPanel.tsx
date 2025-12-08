@@ -1545,6 +1545,73 @@ export default function AdminPanel() {
 
               <div>
                 <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-500" />
+                  Pending Actions
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                  <Card className={`bg-gradient-to-br border ${orderStats.pendingFulfillments > 0 ? 'from-red-500 to-red-600 border-red-400' : 'from-gray-700 to-gray-800 border-gray-700'}`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className={`text-sm ${orderStats.pendingFulfillments > 0 ? 'text-red-100' : 'text-gray-300'}`}>Unfulfilled Orders</p>
+                          <p className="text-2xl font-bold text-white mt-1">{orderStats.pendingFulfillments}</p>
+                        </div>
+                        <Truck className={`w-8 h-8 ${orderStats.pendingFulfillments > 0 ? 'text-red-100 opacity-80' : 'text-gray-500 opacity-60'}`} />
+                      </div>
+                      {orderStats.pendingFulfillments > 0 && (
+                        <Button 
+                          size="sm" 
+                          className="w-full mt-3 bg-white text-red-600 hover:bg-gray-100"
+                          onClick={() => setActiveSection("fulfillment")}
+                          data-testid="button-quick-fulfill"
+                        >
+                          Quick Fulfill →
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Card className={`bg-gradient-to-br border ${products.some(p => (p.stock_quantity || 0) < 5) ? 'from-yellow-500 to-yellow-600 border-yellow-400' : 'from-gray-700 to-gray-800 border-gray-700'}`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className={`text-sm ${products.some(p => (p.stock_quantity || 0) < 5) ? 'text-yellow-100' : 'text-gray-300'}`}>Low Stock Items</p>
+                          <p className="text-2xl font-bold text-white mt-1">{products.filter(p => (p.stock_quantity || 0) < 5).length}</p>
+                        </div>
+                        <Package className={`w-8 h-8 ${products.some(p => (p.stock_quantity || 0) < 5) ? 'text-yellow-100 opacity-80' : 'text-gray-500 opacity-60'}`} />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className={`bg-gradient-to-br border ${blogPosts.filter(p => !p.published).length > 0 ? 'from-blue-500 to-blue-600 border-blue-400' : 'from-gray-700 to-gray-800 border-gray-700'}`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className={`text-sm ${blogPosts.filter(p => !p.published).length > 0 ? 'text-blue-100' : 'text-gray-300'}`}>Draft Posts</p>
+                          <p className="text-2xl font-bold text-white mt-1">{blogPosts.filter(p => !p.published).length}</p>
+                        </div>
+                        <FileText className={`w-8 h-8 ${blogPosts.filter(p => !p.published).length > 0 ? 'text-blue-100 opacity-80' : 'text-gray-500 opacity-60'}`} />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-gray-700 to-gray-800 border border-gray-700">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-300">Conversion Rate</p>
+                          <p className="text-2xl font-bold text-white mt-1">{visitorStats.totalVisitors > 0 ? ((orderStats.totalOrders / visitorStats.totalVisitors) * 100).toFixed(2) : '0.00'}%</p>
+                        </div>
+                        <TrendingUp className="w-8 h-8 text-green-400 opacity-80" />
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2">{orderStats.totalOrders} orders / {visitorStats.totalVisitors} visitors</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-green-500" />
                   Revenue & Orders
                 </h3>
@@ -2050,6 +2117,7 @@ export default function AdminPanel() {
                             <TableRow className="border-gray-700 hover:bg-transparent">
                               <TableHead className="text-gray-400">Name</TableHead>
                               <TableHead className="text-gray-400">Price</TableHead>
+                              <TableHead className="text-gray-400">Stock</TableHead>
                               <TableHead className="text-gray-400">Category</TableHead>
                               <TableHead className="text-gray-400">Status</TableHead>
                               <TableHead className="text-gray-400">Shadow Product</TableHead>
@@ -2081,6 +2149,15 @@ export default function AdminPanel() {
                                   {product.sale_price && (
                                     <span className="text-gray-500 line-through ml-2">{formatPriceDisplay(product.price)}</span>
                                   )}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge className={
+                                    (product.stock_quantity || 0) < 5 ? 'bg-red-500/20 text-red-300' :
+                                    (product.stock_quantity || 0) < 20 ? 'bg-yellow-500/20 text-yellow-300' :
+                                    'bg-green-500/20 text-green-300'
+                                  } data-testid={`text-stock-${product.id}`}>
+                                    {product.stock_quantity || 0} units
+                                  </Badge>
                                 </TableCell>
                                 <TableCell>
                                   <Badge variant="outline" className="border-gray-600 text-gray-300 capitalize">
