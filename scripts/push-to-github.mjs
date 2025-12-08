@@ -21,6 +21,7 @@ const EXCLUDE_PATTERNS = [
   '.env',
   'tmp',
   '/tmp',
+  '.wrangler-secrets',
 ];
 
 function shouldExclude(filePath) {
@@ -168,15 +169,14 @@ async function main() {
   console.log(`New tree SHA: ${newTree.sha}`);
   console.log('Creating commit...\n');
   
-  const commitMessage = `Enhanced Fire Stick product cards - ${new Date().toISOString()}
+  const commitMessage = `Sync all updates - ${new Date().toISOString()}
 
 Updates:
-- Multi-layer gradient backgrounds with depth
-- Tech grid pattern overlays
-- Accent glow effects at card tops
-- Corner decorations with gradients
-- Animated border glow on hover
-- Unique color themes per product tier`;
+- Scroll animations and parallax effects
+- Animated counters in hero section
+- Savings calculator enhancements
+- Exit popup integration
+- Product cards and UI improvements`;
   
   const { data: newCommit } = await octokit.git.createCommit({
     owner: OWNER,
