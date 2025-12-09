@@ -328,7 +328,7 @@ export default function MainStore() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "StreamStickPro",
-    "url": "https://streamstickpro.com",
+    "url": "https://streamstickpro.com/",
     "description": "Premium jailbroken Fire Sticks with IPTV - 18,000+ channels, 60,000+ movies, all sports & PPV",
     "potentialAction": {
       "@type": "SearchAction",
@@ -372,7 +372,7 @@ export default function MainStore() {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "StreamStickPro",
-    "url": "https://streamstickpro.com",
+    "url": "https://streamstickpro.com/",
     "logo": "https://streamstickpro.com/logo.png",
     "contactPoint": {
       "@type": "ContactPoint",
