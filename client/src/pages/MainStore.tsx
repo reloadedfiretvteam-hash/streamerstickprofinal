@@ -200,7 +200,7 @@ export default function MainStore() {
     visible: { 
       opacity: 1, 
       y: 0, 
-      transition: { duration: 0.5, ease: "easeOut" } 
+      transition: { duration: 0.5, ease: "easeOut" as any } 
     }
   };
 
@@ -209,7 +209,7 @@ export default function MainStore() {
     visible: { 
       opacity: 1, 
       scale: 1, 
-      transition: { duration: 0.4, ease: "easeOut" } 
+      transition: { duration: 0.4, ease: "easeOut" as any } 
     }
   };
 
@@ -472,7 +472,8 @@ export default function MainStore() {
             width={1920}
             height={600}
             fetchPriority="high"
-            style={{ transform: 'scale(1.25)', transformOrigin: 'center center' }}
+            decoding="async"
+            style={{ transform: 'scale(1.25)', transformOrigin: 'center center', contentVisibility: 'auto' }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               if (target.src !== fallbackHeroImg) {
