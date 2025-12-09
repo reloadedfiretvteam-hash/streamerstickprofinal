@@ -101,8 +101,9 @@ export default function FireSticksPage() {
     <div className="min-h-screen bg-gray-900 text-white">
       <SEOSchema 
         title="Jailbroken Fire Sticks | StreamStickPro"
-        description="Browse our selection of fully configured jailbroken Fire Sticks with 1 Year IPTV included. HD, 4K, and 4K Max models available. Free shipping, 24/7 support."
-        url="https://streamstickpro.com/products/fire-sticks"
+        description="Browse our selection of jailbroken Fire Sticks with 1 Year IPTV included. HD, 4K, and 4K Max models. Free shipping, 24/7 support."
+        url="https://streamstickpro.com/products/fire-sticks/"
+        image="https://streamstickpro.com/opengraph.jpg"
       />
 
       {/* Navigation Bar */}

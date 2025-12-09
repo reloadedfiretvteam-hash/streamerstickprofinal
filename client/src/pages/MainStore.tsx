@@ -499,20 +499,21 @@ export default function MainStore() {
               </span>
             </motion.div>
 
-            <motion.h1 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight"
             >
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-orange-400">
-                Stream Stick Pro
-              </span>
-              <br />
-              <span className="text-2xl sm:text-3xl md:text-5xl text-white">Premium IPTV Subscriptions</span>
-              <br />
-              <span className="text-xl sm:text-2xl md:text-4xl text-blue-200">& Jailbroken Fire Stick Shop</span>
-            </motion.h1>
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-orange-400">
+                  Stream Stick Pro
+                </span>
+                <br />
+                <span className="text-2xl sm:text-3xl md:text-5xl text-white">Premium IPTV Subscriptions</span>
+                <br />
+                <span className="text-xl sm:text-2xl md:text-4xl text-blue-200">& Jailbroken Fire Stick Shop</span>
+              </h1>
+            </motion.div>
 
             <motion.p 
               initial={{ opacity: 0, y: 20 }}

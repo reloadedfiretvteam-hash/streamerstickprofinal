@@ -2984,6 +2984,83 @@ export default function AdminPanel() {
 
               {blogView === 'list' && (
                 <div className="space-y-6">
+                  {/* Blog Status Card */}
+                  <Card className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border-blue-500/30">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-white">
+                        <BarChart3 className="w-5 h-5 text-blue-400" />
+                        Blog Status
+                      </CardTitle>
+                      <CardDescription className="text-gray-400">
+                        Overview of your blog posts and seeding status
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div className="bg-gray-800/50 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-gray-400 text-sm">Total Published</span>
+                            <BookOpen className="w-4 h-4 text-green-400" />
+                          </div>
+                          <div className="text-2xl font-bold text-white">
+                            {blogPosts.filter(p => p.published).length}
+                          </div>
+                        </div>
+                        <div className="bg-gray-800/50 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-gray-400 text-sm">Featured Posts</span>
+                            <Star className="w-4 h-4 text-yellow-400" />
+                          </div>
+                          <div className="text-2xl font-bold text-white">
+                            {blogPosts.filter(p => p.featured).length}
+                          </div>
+                        </div>
+                        <div className="bg-gray-800/50 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-gray-400 text-sm">Draft Posts</span>
+                            <FileText className="w-4 h-4 text-gray-400" />
+                          </div>
+                          <div className="text-2xl font-bold text-white">
+                            {blogPosts.filter(p => !p.published).length}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-blue-900/20 rounded-lg border border-blue-500/30">
+                        <div>
+                          <p className="text-white font-semibold mb-1">Seed Missing Blog Posts</p>
+                          <p className="text-gray-400 text-sm">
+                            Run the seed script to add predefined blog posts from seedBlog.ts
+                          </p>
+                        </div>
+                        <Button
+                          onClick={async () => {
+                            if (!confirm('This will seed blog posts from the predefined list. Continue?')) return;
+                            try {
+                              const response = await authFetch('/api/admin/seed-blog', {
+                                method: 'POST'
+                              });
+                              const result = await response.json();
+                              if (response.ok) {
+                                showToast(result.message || 'Blog posts seeded successfully!', 'success');
+                                loadBlogPosts();
+                              } else {
+                                showToast(result.error || 'Failed to seed blog posts', 'error');
+                              }
+                            } catch (error) {
+                              console.error('Error seeding blog posts:', error);
+                              showToast('Failed to seed blog posts', 'error');
+                            }
+                          }}
+                          className="bg-blue-500 hover:bg-blue-600 flex-shrink-0"
+                          data-testid="button-seed-blog"
+                        >
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Seed Posts
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
                   <div className="flex items-center gap-4">
                     <div className="relative flex-1">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

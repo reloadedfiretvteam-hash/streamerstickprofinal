@@ -100,8 +100,9 @@ export default function IPTVPage() {
     <div className="min-h-screen bg-gray-900 text-white">
       <SEOSchema 
         title="IPTV Subscriptions | StreamStickPro"
-        description="Premium IPTV subscription plans with 18,000+ live TV channels, 60,000+ movies & shows, all sports & PPV events. Flexible plans for 1-5 devices. Instant delivery."
-        url="https://streamstickpro.com/products/iptv"
+        description="Premium IPTV plans with 18,000+ live channels, 60,000+ movies & shows, all sports & PPV. Flexible 1-5 device plans. Instant delivery."
+        url="https://streamstickpro.com/products/iptv/"
+        image="https://streamstickpro.com/opengraph.jpg"
       />
 
       {/* Navigation Bar */}

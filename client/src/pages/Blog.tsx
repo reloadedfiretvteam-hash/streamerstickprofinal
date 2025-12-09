@@ -307,14 +307,17 @@ export default function Blog() {
           <Flame className="absolute w-32 h-32 top-4 right-8 text-white" />
         </div>
         <div className="relative h-full flex flex-col items-center justify-center px-4">
-          <motion.h1 
-            className="text-4xl sm:text-5xl md:text-6xl font-bold text-white text-center mb-4"
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            data-testid="heading-blog-title"
           >
-            StreamStickPro Blog
-          </motion.h1>
+            <h1 
+              className="text-4xl sm:text-5xl md:text-6xl font-bold text-white text-center mb-4"
+              data-testid="heading-blog-title"
+            >
+              StreamStickPro Blog
+            </h1>
+          </motion.div>
           <motion.p 
             className="text-lg text-gray-100 text-center max-w-2xl"
             initial={{ opacity: 0 }}

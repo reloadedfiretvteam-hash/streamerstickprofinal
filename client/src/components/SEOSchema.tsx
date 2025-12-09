@@ -19,9 +19,13 @@ interface SEOSchemaProps {
   faq?: FAQItem[];
   products?: Product[];
   breadcrumbs?: { name: string; url: string }[];
+  title?: string;
+  description?: string;
+  url?: string;
+  image?: string;
 }
 
-export function SEOSchema({ faq, products, breadcrumbs }: SEOSchemaProps) {
+export function SEOSchema({ faq, products, breadcrumbs, title, description, url, image }: SEOSchemaProps) {
   const faqMemo = useMemo(() => faq, [JSON.stringify(faq)]);
   const productsMemo = useMemo(() => products, [JSON.stringify(products)]);
   const breadcrumbsMemo = useMemo(() => breadcrumbs, [JSON.stringify(breadcrumbs)]);
@@ -124,6 +128,66 @@ export function SEOSchema({ faq, products, breadcrumbs }: SEOSchemaProps) {
       if (breadcrumbScript) breadcrumbScript.remove();
     };
   }, [breadcrumbsMemo]);
+
+  // Meta tags and canonical URL management
+  useEffect(() => {
+    const updateOrCreateMetaTag = (property: string, content: string) => {
+      let meta = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement;
+      if (!meta) {
+        meta = document.querySelector(`meta[name="${property}"]`) as HTMLMetaElement;
+      }
+      if (meta) {
+        meta.content = content;
+      } else {
+        meta = document.createElement('meta');
+        if (property.startsWith('og:') || property.startsWith('twitter:')) {
+          meta.setAttribute('property', property);
+        } else {
+          meta.setAttribute('name', property);
+        }
+        meta.content = content;
+        document.head.appendChild(meta);
+      }
+    };
+
+    // Ensure canonical URL with trailing slash
+    if (url) {
+      const canonicalUrl = url.endsWith('/') ? url : url + '/';
+      let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+      if (canonicalLink) {
+        canonicalLink.href = canonicalUrl;
+      } else {
+        canonicalLink = document.createElement('link');
+        canonicalLink.rel = 'canonical';
+        canonicalLink.href = canonicalUrl;
+        document.head.appendChild(canonicalLink);
+      }
+
+      // Update og:url to match canonical
+      updateOrCreateMetaTag('og:url', canonicalUrl);
+    }
+
+    if (title) {
+      document.title = title;
+      updateOrCreateMetaTag('og:title', title);
+      updateOrCreateMetaTag('twitter:title', title);
+    }
+
+    if (description) {
+      updateOrCreateMetaTag('description', description);
+      updateOrCreateMetaTag('og:description', description);
+      updateOrCreateMetaTag('twitter:description', description);
+    }
+
+    if (image) {
+      updateOrCreateMetaTag('og:image', image);
+      updateOrCreateMetaTag('twitter:image', image);
+    }
+
+    // Ensure og:type
+    updateOrCreateMetaTag('og:type', 'website');
+    updateOrCreateMetaTag('twitter:card', 'summary_large_image');
+  }, [title, description, url, image]);
 
   return null;
 }
