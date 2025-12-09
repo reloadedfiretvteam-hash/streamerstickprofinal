@@ -1,1 +1,10 @@
+# Legacy product category redirects
+/shop                   /#shop              301
+/products               /#shop              301
+/fire-sticks            /products/fire-sticks   301
+/firesticks             /products/fire-sticks   301
+/iptv                   /products/iptv          301
+/iptv-subscriptions     /products/iptv          301
+
+# Catch-all for client-side routing
 /*    /index.html   200

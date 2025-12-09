@@ -126,7 +126,7 @@ const defaultProducts: Product[] = [
     id: "fs-hd",
     name: "Fire Stick HD - Jailbroken & Ready",
     price: 119,
-    description: "Premium jailbroken Fire Stick HD with 1 Year IPTV included. Get instant access to 18,000+ live TV channels, 60,000+ movies & TV shows, and all sports leagues including NFL, NBA, UFC, and PPV events. Fully configured & ready to use - you'll receive your login credentials, an easy 10-minute setup tutorial, and 24/7 customer support.",
+    description: "Premium jailbroken Fire Stick HD with 1 Year IPTV included. Get instant access to 18,000+ live TV channels, 60,000+ movies & TV shows, and all sports leagues including NFL, NBA, UFC, and PPV events. You receive a Fire Stick and a step-by-step tutorial by email. 10-minute setup with your login credentials. 24/7 support available.",
     features: ["1080p Full HD Resolution", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "Fully Pre-Configured & Ready", "24/7 Customer Support"],
     image: firestickHdImg,
     category: "firestick",
@@ -136,7 +136,7 @@ const defaultProducts: Product[] = [
     id: "fs-4k",
     name: "Fire Stick 4K - Jailbroken & Ready",
     price: 127.50,
-    description: "Best-selling jailbroken Fire Stick 4K with Dolby Vision & 1 Year premium IPTV subscription included. Enjoy 18,000+ live TV channels, 60,000+ movies & TV shows in stunning 4K quality. Watch all major sports - NFL, NBA, UFC, and PPV events. Fully configured & ready to use with instant credentials, easy setup, and 24/7 support.",
+    description: "Best-selling jailbroken Fire Stick 4K with Dolby Vision & 1 Year premium IPTV subscription included. Enjoy 18,000+ live TV channels, 60,000+ movies & TV shows in stunning 4K quality. Watch all major sports - NFL, NBA, UFC, and PPV events. You receive a Fire Stick and a step-by-step tutorial by email. 10-minute setup with your login credentials. 24/7 support available.",
     features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Premium IPTV Included", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "24/7 Customer Support"],
     image: firestick4kImg,
     category: "firestick",
@@ -147,7 +147,7 @@ const defaultProducts: Product[] = [
     id: "fs-max",
     name: "Fire Stick 4K Max - Jailbroken & Ready",
     price: 136,
-    description: "Ultimate jailbroken Fire Stick 4K Max with Wi-Fi 6E and 1 Year premium IPTV subscription. Experience 18,000+ live TV channels, 60,000+ movies & TV shows, and all major sports in breathtaking 4K with Dolby Atmos sound. Fully configured & ready to use - includes login credentials, quick setup guide, and priority 24/7 customer support.",
+    description: "Ultimate jailbroken Fire Stick 4K Max with Wi-Fi 6E and 1 Year premium IPTV subscription. Experience 18,000+ live TV channels, 60,000+ movies & TV shows, and all major sports in breathtaking 4K with Dolby Atmos sound. You receive a Fire Stick and a step-by-step tutorial by email. 10-minute setup with your login credentials. Priority 24/7 support available.",
     features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Premium IPTV Included", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "Priority 24/7 Support"],
     image: firestick4kMaxImg,
     category: "firestick",
@@ -405,7 +405,7 @@ export default function MainStore() {
 
       <SEOSchema 
         faq={[
-          { question: "What's included with a Fire Stick?", answer: "Every Fire Stick comes fully configured and ready to use with 1 Year of IPTV service included. You'll receive your login credentials instantly, a quick setup tutorial (10 minutes), and access to 24/7 customer support whenever you need assistance. Just plug it in and start streaming!" },
+          { question: "What's included with a Fire Stick?", answer: "You receive a Fire Stick and a step-by-step tutorial by email. 10-minute setup with your login credentials. 1 Year of IPTV service included. 24/7 support available. Live chat available." },
           { question: "How do I renew my subscription?", answer: "Simply come back to the site and purchase a renewal package. Your credentials will be updated instantly." },
           { question: "Do you offer support?", answer: "Yes, we offer 24/7 support via email for all active subscribers. Contact us at reloadedfiretvteam@gmail.com" },
           { question: "What devices are supported?", answer: "Our IPTV service works on Fire Sticks, Android boxes, Smart TVs, phones, tablets, and computers. Use up to 2 devices simultaneously!" }
@@ -1367,7 +1367,7 @@ export default function MainStore() {
             <AccordionItem value="item-1" className="border border-white/10 rounded-xl px-6 bg-white/5">
               <AccordionTrigger className="text-lg font-semibold hover:text-orange-400">What's included with a Fire Stick?</AccordionTrigger>
               <AccordionContent className="text-gray-400">
-                Every Fire Stick comes pre-configured and jailbroken with 1 Year of IPTV service included. Just plug it in and start streaming immediately!
+                You receive a Fire Stick and a step-by-step tutorial by email. 10-minute setup with your login credentials. 1 Year of IPTV service included. 24/7 support available. Live chat available.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2" className="border border-white/10 rounded-xl px-6 bg-white/5">
@@ -1392,12 +1392,17 @@ export default function MainStore() {
         </div>
       </section>
 
-      {/* Floating Chat Widget */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button className="rounded-full w-14 h-14 shadow-lg bg-green-500 hover:bg-green-600 animate-pulse" data-testid="button-chat">
-          <MessageCircle className="w-6 h-6 text-white" />
-        </Button>
-      </div>
+      {/* Floating WhatsApp Chat Widget */}
+      <a
+        href="https://wa.me/15853037381"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 rounded-full w-14 h-14 md:w-16 md:h-16 shadow-lg bg-green-500 hover:bg-green-600 animate-pulse flex items-center justify-center transition-transform hover:scale-110"
+        aria-label="Contact us on WhatsApp"
+        data-testid="button-whatsapp"
+      >
+        <MessageCircle className="w-6 h-6 md:w-7 md:h-7 text-white" />
+      </a>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300 border-t border-white/10">
