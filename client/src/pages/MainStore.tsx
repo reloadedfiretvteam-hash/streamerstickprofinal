@@ -126,7 +126,7 @@ const defaultProducts: Product[] = [
     id: "fs-hd",
     name: "Fire Stick HD - Jailbroken & Ready",
     price: 119,
-    description: "Premium jailbroken Fire Stick HD with 1 Year IPTV included. Get instant access to 18,000+ live TV channels, 60,000+ movies & TV shows, and all sports leagues including NFL, NBA, UFC, and PPV events. You receive a Fire Stick and a step-by-step tutorial by email. 10-minute setup with your login credentials. 24/7 support available.",
+    description: "Premium jailbroken Fire Stick HD with 1 Year IPTV included. Get instant access to 18,000+ live TV channels, 60,000+ movies & TV shows, and all sports leagues including NFL, NBA, UFC, and PPV events. Fully configured & ready to use - you'll receive your login credentials, an easy 10-minute setup tutorial, and 24/7 customer support.",
     features: ["1080p Full HD Resolution", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "Fully Pre-Configured & Ready", "24/7 Customer Support"],
     image: firestickHdImg,
     category: "firestick",
@@ -136,7 +136,7 @@ const defaultProducts: Product[] = [
     id: "fs-4k",
     name: "Fire Stick 4K - Jailbroken & Ready",
     price: 127.50,
-    description: "Best-selling jailbroken Fire Stick 4K with Dolby Vision & 1 Year premium IPTV subscription included. Enjoy 18,000+ live TV channels, 60,000+ movies & TV shows in stunning 4K quality. Watch all major sports - NFL, NBA, UFC, and PPV events. You receive a Fire Stick and a step-by-step tutorial by email. 10-minute setup with your login credentials. 24/7 support available.",
+    description: "Best-selling jailbroken Fire Stick 4K with Dolby Vision & 1 Year premium IPTV subscription included. Enjoy 18,000+ live TV channels, 60,000+ movies & TV shows in stunning 4K quality. Watch all major sports - NFL, NBA, UFC, and PPV events. Fully configured & ready to use with instant credentials, easy setup, and 24/7 support.",
     features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Premium IPTV Included", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "24/7 Customer Support"],
     image: firestick4kImg,
     category: "firestick",
@@ -147,7 +147,7 @@ const defaultProducts: Product[] = [
     id: "fs-max",
     name: "Fire Stick 4K Max - Jailbroken & Ready",
     price: 136,
-    description: "Ultimate jailbroken Fire Stick 4K Max with Wi-Fi 6E and 1 Year premium IPTV subscription. Experience 18,000+ live TV channels, 60,000+ movies & TV shows, and all major sports in breathtaking 4K with Dolby Atmos sound. You receive a Fire Stick and a step-by-step tutorial by email. 10-minute setup with your login credentials. Priority 24/7 support available.",
+    description: "Ultimate jailbroken Fire Stick 4K Max with Wi-Fi 6E and 1 Year premium IPTV subscription. Experience 18,000+ live TV channels, 60,000+ movies & TV shows, and all major sports in breathtaking 4K with Dolby Atmos sound. Fully configured & ready to use - includes login credentials, quick setup guide, and priority 24/7 customer support.",
     features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Premium IPTV Included", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "Priority 24/7 Support"],
     image: firestick4kMaxImg,
     category: "firestick",
@@ -186,6 +186,15 @@ export default function MainStore() {
   });
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.3]);
+
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+      setTimeout(() => {
+        document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, []);
 
   const staggerContainer = {
     hidden: { opacity: 0 },
@@ -405,7 +414,7 @@ export default function MainStore() {
 
       <SEOSchema 
         faq={[
-          { question: "What's included with a Fire Stick?", answer: "You receive a Fire Stick and a step-by-step tutorial by email. 10-minute setup with your login credentials. 1 Year of IPTV service included. 24/7 support available. Live chat available." },
+          { question: "What's included with a Fire Stick?", answer: "Every Fire Stick comes fully configured and ready to use with 1 Year of IPTV service included. You'll receive your login credentials instantly, a quick setup tutorial (10 minutes), and access to 24/7 customer support whenever you need assistance. Just plug it in and start streaming!" },
           { question: "How do I renew my subscription?", answer: "Simply come back to the site and purchase a renewal package. Your credentials will be updated instantly." },
           { question: "Do you offer support?", answer: "Yes, we offer 24/7 support via email for all active subscribers. Contact us at reloadedfiretvteam@gmail.com" },
           { question: "What devices are supported?", answer: "Our IPTV service works on Fire Sticks, Android boxes, Smart TVs, phones, tablets, and computers. Use up to 2 devices simultaneously!" }
@@ -499,21 +508,20 @@ export default function MainStore() {
               </span>
             </motion.div>
 
-            <motion.div
+            <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight"
             >
-              <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-orange-400">
-                  Stream Stick Pro
-                </span>
-                <br />
-                <span className="text-2xl sm:text-3xl md:text-5xl text-white">Premium IPTV Subscriptions</span>
-                <br />
-                <span className="text-xl sm:text-2xl md:text-4xl text-blue-200">& Jailbroken Fire Stick Shop</span>
-              </h1>
-            </motion.div>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-orange-400">
+                Stream Stick Pro
+              </span>
+              <br />
+              <span className="text-2xl sm:text-3xl md:text-5xl text-white">Premium IPTV Subscriptions</span>
+              <br />
+              <span className="text-xl sm:text-2xl md:text-4xl text-blue-200">& Jailbroken Fire Stick Shop</span>
+            </motion.h1>
 
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -713,8 +721,8 @@ export default function MainStore() {
               <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mb-6">
                 <Zap className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Fully Configured & Ready</h3>
-              <p className="text-gray-400">Every Fire Stick arrives fully configured with login credentials and a quick 10-minute setup tutorial. 24/7 customer support is available anytime if you need help.</p>
+              <h3 className="text-xl font-bold mb-4">Be Streaming in 10 Minutes</h3>
+              <p className="text-gray-400">Your Fire Stick comes with instant login credentials and an easy 10-minute setup video. Start watching Live TV, Movies, Series, Sports & PPV today with 24/7 support ready when you need it.</p>
             </motion.div>
             <motion.div 
               variants={fadeInUp}
@@ -775,7 +783,7 @@ export default function MainStore() {
                 Fire Stick Comparison
               </h3>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                All Fire Sticks come fully configured and ready to use with 1 Year IPTV subscription included, login credentials, quick setup tutorial, and 24/7 support!
+                Be streaming in 10 minutes! Your Fire Stick includes 1 Year IPTV, instant login credentials, a quick setup video, and 24/7 support. Live TV, Movies, Series, Sports & PPV await!
               </p>
             </div>
             <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl border border-slate-700/50 overflow-hidden" data-testid="tier-comparison-table">
@@ -1368,7 +1376,7 @@ export default function MainStore() {
             <AccordionItem value="item-1" className="border border-white/10 rounded-xl px-6 bg-white/5">
               <AccordionTrigger className="text-lg font-semibold hover:text-orange-400">What's included with a Fire Stick?</AccordionTrigger>
               <AccordionContent className="text-gray-400">
-                You receive a Fire Stick and a step-by-step tutorial by email. 10-minute setup with your login credentials. 1 Year of IPTV service included. 24/7 support available. Live chat available.
+                Be streaming in 10 minutes! Every Fire Stick comes with 1 Year IPTV included, your login credentials, and an easy setup video. Live TV, Movies, Series, Sports & PPV - all waiting for you!
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2" className="border border-white/10 rounded-xl px-6 bg-white/5">
@@ -1393,16 +1401,17 @@ export default function MainStore() {
         </div>
       </section>
 
-      {/* Floating WhatsApp Chat Widget */}
-      <a
-        href="https://wa.me/15853037381"
-        target="_blank"
+      {/* WhatsApp Chat Widget - Higher z-index to stay above all CTAs */}
+      <a 
+        href="https://wa.me/15853037381" 
+        target="_blank" 
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 rounded-full w-14 h-14 md:w-16 md:h-16 shadow-lg bg-green-500 hover:bg-green-600 animate-pulse flex items-center justify-center transition-transform hover:scale-110"
-        aria-label="Contact us on WhatsApp"
-        data-testid="button-whatsapp"
+        className="fixed bottom-20 md:bottom-6 right-6 z-[100]"
+        data-testid="link-whatsapp"
       >
-        <MessageCircle className="w-6 h-6 md:w-7 md:h-7 text-white" />
+        <Button className="rounded-full w-14 h-14 shadow-2xl bg-green-500 hover:bg-green-600 animate-pulse border-2 border-white/20" data-testid="button-chat">
+          <MessageCircle className="w-6 h-6 text-white" />
+        </Button>
       </a>
 
       {/* Footer */}

@@ -339,3 +339,365 @@ export const updateBlogPostSchema = createInsertSchema(blogPosts).omit({
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type UpdateBlogPost = z.infer<typeof updateBlogPostSchema>;
 export type BlogPost = typeof blogPosts.$inferSelect;
+
+// ============================================
+// SEO TOOLKIT TABLES (Rank Math Premium Clone)
+// ============================================
+
+// SEO Settings - Global configuration
+export const seoSettings = pgTable("seo_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  settingKey: text("setting_key").notNull().unique(),
+  settingValue: text("setting_value"),
+  settingType: text("setting_type").default("string"), // string, boolean, json, number
+  category: text("category").default("general"), // general, sitemap, social, schema, indexing
+  description: text("description"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSeoSettingSchema = createInsertSchema(seoSettings).omit({ id: true, updatedAt: true });
+export type InsertSeoSetting = z.infer<typeof insertSeoSettingSchema>;
+export type SeoSetting = typeof seoSettings.$inferSelect;
+
+// SEO Pages - Per-page SEO metadata and scores
+export const seoPages = pgTable("seo_pages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageUrl: text("page_url").notNull().unique(),
+  pageType: text("page_type").default("page"), // page, post, product, category
+  
+  // Focus Keywords (up to 5)
+  focusKeyword: text("focus_keyword"),
+  secondaryKeywords: text("secondary_keywords").array(),
+  
+  // Meta Tags
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  canonicalUrl: text("canonical_url"),
+  robots: text("robots").default("index, follow"),
+  
+  // Social Media
+  ogTitle: text("og_title"),
+  ogDescription: text("og_description"),
+  ogImage: text("og_image"),
+  twitterTitle: text("twitter_title"),
+  twitterDescription: text("twitter_description"),
+  twitterImage: text("twitter_image"),
+  
+  // Schema Markup
+  schemaType: text("schema_type"), // Article, Product, LocalBusiness, FAQ, HowTo, etc.
+  schemaData: text("schema_data"), // JSON string of schema
+  
+  // SEO Scores (0-100)
+  titleScore: integer("title_score").default(0),
+  descriptionScore: integer("description_score").default(0),
+  contentScore: integer("content_score").default(0),
+  readabilityScore: integer("readability_score").default(0),
+  keywordScore: integer("keyword_score").default(0),
+  linkScore: integer("link_score").default(0),
+  imageScore: integer("image_score").default(0),
+  overallScore: integer("overall_score").default(0),
+  
+  // Analysis
+  seoIssues: text("seo_issues"), // JSON array of issues
+  seoSuggestions: text("seo_suggestions"), // JSON array of suggestions
+  lastAnalyzed: timestamp("last_analyzed"),
+  
+  // Indexing
+  indexNowSubmitted: boolean("indexnow_submitted").default(false),
+  indexNowLastSubmit: timestamp("indexnow_last_submit"),
+  inSitemap: boolean("in_sitemap").default(true),
+  sitemapPriority: text("sitemap_priority").default("0.5"),
+  sitemapChangefreq: text("sitemap_changefreq").default("weekly"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("seo_pages_url_idx").on(table.pageUrl),
+  index("seo_pages_type_idx").on(table.pageType),
+  index("seo_pages_score_idx").on(table.overallScore),
+]);
+
+export const insertSeoPageSchema = createInsertSchema(seoPages).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertSeoPage = z.infer<typeof insertSeoPageSchema>;
+export type SeoPage = typeof seoPages.$inferSelect;
+
+// SEO Keywords - Focus keyword tracking and ranking
+export const seoKeywords = pgTable("seo_keywords", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  keyword: text("keyword").notNull(),
+  searchVolume: integer("search_volume"),
+  difficulty: integer("difficulty"), // 0-100
+  cpc: text("cpc"), // Cost per click
+  trend: text("trend"), // up, down, stable
+  
+  // Tracking
+  trackingEnabled: boolean("tracking_enabled").default(false),
+  targetUrl: text("target_url"),
+  currentPosition: integer("current_position"),
+  previousPosition: integer("previous_position"),
+  bestPosition: integer("best_position"),
+  positionChange: integer("position_change"),
+  
+  // SERP Features
+  serpFeatures: text("serp_features").array(), // featured_snippet, people_also_ask, etc.
+  serpUrl: text("serp_url"),
+  
+  // Competition
+  competitors: text("competitors"), // JSON array of competitor URLs
+  
+  lastChecked: timestamp("last_checked"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("seo_keywords_keyword_idx").on(table.keyword),
+  index("seo_keywords_position_idx").on(table.currentPosition),
+  index("seo_keywords_tracking_idx").on(table.trackingEnabled),
+]);
+
+export const insertSeoKeywordSchema = createInsertSchema(seoKeywords).omit({ id: true, createdAt: true });
+export type InsertSeoKeyword = z.infer<typeof insertSeoKeywordSchema>;
+export type SeoKeyword = typeof seoKeywords.$inferSelect;
+
+// SEO Keyword History - Daily position tracking
+export const seoKeywordHistory = pgTable("seo_keyword_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  keywordId: text("keyword_id").notNull(),
+  position: integer("position"),
+  url: text("url"),
+  serpFeatures: text("serp_features").array(),
+  checkedAt: timestamp("checked_at").defaultNow(),
+}, (table) => [
+  index("seo_keyword_history_keyword_idx").on(table.keywordId),
+  index("seo_keyword_history_date_idx").on(table.checkedAt),
+]);
+
+export type SeoKeywordHistory = typeof seoKeywordHistory.$inferSelect;
+
+// SEO Redirects - 301/302 redirect management
+export const seoRedirects = pgTable("seo_redirects", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sourceUrl: text("source_url").notNull(),
+  targetUrl: text("target_url").notNull(),
+  redirectType: text("redirect_type").default("301"), // 301, 302, 307
+  isRegex: boolean("is_regex").default(false),
+  isActive: boolean("is_active").default(true),
+  hitCount: integer("hit_count").default(0),
+  lastHit: timestamp("last_hit"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("seo_redirects_source_idx").on(table.sourceUrl),
+  index("seo_redirects_active_idx").on(table.isActive),
+]);
+
+export const insertSeoRedirectSchema = createInsertSchema(seoRedirects).omit({ id: true, createdAt: true, updatedAt: true, hitCount: true, lastHit: true });
+export type InsertSeoRedirect = z.infer<typeof insertSeoRedirectSchema>;
+export type SeoRedirect = typeof seoRedirects.$inferSelect;
+
+// SEO 404 Logs - Track broken links
+export const seo404Logs = pgTable("seo_404_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  url: text("url").notNull(),
+  referrer: text("referrer"),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+  hitCount: integer("hit_count").default(1),
+  firstHit: timestamp("first_hit").defaultNow(),
+  lastHit: timestamp("last_hit").defaultNow(),
+  resolved: boolean("resolved").default(false),
+  resolvedRedirectId: text("resolved_redirect_id"),
+  ignored: boolean("ignored").default(false),
+}, (table) => [
+  index("seo_404_url_idx").on(table.url),
+  index("seo_404_resolved_idx").on(table.resolved),
+  index("seo_404_hits_idx").on(table.hitCount),
+]);
+
+export const insertSeo404LogSchema = createInsertSchema(seo404Logs).omit({ id: true, firstHit: true, lastHit: true });
+export type InsertSeo404Log = z.infer<typeof insertSeo404LogSchema>;
+export type Seo404Log = typeof seo404Logs.$inferSelect;
+
+// SEO Audits - Site-wide SEO health checks
+export const seoAudits = pgTable("seo_audits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  auditType: text("audit_type").default("full"), // full, quick, custom
+  status: text("status").default("pending"), // pending, running, completed, failed
+  
+  // Overall Scores
+  overallScore: integer("overall_score").default(0),
+  technicalScore: integer("technical_score").default(0),
+  contentScore: integer("content_score").default(0),
+  linkScore: integer("link_score").default(0),
+  performanceScore: integer("performance_score").default(0),
+  
+  // Issue Counts
+  criticalIssues: integer("critical_issues").default(0),
+  warningIssues: integer("warning_issues").default(0),
+  passedChecks: integer("passed_checks").default(0),
+  
+  // Results
+  issues: text("issues"), // JSON array of issues
+  recommendations: text("recommendations"), // JSON array
+  pagesAnalyzed: integer("pages_analyzed").default(0),
+  
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("seo_audits_status_idx").on(table.status),
+  index("seo_audits_created_idx").on(table.createdAt),
+]);
+
+export const insertSeoAuditSchema = createInsertSchema(seoAudits).omit({ id: true, createdAt: true });
+export type InsertSeoAudit = z.infer<typeof insertSeoAuditSchema>;
+export type SeoAudit = typeof seoAudits.$inferSelect;
+
+// SEO Internal Links - Link structure analysis
+export const seoInternalLinks = pgTable("seo_internal_links", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sourceUrl: text("source_url").notNull(),
+  targetUrl: text("target_url").notNull(),
+  anchorText: text("anchor_text"),
+  linkType: text("link_type").default("internal"), // internal, external, nofollow
+  isFollowed: boolean("is_followed").default(true),
+  isBroken: boolean("is_broken").default(false),
+  lastChecked: timestamp("last_checked").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("seo_links_source_idx").on(table.sourceUrl),
+  index("seo_links_target_idx").on(table.targetUrl),
+  index("seo_links_broken_idx").on(table.isBroken),
+]);
+
+export type SeoInternalLink = typeof seoInternalLinks.$inferSelect;
+
+// SEO Images - Image optimization tracking
+export const seoImages = pgTable("seo_images", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  imageUrl: text("image_url").notNull(),
+  pageUrl: text("page_url"),
+  originalFilename: text("original_filename"),
+  altText: text("alt_text"),
+  altTextGenerated: boolean("alt_text_generated").default(false),
+  title: text("title"),
+  fileSize: integer("file_size"),
+  width: integer("width"),
+  height: integer("height"),
+  format: text("format"),
+  isOptimized: boolean("is_optimized").default(false),
+  hasLazyLoading: boolean("has_lazy_loading").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("seo_images_url_idx").on(table.imageUrl),
+  index("seo_images_page_idx").on(table.pageUrl),
+  index("seo_images_optimized_idx").on(table.isOptimized),
+]);
+
+export type SeoImage = typeof seoImages.$inferSelect;
+
+// SEO Analytics Cache - Store GA/GSC data
+export const seoAnalyticsCache = pgTable("seo_analytics_cache", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  dataType: text("data_type").notNull(), // traffic, search_queries, pages, countries
+  dateRange: text("date_range").notNull(), // 7d, 30d, 90d
+  data: text("data").notNull(), // JSON
+  source: text("source").default("gsc"), // ga4, gsc
+  fetchedAt: timestamp("fetched_at").defaultNow(),
+}, (table) => [
+  index("seo_analytics_type_idx").on(table.dataType),
+  index("seo_analytics_source_idx").on(table.source),
+]);
+
+export type SeoAnalyticsCache = typeof seoAnalyticsCache.$inferSelect;
+
+// SEO Content AI - AI-powered content suggestions
+export const seoContentSuggestions = pgTable("seo_content_suggestions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageUrl: text("page_url"),
+  suggestionType: text("suggestion_type").notNull(), // keyword, topic, content, title, description
+  suggestion: text("suggestion").notNull(),
+  reasoning: text("reasoning"),
+  priority: text("priority").default("medium"), // low, medium, high
+  status: text("status").default("pending"), // pending, applied, dismissed
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("seo_suggestions_page_idx").on(table.pageUrl),
+  index("seo_suggestions_type_idx").on(table.suggestionType),
+  index("seo_suggestions_status_idx").on(table.status),
+]);
+
+export type SeoContentSuggestion = typeof seoContentSuggestions.$inferSelect;
+
+// Schema Types Configuration
+export const seoSchemaTypes = pgTable("seo_schema_types", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  schemaType: text("schema_type").notNull().unique(), // Article, Product, FAQ, HowTo, LocalBusiness, etc.
+  isEnabled: boolean("is_enabled").default(true),
+  defaultTemplate: text("default_template"), // JSON template
+  description: text("description"),
+  applicablePageTypes: text("applicable_page_types").array(), // page, post, product
+}, (table) => [
+  index("seo_schema_types_type_idx").on(table.schemaType),
+]);
+
+export type SeoSchemaType = typeof seoSchemaTypes.$inferSelect;
+
+// Breadcrumb Settings
+export const seoBreadcrumbs = pgTable("seo_breadcrumbs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageUrl: text("page_url").notNull().unique(),
+  breadcrumbPath: text("breadcrumb_path").notNull(), // JSON array of {name, url}
+  customLabels: text("custom_labels"), // JSON object for custom labels
+  isEnabled: boolean("is_enabled").default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("seo_breadcrumbs_url_idx").on(table.pageUrl),
+]);
+
+export type SeoBreadcrumb = typeof seoBreadcrumbs.$inferSelect;
+
+// Request schemas for API validation
+export const createSeoRedirectSchema = z.object({
+  sourceUrl: z.string().min(1, "Source URL is required"),
+  targetUrl: z.string().min(1, "Target URL is required"),
+  redirectType: z.enum(["301", "302", "307"]).default("301"),
+  isRegex: z.boolean().default(false),
+  isActive: z.boolean().default(true),
+  notes: z.string().optional(),
+});
+
+export const updateSeoPageSchema = z.object({
+  focusKeyword: z.string().optional(),
+  secondaryKeywords: z.array(z.string()).optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  canonicalUrl: z.string().optional(),
+  robots: z.string().optional(),
+  ogTitle: z.string().optional(),
+  ogDescription: z.string().optional(),
+  ogImage: z.string().optional(),
+  twitterTitle: z.string().optional(),
+  twitterDescription: z.string().optional(),
+  twitterImage: z.string().optional(),
+  schemaType: z.string().optional(),
+  schemaData: z.string().optional(),
+  inSitemap: z.boolean().optional(),
+  sitemapPriority: z.string().optional(),
+  sitemapChangefreq: z.string().optional(),
+});
+
+export const createSeoKeywordSchema = z.object({
+  keyword: z.string().min(1, "Keyword is required"),
+  targetUrl: z.string().optional(),
+  trackingEnabled: z.boolean().default(false),
+});
+
+export const runSeoAuditSchema = z.object({
+  auditType: z.enum(["full", "quick", "custom"]).default("full"),
+  pageUrls: z.array(z.string()).optional(),
+});
+
+export type CreateSeoRedirect = z.infer<typeof createSeoRedirectSchema>;
+export type UpdateSeoPage = z.infer<typeof updateSeoPageSchema>;
+export type CreateSeoKeyword = z.infer<typeof createSeoKeywordSchema>;
+export type RunSeoAudit = z.infer<typeof runSeoAuditSchema>;

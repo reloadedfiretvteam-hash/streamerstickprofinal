@@ -94,7 +94,7 @@ async function pushToGitHub() {
     
     const { data: newCommit } = await octokit.git.createCommit({
       owner, repo,
-      message: `Deploy: Complete StreamStickPro with SEO, blog system (63 posts), admin panel, GitHub integration`,
+      message: `Fix: Canonical URL consistency - add trailing slashes for Google indexing`,
       tree: tree.sha,
       parents: [baseSha]
     });

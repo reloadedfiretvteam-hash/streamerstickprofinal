@@ -33,9 +33,9 @@ export function FloatingCTA({ onBuyNow }: FloatingCTAProps) {
   };
 
   const scrollToProducts = () => {
-    const productsSection = document.getElementById("firestick-section");
-    if (productsSection) {
-      productsSection.scrollIntoView({ behavior: "smooth" });
+    const shopSection = document.getElementById("shop");
+    if (shopSection) {
+      shopSection.scrollIntoView({ behavior: "smooth" });
     }
     if (onBuyNow) onBuyNow();
   };

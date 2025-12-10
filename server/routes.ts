@@ -3,6 +3,7 @@ import { type Server } from "http";
 import { storage } from "./storage";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { analyzeSeo } from "./seoAnalyzer";
+import { registerSeoRoutes } from "./seo-routes";
 import { 
   generateContentOutline, 
   generateFullContent, 
@@ -2018,7 +2019,7 @@ Host: https://streamstickpro.com
         return res.status(400).json({ error: 'Password is required' });
       }
 
-      const hash = await hashPassword(password);
+      const hash = hashPasswordLegacy(password);
       res.json({ 
         hash,
         instructions: 'Set this hash as ADMIN_PASSWORD_HASH in your environment variables'
@@ -2220,6 +2221,9 @@ Host: https://streamstickpro.com
       res.status(500).json({ error: `Failed to push to GitHub: ${error.message}` });
     }
   });
+
+  // Register SEO Toolkit Routes (Rank Math Premium Clone)
+  registerSeoRoutes(app);
 
   return httpServer;
 }

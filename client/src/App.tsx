@@ -14,8 +14,6 @@ import Success from "@/pages/Success";
 import Blog from "@/pages/Blog";
 import CustomerLogin from "@/pages/CustomerLogin";
 import CustomerPortal from "@/pages/CustomerPortal";
-import FireSticksPage from "@/pages/FireSticksPage";
-import IPTVPage from "@/pages/IPTVPage";
 import { CartDrawer } from "@/components/CartDrawer";
 import { WishlistDrawer } from "@/components/WishlistDrawer";
 
@@ -43,8 +41,6 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={MainStore} />
-      <Route path="/products/fire-sticks" component={FireSticksPage} />
-      <Route path="/products/iptv" component={IPTVPage} />
       <Route path="/shadow-services" component={ShadowStore} />
       <Route path="/admin" component={AdminPanel} />
       <Route path="/checkout" component={Checkout} />

@@ -14,7 +14,7 @@ interface MobileNavProps {
 
 export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { items, openCart } = useCart();
 
   const handleNavClick = (action: () => void) => {
@@ -22,13 +22,24 @@ export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq }: MobileNa
     setIsOpen(false);
   };
 
+  const navigateToSection = (sectionId: string) => {
+    if (location !== "/") {
+      setLocation("/#" + sectionId);
+      setTimeout(() => {
+        document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const menuItems = [
-    { label: "Home", icon: Home, action: () => { window.scrollTo({ top: 0, behavior: 'smooth' }); setLocation("/"); } },
-    { label: "Fire Sticks", icon: Tv, action: () => setLocation("/products/fire-sticks") },
-    { label: "IPTV Plans", icon: Wifi, action: () => setLocation("/products/iptv") },
-    { label: "How It Works", icon: ChevronRight, action: scrollToAbout },
+    { label: "Home", icon: Home, action: () => { setLocation("/"); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
+    { label: "Fire Sticks", icon: Tv, action: () => navigateToSection("shop") },
+    { label: "IPTV Plans", icon: Wifi, action: () => navigateToSection("shop") },
+    { label: "How It Works", icon: ChevronRight, action: () => navigateToSection("about") },
     { label: "Blog", icon: BookOpen, action: () => setLocation("/blog") },
-    { label: "Support & FAQ", icon: HelpCircle, action: scrollToFaq },
+    { label: "Support & FAQ", icon: HelpCircle, action: () => navigateToSection("faq") },
   ];
 
   return (
