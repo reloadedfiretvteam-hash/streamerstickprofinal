@@ -141,7 +141,7 @@ The application maintains two separate product catalogs to comply with payment p
 
 ### Email Service Architecture
 
-**Provider:** Resend API via Replit Connectors
+**Provider:** Resend API
 
 **Email Templates:**
 1. Order Confirmation - Immediate upon checkout completion
@@ -152,12 +152,8 @@ The application maintains two separate product catalogs to comply with payment p
    - Fire Stick specific instructions (conditional)
 
 **Design Pattern:**
-- `getUncachableResendClient()` - Fetches fresh API credentials from Replit Connectors on each send
-- Prevents stale credentials in long-running processes
-- Similar pattern used for Stripe client (`getUncachableStripeClient()`)
-
-**Why Uncachable Clients:**
-Replit Deployments may rotate secrets or update connector configs. Fetching fresh credentials on each API call ensures the application always uses current values without requiring restarts.
+- API keys managed via Cloudflare Worker environment variables
+- Credentials stored in wrangler.toml secrets configuration
 
 ### Frontend Architecture
 
@@ -241,19 +237,16 @@ Admin panel is intentionally simple - no complex dashboards or charts. Focus on 
 
 ### Payment Processing
 - **Stripe:** Checkout Sessions, Payment Intents, Webhooks
-- **stripe-replit-sync:** Custom package for syncing Stripe events to PostgreSQL
-- Credentials managed via Replit Connectors (development/production environments)
+- Credentials managed via Cloudflare Worker environment variables
 
 ### Email Service
 - **Resend:** Transactional email API
-- Credentials via Replit Connectors
-- Fallback handling if connector unavailable
+- Credentials via Cloudflare Worker environment variables
 
 ### Database
-- **PostgreSQL:** Primary data store
-- Managed via `DATABASE_URL` environment variable
-- Connection pooling with `pg` library
-- Drizzle Kit for migrations (`npm run db:push`)
+- **Supabase (PostgreSQL):** Primary data store
+- Managed via Cloudflare Worker environment variables
+- Direct Supabase client connections
 
 ### Storage
 - **Supabase Storage:** Image hosting and CDN
