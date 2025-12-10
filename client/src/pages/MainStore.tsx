@@ -254,6 +254,18 @@ export default function MainStore() {
     document.documentElement.classList.add("dark");
     document.title = "StreamStickPro - Jailbroken Fire Sticks & IPTV | 18,000+ Channels";
     loadProducts();
+    
+    // Handle section scroll from query params (e.g., /?section=shop)
+    const urlParams = new URLSearchParams(window.location.search);
+    const section = urlParams.get('section');
+    if (section) {
+      setTimeout(() => {
+        const element = document.getElementById(section);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 500);
+    }
   }, []);
 
   const loadProducts = async () => {

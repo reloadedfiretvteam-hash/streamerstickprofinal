@@ -24,14 +24,15 @@ export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq }: MobileNa
 
   const navigateToSection = (sectionId: string) => {
     if (location !== "/" && !location.startsWith("/?")) {
-      window.location.href = "/?section=" + sectionId;
+      setLocation("/?section=" + sectionId);
     } else {
       document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
     }
+    setIsOpen(false);
   };
 
   const menuItems = [
-    { label: "Home", icon: Home, action: () => { window.location.href = "/"; } },
+    { label: "Home", icon: Home, action: () => { setLocation("/"); } },
     { label: "Fire Sticks", icon: Tv, action: () => navigateToSection("shop") },
     { label: "IPTV Plans", icon: Wifi, action: () => navigateToSection("shop") },
     { label: "How It Works", icon: ChevronRight, action: () => navigateToSection("about") },
