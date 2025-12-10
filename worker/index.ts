@@ -10,6 +10,7 @@ import { createVisitorRoutes } from './routes/visitors';
 import { createCustomerRoutes } from './routes/customers';
 import { createTrialRoutes } from './routes/trial';
 import { createAuthRoutes, authMiddleware } from './routes/auth';
+import { createBlogRoutes } from './routes/blog';
 
 export interface Env {
   DATABASE_URL: string;
@@ -46,6 +47,7 @@ app.route('/api/stripe', createWebhookRoutes());
 app.route('/api/track', createVisitorRoutes());
 app.route('/api/customer', createCustomerRoutes());
 app.route('/api/free-trial', createTrialRoutes());
+app.route('/api/blog', createBlogRoutes());
 
 app.get('/api/stripe/config', async (c) => {
   const publishableKey = c.env.STRIPE_PUBLISHABLE_KEY;
