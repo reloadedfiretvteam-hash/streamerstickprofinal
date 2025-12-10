@@ -1,9 +1,11 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile } from "fs/promises";
+import { rm, readFile, writeFile, mkdir } from "fs/promises";
+import path from "path";
+import { existsSync } from "fs";
 
-// server deps to bundle to reduce openat(2) syscalls
-// which helps cold start times
+const isCloudflare = process.env.CF_PAGES === "1" || existsSync("wrangler.toml");
+
 const allowlist = [
   "@google/generative-ai",
   "axios",
@@ -32,7 +34,50 @@ const allowlist = [
   "zod-validation-error",
 ];
 
-async function buildAll() {
+async function buildCloudflare() {
+  await rm("dist", { recursive: true, force: true });
+  await mkdir("dist", { recursive: true });
+
+  console.log("Building client with Vite (Cloudflare config)...");
+  await viteBuild({
+    configFile: path.resolve(process.cwd(), "vite.config.cloudflare.ts"),
+    build: {
+      outDir: path.resolve(process.cwd(), "dist"),
+      emptyOutDir: false,
+    },
+  });
+
+  console.log("Building Cloudflare Worker...");
+  await esbuild({
+    entryPoints: ["worker/index.ts"],
+    platform: "browser",
+    target: "esnext",
+    bundle: true,
+    format: "esm",
+    outfile: "dist/_worker.js",
+    define: {
+      "process.env.NODE_ENV": '"production"',
+    },
+    minify: true,
+    sourcemap: false,
+    conditions: ["workerd", "worker", "browser"],
+    mainFields: ["browser", "module", "main"],
+    logLevel: "info",
+    external: ["node:*"],
+  });
+
+  console.log("Creating _routes.json for Cloudflare Pages...");
+  const routesJson = {
+    version: 1,
+    include: ["/api/*"],
+    exclude: ["/assets/*", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.ico", "/*.woff", "/*.woff2"]
+  };
+  await writeFile("dist/_routes.json", JSON.stringify(routesJson, null, 2));
+
+  console.log("Cloudflare Pages build complete!");
+}
+
+async function buildNode() {
   await rm("dist", { recursive: true, force: true });
 
   console.log("building client...");
@@ -59,6 +104,16 @@ async function buildAll() {
     external: externals,
     logLevel: "info",
   });
+}
+
+async function buildAll() {
+  if (isCloudflare) {
+    console.log("Detected Cloudflare environment, building for Pages...");
+    await buildCloudflare();
+  } else {
+    console.log("Building for Node.js...");
+    await buildNode();
+  }
 }
 
 buildAll().catch((err) => {
