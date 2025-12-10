@@ -12,7 +12,8 @@ import {
   Tv,
   Zap,
   Shield,
-  Star
+  Star,
+  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,6 +54,7 @@ export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showPostNotFound, setShowPostNotFound] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -109,20 +111,27 @@ export default function Blog() {
       const postFromSlug = posts.find(p => p.slug === params.slug);
       if (postFromSlug) {
         setSelectedPost(postFromSlug);
+        setShowPostNotFound(false);
         document.title = `${postFromSlug.title} | StreamStickPro Blog`;
       } else {
+        // Post not found - redirect to blog with message
         setSelectedPost(null);
+        setShowPostNotFound(true);
+        setLocation("/blog");
         document.title = "Blog | StreamStickPro - Cord Cutting Guides & Tips";
+        // Clear the message after 5 seconds
+        setTimeout(() => setShowPostNotFound(false), 5000);
       }
     } else {
       setSelectedPost(null);
+      setShowPostNotFound(false);
       document.title = "Blog | StreamStickPro - Cord Cutting Guides & Tips";
     }
     
     return () => {
       document.title = "StreamStickPro - Jailbroken Fire Sticks & IPTV";
     };
-  }, [params.slug, posts]);
+  }, [params.slug, posts, setLocation]);
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -298,14 +307,17 @@ export default function Blog() {
           <Flame className="absolute w-32 h-32 top-4 right-8 text-white" />
         </div>
         <div className="relative h-full flex flex-col items-center justify-center px-4">
-          <motion.h1 
-            className="text-4xl sm:text-5xl md:text-6xl font-bold text-white text-center mb-4"
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            data-testid="heading-blog-title"
           >
-            StreamStickPro Blog
-          </motion.h1>
+            <h1 
+              className="text-4xl sm:text-5xl md:text-6xl font-bold text-white text-center mb-4"
+              data-testid="heading-blog-title"
+            >
+              StreamStickPro Blog
+            </h1>
+          </motion.div>
           <motion.p 
             className="text-lg text-gray-100 text-center max-w-2xl"
             initial={{ opacity: 0 }}
@@ -319,6 +331,20 @@ export default function Blog() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {showPostNotFound && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="mb-6 p-4 bg-yellow-900/30 border border-yellow-600/50 rounded-lg"
+          >
+            <p className="text-yellow-200 text-center">
+              <AlertCircle className="w-5 h-5 inline mr-2" />
+              The post you're looking for has moved or is not available. Check out our featured posts below.
+            </p>
+          </motion.div>
+        )}
+        
         {loading ? (
           <div className="text-center py-12" data-testid="text-loading">
             <p className="text-gray-400">Loading blog posts...</p>

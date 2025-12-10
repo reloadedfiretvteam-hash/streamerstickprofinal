@@ -23,9 +23,9 @@ export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq }: MobileNa
   };
 
   const menuItems = [
-    { label: "Home", icon: Home, action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
-    { label: "Fire Sticks", icon: Tv, action: scrollToShop },
-    { label: "IPTV Plans", icon: Wifi, action: scrollToShop },
+    { label: "Home", icon: Home, action: () => { window.scrollTo({ top: 0, behavior: 'smooth' }); setLocation("/"); } },
+    { label: "Fire Sticks", icon: Tv, action: () => setLocation("/products/fire-sticks") },
+    { label: "IPTV Plans", icon: Wifi, action: () => setLocation("/products/iptv") },
     { label: "How It Works", icon: ChevronRight, action: scrollToAbout },
     { label: "Blog", icon: BookOpen, action: () => setLocation("/blog") },
     { label: "Support & FAQ", icon: HelpCircle, action: scrollToFaq },
