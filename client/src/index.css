@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Tailwind v4 content sources - ensures all responsive classes are compiled */
+@source "./**/*.tsx";
+@source "./**/*.ts";
+@source "../index.html";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
