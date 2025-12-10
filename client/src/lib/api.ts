@@ -4,14 +4,20 @@ export function getApiBase(): string {
     return '';
   }
   
-  // For production on Cloudflare Pages, use same-origin (empty string)
-  // The Cloudflare Worker handles /api/* routes directly
-  // No external backend dependency needed
+  // For production, use Supabase Edge Functions
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  if (supabaseUrl) {
+    return `${supabaseUrl}/functions/v1`;
+  }
+  
+  // Fallback to same-origin
   return '';
 }
 
 export async function apiCall(endpoint: string, options?: RequestInit): Promise<Response> {
   const base = getApiBase();
-  const url = base ? `${base}${endpoint}` : endpoint;
+  // Map /api/* to Supabase function names
+  const functionName = endpoint.replace(/^\/api\//, '').split('/')[0];
+  const url = base ? `${base}/${functionName}` : endpoint;
   return fetch(url, options);
 }
