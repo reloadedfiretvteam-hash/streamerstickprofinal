@@ -114,14 +114,24 @@ export async function fetchBlogPosts(publishedOnly = true) {
   try {
     let query = supabase.from('blogPosts').select('*');
     
-    if (publishedOnly) {
-      query = query.eq('published', true);
-    }
-    
-    const { data, error } = await query.order('publishedAt', { ascending: false });
+    const { data, error } = await query;
     
     if (error) throw error;
-    return { success: true, data: data || [] };
+    
+    let posts = data || [];
+    
+    // Map Supabase column names to expected format and filter
+    posts = posts.map((post: any) => ({
+      ...post,
+      // Handle both naming conventions
+      published: post.published ?? post.is_published ?? true,
+      createdAt: post.createdAt ?? post.published_at ?? post.created_at ?? new Date().toISOString(),
+    })).filter((post: any) => !publishedOnly || post.published);
+    
+    // Sort by date descending
+    posts.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
+    return { success: true, data: posts };
   } catch (err: any) {
     console.error('Failed to fetch blog posts:', err);
     return { success: false, data: [], error: err.message };

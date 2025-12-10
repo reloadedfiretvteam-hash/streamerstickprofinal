@@ -216,7 +216,10 @@ export default function Blog() {
                       key={product.id}
                       whileHover={{ y: -3, scale: 1.02 }}
                       className="cursor-pointer"
-                      onClick={() => setLocation("/?section=shop")}
+                      onClick={() => {
+                        setLocation("/?section=shop");
+                        setTimeout(() => window.dispatchEvent(new Event('scrollToSection')), 100);
+                      }}
                       data-testid={`card-related-product-${product.id}`}
                     >
                       <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-orange-500 transition-all h-full">
@@ -260,7 +263,10 @@ export default function Blog() {
                     <Button 
                       size="lg" 
                       className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap"
-                      onClick={() => setLocation("/?section=shop")}
+                      onClick={() => {
+                        setLocation("/?section=shop");
+                        setTimeout(() => window.dispatchEvent(new Event('scrollToSection')), 100);
+                      }}
                       data-testid="button-shop-now"
                     >
                       <Flame className="w-4 h-4 mr-2" />

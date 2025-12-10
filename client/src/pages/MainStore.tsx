@@ -189,14 +189,28 @@ export default function MainStore() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.3]);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const section = params.get('section');
-    if (section) {
-      setTimeout(() => {
-        document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' });
-        window.history.replaceState({}, '', '/');
-      }, 300);
-    }
+    const handleScroll = () => {
+      const params = new URLSearchParams(window.location.search);
+      const section = params.get('section');
+      if (section) {
+        setTimeout(() => {
+          document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' });
+          window.history.replaceState({}, '', '/');
+        }, 300);
+      }
+    };
+    
+    // Run on mount
+    handleScroll();
+    
+    // Also listen for popstate (back/forward nav) and custom event for internal nav
+    window.addEventListener('popstate', handleScroll);
+    window.addEventListener('scrollToSection', handleScroll);
+    
+    return () => {
+      window.removeEventListener('popstate', handleScroll);
+      window.removeEventListener('scrollToSection', handleScroll);
+    };
   }, []);
 
   const staggerContainer = {
