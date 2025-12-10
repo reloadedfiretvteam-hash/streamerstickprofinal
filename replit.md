@@ -3,15 +3,25 @@
 ## PROJECT STATUS: ✅ COMPLETE & MERGED TO CLEAN-MAIN
 
 **Latest Deployment:**
-- Commit: `49decf0cd8012ccc70452e1c23be51292f8a47a9`
+- Commit: Recent (blog posts + config updates pushed)
 - Branch: `clean-main`
-- Files: 129 total
-- Database Schema: Updated & Verified
+- Files: 197 total
+- Database: 81 blog posts (expanded from 49)
+- Database Schema: Updated & Verified with optimized indexes
+- Wrangler.toml: Updated with production secrets configuration
 - All features production-ready
 
 ## Overview
 
-StreamStickPro is a full-stack e-commerce application for selling jailbroken Fire Sticks and IPTV subscriptions. The platform implements a dual-store architecture with product cloaking to present different products to customers versus payment processors. It features automated email delivery of credentials, Stripe payment integration, and a comprehensive admin panel.
+StreamStickPro is a full-stack e-commerce application for selling jailbroken Fire Sticks and IPTV subscriptions. The platform implements a dual-store architecture with product cloaking to present different products to customers versus payment processors. It features automated email delivery of credentials, Stripe payment integration, and a comprehensive admin panel with 81 SEO-optimized blog posts targeting US, UK, and Canada markets.
+
+**Recent Updates (December 2025):**
+- Added 32 new SEO blog posts covering Premier League, NHL, Sky Sports, NFL, MotoGP/F1, Cricket, Boxing, and family streaming guides
+- Updated navigation to use query parameters (?section=shop) for reliable page routing
+- Fixed WhatsApp chat button z-index for proper visibility
+- Updated messaging to emphasize "10-minute setup" with instant credentials and 24/7 support
+- Configured wrangler.toml with production secrets and environment variables
+- Set CLOUDFLARE_ACCOUNT_ID environment variable
 
 ## User Preferences
 
