@@ -1,5 +1,6 @@
 import { useState, useEffect, ChangeEvent, useCallback } from "react";
 import { useLocation } from "wouter";
+import { apiCall } from "@/lib/api";
 import { 
   LayoutDashboard, 
   Package, 
@@ -377,7 +378,7 @@ export default function AdminPanel() {
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }
-    return fetch(url, { ...options, headers });
+    return apiCall(url, { ...options, headers });
   }, [authToken]);
 
   const checkAuth = useCallback(async () => {
@@ -388,7 +389,7 @@ export default function AdminPanel() {
     }
 
     try {
-      const response = await fetch('/api/auth/verify', {
+      const response = await apiCall('/api/auth/verify', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -421,7 +422,7 @@ export default function AdminPanel() {
     setLoginError(null);
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await apiCall('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginForm)

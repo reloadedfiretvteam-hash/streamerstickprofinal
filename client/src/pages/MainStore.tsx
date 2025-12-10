@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "wouter";
+import { apiCall } from "@/lib/api";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, Play, X, Gift, ChevronRight, Heart } from "lucide-react";
 import { useCart, useWishlist } from "@/lib/store";
@@ -258,7 +259,7 @@ export default function MainStore() {
 
   const loadProducts = async () => {
     try {
-      const response = await fetch('/api/products');
+      const response = await apiCall('/api/products');
       const result = await response.json();
       
       if (result.data && result.data.length > 0) {

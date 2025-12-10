@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { apiCall } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -80,8 +81,8 @@ export default function CustomerPortal() {
   const loadCustomerData = async () => {
     try {
       const [profileRes, ordersRes] = await Promise.all([
-        fetch("/api/customer/me", { headers: getAuthHeaders() }),
-        fetch("/api/customer/orders", { headers: getAuthHeaders() }),
+        apiCall("/api/customer/me", { headers: getAuthHeaders() }),
+        apiCall("/api/customer/orders", { headers: getAuthHeaders() }),
       ]);
 
       if (!profileRes.ok) {
@@ -119,7 +120,7 @@ export default function CustomerPortal() {
     setIsSaving(true);
 
     try {
-      const response = await fetch("/api/customer/profile", {
+      const response = await apiCall("/api/customer/profile", {
         method: "PUT",
         headers: getAuthHeaders(),
         body: JSON.stringify(profileData),
@@ -171,7 +172,7 @@ export default function CustomerPortal() {
     setIsSaving(true);
 
     try {
-      const response = await fetch("/api/customer/password", {
+      const response = await apiCall("/api/customer/password", {
         method: "PUT",
         headers: getAuthHeaders(),
         body: JSON.stringify({

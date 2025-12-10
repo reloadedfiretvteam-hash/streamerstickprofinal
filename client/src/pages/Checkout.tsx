@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { apiCall } from "@/lib/api";
 import { useCart } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -123,7 +124,7 @@ export default function Checkout() {
         checkoutPayload.countryPreference = buildCountryPreference();
       }
 
-      const response = await fetch("/api/checkout", {
+      const response = await apiCall("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(checkoutPayload),

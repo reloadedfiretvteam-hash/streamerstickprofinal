@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
+import { apiCall } from "@/lib/api";
 import { motion } from "framer-motion";
 import { 
   Flame, 
@@ -57,7 +58,7 @@ export default function Blog() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("/api/products");
+        const response = await apiCall("/api/products");
         if (response.ok) {
           const data = await response.json();
           setProducts(data.data || []);
@@ -72,7 +73,7 @@ export default function Blog() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch("/api/blog/posts");
+        const response = await apiCall("/api/blog/posts");
         if (response.ok) {
           const data = await response.json();
           const fetchedPosts = (data.data || []).map((post: any) => ({

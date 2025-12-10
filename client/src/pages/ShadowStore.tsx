@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { apiCall } from "@/lib/api";
 import { motion } from "framer-motion";
 import { LayoutGrid, Code, ArrowRight, Check, Star, Users, Award, Globe, Mail, Phone, MapPin, ChevronRight, Zap, Shield, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -220,7 +221,7 @@ export default function ShadowStore() {
 
     setIsProcessing(true);
     try {
-      const response = await fetch('/api/checkout', {
+      const response = await apiCall('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiCall } from "@/lib/api";
 import { Gift, Mail, User, Loader2, Check, Clock, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,7 @@ export function FreeTrial() {
     setError("");
 
     try {
-      const response = await fetch("/api/free-trial", {
+      const response = await apiCall("/api/free-trial", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, name })
