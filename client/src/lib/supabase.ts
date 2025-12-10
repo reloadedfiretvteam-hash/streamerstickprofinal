@@ -94,3 +94,52 @@ export function dollarsToCents(dollars: number): number {
 export function centsToDollars(cents: number): number {
   return cents / 100;
 }
+
+// Direct database queries for production (bypasses API layer)
+export async function fetchProducts() {
+  try {
+    const { data, error } = await supabase
+      .from('realProducts')
+      .select('*');
+    
+    if (error) throw error;
+    return { success: true, data: data || [] };
+  } catch (err: any) {
+    console.error('Failed to fetch products:', err);
+    return { success: false, data: [], error: err.message };
+  }
+}
+
+export async function fetchBlogPosts(publishedOnly = true) {
+  try {
+    let query = supabase.from('blogPosts').select('*');
+    
+    if (publishedOnly) {
+      query = query.eq('published', true);
+    }
+    
+    const { data, error } = await query.order('publishedAt', { ascending: false });
+    
+    if (error) throw error;
+    return { success: true, data: data || [] };
+  } catch (err: any) {
+    console.error('Failed to fetch blog posts:', err);
+    return { success: false, data: [], error: err.message };
+  }
+}
+
+export async function fetchBlogPostBySlug(slug: string) {
+  try {
+    const { data, error } = await supabase
+      .from('blogPosts')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    
+    if (error) throw error;
+    return { success: true, data };
+  } catch (err: any) {
+    console.error('Failed to fetch blog post:', err);
+    return { success: false, data: null, error: err.message };
+  }
+}
