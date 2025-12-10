@@ -323,24 +323,27 @@ export default function MainStore() {
   const scrollToShop = () => {
     const element = document.getElementById('shop');
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      window.scrollBy(0, -60);
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
     }
   };
 
   const scrollToAbout = () => {
     const element = document.getElementById('about');
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      window.scrollBy(0, -60);
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
     }
   };
 
   const scrollToFaq = () => {
     const element = document.getElementById('faq');
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      window.scrollBy(0, -60);
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
     }
   };
 
