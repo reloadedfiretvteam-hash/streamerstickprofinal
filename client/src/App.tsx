@@ -12,6 +12,7 @@ import AdminPanel from "@/pages/AdminPanel";
 import Checkout from "@/pages/Checkout";
 import Success from "@/pages/Success";
 import Blog from "@/pages/Blog";
+import EliteSEO from "@/pages/EliteSEO";
 import CustomerLogin from "@/pages/CustomerLogin";
 import CustomerPortal from "@/pages/CustomerPortal";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -47,6 +48,7 @@ function Router() {
       <Route path="/success" component={Success} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={Blog} />
+      <Route path="/elite-seo" component={EliteSEO} />
       <Route path="/customer-login" component={CustomerLogin} />
       <Route path="/my-account" component={CustomerPortal} />
       <Route component={NotFound} />
