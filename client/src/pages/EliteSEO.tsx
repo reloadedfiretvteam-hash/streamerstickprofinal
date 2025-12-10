@@ -55,18 +55,23 @@ export default function EliteSEO() {
     const sitemapUrl = `${siteBaseUrl}/sitemap.xml`;
     
     try {
-      const response = await fetch(sitemapUrl, { method: 'HEAD' });
+      const response = await fetch(sitemapUrl, { 
+        method: 'HEAD',
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
       setSitemapCheck({
         exists: response.ok,
         url: sitemapUrl,
         status: response.status
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error checking sitemap:', error);
       setSitemapCheck({
         exists: false,
         url: sitemapUrl,
-        status: 0
+        status: error.name === 'TimeoutError' ? 408 : 0
       });
+      toast.error("Failed to check sitemap: " + (error.message || "Network error"));
     }
     
     setChecking(false);
@@ -77,7 +82,9 @@ export default function EliteSEO() {
     const robotsUrl = `${siteBaseUrl}/robots.txt`;
     
     try {
-      const response = await fetch(robotsUrl);
+      const response = await fetch(robotsUrl, {
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
       if (response.ok) {
         const content = await response.text();
         setRobotsCheck({
@@ -93,12 +100,14 @@ export default function EliteSEO() {
           hasSitemap: false
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error checking robots.txt:', error);
       setRobotsCheck({
         exists: false,
         url: robotsUrl,
         hasSitemap: false
       });
+      toast.error("Failed to check robots.txt: " + (error.message || "Network error"));
     }
     
     setChecking(false);
@@ -165,16 +174,49 @@ export default function EliteSEO() {
 }
 </script>`;
 
-  const copyToClipboard = (text: string, type: 'meta' | 'jsonld') => {
-    navigator.clipboard.writeText(text);
-    if (type === 'meta') {
-      setCopiedMeta(true);
-      setTimeout(() => setCopiedMeta(false), 2000);
-    } else {
-      setCopiedJsonLd(true);
-      setTimeout(() => setCopiedJsonLd(false), 2000);
+  const copyToClipboard = async (text: string, type: 'meta' | 'jsonld') => {
+    try {
+      // Check if clipboard API is available
+      if (!navigator.clipboard) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          if (type === 'meta') {
+            setCopiedMeta(true);
+            setTimeout(() => setCopiedMeta(false), 2000);
+          } else {
+            setCopiedJsonLd(true);
+            setTimeout(() => setCopiedJsonLd(false), 2000);
+          }
+          toast.success("Copied to clipboard!");
+        } catch (err) {
+          document.body.removeChild(textArea);
+          toast.error("Failed to copy to clipboard");
+        }
+        return;
+      }
+
+      // Modern clipboard API
+      await navigator.clipboard.writeText(text);
+      if (type === 'meta') {
+        setCopiedMeta(true);
+        setTimeout(() => setCopiedMeta(false), 2000);
+      } else {
+        setCopiedJsonLd(true);
+        setTimeout(() => setCopiedJsonLd(false), 2000);
+      }
+      toast.success("Copied to clipboard!");
+    } catch (err: any) {
+      console.error('Failed to copy:', err);
+      toast.error("Failed to copy to clipboard. Please copy manually.");
     }
-    toast.success("Copied to clipboard!");
   };
 
   return (
