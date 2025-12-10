@@ -7,7 +7,7 @@
  * 
  * Required Environment Variables:
  * - SUPABASE_URL: Your Supabase project URL
- * - SUPABASE_KEY: Service role key or anon key
+ * - SUPABASE_KEY or SUPABASE_SERVICE_ROLE_KEY: Your Supabase service role key (preferred) or anon key
  * - SITE_BASE_URL: Base URL for your site (e.g., https://streamstickpro.com)
  * 
  * Usage:
