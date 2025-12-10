@@ -35,13 +35,37 @@ export default function EliteSEO() {
     setChecking(true);
     
     try {
-      // Check sitemap.xml
-      const sitemapResponse = await fetch(sitemapUrl, { method: 'HEAD' });
-      setSitemapExists(sitemapResponse.ok);
+      // Check sitemap.xml with timeout
+      const sitemapController = new AbortController();
+      const sitemapTimeout = setTimeout(() => sitemapController.abort(), 5000);
       
-      // Check robots.txt
-      const robotsResponse = await fetch(robotsUrl, { method: 'HEAD' });
-      setRobotsExists(robotsResponse.ok);
+      try {
+        const sitemapResponse = await fetch(sitemapUrl, { 
+          method: 'HEAD',
+          signal: sitemapController.signal 
+        });
+        setSitemapExists(sitemapResponse.ok);
+      } catch (fetchErr) {
+        setSitemapExists(false);
+      } finally {
+        clearTimeout(sitemapTimeout);
+      }
+      
+      // Check robots.txt with timeout
+      const robotsController = new AbortController();
+      const robotsTimeout = setTimeout(() => robotsController.abort(), 5000);
+      
+      try {
+        const robotsResponse = await fetch(robotsUrl, { 
+          method: 'HEAD',
+          signal: robotsController.signal 
+        });
+        setRobotsExists(robotsResponse.ok);
+      } catch (fetchErr) {
+        setRobotsExists(false);
+      } finally {
+        clearTimeout(robotsTimeout);
+      }
       
       toast({
         title: "Check Complete",
@@ -63,11 +87,20 @@ export default function EliteSEO() {
   }, []);
   
   const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Copied!",
-      description: `${label} copied to clipboard`,
-    });
+    try {
+      navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied!",
+        description: `${label} copied to clipboard`,
+      });
+    } catch (err) {
+      // Fallback for browsers without clipboard API
+      toast({
+        title: "Copy Failed",
+        description: "Please copy manually",
+        variant: "destructive"
+      });
+    }
   };
   
   const pingBing = () => {
