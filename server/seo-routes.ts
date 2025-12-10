@@ -1046,15 +1046,15 @@ export function registerSeoRoutes(app: Express): void {
       await seoStorage.deleteAllInternalLinks();
       
       const pages = await seoStorage.getAllPages();
-      const blogPosts = await import("./storage").then(m => m.storage.getBlogPosts());
+      const blogPosts = await import("./storage").then(m => m.storage.getAllBlogPosts());
       const products = await import("./storage").then(m => m.storage.getRealProducts());
       
-      const sitePages = [
+      const sitePages: Array<{url: string; title: string}> = [
         { url: '/', title: 'Home' },
         { url: '/blog', title: 'Blog' },
         { url: '/checkout', title: 'Checkout' },
-        ...blogPosts.filter(p => p.published).map(p => ({ url: `/blog/${p.slug}`, title: p.title })),
-        ...products.map(p => ({ url: `/product/${p.id}`, title: p.name })),
+        ...blogPosts.filter((p: any) => p.published).map((p: any) => ({ url: `/blog/${p.slug}`, title: p.title })),
+        ...products.map((p: any) => ({ url: `/product/${p.id}`, title: p.name })),
       ];
       
       let linksCreated = 0;

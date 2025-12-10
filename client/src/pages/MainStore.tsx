@@ -320,8 +320,8 @@ export default function MainStore() {
     return { unitPrice: discountedUnitPrice, totalPrice, savings };
   };
 
-  const scrollToShop = () => {
-    const element = document.getElementById('shop');
+  const navigateToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
     if (element) {
       setTimeout(() => {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -329,23 +329,9 @@ export default function MainStore() {
     }
   };
 
-  const scrollToAbout = () => {
-    const element = document.getElementById('about');
-    if (element) {
-      setTimeout(() => {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 0);
-    }
-  };
-
-  const scrollToFaq = () => {
-    const element = document.getElementById('faq');
-    if (element) {
-      setTimeout(() => {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 0);
-    }
-  };
+  const scrollToShop = () => navigateToSection('shop');
+  const scrollToAbout = () => navigateToSection('about');
+  const scrollToFaq = () => navigateToSection('faq');
 
   const firestickProducts = products.filter(p => p.category === 'firestick');
   const iptvProducts = products.filter(p => p.category === 'iptv');
