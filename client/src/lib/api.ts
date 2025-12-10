@@ -4,15 +4,24 @@ export function getApiBase(): string {
     return '';
   }
   
-  // For production, use the environment variable or the current origin
+  // For production, use the environment variable if set
   const envBase = import.meta.env.VITE_API_BASE_URL;
   if (envBase) {
     return envBase;
   }
   
-  // Fallback to current origin
+  // Hardcoded fallback for Cloudflare Pages deployment
+  // This ensures API calls always go to the correct backend server
+  // regardless of whether environment variables are configured
   if (typeof window !== 'undefined') {
-    return window.location.origin;
+    const hostname = window.location.hostname;
+    // If running on pages.dev or any production domain, use the backend server
+    if (hostname.includes('pages.dev') || 
+        hostname.includes('streamstickpro') ||
+        hostname.includes('streamerstickpro') ||
+        !hostname.includes('localhost')) {
+      return 'https://secure.streamstickpro.com';
+    }
   }
   
   return '';
