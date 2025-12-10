@@ -321,15 +321,27 @@ export default function MainStore() {
   };
 
   const scrollToShop = () => {
-    document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
+    const element = document.getElementById('shop');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.scrollBy(0, -60);
+    }
   };
 
   const scrollToAbout = () => {
-    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+    const element = document.getElementById('about');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.scrollBy(0, -60);
+    }
   };
 
   const scrollToFaq = () => {
-    document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
+    const element = document.getElementById('faq');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.scrollBy(0, -60);
+    }
   };
 
   const firestickProducts = products.filter(p => p.category === 'firestick');
