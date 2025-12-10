@@ -8,7 +8,12 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     // Try service role key first, fall back to anon key
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_ANON_KEY");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const supabaseKey = serviceRoleKey || anonKey;
+    
+    // Log which key type is being used (for debugging, not in production)
+    const keyType = serviceRoleKey ? "service_role" : (anonKey ? "anon" : "none");
     
     if (!supabaseUrl || !supabaseKey) {
       return new Response(JSON.stringify({ 
@@ -38,6 +43,7 @@ serve(async (req) => {
             success: true,
             table: tableName,
             count: data.length,
+            keyType: keyType, // Include for debugging
             data: data
           }), { 
             headers: { "Content-Type": "application/json" }, 

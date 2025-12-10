@@ -79,26 +79,36 @@ function generateSitemapXML(posts) {
   
   const now = new Date().toISOString().split('T')[0];
   
-  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  const xmlParts = [];
+  xmlParts.push('<?xml version="1.0" encoding="UTF-8"?>\n');
+  xmlParts.push('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n');
   
   // Add static pages
   for (const page of STATIC_PAGES) {
-    xml += '  <url>\n';
-    xml += `    <loc>${SITE_BASE_URL}${page.loc}</loc>\n`;
-    xml += `    <lastmod>${now}</lastmod>\n`;
-    xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
-    xml += `    <priority>${page.priority}</priority>\n`;
-    xml += '  </url>\n';
+    xmlParts.push('  <url>\n');
+    xmlParts.push(`    <loc>${SITE_BASE_URL}${page.loc}</loc>\n`);
+    xmlParts.push(`    <lastmod>${now}</lastmod>\n`);
+    xmlParts.push(`    <changefreq>${page.changefreq}</changefreq>\n`);
+    xmlParts.push(`    <priority>${page.priority}</priority>\n`);
+    xmlParts.push('  </url>\n');
   }
   
   // Add blog posts
   for (const post of posts) {
     // Try to get slug from various possible field names
-    const slug = post.slug || post.id || post.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    // If no slug exists, create one from title or use id with a prefix
+    let slug = post.slug;
+    
+    if (!slug && post.title) {
+      // Generate slug from title and append id to ensure uniqueness
+      const titleSlug = post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      slug = post.id ? `${titleSlug}-${post.id}` : titleSlug;
+    } else if (!slug && post.id) {
+      slug = `post-${post.id}`;
+    }
     
     if (!slug) {
-      console.warn(`⚠️  Skipping post without slug: ${post.title || 'Unknown'}`);
+      console.warn(`⚠️  Skipping post without slug or id: ${post.title || 'Unknown'}`);
       continue;
     }
     
@@ -106,17 +116,17 @@ function generateSitemapXML(posts) {
     const lastmod = post.updated_at || post.created_at || now;
     const lastmodDate = new Date(lastmod).toISOString().split('T')[0];
     
-    xml += '  <url>\n';
-    xml += `    <loc>${SITE_BASE_URL}/blog/${slug}</loc>\n`;
-    xml += `    <lastmod>${lastmodDate}</lastmod>\n`;
-    xml += `    <changefreq>monthly</changefreq>\n`;
-    xml += `    <priority>0.8</priority>\n`;
-    xml += '  </url>\n';
+    xmlParts.push('  <url>\n');
+    xmlParts.push(`    <loc>${SITE_BASE_URL}/blog/${slug}</loc>\n`);
+    xmlParts.push(`    <lastmod>${lastmodDate}</lastmod>\n`);
+    xmlParts.push(`    <changefreq>monthly</changefreq>\n`);
+    xmlParts.push(`    <priority>0.8</priority>\n`);
+    xmlParts.push('  </url>\n');
   }
   
-  xml += '</urlset>\n';
+  xmlParts.push('</urlset>\n');
   
-  return xml;
+  return xmlParts.join('');
 }
 
 function writeSitemap(xml) {

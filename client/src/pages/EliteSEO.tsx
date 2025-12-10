@@ -121,24 +121,16 @@ export default function EliteSEO() {
     "logo": `${siteUrl}/favicon.png`,
     "sameAs": [
       // Add your social media URLs here
-    ],
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "contactType": "Customer Service",
-      "email": "support@streamstickpro.com"
-    }
+    ]
+    // Note: Add contactPoint with your support email when available
   };
 
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "StreamStick Pro",
-    "url": siteUrl,
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": `${siteUrl}/search?q={search_term_string}`,
-      "query-input": "required name=search_term_string"
-    }
+    "url": siteUrl
+    // Note: Add SearchAction when search functionality is implemented
   };
 
   return (
