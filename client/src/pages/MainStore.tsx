@@ -188,11 +188,13 @@ export default function MainStore() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.3]);
 
   useEffect(() => {
-    const hash = window.location.hash.replace('#', '');
-    if (hash) {
+    const params = new URLSearchParams(window.location.search);
+    const section = params.get('section');
+    if (section) {
       setTimeout(() => {
-        document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+        document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' });
+        window.history.replaceState({}, '', '/');
+      }, 300);
     }
   }, []);
 
