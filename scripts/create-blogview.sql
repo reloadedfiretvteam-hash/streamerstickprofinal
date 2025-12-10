@@ -18,7 +18,8 @@
 
 -- Create or replace the blogPosts view
 -- Maps to blog_posts table if it exists
--- Explicitly list columns to avoid issues with schema changes
+-- NOTE: Adjust the column list below to match your actual blog_posts table schema
+-- This example includes common blog post columns. Remove or add columns as needed.
 CREATE OR REPLACE VIEW public."blogPosts" AS
 SELECT 
   id,
@@ -29,16 +30,13 @@ SELECT
   category,
   published,
   date,
-  updated_at,
-  featured,
-  image,
-  "readTime",
-  "linkedProductIds"
+  updated_at
+  -- Optional columns (uncomment if they exist in your table):
+  -- featured,
+  -- image,
+  -- "readTime",
+  -- "linkedProductIds"
 FROM public.blog_posts;
-
--- Alternative: If your table has different columns, adjust the above SELECT
--- to match your actual blog_posts schema. Common columns include:
--- id, title, slug, excerpt, content, category, published, date, updated_at
 
 -- Grant access to the view
 -- Adjust permissions based on your security requirements

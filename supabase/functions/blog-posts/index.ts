@@ -46,7 +46,7 @@ serve(async (req) => {
             { headers: { "Content-Type": "application/json" }, status: 200 }
           );
         }
-      } catch (tableErr) {
+      } catch {
         // Continue to next table candidate
         continue;
       }

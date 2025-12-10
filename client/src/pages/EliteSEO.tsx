@@ -45,7 +45,7 @@ export default function EliteSEO() {
           signal: sitemapController.signal 
         });
         setSitemapExists(sitemapResponse.ok);
-      } catch (fetchErr) {
+      } catch {
         setSitemapExists(false);
       } finally {
         clearTimeout(sitemapTimeout);
@@ -61,7 +61,7 @@ export default function EliteSEO() {
           signal: robotsController.signal 
         });
         setRobotsExists(robotsResponse.ok);
-      } catch (fetchErr) {
+      } catch {
         setRobotsExists(false);
       } finally {
         clearTimeout(robotsTimeout);
@@ -96,8 +96,8 @@ export default function EliteSEO() {
     } catch (err) {
       // Fallback for browsers without clipboard API
       toast({
-        title: "Copy Failed",
-        description: "Please copy manually",
+        title: "Copy Not Supported",
+        description: "Please manually select and copy the text",
         variant: "destructive"
       });
     }
