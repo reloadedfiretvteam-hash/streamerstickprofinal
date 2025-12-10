@@ -426,11 +426,10 @@ export default function EliteSEO() {
             </p>
             <Button
               variant="outline"
-              onClick={() => window.open('/docs/ELITE_SEO_README.md', '_blank')}
               className="border-purple-600 hover:bg-purple-600/20"
             >
               <FileText className="w-4 h-4 mr-2" />
-              View Full Documentation
+              View Documentation (docs/ELITE_SEO_README.md)
             </Button>
           </CardContent>
         </Card>
