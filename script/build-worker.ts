@@ -38,8 +38,8 @@ async function buildWorker() {
   console.log("Creating _routes.json for Cloudflare Pages...");
   const routesJson = {
     version: 1,
-    include: ["/api/*"],
-    exclude: ["/assets/*", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.ico", "/*.woff", "/*.woff2"]
+    include: ["/*"],
+    exclude: ["/assets/*", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.ico", "/*.woff", "/*.woff2", "/favicon.png", "/opengraph.jpg", "/robots.txt", "/sitemap.xml"]
   };
   await writeFile("dist/_routes.json", JSON.stringify(routesJson, null, 2));
 
