@@ -16,15 +16,53 @@ interface Product {
 }
 
 interface SEOSchemaProps {
+  title?: string;
+  description?: string;
+  url?: string;
+  image?: string;
   faq?: FAQItem[];
   products?: Product[];
   breadcrumbs?: { name: string; url: string }[];
 }
 
-export function SEOSchema({ faq, products, breadcrumbs }: SEOSchemaProps) {
+export function SEOSchema({ title, description, url, image, faq, products, breadcrumbs }: SEOSchemaProps) {
   const faqMemo = useMemo(() => faq, [JSON.stringify(faq)]);
   const productsMemo = useMemo(() => products, [JSON.stringify(products)]);
   const breadcrumbsMemo = useMemo(() => breadcrumbs, [JSON.stringify(breadcrumbs)]);
+
+  useEffect(() => {
+    if (!title && !description && !url && !image) return;
+
+    const existingWebpage = document.querySelector('script[data-seo-schema="webpage"]');
+    if (existingWebpage) existingWebpage.remove();
+
+    const schema: Record<string, unknown> = {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+    };
+
+    if (title) schema.name = title;
+    if (description) schema.description = description;
+    const resolvedUrl = url || (typeof window !== 'undefined' ? window.location.href : undefined);
+    if (resolvedUrl) schema.url = resolvedUrl;
+    if (image) {
+      schema.primaryImageOfPage = {
+        "@type": "ImageObject",
+        "url": image
+      };
+    }
+
+    const webpageScript = document.createElement('script');
+    webpageScript.type = 'application/ld+json';
+    webpageScript.setAttribute('data-seo-schema', 'webpage');
+    webpageScript.textContent = JSON.stringify(schema);
+    document.head.appendChild(webpageScript);
+
+    return () => {
+      const scriptToRemove = document.querySelector('script[data-seo-schema="webpage"]');
+      if (scriptToRemove) scriptToRemove.remove();
+    };
+  }, [title, description, url, image]);
 
   useEffect(() => {
     if (faqMemo && faqMemo.length > 0) {
