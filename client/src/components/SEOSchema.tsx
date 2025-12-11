@@ -33,8 +33,18 @@ export function SEOSchema({ title, description, url, image, faq, products, bread
   useEffect(() => {
     if (!title && !description && !url && !image) return;
 
-    const existingWebpage = document.querySelector('script[data-seo-schema="webpage"]');
-    if (existingWebpage) existingWebpage.remove();
+    const removeWebpageSchema = () => {
+      const existingWebpage = document.querySelector('script[data-seo-schema="webpage"]');
+      if (existingWebpage) existingWebpage.remove();
+    };
+
+    const getResolvedUrl = () => {
+      if (url) return url;
+      if (typeof window !== 'undefined') return window.location.href;
+      return undefined;
+    };
+
+    removeWebpageSchema();
 
     const schema: Record<string, unknown> = {
       "@context": "https://schema.org",
@@ -43,7 +53,7 @@ export function SEOSchema({ title, description, url, image, faq, products, bread
 
     if (title) schema.name = title;
     if (description) schema.description = description;
-    const resolvedUrl = url || (typeof window !== 'undefined' ? window.location.href : undefined);
+    const resolvedUrl = getResolvedUrl();
     if (resolvedUrl) schema.url = resolvedUrl;
     if (image) {
       schema.primaryImageOfPage = {
@@ -59,8 +69,7 @@ export function SEOSchema({ title, description, url, image, faq, products, bread
     document.head.appendChild(webpageScript);
 
     return () => {
-      const scriptToRemove = document.querySelector('script[data-seo-schema="webpage"]');
-      if (scriptToRemove) scriptToRemove.remove();
+      removeWebpageSchema();
     };
   }, [title, description, url, image]);
 
