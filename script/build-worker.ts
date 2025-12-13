@@ -64,7 +64,7 @@ async function buildProject() {
   const routesJson = {
     version: 1,
     include: ["/api/*"],
-    exclude: ["/assets/*", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.ico", "/*.woff", "/*.woff2"]
+    exclude: ["/assets/*", "/blog/*", "/blog", "/sitemap.xml", "/robots.txt", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.ico", "/*.woff", "/*.woff2", "/*.html"]
   };
   await writeFile("dist/_routes.json", JSON.stringify(routesJson, null, 2));
 
