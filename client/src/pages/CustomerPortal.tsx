@@ -295,7 +295,7 @@ export default function CustomerPortal() {
           <TabsList className="grid w-full grid-cols-3 bg-gray-800">
             <TabsTrigger value="credentials" data-testid="tab-credentials">
               <Key className="h-4 w-4 mr-2" />
-              IPTV Credentials
+              Live TV Credentials
             </TabsTrigger>
             <TabsTrigger value="orders" data-testid="tab-orders">
               <Package className="h-4 w-4 mr-2" />
@@ -312,7 +312,7 @@ export default function CustomerPortal() {
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Key className="h-5 w-5 text-orange-500" />
-                  Your IPTV Subscription Credentials
+                  Your Live TV Subscription Credentials
                 </CardTitle>
                 <CardDescription className="text-gray-400">
                   Use these credentials to access your streaming service at{" "}
@@ -325,7 +325,7 @@ export default function CustomerPortal() {
                 {iptvCredentials.length === 0 ? (
                   <div className="text-center py-8 text-gray-400">
                     <Key className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No IPTV credentials yet.</p>
+                    <p>No Live TV credentials yet.</p>
                     <p className="text-sm mt-2">Make a purchase to get your streaming access!</p>
                     <Button
                       onClick={() => navigate("/")}

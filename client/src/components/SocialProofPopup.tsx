@@ -13,12 +13,12 @@ const states = [
 ];
 
 const products = [
-  "Fire Stick 4K Max Bundle",
-  "Fire Stick HD with 1 Year IPTV",
-  "3 Month IPTV Subscription",
-  "Fire Stick 4K with 1 Year IPTV",
-  "6 Month IPTV - 2 Devices",
-  "1 Year IPTV Subscription"
+  "StreamStick Max Kit",
+  "StreamStick 4K with 1 Year Plan",
+  "3 Month Live TV Plan",
+  "StreamStick 4K with 1 Year Plan",
+  "6 Month Live TV - 2 Devices",
+  "1 Year Live TV Plan"
 ];
 
 function getRandomItem<T>(arr: T[]): T {

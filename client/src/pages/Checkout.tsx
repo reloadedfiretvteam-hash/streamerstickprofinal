@@ -158,7 +158,7 @@ export default function Checkout() {
           </div>
           <h1 className="text-3xl font-bold">Your cart is empty</h1>
           <p className="text-muted-foreground max-w-md">
-            Browse our selection of premium streaming devices and IPTV subscriptions.
+            Browse our selection of premium streaming devices and Live TV plans.
           </p>
           <Button 
             onClick={() => setLocation("/")} 
@@ -299,14 +299,14 @@ export default function Checkout() {
                       <Label htmlFor="existingUsername">Your Existing Username *</Label>
                       <Input 
                         id="existingUsername"
-                        placeholder="Enter your current IPTV username" 
+                        placeholder="Enter your current Live TV username" 
                         value={existingUsername}
                         onChange={(e) => setExistingUsername(e.target.value)}
                         className="bg-background/50 border-white/20 h-12"
                         data-testid="input-existing-username"
                       />
                       <p className="text-xs text-muted-foreground">
-                        Enter the username you currently use to access IPTV. Your subscription will be extended.
+                        Enter the username you currently use to access Live TV. Your subscription will be extended.
                       </p>
                     </div>
                   )}

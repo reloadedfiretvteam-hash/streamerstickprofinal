@@ -35,8 +35,8 @@ export function ChannelLogos({ className = "" }: { className?: string }) {
             <span className="text-sm font-medium text-blue-300">AVAILABLE CHANNELS</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-bold mb-2">
-            <span className="text-white">Access </span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">18,000+ Channels</span>
+            <span className="text-white">Access Our </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Extensive Channel Library</span>
           </h2>
           <p className="text-gray-400">All your favorite networks included</p>
         </div>
@@ -62,18 +62,18 @@ export function ChannelLogos({ className = "" }: { className?: string }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
           <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
             <Tv className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-white">18,000+</div>
-            <div className="text-sm text-gray-400">Live Channels</div>
+            <div className="text-2xl font-bold text-white">Extensive</div>
+            <div className="text-sm text-gray-400">Channel Library</div>
           </div>
           <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
             <Film className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-white">60,000+</div>
+            <div className="text-2xl font-bold text-white">Thousands</div>
             <div className="text-sm text-gray-400">Movies & Shows</div>
           </div>
           <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
             <Trophy className="w-8 h-8 text-orange-400 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-white">All Sports</div>
-            <div className="text-sm text-gray-400">& PPV Events</div>
+            <div className="text-2xl font-bold text-white">Full Sports</div>
+            <div className="text-sm text-gray-400">Coverage</div>
           </div>
           <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
             <Zap className="w-8 h-8 text-yellow-400 mx-auto mb-2" />

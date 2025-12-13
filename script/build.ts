@@ -74,6 +74,23 @@ async function buildCloudflare() {
   };
   await writeFile("dist/_routes.json", JSON.stringify(routesJson, null, 2));
 
+  console.log("Pre-rendering blog posts for SEO...");
+  try {
+    const { execSync } = await import("child_process");
+    execSync("npx tsx scripts/prerender-blog.ts", { 
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        SUPABASE_URL: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL,
+        SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY,
+        SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
+      }
+    });
+    console.log("Blog pre-rendering complete!");
+  } catch (err) {
+    console.warn("Blog pre-rendering skipped (Supabase credentials may be missing)");
+  }
+
   console.log("Cloudflare Pages build complete!");
 }
 

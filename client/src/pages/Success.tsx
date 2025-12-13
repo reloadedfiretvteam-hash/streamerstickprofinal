@@ -123,7 +123,7 @@ export default function Success() {
               </li>
               <li className="flex gap-3">
                 <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold shrink-0">2</span>
-                <span>Download the IPTV app on your device</span>
+                <span>Download the Live TV app on your device</span>
               </li>
               <li className="flex gap-3">
                 <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold shrink-0">3</span>

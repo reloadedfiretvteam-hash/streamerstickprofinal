@@ -15,6 +15,7 @@ const IGNORE_PATTERNS = [
   'attached_assets',
   '.upm',
   '.config',
+  '.wrangler-secrets',
   'generated-icon.png',
   '.replit',
   'replit.nix',
@@ -123,7 +124,8 @@ async function main() {
     owner: OWNER,
     repo: REPO,
     ref: `heads/${BRANCH}`,
-    sha: newCommit.sha
+    sha: newCommit.sha,
+    force: true
   });
   
   console.log(`\nSuccess! Pushed to ${OWNER}/${REPO}@${BRANCH}`);

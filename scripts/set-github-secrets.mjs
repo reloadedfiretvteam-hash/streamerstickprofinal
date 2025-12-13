@@ -133,6 +133,22 @@ async function main() {
     secrets.SESSION_SECRET = process.env.SESSION_SECRET;
   }
   
+  // Add additional secrets
+  if (process.env.STRIPE_WEBHOOK_SECRET) {
+    secrets.STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+  }
+  if (process.env.SUPABASE_SERVICE_KEY) {
+    secrets.SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+  }
+  if (process.env.ADMIN_USERNAME) {
+    secrets.ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+  }
+  if (process.env.ADMIN_PASSWORD) {
+    secrets.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+  }
+  const jwtSecret = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'streamstickpro-jwt-secret-2025';
+  secrets.JWT_SECRET = jwtSecret;
+
   const requiredSecrets = [
     'CLOUDFLARE_ACCOUNT_ID',
     'CLOUDFLARE_API_TOKEN', 
@@ -142,7 +158,11 @@ async function main() {
     'RESEND_API_KEY',
     'VITE_SUPABASE_URL',
     'VITE_SUPABASE_ANON_KEY',
-    'SESSION_SECRET'
+    'SESSION_SECRET',
+    'SUPABASE_SERVICE_KEY',
+    'ADMIN_USERNAME',
+    'ADMIN_PASSWORD',
+    'JWT_SECRET'
   ];
   
   const missingSecrets = requiredSecrets.filter(name => !secrets[name]);

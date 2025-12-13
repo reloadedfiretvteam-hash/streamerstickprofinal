@@ -121,7 +121,7 @@ export function ProductQuickView({ product, isOpen, onClose }: ProductQuickViewP
             {product.category === 'firestick' && (
               <span className="text-green-400 text-sm font-medium flex items-center gap-1">
                 <Package className="w-4 h-4" />
-                1 Year IPTV Included
+                1 Year Live TV Included
               </span>
             )}
           </div>

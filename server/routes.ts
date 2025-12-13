@@ -647,6 +647,17 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/admin/seed-blog-elite", async (req, res) => {
+    try {
+      const { seedMassiveBlog } = await import('./seedBlogEliteSEO');
+      const result = await seedMassiveBlog();
+      res.json({ success: true, message: `Seeded ${result.successCount} blog posts, ${result.errorCount} errors` });
+    } catch (error: any) {
+      console.error("Error seeding elite blog posts:", error);
+      res.status(500).json({ error: "Failed to seed blog posts" });
+    }
+  });
+
   app.put("/api/admin/fulfillment/:id", async (req, res) => {
     try {
       const { fulfillmentStatus, amazonOrderId } = req.body;

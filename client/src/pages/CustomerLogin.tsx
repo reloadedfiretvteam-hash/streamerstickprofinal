@@ -127,7 +127,7 @@ export default function CustomerLogin() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl text-white">Customer Portal</CardTitle>
           <CardDescription className="text-gray-400">
-            Sign in to view your orders and IPTV credentials
+            Sign in to view your orders and Live TV credentials
           </CardDescription>
         </CardHeader>
         <CardContent>

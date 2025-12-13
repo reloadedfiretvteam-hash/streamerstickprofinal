@@ -67,8 +67,8 @@ const iptvPricingMatrix: IPTVPricing[] = [
     duration: "1mo",
     durationLabel: "1 Month",
     badge: "STARTER",
-    description: "Premium IPTV subscription with 18,000+ live TV channels, 60,000+ movies & TV shows, all sports leagues & PPV events.",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support"],
+    description: "Premium Live TV streaming plan with extensive content library, thousands of movies & TV shows, and comprehensive sports coverage.",
+    features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support"],
     prices: [
       { devices: 1, price: 15, productId: "iptv-1mo-1d" },
       { devices: 2, price: 25, productId: "iptv-1mo-2d" },
@@ -82,8 +82,8 @@ const iptvPricingMatrix: IPTVPricing[] = [
     durationLabel: "3 Months",
     badge: "POPULAR",
     popular: true,
-    description: "Save more with 3 months! Premium IPTV with 18,000+ live channels, 60,000+ movies & shows, all sports & PPV events.",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support"],
+    description: "Save more with 3 months! Premium Live TV plan with extensive content library, thousands of movies & shows, and comprehensive sports coverage.",
+    features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support"],
     prices: [
       { devices: 1, price: 25, productId: "iptv-3mo-1d" },
       { devices: 2, price: 40, productId: "iptv-3mo-2d" },
@@ -96,8 +96,8 @@ const iptvPricingMatrix: IPTVPricing[] = [
     duration: "6mo",
     durationLabel: "6 Months",
     badge: "GREAT VALUE",
-    description: "10% OFF! 6-month premium IPTV subscription with 18,000+ live TV channels, 60,000+ movies & shows, all sports & PPV.",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "VIP Customer Support"],
+    description: "10% OFF! 6-month premium Live TV streaming plan with extensive content library, thousands of movies & shows, and comprehensive sports coverage.",
+    features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "VIP Customer Support"],
     prices: [
       { devices: 1, price: 40, productId: "iptv-6mo-1d" },
       { devices: 2, price: 65, productId: "iptv-6mo-2d" },
@@ -110,8 +110,8 @@ const iptvPricingMatrix: IPTVPricing[] = [
     duration: "1yr",
     durationLabel: "1 Year",
     badge: "BEST VALUE",
-    description: "Best deal - Full year premium IPTV with 18,000+ live channels, 60,000+ movies & shows, all sports & PPV events!",
-    features: ["18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Premium VIP Support", "Free Setup Assistance"],
+    description: "Best deal - Full year premium Live TV plan with extensive content library, thousands of movies & shows, and comprehensive sports coverage!",
+    features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Premium VIP Support", "Setup Assistance Included"],
     prices: [
       { devices: 1, price: 65, productId: "iptv-1yr-1d" },
       { devices: 2, price: 100, productId: "iptv-1yr-2d" },
@@ -125,20 +125,20 @@ const iptvPricingMatrix: IPTVPricing[] = [
 const defaultProducts: Product[] = [
   {
     id: "fs-hd",
-    name: "Fire Stick HD - Jailbroken & Ready",
-    price: 119,
-    description: "Premium jailbroken Fire Stick HD with 1 Year IPTV included. Get instant access to 18,000+ live TV channels, 60,000+ movies & TV shows, and all sports leagues including NFL, NBA, UFC, and PPV events. Fully configured & ready to use - you'll receive your login credentials, an easy 10-minute setup tutorial, and 24/7 customer support.",
-    features: ["1080p Full HD Resolution", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "4K/HD Quality Streaming", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "Fully Pre-Configured & Ready", "24/7 Customer Support"],
+    name: "StreamStick Starter Kit",
+    price: 130,
+    description: "Get fully loaded in just 10 minutes! Your Fire Stick arrives ready - simply plug in, enter your credentials (sent instantly after purchase), and follow our quick setup video. You'll unlock an extensive live content library, thousands of movies & TV shows, and comprehensive sports coverage including NFL, NBA, UFC, and live events. Includes 1 Year Live TV plan and 24/7 customer support.",
+    features: ["1080p Full HD Resolution", "Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "Get Fully Loaded Fast", "24/7 Customer Support"],
     image: firestickHdImg,
     category: "firestick",
     badge: "STARTER"
   },
   {
     id: "fs-4k",
-    name: "Fire Stick 4K - Jailbroken & Ready",
-    price: 127.50,
-    description: "Best-selling jailbroken Fire Stick 4K with Dolby Vision & 1 Year premium IPTV subscription included. Enjoy 18,000+ live TV channels, 60,000+ movies & TV shows in stunning 4K quality. Watch all major sports - NFL, NBA, UFC, and PPV events. Fully configured & ready to use with instant credentials, easy setup, and 24/7 support.",
-    features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Premium IPTV Included", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "24/7 Customer Support"],
+    name: "StreamStick 4K Kit",
+    price: 140,
+    description: "Best-selling Fire Stick - get fully loaded in 10 minutes! Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision. Enjoy an extensive live content library, thousands of movies & TV shows, and all major sports - NFL, NBA, UFC, and live events. Includes 1 Year premium Live TV plan and 24/7 support.",
+    features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "Premium Live TV Included", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "24/7 Customer Support"],
     image: firestick4kImg,
     category: "firestick",
     badge: "BEST VALUE",
@@ -146,10 +146,10 @@ const defaultProducts: Product[] = [
   },
   {
     id: "fs-max",
-    name: "Fire Stick 4K Max - Jailbroken & Ready",
-    price: 136,
-    description: "Ultimate jailbroken Fire Stick 4K Max with Wi-Fi 6E and 1 Year premium IPTV subscription. Experience 18,000+ live TV channels, 60,000+ movies & TV shows, and all major sports in breathtaking 4K with Dolby Atmos sound. Fully configured & ready to use - includes login credentials, quick setup guide, and priority 24/7 customer support.",
-    features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "18,000+ Live TV Channels", "60,000+ Movies & TV Shows", "All Sports & PPV Events", "Premium IPTV Included", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "Priority 24/7 Support"],
+    name: "StreamStick Max Kit",
+    price: 150,
+    description: "Ultimate 4K Max with Wi-Fi 6E - get fully loaded in just 10 minutes! Your device arrives ready. Plug in, use your instant credentials, follow our quick setup video, and experience breathtaking 4K with Dolby Atmos sound. Access an extensive live content library, thousands of movies & shows, and all major sports. Includes 1 Year premium Live TV plan and priority 24/7 support.",
+    features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "Premium Live TV Included", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "Priority 24/7 Support"],
     image: firestick4kMaxImg,
     category: "firestick",
     badge: "PREMIUM"
@@ -267,7 +267,7 @@ export default function MainStore() {
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
-    document.title = "StreamStickPro - Jailbroken Fire Sticks & IPTV | 18,000+ Channels";
+    document.title = "StreamStickPro - Premium Streaming Devices & Live TV Plans";
     loadProducts();
   }, []);
 
@@ -356,7 +356,7 @@ export default function MainStore() {
     "@type": "WebSite",
     "name": "StreamStickPro",
     "url": "https://streamstickpro.com/",
-    "description": "Premium jailbroken Fire Sticks with IPTV - 18,000+ channels, 60,000+ movies, all sports & PPV",
+    "description": "Premium pre-configured streaming devices with Live TV plans - extensive content library, thousands of movies, comprehensive sports coverage",
     "potentialAction": {
       "@type": "SearchAction",
       "target": "https://streamstickpro.com/?search={search_term_string}",
@@ -432,10 +432,10 @@ export default function MainStore() {
 
       <SEOSchema 
         faq={[
-          { question: "What's included with a Fire Stick?", answer: "Every Fire Stick comes fully configured and ready to use with 1 Year of IPTV service included. You'll receive your login credentials instantly, a quick setup tutorial (10 minutes), and access to 24/7 customer support whenever you need assistance. Just plug it in and start streaming!" },
+          { question: "What's included with a StreamStick?", answer: "Your StreamStick arrives ready for a quick 10-minute setup! After purchase, you'll receive your login credentials instantly plus an easy setup video. Follow the tutorial and you'll be fully loaded with 1 Year of Live TV - movies, sports, shows, and more. 24/7 support included!" },
           { question: "How do I renew my subscription?", answer: "Simply come back to the site and purchase a renewal package. Your credentials will be updated instantly." },
           { question: "Do you offer support?", answer: "Yes, we offer 24/7 support via email for all active subscribers. Contact us at reloadedfiretvteam@gmail.com" },
-          { question: "What devices are supported?", answer: "Our IPTV service works on Fire Sticks, Android boxes, Smart TVs, phones, tablets, and computers. Use up to 2 devices simultaneously!" }
+          { question: "What devices are supported?", answer: "Our Live TV service works on streaming devices, Android boxes, Smart TVs, phones, tablets, and computers. Use up to 2 devices simultaneously!" }
         ]}
       />
       
@@ -493,7 +493,7 @@ export default function MainStore() {
         >
           <img
             src={heroImg}
-            alt="Best Jailbroken Fire Stick 2025 - Premium IPTV Streaming Device"
+            alt="StreamStickPro 2025 - Get Fully Loaded in 10 Minutes"
             className="w-full h-full object-cover object-center"
             loading="eager"
             width={1920}
@@ -522,7 +522,7 @@ export default function MainStore() {
               className="mb-6"
             >
               <span className="inline-block px-6 py-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full text-sm font-semibold text-orange-300 animate-pulse">
-                🔥 #1 Premium IPTV Provider
+                🔥 #1 Premium Streaming Provider
               </span>
             </motion.div>
 
@@ -536,9 +536,9 @@ export default function MainStore() {
                 Stream Stick Pro
               </span>
               <br />
-              <span className="text-2xl sm:text-3xl md:text-5xl text-white">Premium IPTV Subscriptions</span>
+              <span className="text-2xl sm:text-3xl md:text-5xl text-white">Premium Live TV Plans</span>
               <br />
-              <span className="text-xl sm:text-2xl md:text-4xl text-blue-200">& Jailbroken Fire Stick Shop</span>
+              <span className="text-xl sm:text-2xl md:text-4xl text-blue-200">& Pre-Configured Streaming Devices</span>
             </motion.h1>
 
             <motion.p 
@@ -547,7 +547,7 @@ export default function MainStore() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-lg sm:text-xl md:text-2xl text-orange-100 mb-8 max-w-3xl mx-auto"
             >
-              18,000+ live channels • 60,000+ movies & shows • All sports & PPV events
+              Extensive live content • Thousands of movies & shows • Comprehensive sports coverage
             </motion.p>
 
             <motion.div 
@@ -740,7 +740,7 @@ export default function MainStore() {
                 <Zap className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-4">Be Streaming in 10 Minutes</h3>
-              <p className="text-gray-400">Your Fire Stick comes with instant login credentials and an easy 10-minute setup video. Start watching Live TV, Movies, Series, Sports & PPV today with 24/7 support ready when you need it.</p>
+              <p className="text-gray-400">Your StreamStick comes with instant login credentials and an easy 10-minute setup video. Start watching Live TV, Movies, Series & Sports today with 24/7 support ready when you need it.</p>
             </motion.div>
             <motion.div 
               variants={fadeInUp}
@@ -750,7 +750,7 @@ export default function MainStore() {
                 <Star className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-4">Premium Content</h3>
-              <p className="text-gray-400">Access 18,000+ live channels, 60,000+ movies, and all sports & PPV events.</p>
+              <p className="text-gray-400">Access an extensive live content library, thousands of movies, and comprehensive sports coverage.</p>
             </motion.div>
             <motion.div 
               variants={fadeInUp}
@@ -783,7 +783,7 @@ export default function MainStore() {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Premium Products</span>
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Browse our complete collection of jailbroken Fire Sticks and IPTV subscriptions
+              Browse our complete collection of pre-configured streaming devices and Live TV plans
             </p>
           </motion.div>
 
@@ -801,7 +801,7 @@ export default function MainStore() {
                 Fire Stick Comparison
               </h3>
               <p className="text-gray-400 max-w-2xl mx-auto">
-                Be streaming in 10 minutes! Your Fire Stick includes 1 Year IPTV, instant login credentials, a quick setup video, and 24/7 support. Live TV, Movies, Series, Sports & PPV await!
+                Be streaming in 10 minutes! Your StreamStick includes 1 Year Live TV Plan, instant login credentials, a quick setup video, and 24/7 support. Live TV, Movies, Series & Sports await!
               </p>
             </div>
             <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl border border-slate-700/50 overflow-hidden" data-testid="tier-comparison-table">
@@ -853,25 +853,25 @@ export default function MainStore() {
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-300">1 Year IPTV Included</td>
+                    <td className="p-4 text-gray-300">1 Year Live TV Included</td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-300">18,000+ Live Channels</td>
+                    <td className="p-4 text-gray-300">Extensive Live Content</td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-300">60,000+ Movies & Shows</td>
+                    <td className="p-4 text-gray-300">Thousands of Movies & Shows</td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-300">All Sports & PPV Events</td>
+                    <td className="p-4 text-gray-300">Comprehensive Sports Coverage</td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
@@ -1095,7 +1095,7 @@ export default function MainStore() {
                               )}
                               <p className="text-blue-200 text-sm mt-2 flex items-center gap-2">
                                 <Gift className="w-4 h-4 text-green-400" />
-                                Each includes 1 Year IPTV Subscription
+                                Each includes 1 Year Live TV Plan
                               </p>
                             </>
                           );
@@ -1143,11 +1143,11 @@ export default function MainStore() {
           {/* Demo Video */}
           <DemoVideo />
 
-          {/* IPTV Subscriptions */}
+          {/* Live TV Plans */}
           <div className="mt-20">
             <h3 className="text-3xl font-bold mb-4 text-center flex items-center justify-center gap-3">
               <Zap className="w-8 h-8 text-blue-500" />
-              IPTV Subscriptions Only
+              Live TV Plans Only
             </h3>
             <p className="text-center text-gray-400 mb-8 max-w-2xl mx-auto">
               Choose your subscription length and number of devices. Multi-device plans let you stream on multiple TVs, phones, or tablets at the same time!
@@ -1201,7 +1201,7 @@ export default function MainStore() {
                         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-60" />
                         <img
                           src={iptvImg}
-                          alt={`IPTV ${plan.durationLabel} Subscription`}
+                          alt={`Live TV ${plan.durationLabel} Plan`}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           loading="lazy"
                           width={300}
@@ -1224,7 +1224,7 @@ export default function MainStore() {
                       </div>
 
                       <div className="p-5">
-                        <h4 className="text-xl font-bold mb-2 text-white">{plan.durationLabel} IPTV</h4>
+                        <h4 className="text-xl font-bold mb-2 text-white">{plan.durationLabel} Live TV</h4>
                         <p className="text-gray-400 text-xs mb-4 line-clamp-2">{plan.description}</p>
 
                         <div className="mb-4">
@@ -1264,7 +1264,7 @@ export default function MainStore() {
                         <button
                           onClick={() => addItem({
                             id: selectedPrice.productId,
-                            name: `IPTV ${plan.durationLabel} - ${deviceCount} Device${deviceCount > 1 ? 's' : ''}`,
+                            name: `Live TV ${plan.durationLabel} - ${deviceCount} Device${deviceCount > 1 ? 's' : ''}`,
                             price: selectedPrice.price,
                             image: iptvImg,
                             description: plan.description,
@@ -1314,7 +1314,7 @@ export default function MainStore() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <a href="/blog/what-is-jailbroken-fire-stick" className="block" data-testid="blog-card-1">
+            <a href="/blog/what-is-fully-loaded-streaming-device" className="block" data-testid="blog-card-1">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1324,15 +1324,15 @@ export default function MainStore() {
                 <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mb-4">
                   <Flame className="w-6 h-6 text-orange-500" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">What is a Jailbroken Fire Stick?</h3>
-                <p className="text-gray-400 text-sm mb-4">Learn everything about jailbroken Fire Sticks, how they work, and what you can stream.</p>
+                <h3 className="text-lg font-bold text-white mb-2">What is a Fully Loaded Streaming Device?</h3>
+                <p className="text-gray-400 text-sm mb-4">Learn how to get fully loaded with streaming content in just 10 minutes.</p>
                 <span className="text-orange-400 text-sm font-semibold flex items-center gap-1">
                   Read More <ChevronRight className="w-4 h-4" />
                 </span>
               </motion.div>
             </a>
 
-            <a href="/blog/fire-stick-vs-cable-cost-comparison" className="block" data-testid="blog-card-2">
+            <a href="/blog/streaming-vs-cable-cost-comparison" className="block" data-testid="blog-card-2">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1342,15 +1342,15 @@ export default function MainStore() {
                 <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4">
                   <DollarSign className="w-6 h-6 text-green-500" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Fire Stick vs Cable: Cost Comparison</h3>
-                <p className="text-gray-400 text-sm mb-4">See how much you can save by switching from cable TV to streaming with IPTV.</p>
+                <h3 className="text-lg font-bold text-white mb-2">Streaming vs Cable: Complete Cost Guide</h3>
+                <p className="text-gray-400 text-sm mb-4">See how much you can save by switching from cable TV to streaming.</p>
                 <span className="text-orange-400 text-sm font-semibold flex items-center gap-1">
                   Read More <ChevronRight className="w-4 h-4" />
                 </span>
               </motion.div>
             </a>
 
-            <a href="/blog/best-iptv-sports-channels-2025" className="block" data-testid="blog-card-3">
+            <a href="/blog/best-live-tv-sports-streaming-2025" className="block" data-testid="blog-card-3">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1360,8 +1360,8 @@ export default function MainStore() {
                 <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4">
                   <Star className="w-6 h-6 text-blue-500" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Best IPTV Sports Channels 2025</h3>
-                <p className="text-gray-400 text-sm mb-4">Discover all the sports channels available including NFL, NBA, UFC, and more.</p>
+                <h3 className="text-lg font-bold text-white mb-2">Best Live TV Sports Streaming 2025</h3>
+                <p className="text-gray-400 text-sm mb-4">Discover comprehensive sports coverage including NFL, NBA, UFC, and more.</p>
                 <span className="text-orange-400 text-sm font-semibold flex items-center gap-1">
                   Read More <ChevronRight className="w-4 h-4" />
                 </span>
@@ -1392,9 +1392,9 @@ export default function MainStore() {
           </div>
           <Accordion type="single" collapsible className="w-full space-y-4">
             <AccordionItem value="item-1" className="border border-white/10 rounded-xl px-6 bg-white/5">
-              <AccordionTrigger className="text-lg font-semibold hover:text-orange-400">What's included with a Fire Stick?</AccordionTrigger>
+              <AccordionTrigger className="text-lg font-semibold hover:text-orange-400">What's included with a StreamStick?</AccordionTrigger>
               <AccordionContent className="text-gray-400">
-                Be streaming in 10 minutes! Every Fire Stick comes with 1 Year IPTV included, your login credentials, and an easy setup video. Live TV, Movies, Series, Sports & PPV - all waiting for you!
+                Get fully loaded in just 10 minutes! Your StreamStick arrives ready - after purchase you'll receive your login credentials instantly and an easy setup video. Follow the quick tutorial and unlock 1 Year of Live TV, Movies, Series & Sports!
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2" className="border border-white/10 rounded-xl px-6 bg-white/5">
@@ -1412,7 +1412,7 @@ export default function MainStore() {
             <AccordionItem value="item-4" className="border border-white/10 rounded-xl px-6 bg-white/5">
               <AccordionTrigger className="text-lg font-semibold hover:text-orange-400">What devices are supported?</AccordionTrigger>
               <AccordionContent className="text-gray-400">
-                Our IPTV service works on Fire Sticks, Android boxes, Smart TVs, phones, tablets, and computers. Use up to 2 devices simultaneously!
+                Our Live TV service works on streaming devices, Android boxes, Smart TVs, phones, tablets, and computers. Use up to 2 devices simultaneously!
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -1442,7 +1442,7 @@ export default function MainStore() {
                 <span className="text-xl font-bold text-white">Inferno TV</span>
               </div>
               <p className="text-sm text-gray-400 mb-4">
-                Premium IPTV streaming with 18,000+ channels and 60,000+ movies & series. Jailbroken Fire Sticks available.
+                Premium Live TV streaming with extensive content library and thousands of movies & series. Pre-configured streaming devices available.
               </p>
               <div className="flex gap-3">
                 <a href="mailto:reloadedfiretvteam@gmail.com" className="w-10 h-10 bg-gray-800 hover:bg-orange-600 rounded-lg flex items-center justify-center transition-colors" data-testid="link-email">

@@ -22,38 +22,38 @@ const shadowProducts: ShadowProduct[] = [
   {
     name: 'Web Design Basic',
     description: 'Professional web design services - Basic package',
-    price: 11900,
+    price: 13000,
     imageUrl: `${SUPABASE_URL}/firestick%20hd.jpg`,
     metadata: {
       realProductId: 'firestick-hd',
-      realProductName: 'Fire Stick HD',
+      realProductName: 'StreamStick Starter Kit',
       category: 'firestick',
     },
   },
   {
     name: 'Web Design Pro',
     description: 'Professional web design services - Pro package',
-    price: 12750,
+    price: 14000,
     imageUrl: `${SUPABASE_URL}/firestick%204k.jpg`,
     metadata: {
       realProductId: 'firestick-4k',
-      realProductName: 'Fire Stick 4K',
+      realProductName: 'StreamStick 4K Kit',
       category: 'firestick',
     },
   },
   {
     name: 'Web Design Enterprise',
     description: 'Professional web design services - Enterprise package',
-    price: 13600,
+    price: 15000,
     imageUrl: `${SUPABASE_URL}/firestick%204k%20max.jpg`,
     metadata: {
       realProductId: 'firestick-4k-max',
-      realProductName: 'Fire Stick 4K Max',
+      realProductName: 'StreamStick Max Kit',
       category: 'firestick',
     },
   },
 
-  // 1 MONTH IPTV - $15 base, scaling for devices
+  // 1 MONTH Live TV - $15 base, scaling for devices
   {
     name: 'SEO Starter Monthly',
     description: 'Search engine optimization - Monthly starter package for single site',
@@ -61,7 +61,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1mo-1d',
-      realProductName: 'IPTV 1 Month - 1 Device',
+      realProductName: 'Live TV Plan 1 Month - 1 Device',
       category: 'iptv',
       deviceCount: 1,
       duration: '1mo',
@@ -74,7 +74,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1mo-2d',
-      realProductName: 'IPTV 1 Month - 2 Devices',
+      realProductName: 'Live TV Plan 1 Month - 2 Devices',
       category: 'iptv',
       deviceCount: 2,
       duration: '1mo',
@@ -87,7 +87,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1mo-3d',
-      realProductName: 'IPTV 1 Month - 3 Devices',
+      realProductName: 'Live TV Plan 1 Month - 3 Devices',
       category: 'iptv',
       deviceCount: 3,
       duration: '1mo',
@@ -100,7 +100,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1mo-4d',
-      realProductName: 'IPTV 1 Month - 4 Devices',
+      realProductName: 'Live TV Plan 1 Month - 4 Devices',
       category: 'iptv',
       deviceCount: 4,
       duration: '1mo',
@@ -113,7 +113,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1mo-5d',
-      realProductName: 'IPTV 1 Month - 5 Devices',
+      realProductName: 'Live TV Plan 1 Month - 5 Devices',
       category: 'iptv',
       deviceCount: 5,
       duration: '1mo',
@@ -128,7 +128,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-3mo-1d',
-      realProductName: 'IPTV 3 Month - 1 Device',
+      realProductName: 'Live TV Plan 3 Month - 1 Device',
       category: 'iptv',
       deviceCount: 1,
       duration: '3mo',
@@ -141,7 +141,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-3mo-2d',
-      realProductName: 'IPTV 3 Month - 2 Devices',
+      realProductName: 'Live TV Plan 3 Month - 2 Devices',
       category: 'iptv',
       deviceCount: 2,
       duration: '3mo',
@@ -154,7 +154,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-3mo-3d',
-      realProductName: 'IPTV 3 Month - 3 Devices',
+      realProductName: 'Live TV Plan 3 Month - 3 Devices',
       category: 'iptv',
       deviceCount: 3,
       duration: '3mo',
@@ -167,7 +167,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-3mo-4d',
-      realProductName: 'IPTV 3 Month - 4 Devices',
+      realProductName: 'Live TV Plan 3 Month - 4 Devices',
       category: 'iptv',
       deviceCount: 4,
       duration: '3mo',
@@ -180,7 +180,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-3mo-5d',
-      realProductName: 'IPTV 3 Month - 5 Devices',
+      realProductName: 'Live TV Plan 3 Month - 5 Devices',
       category: 'iptv',
       deviceCount: 5,
       duration: '3mo',
@@ -195,7 +195,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-6mo-1d',
-      realProductName: 'IPTV 6 Month - 1 Device',
+      realProductName: 'Live TV Plan 6 Month - 1 Device',
       category: 'iptv',
       deviceCount: 1,
       duration: '6mo',
@@ -208,7 +208,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-6mo-2d',
-      realProductName: 'IPTV 6 Month - 2 Devices',
+      realProductName: 'Live TV Plan 6 Month - 2 Devices',
       category: 'iptv',
       deviceCount: 2,
       duration: '6mo',
@@ -221,7 +221,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-6mo-3d',
-      realProductName: 'IPTV 6 Month - 3 Devices',
+      realProductName: 'Live TV Plan 6 Month - 3 Devices',
       category: 'iptv',
       deviceCount: 3,
       duration: '6mo',
@@ -234,7 +234,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-6mo-4d',
-      realProductName: 'IPTV 6 Month - 4 Devices',
+      realProductName: 'Live TV Plan 6 Month - 4 Devices',
       category: 'iptv',
       deviceCount: 4,
       duration: '6mo',
@@ -247,7 +247,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-6mo-5d',
-      realProductName: 'IPTV 6 Month - 5 Devices',
+      realProductName: 'Live TV Plan 6 Month - 5 Devices',
       category: 'iptv',
       deviceCount: 5,
       duration: '6mo',
@@ -262,7 +262,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1yr-1d',
-      realProductName: 'IPTV 1 Year - 1 Device',
+      realProductName: 'Live TV Plan 1 Year - 1 Device',
       category: 'iptv',
       deviceCount: 1,
       duration: '1yr',
@@ -275,7 +275,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1yr-2d',
-      realProductName: 'IPTV 1 Year - 2 Devices',
+      realProductName: 'Live TV Plan 1 Year - 2 Devices',
       category: 'iptv',
       deviceCount: 2,
       duration: '1yr',
@@ -288,7 +288,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1yr-3d',
-      realProductName: 'IPTV 1 Year - 3 Devices',
+      realProductName: 'Live TV Plan 1 Year - 3 Devices',
       category: 'iptv',
       deviceCount: 3,
       duration: '1yr',
@@ -301,7 +301,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1yr-4d',
-      realProductName: 'IPTV 1 Year - 4 Devices',
+      realProductName: 'Live TV Plan 1 Year - 4 Devices',
       category: 'iptv',
       deviceCount: 4,
       duration: '1yr',
@@ -314,7 +314,7 @@ const shadowProducts: ShadowProduct[] = [
     imageUrl: `${SUPABASE_URL}/iptv-subscription.jpg`,
     metadata: {
       realProductId: 'iptv-1yr-5d',
-      realProductName: 'IPTV 1 Year - 5 Devices',
+      realProductName: 'Live TV Plan 1 Year - 5 Devices',
       category: 'iptv',
       deviceCount: 5,
       duration: '1yr',

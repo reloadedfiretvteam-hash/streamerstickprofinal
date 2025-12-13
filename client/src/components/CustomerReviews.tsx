@@ -29,8 +29,8 @@ const reviews: Review[] = [
     location: "Atlanta, GA",
     date: "Oct 2024",
     rating: 5,
-    product: "1 Year IPTV",
-    review: "Customer service is top notch. Had a small issue with my login not working at first and they fixed it within a few hours. The channel selection is insane - I can watch anything. My husband is happy he can finally watch all the UFC fights without paying $80 each time.",
+    product: "1 Year Live TV Plan",
+    review: "Customer service is top notch. Had a small issue with my login not working at first and they fixed it within a few hours. The channel selection is amazing - I can watch anything. My husband is happy he can finally watch all the UFC fights without paying extra each time.",
     verified: true
   },
   {
@@ -49,7 +49,7 @@ const reviews: Review[] = [
     location: "Chicago, IL",
     date: "Sep 2024",
     rating: 5,
-    product: "3 Month IPTV",
+    product: "3 Month Live TV Plan",
     review: "Started with 3 months to test it out and just renewed for a full year. Picture quality is great, rarely any buffering. I emailed support once on a Sunday and didn't hear back until Monday morning, but they were helpful when they responded. Overall very satisfied.",
     verified: true
   },
@@ -69,7 +69,7 @@ const reviews: Review[] = [
     location: "Denver, CO",
     date: "Nov 2024",
     rating: 5,
-    product: "6 Month IPTV",
+    product: "6 Month Live TV Plan",
     review: "Love being able to watch my shows whenever I want. The on-demand library is huge. Took me a day to get my credentials after ordering but once I got them everything worked perfectly. Support walked me through connecting to my smart TV. Would definitely recommend to friends.",
     verified: true
   },

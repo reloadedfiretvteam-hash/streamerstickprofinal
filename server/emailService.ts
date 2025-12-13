@@ -4,7 +4,7 @@ import type { Order, Customer } from '@shared/schema';
 
 const CREDENTIALS_DELAY_MS = 5 * 60 * 1000;
 const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
-const IPTV_PORTAL_URL = 'http://ky-tv.cc';
+const STREAMING_PORTAL_URL = 'http://ky-tv.cc';
 const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
 
 export class EmailService {
@@ -65,15 +65,15 @@ export class EmailService {
     if (hasIPTV) {
       productInstructions = `
         <div style="background: #e8f4fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h2 style="margin-top: 0; color: #0066cc;">IPTV Setup Instructions</h2>
-          <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}">${IPTV_PORTAL_URL}</a></p>
+          <h2 style="margin-top: 0; color: #0066cc;">Live TV Setup Instructions</h2>
+          <p><strong>Portal URL:</strong> <a href="${STREAMING_PORTAL_URL}">${STREAMING_PORTAL_URL}</a></p>
           <p><strong>Username:</strong> ${credentials.username}</p>
           <p><strong>Password:</strong> ${credentials.password}</p>
           
           <h3 style="color: #0066cc;">How to Setup:</h3>
           <ol>
-            <li>Download IPTV Smarters or TiviMate app on your device</li>
-            <li>Enter the portal URL: ${IPTV_PORTAL_URL}</li>
+            <li>Download the streaming app on your device</li>
+            <li>Enter the portal URL: ${STREAMING_PORTAL_URL}</li>
             <li>Enter your username and password</li>
             <li>Start streaming!</li>
           </ol>
@@ -86,17 +86,17 @@ export class EmailService {
     if (hasFireStick) {
       productInstructions += `
         <div style="background: #fff7ed; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h2 style="margin-top: 0; color: #ea580c;">Fire Stick Setup Instructions</h2>
-          <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}">${IPTV_PORTAL_URL}</a></p>
+          <h2 style="margin-top: 0; color: #ea580c;">StreamStick Setup Instructions</h2>
+          <p><strong>Portal URL:</strong> <a href="${STREAMING_PORTAL_URL}">${STREAMING_PORTAL_URL}</a></p>
           <p><strong>Username:</strong> ${credentials.username}</p>
           <p><strong>Password:</strong> ${credentials.password}</p>
           
-          <h3 style="color: #ea580c;">How to Setup Your Device:</h3>
+          <h3 style="color: #ea580c;">How to Get Fully Loaded in 10 Minutes:</h3>
           <ol>
-            <li>Your Fire Stick will arrive pre-configured</li>
-            <li>Simply plug it into your TV</li>
+            <li>Your StreamStick arrives ready - just plug it into your TV</li>
             <li>Connect to your WiFi</li>
-            <li>Open the IPTV app and enter your credentials</li>
+            <li>Open the Live TV app and enter your credentials above</li>
+            <li>Follow our quick setup video and you're fully loaded!</li>
           </ol>
           
           <p><strong>Watch our setup video:</strong> <a href="${SETUP_VIDEO_URL}">${SETUP_VIDEO_URL}</a></p>
@@ -153,7 +153,7 @@ export class EmailService {
           
           <p>Hi ${order.customerName || 'Valued Customer'},</p>
           
-          <p>Great news! Your IPTV subscription has been successfully renewed.</p>
+          <p>Great news! Your Live TV subscription has been successfully renewed.</p>
           
           <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 25px; border-radius: 12px; margin: 20px 0; color: white;">
             <h2 style="margin-top: 0; color: white;">Renewal Confirmed</h2>
@@ -165,7 +165,7 @@ export class EmailService {
           <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7;">
             <h3 style="margin-top: 0; color: #0369a1;">Your Existing Credentials Still Work!</h3>
             <p>You can continue using your current login credentials. No changes needed!</p>
-            <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #0369a1;">${IPTV_PORTAL_URL}</a></p>
+            <p><strong>Portal URL:</strong> <a href="${STREAMING_PORTAL_URL}" style="color: #0369a1;">${STREAMING_PORTAL_URL}</a></p>
             <p><strong>Username:</strong> ${existingUsername}</p>
             <p><strong>Password:</strong> (same as before)</p>
           </div>
@@ -271,7 +271,7 @@ export class EmailService {
         : EmailService.generateCredentials(order);
 
     const emoji = hasFireStick ? '🔥' : '📺';
-    const category = hasFireStick && hasIPTV ? '🔥📺 Fire Stick + IPTV' : hasFireStick ? '🔥 Fire Stick' : '📺 IPTV Subscription';
+    const category = hasFireStick && hasIPTV ? '🔥📺 StreamStick + Live TV' : hasFireStick ? '🔥 StreamStick' : '📺 Live TV Plan';
     
     const headerColor = isRenewal 
       ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
@@ -281,16 +281,16 @@ export class EmailService {
           <div style="background: #d1fae5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
             <h2 style="margin-top: 0; color: #047857;">🔄 Renewal - Existing Customer</h2>
             <p><strong>Existing Username:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${order.existingUsername || 'Not provided'}</code></p>
-            <p><strong>Action:</strong> Extend this customer's subscription in IPTV panel</p>
-            <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #047857;">${IPTV_PORTAL_URL}</a></p>
+            <p><strong>Action:</strong> Extend this customer's subscription in admin panel</p>
+            <p><strong>Portal URL:</strong> <a href="${STREAMING_PORTAL_URL}" style="color: #047857;">${STREAMING_PORTAL_URL}</a></p>
           </div>
     ` : `
           <div style="background: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
             <h2 style="margin-top: 0; color: #15803d;">🔑 New Customer Credentials</h2>
             <p><strong>Username:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${credentials.username}</code></p>
             <p><strong>Password:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${credentials.password}</code></p>
-            <p><strong>Action:</strong> Create this account in IPTV panel</p>
-            <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #15803d;">${IPTV_PORTAL_URL}</a></p>
+            <p><strong>Action:</strong> Create this account in admin panel</p>
+            <p><strong>Portal URL:</strong> <a href="${STREAMING_PORTAL_URL}" style="color: #15803d;">${STREAMING_PORTAL_URL}</a></p>
             <p><strong>Setup Video:</strong> <a href="${SETUP_VIDEO_URL}" style="color: #15803d;">${SETUP_VIDEO_URL}</a></p>
           </div>
     `;

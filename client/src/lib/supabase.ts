@@ -112,24 +112,30 @@ export async function fetchProducts() {
 
 export async function fetchBlogPosts(publishedOnly = true) {
   try {
-    let query = supabase.from('blogPosts').select('*');
+    let query = supabase.from('blog_posts').select('*');
     
-    const { data, error } = await query;
+    if (publishedOnly) {
+      query = query.eq('is_published', true);
+    }
+    
+    const { data, error } = await query.order('published_at', { ascending: false });
     
     if (error) throw error;
     
-    let posts = data || [];
-    
-    // Map Supabase column names to expected format and filter
-    posts = posts.map((post: any) => ({
-      ...post,
-      // Handle both naming conventions
-      published: post.published ?? post.is_published ?? true,
-      createdAt: post.createdAt ?? post.published_at ?? post.created_at ?? new Date().toISOString(),
-    })).filter((post: any) => !publishedOnly || post.published);
-    
-    // Sort by date descending
-    posts.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    // Map Supabase snake_case columns to camelCase for frontend
+    const posts = (data || []).map((post: any) => ({
+      id: post.id,
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt,
+      content: post.content,
+      category: post.category || 'Guides',
+      featured: post.featured || false,
+      published: post.is_published ?? true,
+      createdAt: post.published_at || new Date().toISOString(),
+      keywords: post.keywords || [],
+      metaDescription: post.meta_description || post.excerpt || '',
+    }));
     
     return { success: true, data: posts };
   } catch (err: any) {
@@ -141,13 +147,30 @@ export async function fetchBlogPosts(publishedOnly = true) {
 export async function fetchBlogPostBySlug(slug: string) {
   try {
     const { data, error } = await supabase
-      .from('blogPosts')
+      .from('blog_posts')
       .select('*')
       .eq('slug', slug)
+      .eq('is_published', true)
       .single();
     
     if (error) throw error;
-    return { success: true, data };
+    
+    // Map Supabase snake_case columns to camelCase
+    const post = data ? {
+      id: data.id,
+      title: data.title,
+      slug: data.slug,
+      excerpt: data.excerpt,
+      content: data.content,
+      category: data.category || 'Guides',
+      featured: data.featured || false,
+      published: data.is_published ?? true,
+      createdAt: data.published_at || new Date().toISOString(),
+      keywords: data.keywords || [],
+      metaDescription: data.meta_description || data.excerpt || '',
+    } : null;
+    
+    return { success: true, data: post };
   } catch (err: any) {
     console.error('Failed to fetch blog post:', err);
     return { success: false, data: null, error: err.message };

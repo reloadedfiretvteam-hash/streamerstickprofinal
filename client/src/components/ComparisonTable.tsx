@@ -3,9 +3,9 @@ import { Check, X, Tv, DollarSign, Zap } from "lucide-react";
 
 const comparisonData = [
   { feature: "Monthly Cost", streamstick: "$15/mo", cable: "$150+/mo", netflix: "$23/mo" },
-  { feature: "Live TV Channels", streamstick: "18,000+", cable: "200-300", netflix: false },
-  { feature: "Movies & Shows", streamstick: "60,000+", cable: "Limited", netflix: "15,000+" },
-  { feature: "Live Sports & PPV", streamstick: true, cable: "Extra $$", netflix: false },
+  { feature: "Live TV Channels", streamstick: "Extensive Library", cable: "200-300", netflix: false },
+  { feature: "Movies & Shows", streamstick: "Thousands", cable: "Limited", netflix: "15,000+" },
+  { feature: "Live Sports Coverage", streamstick: true, cable: "Extra $$", netflix: false },
   { feature: "No Contracts", streamstick: true, cable: false, netflix: true },
   { feature: "Works Anywhere", streamstick: true, cable: false, netflix: true },
   { feature: "4K Streaming", streamstick: true, cable: "Extra $$", netflix: "Extra $$" },

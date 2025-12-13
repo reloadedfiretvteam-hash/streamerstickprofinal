@@ -121,7 +121,7 @@ export default function Blog() {
     }
     
     return () => {
-      document.title = "StreamStickPro - Jailbroken Fire Sticks & IPTV";
+      document.title = "StreamStickPro - Get Fully Loaded Streaming in 10 Minutes";
     };
   }, [params.slug, posts]);
 
@@ -229,7 +229,7 @@ export default function Blog() {
                               variant="secondary" 
                               className={product.category === 'firestick' ? 'bg-orange-600/20 text-orange-400' : 'bg-purple-600/20 text-purple-400'}
                             >
-                              {product.category === 'firestick' ? 'Fire Stick' : 'IPTV'}
+                              {product.category === 'firestick' ? 'StreamStick' : 'Live TV'}
                             </Badge>
                           </div>
                           <CardTitle className="text-lg text-white">{product.name}</CardTitle>
@@ -258,7 +258,7 @@ export default function Blog() {
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div>
                       <h3 className="text-xl font-bold text-white mb-1">Ready to Cut the Cord?</h3>
-                      <p className="text-gray-300">Be streaming in 10 minutes! Your Fire Stick includes login credentials, a quick setup video, and 24/7 support. Live TV, Movies, Series, Sports & PPV await!</p>
+                      <p className="text-gray-300">Be streaming in 10 minutes! Your StreamStick includes login credentials, a quick setup video, and 24/7 support. Live TV, Movies, Series, and comprehensive sports coverage await!</p>
                     </div>
                     <Button 
                       size="lg" 
@@ -288,7 +288,7 @@ export default function Blog() {
         "@context": "https://schema.org",
         "@type": "Blog",
         "name": "StreamStickPro Blog",
-        "description": "Guides, tips, and news about jailbroken Fire Sticks and IPTV streaming",
+        "description": "Guides, tips, and news about streaming devices and Live TV",
         "url": "https://streamstickpro.com/blog",
         "blogPost": posts.map(post => ({
           "@type": "BlogPosting",
@@ -320,7 +320,7 @@ export default function Blog() {
             transition={{ delay: 0.2 }}
             data-testid="text-blog-subtitle"
           >
-            Guides, tips, and everything you need to know about cord cutting and IPTV
+            Guides, tips, and everything you need to know about cord cutting and streaming
           </motion.p>
         </div>
       </div>

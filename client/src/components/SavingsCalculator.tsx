@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 export function SavingsCalculator({ className = "" }: { className?: string }) {
   const [cableBill, setCableBill] = useState(150);
 
-  const yearlyPriceFireStick = 150; // Fire Stick 4K with 1 year IPTV
-  const yearlyRenewal = 65; // IPTV 1 Year renewal price
+  const yearlyPriceFireStick = 150; // StreamStick 4K with 1 year Live TV
+  const yearlyRenewal = 65; // Live TV 1 Year renewal price
   const yearlyCable = cableBill * 12;
   const yearlySavings = yearlyCable - yearlyPriceFireStick;
   const fiveYearSavings = (yearlyCable * 5) - (yearlyPriceFireStick + (yearlyRenewal * 4)); // Initial + 4 renewals
@@ -90,7 +90,7 @@ export function SavingsCalculator({ className = "" }: { className?: string }) {
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Fire Stick 4K + 1yr IPTV</span>
+                    <span className="text-gray-400">StreamStick 4K + 1yr Live TV</span>
                     <span className="text-green-400 font-semibold">$150 one-time</span>
                   </div>
                   <div className="flex justify-between text-sm">

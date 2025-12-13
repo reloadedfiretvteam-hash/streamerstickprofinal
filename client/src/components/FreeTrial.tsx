@@ -84,7 +84,7 @@ export function FreeTrial() {
         <div className="md:col-span-2 relative h-48 md:h-auto">
           <img 
             src={iptvImg} 
-            alt="4K LIVE IPTV - Free Trial" 
+            alt="4K Live TV - Free Trial" 
             className="w-full h-full object-cover"
             loading="lazy"
             width={300}
@@ -113,7 +113,7 @@ export function FreeTrial() {
 
           <div className="flex items-center gap-2 text-gray-300 mb-6">
             <Clock className="w-5 h-5 text-purple-400" />
-            <span>Try our premium 4K IPTV service FREE - experience 18,000+ channels!</span>
+            <span>Try our premium 4K Live TV service FREE - experience our extensive channel library!</span>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
