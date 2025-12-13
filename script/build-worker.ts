@@ -1,5 +1,6 @@
+import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, mkdir, cp } from "fs/promises";
+import { rm, mkdir, writeFile } from "fs/promises";
 import { spawn } from "child_process";
 import path from "path";
 
@@ -40,15 +41,40 @@ async function buildProject() {
     },
   });
 
-  console.log("Copying Pages Functions...");
-  await cp("functions", "dist/functions", { recursive: true });
+  console.log("Building Cloudflare Worker...");
+  await esbuild({
+    entryPoints: ["worker/index.ts"],
+    platform: "browser",
+    target: "esnext",
+    bundle: true,
+    format: "esm",
+    outfile: "dist/_worker.js",
+    define: {
+      "process.env.NODE_ENV": '"production"',
+    },
+    minify: true,
+    sourcemap: false,
+    conditions: ["workerd", "worker", "browser"],
+    mainFields: ["browser", "module", "main"],
+    logLevel: "info",
+    external: ["node:*"],
+  });
+
+  console.log("Creating _routes.json for Cloudflare Pages...");
+  const routesJson = {
+    version: 1,
+    include: ["/api/*"],
+    exclude: ["/assets/*", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.ico", "/*.woff", "/*.woff2"]
+  };
+  await writeFile("dist/_routes.json", JSON.stringify(routesJson, null, 2));
 
   console.log("Prerendering blog posts for SEO...");
   await runPrerenderBlog();
 
   console.log("Build complete!");
   console.log("Output:");
-  console.log("  - dist/ (static assets + functions directory)");
+  console.log("  - dist/_worker.js (Cloudflare Worker)");
+  console.log("  - dist/_routes.json (routing config)");
   console.log("  - dist/blog/ (prerendered blog posts for SEO)");
 }
 
