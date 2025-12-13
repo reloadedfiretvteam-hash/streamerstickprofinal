@@ -14,6 +14,9 @@ import Success from "@/pages/Success";
 import Blog from "@/pages/Blog";
 import CustomerLogin from "@/pages/CustomerLogin";
 import CustomerPortal from "@/pages/CustomerPortal";
+import TermsOfService from "@/pages/TermsOfService";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import RefundPolicy from "@/pages/RefundPolicy";
 import { CartDrawer } from "@/components/CartDrawer";
 import { WishlistDrawer } from "@/components/WishlistDrawer";
 
@@ -49,6 +52,9 @@ function Router() {
       <Route path="/blog/:slug" component={Blog} />
       <Route path="/customer-login" component={CustomerLogin} />
       <Route path="/my-account" component={CustomerPortal} />
+      <Route path="/terms" component={TermsOfService} />
+      <Route path="/privacy" component={PrivacyPolicy} />
+      <Route path="/refund" component={RefundPolicy} />
       <Route component={NotFound} />
     </Switch>
   );
