@@ -78,7 +78,7 @@ async function main() {
   console.log("Creating commit...");
   const { data: newCommit } = await octokit.git.createCommit({
     owner, repo,
-    message: "Fix: Remove duplicate FAQ schema to resolve Google Search Console errors - " + new Date().toISOString(),
+    message: "Fix accessibility: contrast improvements (gray-400 to gray-300), heading order fix, muted-foreground lightness increase - " + new Date().toISOString(),
     tree: newTree.sha,
     parents: [currentSha]
   });

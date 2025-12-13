@@ -43,7 +43,7 @@ export function CartDrawer() {
               </Badge>
             )}
           </SheetTitle>
-          <SheetDescription className="text-gray-400">
+          <SheetDescription className="text-gray-300">
             Review your items before checkout
           </SheetDescription>
         </SheetHeader>
@@ -61,7 +61,7 @@ export function CartDrawer() {
               <Package className="w-12 h-12 text-gray-500" />
             </motion.div>
             <p className="text-lg font-semibold text-white mb-2">Your cart is empty</p>
-            <p className="text-gray-400 text-sm mb-6">
+            <p className="text-gray-300 text-sm mb-6">
               Add some amazing products to get started!
             </p>
             <Button 
@@ -111,7 +111,7 @@ export function CartDrawer() {
                           <button
                             type="button"
                             aria-label="Decrease quantity"
-                            className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 rounded-l-lg transition-colors"
+                            className="h-8 w-8 flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700 rounded-l-lg transition-colors"
                             onClick={() => {
                               if (item.quantity > 1) {
                                 updateQuantity(item.id, item.quantity - 1);
@@ -129,7 +129,7 @@ export function CartDrawer() {
                           <button
                             type="button"
                             aria-label="Increase quantity"
-                            className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 rounded-r-lg transition-colors"
+                            className="h-8 w-8 flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700 rounded-r-lg transition-colors"
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
                             data-testid={`button-increase-${item.id}`}
                           >
@@ -168,11 +168,11 @@ export function CartDrawer() {
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Subtotal</span>
+                  <span className="text-gray-300">Subtotal</span>
                   <span className="text-white" data-testid="text-subtotal">${total().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Shipping</span>
+                  <span className="text-gray-300">Shipping</span>
                   <span className="text-green-400">FREE</span>
                 </div>
                 <Separator className="bg-gray-800" />

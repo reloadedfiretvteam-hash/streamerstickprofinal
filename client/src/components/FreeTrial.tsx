@@ -67,7 +67,7 @@ export function FreeTrial() {
         <p className="text-gray-300 mb-4">
           Check your email for your 36-hour trial credentials. Your login details have been sent to <span className="text-green-400 font-semibold">{email || "your email"}</span>.
         </p>
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-gray-300">
           Didn't receive it? Check your spam folder or contact us at reloadedfiretvteam@gmail.com
         </p>
       </motion.div>
@@ -108,7 +108,7 @@ export function FreeTrial() {
               <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
                 FREE 36-Hour Trial
               </p>
-              <p className="text-gray-400 text-sm">No credit card required • Instant access</p>
+              <p className="text-gray-300 text-sm">No credit card required • Instant access</p>
             </div>
           </div>
 
@@ -121,7 +121,7 @@ export function FreeTrial() {
             <div className="grid md:grid-cols-2 gap-4">
               <div className="relative">
                 <Label htmlFor="trial-name" className="sr-only">Your Name</Label>
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
                 <Input
                   id="trial-name"
                   type="text"
@@ -134,7 +134,7 @@ export function FreeTrial() {
               </div>
               <div className="relative">
                 <Label htmlFor="trial-email" className="sr-only">Your Email</Label>
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
                 <Input
                   id="trial-email"
                   type="email"

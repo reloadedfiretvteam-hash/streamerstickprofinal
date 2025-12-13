@@ -38,7 +38,7 @@ export function ChannelLogos({ className = "" }: { className?: string }) {
             <span className="text-white">Access Our </span>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Extensive Channel Library</span>
           </h2>
-          <p className="text-gray-400">All your favorite networks included</p>
+          <p className="text-gray-300">All your favorite networks included</p>
         </div>
       </div>
       
@@ -63,22 +63,22 @@ export function ChannelLogos({ className = "" }: { className?: string }) {
           <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
             <Tv className="w-8 h-8 text-blue-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-white">Extensive</div>
-            <div className="text-sm text-gray-400">Channel Library</div>
+            <div className="text-sm text-gray-300">Channel Library</div>
           </div>
           <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
             <Film className="w-8 h-8 text-purple-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-white">Thousands</div>
-            <div className="text-sm text-gray-400">Movies & Shows</div>
+            <div className="text-sm text-gray-300">Movies & Shows</div>
           </div>
           <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
             <Trophy className="w-8 h-8 text-orange-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-white">Full Sports</div>
-            <div className="text-sm text-gray-400">Coverage</div>
+            <div className="text-sm text-gray-300">Coverage</div>
           </div>
           <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
             <Zap className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-white">4K/HD</div>
-            <div className="text-sm text-gray-400">Quality Streams</div>
+            <div className="text-sm text-gray-300">Quality Streams</div>
           </div>
         </div>
       </div>

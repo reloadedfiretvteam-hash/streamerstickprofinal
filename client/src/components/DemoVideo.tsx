@@ -113,7 +113,7 @@ export function DemoVideo() {
                       <p className="text-sm text-gray-300">Setup Guide & Live Demo</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
+                  <div className="flex items-center gap-4 text-sm text-gray-300">
                     <span className="flex items-center gap-1">
                       <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                       4.9 Rating
@@ -161,15 +161,15 @@ export function DemoVideo() {
           <div className="grid grid-cols-3 gap-4 mt-6">
             <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-xl p-4 text-center">
               <div className="text-2xl font-bold text-orange-400">Extensive</div>
-              <div className="text-sm text-gray-400">Channel Library</div>
+              <div className="text-sm text-gray-300">Channel Library</div>
             </div>
             <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl p-4 text-center">
               <div className="text-2xl font-bold text-blue-400">Thousands</div>
-              <div className="text-sm text-gray-400">Movies & Shows</div>
+              <div className="text-sm text-gray-300">Movies & Shows</div>
             </div>
             <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 text-center">
               <div className="text-2xl font-bold text-purple-400">Full Sports</div>
-              <div className="text-sm text-gray-400">Coverage</div>
+              <div className="text-sm text-gray-300">Coverage</div>
             </div>
           </div>
         </motion.div>

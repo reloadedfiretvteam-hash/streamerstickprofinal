@@ -103,7 +103,7 @@ export function CustomerReviews({ className = "" }: { className?: string }) {
             <span className="text-white">What Our </span>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">Customers Say</span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p className="text-gray-300 max-w-2xl mx-auto">
             Real reviews from verified customers. We're proud of our 4.9/5 average rating.
           </p>
           
@@ -115,9 +115,9 @@ export function CustomerReviews({ className = "" }: { className?: string }) {
               ))}
             </div>
             <span className="text-2xl font-bold text-white">4.9</span>
-            <span className="text-gray-400">out of 5</span>
+            <span className="text-gray-300">out of 5</span>
             <span className="text-gray-500">|</span>
-            <span className="text-gray-400">2,700+ reviews</span>
+            <span className="text-gray-300">2,700+ reviews</span>
           </div>
         </div>
 

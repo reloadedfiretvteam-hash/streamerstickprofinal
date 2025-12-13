@@ -62,7 +62,7 @@ export function WishlistDrawer() {
               </Badge>
             )}
           </SheetTitle>
-          <SheetDescription className="text-gray-400">
+          <SheetDescription className="text-gray-300">
             Items you've saved for later
           </SheetDescription>
         </SheetHeader>
@@ -80,7 +80,7 @@ export function WishlistDrawer() {
               <Heart className="w-12 h-12 text-gray-500" />
             </motion.div>
             <p className="text-lg font-semibold text-white mb-2">Your wishlist is empty</p>
-            <p className="text-gray-400 text-sm mb-6">
+            <p className="text-gray-300 text-sm mb-6">
               Save items you love by clicking the heart icon!
             </p>
             <Button 

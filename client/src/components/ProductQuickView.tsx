@@ -109,7 +109,7 @@ export function ProductQuickView({ product, isOpen, onClose }: ProductQuickViewP
             <DialogTitle className="text-2xl font-bold text-white" data-testid="quick-view-title">
               {product.name}
             </DialogTitle>
-            <DialogDescription className="text-gray-400 text-base mt-2">
+            <DialogDescription className="text-gray-300 text-base mt-2">
               {product.description}
             </DialogDescription>
           </DialogHeader>

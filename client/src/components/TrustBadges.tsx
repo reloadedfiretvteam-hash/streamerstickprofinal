@@ -61,7 +61,7 @@ export function TrustBadges({ variant = "horizontal", className = "" }: TrustBad
               </div>
               <div className="text-left">
                 <div className="font-semibold text-white text-sm">{badge.label}</div>
-                <div className="text-xs text-gray-400">{badge.sublabel}</div>
+                <div className="text-xs text-gray-300">{badge.sublabel}</div>
               </div>
             </div>
           ))}
@@ -111,7 +111,7 @@ export function GuaranteeBadge({ className = "" }: { className?: string }) {
       </div>
       <div className="text-left">
         <div className="text-lg font-bold text-white">Satisfaction Guaranteed</div>
-        <div className="text-sm text-gray-400">30-day money-back promise</div>
+        <div className="text-sm text-gray-300">30-day money-back promise</div>
       </div>
     </div>
   );

@@ -207,7 +207,7 @@ export default function Blog() {
                 setSelectedPost(null);
                 setLocation("/blog");
               }}
-              className="text-gray-400 hover:text-white"
+              className="text-gray-300 hover:text-white"
               data-testid="button-back-to-blog"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -220,7 +220,7 @@ export default function Blog() {
         </nav>
 
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex items-center gap-4 text-gray-400 text-sm mb-8 flex-wrap">
+          <div className="flex items-center gap-4 text-gray-300 text-sm mb-8 flex-wrap">
             <span className="flex items-center gap-1" data-testid="text-publish-date">
               <Calendar className="w-4 h-4" />
               {new Date(selectedPost.date).toLocaleDateString()}
@@ -258,7 +258,7 @@ export default function Blog() {
                   <Zap className="w-6 h-6 text-orange-500" />
                   Related Products
                 </h2>
-                <p className="text-gray-400 mb-6">
+                <p className="text-gray-300 mb-6">
                   Ready to start streaming? Check out our top-rated products mentioned in this article.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -379,11 +379,11 @@ export default function Blog() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {loading ? (
           <div className="text-center py-12" data-testid="text-loading">
-            <p className="text-gray-400">Loading blog posts...</p>
+            <p className="text-gray-300">Loading blog posts...</p>
           </div>
         ) : posts.length === 0 ? (
           <div className="text-center py-12" data-testid="text-no-posts">
-            <p className="text-gray-400">No blog posts available yet.</p>
+            <p className="text-gray-300">No blog posts available yet.</p>
           </div>
         ) : (
           <>
@@ -409,13 +409,13 @@ export default function Blog() {
                         <CardHeader>
                           <div className="flex items-center gap-2 mb-2">
                             <Badge variant="secondary" data-testid={`badge-category-${post.id}`}>{post.category}</Badge>
-                            <span className="text-xs text-gray-400" data-testid={`text-date-${post.id}`}>{post.date}</span>
+                            <span className="text-xs text-gray-300" data-testid={`text-date-${post.id}`}>{post.date}</span>
                           </div>
                           <CardTitle className="text-xl" data-testid={`text-title-${post.id}`}>{post.title}</CardTitle>
-                          <CardDescription className="text-gray-400" data-testid={`text-excerpt-${post.id}`}>{post.excerpt}</CardDescription>
+                          <CardDescription className="text-gray-300" data-testid={`text-excerpt-${post.id}`}>{post.excerpt}</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className="flex items-center justify-between text-sm text-gray-400">
+                          <div className="flex items-center justify-between text-sm text-gray-300">
                             <span className="flex items-center gap-1" data-testid={`text-read-time-${post.id}`}>
                               <Clock className="w-4 h-4" />
                               {post.readTime}
@@ -461,7 +461,7 @@ export default function Blog() {
 
               {filteredPosts.length === 0 ? (
                 <div className="text-center py-12" data-testid="text-no-matching-posts">
-                  <p className="text-gray-400">No posts found. Try adjusting your search or filters.</p>
+                  <p className="text-gray-300">No posts found. Try adjusting your search or filters.</p>
                 </div>
               ) : (
                 <div className="grid gap-6">
@@ -479,15 +479,15 @@ export default function Blog() {
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
                                 <Badge variant="secondary" data-testid={`badge-category-list-${post.id}`}>{post.category}</Badge>
-                                <span className="text-xs text-gray-400" data-testid={`text-date-list-${post.id}`}>{post.date}</span>
+                                <span className="text-xs text-gray-300" data-testid={`text-date-list-${post.id}`}>{post.date}</span>
                               </div>
                               <CardTitle data-testid={`text-post-title-${post.id}`}>{post.title}</CardTitle>
-                              <CardDescription className="text-gray-400 mt-2" data-testid={`text-post-excerpt-${post.id}`}>{post.excerpt}</CardDescription>
+                              <CardDescription className="text-gray-300 mt-2" data-testid={`text-post-excerpt-${post.id}`}>{post.excerpt}</CardDescription>
                             </div>
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <div className="flex items-center justify-between text-sm text-gray-400">
+                          <div className="flex items-center justify-between text-sm text-gray-300">
                             <span className="flex items-center gap-1" data-testid={`text-read-time-list-${post.id}`}>
                               <Clock className="w-4 h-4" />
                               {post.readTime}

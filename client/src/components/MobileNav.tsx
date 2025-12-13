@@ -100,7 +100,7 @@ export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq }: MobileNa
           
           <div className="mt-6 p-4 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-lg border border-orange-400/30">
             <p className="text-sm text-orange-200 font-medium mb-2">Limited Time Offer!</p>
-            <p className="text-xs text-gray-400">Get up to 50% off on yearly IPTV subscriptions.</p>
+            <p className="text-xs text-gray-300">Get up to 50% off on yearly IPTV subscriptions.</p>
           </div>
         </nav>
       </SheetContent>

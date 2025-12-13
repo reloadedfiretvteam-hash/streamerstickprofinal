@@ -24,7 +24,7 @@ export function SavingsCalculator({ className = "" }: { className?: string }) {
             <span className="text-white">See How Much </span>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">You'll Save</span>
           </h2>
-          <p className="text-gray-400">Compare your current cable bill to StreamStickPro</p>
+          <p className="text-gray-300">Compare your current cable bill to StreamStickPro</p>
         </div>
 
         <div className="max-w-4xl mx-auto">
@@ -36,7 +36,7 @@ export function SavingsCalculator({ className = "" }: { className?: string }) {
               </label>
               <div className="flex items-center gap-4">
                 <div className="relative flex-1 max-w-xs">
-                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
+                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" aria-hidden="true" />
                   <input
                     id="cable-bill-slider"
                     type="range"
@@ -73,15 +73,15 @@ export function SavingsCalculator({ className = "" }: { className?: string }) {
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Monthly cost</span>
+                    <span className="text-gray-300">Monthly cost</span>
                     <span className="text-red-400 font-semibold">${cableBill}/mo</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Yearly cost</span>
+                    <span className="text-gray-300">Yearly cost</span>
                     <span className="text-red-400 font-semibold">${yearlyCable.toLocaleString()}/yr</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">5 Year cost</span>
+                    <span className="text-gray-300">5 Year cost</span>
                     <span className="text-red-400 font-semibold">${(yearlyCable * 5).toLocaleString()}</span>
                   </div>
                 </div>
@@ -95,15 +95,15 @@ export function SavingsCalculator({ className = "" }: { className?: string }) {
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">StreamStick 4K + 1yr Live TV</span>
+                    <span className="text-gray-300">StreamStick 4K + 1yr Live TV</span>
                     <span className="text-green-400 font-semibold">$150 one-time</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Yearly renewal</span>
+                    <span className="text-gray-300">Yearly renewal</span>
                     <span className="text-green-400 font-semibold">$65/yr</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">5 Year total</span>
+                    <span className="text-gray-300">5 Year total</span>
                     <span className="text-green-400 font-semibold">${(yearlyPriceFireStick + (yearlyRenewal * 4)).toLocaleString()}</span>
                   </div>
                 </div>
@@ -122,14 +122,14 @@ export function SavingsCalculator({ className = "" }: { className?: string }) {
                   <div className="text-4xl md:text-5xl font-bold text-green-400">
                     ${yearlySavings.toLocaleString()}
                   </div>
-                  <div className="text-sm text-gray-400">First Year</div>
+                  <div className="text-sm text-gray-300">First Year</div>
                 </div>
                 <ArrowRight className="w-6 h-6 text-gray-500 hidden md:block" />
                 <div>
                   <div className="text-4xl md:text-5xl font-bold text-green-400">
                     ${fiveYearSavings.toLocaleString()}
                   </div>
-                  <div className="text-sm text-gray-400">Over 5 Years</div>
+                  <div className="text-sm text-gray-300">Over 5 Years</div>
                 </div>
               </div>
             </motion.div>

@@ -42,7 +42,7 @@ export function ComparisonTable() {
               See Why 2,700+ Customers Made The Switch
             </span>
           </h2>
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
             Stop overpaying for cable. Get everything you want for a fraction of the price.
           </p>
         </motion.div>
@@ -57,7 +57,7 @@ export function ComparisonTable() {
           <table className="w-full border-collapse" data-testid="comparison-table">
             <thead>
               <tr>
-                <th className="p-4 text-left text-gray-400 font-medium"></th>
+                <th className="p-4 text-left text-gray-300 font-medium"></th>
                 <th className="p-4 text-center">
                   <div className="bg-gradient-to-br from-orange-500 to-purple-600 rounded-xl p-4 transform -translate-y-2 shadow-xl shadow-orange-500/20">
                     <Zap className="w-6 h-6 text-white mx-auto mb-1" />
@@ -67,13 +67,13 @@ export function ComparisonTable() {
                 </th>
                 <th className="p-4 text-center">
                   <div className="bg-gray-700/50 rounded-xl p-4">
-                    <Tv className="w-6 h-6 text-gray-400 mx-auto mb-1" />
+                    <Tv className="w-6 h-6 text-gray-300 mx-auto mb-1" />
                     <span className="text-gray-300 font-bold">Cable TV</span>
                   </div>
                 </th>
                 <th className="p-4 text-center">
                   <div className="bg-gray-700/50 rounded-xl p-4">
-                    <Tv className="w-6 h-6 text-gray-400 mx-auto mb-1" />
+                    <Tv className="w-6 h-6 text-gray-300 mx-auto mb-1" />
                     <span className="text-gray-300 font-bold">Netflix</span>
                   </div>
                 </th>
@@ -112,7 +112,7 @@ export function ComparisonTable() {
           viewport={{ once: true }}
           className="text-center mt-8"
         >
-          <p className="text-gray-400 mb-4">
+          <p className="text-gray-300 mb-4">
             <span className="text-green-400 font-bold">Save $1,500+</span> per year by switching to Stream Stick Pro
           </p>
         </motion.div>

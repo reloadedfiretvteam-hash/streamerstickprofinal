@@ -59,7 +59,7 @@ export function CountdownTimer({
           {value.toString().padStart(2, '0')}
         </span>
       </motion.div>
-      <span className="text-xs text-gray-400 mt-1 uppercase tracking-wider">{label}</span>
+      <span className="text-xs text-gray-300 mt-1 uppercase tracking-wider">{label}</span>
     </div>
   );
 
@@ -72,8 +72,8 @@ export function CountdownTimer({
               <Flame className="w-5 h-5 text-orange-400 animate-pulse" />
             </div>
             <div className="text-center md:text-left">
-              <h3 className="text-lg font-bold text-white">{title}</h3>
-              <p className="text-sm text-gray-400">{subtitle}</p>
+              <p className="text-lg font-bold text-white">{title}</p>
+              <p className="text-sm text-gray-300">{subtitle}</p>
             </div>
           </div>
           

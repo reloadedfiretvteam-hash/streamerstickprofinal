@@ -54,7 +54,7 @@ export function FloatingCTA({ onBuyNow }: FloatingCTAProps) {
           <div className="relative">
             <button
               onClick={handleDismiss}
-              className="absolute -top-2 -right-2 w-6 h-6 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center text-gray-400 hover:text-white transition-colors z-10"
+              className="absolute -top-2 -right-2 w-6 h-6 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center text-gray-300 hover:text-white transition-colors z-10"
               aria-label="Dismiss"
             >
               <X className="w-3 h-3" />
@@ -70,7 +70,7 @@ export function FloatingCTA({ onBuyNow }: FloatingCTAProps) {
                   </div>
                   <div className="flex-1">
                     <p className="text-white font-bold text-sm">Ready to Cut the Cord?</p>
-                    <p className="text-gray-400 text-xs">18,000+ channels from $15/mo</p>
+                    <p className="text-gray-300 text-xs">18,000+ channels from $15/mo</p>
                   </div>
                   <Button
                     onClick={scrollToProducts}

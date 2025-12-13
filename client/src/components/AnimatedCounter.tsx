@@ -85,7 +85,7 @@ export function AnimatedStatCard({ value, suffix = "+", label, icon }: StatCardP
           className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-purple-500"
         />
       </div>
-      <p className="text-sm text-gray-400">{label}</p>
+      <p className="text-sm text-gray-300">{label}</p>
     </div>
   );
 }
