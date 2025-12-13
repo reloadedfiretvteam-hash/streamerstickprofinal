@@ -31,13 +31,14 @@ export function SavingsCalculator({ className = "" }: { className?: string }) {
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
             {/* Input */}
             <div className="mb-8">
-              <label className="block text-gray-300 text-sm mb-3">
+              <label htmlFor="cable-bill-slider" className="block text-gray-300 text-sm mb-3">
                 What's your current monthly cable/streaming bill?
               </label>
               <div className="flex items-center gap-4">
                 <div className="relative flex-1 max-w-xs">
-                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
                   <input
+                    id="cable-bill-slider"
                     type="range"
                     min="50"
                     max="300"
@@ -45,6 +46,10 @@ export function SavingsCalculator({ className = "" }: { className?: string }) {
                     onChange={(e) => setCableBill(Number(e.target.value))}
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-green-500"
                     data-testid="input-cable-bill"
+                    aria-valuemin={50}
+                    aria-valuemax={300}
+                    aria-valuenow={cableBill}
+                    aria-valuetext={`$${cableBill} per month`}
                   />
                 </div>
                 <div className="text-3xl font-bold text-white min-w-[100px]">

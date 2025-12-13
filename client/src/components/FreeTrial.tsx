@@ -3,6 +3,7 @@ import { apiCall } from "@/lib/api";
 import { Gift, Mail, User, Loader2, Check, Clock, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
 import iptvImg from "@assets/OIF_1764979270800.jpg";
 
@@ -119,8 +120,10 @@ export function FreeTrial() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="relative">
+                <Label htmlFor="trial-name" className="sr-only">Your Name</Label>
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
+                  id="trial-name"
                   type="text"
                   placeholder="Your Name"
                   value={name}
@@ -130,8 +133,10 @@ export function FreeTrial() {
                 />
               </div>
               <div className="relative">
+                <Label htmlFor="trial-email" className="sr-only">Your Email</Label>
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
+                  id="trial-email"
                   type="email"
                   placeholder="Your Email"
                   value={email}

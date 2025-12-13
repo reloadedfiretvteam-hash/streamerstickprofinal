@@ -217,12 +217,14 @@ export default function Checkout() {
                           className="px-3 py-2 hover:bg-white/10 transition-colors"
                           onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                           data-testid={`button-decrease-${item.id}`}
+                          aria-label={`Decrease quantity of ${item.name}`}
                         >-</button>
                         <span className="px-3 py-2 bg-white/5 min-w-[40px] text-center">{item.quantity}</span>
                         <button 
                           className="px-3 py-2 hover:bg-white/10 transition-colors"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           data-testid={`button-increase-${item.id}`}
+                          aria-label={`Increase quantity of ${item.name}`}
                         >+</button>
                       </div>
                       <Button 
@@ -231,6 +233,7 @@ export default function Checkout() {
                         onClick={() => removeItem(item.id)} 
                         className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
                         data-testid={`button-remove-${item.id}`}
+                        aria-label={`Remove ${item.name} from cart`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

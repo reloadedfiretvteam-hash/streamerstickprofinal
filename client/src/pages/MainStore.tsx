@@ -1050,6 +1050,8 @@ export default function MainStore() {
                                     : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                 }`}
                                 data-testid={`button-qty-${product.id}-${qty}`}
+                                aria-label={`Select quantity ${qty}`}
+                                aria-pressed={firestickQuantities[product.id] === qty}
                               >
                                 {qty}
                                 {discountInfo.label && (
@@ -1238,6 +1240,8 @@ export default function MainStore() {
                                     : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                 }`}
                                 data-testid={`button-device-${plan.duration}-${num}`}
+                                aria-label={`Select ${num} device${num > 1 ? 's' : ''}`}
+                                aria-pressed={deviceCount === num}
                               >
                                 {num}
                               </button>
@@ -1424,9 +1428,10 @@ export default function MainStore() {
         rel="noopener noreferrer"
         className="fixed bottom-20 md:bottom-6 right-6 z-[100]"
         data-testid="link-whatsapp"
+        aria-label="Chat with us on WhatsApp"
       >
-        <Button className="rounded-full w-14 h-14 shadow-2xl bg-green-500 hover:bg-green-600 animate-pulse border-2 border-white/20" data-testid="button-chat">
-          <MessageCircle className="w-6 h-6 text-white" />
+        <Button className="rounded-full w-14 h-14 shadow-2xl bg-green-500 hover:bg-green-600 animate-pulse border-2 border-white/20" data-testid="button-chat" aria-hidden="true" tabIndex={-1}>
+          <MessageCircle className="w-6 h-6 text-white" aria-hidden="true" />
         </Button>
       </a>
 
@@ -1443,8 +1448,8 @@ export default function MainStore() {
                 Premium Live TV streaming with extensive content library and thousands of movies & series. Pre-configured streaming devices available.
               </p>
               <div className="flex gap-3">
-                <a href="mailto:reloadedfiretvteam@gmail.com" className="w-10 h-10 bg-gray-800 hover:bg-orange-600 rounded-lg flex items-center justify-center transition-colors" data-testid="link-email">
-                  <Mail className="w-5 h-5" />
+                <a href="mailto:reloadedfiretvteam@gmail.com" className="w-10 h-10 bg-gray-800 hover:bg-orange-600 rounded-lg flex items-center justify-center transition-colors" data-testid="link-email" aria-label="Email us">
+                  <Mail className="w-5 h-5" aria-hidden="true" />
                 </a>
               </div>
               <div className="mt-4">
