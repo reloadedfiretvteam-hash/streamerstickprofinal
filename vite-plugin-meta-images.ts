@@ -56,6 +56,14 @@ export function metaImagesPlugin(): Plugin {
 }
 
 function getDeploymentUrl(): string | null {
+  // For Cloudflare production builds, use the production domain
+  if (process.env.CF_PAGES === '1' || process.env.SITE_URL) {
+    const url = process.env.SITE_URL || 'https://streamstickpro.com';
+    log('[meta-images] using production domain:', url);
+    return url;
+  }
+
+  // For development, use Replit domain
   if (process.env.REPLIT_INTERNAL_APP_DOMAIN) {
     const url = `https://${process.env.REPLIT_INTERNAL_APP_DOMAIN}`;
     log('[meta-images] using internal app domain:', url);

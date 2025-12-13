@@ -70,7 +70,23 @@ async function buildCloudflare() {
   const routesJson = {
     version: 1,
     include: ["/api/*"],
-    exclude: ["/assets/*", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.ico", "/*.woff", "/*.woff2"]
+    exclude: [
+      "/assets/*", 
+      "/*.css", 
+      "/*.js", 
+      "/*.png", 
+      "/*.jpg", 
+      "/*.svg", 
+      "/*.ico", 
+      "/*.woff", 
+      "/*.woff2",
+      "/*.xml",
+      "/*.txt",
+      "/googledf2a7b91b7b9494f.html",
+      "/BingSiteAuth.xml",
+      "/sitemap.xml",
+      "/robots.txt"
+    ]
   };
   await writeFile("dist/_routes.json", JSON.stringify(routesJson, null, 2));
 
