@@ -454,8 +454,9 @@ export default function MainStore() {
               variant="ghost"
               className="relative text-gray-300 hover:text-white hover:bg-white/10"
               data-testid="button-wishlist"
+              aria-label={`Wishlist${wishlistItems.length > 0 ? `, ${wishlistItems.length} items` : ''}`}
             >
-              <Heart className={`w-5 h-5 ${wishlistItems.length > 0 ? 'fill-red-500 text-red-500' : ''}`} />
+              <Heart className={`w-5 h-5 ${wishlistItems.length > 0 ? 'fill-red-500 text-red-500' : ''}`} aria-hidden="true" />
               {wishlistItems.length > 0 && (
                 <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs h-5 w-5 flex items-center justify-center p-0" data-testid="text-wishlist-count">
                   {wishlistItems.length}
@@ -466,8 +467,9 @@ export default function MainStore() {
               onClick={openCart} 
               className="relative bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/30"
               data-testid="button-cart"
+              aria-label={`Shopping cart${items.length > 0 ? `, ${items.length} items` : ''}`}
             >
-              <ShoppingCart className="w-5 h-5 mr-2" />
+              <ShoppingCart className="w-5 h-5 mr-2" aria-hidden="true" />
               <span className="hidden sm:inline">Cart</span>
               {items.length > 0 && (
                 <Badge className="absolute -top-2 -right-2 bg-white text-black hover:bg-gray-200" data-testid="text-cart-count">
@@ -479,6 +481,8 @@ export default function MainStore() {
         </div>
       </nav>
 
+      {/* Main Content */}
+      <main id="main-content" role="main">
       {/* Hero Section */}
       <section ref={heroRef} className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden min-h-[600px] flex items-center">
         <motion.div 
@@ -1501,6 +1505,7 @@ export default function MainStore() {
           </div>
         </div>
       </footer>
+      </main>
 
       {/* Exit Intent Popup */}
       <ExitPopup />

@@ -84,8 +84,9 @@ export function ScrollToTopButton() {
           onClick={scrollToTop}
           className="fixed bottom-24 right-4 z-40 w-12 h-12 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors hidden md:flex"
           data-testid="scroll-to-top"
+          aria-label="Scroll to top"
         >
-          <ArrowUp className="w-5 h-5" />
+          <ArrowUp className="w-5 h-5" aria-hidden="true" />
         </motion.button>
       )}
     </AnimatePresence>
