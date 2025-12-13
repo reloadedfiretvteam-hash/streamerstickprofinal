@@ -64,10 +64,36 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
   const keywords = post.keywords?.join(", ") || "fire stick, iptv, streaming, cord cutting";
   const date = post.createdAt || new Date().toISOString();
   const readTime = Math.ceil((post.content || "").split(" ").length / 200);
-  const cleanContent = (post.content || "")
+  
+  // Mid-article product advertisement
+  const midArticleAd = `
+    </p>
+    <div class="my-8 p-6 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl border border-blue-500/30">
+      <div class="flex flex-col md:flex-row items-center gap-4">
+        <div class="text-4xl">🔥</div>
+        <div class="flex-1 text-center md:text-left">
+          <h4 class="text-lg font-bold text-orange-400">Limited Time Offer!</h4>
+          <p class="text-gray-300 text-sm">Fire Sticks with 1 Year Live TV - Starting at just $130</p>
+        </div>
+        <a href="/?section=shop" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-6 rounded-lg whitespace-nowrap">
+          Shop Now →
+        </a>
+      </div>
+    </div>
+    <p>`;
+  
+  // Insert ad after first 2 paragraphs
+  let cleanContent = (post.content || "")
     .replace(/\n\n/g, "</p><p>")
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/^- (.+)$/gm, "<li>$1</li>");
+  
+  // Insert mid-article ad after 2nd paragraph
+  const paragraphs = cleanContent.split("</p><p>");
+  if (paragraphs.length > 3) {
+    paragraphs.splice(2, 0, midArticleAd);
+    cleanContent = paragraphs.join("</p><p>");
+  }
 
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
