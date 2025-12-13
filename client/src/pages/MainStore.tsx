@@ -19,6 +19,7 @@ import { DemoVideo } from "@/components/DemoVideo";
 import { FreeTrial } from "@/components/FreeTrial";
 import { TrustBadges, PaymentBadges, GuaranteeBadge } from "@/components/TrustBadges";
 import { TrustStats } from "@/components/SocialProof";
+import { SocialProofPopup } from "@/components/SocialProofPopup";
 import { CustomerReviews } from "@/components/CustomerReviews";
 import { ChannelLogos } from "@/components/ChannelLogos";
 import { SavingsCalculator } from "@/components/SavingsCalculator";
@@ -1510,6 +1511,9 @@ export default function MainStore() {
 
       {/* Exit Intent Popup */}
       <ExitPopup />
+
+      {/* Social Proof Popup - Recent Purchases */}
+      <SocialProofPopup />
 
       {/* Floating CTA */}
       <FloatingCTA />
