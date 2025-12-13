@@ -811,20 +811,20 @@ export default function MainStore() {
                   <tr className="border-b border-slate-700/50">
                     <th className="text-left p-4 text-gray-400 font-medium">Features</th>
                     <th className="text-center p-4">
-                      <div className="text-lg font-bold text-white">HD</div>
-                      <div className="text-2xl font-bold text-orange-400">$119</div>
-                      <div className="text-xs text-gray-400 line-through">$140</div>
+                      <div className="text-lg font-bold text-white">Starter Kit</div>
+                      <div className="text-2xl font-bold text-orange-400">$130</div>
+                      <div className="text-xs text-gray-400">1080p Full HD</div>
                     </th>
                     <th className="text-center p-4 bg-orange-500/10 relative">
                       <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-b">BEST VALUE</div>
-                      <div className="text-lg font-bold text-white pt-4">4K</div>
-                      <div className="text-2xl font-bold text-orange-400">$127.50</div>
-                      <div className="text-xs text-gray-400 line-through">$150</div>
+                      <div className="text-lg font-bold text-white pt-4">4K Kit</div>
+                      <div className="text-2xl font-bold text-orange-400">$140</div>
+                      <div className="text-xs text-gray-400">4K Ultra HD</div>
                     </th>
                     <th className="text-center p-4">
-                      <div className="text-lg font-bold text-white">4K Max</div>
-                      <div className="text-2xl font-bold text-orange-400">$136</div>
-                      <div className="text-xs text-gray-400 line-through">$160</div>
+                      <div className="text-lg font-bold text-white">Max Kit</div>
+                      <div className="text-2xl font-bold text-orange-400">$150</div>
+                      <div className="text-xs text-gray-400">4K + Wi-Fi 6E</div>
                     </th>
                   </tr>
                 </thead>
