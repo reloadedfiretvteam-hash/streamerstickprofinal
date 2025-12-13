@@ -834,20 +834,20 @@ export default function MainStore() {
                   </tr>
                   <tr className="border-b border-slate-700/30">
                     <td className="p-4 text-gray-300">HDR Support</td>
-                    <td className="text-center p-4"><X className="w-5 h-5 text-gray-500 mx-auto" /></td>
+                    <td className="text-center p-4"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
                     <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
                     <td className="p-4 text-gray-300">Dolby Vision & Atmos</td>
-                    <td className="text-center p-4"><X className="w-5 h-5 text-gray-500 mx-auto" /></td>
+                    <td className="text-center p-4"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
                     <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
                     <td className="p-4 text-gray-300">Wi-Fi 6E (Fastest)</td>
-                    <td className="text-center p-4"><X className="w-5 h-5 text-gray-500 mx-auto" /></td>
-                    <td className="text-center p-4 bg-orange-500/5"><X className="w-5 h-5 text-gray-500 mx-auto" /></td>
+                    <td className="text-center p-4"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
+                    <td className="text-center p-4 bg-orange-500/5"><X className="w-5 h-5 text-gray-400 mx-auto" /></td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
@@ -1258,7 +1258,7 @@ export default function MainStore() {
                               / {plan.durationLabel.toLowerCase()}
                             </span>
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-gray-400 mt-1">
                             {deviceCount} device{deviceCount > 1 ? 's' : ''} included
                           </p>
                         </div>
@@ -1491,7 +1491,7 @@ export default function MainStore() {
                 <li><a href="/terms" className="hover:text-orange-400 transition-colors">Terms of Service</a></li>
                 <li><a href="/privacy" className="hover:text-orange-400 transition-colors">Privacy Policy</a></li>
                 <li><a href="/refund" className="hover:text-orange-400 transition-colors">Refund Policy</a></li>
-                <li><a href="/admin" className="text-gray-600 hover:text-gray-500 transition-colors text-xs">Admin</a></li>
+                <li><a href="/admin" className="text-gray-600 hover:text-gray-400 transition-colors text-xs">Admin</a></li>
               </ul>
             </div>
           </div>
