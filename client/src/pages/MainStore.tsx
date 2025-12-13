@@ -431,14 +431,7 @@ export default function MainStore() {
         </div>
       </div>
 
-      <SEOSchema 
-        faq={[
-          { question: "What's included with a StreamStick?", answer: "Your StreamStick arrives ready for a quick 10-minute setup! After purchase, you'll receive your login credentials instantly plus an easy setup video. Follow the tutorial and you'll be fully loaded with 1 Year of Live TV - movies, sports, shows, and more. 24/7 support included!" },
-          { question: "How do I renew my subscription?", answer: "Simply come back to the site and purchase a renewal package. Your credentials will be updated instantly." },
-          { question: "Do you offer support?", answer: "Yes, we offer 24/7 support via email for all active subscribers. Contact us at reloadedfiretvteam@gmail.com" },
-          { question: "What devices are supported?", answer: "Our Live TV service works on streaming devices, Android boxes, Smart TVs, phones, tablets, and computers. Use up to 2 devices simultaneously!" }
-        ]}
-      />
+      {/* FAQ schema is already in index.html - don't duplicate */}
       
       {/* Navigation */}
       <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-gray-900/95 backdrop-blur-md">

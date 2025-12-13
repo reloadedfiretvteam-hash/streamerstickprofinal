@@ -7,10 +7,9 @@ const owner = "reloadedfiretvteam-hash";
 const repo = "streamerstickprofinal";
 const branch = "clean-main";
 
-// Files to ignore
 const ignorePatterns = [
   'node_modules', '.git', 'dist', '.cache', '.local', '.replit', 'replit.nix',
-  '.upm', '.config', 'package-lock.json', '.env', 'attached_assets'
+  '.upm', '.config', 'package-lock.json', '.env', 'attached_assets', '.wrangler-secrets'
 ];
 
 function shouldIgnore(filePath: string): boolean {
@@ -79,7 +78,7 @@ async function main() {
   console.log("Creating commit...");
   const { data: newCommit } = await octokit.git.createCommit({
     owner, repo,
-    message: "Deploy: All updates synced from Replit - " + new Date().toISOString(),
+    message: "Fix: Remove duplicate FAQ schema to resolve Google Search Console errors - " + new Date().toISOString(),
     tree: newTree.sha,
     parents: [currentSha]
   });
