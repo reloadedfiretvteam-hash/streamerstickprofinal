@@ -124,7 +124,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
 
 const defaultProducts: Product[] = [
   {
-    id: "fs-hd",
+    id: "firestick-hd",
     name: "StreamStick Starter Kit",
     price: 130,
     description: "Get fully loaded in just 10 minutes! Your Fire Stick arrives ready - simply plug in, enter your credentials (sent instantly after purchase), and follow our quick setup video. You'll unlock an extensive live content library, thousands of movies & TV shows, and comprehensive sports coverage including NFL, NBA, UFC, and live events. Includes 1 Year Live TV plan and 24/7 customer support.",
@@ -134,7 +134,7 @@ const defaultProducts: Product[] = [
     badge: "STARTER"
   },
   {
-    id: "fs-4k",
+    id: "firestick-4k",
     name: "StreamStick 4K Kit",
     price: 140,
     description: "Best-selling Fire Stick - get fully loaded in 10 minutes! Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision. Enjoy an extensive live content library, thousands of movies & TV shows, and all major sports - NFL, NBA, UFC, and live events. Includes 1 Year premium Live TV plan and 24/7 support.",
@@ -145,7 +145,7 @@ const defaultProducts: Product[] = [
     popular: true
   },
   {
-    id: "fs-max",
+    id: "firestick-4k-max",
     name: "StreamStick Max Kit",
     price: 150,
     description: "Ultimate 4K Max with Wi-Fi 6E - get fully loaded in just 10 minutes! Your device arrives ready. Plug in, use your instant credentials, follow our quick setup video, and experience breathtaking 4K with Dolby Atmos sound. Access an extensive live content library, thousands of movies & shows, and all major sports. Includes 1 Year premium Live TV plan and priority 24/7 support.",
@@ -168,9 +168,9 @@ export default function MainStore() {
     "1yr": 1,
   });
   const [firestickQuantities, setFirestickQuantities] = useState<Record<string, number>>({
-    "fs-hd": 1,
-    "fs-4k": 1,
-    "fs-max": 1,
+    "firestick-hd": 1,
+    "firestick-4k": 1,
+    "firestick-4k-max": 1,
   });
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -1481,10 +1481,13 @@ export default function MainStore() {
             </div>
 
             <div>
-              <h3 className="text-white font-semibold mb-4">Support</h3>
+              <h3 className="text-white font-semibold mb-4">Support & Policies</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-orange-400 transition-colors">FAQ</a></li>
+                <li><a href="#faq" className="hover:text-orange-400 transition-colors">FAQ</a></li>
                 <li><a href="mailto:reloadedfiretvteam@gmail.com" className="hover:text-orange-400 transition-colors">Contact Us</a></li>
+                <li><a href="/terms" className="hover:text-orange-400 transition-colors">Terms of Service</a></li>
+                <li><a href="/privacy" className="hover:text-orange-400 transition-colors">Privacy Policy</a></li>
+                <li><a href="/refund" className="hover:text-orange-400 transition-colors">Refund Policy</a></li>
                 <li><a href="/admin" className="text-gray-600 hover:text-gray-500 transition-colors text-xs">Admin</a></li>
               </ul>
             </div>
