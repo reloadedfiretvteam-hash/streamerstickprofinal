@@ -79,7 +79,7 @@ export function WishlistDrawer() {
             >
               <Heart className="w-12 h-12 text-gray-500" />
             </motion.div>
-            <h3 className="text-lg font-semibold text-white mb-2">Your wishlist is empty</h3>
+            <p className="text-lg font-semibold text-white mb-2">Your wishlist is empty</p>
             <p className="text-gray-400 text-sm mb-6">
               Save items you love by clicking the heart icon!
             </p>
@@ -118,9 +118,9 @@ export function WishlistDrawer() {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-white text-sm leading-tight truncate" data-testid={`text-wishlist-item-name-${item.id}`}>
+                      <p className="font-medium text-white text-sm leading-tight truncate" data-testid={`text-wishlist-item-name-${item.id}`}>
                         {item.name}
-                      </h4>
+                      </p>
                       <p className="text-orange-400 font-bold mt-1" data-testid={`text-wishlist-item-price-${item.id}`}>
                         ${item.price.toFixed(2)}
                       </p>

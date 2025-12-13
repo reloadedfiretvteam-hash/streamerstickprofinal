@@ -63,7 +63,7 @@ export function FreeTrial() {
         <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
           <Check className="w-8 h-8 text-white" />
         </div>
-        <h3 className="text-2xl font-bold text-green-400 mb-2">Trial Activated!</h3>
+        <p className="text-2xl font-bold text-green-400 mb-2">Trial Activated!</p>
         <p className="text-gray-300 mb-4">
           Check your email for your 36-hour trial credentials. Your login details have been sent to <span className="text-green-400 font-semibold">{email || "your email"}</span>.
         </p>
@@ -105,9 +105,9 @@ export function FreeTrial() {
               <Gift className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+              <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
                 FREE 36-Hour Trial
-              </h3>
+              </p>
               <p className="text-gray-400 text-sm">No credit card required • Instant access</p>
             </div>
           </div>

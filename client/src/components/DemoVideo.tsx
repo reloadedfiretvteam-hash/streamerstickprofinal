@@ -85,7 +85,9 @@ export function DemoVideo() {
               onEnded={() => setIsPlaying(false)}
               playsInline
               data-testid="demo-video"
-            />
+            >
+              <track kind="captions" src="/captions/demo.vtt" srcLang="en" label="English" default />
+            </video>
             
             {!isPlaying && (
               <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-tr from-purple-900/60 via-black/40 to-orange-900/40">

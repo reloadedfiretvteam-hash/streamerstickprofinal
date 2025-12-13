@@ -60,7 +60,7 @@ export function CartDrawer() {
             >
               <Package className="w-12 h-12 text-gray-500" />
             </motion.div>
-            <h3 className="text-lg font-semibold text-white mb-2">Your cart is empty</h3>
+            <p className="text-lg font-semibold text-white mb-2">Your cart is empty</p>
             <p className="text-gray-400 text-sm mb-6">
               Add some amazing products to get started!
             </p>
@@ -99,9 +99,9 @@ export function CartDrawer() {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-white text-sm leading-tight truncate" data-testid={`text-item-name-${item.id}`}>
+                      <p className="font-medium text-white text-sm leading-tight truncate" data-testid={`text-item-name-${item.id}`}>
                         {item.name}
-                      </h4>
+                      </p>
                       <p className="text-orange-400 font-bold mt-1" data-testid={`text-item-price-${item.id}`}>
                         ${item.price.toFixed(2)}
                       </p>

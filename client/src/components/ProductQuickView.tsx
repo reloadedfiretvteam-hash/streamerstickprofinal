@@ -129,9 +129,9 @@ export function ProductQuickView({ product, isOpen, onClose }: ProductQuickViewP
           <Separator className="bg-gray-800 mb-6" />
 
           <div className="mb-6">
-            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-wide mb-3">
+            <p className="text-sm font-semibold text-gray-300 uppercase tracking-wide mb-3">
               What's Included:
-            </h4>
+            </p>
             <ScrollArea className="h-40">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {product.features.map((feature, idx) => (
