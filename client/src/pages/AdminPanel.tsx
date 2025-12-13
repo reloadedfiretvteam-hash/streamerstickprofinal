@@ -3844,7 +3844,7 @@ export default function AdminPanel() {
                     value={editingProduct.name}
                     onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
                     className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="e.g., Fire Stick 4K - Jailbroken"
+                    placeholder="e.g., StreamStick 4K Kit"
                     data-testid="input-product-name"
                   />
                 </div>

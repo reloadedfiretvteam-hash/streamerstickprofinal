@@ -956,7 +956,7 @@ export function registerSeoRoutes(app: Express): void {
     try {
       const defaultSettings = [
         { key: 'site_title', value: 'StreamStickPro', type: 'string', category: 'general', description: 'Default site title' },
-        { key: 'site_description', value: 'Premium Jailbroken Fire Sticks & IPTV Subscriptions', type: 'string', category: 'general', description: 'Default meta description' },
+        { key: 'site_description', value: 'Premium Streaming Devices & Live TV Plans', type: 'string', category: 'general', description: 'Default meta description' },
         { key: 'title_separator', value: '|', type: 'string', category: 'general', description: 'Separator between page title and site name' },
         { key: 'robots_default', value: 'index, follow', type: 'string', category: 'general', description: 'Default robots meta tag' },
         { key: 'sitemap_enabled', value: 'true', type: 'boolean', category: 'sitemap', description: 'Enable XML sitemap' },

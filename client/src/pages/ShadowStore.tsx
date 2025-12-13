@@ -198,7 +198,7 @@ export default function ShadowStore() {
     return () => {
        document.documentElement.classList.remove("shadow-theme");
        document.documentElement.classList.add("dark");
-       document.title = "StreamStickPro - Jailbroken Fire Sticks & IPTV";
+       document.title = "StreamStickPro - Premium Streaming Devices & Live TV";
     }
   }, []);
 

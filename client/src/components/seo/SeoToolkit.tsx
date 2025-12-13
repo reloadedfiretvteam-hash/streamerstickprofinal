@@ -1526,7 +1526,7 @@ export default function SeoToolkit({ authFetch, showToast }: Props) {
             <div>
               <Label>Keyword</Label>
               <Input
-                placeholder="jailbroken fire stick"
+                placeholder="streaming device"
                 value={newKeyword.keyword}
                 onChange={(e) => setNewKeyword({ ...newKeyword, keyword: e.target.value })}
                 data-testid="input-keyword"
