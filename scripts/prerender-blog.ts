@@ -65,10 +65,8 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
   const date = post.createdAt || new Date().toISOString();
   const readTime = Math.ceil((post.content || "").split(" ").length / 200);
   
-  // Mid-article product advertisement
-  const midArticleAd = `
-    </p>
-    <div class="my-8 p-6 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl border border-blue-500/30">
+  // Mid-article product advertisement (proper HTML - not inside <p>)
+  const midArticleAd = `<div class="my-8 p-6 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl border border-blue-500/30">
       <div class="flex flex-col md:flex-row items-center gap-4">
         <div class="text-4xl">🔥</div>
         <div class="flex-1 text-center md:text-left">
@@ -79,21 +77,25 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
           Shop Now →
         </a>
       </div>
-    </div>
-    <p>`;
+    </div>`;
   
-  // Insert ad after first 2 paragraphs
-  let cleanContent = (post.content || "")
-    .replace(/\n\n/g, "</p><p>")
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/^- (.+)$/gm, "<li>$1</li>");
+  // Convert content to paragraphs
+  const contentParagraphs = (post.content || "").split(/\n\n+/).filter(p => p.trim());
   
-  // Insert mid-article ad after 2nd paragraph
-  const paragraphs = cleanContent.split("</p><p>");
-  if (paragraphs.length > 3) {
-    paragraphs.splice(2, 0, midArticleAd);
-    cleanContent = paragraphs.join("</p><p>");
+  // Build clean HTML with ad inserted after 2nd paragraph
+  const htmlParagraphs: string[] = [];
+  for (let i = 0; i < contentParagraphs.length; i++) {
+    const p = contentParagraphs[i]
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/^- (.+)$/gm, "<li>$1</li>");
+    htmlParagraphs.push(`<p>${p}</p>`);
+    
+    // Insert ad after 2nd paragraph
+    if (i === 1 && contentParagraphs.length > 3) {
+      htmlParagraphs.push(midArticleAd);
+    }
   }
+  const cleanContent = htmlParagraphs.join("\n");
 
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
@@ -162,7 +164,7 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
           <span class="bg-orange-600/20 text-orange-400 px-2 py-1 rounded text-sm">${post.category || "Guides"}</span>
         </div>
         <div class="prose prose-invert max-w-none">
-          <p>${cleanContent}</p>
+          ${cleanContent}
         </div>
         
         <div class="mt-12 p-6 bg-gradient-to-r from-orange-600/20 to-red-600/20 rounded-xl border border-orange-500/30">
