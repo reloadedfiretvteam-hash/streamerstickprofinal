@@ -110,13 +110,53 @@ export async function registerRoutes(
   
   app.use('/api/admin', adminAuthMiddleware);
   
+  const defaultProducts = [
+    {
+      id: "firestick-hd",
+      name: "StreamStick Starter Kit",
+      price: 13000,
+      description: "Get fully loaded in just 10 minutes! Your Fire Stick arrives ready - simply plug in, enter your credentials (sent instantly after purchase), and follow our quick setup video.",
+      imageUrl: "",
+      category: "firestick",
+      shadowProductId: "prod_TYEEobMjXf5B3d",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "firestick-4k",
+      name: "StreamStick 4K Kit",
+      price: 14000,
+      description: "Best-selling Fire Stick - get fully loaded in 10 minutes! Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision.",
+      imageUrl: "",
+      category: "firestick",
+      shadowProductId: "prod_TYEEFruD8obUE7",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: "firestick-4k-max",
+      name: "StreamStick Max Kit",
+      price: 15000,
+      description: "Ultimate 4K Max with Wi-Fi 6E - get fully loaded in just 10 minutes! Your device arrives ready with breathtaking 4K and Dolby Atmos sound.",
+      imageUrl: "",
+      category: "firestick",
+      shadowProductId: "prod_TYEEeLmZMqrUxh",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+  ];
+
   app.get("/api/products", async (req, res) => {
     try {
       const products = await storage.getRealProducts();
-      res.json({ data: products });
+      if (products && products.length > 0) {
+        res.json({ data: products });
+      } else {
+        res.json({ data: defaultProducts });
+      }
     } catch (error: any) {
       console.error("Error fetching products:", error);
-      res.status(500).json({ error: "Failed to fetch products" });
+      res.json({ data: defaultProducts });
     }
   });
 
