@@ -6,8 +6,8 @@ export function getApiBase(): string {
     return '';
   }
   
-  // For production, use same-origin (static site)
-  return '';
+  // For production, use the configured API base URL for backend endpoints
+  return import.meta.env.VITE_API_BASE_URL || '';
 }
 
 // Helper to create a Response-like object from Supabase data
@@ -21,22 +21,24 @@ function createJsonResponse(data: any, ok: boolean = true): Response {
 }
 
 export async function apiCall(endpoint: string, options?: RequestInit): Promise<Response> {
-  // In production, use direct Supabase queries for read operations
+  // In production, use direct Supabase queries for read-only operations
   if (!import.meta.env.DEV) {
-    // Handle products endpoint
-    if (endpoint === '/api/products' || endpoint.startsWith('/api/products')) {
+    // Handle products endpoint (GET only)
+    if ((endpoint === '/api/products' || endpoint.startsWith('/api/products')) && 
+        (!options?.method || options.method === 'GET')) {
       const result = await fetchProducts();
       return createJsonResponse(result, result.success);
     }
     
-    // Handle blog posts endpoint
-    if (endpoint === '/api/blog/posts' || endpoint.startsWith('/api/blog/posts')) {
+    // Handle blog posts endpoint (GET only)
+    if ((endpoint === '/api/blog/posts' || endpoint.startsWith('/api/blog/posts')) &&
+        (!options?.method || options.method === 'GET')) {
       const result = await fetchBlogPosts();
       return createJsonResponse(result, result.success);
     }
   }
   
-  // For development or other endpoints, use fetch
+  // For all other endpoints (including checkout, free-trial, etc.), use the API base URL
   const base = getApiBase();
   const url = base ? `${base}${endpoint}` : endpoint;
   return fetch(url, options);
