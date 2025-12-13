@@ -106,18 +106,69 @@ export default function Blog() {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
     
+    const setMetaTag = (name: string, content: string, isProperty = false) => {
+      const attr = isProperty ? 'property' : 'name';
+      let tag = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute(attr, name);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    const setCanonical = (url: string) => {
+      let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+      if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', 'canonical');
+        document.head.appendChild(link);
+      }
+      link.setAttribute('href', url);
+    };
+
+    const baseUrl = 'https://streamstickpro.com';
+    const defaultDescription = 'Guides, tips, and everything you need to know about cord cutting and streaming';
+    const defaultTitle = 'Blog | StreamStickPro - Cord Cutting Guides & Tips';
+    
     if (params.slug && posts.length > 0) {
       const postFromSlug = posts.find(p => p.slug === params.slug);
       if (postFromSlug) {
         setSelectedPost(postFromSlug);
         document.title = `${postFromSlug.title} | StreamStickPro Blog`;
+        
+        setMetaTag('description', postFromSlug.excerpt);
+        setCanonical(`${baseUrl}/blog/${postFromSlug.slug}`);
+        setMetaTag('og:title', postFromSlug.title, true);
+        setMetaTag('og:description', postFromSlug.excerpt, true);
+        setMetaTag('og:url', `${baseUrl}/blog/${postFromSlug.slug}`, true);
+        setMetaTag('og:type', 'article', true);
+        setMetaTag('twitter:title', postFromSlug.title);
+        setMetaTag('twitter:description', postFromSlug.excerpt);
+        setMetaTag('article:published_time', postFromSlug.date, true);
       } else {
         setSelectedPost(null);
-        document.title = "Blog | StreamStickPro - Cord Cutting Guides & Tips";
+        document.title = defaultTitle;
+        setMetaTag('description', defaultDescription);
+        setCanonical(`${baseUrl}/blog`);
+        setMetaTag('og:title', defaultTitle, true);
+        setMetaTag('og:description', defaultDescription, true);
+        setMetaTag('og:url', `${baseUrl}/blog`, true);
+        setMetaTag('og:type', 'website', true);
+        setMetaTag('twitter:title', defaultTitle);
+        setMetaTag('twitter:description', defaultDescription);
       }
     } else {
       setSelectedPost(null);
-      document.title = "Blog | StreamStickPro - Cord Cutting Guides & Tips";
+      document.title = defaultTitle;
+      setMetaTag('description', defaultDescription);
+      setCanonical(`${baseUrl}/blog`);
+      setMetaTag('og:title', defaultTitle, true);
+      setMetaTag('og:description', defaultDescription, true);
+      setMetaTag('og:url', `${baseUrl}/blog`, true);
+      setMetaTag('og:type', 'website', true);
+      setMetaTag('twitter:title', defaultTitle);
+      setMetaTag('twitter:description', defaultDescription);
     }
     
     return () => {
