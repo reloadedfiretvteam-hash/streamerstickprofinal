@@ -532,17 +532,17 @@ export function createStorage(config: StorageConfig) {
     async getBlogPosts(): Promise<any[]> {
       const { data } = await supabase.from('blog_posts')
         .select('*')
-        .eq('published', true)
-        .order('created_at', { ascending: false });
+        .eq('is_published', true)
+        .order('published_at', { ascending: false });
       return (data || []).map((d: any) => this.mapBlogPostFromDb(d));
     },
 
     async getFeaturedBlogPosts(): Promise<any[]> {
       const { data } = await supabase.from('blog_posts')
         .select('*')
-        .eq('published', true)
+        .eq('is_published', true)
         .eq('featured', true)
-        .order('created_at', { ascending: false })
+        .order('published_at', { ascending: false })
         .limit(6);
       return (data || []).map((d: any) => this.mapBlogPostFromDb(d));
     },
@@ -558,9 +558,9 @@ export function createStorage(config: StorageConfig) {
     async searchBlogPosts(query: string): Promise<any[]> {
       const { data } = await supabase.from('blog_posts')
         .select('*')
-        .eq('published', true)
+        .eq('is_published', true)
         .or(`title.ilike.%${query}%,excerpt.ilike.%${query}%,content.ilike.%${query}%`)
-        .order('created_at', { ascending: false });
+        .order('published_at', { ascending: false });
       return (data || []).map((d: any) => this.mapBlogPostFromDb(d));
     },
 
@@ -573,10 +573,10 @@ export function createStorage(config: StorageConfig) {
         content: data.content,
         category: data.category,
         featured: data.featured,
-        published: data.published,
-        linkedProductIds: data.linked_product_ids,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
+        published: data.is_published,
+        keywords: data.keywords,
+        metaDescription: data.meta_description,
+        publishedAt: data.published_at,
       };
     },
   };
