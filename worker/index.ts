@@ -32,9 +32,10 @@ export interface Env {
 const app = new Hono<{ Bindings: Env }>();
 
 app.use('*', cors({
-  origin: '*',
+  origin: ['https://streamstickpro.com', 'https://www.streamstickpro.com', 'https://secure.streamstickpro.com'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization', 'stripe-signature'],
+  credentials: true,
 }));
 
 app.route('/api/auth', createAuthRoutes());
