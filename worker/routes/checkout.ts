@@ -20,7 +20,7 @@ export function createCheckoutRoutes() {
         return c.json({ error: parseResult.error.message }, 400);
       }
       
-      const { items, customerEmail, customerName, isRenewal, existingUsername } = parseResult.data;
+      const { items, customerEmail, customerName, customerPhone, shippingStreet, shippingCity, shippingState, shippingZip, shippingCountry, isRenewal, existingUsername, countryPreference } = parseResult.data;
       console.log("Checkout: Parsed data - items:", items.length, "email:", customerEmail);
 
       let existingCustomer: Awaited<ReturnType<typeof storage.getCustomerByUsername>> | null = null;
@@ -107,6 +107,12 @@ export function createCheckoutRoutes() {
       const order = await storage.createOrder({
         customerEmail,
         customerName: customerName || null,
+        shippingPhone: customerPhone || null,
+        shippingStreet: shippingStreet || null,
+        shippingCity: shippingCity || null,
+        shippingState: shippingState || null,
+        shippingZip: shippingZip || null,
+        shippingCountry: shippingCountry || null,
         stripeCheckoutSessionId: session.id,
         shadowProductId: shadowProductIds,
         shadowPriceId: productsWithQuantity.map(p => p.product.shadowPriceId).join(','),
@@ -118,6 +124,7 @@ export function createCheckoutRoutes() {
         isRenewal: isRenewal || false,
         existingUsername: existingUsername || null,
         customerId: existingCustomer?.id || null,
+        countryPreference: countryPreference || null,
       });
       console.log("Checkout: Order created:", order.id);
 

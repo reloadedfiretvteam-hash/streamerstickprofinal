@@ -313,9 +313,18 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
           <h2 style="margin-top: 0; color: #7c3aed;">Customer Details</h2>
           <p><strong>Name:</strong> ${order.customerName || 'Not provided'}</p>
           <p><strong>Email:</strong> ${order.customerEmail}</p>
+          ${order.shippingPhone ? `<p><strong>Phone:</strong> ${order.shippingPhone}</p>` : ''}
           <p><strong>Order ID:</strong> ${order.id}</p>
           <p><strong>Order Date:</strong> ${orderDate}</p>
           <p><strong>Customer Type:</strong> <span style="background: ${isRenewal ? '#d1fae5' : '#fef3c7'}; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${orderTypeLabel}</span></p>
+          ${order.shippingStreet || order.shippingCity ? `
+          <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #f59e0b;">
+            <h3 style="margin-top: 0; color: #92400e;">📦 Shipping Address</h3>
+            ${order.shippingStreet ? `<p><strong>Street:</strong> ${order.shippingStreet}</p>` : ''}
+            ${order.shippingCity || order.shippingState || order.shippingZip ? `<p><strong>City, State ZIP:</strong> ${[order.shippingCity, order.shippingState, order.shippingZip].filter(Boolean).join(', ')}</p>` : ''}
+            ${order.shippingCountry ? `<p><strong>Country:</strong> ${order.shippingCountry}</p>` : ''}
+          </div>
+          ` : ''}
         </div>
         
         ${credentialsSection}

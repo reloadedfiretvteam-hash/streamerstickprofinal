@@ -54,6 +54,12 @@ export default function Checkout() {
     email: "",
     firstName: "",
     lastName: "",
+    phone: "",
+    street: "",
+    city: "",
+    state: "",
+    zip: "",
+    country: "",
   });
 
   useEffect(() => {
@@ -90,6 +96,16 @@ export default function Checkout() {
       return;
     }
 
+    if (!formData.phone) {
+      setError("Please enter your phone number");
+      return;
+    }
+
+    if (!formData.street || !formData.city || !formData.state || !formData.zip) {
+      setError("Please enter your complete shipping address");
+      return;
+    }
+
     if (items.length === 0) {
       setError("Your cart is empty");
       return;
@@ -113,6 +129,12 @@ export default function Checkout() {
         items: checkoutItems,
         customerEmail: formData.email,
         customerName: `${formData.firstName} ${formData.lastName}`.trim(),
+        customerPhone: formData.phone,
+        shippingStreet: formData.street,
+        shippingCity: formData.city,
+        shippingState: formData.state,
+        shippingZip: formData.zip,
+        shippingCountry: formData.country || "USA",
       };
 
       if (accountType === "renewal" && hasIPTVProduct && existingUsername.trim()) {
@@ -450,6 +472,94 @@ export default function Checkout() {
                       onChange={handleInputChange}
                       className="bg-background/50 border-white/20 h-12"
                       data-testid="input-last-name"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number *</Label>
+                  <Input 
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    placeholder="(555) 123-4567" 
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="bg-background/50 border-white/20 h-12"
+                    data-testid="input-phone"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-white/10 bg-card/50 backdrop-blur">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-xl">Shipping Address</CardTitle>
+                <CardDescription>
+                  Where should we send your order?
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="street">Street Address *</Label>
+                  <Input 
+                    id="street"
+                    name="street"
+                    placeholder="123 Main St" 
+                    value={formData.street}
+                    onChange={handleInputChange}
+                    className="bg-background/50 border-white/20 h-12"
+                    data-testid="input-street"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City *</Label>
+                    <Input 
+                      id="city"
+                      name="city"
+                      placeholder="New York" 
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      className="bg-background/50 border-white/20 h-12"
+                      data-testid="input-city"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="state">State *</Label>
+                    <Input 
+                      id="state"
+                      name="state"
+                      placeholder="NY" 
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      className="bg-background/50 border-white/20 h-12"
+                      data-testid="input-state"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="zip">ZIP Code *</Label>
+                    <Input 
+                      id="zip"
+                      name="zip"
+                      placeholder="10001" 
+                      value={formData.zip}
+                      onChange={handleInputChange}
+                      className="bg-background/50 border-white/20 h-12"
+                      data-testid="input-zip"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="country">Country</Label>
+                    <Input 
+                      id="country"
+                      name="country"
+                      placeholder="USA" 
+                      value={formData.country}
+                      onChange={handleInputChange}
+                      className="bg-background/50 border-white/20 h-12"
+                      data-testid="input-country"
                     />
                   </div>
                 </div>

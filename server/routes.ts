@@ -151,7 +151,7 @@ export async function registerRoutes(
         return res.status(400).json({ error: validationError.message });
       }
       
-      const { items, customerEmail, customerName, isRenewal, existingUsername, countryPreference } = parseResult.data;
+      const { items, customerEmail, customerName, customerPhone, shippingStreet, shippingCity, shippingState, shippingZip, shippingCountry, isRenewal, existingUsername, countryPreference } = parseResult.data;
 
       let existingCustomer = null;
       if (isRenewal && existingUsername) {
@@ -232,6 +232,12 @@ export async function registerRoutes(
       const order = await storage.createOrder({
         customerEmail,
         customerName: customerName || null,
+        shippingPhone: customerPhone || null,
+        shippingStreet: shippingStreet || null,
+        shippingCity: shippingCity || null,
+        shippingState: shippingState || null,
+        shippingZip: shippingZip || null,
+        shippingCountry: shippingCountry || null,
         stripeCheckoutSessionId: session.id,
         shadowProductId: shadowProductIds,
         shadowPriceId: productsWithQuantity.map(p => p.product.shadowPriceId).join(','),
