@@ -116,11 +116,13 @@ export default function CheckoutPage() {
       localStorage.removeItem('cart');
       setCart([]);
       setOrderComplete(true);
-      setOrderId(data.id);
+      
+      const orderCode = `ORDER-${data.id.slice(0, 8).toUpperCase()}`;
+      setOrderId(orderCode);
 
-      // Send confirmation email (via edge function)
-      await supabase.functions.invoke('send-order-emails', {
-        body: { orderId: data.id },
+      // Send confirmation email with complete data (via edge function)
+      await supabase.functions.invoke('create-order-with-credentials', {
+        body: orderData,
       });
 
     } catch (error) {

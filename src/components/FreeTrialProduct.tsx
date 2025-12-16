@@ -1,74 +1,87 @@
 import { useState } from 'react';
-import { Gift, Check, Mail, User, Phone, Send, Sparkles } from 'lucide-react';
+import { Gift, Check, Mail, User, Phone, Send, Sparkles, MapPin, Globe, MessageSquare } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function FreeTrialProduct() {
-  // const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [zip, setZip] = useState('');
+  const [country, setCountry] = useState('United States');
+  const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const countries = [
+    'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany',
+    'France', 'Spain', 'Italy', 'Netherlands', 'Belgium', 'Switzerland',
+    'Mexico', 'Brazil', 'Argentina', 'Other'
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !email) {
-      alert('Please enter your name and email');
+    if (!name || !email || !phone || !address || !country) {
+      alert('Please fill in all required fields (Name, Email, Phone, Address, Country)');
       return;
     }
 
     setLoading(true);
 
     try {
+      const fullAddress = `${address}, ${city}, ${state} ${zip}`.trim();
+      
       // Save to database
       await supabase
         .from('email_captures')
         .insert([{
           email: email,
           name: name,
-          phone: phone || null,
+          phone: phone,
           source: 'free-trial-signup',
-          metadata: { product: 'Free Trial - IPTV Subscription' }
+          metadata: { 
+            product: 'Free Trial - IPTV Subscription',
+            country: country,
+            address: fullAddress,
+            message: message || null
+          }
         }]);
 
-      // Create email body
-      const emailBody = `
-FREE TRIAL REQUEST - IPTV SUBSCRIPTION
+      // Send email via backend (Supabase Edge Function)
+      const { error: emailError } = await supabase.functions.invoke('send-order-emails', {
+        body: {
+          orderCode: `TRIAL-${Date.now().toString().slice(-8)}`,
+          customerEmail: email,
+          customerName: name,
+          customerPhone: phone,
+          shippingAddress: fullAddress,
+          country: country,
+          message: message || 'No additional message',
+          totalUsd: 0,
+          paymentMethod: 'Free Trial',
+          products: [{
+            name: 'Free Trial - 36 Hours IPTV Access',
+            price: 0,
+            quantity: 1
+          }],
+          adminEmail: 'reloadedfiretvteam@gmail.com',
+          isTrial: true
+        }
+      });
 
-Customer Details:
-- Name: ${name}
-- Email: ${email}
-- Phone: ${phone || 'Not provided'}
-- Date: ${new Date().toLocaleString()}
-
-Product: Free Trial IPTV Subscription
-- 36 Hours Free Access
-- All channels included
-- All features included
-
-Please process this free trial request and send activation details to the customer.
-
----
-This is an automated message from FireStreamPlus.com
-      `.trim();
-
-      // Create mailto link
-      const mailtoLink = `mailto:reloadedfiretvteam@gmail.com?subject=Free Trial Request - ${name}&body=${encodeURIComponent(emailBody)}`;
-
-      // Open email client
-      window.location.href = mailtoLink;
+      if (emailError) {
+        console.error('Email error:', emailError);
+        throw emailError;
+      }
 
       setSubmitted(true);
 
-      // Show success message
-      setTimeout(() => {
-        alert('Email opened! Please send the email to complete your free trial request. We will contact you within 24 hours.');
-      }, 500);
-
     } catch (error) {
       console.error('Error:', error);
-      alert('Submission error. Please email us directly at reloadedfiretvteam@gmail.com');
+      alert('Submission error. Please try again or email us directly at reloadedfiretvteam@gmail.com');
     } finally {
       setLoading(false);
     }
@@ -99,7 +112,7 @@ This is an automated message from FireStreamPlus.com
         </div>
 
         {/* Free Trial Product Box */}
-        <div className="max-w-xl mx-auto">
+        <div className="max-w-2xl mx-auto">
           <div className="bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden border-2 border-green-400 shadow-2xl transform hover:scale-105 transition-all duration-300">
             {/* Badge */}
             <div className="bg-gradient-to-r from-green-500 to-teal-500 text-white text-center py-2 font-bold text-base relative">
@@ -199,6 +212,7 @@ This is an automated message from FireStreamPlus.com
                       </p>
 
                       <form onSubmit={handleSubmit} className="space-y-3">
+                        {/* Name */}
                         <div>
                           <label className="block text-xs font-semibold text-gray-700 mb-1">
                             Full Name *
@@ -216,6 +230,7 @@ This is an automated message from FireStreamPlus.com
                           </div>
                         </div>
 
+                        {/* Email */}
                         <div>
                           <label className="block text-xs font-semibold text-gray-700 mb-1">
                             Email Address *
@@ -233,18 +248,116 @@ This is an automated message from FireStreamPlus.com
                           </div>
                         </div>
 
+                        {/* Phone */}
                         <div>
                           <label className="block text-xs font-semibold text-gray-700 mb-1">
-                            Phone Number (Optional)
+                            Phone Number *
                           </label>
                           <div className="relative">
                             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                             <input
                               type="tel"
+                              required
                               value={phone}
                               onChange={(e) => setPhone(e.target.value)}
                               placeholder="(555) 123-4567"
                               className="w-full pl-9 pr-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition text-gray-900"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Address */}
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">
+                            Street Address *
+                          </label>
+                          <div className="relative">
+                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                              type="text"
+                              required
+                              value={address}
+                              onChange={(e) => setAddress(e.target.value)}
+                              placeholder="123 Main Street"
+                              className="w-full pl-9 pr-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition text-gray-900"
+                            />
+                          </div>
+                        </div>
+
+                        {/* City, State, Zip */}
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="col-span-2">
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">
+                              City
+                            </label>
+                            <input
+                              type="text"
+                              value={city}
+                              onChange={(e) => setCity(e.target.value)}
+                              placeholder="City"
+                              className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition text-gray-900"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">
+                              State
+                            </label>
+                            <input
+                              type="text"
+                              value={state}
+                              onChange={(e) => setState(e.target.value)}
+                              placeholder="ST"
+                              className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition text-gray-900"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">
+                            ZIP Code
+                          </label>
+                          <input
+                            type="text"
+                            value={zip}
+                            onChange={(e) => setZip(e.target.value)}
+                            placeholder="12345"
+                            className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition text-gray-900"
+                          />
+                        </div>
+
+                        {/* Country */}
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">
+                            Country *
+                          </label>
+                          <div className="relative">
+                            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <select
+                              required
+                              value={country}
+                              onChange={(e) => setCountry(e.target.value)}
+                              className="w-full pl-9 pr-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition text-gray-900 appearance-none"
+                            >
+                              {countries.map(c => (
+                                <option key={c} value={c}>{c}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Message */}
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">
+                            Additional Message (Optional)
+                          </label>
+                          <div className="relative">
+                            <MessageSquare className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                            <textarea
+                              value={message}
+                              onChange={(e) => setMessage(e.target.value)}
+                              placeholder="Any special requests or questions?"
+                              rows={3}
+                              className="w-full pl-9 pr-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition text-gray-900 resize-none"
                             />
                           </div>
                         </div>
@@ -265,7 +378,7 @@ This is an automated message from FireStreamPlus.com
                         </button>
 
                         <p className="text-xs text-gray-500 text-center">
-                          By clicking the button, your email client will open with a pre-filled message. Simply send it to complete your request.
+                          By clicking the button, we'll send your activation details to your email within 24 hours.
                         </p>
                       </form>
                     </div>
@@ -278,8 +391,7 @@ This is an automated message from FireStreamPlus.com
                         Request Submitted!
                       </h4>
                       <p className="text-gray-600 text-sm mb-4">
-                        Thank you {name}! We've opened your email client with a pre-filled message.
-                        Please send the email to complete your free trial request.
+                        Thank you {name}! Your free trial request has been received.
                       </p>
                       <p className="text-xs text-gray-500 mb-4">
                         We'll send your activation details to <strong>{email}</strong> within 24 hours.
@@ -290,6 +402,12 @@ This is an automated message from FireStreamPlus.com
                           setName('');
                           setEmail('');
                           setPhone('');
+                          setAddress('');
+                          setCity('');
+                          setState('');
+                          setZip('');
+                          setCountry('United States');
+                          setMessage('');
                         }}
                         className="text-green-600 hover:text-green-700 font-medium text-sm"
                       >
@@ -304,7 +422,7 @@ This is an automated message from FireStreamPlus.com
             {/* Footer Note */}
             <div className="bg-green-500/10 border-t border-green-400/20 p-3 text-center">
               <p className="text-green-200 text-xs">
-                🎉 <strong>Limited Time:</strong> First 100 signups get a bonus month free after trial ends!
+                ⚡ <strong>Limited Time:</strong> First 100 signups get a bonus month free after trial ends!
               </p>
             </div>
           </div>

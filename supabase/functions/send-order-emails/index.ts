@@ -10,10 +10,13 @@ interface OrderEmailPayload {
   orderCode: string;
   customerEmail: string;
   customerName: string;
+  customerPhone?: string;
   totalUsd: number;
   paymentMethod: string;
   products: Array<{ name: string; price: number; quantity: number }>;
   shippingAddress: string;
+  country?: string;
+  message?: string;
   adminEmail: string;
   totalBtc?: string;
   btcPrice?: number;
@@ -23,6 +26,7 @@ interface OrderEmailPayload {
   password?: string;
   setupVideoUrl?: string;
   serviceUrl?: string;
+  isTrial?: boolean;
 }
 
 function generateCustomerBitcoinEmail(payload: OrderEmailPayload): string {
@@ -64,7 +68,9 @@ function generateAdminNotificationEmail(payload: OrderEmailPayload): string {
     </ul>
   ` : '';
 
-  return `<!DOCTYPE html><html><body><h2>🔥 New Order: ${payload.orderCode}</h2><p><strong>Customer:</strong> ${payload.customerName} (${payload.customerEmail})</p><p><strong>Payment Method:</strong> ${payload.paymentMethod}</p><p><strong>Total:</strong> $${payload.totalUsd.toFixed(2)}</p><p><strong>Products:</strong></p><ul>${productsHtml}</ul>${payload.shippingAddress ? `<p><strong>Shipping:</strong> ${payload.shippingAddress}</p>` : ''}${credentialsHtml}<hr><p><em>This order notification was sent from Stream Stick Pro</em></p></body></html>`;
+  const trialBadge = payload.isTrial ? '<p style="background:#10b981;color:white;padding:10px;text-align:center;font-weight:bold">🎁 FREE TRIAL REQUEST</p>' : '';
+
+  return `<!DOCTYPE html><html><body>${trialBadge}<h2>🔥 New ${payload.isTrial ? 'Trial Request' : 'Order'}: ${payload.orderCode}</h2><p><strong>Customer:</strong> ${payload.customerName} (${payload.customerEmail})</p>${payload.customerPhone ? `<p><strong>Phone:</strong> ${payload.customerPhone}</p>` : ''}<p><strong>Payment Method:</strong> ${payload.paymentMethod}</p><p><strong>Total:</strong> $${payload.totalUsd.toFixed(2)}</p><p><strong>Products:</strong></p><ul>${productsHtml}</ul>${payload.shippingAddress ? `<p><strong>Shipping:</strong> ${payload.shippingAddress}</p>` : ''}${payload.country ? `<p><strong>Country:</strong> ${payload.country}</p>` : ''}${payload.message ? `<p><strong>Customer Message:</strong></p><p style="background:#f3f4f6;padding:10px;border-left:4px solid #3b82f6">${payload.message}</p>` : ''}${credentialsHtml}<hr><p><em>This ${payload.isTrial ? 'trial request' : 'order'} notification was sent from Stream Stick Pro</em></p></body></html>`;
 }
 
 Deno.serve(async (req: Request) => {
