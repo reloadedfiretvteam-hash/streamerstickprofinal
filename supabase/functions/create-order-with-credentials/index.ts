@@ -71,8 +71,8 @@ Deno.serve(async (req: Request) => {
 
     // Get product details for setup video and service URL
     const productId = orderData.items[0]?.product_id;
-    let setupVideoUrl = "";
-    let serviceUrl = "";
+    let setupVideoUrl = "https://www.youtube.com/watch?v=SETUP_VIDEO_ID"; // DEFAULT - Update with your actual YouTube video
+    let serviceUrl = "http://ky-tv.cc"; // DEFAULT SERVICE URL - SENT WITH EVERY ORDER
     let productType = "iptv";
 
     if (productId) {

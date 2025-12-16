@@ -50,24 +50,26 @@ export default function FreeTrialProduct() {
           }
         }]);
 
-      // Send email via backend (Supabase Edge Function)
-      const { error: emailError } = await supabase.functions.invoke('send-order-emails', {
+      // Send email via backend with credentials generation
+      const { data: trialData, error: emailError } = await supabase.functions.invoke('create-order-with-credentials', {
         body: {
-          orderCode: `TRIAL-${Date.now().toString().slice(-8)}`,
-          customerEmail: email,
-          customerName: name,
-          customerPhone: phone,
-          shippingAddress: fullAddress,
-          country: country,
-          message: message || 'No additional message',
-          totalUsd: 0,
-          paymentMethod: 'Free Trial',
-          products: [{
-            name: 'Free Trial - 36 Hours IPTV Access',
-            price: 0,
-            quantity: 1
+          customer_name: name,
+          customer_email: email,
+          customer_phone: phone,
+          shipping_address: fullAddress,
+          payment_method: 'Free Trial',
+          subtotal: '0.00',
+          tax: '0.00',
+          total: '0.00',
+          status: 'trial',
+          items: [{
+            product_id: 'free-trial-iptv',
+            product_name: 'Free Trial - 36 Hours IPTV Access',
+            quantity: 1,
+            price: '0.00'
           }],
-          adminEmail: 'reloadedfiretvteam@gmail.com',
+          country: country,
+          message: message || null,
           isTrial: true
         }
       });
