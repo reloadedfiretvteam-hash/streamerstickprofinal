@@ -3,6 +3,8 @@ import { Calendar, Clock, ArrowLeft, BookOpen, Share2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
+import Breadcrumbs from '../components/Breadcrumbs';
+import { autoLinkBlogContent } from '../utils/autoLinkBlogContent';
 
 interface BlogPostData {
   id: string;
@@ -363,7 +365,28 @@ export default function EnhancedBlogPost() {
       <article className="container mx-auto px-4 py-12 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <aside className="lg:col-span-3 hidden lg:block">
-            <div className="sticky top-24">
+            <div className="sticky top-24 space-y-6">
+              {/* Featured Products */}
+              <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                <h3 className="text-xl font-bold text-white mb-4">Featured Products</h3>
+                
+                <a href="/" className="block mb-4 hover:opacity-80 transition">
+                  <img src="/firestick-4k.jpg" alt="Fire Stick 4K" className="rounded-lg mb-2" />
+                  <p className="text-orange-500 font-semibold">Fire Stick 4K Max</p>
+                  <p className="text-gray-400 text-sm">Shop Now →</p>
+                </a>
+
+                <a href="/" className="block mb-4 hover:opacity-80 transition">
+                  <p className="text-orange-500 font-semibold">IPTV Subscriptions</p>
+                  <p className="text-gray-400 text-sm">View Plans →</p>
+                </a>
+
+                <a href="/" className="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg font-semibold text-center block">
+                  Visit Our Store
+                </a>
+              </div>
+
+              {/* Table of Contents */}
               <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
                 <div className="flex items-center gap-2 mb-4">
                   <BookOpen className="w-5 h-5 text-orange-500" />
@@ -387,6 +410,11 @@ export default function EnhancedBlogPost() {
           </aside>
 
           <div className="lg:col-span-9">
+            <Breadcrumbs items={[
+              { label: 'Blog', href: '/#blog' },
+              { label: post.title }
+            ]} />
+
             <a
               href="/"
               className="inline-flex items-center gap-2 text-orange-500 hover:text-orange-400 mb-8"
@@ -443,10 +471,11 @@ export default function EnhancedBlogPost() {
                 prose-blockquote:rounded-r-lg prose-blockquote:text-gray-300
                 prose-code:text-orange-400 prose-code:bg-gray-800 prose-code:px-2 prose-code:py-1 prose-code:rounded
                 prose-pre:bg-gray-800 prose-pre:border prose-pre:border-gray-700"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ __html: autoLinkBlogContent(post.content) }}
             />
 
-            <div className="mt-16 pt-8 border-t border-gray-800">
+            <div className="mt-16 pt-8 border-t border-gray-800 space-y-4">
+              {/* Primary CTA */}
               <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 rounded-2xl p-8 border border-orange-500/20">
                 <h3 className="text-2xl font-bold text-white mb-4">
                   Ready to Start Streaming?
@@ -457,18 +486,26 @@ export default function EnhancedBlogPost() {
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <a
-                    href="/iptv-services"
+                    href="/"
                     className="inline-block px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors"
                   >
-                    View Pricing Plans
+                    View Our Products
                   </a>
                   <a
-                    href="/fire-sticks"
+                    href="/"
                     className="inline-block px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors border border-gray-700"
                   >
-                    Shop Fire Sticks
+                    Visit Homepage
                   </a>
                 </div>
+              </div>
+
+              {/* Secondary link back */}
+              <div className="text-center">
+                <a href="/" className="text-orange-500 hover:text-orange-400 inline-flex items-center gap-2">
+                  <ArrowLeft className="w-4 h-4" />
+                  Return to Main Website
+                </a>
               </div>
             </div>
 

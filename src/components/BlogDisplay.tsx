@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, Eye, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, Eye, ArrowRight, ShoppingCart } from 'lucide-react';
 import { supabase, getStorageUrl } from '../lib/supabase';
 
 interface BlogPost {
@@ -118,13 +118,19 @@ export default function BlogDisplay() {
   return (
     <section id="blog" className="py-20 bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-4">
-            Latest from Our Blog
-          </h2>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Expert guides, tips, and insights about IPTV streaming, Fire Stick setup, and cutting the cord
-          </p>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Latest from Our Blog
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl">
+              Expert guides, tips, and insights about IPTV streaming, Fire Stick setup, and cutting the cord
+            </p>
+          </div>
+          <a href="/" className="hidden lg:inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition">
+            <ShoppingCart className="w-5 h-5" />
+            Visit Store
+          </a>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -209,17 +215,25 @@ export default function BlogDisplay() {
           ))}
         </div>
 
-        <div className="text-center mt-12">
-          <button
-            onClick={() => {
-              // Scroll to top and show all blog posts or navigate to blog page
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-              // Could navigate to /blog if you create a dedicated blog listing page
-            }}
-            className="inline-block px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors transform hover:scale-105"
+        <div className="text-center mt-12 space-y-4">
+          <a
+            href="/"
+            className="inline-block px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors transform hover:scale-105"
           >
-            View All Blog Posts
-          </button>
+            Shop Fire Sticks & IPTV on Homepage
+          </a>
+          <div>
+            <button
+              onClick={() => {
+                // Scroll to top and show all blog posts or navigate to blog page
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Could navigate to /blog if you create a dedicated blog listing page
+              }}
+              className="inline-block px-8 py-3 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors transform hover:scale-105 border border-gray-700"
+            >
+              View All Blog Posts
+            </button>
+          </div>
         </div>
       </div>
     </section>
