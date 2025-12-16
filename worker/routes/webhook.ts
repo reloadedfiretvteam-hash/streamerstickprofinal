@@ -143,9 +143,6 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
     // Update phone from Stripe if provided (Stripe always collects for Fire Stick orders)
     if (session.customer_details?.phone) {
       updateData.shippingPhone = session.customer_details.phone;
-    } else if (!order.shippingPhone) {
-      // Preserve existing phone if Stripe didn't collect it
-      updateData.shippingPhone = order.shippingPhone;
     }
     
     if (shipping.address) {
