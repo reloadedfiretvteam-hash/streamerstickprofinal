@@ -1,3 +1,48 @@
+/*
+ * EMAIL SERVICE - Order Notification System
+ * 
+ * EMAIL FLOW:
+ * ===========
+ * 1. sendOrderConfirmation() - Immediate confirmation to customer
+ * 2. sendOwnerOrderNotification() - Immediate notification to owner with FULL customer info
+ * 3. sendCredentialsEmail() - Delayed 5 minutes, sends login credentials to customer
+ * 
+ * CUSTOMER INFO IN OWNER EMAILS:
+ * ==============================
+ * The sendOwnerOrderNotification() function displays:
+ * - Customer name, email, phone (lines 314-316)
+ * - Shipping address (lines 320-327)
+ * - Order details, credentials, product info
+ * 
+ * This data comes from the Order object passed in.
+ * If phone/address fields are empty in owner email, the issue is in:
+ * - Checkout form not collecting data, OR
+ * - Checkout API not saving data, OR
+ * - Webhook overwriting data with NULL values
+ * 
+ * FIX APPLIED: Webhook now preserves checkout data (see webhook.ts)
+ * 
+ * EMAIL TYPES:
+ * ============
+ * - Order confirmation: Basic order details to customer
+ * - Owner notification: Full customer info + credentials for manual IPTV setup
+ * - Credentials email: Login info sent 5 minutes after payment
+ * - Renewal confirmation: For existing customers extending subscription
+ * 
+ * CREDENTIAL GENERATION:
+ * ======================
+ * - generateCredentials(): Basic generation from order email
+ * - generateUniqueCredentials(): Checks database for conflicts, ensures uniqueness
+ * - Usernames: Max 10 chars, derived from email + timestamp
+ * - Passwords: 10 chars, mix of letters/numbers/symbols
+ * 
+ * DUPLICATE EMAIL PREVENTION:
+ * ===========================
+ * Handled in webhook.ts:
+ * - checkout.session.completed sends all 3 emails
+ * - payment_intent.succeeded checks order.status !== 'paid' before sending
+ * - This prevents duplicate emails if both events fire
+ */
 import { Resend } from 'resend';
 import type { Order } from '../shared/schema';
 import type { Storage } from './storage';

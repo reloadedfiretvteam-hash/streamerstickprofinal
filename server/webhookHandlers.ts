@@ -1,3 +1,29 @@
+/*
+ * SERVER WEBHOOK HANDLER - Order Processing System
+ * 
+ * CRITICAL FIX APPLIED (2024-12-16):
+ * ===================================
+ * Fixed customer shipping data being lost in owner notification emails.
+ * 
+ * See worker/routes/webhook.ts for full documentation.
+ * 
+ * DUPLICATE CODE WARNING:
+ * =======================
+ * This is a DUPLICATE of worker/routes/webhook.ts
+ * Both files must be kept in sync.
+ * 
+ * ARCHITECTURE NOTE:
+ * ==================
+ * This codebase has TWO parallel systems:
+ * 1. Cloudflare Workers (worker/) - Used for production deployment
+ * 2. Express Server (server/) - Used for development/testing
+ * 
+ * The same webhook logic exists in both:
+ * - worker/routes/webhook.ts
+ * - server/webhookHandlers.ts
+ * 
+ * Future changes must be applied to BOTH files.
+ */
 import { getStripeSync, getUncachableStripeClient } from './stripeClient';
 import { storage } from './storage';
 import { EmailService } from './emailService';

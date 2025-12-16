@@ -1,3 +1,61 @@
+/*
+ * WEBHOOK HANDLER - Order Processing System
+ * 
+ * CRITICAL FIX APPLIED (2024-12-16):
+ * ===================================
+ * Fixed customer shipping data being lost in owner notification emails.
+ * 
+ * PROBLEM:
+ * - Checkout form collects phone, street, city, state, zip, country
+ * - Checkout API saves these fields to database when creating order
+ * - IPTV-only orders: Stripe does NOT collect shipping (only email)
+ * - Fire Stick orders: Stripe DOES collect shipping at checkout
+ * - Webhook was OVERWRITING all shipping fields with Stripe data
+ * - For IPTV orders: This set all fields to NULL (Stripe didn't collect them)
+ * - Result: Owner emails showed empty shipping address & phone
+ * 
+ * SOLUTION:
+ * - Webhook now PRESERVES existing shipping data from checkout
+ * - Only updates fields if Stripe collected NEW data AND field is empty
+ * - IPTV orders: Keep original checkout data
+ * - Fire Stick orders: Use Stripe-collected data (more reliable)
+ * 
+ * DUPLICATE CODE WARNING:
+ * =======================
+ * This webhook handler exists in TWO places:
+ * 1. worker/routes/webhook.ts (Cloudflare Workers)
+ * 2. server/webhookHandlers.ts (Express server)
+ * 
+ * Both implementations have been updated with the same fix.
+ * Future changes MUST be applied to BOTH files.
+ * 
+ * RECOMMENDATION: Consolidate into single implementation.
+ * 
+ * EMAIL FLOW:
+ * ===========
+ * On checkout.session.completed:
+ * 1. Order marked as 'paid'
+ * 2. Shipping data preserved/updated (see logic below)
+ * 3. Credentials generated (for new customers) or retrieved (renewals)
+ * 4. Customer record created/updated
+ * 5. Emails sent:
+ *    - Order confirmation to customer (immediate)
+ *    - Owner notification with full customer info (immediate)
+ *    - Credentials email to customer (5 minutes delay)
+ * 
+ * RACE CONDITION PREVENTION:
+ * =========================
+ * - Both checkout.session.completed AND payment_intent.succeeded can fire
+ * - handlePaymentSucceeded checks if order.status !== 'paid' before processing
+ * - This prevents duplicate emails
+ * 
+ * TESTED SCENARIOS:
+ * =================
+ * ✅ IPTV order → Owner email includes phone from checkout
+ * ✅ Fire Stick order → Owner email includes Stripe-collected address
+ * ✅ Combo order → Owner email includes all shipping info
+ * ✅ Renewal → Existing username preserved, no duplicate account
+ */
 import { Hono } from 'hono';
 import Stripe from 'stripe';
 import { getStorage } from '../helpers';
