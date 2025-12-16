@@ -659,6 +659,16 @@ export default function Checkout() {
                       Powered by Stripe
                     </div>
                   </div>
+
+                  <div className="text-center text-sm text-muted-foreground pt-4 border-t border-white/10">
+                    <p>Need help? Contact us:</p>
+                    <a 
+                      href="mailto:reloadedfiretvteam@gmail.com" 
+                      className="text-primary hover:text-primary/80 transition-colors"
+                    >
+                      reloadedfiretvteam@gmail.com
+                    </a>
+                  </div>
                 </div>
               </CardContent>
             </Card>

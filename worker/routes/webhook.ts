@@ -71,22 +71,52 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
     stripeCustomerId: session.customer,
   };
 
+  // CRITICAL FIX: Only update shipping fields if Stripe collected them AND they're not already set
+  // This preserves shipping info collected during checkout (for IPTV orders)
+  // while still capturing Stripe-collected shipping (for Fire Stick orders)
   if (session.shipping_details) {
     const shipping = session.shipping_details;
-    updateData.shippingName = shipping.name || null;
-    updateData.shippingPhone = session.customer_details?.phone || null;
+    
+    // Only update if not already set from checkout
+    if (!order.shippingName && shipping.name) {
+      updateData.shippingName = shipping.name;
+    }
+    
+    // Update phone from Stripe if provided (Stripe always collects for Fire Stick orders)
+    if (session.customer_details?.phone) {
+      updateData.shippingPhone = session.customer_details.phone;
+    } else if (!order.shippingPhone) {
+      // Preserve existing phone if Stripe didn't collect it
+      updateData.shippingPhone = order.shippingPhone;
+    }
     
     if (shipping.address) {
       const line1 = shipping.address.line1 || '';
       const line2 = shipping.address.line2 || '';
-      updateData.shippingStreet = line2 ? `${line1}, ${line2}` : line1;
-      updateData.shippingCity = shipping.address.city || null;
-      updateData.shippingState = shipping.address.state || null;
-      updateData.shippingZip = shipping.address.postal_code || null;
-      updateData.shippingCountry = shipping.address.country || null;
+      const stripeStreet = line2 ? `${line1}, ${line2}` : line1;
+      
+      // Only update if not already set from checkout
+      if (!order.shippingStreet && stripeStreet) {
+        updateData.shippingStreet = stripeStreet;
+      }
+      if (!order.shippingCity && shipping.address.city) {
+        updateData.shippingCity = shipping.address.city;
+      }
+      if (!order.shippingState && shipping.address.state) {
+        updateData.shippingState = shipping.address.state;
+      }
+      if (!order.shippingZip && shipping.address.postal_code) {
+        updateData.shippingZip = shipping.address.postal_code;
+      }
+      if (!order.shippingCountry && shipping.address.country) {
+        updateData.shippingCountry = shipping.address.country;
+      }
     }
     
-    console.log(`Shipping address captured for order ${order.id}`);
+    console.log(`Shipping address updated for order ${order.id} - preserved existing: ${!!order.shippingStreet}`);
+  } else {
+    // No shipping details from Stripe - preserve existing data from checkout
+    console.log(`No shipping details from Stripe for order ${order.id} - preserving checkout data`);
   }
 
   const productIds = order.realProductId?.split(',') || [];

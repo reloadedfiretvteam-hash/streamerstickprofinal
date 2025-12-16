@@ -140,6 +140,17 @@ export default function Success() {
             Return to Store
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
+
+          <div className="text-center text-sm text-muted-foreground pt-4 border-t border-white/10">
+            <p className="mb-2">Need help with your order?</p>
+            <a 
+              href="mailto:reloadedfiretvteam@gmail.com" 
+              className="text-primary hover:text-primary/80 transition-colors flex items-center justify-center gap-2"
+            >
+              <Mail className="w-4 h-4" />
+              reloadedfiretvteam@gmail.com
+            </a>
+          </div>
         </CardContent>
       </Card>
     </div>
