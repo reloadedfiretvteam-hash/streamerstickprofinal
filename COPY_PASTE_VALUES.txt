@@ -1,0 +1,81 @@
+═══════════════════════════════════════════════════════════
+📋 COPY-PASTE VALUES FOR DEPLOYMENT
+═══════════════════════════════════════════════════════════
+
+🔐 SUPABASE SECRETS
+───────────────────────────────────────────────────────────
+
+Secret Name: STRIPE_SECRET_KEY
+Value: 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
+
+Secret Name: SUPABASE_URL
+Value: https://emlqlmfzqsnqokrqvmcm.supabase.co
+
+Secret Name: SUPABASE_SERVICE_ROLE_KEY
+Value: [Get this from: https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/settings/api → Click Reveal on service_role key]
+
+Secret Name: STRIPE_WEBHOOK_SECRET
+Value: [Get this from: https://dashboard.stripe.com/webhooks → Click we_1SYe14HBw27Y92Ci0z5p0Wkl → Reveal signing secret]
+
+───────────────────────────────────────────────────────────
+
+☁️ CLOUDFLARE ENVIRONMENT VARIABLES
+───────────────────────────────────────────────────────────
+
+Variable Name: VITE_SUPABASE_URL
+Value: https://emlqlmfzqsnqokrqvmcm.supabase.co
+
+Variable Name: VITE_SUPABASE_ANON_KEY
+Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg
+
+Variable Name: VITE_STRIPE_PUBLISHABLE_KEY
+Value: pk_live_51SXXh4HBw27Y92Ci4r7de3JTz13uAz7EF04b2ZpW8KhtDQYaa2mh1ayE8RiCKSRxRYtn3o7VNMINWJd9f7oGYsxT002VVUcvC8
+
+Variable Name: VITE_STORAGE_BUCKET_NAME
+Value: images
+
+───────────────────────────────────────────────────────────
+
+📁 LOCAL FUNCTION FILES TO DEPLOY
+───────────────────────────────────────────────────────────
+
+Function 1: stripe-payment-intent
+File: supabase/functions/stripe-payment-intent/index.ts
+Lines: 107 lines
+
+Function 2: stripe-webhook
+File: supabase/functions/stripe-webhook/index.ts
+Lines: 427 lines
+
+Function 3: send-order-emails
+File: supabase/functions/send-order-emails/index.ts
+Lines: 176 lines
+
+Function 4: send-credentials-email
+File: supabase/functions/send-credentials-email/index.ts
+Lines: 264 lines
+
+───────────────────────────────────────────────────────────
+
+🔗 DIRECT LINKS
+───────────────────────────────────────────────────────────
+
+Supabase Functions:
+https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/functions
+
+Supabase Secrets:
+https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/settings/functions
+
+Supabase API Keys:
+https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/settings/api
+
+Stripe Webhooks:
+https://dashboard.stripe.com/webhooks
+
+Cloudflare Dashboard:
+https://dash.cloudflare.com
+
+═══════════════════════════════════════════════════════════
+
+
+

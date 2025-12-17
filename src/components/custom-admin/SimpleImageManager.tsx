@@ -58,6 +58,9 @@ export default function SimpleImageManager() {
     if (!files || files.length === 0) return;
 
     setUploading(true);
+    
+    // Use the configured storage bucket from environment variable
+    const bucketName = import.meta.env.VITE_STORAGE_BUCKET_NAME || 'images';
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -65,12 +68,12 @@ export default function SimpleImageManager() {
       const fileName = `${selectedProduct}-${Date.now()}-${i}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('product-images')
+        .from(bucketName)
         .upload(fileName, file);
 
       if (!uploadError) {
         const { data: { publicUrl } } = supabase.storage
-          .from('product-images')
+          .from(bucketName)
           .getPublicUrl(fileName);
 
         await supabase.from('product_images').insert({
@@ -89,9 +92,10 @@ export default function SimpleImageManager() {
   const handleDelete = async (imageId: string, imageUrl: string) => {
     if (!confirm('Delete this image?')) return;
 
+    const bucketName = import.meta.env.VITE_STORAGE_BUCKET_NAME || 'images';
     const fileName = imageUrl.split('/').pop();
     if (fileName) {
-      await supabase.storage.from('product-images').remove([fileName]);
+      await supabase.storage.from(bucketName).remove([fileName]);
     }
     await supabase.from('product_images').delete().eq('id', imageId);
     loadImages(selectedProduct);

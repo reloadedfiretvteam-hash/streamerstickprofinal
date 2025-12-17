@@ -1,0 +1,39 @@
+ALL FIXES MADE IN PAST HOUR
+===========================
+
+14 CRITICAL BUGS FIXED:
+
+1. index.html - Changed OLD Supabase project (fiwkgpsvcvzitnuevqxz) to NEW (emlqlmfzqsnqokrqvmcm)
+2. index.html - Removed Square Payment SDK (you're Stripe-only)
+3. SEOHead.tsx - Added real Google verification code (c8f0b74f53fde501)
+4. ImageUpload.tsx - Fixed hardcoded 'product-images' bucket to use env variable
+5. SimpleImageManager.tsx - Fixed hardcoded bucket name
+6. WhatYouGetVideo.tsx - Removed hardcoded Supabase URL with typo (imiges→images)
+7. SecureCheckoutPage.tsx - Changed stripe_products to real_products
+8. ConciergePage.tsx - Changed stripe_products to real_products
+9. ProductDetailPage.tsx - Changed stripe_products to real_products
+10. RealAdminDashboard.tsx - Removed non-existent stripe_products menu item
+11. ConciergeCheckout.tsx - Replaced SquarePaymentForm with StripePaymentForm
+12. Deleted Shop_FIXED.tsx (duplicate file)
+13. Deleted SquarePaymentForm.tsx (unused component)
+14. Created migration: 20251203_add_missing_columns_to_real_products.sql
+
+FILES DELETED:
+- Shop_FIXED.tsx
+- SquarePaymentForm.tsx
+- 20251128_create_stripe_products_table.sql (wrong architecture)
+- 20250115_create_square_products_defaults.sql (Square not used)
+
+MIGRATION CREATED:
+- Adds cloaked_name column to real_products
+- Adds service_url column (http://ky-tv.cc)
+- Adds setup_video_url column
+
+READY TO PUSH:
+Double-click: PUSH_ALL_FIXES_FINAL.bat
+
+This will push everything to GitHub clean-main branch.
+GitHub will auto-trigger Cloudflare deployment.
+Wait 5 minutes after push completes.
+
+

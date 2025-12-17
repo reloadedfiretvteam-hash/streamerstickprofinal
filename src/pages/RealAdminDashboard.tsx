@@ -10,11 +10,17 @@ import RealBlogManager from '../components/custom-admin/RealBlogManager';
 import FrontendVisualEditor from '../components/custom-admin/FrontendVisualEditor';
 import CompleteSEOManager from '../components/custom-admin/CompleteSEOManager';
 import RankMathProSEOManager from '../components/custom-admin/RankMathProSEOManager';
-import StripeProductManager from '../components/custom-admin/StripeProductManager';
+// StripeProductManager removed - we use real_products table with cloaked_name column, not separate stripe_products table
+// import StripeProductManager from '../components/custom-admin/StripeProductManager';
 import RealAIVideoGenerator from '../components/custom-admin/RealAIVideoGenerator';
 import AmazonFireStickAutomation from '../components/custom-admin/AmazonFireStickAutomation';
 import SuperAICopilot from '../components/custom-admin/SuperAICopilot';
 import GitHubCloudflareConfig from '../components/custom-admin/GitHubCloudflareConfig';
+import OrdersCustomersManager from '../components/custom-admin/OrdersCustomersManager';
+import AdvancedAnalytics from '../components/custom-admin/AdvancedAnalytics';
+import CategoryManager from '../components/custom-admin/CategoryManager';
+import BulkEmailManager from '../components/custom-admin/BulkEmailManager';
+import SiteSettingsManager from '../components/custom-admin/SiteSettingsManager';
 
 export default function RealAdminDashboard() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -45,8 +51,13 @@ export default function RealAdminDashboard() {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, color: 'bg-blue-500' },
     { id: 'homepage-editor', label: 'HOMEPAGE EDITOR (Click & Edit)', icon: Layout, color: 'bg-purple-500' },
+<<<<<<< HEAD
     { id: 'products', label: 'PRODUCTS (Your Actual Products)', icon: Package, color: 'bg-green-500' },
     { id: 'stripe-products', label: 'STRIPE PRODUCTS (pay.streamstickpro.com)', icon: Package, color: 'bg-blue-600' },
+=======
+    { id: 'products', label: 'PRODUCTS (Manage All Products)', icon: Package, color: 'bg-green-500' },
+    // 'stripe-products' menu removed - we use real_products table with cloaked_name column
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
     { id: 'ai-video-generator', label: '🎬 AI VIDEO GENERATOR (TikTok/YouTube)', icon: Video, color: 'bg-pink-600' },
     { id: 'amazon-automation', label: '⚡ Amazon Fire Stick Automation', icon: Zap, color: 'bg-orange-600' },
     { id: 'blog', label: 'BLOG POSTS (With SEO Scores)', icon: FileText, color: 'bg-orange-500' },
@@ -67,8 +78,7 @@ export default function RealAdminDashboard() {
         return <FrontendVisualEditor />;
       case 'products':
         return <RealProductManager />;
-      case 'stripe-products':
-        return <StripeProductManager />;
+      // 'stripe-products' case removed - using real_products with cloaked_name instead
       case 'ai-video-generator':
         return <RealAIVideoGenerator />;
       case 'amazon-automation':
@@ -80,17 +90,17 @@ export default function RealAdminDashboard() {
       case 'seo-manager':
         return <RankMathProSEOManager />;
       case 'orders':
-        return <OrdersView />;
+        return <OrdersCustomersManager />;
       case 'analytics':
-        return <AnalyticsView />;
+        return <AdvancedAnalytics />;
       case 'categories':
-        return <CategoriesView />;
+        return <CategoryManager />;
       case 'emails':
-        return <EmailsView />;
+        return <BulkEmailManager />;
       case 'github-cloudflare':
         return <GitHubCloudflareConfig />;
       case 'settings':
-        return <SettingsView />;
+        return <SiteSettingsManager />;
       default:
         return <DashboardOverview setActiveView={setActiveView} />;
     }
@@ -287,62 +297,6 @@ function DashboardOverview({ setActiveView }: { setActiveView: (view: string) =>
       <div className="bg-white rounded-xl shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Activity</h2>
         <p className="text-gray-600">Activity tracking coming soon...</p>
-      </div>
-    </div>
-  );
-}
-
-// Placeholder views (to be implemented with real database connections)
-function OrdersView() {
-  return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Orders & Customers</h1>
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <p>Orders management - Loading from customer_orders table...</p>
-      </div>
-    </div>
-  );
-}
-
-function AnalyticsView() {
-  return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Analytics Dashboard</h1>
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <p>Analytics - Real-time stats from database...</p>
-      </div>
-    </div>
-  );
-}
-
-function CategoriesView() {
-  return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Categories & Tags</h1>
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <p>Category management - Coming soon...</p>
-      </div>
-    </div>
-  );
-}
-
-function EmailsView() {
-  return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Email Campaigns</h1>
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <p>Email campaigns - From email_campaigns table...</p>
-      </div>
-    </div>
-  );
-}
-
-function SettingsView() {
-  return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Site Settings</h1>
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <p>Site settings - From site_settings table...</p>
       </div>
     </div>
   );

@@ -27,7 +27,7 @@ export default function SEOHead() {
     setMetaTag('googlebot', 'index, follow');
     setMetaTag('bingbot', 'index, follow');
 
-    setMetaTag('google-site-verification', 'YOUR_GOOGLE_VERIFICATION_CODE');
+    setMetaTag('google-site-verification', 'c8f0b74f53fde501');
 
     setMetaTag('language', 'English');
     setMetaTag('revisit-after', '1 day');

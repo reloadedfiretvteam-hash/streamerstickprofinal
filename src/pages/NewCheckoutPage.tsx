@@ -4,6 +4,10 @@ import { supabase } from '../lib/supabase';
 import BitcoinPaymentFlow from '../components/BitcoinPaymentFlow';
 import CashAppPaymentFlow from '../components/CashAppPaymentFlow';
 import StripePaymentForm from '../components/StripePaymentForm';
+<<<<<<< HEAD
+=======
+import FreeTrialCheckout from '../components/FreeTrialCheckout';
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 import Footer from '../components/Footer';
 
 interface CartItem {
@@ -38,6 +42,8 @@ export default function NewCheckoutPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
+  const [creatingPaymentIntent, setCreatingPaymentIntent] = useState(false);
 
   useEffect(() => {
     loadCart();
@@ -80,7 +86,15 @@ export default function NewCheckoutPage() {
   const handleNextStep = async () => {
     if (currentStep === 1) {
       if (validateStep1()) {
-        setCurrentStep(2);
+        // Check if this is a free trial (total is $0.00)
+        const total = calculateTotal();
+        if (total === 0) {
+          // Skip payment selection and go straight to free trial activation
+          setCurrentStep(3);
+          setPaymentMethod(''); // No payment needed
+        } else {
+          setCurrentStep(2);
+        }
       }
     } else if (currentStep === 2 && paymentMethod) {
       // If Stripe is selected, create payment intent before moving to step 3
@@ -600,6 +614,7 @@ export default function NewCheckoutPage() {
                       <CreditCard className="w-6 h-6 text-blue-600" />
                       Secure Card Payment
                     </h2>
+<<<<<<< HEAD
                     
                     {paymentError && (
                       <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
@@ -621,14 +636,94 @@ export default function NewCheckoutPage() {
                             const { data, error } = await supabase
                               .from('orders')
                               .insert([{
+=======
+                    {!stripeClientSecret ? (
+                      <div>
+                        <p className="text-gray-600 mb-4">Click below to initialize secure payment</p>
+                        <button
+                          onClick={async () => {
+                            setCreatingPaymentIntent(true);
+                            try {
+                              const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                              
+                              if (!supabaseUrl) {
+                                throw new Error('Supabase URL not configured');
+                              }
+                              
+                              // Use stripe-payment-intent function which properly handles cloaked names for Stripe compliance
+                              // This function queries real_products.cloaked_name and sends compliant names to Stripe
+                              const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                  realProductId: cart[0]?.product.id, // Use first product (single product checkout)
+                                  customerEmail: customerInfo.email,
+                                  customerName: customerInfo.name
+                                }),
+                              });
+
+                              const data = await response.json();
+
+                              if (!response.ok) {
+                                throw new Error(data.error || 'Failed to create payment intent');
+                              }
+
+                              if (!data.clientSecret) {
+                                throw new Error('No client secret returned from server');
+                              }
+
+                              setStripeClientSecret(data.clientSecret);
+                            } catch (error: unknown) {
+                              console.error('Error creating payment intent:', error);
+                              const errorMessage = error instanceof Error ? error.message : 'Failed to initialize payment. Please try again.';
+                              alert(`Error: ${errorMessage}`);
+                            } finally {
+                              setCreatingPaymentIntent(false);
+                            }
+                          }}
+                          disabled={creatingPaymentIntent}
+                          className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-bold text-lg transition-all disabled:opacity-50"
+                        >
+                          {creatingPaymentIntent ? 'Initializing...' : 'Initialize Secure Payment'}
+                        </button>
+                      </div>
+                    ) : (
+                      <StripePaymentForm
+                        amount={calculateTotal()}
+                        clientSecret={stripeClientSecret}
+                        onSuccess={async (paymentIntentId) => {
+                          try {
+                            const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+                            const orderItems = cart.map(item => ({
+                              product_id: item.product.id,
+                              product_name: item.product.name,
+                              quantity: item.quantity,
+                              unit_price: parseFloat(item.product.sale_price || item.product.price),
+                              total_price: parseFloat(item.product.sale_price || item.product.price) * item.quantity
+                            }));
+
+                            const { data, error } = await supabase
+                              .from('orders')
+                              .insert({
+                                order_number: orderNumber,
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
                                 customer_name: customerInfo.name,
                                 customer_email: customerInfo.email,
                                 customer_phone: customerInfo.phone,
                                 shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
+<<<<<<< HEAD
+=======
+                                subtotal: calculateTotal(),
+                                tax: 0,
+                                total: calculateTotal(),
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
                                 total_amount: calculateTotal().toString(),
                                 payment_method: 'stripe',
                                 payment_intent_id: paymentIntentId,
                                 payment_status: 'completed',
+<<<<<<< HEAD
                                 status: 'processing',
                                 items: cart.map(item => ({
                                   product_id: item.product.id,
@@ -639,11 +734,20 @@ export default function NewCheckoutPage() {
                               }])
                               .select();
 
+=======
+                                order_status: 'processing',
+                                status: 'processing',
+                                items: orderItems,
+                                notes: `Payment method: stripe, Payment Intent ID: ${paymentIntentId}`
+                              })
+                              .select();
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
                             if (error) throw error;
                             const orderCode = (data && data.length > 0 && data[0].id) ? String(data[0].id) : `STRIPE-${Date.now()}`;
                             handleOrderComplete(orderCode);
                           } catch (error) {
                             console.error('Order creation failed:', error);
+<<<<<<< HEAD
                             alert('Payment processed but order creation failed. Please contact support.');
                           }
                         }}
@@ -663,6 +767,20 @@ export default function NewCheckoutPage() {
                         setCurrentStep(2);
                         setClientSecret(null);
                         setPaymentError(null);
+=======
+                            alert('Payment succeeded but order creation failed. Please contact support.');
+                          }
+                        }}
+                        onError={(error) => {
+                          alert(`Payment failed: ${error}`);
+                        }}
+                      />
+                    )}
+                    <button
+                      onClick={() => {
+                        setCurrentStep(2);
+                        setStripeClientSecret(null);
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
                       }}
                       className="mt-6 w-full bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition-all"
                     >
@@ -670,7 +788,9 @@ export default function NewCheckoutPage() {
                     </button>
                   </div>
                 )}
-                {paymentMethod === 'bitcoin' && (
+
+                {/* BITCOIN PAYMENT */}
+                {paymentMethod === 'bitcoin' && calculateTotal() > 0 && (
                   <BitcoinPaymentFlow
                     totalAmount={calculateTotal()}
                     customerInfo={customerInfo}
@@ -684,7 +804,8 @@ export default function NewCheckoutPage() {
                   />
                 )}
 
-                {paymentMethod === 'cashapp' && (
+                {/* CASH APP PAYMENT */}
+                {paymentMethod === 'cashapp' && calculateTotal() > 0 && (
                   <CashAppPaymentFlow
                     totalAmount={calculateTotal()}
                     customerInfo={customerInfo}

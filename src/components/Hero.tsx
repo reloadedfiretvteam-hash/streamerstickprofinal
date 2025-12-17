@@ -1,23 +1,51 @@
 import { ShoppingCart, Play } from 'lucide-react';
+<<<<<<< HEAD
 import { getStorageUrl, supabase } from '../lib/supabase';
 import { useEffect, useState } from 'react';
 
 export default function Hero() {
   const [heroImageUrl, setHeroImageUrl] = useState<string>(getStorageUrl('images', 'hero-firestick-breakout.jpg'));
   const [imageError, setImageError] = useState(false);
+=======
+import { useState, useEffect } from 'react';
+import { getStorageUrl } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
+
+export default function Hero() {
+  // Start with a default image URL to prevent blank flash
+  const [heroImageUrl, setHeroImageUrl] = useState<string>(getStorageUrl('images', 'hero-firestick-breakout.jpg'));
+  
+  // Try multiple hero image filename variations
+  const heroImageVariations = [
+    'Hero Image.jpg',
+    'Hero Image.png',
+    'Hero Image',
+    'hero image.jpg',
+    'hero-image.jpg',
+    'Hero-Image.jpg',
+    'hero-firestick-breakout.jpg', // Original fallback
+  ];
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 
   useEffect(() => {
     loadHeroImage();
   }, []);
 
   const loadHeroImage = async () => {
+<<<<<<< HEAD
     try {
       // Try to load from database first
       const { data, error } = await supabase
+=======
+    // First, try to get from section_images table if it exists
+    try {
+      const { data } = await supabase
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
         .from('section_images')
         .select('image_url')
         .eq('section_name', 'hero')
         .single();
+<<<<<<< HEAD
 
       if (!error && data && data.image_url) {
         // If image_url is just a filename (no http/https), use getStorageUrl
@@ -38,6 +66,54 @@ export default function Hero() {
     }
   };
 
+=======
+      
+      if (data?.image_url) {
+        const url = data.image_url.startsWith('http') 
+          ? data.image_url 
+          : getStorageUrl('images', data.image_url);
+        setHeroImageUrl(url);
+        return;
+      }
+    } catch (error) {
+      // section_images table might not exist, continue to filename variations
+      console.debug('Hero: section_images table not found, trying filename variations');
+    }
+
+    // Try filename variations in order
+    for (const filename of heroImageVariations) {
+      const testUrl = getStorageUrl('images', filename);
+      try {
+        const response = await fetch(testUrl, { method: 'HEAD' });
+        if (response.ok) {
+          const contentLength = response.headers.get('content-length');
+          if (contentLength && parseInt(contentLength, 10) > 1000) {
+            if (import.meta.env.DEV) {
+              console.log(`[Hero] Found valid hero image: ${filename} (${contentLength} bytes)`);
+            }
+            setHeroImageUrl(testUrl);
+            return;
+          } else if (import.meta.env.DEV) {
+            console.warn(`[Hero] Image too small: ${filename} (${contentLength} bytes)`);
+          }
+        }
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.debug(`[Hero] Failed to load: ${filename}`, error);
+        }
+        // Continue to next variation
+        continue;
+      }
+    }
+
+    if (import.meta.env.DEV) {
+      console.warn('[Hero] All hero image variations failed, using default fallback');
+    }
+
+    // If all variations fail, use the original as fallback
+    setHeroImageUrl(getStorageUrl('images', 'hero-firestick-breakout.jpg'));
+  };
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
   const goToShop = () => {
     window.location.href = '/shop';
   };

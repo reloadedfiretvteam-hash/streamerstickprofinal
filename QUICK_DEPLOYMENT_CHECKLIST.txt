@@ -1,0 +1,32 @@
+═══════════════════════════════════════════════════════════
+🚀 QUICK DEPLOYMENT CHECKLIST - CHECK OFF AS YOU GO
+═══════════════════════════════════════════════════════════
+
+📋 SUPABASE FUNCTIONS (https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/functions)
+□ stripe-payment-intent deployed
+□ stripe-webhook deployed  
+□ send-order-emails deployed
+□ send-credentials-email deployed
+
+📋 SUPABASE SECRETS (https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/settings/functions)
+□ STRIPE_SECRET_KEY = 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
+□ SUPABASE_URL = https://emlqlmfzqsnqokrqvmcm.supabase.co
+□ SUPABASE_SERVICE_ROLE_KEY = [Get from: https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/settings/api]
+□ STRIPE_WEBHOOK_SECRET = [Get from: https://dashboard.stripe.com/webhooks → we_1SYe14HBw27Y92Ci0z5p0Wkl]
+
+📋 CLOUDFLARE VARIABLES (https://dash.cloudflare.com → Pages → Your Project → Settings → Environment variables)
+□ VITE_SUPABASE_URL = https://emlqlmfzqsnqokrqvmcm.supabase.co
+□ VITE_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg
+□ VITE_STRIPE_PUBLISHABLE_KEY = pk_live_51SXXh4HBw27Y92Ci4r7de3JTz13uAz7EF04b2ZpW8KhtDQYaa2mh1ayE8RiCKSRxRYtn3o7VNMINWJd9f7oGYsxT002VVUcvC8
+□ VITE_STORAGE_BUCKET_NAME = images
+
+📋 FINAL STEPS
+□ Triggered Cloudflare redeploy (Deployments tab → three dots → Retry deployment)
+□ Waited 5 minutes for deployment to complete
+□ Tested: yoursite.com/stripe-checkout loads products automatically
+□ ✅ COMPLETE!
+
+═══════════════════════════════════════════════════════════
+
+
+

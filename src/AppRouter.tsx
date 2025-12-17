@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import App from './App';
 import UnifiedAdminLogin from './pages/UnifiedAdminLogin';
-import ModalAdminDashboard from './pages/ModalAdminDashboard';
+import RealAdminDashboard from './pages/RealAdminDashboard';
 import OrderTracking from './pages/OrderTracking';
 import FAQPage from './pages/FAQPage';
 import EnhancedBlogPost from './pages/EnhancedBlogPost';
@@ -21,6 +21,11 @@ function isStripePaymentHost(): boolean {
   return stripeHosts.includes(host);
 }
 
+<<<<<<< HEAD
+=======
+// Note: Square integration removed - Stripe only
+
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 export default function AppRouter() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -42,6 +47,11 @@ export default function AppRouter() {
     return <StripeSecureCheckoutPage />;
   }
 
+<<<<<<< HEAD
+=======
+  // Square integration removed - Stripe only
+
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
   if (currentPath === '/shop' || currentPath === '/shop/') {
     return <ShopPage />;
   }
@@ -77,7 +87,7 @@ export default function AppRouter() {
 
   if (currentPath === '/custom-admin/dashboard') {
     if (isAuthenticated) {
-      return <ModalAdminDashboard />;
+      return <RealAdminDashboard />;
     }
     window.location.href = '/';
     return null;
@@ -87,7 +97,7 @@ export default function AppRouter() {
   if (currentPath === '/admin' || currentPath === '/admin/' || currentPath === '/admin/dashboard' ||
       currentPath === '/custom-admin' || currentPath === '/custom-admin/') {
     if (isAuthenticated) {
-      return <ModalAdminDashboard />;
+      return <RealAdminDashboard />;
     }
     return <UnifiedAdminLogin />;
   }

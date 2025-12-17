@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Shield, Lock, Package, CheckCircle, AlertCircle, ArrowRight, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import StripePaymentForm from '../components/StripePaymentForm';
+import { generateCredentials } from '../utils/credentialsGenerator';
 
 interface Product {
   id: string;
@@ -50,10 +51,10 @@ export default function StripeSecureCheckoutPage() {
   async function loadSingleProduct(productId: string) {
     try {
       const { data, error } = await supabase
-        .from('stripe_products')
+        .from('real_products')
         .select('*')
         .eq('id', productId)
-        .eq('is_active', true)
+        .eq('status', 'published')
         .single();
 
       if (error) throw error;
@@ -76,10 +77,10 @@ export default function StripeSecureCheckoutPage() {
   async function loadProducts() {
     try {
       const { data, error } = await supabase
-        .from('stripe_products')
+        .from('real_products')
         .select('*')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
+        .eq('status', 'published')
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       
@@ -124,7 +125,7 @@ export default function StripeSecureCheckoutPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          productId: selectedProduct.id,
+          realProductId: selectedProduct.id,
           customerEmail: customerInfo.email,
           customerName: customerInfo.name,
         }),
@@ -146,9 +147,139 @@ export default function StripeSecureCheckoutPage() {
     }
   }
 
-  function handlePaymentSuccess(paymentIntentId: string) {
+  async function handlePaymentSuccess(paymentIntentId: string) {
     console.log('Payment successful:', paymentIntentId);
-    setStep('success');
+    
+    if (!selectedProduct) {
+      console.error('No product selected when payment succeeded');
+      setPaymentError('Payment succeeded but order could not be created. Please contact support.');
+      return;
+    }
+
+    try {
+      // Generate order number
+      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+      
+      // Prepare order items
+      const orderItems = [{
+        product_id: selectedProduct.id,
+        product_name: selectedProduct.name,
+        quantity: 1,
+        unit_price: selectedProduct.sale_price || selectedProduct.price,
+        total_price: selectedProduct.sale_price || selectedProduct.price
+      }];
+
+      const totalAmount = selectedProduct.sale_price || selectedProduct.price;
+
+      // Save order to database
+      const { data, error } = await supabase
+        .from('orders')
+        .insert({
+          order_number: orderNumber,
+          customer_name: customerInfo.name,
+          customer_email: customerInfo.email,
+          customer_phone: customerInfo.phone || null,
+          shipping_address: null, // Digital product, no shipping needed
+          subtotal: totalAmount,
+          tax: 0,
+          total: totalAmount,
+          total_amount: totalAmount.toString(),
+          payment_method: 'stripe',
+          payment_intent_id: paymentIntentId,
+          payment_status: 'completed',
+          order_status: 'processing',
+          status: 'processing',
+          items: orderItems,
+          notes: `Payment method: stripe, Payment Intent ID: ${paymentIntentId}`
+        })
+        .select();
+
+      if (error) {
+        console.error('Order creation failed:', error);
+        throw error;
+      }
+
+      console.log('Order created successfully:', data);
+      
+      // Generate username and password for customer
+      const credentials = generateCredentials(customerInfo.name);
+      
+      // Save credentials to order (update order with credentials)
+      if (data && data[0]) {
+        await supabase
+          .from('orders')
+          .update({
+            customer_username: credentials.username,
+            customer_password: credentials.password,
+            service_url: credentials.serviceUrl,
+            notes: `${data[0].notes || ''}\n\nCredentials Generated:\nUsername: ${credentials.username}\nPassword: ${credentials.password}\nService URL: ${credentials.serviceUrl}`
+          })
+          .eq('id', data[0].id);
+      }
+
+      // Send first email (greeting/confirmation)
+      try {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        await fetch(`${supabaseUrl}/functions/v1/send-order-emails`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            orderCode: orderNumber,
+            customerEmail: customerInfo.email,
+            customerName: customerInfo.name,
+            totalUsd: totalAmount,
+            paymentMethod: 'stripe',
+            products: orderItems.map(item => ({
+              name: item.product_name,
+              price: item.unit_price,
+              quantity: item.quantity
+            })),
+            shippingAddress: 'Digital Product - No Shipping Required',
+            adminEmail: 'reloadedfirestvteam@gmail.com',
+            orderId: data?.[0]?.id,
+            paymentIntentId: paymentIntentId
+          }),
+        });
+        console.log('First email (confirmation) sent');
+      } catch (emailError) {
+        console.error('Error sending confirmation email:', emailError);
+        // Don't fail the order if email fails
+      }
+
+      // Send second email (credentials) - can be immediate or delayed
+      try {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        await fetch(`${supabaseUrl}/functions/v1/send-credentials-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            customerEmail: customerInfo.email,
+            customerName: customerInfo.name,
+            username: credentials.username,
+            password: credentials.password,
+            serviceUrl: credentials.serviceUrl,
+            orderNumber: orderNumber,
+            productName: selectedProduct.name,
+            totalAmount: totalAmount,
+            youtubeTutorialUrl: 'https://www.youtube.com/watch?v=fDjDH_WAvYI'
+          }),
+        });
+        console.log('Second email (credentials) sent');
+      } catch (emailError) {
+        console.error('Error sending credentials email:', emailError);
+        // Don't fail the order if email fails
+      }
+
+      setStep('success');
+    } catch (error) {
+      console.error('Error saving order after payment:', error);
+      setPaymentError('Payment succeeded but order could not be saved. Please contact support with your payment ID: ' + paymentIntentId);
+      // Still show success since payment went through, but warn user
+    }
   }
 
   function handlePaymentError(error: string) {

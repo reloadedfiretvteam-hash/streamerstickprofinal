@@ -10,6 +10,7 @@ interface StripePaymentFormProps {
   onRetry?: () => void; // Optional retry callback when clientSecret is missing
 }
 
+<<<<<<< HEAD
 // Stripe Payment Element appearance configuration
 // These styles match the site's design system
 const STRIPE_APPEARANCE: Appearance = {
@@ -42,6 +43,38 @@ const STRIPE_APPEARANCE: Appearance = {
     },
   },
 };
+=======
+// Stripe types - using interface to avoid 'any'
+interface StripeInstance {
+  elements: (options: Record<string, unknown>) => StripeElements;
+  confirmPayment: (options: Record<string, unknown>) => Promise<StripePaymentResult>;
+}
+
+interface StripeElements {
+  create: (type: string) => StripeElement;
+}
+
+interface StripeElement {
+  mount: (selector: string) => void;
+  unmount: () => void;
+}
+
+interface StripePaymentIntentResult {
+  id: string;
+  status: string;
+}
+
+interface StripePaymentResult {
+  error?: { message?: string };
+  paymentIntent?: StripePaymentIntentResult;
+}
+
+declare global {
+  interface Window {
+    Stripe: ((key: string) => StripeInstance) | undefined;
+  }
+}
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 
 /**
  * Stripe Payment Element Form
@@ -74,17 +107,23 @@ export default function StripePaymentForm({
   const elementMounted = useRef(false);
 
   useEffect(() => {
+<<<<<<< HEAD
     const initializeStripe = async () => {
       if (!window.Stripe) {
         setErrorMessage('Stripe.js failed to load. Please refresh the page.');
         setPaymentStatus('error');
         return;
       }
+=======
+    if (!clientSecret) return;
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 
+    const initializeStripe = () => {
       const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
       if (!publishableKey) {
         setErrorMessage('Stripe configuration missing. Please contact support.');
+<<<<<<< HEAD
         setPaymentStatus('error');
         return;
       }
@@ -153,12 +192,81 @@ export default function StripePaymentForm({
         console.error('Stripe initialization failed:', e);
         setErrorMessage('Failed to load secure payment form. Please refresh and try again.');
         setPaymentStatus('error');
+=======
+        return;
+      }
+
+      // Wait for Stripe.js to load
+      if (typeof window === 'undefined' || !window.Stripe) {
+        // Retry after a short delay if Stripe hasn't loaded yet
+        let attempts = 0;
+        const maxAttempts = 50; // 5 seconds total
+        
+        const checkStripe = setInterval(() => {
+          attempts++;
+          if (window.Stripe) {
+            clearInterval(checkStripe);
+            doInitialize();
+          } else if (attempts >= maxAttempts) {
+            clearInterval(checkStripe);
+            setErrorMessage('Stripe.js failed to load. Please refresh the page.');
+          }
+        }, 100);
+        return;
+      }
+
+      doInitialize();
+
+      function doInitialize() {
+        try {
+          if (!window.Stripe) {
+            throw new Error('Stripe.js not available');
+          }
+
+          const stripeInstance = window.Stripe(publishableKey);
+          if (!stripeInstance) {
+            throw new Error('Failed to initialize Stripe');
+          }
+          setStripe(stripeInstance);
+
+          const elementsInstance = stripeInstance.elements({
+            clientSecret,
+            appearance: {
+              theme: 'stripe',
+              variables: {
+                colorPrimary: '#3b82f6',
+                colorBackground: '#ffffff',
+                colorText: '#1f2937',
+                colorDanger: '#ef4444',
+                fontFamily: 'system-ui, sans-serif',
+                spacingUnit: '4px',
+                borderRadius: '8px',
+              },
+            },
+          });
+          setElements(elementsInstance);
+
+          // Create and mount card element
+          const cardElement = elementsInstance.create('payment');
+          cardElementRef.current = cardElement;
+          
+          // Wait for the container to be in the DOM
+          setTimeout(() => {
+            const container = document.getElementById('stripe-card-element');
+            if (container && !cardMounted.current) {
+              cardElement.mount('#stripe-card-element');
+              cardMounted.current = true;
+            }
+          }, 100);
+        } catch (e) {
+          console.error('Stripe initialization failed:', e);
+          setErrorMessage('Failed to load secure payment form. Please refresh the page.');
+        }
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
       }
     };
 
-    if (clientSecret) {
-      initializeStripe();
-    }
+    initializeStripe();
 
     return () => {
       if (paymentElementRef.current && elementMounted.current) {
@@ -191,6 +299,7 @@ export default function StripePaymentForm({
         setPaymentStatus('ready');
         setErrorMessage(error.message || 'Payment failed. Please try again.');
         onError(error.message || 'Payment failed');
+<<<<<<< HEAD
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
         setPaymentStatus('success');
         onSuccess(paymentIntent.id);
@@ -200,6 +309,32 @@ export default function StripePaymentForm({
       } else if (paymentIntent && paymentIntent.status === 'processing') {
         // Payment is still processing (common with bank transfers)
         setPaymentStatus('processing');
+=======
+      } else if (paymentIntent) {
+        if (paymentIntent.status === 'succeeded') {
+          setPaymentStatus('success');
+          // Extract payment intent ID - paymentIntent should have an id property
+          const paymentIntentId = paymentIntent.id || '';
+          if (paymentIntentId) {
+            onSuccess(paymentIntentId);
+          } else {
+            // Fallback: extract from clientSecret (format: pi_xxxxx_secret_yyyyy)
+            const secretParts = clientSecret.split('_secret_');
+            if (secretParts.length > 0 && secretParts[0].startsWith('pi_')) {
+              onSuccess(secretParts[0]);
+            } else {
+              onError('Payment succeeded but could not retrieve payment ID');
+            }
+          }
+        } else if (paymentIntent.status === 'requires_action') {
+          // Handle 3D Secure or other authentication
+          setPaymentStatus('loading');
+        } else {
+          setPaymentStatus('error');
+          setErrorMessage(`Payment status: ${paymentIntent.status}`);
+          onError(`Payment status: ${paymentIntent.status}`);
+        }
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
       } else {
         setPaymentStatus('ready');
         setErrorMessage('Payment could not be completed. Please try a different payment method.');

@@ -22,6 +22,7 @@ export default function MediaCarousel() {
   const [slides, setSlides] = useState<CarouselSlide[]>([]);
   const [loading, setLoading] = useState(true);
 
+<<<<<<< HEAD
   // Load carousel slides from database
   useEffect(() => {
     loadCarouselSlides();
@@ -82,6 +83,15 @@ export default function MediaCarousel() {
   };
 
   const mediaItems = getMediaItems();
+=======
+  // SPORTS ONLY - Football, Baseball, Basketball, UFC from Supabase storage
+  const mediaItems = [
+    { type: 'sport', title: 'NFL All Teams Live', image: getStorageUrl('images', 'c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg'), logo: '🏈' },
+    { type: 'sport', title: 'MLB All 30 Teams', image: getStorageUrl('images', 'BASEBALL.webp'), logo: '⚾' },
+    { type: 'sport', title: 'NBA All Games', image: getStorageUrl('images', 'downloadBASKET BALL.jpg'), logo: '🏀' },
+    { type: 'sport', title: 'UFC & Boxing PPV', image: getStorageUrl('images', 'UFC.jpg'), logo: '🥊' },
+  ];
+>>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 
   useEffect(() => {
     if (mediaItems.length === 0) return;

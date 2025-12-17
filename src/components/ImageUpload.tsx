@@ -34,14 +34,17 @@ export default function ImageUpload({ productId, existingImages, onImagesChange 
 
         setUploadProgress(`Uploading ${i + 1} of ${files.length}...`);
 
+        // Use the configured storage bucket from environment variable
+        const bucketName = import.meta.env.VITE_STORAGE_BUCKET_NAME || 'images';
+        
         const { error: uploadError } = await supabase.storage
-          .from('product-images')
+          .from(bucketName)
           .upload(filePath, file);
 
         if (uploadError) throw uploadError;
 
         const { data: { publicUrl } } = supabase.storage
-          .from('product-images')
+          .from(bucketName)
           .getPublicUrl(filePath);
 
         const { error: dbError } = await supabase
@@ -74,10 +77,11 @@ export default function ImageUpload({ productId, existingImages, onImagesChange 
     if (!confirm('Delete this image?')) return;
 
     try {
+      const bucketName = import.meta.env.VITE_STORAGE_BUCKET_NAME || 'images';
       const fileName = imageUrl.split('/').pop();
       if (fileName) {
         await supabase.storage
-          .from('product-images')
+          .from(bucketName)
           .remove([fileName]);
       }
 

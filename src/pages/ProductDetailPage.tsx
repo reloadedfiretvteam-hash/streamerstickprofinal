@@ -43,23 +43,12 @@ export default function ProductDetailPage({ productId: propProductId }: ProductD
     }
 
     try {
-      // Try stripe_products first
-      let { data, error } = await supabase
-        .from('stripe_products')
+      // Load from real_products table (single source of truth)
+      const { data, error } = await supabase
+        .from('real_products')
         .select('*')
         .eq('id', productId)
         .single();
-
-      // If not found, try real_products
-      if (error || !data) {
-        const result = await supabase
-          .from('real_products')
-          .select('*')
-          .eq('id', productId)
-          .single();
-        data = result.data;
-        error = result.error;
-      }
 
       if (error) throw error;
       setProduct(data);

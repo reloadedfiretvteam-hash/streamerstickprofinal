@@ -1,0 +1,37 @@
+STEP 1: PUSH TO GITHUB
+=======================
+Double-click this file: PUSH_TO_GITHUB.bat
+Wait for it to say "Done!"
+
+
+STEP 2: REDEPLOY ON CLOUDFLARE
+================================
+1. Go to: https://dash.cloudflare.com
+
+2. Login
+
+3. Click "Pages" on left sidebar
+
+4. Click your project "streamerstickpro-live"
+
+5. Click "Deployments" tab at top
+
+6. Find the most recent deployment (top of list)
+
+7. Click the three dots (⋮) on the right side
+
+8. Click "Retry deployment"
+
+9. WAIT 3-5 minutes
+
+10. When it says "Success" - your checkout page is back!
+
+
+STEP 3: TEST YOUR SITE
+========================
+Go to: https://streamerstickpro-live.pages.dev/stripe-checkout
+(or your custom domain)
+
+Your checkout should now be working!
+
+

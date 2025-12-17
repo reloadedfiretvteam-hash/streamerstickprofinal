@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Play, Check, X } from 'lucide-react';
+import { getStorageUrl } from '../lib/supabase';
 
 interface WhatYouGetVideoProps {
   videoUrl?: string;
@@ -12,20 +13,19 @@ interface WhatYouGetVideoProps {
  * This is the main "What You Get" section at the bottom of the homepage.
  * 
  * Video Configuration:
- * - The default video URL points to Supabase Storage public bucket
- * - To change the video, update the DEFAULT_VIDEO_URL constant below
+ * - The default video URL points to Supabase Storage public bucket ('images')
+ * - To change the video, upload a new video to Supabase Storage and update the filename below
  * - Alternatively, pass a custom videoUrl prop to override the default
  * 
  * To upload a new video:
  * 1. Go to your Supabase project dashboard
- * 2. Navigate to Storage > imiges bucket (public bucket)
+ * 2. Navigate to Storage > images bucket (public bucket)
  * 3. Upload your new MP4 video file
- * 4. Update the DEFAULT_VIDEO_URL with the new public URL
+ * 4. Update the filename in getStorageUrl below
  */
 
-// Default video URL from Supabase Storage public bucket
-// To change the video, update this URL to point to your new video file
-const DEFAULT_VIDEO_URL = 'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-preview-video.mp4';
+// Default video URL from Supabase Storage - uses environment-configured bucket
+const DEFAULT_VIDEO_URL = getStorageUrl('images', 'iptv-preview-video.mp4');
 
 export default function WhatYouGetVideo({ videoUrl }: WhatYouGetVideoProps) {
   const [showModal, setShowModal] = useState(false);
@@ -151,7 +151,7 @@ export default function WhatYouGetVideo({ videoUrl }: WhatYouGetVideoProps) {
               </video>
             </div>
             <p className="text-white text-center mt-4 text-sm">
-              Video source: Supabase Storage (imiges bucket)
+              Video source: Supabase Storage (images bucket)
             </p>
           </div>
         </div>

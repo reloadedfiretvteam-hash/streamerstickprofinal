@@ -269,7 +269,161 @@ export default function SystemHealthCheck() {
     }
     setChecks([...results]);
 
-    // Check 11: RLS Policies
+    // Check 11: Stripe Configuration
+    results.push({ name: 'Stripe Payment Gateway', status: 'checking', message: 'Checking...' });
+    setChecks([...results]);
+
+    try {
+      const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+      
+      if (!stripePublishableKey || stripePublishableKey.startsWith('pk_test_') || stripePublishableKey === 'your-stripe-publishable-key') {
+        results[results.length - 1] = {
+          name: 'Stripe Payment Gateway',
+          status: 'fail',
+          message: 'Stripe publishable key not configured',
+          details: 'Add VITE_STRIPE_PUBLISHABLE_KEY to your environment variables'
+        };
+      } else {
+        // Check if Stripe.js is loaded
+        const stripeLoaded = typeof window !== 'undefined' && typeof (window as any).Stripe === 'function';
+        
+        if (stripeLoaded) {
+          // Verify key format (pk_test_ or pk_live_)
+          const isTestKey = stripePublishableKey.startsWith('pk_test_');
+          const isLiveKey = stripePublishableKey.startsWith('pk_live_');
+          
+          if (isTestKey || isLiveKey) {
+            results[results.length - 1] = {
+              name: 'Stripe Payment Gateway',
+              status: 'pass',
+              message: `Stripe configured (${isLiveKey ? 'LIVE MODE' : 'TEST MODE'})`,
+              details: isLiveKey 
+                ? '✅ Live payments are enabled - real charges will occur'
+                : '⚠️ Test mode - use test card 4242 4242 4242 4242'
+            };
+          } else {
+            results[results.length - 1] = {
+              name: 'Stripe Payment Gateway',
+              status: 'warning',
+              message: 'Invalid Stripe key format',
+              details: 'Key should start with pk_test_ or pk_live_'
+            };
+          }
+        } else {
+          results[results.length - 1] = {
+            name: 'Stripe Payment Gateway',
+            status: 'warning',
+            message: 'Stripe.js SDK not loaded',
+            details: 'Check that Stripe SDK script is in index.html'
+          };
+        }
+      }
+    } catch (_error: unknown) {
+      results[results.length - 1] = {
+        name: 'Stripe Payment Gateway',
+        status: 'fail',
+        message: 'Stripe check failed',
+        details: 'Unable to verify Stripe configuration'
+      };
+    }
+    setChecks([...results]);
+
+    // Check 12: Cloaked Product Names (Stripe Compliance)
+    results.push({ name: 'Cloaked Product Names', status: 'checking', message: 'Checking...' });
+    setChecks([...results]);
+
+    try {
+      const { count, error } = await supabase
+        .from('real_products')
+        .select('cloaked_name', { count: 'exact', head: true })
+        .not('cloaked_name', 'is', null);
+      
+      if (error) throw error;
+      
+      results[results.length - 1] = {
+        name: 'Cloaked Product Names',
+        status: count && count > 0 ? 'pass' : 'warning',
+        message: `${count || 0} products with Stripe-compliant names`,
+        details: count && count > 0 
+          ? 'Products have cloaked names for Stripe compliance'
+          : 'Add cloaked_name values to real_products for Stripe compliance'
+      };
+    } catch (_error: unknown) {
+      results[results.length - 1] = {
+        name: 'Cloaked Product Names',
+        status: 'warning',
+        message: 'Cloaked name column not found',
+        details: 'Run migration 20251203_add_missing_columns_to_real_products.sql'
+      };
+    }
+    setChecks([...results]);
+
+    // Check 13: Payment Intent Edge Function
+    results.push({ name: 'Stripe Payment Intent API', status: 'checking', message: 'Testing...' });
+    setChecks([...results]);
+
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      
+      if (supabaseUrl) {
+        // Just check if the endpoint responds (OPTIONS request for CORS)
+        const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
+          method: 'OPTIONS',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        results[results.length - 1] = {
+          name: 'Stripe Payment Intent API',
+          status: response.ok || response.status === 204 ? 'pass' : 'warning',
+          message: response.ok || response.status === 204 ? 'Payment intent endpoint reachable' : 'Endpoint may not be deployed',
+          details: 'Edge function create-payment-intent handles checkout payments'
+        };
+      } else {
+        throw new Error('Supabase URL not configured');
+      }
+    } catch (_error: unknown) {
+      results[results.length - 1] = {
+        name: 'Stripe Payment Intent API',
+        status: 'warning',
+        message: 'Could not reach payment endpoint',
+        details: 'Deploy create-payment-intent edge function to Supabase'
+      };
+    }
+    setChecks([...results]);
+
+    // Check 14: Site Settings (Payment Config)
+    results.push({ name: 'Payment Configuration', status: 'checking', message: 'Checking...' });
+    setChecks([...results]);
+
+    try {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('setting_key, setting_value')
+        .in('setting_key', ['stripe_publishable_key', 'stripe_enabled']);
+      
+      if (error) throw error;
+      
+      const hasStripeKey = data?.some(s => s.setting_key === 'stripe_publishable_key' && s.setting_value);
+      
+      results[results.length - 1] = {
+        name: 'Payment Configuration',
+        status: hasStripeKey ? 'pass' : 'warning',
+        message: hasStripeKey ? 'Payment settings configured in database' : 'Using environment variables',
+        details: 'Stripe keys can be stored in site_settings or env vars'
+      };
+    } catch (_error: unknown) {
+      results[results.length - 1] = {
+        name: 'Payment Configuration',
+        status: 'warning',
+        message: 'site_settings table not accessible',
+        details: 'Payment config will use environment variables'
+      };
+    }
+    setChecks([...results]);
+
+    // Check 15: RLS Policies
     results.push({ name: 'Security (RLS)', status: 'checking', message: 'Checking...' });
     setChecks([...results]);
 
