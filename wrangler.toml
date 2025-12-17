@@ -1,0 +1,26 @@
+name = "streamerstickpro-live"
+pages_build_output_dir = "./dist"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# PUBLIC variables (safe to commit)
+[vars]
+NODE_ENV = "production"
+RESEND_FROM_EMAIL = "noreply@streamstickpro.com"
+VITE_SUPABASE_URL = "https://emlqlmfzqsnqokrqvmcm.supabase.co"
+VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg"
+VITE_SECURE_HOSTS = "secure.streamstickpro.com"
+VITE_STORAGE_BUCKET_NAME = "imiges"
+SITE_URL = "https://streamstickpro.com"
+
+# SECRETS - Set these in Cloudflare Pages Dashboard → Settings → Environment Variables
+# Do NOT commit actual values here
+# Required secrets:
+#   ADMIN_USERNAME - Admin login username
+#   ADMIN_PASSWORD - Admin login password  
+#   SUPABASE_SERVICE_KEY - Supabase service role key (for server-side operations)
+#   STRIPE_SECRET_KEY - Stripe API secret key
+#   STRIPE_PUBLISHABLE_KEY - Stripe publishable key
+#   STRIPE_WEBHOOK_SECRET - Stripe webhook signing secret
+#   RESEND_API_KEY - Resend email API key
+#   SESSION_SECRET - Session encryption key
