@@ -131,7 +131,7 @@ export function createStorage(config: StorageConfig) {
     },
 
     async createOrder(order: InsertOrder): Promise<Order> {
-      const dbOrder = {
+      const dbOrder: Record<string, any> = {
         customer_email: order.customerEmail,
         customer_name: order.customerName,
         customer_id: order.customerId,
@@ -159,9 +159,8 @@ export function createStorage(config: StorageConfig) {
         generated_username: order.generatedUsername,
         generated_password: order.generatedPassword,
         country_preference: order.countryPreference,
-        customer_message: order.customerMessage,
-        customer_phone: order.customerPhone,
       };
+      
       const { data, error } = await supabase.from('orders').insert(dbOrder).select().single();
       if (error) throw error;
       return this.mapOrderFromDb(data);
@@ -582,6 +581,78 @@ export function createStorage(config: StorageConfig) {
         metaDescription: data.meta_description,
         publishedAt: data.published_at,
       };
+    },
+
+    async trackAbandonedCart(cart: {
+      email: string;
+      customerName?: string | null;
+      cartItems: any[];
+      totalAmount: number;
+    }): Promise<any> {
+      const { data: existing } = await supabase.from('abandoned_carts')
+        .select('*')
+        .eq('email', cart.email)
+        .eq('converted', false)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (existing) {
+        const { data, error } = await supabase.from('abandoned_carts')
+          .update({
+            cart_items: cart.cartItems,
+            total_amount: cart.totalAmount,
+            customer_name: cart.customerName,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existing.id)
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      }
+
+      const { data, error } = await supabase.from('abandoned_carts')
+        .insert({
+          email: cart.email,
+          customer_name: cart.customerName,
+          cart_items: cart.cartItems,
+          total_amount: cart.totalAmount,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+
+    async getAbandonedCartsToRecover(): Promise<any[]> {
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+      const { data } = await supabase.from('abandoned_carts')
+        .select('*')
+        .eq('recovery_email_sent', false)
+        .eq('converted', false)
+        .lt('created_at', thirtyMinutesAgo.toISOString())
+        .order('created_at', { ascending: false });
+      return data || [];
+    },
+
+    async markRecoveryEmailSent(id: string): Promise<void> {
+      await supabase.from('abandoned_carts')
+        .update({
+          recovery_email_sent: true,
+          recovery_email_sent_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+    },
+
+    async markCartConverted(id: string, orderId: string): Promise<void> {
+      await supabase.from('abandoned_carts')
+        .update({
+          converted: true,
+          converted_order_id: orderId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id);
     },
   };
 }
