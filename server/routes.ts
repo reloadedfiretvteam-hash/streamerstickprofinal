@@ -231,9 +231,12 @@ export async function registerRoutes(
       const realProductNames = productsWithQuantity.map(p => p.product.name).join(', ');
       const shadowProductIds = productsWithQuantity.map(p => p.product.shadowProductId || '').join(',');
 
-      const hasFireStickProduct = productsWithQuantity.some(({ product }) => {
+      const hasPhysicalProduct = productsWithQuantity.some(({ product }) => {
         const name = (product.name || '').toLowerCase();
-        return name.includes('fire') || name.includes('stick') || name.includes('firestick');
+        const id = (product.id || '').toLowerCase();
+        return name.includes('fire') || name.includes('stick') || name.includes('firestick') ||
+               name.includes('onn') || name.includes('android') || name.includes('device') ||
+               id.includes('firestick') || id.includes('android-onn');
       });
 
       const sessionConfig: any = {
@@ -253,7 +256,7 @@ export async function registerRoutes(
         },
       };
 
-      if (hasFireStickProduct) {
+      if (hasPhysicalProduct) {
         sessionConfig.shipping_address_collection = {
           allowed_countries: ['US', 'CA'],
         };
