@@ -110,8 +110,6 @@ export function createCheckoutRoutes() {
       const order = await storage.createOrder({
         customerEmail,
         customerName: customerName || null,
-        customerPhone: customerPhone || null,
-        customerMessage: customerMessage || null,
         stripeCheckoutSessionId: session.id,
         shadowProductId: shadowProductIds,
         shadowPriceId: productsWithQuantity.map(p => p.product.shadowPriceId).join(','),
