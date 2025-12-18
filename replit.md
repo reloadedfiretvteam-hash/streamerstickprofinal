@@ -10,7 +10,7 @@
 - All features production-ready
 
 **Independent Architecture (No Replit Dependencies):**
-- Code Repository: GitHub (reloadedfiretvteam/streamerstickpro-live)
+- Code Repository: GitHub (reloadedfiretvteam-hash/streamerstickprofinal)
 - CI/CD: GitHub Actions (auto-deploy on push to clean-main)
 - Hosting: Cloudflare Pages + Workers
 - Database: Supabase PostgreSQL
