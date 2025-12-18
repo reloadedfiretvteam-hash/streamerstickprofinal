@@ -48,7 +48,7 @@ const REPO = 'streamerstickprofinal';
 const BRANCH = 'clean-main';
 
 const filesToPush = [
-  // Root config files
+  // Root config files - ALL OF THEM
   'package.json',
   'package-lock.json',
   'tsconfig.json',
@@ -60,7 +60,7 @@ const filesToPush = [
   'components.json',
   'wrangler.toml',
   
-  // Worker files
+  // Worker - ALL files
   'worker/index.ts',
   'worker/db.ts',
   'worker/storage.ts',
@@ -75,9 +75,8 @@ const filesToPush = [
   'worker/routes/customers.ts',
   'worker/routes/trial.ts',
   'worker/routes/blog.ts',
-  'worker/routes/stripe-config.ts',
   
-  // Server files
+  // Server - ALL files
   'server/index.ts',
   'server/routes.ts',
   'server/storage.ts',
@@ -85,64 +84,38 @@ const filesToPush = [
   'server/db.ts',
   'server/seed-products.ts',
   'server/webhookHandlers.ts',
-  'server/blogSeo.ts',
-  'server/openai.ts',
-  'server/productImages.ts',
   
-  // Shared files
+  // Shared
   'shared/schema.ts',
   
-  // Script files
+  // Scripts
   'script/build.ts',
   'script/build-worker.ts',
-  'script/prerender-blog.ts',
   'script/push-to-github.ts',
   
-  // GitHub workflows
+  // GitHub
   '.github/workflows/deploy-cloudflare.yml',
   
-  // Client HTML
+  // Client - HTML and main
   'client/index.html',
-  
-  // Client source - main files
   'client/src/main.tsx',
   'client/src/App.tsx',
   'client/src/index.css',
   
-  // Client pages
+  // Client pages - ALL
   'client/src/pages/MainStore.tsx',
   'client/src/pages/ShadowStore.tsx',
   'client/src/pages/Checkout.tsx',
   'client/src/pages/Success.tsx',
-  'client/src/pages/AdminLogin.tsx',
-  'client/src/pages/AdminDashboard.tsx',
   'client/src/pages/CustomerPortal.tsx',
-  'client/src/pages/BlogIndex.tsx',
-  'client/src/pages/BlogPost.tsx',
-  'client/src/pages/NotFound.tsx',
   
-  // Client components
+  // Client components - ALL that exist
   'client/src/components/FreeTrial.tsx',
-  'client/src/components/Header.tsx',
-  'client/src/components/Footer.tsx',
-  'client/src/components/ProductCard.tsx',
-  'client/src/components/CartSidebar.tsx',
   'client/src/components/SportsCarousel.tsx',
   'client/src/components/TrustBadges.tsx',
-  'client/src/components/WhatsAppButton.tsx',
   'client/src/components/SocialProof.tsx',
-  'client/src/components/CustomerAuth.tsx',
-  'client/src/components/BlogSidebar.tsx',
-  'client/src/components/BlogCard.tsx',
-  'client/src/components/RelatedProducts.tsx',
-  'client/src/components/SEOHead.tsx',
-  'client/src/components/AdminBlogEditor.tsx',
-  'client/src/components/AdminCustomers.tsx',
-  'client/src/components/AdminOrders.tsx',
-  'client/src/components/AdminProducts.tsx',
-  'client/src/components/AdminAnalytics.tsx',
   
-  // Client lib
+  // Client lib - ALL
   'client/src/lib/api.ts',
   'client/src/lib/store.ts',
   'client/src/lib/queryClient.ts',
@@ -153,7 +126,7 @@ const filesToPush = [
   'client/src/hooks/use-mobile.tsx',
   'client/src/hooks/use-toast.ts',
   
-  // UI Components (all of them)
+  // UI Components - ALL
   'client/src/components/ui/accordion.tsx',
   'client/src/components/ui/alert-dialog.tsx',
   'client/src/components/ui/alert.tsx',
@@ -212,6 +185,8 @@ const filesToPush = [
 async function pushFiles() {
   const octokit = await getUncachableGitHubClient();
   
+  console.log(`Pushing ${filesToPush.length} files to GitHub...`);
+  
   console.log('Getting current branch reference...');
   const { data: ref } = await octokit.git.getRef({
     owner: OWNER,
@@ -243,13 +218,16 @@ async function pushFiles() {
   for (const filePath of filesToPush) {
     const fullPath = path.join(process.cwd(), filePath);
     if (!fs.existsSync(fullPath)) {
-      console.log(`Skipping ${filePath} - file not found`);
+      console.log(`Skipping ${filePath} - not found`);
       skippedCount++;
       continue;
     }
     
     const content = fs.readFileSync(fullPath);
-    console.log(`Creating blob for ${filePath}...`);
+    
+    if (pushedCount % 20 === 0 && pushedCount > 0) {
+      console.log(`Progress: ${pushedCount} files...`);
+    }
     
     const { data: blob } = await octokit.git.createBlob({
       owner: OWNER,
@@ -267,7 +245,7 @@ async function pushFiles() {
     pushedCount++;
   }
 
-  console.log(`Creating new tree with ${treeItems.length} files...`);
+  console.log(`Created ${treeItems.length} blobs, creating tree...`);
   const { data: newTree } = await octokit.git.createTree({
     owner: OWNER,
     repo: REPO,
@@ -279,7 +257,7 @@ async function pushFiles() {
   const { data: newCommit } = await octokit.git.createCommit({
     owner: OWNER,
     repo: REPO,
-    message: 'Full sync from Replit - all critical files including package-lock.json and FreeTrial updates',
+    message: 'Full sync: All config files including vite-plugin-meta-images.ts and vite.config.cloudflare.ts',
     tree: newTree.sha,
     parents: [currentSha],
   });
@@ -293,7 +271,7 @@ async function pushFiles() {
     sha: newCommit.sha,
   });
 
-  console.log(`Successfully pushed ${pushedCount} files to ${BRANCH}!`);
+  console.log(`\n✅ Successfully pushed ${pushedCount} files to ${BRANCH}!`);
   console.log(`Skipped ${skippedCount} files (not found)`);
   console.log('GitHub Actions should now trigger the Cloudflare deployment.');
 }
