@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { apiCall } from "@/lib/api";
-import { Gift, Mail, User, Loader2, Check, Clock, Phone, Globe, MessageSquare, RefreshCw, UserPlus, MapPin } from "lucide-react";
+import { Gift, Mail, User, Loader2, Check, Clock, Globe, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { motion } from "framer-motion";
 
 const iptvImg = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/OIF_1764979270800.jpg";
@@ -14,11 +13,7 @@ const iptvImg = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/publ
 export function FreeTrial() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
   const [message, setMessage] = useState("");
-  const [accountType, setAccountType] = useState<"new" | "existing">("new");
-  const [existingUsername, setExistingUsername] = useState("");
   const [countryOptions, setCountryOptions] = useState({
     usaOnly: false,
     usaCanadaUk: false,
@@ -55,11 +50,6 @@ export function FreeTrial() {
       return;
     }
 
-    if (accountType === "existing" && !existingUsername.trim()) {
-      setError("Please enter your existing username");
-      return;
-    }
-
     setLoading(true);
     setError("");
 
@@ -70,12 +60,8 @@ export function FreeTrial() {
         body: JSON.stringify({ 
           email, 
           name,
-          phone: phone.trim() || null,
-          address: address.trim() || null,
           message: message.trim() || null,
           countryPreference: buildCountryPreference(),
-          isExistingUser: accountType === "existing",
-          existingUsername: accountType === "existing" ? existingUsername.trim() : null,
         })
       });
 
@@ -83,10 +69,7 @@ export function FreeTrial() {
         setSuccess(true);
         setEmail("");
         setName("");
-        setPhone("");
-        setAddress("");
         setMessage("");
-        setExistingUsername("");
       } else {
         const data = await response.json();
         setError(data.error || "Something went wrong. Please try again.");
@@ -164,64 +147,6 @@ export function FreeTrial() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Account Type Selection */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-200">Account Type</Label>
-              <RadioGroup 
-                value={accountType} 
-                onValueChange={(value) => setAccountType(value as "new" | "existing")}
-                className="grid grid-cols-2 gap-3"
-              >
-                <div 
-                  className={`flex items-center space-x-2 p-3 rounded-lg border transition-all cursor-pointer ${
-                    accountType === "new" 
-                      ? "border-purple-500 bg-purple-500/20" 
-                      : "border-gray-600 hover:border-gray-500"
-                  }`}
-                  onClick={() => setAccountType("new")}
-                  data-testid="radio-trial-new"
-                >
-                  <RadioGroupItem value="new" id="trial-new" />
-                  <div className="flex items-center gap-2">
-                    <UserPlus className="w-4 h-4 text-green-400" />
-                    <Label htmlFor="trial-new" className="cursor-pointer text-sm">New User</Label>
-                  </div>
-                </div>
-                
-                <div 
-                  className={`flex items-center space-x-2 p-3 rounded-lg border transition-all cursor-pointer ${
-                    accountType === "existing" 
-                      ? "border-purple-500 bg-purple-500/20" 
-                      : "border-gray-600 hover:border-gray-500"
-                  }`}
-                  onClick={() => setAccountType("existing")}
-                  data-testid="radio-trial-existing"
-                >
-                  <RadioGroupItem value="existing" id="trial-existing" />
-                  <div className="flex items-center gap-2">
-                    <RefreshCw className="w-4 h-4 text-blue-400" />
-                    <Label htmlFor="trial-existing" className="cursor-pointer text-sm">Existing User</Label>
-                  </div>
-                </div>
-              </RadioGroup>
-            </div>
-
-            {accountType === "existing" && (
-              <div className="relative">
-                <Label htmlFor="trial-existing-username" className="sr-only">Existing Username</Label>
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
-                <Input
-                  id="trial-existing-username"
-                  type="text"
-                  placeholder="Your Existing Username *"
-                  value={existingUsername}
-                  onChange={(e) => setExistingUsername(e.target.value)}
-                  className="pl-10 bg-gray-800/50 border-gray-600 text-white h-12"
-                  data-testid="input-trial-existing-username"
-                />
-              </div>
-            )}
-
             {/* Name and Email */}
             <div className="grid md:grid-cols-2 gap-4">
               <div className="relative">
@@ -248,36 +173,6 @@ export function FreeTrial() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 bg-gray-800/50 border-gray-600 text-white h-12"
                   data-testid="input-trial-email"
-                />
-              </div>
-            </div>
-
-            {/* Phone and Address */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="relative">
-                <Label htmlFor="trial-phone" className="sr-only">Phone Number</Label>
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
-                <Input
-                  id="trial-phone"
-                  type="tel"
-                  placeholder="Phone Number (Optional)"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="pl-10 bg-gray-800/50 border-gray-600 text-white h-12"
-                  data-testid="input-trial-phone"
-                />
-              </div>
-              <div className="relative">
-                <Label htmlFor="trial-address" className="sr-only">Address</Label>
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
-                <Input
-                  id="trial-address"
-                  type="text"
-                  placeholder="Address (Optional)"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="pl-10 bg-gray-800/50 border-gray-600 text-white h-12"
-                  data-testid="input-trial-address"
                 />
               </div>
             </div>
