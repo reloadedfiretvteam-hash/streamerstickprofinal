@@ -53,12 +53,12 @@ const filesToPush = [
   'package-lock.json',
   'tsconfig.json',
   'vite.config.ts',
-  'tailwind.config.ts',
+  'vite.config.cloudflare.ts',
+  'vite-plugin-meta-images.ts',
   'postcss.config.js',
   'drizzle.config.ts',
   'components.json',
   'wrangler.toml',
-  '.nvmrc',
   
   // Worker files
   'worker/index.ts',
