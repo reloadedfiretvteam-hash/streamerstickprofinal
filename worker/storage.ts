@@ -476,8 +476,8 @@ export function createStorage(config: StorageConfig) {
         generatedUsername: data.generated_username,
         generatedPassword: data.generated_password,
         countryPreference: data.country_preference,
-        customerMessage: data.customer_message,
-        customerPhone: data.customer_phone,
+        customerMessage: null,
+        customerPhone: null,
         createdAt: data.created_at ? new Date(data.created_at) : null,
       };
     },
