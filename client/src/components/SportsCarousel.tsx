@@ -2,12 +2,11 @@ import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
 import { Card, CardContent } from "@/components/ui/card"
 
-import ufcFallback from "@assets/stock_images/ufc_mma_fighter_in_o_3625dd6b.jpg";
-import nflFallback from "@assets/stock_images/american_football_pl_1dce3698.jpg";
-import nbaFallback from "@assets/stock_images/basketball_player_du_c74298fe.jpg";
-import mlbFallback from "@assets/stock_images/baseball_batter_hitt_88195588.jpg";
-
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
+const ufcFallback = `${SUPABASE_BASE}/stock_images/ufc_mma_fighter_in_o_3625dd6b.jpg`;
+const nflFallback = `${SUPABASE_BASE}/stock_images/american_football_pl_1dce3698.jpg`;
+const nbaFallback = `${SUPABASE_BASE}/stock_images/basketball_player_du_c74298fe.jpg`;
+const mlbFallback = `${SUPABASE_BASE}/stock_images/baseball_batter_hitt_88195588.jpg`;
 
 const sports = [
   { name: "UFC & MMA", image: `${SUPABASE_BASE}/UFC.jpg`, fallback: ufcFallback, desc: "Every PPV Event Live" },
