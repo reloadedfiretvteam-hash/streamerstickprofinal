@@ -14,6 +14,8 @@ import Success from "@/pages/Success";
 import Blog from "@/pages/Blog";
 import CustomerLogin from "@/pages/CustomerLogin";
 import CustomerPortal from "@/pages/CustomerPortal";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import TermsOfService from "@/pages/TermsOfService";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import RefundPolicy from "@/pages/RefundPolicy";
@@ -52,6 +54,8 @@ function Router() {
       <Route path="/blog/:slug" component={Blog} />
       <Route path="/customer-login" component={CustomerLogin} />
       <Route path="/my-account" component={CustomerPortal} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/terms" component={TermsOfService} />
       <Route path="/privacy" component={PrivacyPolicy} />
       <Route path="/refund" component={RefundPolicy} />
