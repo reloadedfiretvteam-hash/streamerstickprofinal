@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { type Server } from "http";
 import { storage } from "./storage";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
+import { getUncachableResendClient } from "./resendClient";
 import { analyzeSeo } from "./seoAnalyzer";
 import { registerSeoRoutes } from "./seo-routes";
 import { 
@@ -28,7 +29,7 @@ import { fromZodError } from "zod-validation-error";
 import * as crypto from "crypto";
 import * as bcrypt from "bcryptjs";
 
-const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET;
+const JWT_SECRET: string = process.env.JWT_SECRET || process.env.SESSION_SECRET || '';
 if (!JWT_SECRET) {
   console.error('SECURITY ERROR: JWT_SECRET or SESSION_SECRET must be set');
   process.exit(1);
