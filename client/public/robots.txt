@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://streamstickpro.com/sitemap.xml

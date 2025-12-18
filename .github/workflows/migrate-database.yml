@@ -1,0 +1,45 @@
+name: Run Database Migration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - clean-main
+    paths:
+      - 'scripts/run-supabase-migration.ts'
+      - 'scripts/supabase-customer-auth-migration.sql'
+      - 'shared/schema.ts'
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run Supabase Migration
+        run: npx tsx scripts/run-supabase-migration.ts
+        env:
+          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+      
+      - name: Migration Summary
+        run: |
+          echo "## Migration Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Database tables have been created/updated in Supabase." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Tables:" >> $GITHUB_STEP_SUMMARY
+          echo "- customers" >> $GITHUB_STEP_SUMMARY
+          echo "- password_reset_tokens" >> $GITHUB_STEP_SUMMARY
+          echo "- abandoned_carts" >> $GITHUB_STEP_SUMMARY
+          echo "- orders (updated columns)" >> $GITHUB_STEP_SUMMARY

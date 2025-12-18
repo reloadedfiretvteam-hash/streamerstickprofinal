@@ -1,289 +1,170 @@
-import { Octokit } from '@octokit/rest';
-import * as fs from 'fs';
-import * as path from 'path';
+import { Octokit } from "@octokit/rest";
+import * as fs from "fs";
+import * as path from "path";
 
-let connectionSettings: any;
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const OWNER = "reloadedfiretvteam-hash";
+const REPO = "streamerstickprofinal";
+const BRANCH = "clean-main";
 
-async function getAccessToken() {
-  if (connectionSettings && connectionSettings.settings.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
-    return connectionSettings.settings.access_token;
-  }
-  
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
-  const xReplitToken = process.env.REPL_IDENTITY 
-    ? 'repl ' + process.env.REPL_IDENTITY 
-    : process.env.WEB_REPL_RENEWAL 
-    ? 'depl ' + process.env.WEB_REPL_RENEWAL 
-    : null;
+const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
-  if (!xReplitToken) {
-    throw new Error('X_REPLIT_TOKEN not found for repl/depl');
-  }
+// Directories to EXCLUDE from sync
+const EXCLUDE_DIRS = new Set([
+  'node_modules',
+  'dist',
+  '.git',
+  '.cache',
+  '.replit',
+  '.upm',
+  '.config',
+  'generated',
+  'attached_assets'
+]);
 
-  connectionSettings = await fetch(
-    'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=github',
-    {
-      headers: {
-        'Accept': 'application/json',
-        'X_REPLIT_TOKEN': xReplitToken
-      }
-    }
-  ).then(res => res.json()).then(data => data.items?.[0]);
-
-  const accessToken = connectionSettings?.settings?.access_token || connectionSettings.settings?.oauth?.credentials?.access_token;
-
-  if (!connectionSettings || !accessToken) {
-    throw new Error('GitHub not connected');
-  }
-  return accessToken;
-}
-
-async function getUncachableGitHubClient() {
-  const accessToken = await getAccessToken();
-  return new Octokit({ auth: accessToken });
-}
-
-const OWNER = 'reloadedfiretvteam-hash';
-const REPO = 'streamerstickprofinal';
-const BRANCH = 'clean-main';
-
-const filesToPush = [
-  // Root config files - ALL OF THEM
-  'package.json',
-  'package-lock.json',
-  'tsconfig.json',
-  'vite.config.ts',
-  'vite.config.cloudflare.ts',
-  'vite-plugin-meta-images.ts',
-  'postcss.config.js',
-  'drizzle.config.ts',
-  'components.json',
-  'wrangler.toml',
-  
-  // Worker - ALL files
-  'worker/index.ts',
-  'worker/db.ts',
-  'worker/storage.ts',
-  'worker/email.ts',
-  'worker/helpers.ts',
-  'worker/routes/products.ts',
-  'worker/routes/checkout.ts',
-  'worker/routes/orders.ts',
-  'worker/routes/admin.ts',
-  'worker/routes/webhook.ts',
-  'worker/routes/visitors.ts',
-  'worker/routes/customers.ts',
-  'worker/routes/trial.ts',
-  'worker/routes/blog.ts',
-  
-  // Server - ALL files
-  'server/index.ts',
-  'server/routes.ts',
-  'server/storage.ts',
-  'server/vite.ts',
-  'server/db.ts',
-  'server/seed-products.ts',
-  'server/webhookHandlers.ts',
-  
-  // Shared
-  'shared/schema.ts',
-  
-  // Scripts
-  'script/build.ts',
-  'script/build-worker.ts',
-  'script/push-to-github.ts',
-  
-  // GitHub
-  '.github/workflows/deploy-cloudflare.yml',
-  
-  // Client - HTML and main
-  'client/index.html',
-  'client/src/main.tsx',
-  'client/src/App.tsx',
-  'client/src/index.css',
-  
-  // Client pages - ALL
-  'client/src/pages/MainStore.tsx',
-  'client/src/pages/ShadowStore.tsx',
-  'client/src/pages/Checkout.tsx',
-  'client/src/pages/Success.tsx',
-  'client/src/pages/CustomerPortal.tsx',
-  'client/src/pages/AdminPanel.tsx',
-  'client/src/pages/Blog.tsx',
-  'client/src/pages/CustomerLogin.tsx',
-  'client/src/pages/ForgotPassword.tsx',
-  'client/src/pages/ResetPassword.tsx',
-  'client/src/pages/TermsOfService.tsx',
-  'client/src/pages/PrivacyPolicy.tsx',
-  'client/src/pages/RefundPolicy.tsx',
-  'client/src/pages/not-found.tsx',
-  
-  // Client components - ALL that exist
-  'client/src/components/FreeTrial.tsx',
-  'client/src/components/SportsCarousel.tsx',
-  'client/src/components/TrustBadges.tsx',
-  'client/src/components/SocialProof.tsx',
-  
-  // Client lib - ALL
-  'client/src/lib/api.ts',
-  'client/src/lib/store.ts',
-  'client/src/lib/queryClient.ts',
-  'client/src/lib/utils.ts',
-  'client/src/lib/supabase.ts',
-  
-  // Client hooks - ALL
-  'client/src/hooks/use-mobile.tsx',
-  'client/src/hooks/use-toast.ts',
-  'client/src/hooks/useTracking.ts',
-  
-  // UI Components - ALL
-  'client/src/components/ui/accordion.tsx',
-  'client/src/components/ui/alert-dialog.tsx',
-  'client/src/components/ui/alert.tsx',
-  'client/src/components/ui/aspect-ratio.tsx',
-  'client/src/components/ui/avatar.tsx',
-  'client/src/components/ui/badge.tsx',
-  'client/src/components/ui/breadcrumb.tsx',
-  'client/src/components/ui/button.tsx',
-  'client/src/components/ui/calendar.tsx',
-  'client/src/components/ui/card.tsx',
-  'client/src/components/ui/carousel.tsx',
-  'client/src/components/ui/chart.tsx',
-  'client/src/components/ui/checkbox.tsx',
-  'client/src/components/ui/collapsible.tsx',
-  'client/src/components/ui/command.tsx',
-  'client/src/components/ui/context-menu.tsx',
-  'client/src/components/ui/dialog.tsx',
-  'client/src/components/ui/drawer.tsx',
-  'client/src/components/ui/dropdown-menu.tsx',
-  'client/src/components/ui/form.tsx',
-  'client/src/components/ui/hover-card.tsx',
-  'client/src/components/ui/input-otp.tsx',
-  'client/src/components/ui/input.tsx',
-  'client/src/components/ui/label.tsx',
-  'client/src/components/ui/menubar.tsx',
-  'client/src/components/ui/navigation-menu.tsx',
-  'client/src/components/ui/pagination.tsx',
-  'client/src/components/ui/popover.tsx',
-  'client/src/components/ui/progress.tsx',
-  'client/src/components/ui/radio-group.tsx',
-  'client/src/components/ui/resizable.tsx',
-  'client/src/components/ui/scroll-area.tsx',
-  'client/src/components/ui/select.tsx',
-  'client/src/components/ui/separator.tsx',
-  'client/src/components/ui/sheet.tsx',
-  'client/src/components/ui/sidebar.tsx',
-  'client/src/components/ui/skeleton.tsx',
-  'client/src/components/ui/slider.tsx',
-  'client/src/components/ui/sonner.tsx',
-  'client/src/components/ui/switch.tsx',
-  'client/src/components/ui/table.tsx',
-  'client/src/components/ui/tabs.tsx',
-  'client/src/components/ui/textarea.tsx',
-  'client/src/components/ui/toast.tsx',
-  'client/src/components/ui/toaster.tsx',
-  'client/src/components/ui/toggle-group.tsx',
-  'client/src/components/ui/toggle.tsx',
-  'client/src/components/ui/tooltip.tsx',
-  
-  // Image assets
-  'attached_assets/s-l1600onnbok_1766008738774.webp',
-  'attached_assets/OIPonnbox4k_1766008832103.webp',
-  'attached_assets/OIF_1764979270800.jpg',
+// Files/patterns to EXCLUDE
+const EXCLUDE_PATTERNS = [
+  /\.replit$/,
+  /replit\.nix$/,
+  /\.gitattributes$/,
+  /\.DS_Store$/,
+  /\.env$/,
+  /\.log$/
 ];
 
-async function pushFiles() {
-  const octokit = await getUncachableGitHubClient();
+// Recursively get ALL files from the repository
+function getAllFiles(dir: string, baseDir: string = dir): string[] {
+  const files: string[] = [];
   
-  console.log(`Pushing ${filesToPush.length} files to GitHub...`);
-  
-  console.log('Getting current branch reference...');
-  const { data: ref } = await octokit.git.getRef({
-    owner: OWNER,
-    repo: REPO,
-    ref: `heads/${BRANCH}`,
-  });
-  const currentSha = ref.object.sha;
-  console.log(`Current commit SHA: ${currentSha}`);
-
-  console.log('Getting current commit tree...');
-  const { data: currentCommit } = await octokit.git.getCommit({
-    owner: OWNER,
-    repo: REPO,
-    commit_sha: currentSha,
-  });
-  const baseTreeSha = currentCommit.tree.sha;
-
-  console.log('Creating blobs for files...');
-  const treeItems: Array<{
-    path: string;
-    mode: '100644';
-    type: 'blob';
-    sha: string;
-  }> = [];
-
-  let pushedCount = 0;
-  let skippedCount = 0;
-
-  for (const filePath of filesToPush) {
-    const fullPath = path.join(process.cwd(), filePath);
-    if (!fs.existsSync(fullPath)) {
-      console.log(`Skipping ${filePath} - not found`);
-      skippedCount++;
-      continue;
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      const relativePath = path.relative(baseDir, fullPath);
+      
+      // Skip excluded directories
+      if (entry.isDirectory()) {
+        if (EXCLUDE_DIRS.has(entry.name)) {
+          continue;
+        }
+        files.push(...getAllFiles(fullPath, baseDir));
+      } else {
+        // Skip excluded file patterns
+        const shouldExclude = EXCLUDE_PATTERNS.some(pattern => pattern.test(entry.name));
+        if (shouldExclude) {
+          continue;
+        }
+        files.push(relativePath);
+      }
     }
-    
-    const content = fs.readFileSync(fullPath);
-    
-    if (pushedCount % 20 === 0 && pushedCount > 0) {
-      console.log(`Progress: ${pushedCount} files...`);
-    }
-    
-    const { data: blob } = await octokit.git.createBlob({
-      owner: OWNER,
-      repo: REPO,
-      content: content.toString('base64'),
-      encoding: 'base64',
-    });
-    
-    treeItems.push({
-      path: filePath,
-      mode: '100644',
-      type: 'blob',
-      sha: blob.sha,
-    });
-    pushedCount++;
+  } catch (error) {
+    console.error(`Error reading directory ${dir}:`, error);
   }
-
-  console.log(`Created ${treeItems.length} blobs, creating tree...`);
-  const { data: newTree } = await octokit.git.createTree({
-    owner: OWNER,
-    repo: REPO,
-    base_tree: baseTreeSha,
-    tree: treeItems,
-  });
-
-  console.log('Creating commit...');
-  const { data: newCommit } = await octokit.git.createCommit({
-    owner: OWNER,
-    repo: REPO,
-    message: 'Full sync: All config files including vite-plugin-meta-images.ts and vite.config.cloudflare.ts',
-    tree: newTree.sha,
-    parents: [currentSha],
-  });
-  console.log(`New commit SHA: ${newCommit.sha}`);
-
-  console.log('Updating branch reference...');
-  await octokit.git.updateRef({
-    owner: OWNER,
-    repo: REPO,
-    ref: `heads/${BRANCH}`,
-    sha: newCommit.sha,
-  });
-
-  console.log(`\n✅ Successfully pushed ${pushedCount} files to ${BRANCH}!`);
-  console.log(`Skipped ${skippedCount} files (not found)`);
-  console.log('GitHub Actions should now trigger the Cloudflare deployment.');
+  
+  return files;
 }
 
-pushFiles().catch(console.error);
+async function pushAllFiles() {
+  // Auto-discover ALL files
+  const allFiles = getAllFiles(".");
+  
+  console.log(`Discovered ${allFiles.length} files in repository`);
+  console.log("Pushing ALL files to GitHub...");
+
+  try {
+    // Get current branch reference
+    console.log("Getting current branch reference...");
+    const { data: ref } = await octokit.git.getRef({
+      owner: OWNER,
+      repo: REPO,
+      ref: `heads/${BRANCH}`,
+    });
+    const currentCommitSha = ref.object.sha;
+    console.log(`Current commit SHA: ${currentCommitSha}`);
+
+    // Get current commit tree
+    console.log("Getting current commit tree...");
+    const { data: commit } = await octokit.git.getCommit({
+      owner: OWNER,
+      repo: REPO,
+      commit_sha: currentCommitSha,
+    });
+    const baseTreeSha = commit.tree.sha;
+
+    // Create blobs for ALL files
+    console.log("Creating blobs for ALL files...");
+    const treeItems: { path: string; mode: "100644"; type: "blob"; sha: string }[] = [];
+    let skipped = 0;
+    let processed = 0;
+
+    for (const filePath of allFiles) {
+      try {
+        const content = fs.readFileSync(filePath);
+        const base64Content = content.toString("base64");
+
+        const { data: blob } = await octokit.git.createBlob({
+          owner: OWNER,
+          repo: REPO,
+          content: base64Content,
+          encoding: "base64",
+        });
+
+        treeItems.push({
+          path: filePath,
+          mode: "100644",
+          type: "blob",
+          sha: blob.sha,
+        });
+
+        processed++;
+        if (processed % 25 === 0) {
+          console.log(`Progress: ${processed} files...`);
+        }
+      } catch (error) {
+        console.log(`Skipped (error): ${filePath}`);
+        skipped++;
+      }
+    }
+
+    console.log(`Created ${treeItems.length} blobs, creating tree...`);
+
+    // Create new tree
+    const { data: newTree } = await octokit.git.createTree({
+      owner: OWNER,
+      repo: REPO,
+      base_tree: baseTreeSha,
+      tree: treeItems,
+    });
+
+    // Create commit
+    console.log("Creating commit...");
+    const { data: newCommit } = await octokit.git.createCommit({
+      owner: OWNER,
+      repo: REPO,
+      message: `FULL SYNC: All ${treeItems.length} repository files`,
+      tree: newTree.sha,
+      parents: [currentCommitSha],
+    });
+    console.log(`New commit SHA: ${newCommit.sha}`);
+
+    // Update branch reference
+    console.log("Updating branch reference...");
+    await octokit.git.updateRef({
+      owner: OWNER,
+      repo: REPO,
+      ref: `heads/${BRANCH}`,
+      sha: newCommit.sha,
+    });
+
+    console.log(`\n✅ Successfully pushed ${treeItems.length} files to ${BRANCH}!`);
+    console.log(`Skipped ${skipped} files (errors)`);
+    console.log("GitHub Actions should now trigger the Cloudflare deployment.");
+
+  } catch (error) {
+    console.error("Failed to push to GitHub:", error);
+    process.exit(1);
+  }
+}
+
+pushAllFiles();
