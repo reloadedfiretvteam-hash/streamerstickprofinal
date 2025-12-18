@@ -40,6 +40,13 @@ jobs:
           VITE_SECURE_HOSTS: secure.streamstickpro.com
           VITE_STORAGE_BUCKET_NAME: imiges
           NODE_ENV: production
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
       
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
