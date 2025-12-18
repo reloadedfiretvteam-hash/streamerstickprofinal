@@ -85,6 +85,32 @@ export default function Checkout() {
     setError(null);
   };
 
+  // Track abandoned cart when user enters email (for recovery emails)
+  const trackAbandonedCart = async () => {
+    if (!formData.email || !formData.email.includes('@') || items.length === 0) return;
+    
+    try {
+      await apiCall("/api/track-cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          customerName: `${formData.firstName} ${formData.lastName}`.trim() || null,
+          cartItems: items.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity })),
+          totalAmount: total,
+        }),
+      });
+    } catch (err) {
+      // Silently fail - this is just for recovery
+      console.log("Cart tracking skipped");
+    }
+  };
+
+  // Track cart when email field loses focus
+  const handleEmailBlur = () => {
+    trackAbandonedCart();
+  };
+
   const buildCountryPreference = () => {
     const preferences: string[] = [];
     if (countryOptions.usaOnly) preferences.push("USA Only");
@@ -146,9 +172,16 @@ export default function Checkout() {
         checkoutPayload.customerMessage = formData.message.trim();
       }
 
+      // Include customer token if logged in
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const customerToken = localStorage.getItem("customerToken");
+      if (customerToken) {
+        headers["Authorization"] = `Bearer ${customerToken}`;
+      }
+
       const response = await apiCall("/api/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(checkoutPayload),
       });
 
@@ -448,6 +481,7 @@ export default function Checkout() {
                     placeholder="your@email.com" 
                     value={formData.email}
                     onChange={handleInputChange}
+                    onBlur={handleEmailBlur}
                     className="bg-background/50 border-white/20 h-12 text-lg"
                     data-testid="input-email"
                   />
