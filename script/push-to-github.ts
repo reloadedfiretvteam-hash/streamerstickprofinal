@@ -131,9 +131,10 @@ const filesToPush = [
   'client/src/lib/utils.ts',
   'client/src/lib/supabase.ts',
   
-  // Client hooks
+  // Client hooks - ALL
   'client/src/hooks/use-mobile.tsx',
   'client/src/hooks/use-toast.ts',
+  'client/src/hooks/useTracking.ts',
   
   // UI Components - ALL
   'client/src/components/ui/accordion.tsx',
