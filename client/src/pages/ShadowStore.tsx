@@ -9,9 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
-import heroBg from "@assets/stock_images/modern_abstract_digi_3506c264.jpg";
-
 const SUPABASE_URL = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/shadow-store";
+const heroBg = `${SUPABASE_URL}/modern_abstract_digi_3506c264.jpg`;
 
 const productImages = {
   basic: `${SUPABASE_URL}/professional_web_des_bf1b8ff3.jpg`,
