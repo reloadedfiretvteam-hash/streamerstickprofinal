@@ -108,6 +108,15 @@ const filesToPush = [
   'client/src/pages/Checkout.tsx',
   'client/src/pages/Success.tsx',
   'client/src/pages/CustomerPortal.tsx',
+  'client/src/pages/AdminPanel.tsx',
+  'client/src/pages/Blog.tsx',
+  'client/src/pages/CustomerLogin.tsx',
+  'client/src/pages/ForgotPassword.tsx',
+  'client/src/pages/ResetPassword.tsx',
+  'client/src/pages/TermsOfService.tsx',
+  'client/src/pages/PrivacyPolicy.tsx',
+  'client/src/pages/RefundPolicy.tsx',
+  'client/src/pages/not-found.tsx',
   
   // Client components - ALL that exist
   'client/src/components/FreeTrial.tsx',

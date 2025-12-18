@@ -191,6 +191,18 @@ export default function CustomerLogin() {
                     "Sign In"
                   )}
                 </Button>
+
+                <div className="text-center mt-4">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-orange-400 hover:text-orange-300"
+                    onClick={() => navigate("/forgot-password")}
+                    data-testid="link-forgot-password"
+                  >
+                    Forgot your password?
+                  </Button>
+                </div>
               </form>
             </TabsContent>
 

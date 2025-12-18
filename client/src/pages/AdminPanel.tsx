@@ -976,6 +976,27 @@ export default function AdminPanel() {
     }
   };
 
+  const resetCustomerPassword = async (customerId: string) => {
+    if (!confirm('This will reset the customer password and send them an email with new credentials. Continue?')) return;
+
+    try {
+      const response = await authFetch(`/api/admin/customers/${customerId}/reset-password`, {
+        method: 'POST',
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showToast('Password reset email sent to customer!', 'success');
+      } else {
+        showToast(result.error || 'Failed to reset password', 'error');
+      }
+    } catch (error) {
+      console.error('Error resetting customer password:', error);
+      showToast('Failed to reset password', 'error');
+    }
+  };
+
   const copyCredentials = async (username: string, password: string) => {
     const text = `Username: ${username}\nPassword: ${password}`;
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
@@ -2907,24 +2928,36 @@ export default function AdminPanel() {
                           )}
                         </div>
 
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex flex-col gap-2 pt-2">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setEditingCustomer(selectedCustomer)}
+                              className="flex-1 border-gray-600 text-gray-300"
+                              data-testid="button-edit-selected"
+                            >
+                              <Edit className="w-4 h-4 mr-2" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => { setSelectedCustomer(null); setCustomerOrders([]); }}
+                              className="border-gray-600 text-gray-300"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setEditingCustomer(selectedCustomer)}
-                            className="flex-1 border-gray-600 text-gray-300"
-                            data-testid="button-edit-selected"
+                            onClick={() => resetCustomerPassword(selectedCustomer.id)}
+                            className="w-full border-orange-500/50 text-orange-400 hover:bg-orange-500/20"
+                            data-testid="button-reset-customer-password"
                           >
-                            <Edit className="w-4 h-4 mr-2" />
-                            Edit
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => { setSelectedCustomer(null); setCustomerOrders([]); }}
-                            className="border-gray-600 text-gray-300"
-                          >
-                            <X className="w-4 h-4" />
+                            <Lock className="w-4 h-4 mr-2" />
+                            Reset Password & Email Customer
                           </Button>
                         </div>
                       </CardContent>
