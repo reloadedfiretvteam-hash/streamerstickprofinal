@@ -32,15 +32,15 @@ import { ComparisonTable } from "@/components/ComparisonTable";
 import { FloatingCTA } from "@/components/FloatingCTA";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 
-import firestickHdImg from "@assets/OIP_(11)99_1764978938773.jpg";
-import firestick4kImg from "@assets/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg";
-import firestick4kMaxImg from "@assets/71E1te69hZL._AC_SL1500__1764978938773.jpg";
-import onn4kImg from "@assets/s-l1600onnbok_1766008738774.webp";
-import onn4kProImg from "@assets/OIPonnbox4k_1766008832103.webp";
-import iptvImg from "@assets/OIF_1764979270800.jpg";
-import fallbackHeroImg from "@assets/stock_images/amazon_fire_tv_stick_cc445778.jpg";
-
-const heroImg = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/hero-firestick-breakout.jpg";
+const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
+const firestickHdImg = `${SUPABASE_BASE}/OIP_(11)99_1764978938773.jpg`;
+const firestick4kImg = `${SUPABASE_BASE}/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg`;
+const firestick4kMaxImg = `${SUPABASE_BASE}/71E1te69hZL._AC_SL1500__1764978938773.jpg`;
+const onn4kImg = `${SUPABASE_BASE}/s-l1600onnbok_1766008738774.webp`;
+const onn4kProImg = `${SUPABASE_BASE}/OIPonnbox4k_1766008832103.webp`;
+const iptvImg = `${SUPABASE_BASE}/OIF_1764979270800.jpg`;
+const fallbackHeroImg = `${SUPABASE_BASE}/stock_images/amazon_fire_tv_stick_cc445778.jpg`;
+const heroImg = `${SUPABASE_BASE}/hero-firestick-breakout.jpg`;
 
 interface Product {
   id: string;
