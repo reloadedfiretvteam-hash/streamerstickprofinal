@@ -57,6 +57,10 @@ export default function Checkout() {
     lastName: "",
     phone: "",
     message: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
   });
 
   useEffect(() => {
@@ -72,6 +76,13 @@ export default function Checkout() {
     item.id.includes('firestick') || item.id.includes('fs-') ||
     item.name?.toLowerCase().includes('fire stick') || item.name?.toLowerCase().includes('firestick')
   );
+
+  const hasONNProduct = items.some(item => 
+    item.id.includes('onn') || item.id.includes('android-onn') ||
+    item.name?.toLowerCase().includes('onn') || item.name?.toLowerCase().includes('streaming device')
+  );
+
+  const hasPhysicalProduct = hasFireStickProduct || hasONNProduct;
 
   const hasFreeTrial = items.some(item => 
     item.id.includes('trial') || item.name?.toLowerCase().includes('trial') || item.price === 0
@@ -135,6 +146,17 @@ export default function Checkout() {
       return;
     }
 
+    if (hasPhysicalProduct) {
+      if (!formData.phone.trim()) {
+        setError("Please enter your phone number for shipping");
+        return;
+      }
+      if (!formData.address.trim() || !formData.city.trim() || !formData.state.trim() || !formData.zipCode.trim()) {
+        setError("Please enter your complete shipping address");
+        return;
+      }
+    }
+
     if (accountType === "renewal" && hasIPTVProduct && !existingUsername.trim()) {
       setError("Please enter your existing username");
       return;
@@ -170,6 +192,15 @@ export default function Checkout() {
 
       if (formData.message.trim()) {
         checkoutPayload.customerMessage = formData.message.trim();
+      }
+
+      if (hasPhysicalProduct) {
+        checkoutPayload.shippingAddress = {
+          address: formData.address.trim(),
+          city: formData.city.trim(),
+          state: formData.state.trim(),
+          zipCode: formData.zipCode.trim(),
+        };
       }
 
       // Include customer token if logged in
@@ -515,7 +546,7 @@ export default function Checkout() {
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="flex items-center gap-2">
                     <Phone className="w-4 h-4" />
-                    Phone Number (Optional)
+                    Phone Number {hasPhysicalProduct ? "*" : "(Optional)"}
                   </Label>
                   <Input 
                     id="phone"
@@ -528,9 +559,74 @@ export default function Checkout() {
                     data-testid="input-phone"
                   />
                   <p className="text-xs text-muted-foreground">
-                    For order updates and shipping notifications
+                    {hasPhysicalProduct ? "Required for shipping your device" : "For order updates and shipping notifications"}
                   </p>
                 </div>
+
+                {hasPhysicalProduct && (
+                  <>
+                    <Separator className="my-4" />
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Zap className="w-5 h-5" />
+                        <span className="font-semibold">Shipping Address</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Where should we ship your device? (US & Canada only)
+                      </p>
+                      <div className="space-y-2">
+                        <Label htmlFor="address">Street Address *</Label>
+                        <Input 
+                          id="address"
+                          name="address"
+                          placeholder="123 Main Street, Apt 4B" 
+                          value={formData.address}
+                          onChange={handleInputChange}
+                          className="bg-background/50 border-white/20 h-12"
+                          data-testid="input-address"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="city">City *</Label>
+                          <Input 
+                            id="city"
+                            name="city"
+                            placeholder="New York" 
+                            value={formData.city}
+                            onChange={handleInputChange}
+                            className="bg-background/50 border-white/20 h-12"
+                            data-testid="input-city"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="state">State/Province *</Label>
+                          <Input 
+                            id="state"
+                            name="state"
+                            placeholder="NY" 
+                            value={formData.state}
+                            onChange={handleInputChange}
+                            className="bg-background/50 border-white/20 h-12"
+                            data-testid="input-state"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="zipCode">ZIP/Postal Code *</Label>
+                        <Input 
+                          id="zipCode"
+                          name="zipCode"
+                          placeholder="10001" 
+                          value={formData.zipCode}
+                          onChange={handleInputChange}
+                          className="bg-background/50 border-white/20 h-12"
+                          data-testid="input-zipcode"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="message" className="flex items-center gap-2">
                     <MessageSquare className="w-4 h-4" />

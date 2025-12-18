@@ -78,7 +78,7 @@ async function main() {
   console.log("Creating commit...");
   const { data: newCommit } = await octokit.git.createCommit({
     owner, repo,
-    message: "Fix webhook 404: add /webhook/:uuid route for Stripe managed webhooks - " + new Date().toISOString(),
+    message: "SEO Campaign: Add 200 optimized blog posts + sitemap with 285 URLs - " + new Date().toISOString(),
     tree: newTree.sha,
     parents: [currentSha]
   });
