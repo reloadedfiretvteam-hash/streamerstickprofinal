@@ -1,4 +1,4 @@
-import { eq, desc, gte, and, ilike, or } from "drizzle-orm";
+import { eq, desc, gte, and, ilike, or, lt } from "drizzle-orm";
 import { db } from "./db";
 import {
   type User,
@@ -16,6 +16,10 @@ import {
   type BlogPost,
   type InsertBlogPost,
   type UpdateBlogPost,
+  type PasswordResetToken,
+  type InsertPasswordResetToken,
+  type AbandonedCart,
+  type InsertAbandonedCart,
   users,
   orders,
   realProducts,
@@ -23,6 +27,8 @@ import {
   pageEdits,
   customers,
   blogPosts,
+  passwordResetTokens,
+  abandonedCarts,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -84,6 +90,18 @@ export interface IStorage {
   getBlogPostsByCategory(category: string): Promise<BlogPost[]>;
   getFeaturedBlogPosts(): Promise<BlogPost[]>;
   searchBlogPosts(query: string): Promise<BlogPost[]>;
+  
+  createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
+  markPasswordResetTokenUsed(id: string): Promise<void>;
+  deleteExpiredPasswordResetTokens(): Promise<void>;
+  
+  createAbandonedCart(cart: InsertAbandonedCart): Promise<AbandonedCart>;
+  getAbandonedCart(id: string): Promise<AbandonedCart | undefined>;
+  getAbandonedCartByEmail(email: string): Promise<AbandonedCart | undefined>;
+  getAbandonedCartsToRecover(): Promise<AbandonedCart[]>;
+  markAbandonedCartRecovered(id: string, orderId: string): Promise<void>;
+  markAbandonedCartEmailSent(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -397,6 +415,83 @@ export class DatabaseStorage implements IStorage {
         ilike(blogPosts.content, searchTerm)
       )
     ).orderBy(desc(blogPosts.createdAt));
+  }
+
+  async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    const [resetToken] = await db.insert(passwordResetTokens).values(token).returning();
+    return resetToken;
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    const [resetToken] = await db.select().from(passwordResetTokens)
+      .where(and(
+        eq(passwordResetTokens.token, token),
+        eq(passwordResetTokens.used, false),
+        gte(passwordResetTokens.expiresAt, new Date())
+      ));
+    return resetToken;
+  }
+
+  async markPasswordResetTokenUsed(id: string): Promise<void> {
+    await db.update(passwordResetTokens)
+      .set({ used: true })
+      .where(eq(passwordResetTokens.id, id));
+  }
+
+  async deleteExpiredPasswordResetTokens(): Promise<void> {
+    await db.delete(passwordResetTokens)
+      .where(lt(passwordResetTokens.expiresAt, new Date()));
+  }
+
+  async createAbandonedCart(cart: InsertAbandonedCart): Promise<AbandonedCart> {
+    const [abandonedCart] = await db.insert(abandonedCarts).values(cart).returning();
+    return abandonedCart;
+  }
+
+  async getAbandonedCart(id: string): Promise<AbandonedCart | undefined> {
+    const [cart] = await db.select().from(abandonedCarts).where(eq(abandonedCarts.id, id));
+    return cart;
+  }
+
+  async getAbandonedCartByEmail(email: string): Promise<AbandonedCart | undefined> {
+    const [cart] = await db.select().from(abandonedCarts)
+      .where(and(
+        eq(abandonedCarts.email, email),
+        eq(abandonedCarts.converted, false)
+      ))
+      .orderBy(desc(abandonedCarts.createdAt));
+    return cart;
+  }
+
+  async getAbandonedCartsToRecover(): Promise<AbandonedCart[]> {
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+    return db.select().from(abandonedCarts)
+      .where(and(
+        eq(abandonedCarts.recoveryEmailSent, false),
+        eq(abandonedCarts.converted, false),
+        lt(abandonedCarts.createdAt, thirtyMinutesAgo)
+      ))
+      .orderBy(desc(abandonedCarts.createdAt));
+  }
+
+  async markAbandonedCartRecovered(id: string, orderId: string): Promise<void> {
+    await db.update(abandonedCarts)
+      .set({ 
+        converted: true, 
+        convertedOrderId: orderId,
+        updatedAt: new Date()
+      })
+      .where(eq(abandonedCarts.id, id));
+  }
+
+  async markAbandonedCartEmailSent(id: string): Promise<void> {
+    await db.update(abandonedCarts)
+      .set({ 
+        recoveryEmailSent: true, 
+        recoveryEmailSentAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(abandonedCarts.id, id));
   }
 }
 
