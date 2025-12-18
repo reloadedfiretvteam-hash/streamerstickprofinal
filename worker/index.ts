@@ -50,6 +50,31 @@ app.route('/api/customer', createCustomerRoutes());
 app.route('/api/free-trial', createTrialRoutes());
 app.route('/api/blog', createBlogRoutes());
 
+app.post('/api/track-cart', async (c) => {
+  try {
+    const { getStorage } = await import('./helpers');
+    const storage = getStorage(c.env);
+    const body = await c.req.json();
+    const { email, customerName, cartItems, totalAmount } = body;
+
+    if (!email || !cartItems || cartItems.length === 0) {
+      return c.json({ error: 'Email and cart items required' }, 400);
+    }
+
+    await storage.trackAbandonedCart({
+      email,
+      customerName: customerName || null,
+      cartItems,
+      totalAmount: totalAmount || 0,
+    });
+
+    return c.json({ success: true });
+  } catch (error: any) {
+    console.error('Error tracking cart:', error);
+    return c.json({ success: true });
+  }
+});
+
 app.get('/api/stripe/config', async (c) => {
   const publishableKey = c.env.STRIPE_PUBLISHABLE_KEY;
   if (!publishableKey) {
