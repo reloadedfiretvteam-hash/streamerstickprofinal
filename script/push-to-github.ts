@@ -21,7 +21,7 @@ const EXCLUDE_DIRS = new Set([
 
 const EXCLUDE_PATTERNS = [
   /\.replit$/, /replit\.nix$/, /\.DS_Store$/, /\.env$/, /\.log$/,
-  /\.gitattributes$/, /Pasted-.*\.txt$/
+  /\.gitattributes$/, /Pasted-.*\.txt$/, /\.lock$/
 ];
 
 function getAllFiles(dir: string, baseDir: string = dir): string[] {
@@ -45,36 +45,36 @@ function getAllFiles(dir: string, baseDir: string = dir): string[] {
   return files;
 }
 
-async function pushInBatches() {
+async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function pushAllFilesInOneCommit() {
   const allFiles = getAllFiles(".");
-  console.log(`Found ${allFiles.length} files to push\n`);
+  console.log(`Found ${allFiles.length} files to push in ONE commit\n`);
 
   const { data: ref } = await octokit.git.getRef({
     owner: OWNER, repo: REPO, ref: `heads/${BRANCH}`
   });
-  let currentSha = ref.object.sha;
+  const currentSha = ref.object.sha;
   console.log(`Current commit: ${currentSha}\n`);
 
-  const BATCH_SIZE = 100;
-  const batches = [];
-  for (let i = 0; i < allFiles.length; i += BATCH_SIZE) {
-    batches.push(allFiles.slice(i, i + BATCH_SIZE));
-  }
+  const { data: commit } = await octokit.git.getCommit({
+    owner: OWNER, repo: REPO, commit_sha: currentSha
+  });
+  const baseTreeSha = commit.tree.sha;
 
-  console.log(`Pushing in ${batches.length} batches of up to ${BATCH_SIZE} files each...\n`);
-
-  for (let batchNum = 0; batchNum < batches.length; batchNum++) {
-    const batch = batches[batchNum];
-    console.log(`Batch ${batchNum + 1}/${batches.length}: ${batch.length} files`);
-
-    const { data: commit } = await octokit.git.getCommit({
-      owner: OWNER, repo: REPO, commit_sha: currentSha
-    });
-    const baseTreeSha = commit.tree.sha;
-
-    const treeItems: { path: string; mode: "100644"; type: "blob"; sha: string }[] = [];
+  console.log("Creating blobs with throttling...");
+  const treeItems: { path: string; mode: "100644"; type: "blob"; sha: string }[] = [];
+  let processed = 0;
+  let skipped = 0;
+  
+  const CONCURRENCY = 5;
+  
+  for (let i = 0; i < allFiles.length; i += CONCURRENCY) {
+    const batch = allFiles.slice(i, i + CONCURRENCY);
     
-    for (const filePath of batch) {
+    const results = await Promise.all(batch.map(async (filePath) => {
       try {
         const content = fs.readFileSync(filePath);
         const { data: blob } = await octokit.git.createBlob({
@@ -82,40 +82,51 @@ async function pushInBatches() {
           content: content.toString("base64"),
           encoding: "base64"
         });
-        treeItems.push({ path: filePath, mode: "100644", type: "blob", sha: blob.sha });
-      } catch (e: any) {
-        console.log(`  Skipped: ${filePath}`);
+        return { path: filePath, mode: "100644" as const, type: "blob" as const, sha: blob.sha };
+      } catch {
+        skipped++;
+        return null;
       }
+    }));
+    
+    for (const item of results) {
+      if (item) treeItems.push(item);
     }
-
-    if (treeItems.length === 0) continue;
-
-    const { data: newTree } = await octokit.git.createTree({
-      owner: OWNER, repo: REPO, base_tree: baseTreeSha, tree: treeItems
-    });
-
-    const { data: newCommit } = await octokit.git.createCommit({
-      owner: OWNER, repo: REPO,
-      message: `Sync batch ${batchNum + 1}/${batches.length}`,
-      tree: newTree.sha,
-      parents: [currentSha]
-    });
-
-    await octokit.git.updateRef({
-      owner: OWNER, repo: REPO,
-      ref: `heads/${BRANCH}`,
-      sha: newCommit.sha
-    });
-
-    currentSha = newCommit.sha;
-    console.log(`  ✓ Committed ${treeItems.length} files`);
+    
+    processed += batch.length;
+    if (processed % 50 === 0 || processed === allFiles.length) {
+      console.log(`  Progress: ${processed}/${allFiles.length} files`);
+    }
+    
+    await sleep(100);
   }
 
-  console.log(`\n✅ All ${allFiles.length} files pushed to ${BRANCH}!`);
-  console.log("Cloudflare deployment should trigger automatically.");
+  console.log(`\nCreating tree with ${treeItems.length} files...`);
+  const { data: newTree } = await octokit.git.createTree({
+    owner: OWNER, repo: REPO, base_tree: baseTreeSha, tree: treeItems
+  });
+
+  console.log("Creating commit...");
+  const { data: newCommit } = await octokit.git.createCommit({
+    owner: OWNER, repo: REPO,
+    message: `Full sync: All ${treeItems.length} files`,
+    tree: newTree.sha,
+    parents: [currentSha]
+  });
+
+  console.log("Updating branch...");
+  await octokit.git.updateRef({
+    owner: OWNER, repo: REPO,
+    ref: `heads/${BRANCH}`,
+    sha: newCommit.sha
+  });
+
+  console.log(`\n✅ Successfully pushed ${treeItems.length} files in ONE commit!`);
+  console.log(`Skipped: ${skipped} files`);
+  console.log(`New commit: ${newCommit.sha}`);
 }
 
-pushInBatches().catch(err => {
+pushAllFilesInOneCommit().catch(err => {
   console.error("Push failed:", err.message);
   process.exit(1);
 });
