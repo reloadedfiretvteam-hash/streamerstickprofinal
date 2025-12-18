@@ -28,7 +28,11 @@ import { fromZodError } from "zod-validation-error";
 import * as crypto from "crypto";
 import * as bcrypt from "bcryptjs";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'streamstickpro-admin-secret-2024';
+const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET;
+if (!JWT_SECRET) {
+  console.error('SECURITY ERROR: JWT_SECRET or SESSION_SECRET must be set');
+  process.exit(1);
+}
 const TOKEN_EXPIRY = 24 * 60 * 60 * 1000;
 const CUSTOMER_TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000;
 
@@ -194,13 +198,31 @@ export async function registerRoutes(
       const { items, customerEmail, customerName, isRenewal, existingUsername, countryPreference } = parseResult.data;
 
       let existingCustomer = null;
+      
+      // Check for logged-in customer via token
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        const tokenResult = verifyToken(token);
+        if (tokenResult.valid && tokenResult.payload?.role === 'customer') {
+          existingCustomer = await storage.getCustomer(tokenResult.payload.sub);
+        }
+      }
+      
+      // If renewal with username, validate and use that customer
       if (isRenewal && existingUsername) {
-        existingCustomer = await storage.getCustomerByUsername(existingUsername);
-        if (!existingCustomer) {
+        const renewalCustomer = await storage.getCustomerByUsername(existingUsername);
+        if (!renewalCustomer) {
           return res.status(404).json({ 
             error: "Username not found. Please check your username or select 'New Account' instead." 
           });
         }
+        existingCustomer = renewalCustomer;
+      }
+      
+      // If still no customer found, check by email
+      if (!existingCustomer && customerEmail) {
+        existingCustomer = await storage.getCustomerByEmail(customerEmail);
       }
 
       const productsWithQuantity: Array<{ product: any; quantity: number }> = [];
@@ -297,6 +319,92 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Error creating checkout session:", error);
       res.status(500).json({ error: "Failed to create checkout session" });
+    }
+  });
+
+  // Track abandoned cart when user enters email but doesn't complete checkout
+  app.post("/api/track-cart", async (req, res) => {
+    try {
+      const { email, customerName, cartItems, totalAmount } = req.body;
+      
+      if (!email || !cartItems || !totalAmount) {
+        return res.status(400).json({ error: "Email, cart items, and total amount are required" });
+      }
+
+      // Check if we already have an unconverted cart for this email
+      const existingCart = await storage.getAbandonedCartByEmail(email);
+      if (existingCart) {
+        // Update existing cart with new items (just return success)
+        return res.json({ success: true, message: "Cart updated" });
+      }
+
+      // Create new abandoned cart record
+      await storage.createAbandonedCart({
+        email,
+        customerName: customerName || null,
+        cartItems: JSON.stringify(cartItems),
+        totalAmount,
+      });
+
+      res.json({ success: true, message: "Cart tracked" });
+    } catch (error: any) {
+      console.error("Error tracking cart:", error);
+      res.status(500).json({ error: "Failed to track cart" });
+    }
+  });
+
+  // Admin endpoint to send recovery emails for abandoned carts
+  app.post("/api/admin/send-recovery-emails", async (req, res) => {
+    try {
+      const abandonedCarts = await storage.getAbandonedCartsToRecover();
+      let sent = 0;
+
+      for (const cart of abandonedCarts) {
+        try {
+          const { client, fromEmail } = await getUncachableResendClient();
+          const cartItemsList = JSON.parse(cart.cartItems);
+          
+          await client.emails.send({
+            from: fromEmail,
+            to: cart.email,
+            subject: "You left something behind! Complete your StreamStickPro order",
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1 style="color: #ea580c;">Don't miss out!</h1>
+                <p>Hi${cart.customerName ? ` ${cart.customerName}` : ''},</p>
+                <p>We noticed you started an order but didn't complete checkout. Your items are still waiting for you!</p>
+                
+                <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <h3>Your Cart:</h3>
+                  <p>Total: $${(cart.totalAmount / 100).toFixed(2)}</p>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="https://streamstickpro.com?section=shop" 
+                     style="background: linear-gradient(135deg, #ea580c, #dc2626); color: white; 
+                            padding: 15px 30px; border-radius: 8px; text-decoration: none; 
+                            font-weight: bold; display: inline-block;">
+                    Complete Your Order
+                  </a>
+                </div>
+                
+                <p style="color: #666;">Questions? Reply to this email or contact us at reloadedfiretvteam@gmail.com</p>
+                <p style="color: #666; font-size: 12px;">If you've already completed your order, please ignore this email.</p>
+              </div>
+            `,
+          });
+          
+          await storage.markAbandonedCartEmailSent(cart.id);
+          sent++;
+        } catch (emailError) {
+          console.error(`Failed to send recovery email to ${cart.email}:`, emailError);
+        }
+      }
+
+      res.json({ success: true, sent, total: abandonedCarts.length });
+    } catch (error: any) {
+      console.error("Error sending recovery emails:", error);
+      res.status(500).json({ error: "Failed to send recovery emails" });
     }
   });
 
@@ -1598,6 +1706,34 @@ export async function registerRoutes(
 
       const token = createToken(customer.id, 'customer');
 
+      // Send admin notification for new registration
+      try {
+        const { getUncachableResendClient } = await import('./resendClient');
+        const { client, fromEmail } = await getUncachableResendClient();
+        const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'reloadedfiretvteam@gmail.com';
+        
+        await client.emails.send({
+          from: fromEmail,
+          to: adminEmail,
+          subject: `New Customer Registration: ${username}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #10b981;">New Customer Registered!</h2>
+              <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>Username:</strong> ${username}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Full Name:</strong> ${fullName || 'Not provided'}</p>
+                <p><strong>Registered:</strong> ${new Date().toLocaleString()}</p>
+              </div>
+              <p style="color: #666;">This customer may place an order soon. Check your admin panel for updates.</p>
+            </div>
+          `,
+        });
+        console.log(`Admin notification sent for new customer: ${username}`);
+      } catch (emailError) {
+        console.error('Failed to send admin notification:', emailError);
+      }
+
       res.json({ 
         success: true, 
         token,
@@ -1811,6 +1947,353 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error('Error updating password:', error);
       res.status(500).json({ error: 'Failed to update password' });
+    }
+  });
+
+  // ===== PASSWORD RESET ROUTES =====
+
+  app.post("/api/customer/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      const customer = await storage.getCustomerByEmail(email);
+      
+      // Always return success to prevent email enumeration
+      if (!customer) {
+        return res.json({ success: true, message: 'If an account exists with this email, you will receive a password reset link.' });
+      }
+
+      // Generate secure token
+      const token = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+      // Clean up old tokens
+      await storage.deleteExpiredPasswordResetTokens();
+
+      // Create reset token
+      await storage.createPasswordResetToken({
+        customerId: customer.id,
+        token,
+        expiresAt,
+        used: false,
+      });
+
+      // Send reset email
+      const resetUrl = `https://streamstickpro.com/reset-password?token=${token}`;
+      
+      try {
+        const { getUncachableResendClient } = await import('./resendClient');
+        const { client, fromEmail } = await getUncachableResendClient();
+        
+        await client.emails.send({
+          from: fromEmail,
+          to: email,
+          subject: 'Reset Your StreamStickPro Password',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #f97316;">Password Reset Request</h2>
+              <p>Hi ${customer.fullName || customer.username},</p>
+              <p>We received a request to reset your password. Click the button below to create a new password:</p>
+              <p style="margin: 30px 0;">
+                <a href="${resetUrl}" style="background-color: #f97316; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                  Reset Password
+                </a>
+              </p>
+              <p>This link will expire in 1 hour.</p>
+              <p>If you didn't request this, you can safely ignore this email.</p>
+              <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                StreamStickPro - Premium Streaming Solutions
+              </p>
+            </div>
+          `,
+        });
+        console.log(`Password reset email sent to ${email}`);
+      } catch (emailError) {
+        console.error('Failed to send password reset email:', emailError);
+      }
+
+      res.json({ success: true, message: 'If an account exists with this email, you will receive a password reset link.' });
+    } catch (error: any) {
+      console.error('Forgot password error:', error);
+      res.status(500).json({ error: 'Failed to process request' });
+    }
+  });
+
+  app.post("/api/customer/reset-password", async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+      
+      if (!token || !newPassword) {
+        return res.status(400).json({ error: 'Token and new password are required' });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters' });
+      }
+
+      const resetToken = await storage.getPasswordResetToken(token);
+      
+      if (!resetToken) {
+        return res.status(400).json({ error: 'Invalid or expired reset link. Please request a new one.' });
+      }
+
+      const customer = await storage.getCustomer(resetToken.customerId);
+      if (!customer) {
+        return res.status(404).json({ error: 'Account not found' });
+      }
+
+      // Update password
+      const hashedPassword = await hashCustomerPassword(newPassword);
+      await storage.updateCustomer(customer.id, { password: hashedPassword });
+
+      // Mark token as used
+      await storage.markPasswordResetTokenUsed(resetToken.id);
+
+      res.json({ success: true, message: 'Password has been reset successfully. You can now log in.' });
+    } catch (error: any) {
+      console.error('Reset password error:', error);
+      res.status(500).json({ error: 'Failed to reset password' });
+    }
+  });
+
+  app.get("/api/customer/verify-reset-token", async (req, res) => {
+    try {
+      const token = req.query.token as string;
+      
+      if (!token) {
+        return res.status(400).json({ valid: false, error: 'Token is required' });
+      }
+
+      const resetToken = await storage.getPasswordResetToken(token);
+      
+      if (!resetToken) {
+        return res.status(400).json({ valid: false, error: 'Invalid or expired reset link' });
+      }
+
+      res.json({ valid: true });
+    } catch (error: any) {
+      console.error('Verify reset token error:', error);
+      res.status(500).json({ valid: false, error: 'Failed to verify token' });
+    }
+  });
+
+  // ===== ADMIN CUSTOMER MANAGEMENT ROUTES =====
+
+  app.get("/api/admin/customers", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      
+      const token = authHeader.substring(7);
+      const result = verifyToken(token);
+      if (!result.valid || result.payload?.role !== 'admin') {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const search = req.query.search as string;
+      let customers;
+      
+      if (search) {
+        customers = await storage.searchCustomers(search);
+      } else {
+        customers = await storage.getAllCustomers();
+      }
+
+      // Remove passwords from response
+      const sanitizedCustomers = customers.map(c => ({
+        id: c.id,
+        username: c.username,
+        email: c.email,
+        fullName: c.fullName,
+        phone: c.phone,
+        status: c.status,
+        notes: c.notes,
+        totalOrders: c.totalOrders,
+        lastOrderAt: c.lastOrderAt,
+        createdAt: c.createdAt,
+      }));
+
+      res.json({ data: sanitizedCustomers });
+    } catch (error: any) {
+      console.error('Error fetching customers:', error);
+      res.status(500).json({ error: 'Failed to fetch customers' });
+    }
+  });
+
+  app.get("/api/admin/customers/:id", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      
+      const token = authHeader.substring(7);
+      const result = verifyToken(token);
+      if (!result.valid || result.payload?.role !== 'admin') {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const customer = await storage.getCustomer(req.params.id);
+      if (!customer) {
+        return res.status(404).json({ error: 'Customer not found' });
+      }
+
+      // Get customer's orders
+      const customerOrders = await storage.getCustomerOrders(customer.id);
+      const ordersByEmail = await storage.getOrdersByEmail(customer.email);
+      
+      // Merge and deduplicate orders
+      const allOrderIds = new Set<string>();
+      const allOrders: any[] = [];
+      
+      for (const order of [...customerOrders, ...ordersByEmail]) {
+        if (!allOrderIds.has(order.id)) {
+          allOrderIds.add(order.id);
+          allOrders.push(order);
+        }
+      }
+      
+      allOrders.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
+
+      res.json({
+        data: {
+          id: customer.id,
+          username: customer.username,
+          email: customer.email,
+          fullName: customer.fullName,
+          phone: customer.phone,
+          status: customer.status,
+          notes: customer.notes,
+          totalOrders: customer.totalOrders,
+          lastOrderAt: customer.lastOrderAt,
+          createdAt: customer.createdAt,
+        },
+        orders: allOrders,
+      });
+    } catch (error: any) {
+      console.error('Error fetching customer details:', error);
+      res.status(500).json({ error: 'Failed to fetch customer details' });
+    }
+  });
+
+  app.put("/api/admin/customers/:id", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      
+      const token = authHeader.substring(7);
+      const result = verifyToken(token);
+      if (!result.valid || result.payload?.role !== 'admin') {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const { status, notes, fullName, email, phone } = req.body;
+
+      const updated = await storage.updateCustomer(req.params.id, {
+        status: status || undefined,
+        notes: notes !== undefined ? notes : undefined,
+        fullName: fullName !== undefined ? fullName : undefined,
+        email: email !== undefined ? email : undefined,
+        phone: phone !== undefined ? phone : undefined,
+      });
+
+      if (!updated) {
+        return res.status(404).json({ error: 'Customer not found' });
+      }
+
+      res.json({
+        success: true,
+        data: {
+          id: updated.id,
+          username: updated.username,
+          email: updated.email,
+          fullName: updated.fullName,
+          phone: updated.phone,
+          status: updated.status,
+          notes: updated.notes,
+        }
+      });
+    } catch (error: any) {
+      console.error('Error updating customer:', error);
+      res.status(500).json({ error: 'Failed to update customer' });
+    }
+  });
+
+  app.post("/api/admin/customers/:id/reset-password", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      
+      const token = authHeader.substring(7);
+      const result = verifyToken(token);
+      if (!result.valid || result.payload?.role !== 'admin') {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const customer = await storage.getCustomer(req.params.id);
+      if (!customer) {
+        return res.status(404).json({ error: 'Customer not found' });
+      }
+
+      // Generate a temporary password
+      const tempPassword = crypto.randomBytes(4).toString('hex');
+      const hashedPassword = await hashCustomerPassword(tempPassword);
+      
+      await storage.updateCustomer(customer.id, { password: hashedPassword });
+
+      // Send email with new password
+      try {
+        const { getUncachableResendClient } = await import('./resendClient');
+        const { client, fromEmail } = await getUncachableResendClient();
+        
+        await client.emails.send({
+          from: fromEmail,
+          to: customer.email,
+          subject: 'Your StreamStickPro Password Has Been Reset',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #f97316;">Password Reset</h2>
+              <p>Hi ${customer.fullName || customer.username},</p>
+              <p>Your password has been reset by our support team. Here are your new login details:</p>
+              <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>Username:</strong> ${customer.username}</p>
+                <p><strong>Temporary Password:</strong> ${tempPassword}</p>
+              </div>
+              <p>Please log in and change your password immediately.</p>
+              <p style="margin: 30px 0;">
+                <a href="https://streamstickpro.com/customer-login" style="background-color: #f97316; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                  Log In Now
+                </a>
+              </p>
+              <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                StreamStickPro - Premium Streaming Solutions
+              </p>
+            </div>
+          `,
+        });
+        console.log(`Password reset email sent to ${customer.email}`);
+      } catch (emailError) {
+        console.error('Failed to send password reset email:', emailError);
+      }
+
+      res.json({ success: true, message: 'Password reset email sent to customer' });
+    } catch (error: any) {
+      console.error('Error resetting customer password:', error);
+      res.status(500).json({ error: 'Failed to reset password' });
     }
   });
 

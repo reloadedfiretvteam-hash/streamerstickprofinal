@@ -12,7 +12,16 @@ export function createTrialRoutes() {
   app.post('/', async (c) => {
     try {
       const body = await c.req.json();
-      const { email, name } = body;
+      const { 
+        email, 
+        name, 
+        phone, 
+        address, 
+        message, 
+        countryPreference, 
+        isExistingUser, 
+        existingUsername 
+      } = body;
 
       if (!email || !name) {
         return c.json({ error: "Email and name are required" }, 400);
@@ -20,6 +29,10 @@ export function createTrialRoutes() {
 
       if (!email.includes("@")) {
         return c.json({ error: "Please enter a valid email address" }, 400);
+      }
+
+      if (isExistingUser && !existingUsername) {
+        return c.json({ error: "Please enter your existing username" }, 400);
       }
 
       const resend = new Resend(c.env.RESEND_API_KEY);
@@ -53,10 +66,11 @@ export function createTrialRoutes() {
       }
       
       const trialCredentials = {
-        username: username,
-        password: password.substring(0, 10),
+        username: isExistingUser ? existingUsername : username,
+        password: isExistingUser ? '(using existing password)' : password.substring(0, 10),
       };
 
+      // Customer email
       await resend.emails.send({
         from: fromEmail,
         to: email,
@@ -67,13 +81,13 @@ export function createTrialRoutes() {
             
             <p>Hi ${name},</p>
             
-            <p>Thank you for trying StreamStickPro! Here are your <strong>36-hour free trial</strong> credentials:</p>
+            <p>Thank you for trying StreamStickPro! ${isExistingUser ? 'Your existing account has been extended for a 36-hour trial.' : 'Here are your <strong>36-hour free trial</strong> credentials:'}</p>
             
             <div style="background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%); padding: 25px; border-radius: 12px; margin: 20px 0; color: white;">
               <h2 style="margin-top: 0; color: white;">Your Trial Credentials</h2>
               <p style="font-size: 16px;"><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #fef08a;">${IPTV_PORTAL_URL}</a></p>
               <p style="font-size: 18px;"><strong>Username:</strong> ${trialCredentials.username}</p>
-              <p style="font-size: 18px;"><strong>Password:</strong> ${trialCredentials.password}</p>
+              ${!isExistingUser ? `<p style="font-size: 18px;"><strong>Password:</strong> ${trialCredentials.password}</p>` : '<p style="font-size: 14px;">(Use your existing password)</p>'}
             </div>
             
             <div style="background: #f3e8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -100,6 +114,7 @@ export function createTrialRoutes() {
         `,
       });
 
+      // Owner notification email with all details
       await resend.emails.send({
         from: fromEmail,
         to: OWNER_EMAIL,
@@ -112,13 +127,31 @@ export function createTrialRoutes() {
               <h2 style="margin-top: 0; color: #7c3aed;">Customer Details</h2>
               <p><strong>Name:</strong> ${name}</p>
               <p><strong>Email:</strong> ${email}</p>
+              ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
+              ${address ? `<p><strong>Address:</strong> ${address}</p>` : ''}
               <p><strong>Signed up:</strong> ${new Date().toLocaleString()}</p>
+              <p><strong>Account Type:</strong> ${isExistingUser ? 'Existing User' : 'New User'}</p>
+              ${isExistingUser && existingUsername ? `<p><strong>Existing Username:</strong> ${existingUsername}</p>` : ''}
             </div>
+
+            ${countryPreference ? `
+            <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h2 style="margin-top: 0; color: #0369a1;">Channel Preferences</h2>
+              <p><strong>Countries/Regions:</strong> ${countryPreference}</p>
+            </div>
+            ` : ''}
+
+            ${message ? `
+            <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h2 style="margin-top: 0; color: #b45309;">Customer Message</h2>
+              <p>${message}</p>
+            </div>
+            ` : ''}
             
             <div style="background: #e0e7ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h2 style="margin-top: 0; color: #4338ca;">Trial Credentials Sent</h2>
               <p><strong>Username:</strong> ${trialCredentials.username}</p>
-              <p><strong>Password:</strong> ${trialCredentials.password}</p>
+              ${!isExistingUser ? `<p><strong>Password:</strong> ${trialCredentials.password}</p>` : '<p>(Using existing password)</p>'}
               <p><strong>Expires:</strong> 36 hours from signup</p>
             </div>
             
