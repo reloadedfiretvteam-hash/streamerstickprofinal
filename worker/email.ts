@@ -73,42 +73,48 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
   let productInstructions = '';
   if (hasIPTV) {
     productInstructions = `
-      <div style="background: #e8f4fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <h2 style="margin-top: 0; color: #0066cc;">IPTV Setup Instructions</h2>
-        <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}">${IPTV_PORTAL_URL}</a></p>
-        <p><strong>Username:</strong> ${credentials.username}</p>
-        <p><strong>Password:</strong> ${credentials.password}</p>
-        
-        <h3 style="color: #0066cc;">How to Setup:</h3>
-        <ol>
-          <li>Download IPTV Smarters or TiviMate app on your device</li>
-          <li>Enter the portal URL: ${IPTV_PORTAL_URL}</li>
-          <li>Enter your username and password</li>
-          <li>Start streaming!</li>
-        </ol>
-        
-        <p><strong>Watch our setup video:</strong> <a href="${SETUP_VIDEO_URL}">${SETUP_VIDEO_URL}</a></p>
+      <div style="background: #f9fafb; border: 2px solid #f97316; border-radius: 8px; padding: 20px; margin: 20px 0;">
+        <h2 style="margin-top: 0; color: #f97316;">Your Login Credentials</h2>
+        <div style="margin: 15px 0;">
+          <p><strong>Username:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${credentials.username}</span></p>
+          <p><strong>Password:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${credentials.password}</span></p>
+        </div>
+      </div>
+      
+      <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0 0 10px 0;"><strong>Service Portal URL:</strong></p>
+        <p style="margin: 0;"><a href="${IPTV_PORTAL_URL}" style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 18px;">${IPTV_PORTAL_URL}</a></p>
+        <p style="margin: 10px 0 0 0; font-size: 14px;">Use the credentials above to log in to your service portal.</p>
+      </div>
+
+      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0 0 10px 0;"><strong>📺 Setup Tutorial Video:</strong></p>
+        <p style="margin: 0;"><a href="${SETUP_VIDEO_URL}" style="color: #d97706; text-decoration: none; font-weight: bold;" target="_blank">Watch YouTube Setup Tutorial →</a></p>
+        <p style="margin: 10px 0 0 0; font-size: 14px;">Follow along with our step-by-step video guide to get started.</p>
       </div>
     `;
   }
   
   if (hasFireStick) {
-    productInstructions += `
-      <div style="background: #fff7ed; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <h2 style="margin-top: 0; color: #ea580c;">Fire Stick Setup Instructions</h2>
-        <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}">${IPTV_PORTAL_URL}</a></p>
-        <p><strong>Username:</strong> ${credentials.username}</p>
-        <p><strong>Password:</strong> ${credentials.password}</p>
-        
-        <h3 style="color: #ea580c;">How to Setup Your Device:</h3>
-        <ol>
-          <li>Your Fire Stick will arrive pre-configured</li>
-          <li>Simply plug it into your TV</li>
-          <li>Connect to your WiFi</li>
-          <li>Open the IPTV app and enter your credentials</li>
-        </ol>
-        
-        <p><strong>Watch our setup video:</strong> <a href="${SETUP_VIDEO_URL}">${SETUP_VIDEO_URL}</a></p>
+    productInstructions = `
+      <div style="background: #f9fafb; border: 2px solid #f97316; border-radius: 8px; padding: 20px; margin: 20px 0;">
+        <h2 style="margin-top: 0; color: #f97316;">Your Login Credentials</h2>
+        <div style="margin: 15px 0;">
+          <p><strong>Username:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${credentials.username}</span></p>
+          <p><strong>Password:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${credentials.password}</span></p>
+        </div>
+      </div>
+      
+      <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0 0 10px 0;"><strong>Service Portal URL:</strong></p>
+        <p style="margin: 0;"><a href="${IPTV_PORTAL_URL}" style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 18px;">${IPTV_PORTAL_URL}</a></p>
+        <p style="margin: 10px 0 0 0; font-size: 14px;">Use the credentials above to log in to your service portal.</p>
+      </div>
+
+      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0 0 10px 0;"><strong>📺 Setup Tutorial Video:</strong></p>
+        <p style="margin: 0;"><a href="${SETUP_VIDEO_URL}" style="color: #d97706; text-decoration: none; font-weight: bold;" target="_blank">Watch YouTube Setup Tutorial →</a></p>
+        <p style="margin: 10px 0 0 0; font-size: 14px;">Follow along with our step-by-step video guide to get started.</p>
       </div>
     `;
   }

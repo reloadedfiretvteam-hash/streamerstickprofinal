@@ -1,32 +1,15 @@
-<<<<<<< HEAD
-﻿import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-=======
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
 interface CredentialsEmailPayload {
   customerEmail: string;
   customerName: string;
-<<<<<<< HEAD
-  orderCode: string;
-  username: string;
-  password: string;
-  productName: string;
-  totalAmount: number;
-  setupVideoUrl: string;
-  serviceUrl: string;
-=======
   username: string;
   password: string;
   serviceUrl: string;
@@ -36,8 +19,13 @@ interface CredentialsEmailPayload {
   youtubeTutorialUrl?: string;
 }
 
+const SERVICE_URL = 'http://ky-tv.cc';
+const YOUTUBE_TUTORIAL_URL = 'https://www.youtube.com/watch?v=fDjDH_WAvYI';
+const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
+
 function generateCredentialsEmail(payload: CredentialsEmailPayload): string {
-  const youtubeLink = payload.youtubeTutorialUrl || 'https://www.youtube.com/watch?v=YOUR_TUTORIAL_VIDEO_ID';
+  const youtubeLink = payload.youtubeTutorialUrl || YOUTUBE_TUTORIAL_URL;
+  const serviceUrl = payload.serviceUrl || SERVICE_URL;
   
   return `<!DOCTYPE html>
 <html>
@@ -182,7 +170,7 @@ function generateCredentialsEmail(payload: CredentialsEmailPayload): string {
 
       <div class="service-url-box">
         <p style="margin: 0 0 10px 0;"><strong>Service Portal URL:</strong></p>
-        <p style="margin: 0;"><a href="${payload.serviceUrl}" target="_blank">${payload.serviceUrl}</a></p>
+        <p style="margin: 0;"><a href="${serviceUrl}" target="_blank">${serviceUrl}</a></p>
         <p style="margin: 10px 0 0 0; font-size: 14px;">Use the credentials above to log in to your service portal.</p>
       </div>
 
@@ -202,7 +190,7 @@ function generateCredentialsEmail(payload: CredentialsEmailPayload): string {
       </div>
 
       <div style="margin-top: 30px; text-align: center;">
-        <a href="${payload.serviceUrl}" class="button">Access Service Portal</a>
+        <a href="${serviceUrl}" class="button">Access Service Portal</a>
         <a href="${youtubeLink}" class="button" style="background: #3b82f6;">Watch Tutorial</a>
       </div>
     </div>
@@ -214,7 +202,6 @@ function generateCredentialsEmail(payload: CredentialsEmailPayload): string {
   </div>
 </body>
 </html>`;
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 }
 
 Deno.serve(async (req: Request) => {
@@ -223,49 +210,11 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-<<<<<<< HEAD
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    if (!resendApiKey) {
-      return new Response(JSON.stringify({ success: false, error: "RESEND_API_KEY not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
-    const payload: CredentialsEmailPayload = await req.json();
-    const defaultFromEmail = Deno.env.get("FROM_EMAIL") || "noreply@streamstickpro.com";
-
-    const html = '<!DOCTYPE html><html><body style="font-family:Arial,sans-serif"><div style="max-width:600px;margin:0 auto;padding:20px"><div style="background:linear-gradient(135deg,#3b82f6 0%,#1e40af 100%);color:white;padding:30px;text-align:center;border-radius:10px 10px 0 0"><h1> Stream Stick Pro</h1><h2>Your Login Credentials</h2></div><div style="background:#f9fafb;padding:30px;border:1px solid #e5e7eb;border-radius:0 0 10px 10px"><p>Hi <strong>'+payload.customerName+'</strong>,</p><p>Your account is ready! Here are your login credentials:</p><div style="background:white;border:3px solid #3b82f6;padding:20px;border-radius:10px;margin:20px 0"><h3 style="color:#1e40af"> Account Login</h3><p><strong>Username:</strong> <span style="font-family:monospace;color:#3b82f6;font-size:18px">'+payload.username+'</span></p><p><strong>Password:</strong> <span style="font-family:monospace;color:#3b82f6;font-size:18px">'+payload.password+'</span></p>'+(payload.serviceUrl ? '<p><strong>Service URL:</strong> '+payload.serviceUrl+'</p>' : '')+'</div><p><strong> Order:</strong> '+payload.orderCode+' | '+payload.productName+' | $'+payload.totalAmount.toFixed(2)+'</p>'+(payload.setupVideoUrl ? '<div style="background:#fee2e2;border:2px solid #ef4444;padding:20px;border-radius:10px;margin:20px 0;text-align:center"><h3 style="color:#991b1b"> Watch Setup Tutorial</h3><p>Watch our step-by-step guide:</p><a href="'+payload.setupVideoUrl+'" style="display:inline-block;padding:15px 30px;background:#ef4444;color:white;text-decoration:none;border-radius:8px;font-weight:bold"> Watch on YouTube</a></div>' : '')+'<p>Questions? Reply to this email.</p></div></div></body></html>';
-
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": 'Bearer '+resendApiKey },
-      body: JSON.stringify({ from: defaultFromEmail, to: [payload.customerEmail], subject: ' Your Login Credentials - Order '+payload.orderCode, html: html }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      return new Response(JSON.stringify({ success: false, error: data.message }), { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
-    const adminEmail = Deno.env.get("ADMIN_EMAIL") || "reloadedfiretvteam@gmail.com";
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": 'Bearer '+resendApiKey },
-      body: JSON.stringify({ from: defaultFromEmail, to: [adminEmail], subject: ' Credentials Sent - '+payload.orderCode, html: '<h2>Credentials Sent</h2><p>Order: '+payload.orderCode+'</p><p>Customer: '+payload.customerName+' ('+payload.customerEmail+')</p><p>Username: '+payload.username+'</p><p>Password: '+payload.password+'</p>' }),
-    }).catch(e => console.error("Admin email failed:", e));
-
-    return new Response(JSON.stringify({ success: true, emailId: data.id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ success: false, error: msg }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-  }
-});
-=======
     const payload: CredentialsEmailPayload = await req.json();
     console.log(`Sending credentials email to: ${payload.customerEmail}`);
 
     const emailHtml = generateCredentialsEmail(payload);
     const emailSubject = `Your Stream Stick Pro Service Credentials - Order ${payload.orderNumber}`;
-
-    console.log('Sending credentials email to:', payload.customerEmail);
 
     // Initialize Resend with API key from environment
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
@@ -276,10 +225,11 @@ Deno.serve(async (req: Request) => {
     }
 
     const resend = new Resend(resendApiKey);
+    const fromEmail = Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev";
 
     // Send credentials email to customer
     const { data, error } = await resend.emails.send({
-      from: "Stream Stick Pro <onboarding@resend.dev>", // Change to your verified domain
+      from: `Stream Stick Pro <${fromEmail}>`,
       to: payload.customerEmail,
       subject: emailSubject,
       html: emailHtml,
@@ -290,7 +240,39 @@ Deno.serve(async (req: Request) => {
       throw new Error(`Failed to send email: ${error.message}`);
     }
 
-    console.log("Credentials email sent successfully:", data);
+    console.log("Credentials email sent successfully:", data?.id);
+
+    // Send owner notification email with credentials
+    try {
+      await resend.emails.send({
+        from: `Stream Stick Pro <${fromEmail}>`,
+        to: OWNER_EMAIL,
+        subject: `🔑 Credentials Sent - Order ${payload.orderNumber}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #f97316;">Credentials Sent to Customer</h2>
+            <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <p><strong>Order Number:</strong> ${payload.orderNumber}</p>
+              <p><strong>Customer:</strong> ${payload.customerName} (${payload.customerEmail})</p>
+              <p><strong>Product:</strong> ${payload.productName}</p>
+              <p><strong>Total:</strong> $${payload.totalAmount.toFixed(2)}</p>
+            </div>
+            <div style="background: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+              <h3 style="margin-top: 0; color: #15803d;">Customer Credentials</h3>
+              <p><strong>Username:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${payload.username}</code></p>
+              <p><strong>Password:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${payload.password}</code></p>
+              <p><strong>Service URL:</strong> <a href="${payload.serviceUrl || SERVICE_URL}">${payload.serviceUrl || SERVICE_URL}</a></p>
+              <p><strong>Setup Video:</strong> <a href="${payload.youtubeTutorialUrl || YOUTUBE_TUTORIAL_URL}">Watch Tutorial</a></p>
+            </div>
+            <p style="color: #6b7280; font-size: 12px;">Use these credentials to validate the customer's subscription in your IPTV panel.</p>
+          </div>
+        `,
+      });
+      console.log("Owner notification email sent successfully");
+    } catch (ownerError) {
+      console.error("Failed to send owner notification:", ownerError);
+      // Don't fail the whole request if owner email fails
+    }
 
     return new Response(
       JSON.stringify({
@@ -317,11 +299,3 @@ Deno.serve(async (req: Request) => {
     );
   }
 });
-
-
-
-
-
-
-
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7

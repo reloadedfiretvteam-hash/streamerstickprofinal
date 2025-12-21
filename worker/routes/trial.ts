@@ -39,8 +39,8 @@ export function createTrialRoutes() {
       const fromEmail = c.env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
 
       const letters = 'abcdefghkmnpqrstuvwxyz';
+      const upperLetters = 'ABCDEFGHJKMNPQRSTUVWXYZ';
       const numbers = '23456789';
-      const symbols = '@#$%&*!';
       const timestamp = Date.now().toString(36);
       const seed = email.replace(/[^a-zA-Z0-9]/g, '') + timestamp;
       
@@ -57,12 +57,12 @@ export function createTrialRoutes() {
       username = username.substring(0, 10);
       
       let password = '';
-      password += generateChar(0, letters.toUpperCase());
+      password += generateChar(0, upperLetters);
       password += generateChar(1, letters);
       password += generateChar(2, numbers);
-      password += generateChar(3, symbols);
+      password += generateChar(3, upperLetters);
       for (let i = 4; password.length < 10; i++) {
-        password += generateChar(i + 5, letters + letters.toUpperCase() + numbers + symbols);
+        password += generateChar(i + 5, letters + upperLetters + numbers);
       }
       
       const trialCredentials = {
