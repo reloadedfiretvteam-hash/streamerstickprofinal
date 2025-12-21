@@ -19,6 +19,80 @@ export function createAdminRoutes() {
     }
   });
 
+  app.get('/orders/stats', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const allOrders = await storage.getAllOrders();
+      
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+      
+      const paidOrders = allOrders.filter(o => o.status === 'paid');
+      const pendingOrders = allOrders.filter(o => o.status === 'pending');
+      
+      const ordersToday = allOrders.filter(o => o.createdAt && new Date(o.createdAt) >= today);
+      const ordersThisWeek = allOrders.filter(o => o.createdAt && new Date(o.createdAt) >= weekAgo);
+      const ordersThisMonth = allOrders.filter(o => o.createdAt && new Date(o.createdAt) >= monthAgo);
+      
+      const revenueToday = ordersToday
+        .filter(o => o.status === 'paid')
+        .reduce((sum, o) => sum + (o.amount || 0), 0);
+      const revenueThisWeek = ordersThisWeek
+        .filter(o => o.status === 'paid')
+        .reduce((sum, o) => sum + (o.amount || 0), 0);
+      const revenueThisMonth = ordersThisMonth
+        .filter(o => o.status === 'paid')
+        .reduce((sum, o) => sum + (o.amount || 0), 0);
+      const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+      
+      const firestickOrders = allOrders.filter(o => 
+        o.realProductId?.includes('firestick') || o.realProductName?.toLowerCase().includes('fire stick')
+      );
+      const pendingFulfillments = firestickOrders.filter(o => 
+        o.status === 'paid' && (!o.fulfillmentStatus || o.fulfillmentStatus === 'pending')
+      );
+      
+      const recentOrders = allOrders
+        .filter(o => o.createdAt)
+        .sort((a, b) => {
+          const dateA = new Date(a.createdAt!).getTime();
+          const dateB = new Date(b.createdAt!).getTime();
+          return dateB - dateA;
+        })
+        .slice(0, 10)
+        .map(o => ({
+          id: o.id,
+          customerEmail: o.customerEmail,
+          customerName: o.customerName,
+          productName: o.realProductName,
+          amount: o.amount,
+          status: o.status,
+          fulfillmentStatus: o.fulfillmentStatus,
+          createdAt: o.createdAt,
+        }));
+      
+      return c.json({
+        data: {
+          totalOrders: allOrders.length,
+          ordersToday: ordersToday.length,
+          ordersThisWeek: ordersThisWeek.length,
+          ordersThisMonth: ordersThisMonth.length,
+          totalRevenue,
+          revenueToday,
+          revenueThisWeek,
+          revenueThisMonth,
+          pendingFulfillments: pendingFulfillments.length,
+          recentOrders,
+        }
+      });
+    } catch (error: any) {
+      console.error("Error fetching order stats:", error);
+      return c.json({ error: "Failed to fetch order statistics" }, 500);
+    }
+  });
+
   app.put('/orders/:id', async (c) => {
     try {
       const storage = getStorage(c.env);
