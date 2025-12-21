@@ -6,7 +6,6 @@ import About from './components/About';
 import WhyChooseUs from './components/WhyChooseUs';
 import Shop from './components/Shop';
 import MediaCarousel from './components/MediaCarousel';
-// IPTVPreviewVideo removed - duplicate "See What You Get" section
 // The video is now displayed only in the WhatYouGetVideo component
 import WhatYouGetVideo from './components/WhatYouGetVideo';
 import WhatIsIPTV from './components/WhatIsIPTV';
@@ -179,8 +178,6 @@ function App() {
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Note: Secure domain and concierge domain routing is now handled by AppRouter
-  // This App component is only for the main homepage
 
   return (
     <ErrorBoundary>

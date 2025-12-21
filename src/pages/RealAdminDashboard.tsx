@@ -10,8 +10,6 @@ import RealBlogManager from '../components/custom-admin/RealBlogManager';
 import FrontendVisualEditor from '../components/custom-admin/FrontendVisualEditor';
 import CompleteSEOManager from '../components/custom-admin/CompleteSEOManager';
 import RankMathProSEOManager from '../components/custom-admin/RankMathProSEOManager';
-// StripeProductManager removed - we use real_products table with cloaked_name column, not separate stripe_products table
-// import StripeProductManager from '../components/custom-admin/StripeProductManager';
 import RealAIVideoGenerator from '../components/custom-admin/RealAIVideoGenerator';
 import AmazonFireStickAutomation from '../components/custom-admin/AmazonFireStickAutomation';
 import SuperAICopilot from '../components/custom-admin/SuperAICopilot';
@@ -72,7 +70,6 @@ export default function RealAdminDashboard() {
         return <FrontendVisualEditor />;
       case 'products':
         return <RealProductManager />;
-      // 'stripe-products' case removed - using real_products with cloaked_name instead
       case 'ai-video-generator':
         return <RealAIVideoGenerator />;
       case 'amazon-automation':

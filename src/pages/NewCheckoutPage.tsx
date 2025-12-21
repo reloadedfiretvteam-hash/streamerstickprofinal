@@ -38,8 +38,6 @@ export default function NewCheckoutPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
-  const [creatingPaymentIntent, setCreatingPaymentIntent] = useState(false);
 
   useEffect(() => {
     loadCart();
@@ -677,7 +675,7 @@ export default function NewCheckoutPage() {
                                 throw new Error('No client secret returned from server');
                               }
 
-                              setStripeClientSecret(data.clientSecret);
+                              setClientSecret(data.clientSecret);
                             } catch (error: unknown) {
                               console.error('Error creating payment intent:', error);
                               const errorMessage = error instanceof Error ? error.message : 'Failed to initialize payment. Please try again.';
@@ -695,7 +693,7 @@ export default function NewCheckoutPage() {
                     ) : (
                       <StripePaymentForm
                         amount={calculateTotal()}
-                        clientSecret={stripeClientSecret}
+                        clientSecret={clientSecret}
                         onSuccess={async (paymentIntentId) => {
                           try {
                             const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
