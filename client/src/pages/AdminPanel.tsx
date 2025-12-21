@@ -367,6 +367,19 @@ export default function AdminPanel() {
   const [pushing, setPushing] = useState(false);
   const [pushResult, setPushResult] = useState<{ success: boolean; message: string; commitUrl?: string; filesCount?: number } | null>(null);
 
+  const [envStatus, setEnvStatus] = useState<{
+    hasStripeKey?: boolean;
+    hasWebhookSecret?: boolean;
+    hasResendKey?: boolean;
+    hasFromEmail?: boolean;
+    hasSupabaseKey?: boolean;
+    hasAdminUsername?: boolean;
+    hasAdminPassword?: boolean;
+    nodeEnv?: string;
+    fromEmail?: string;
+    supabaseUrl?: string;
+  } | null>(null);
+
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -467,6 +480,29 @@ export default function AdminPanel() {
     loadFulfillmentOrders();
     loadCustomers();
     loadBlogPosts();
+    
+    // Load environment status
+    const loadEnvStatus = async () => {
+      try {
+        const response = await authFetch('/api/debug');
+        const data = await response.json();
+        setEnvStatus({
+          hasStripeKey: !!data.stripe?.hasSecretKey,
+          hasWebhookSecret: !!data.stripe?.hasWebhookSecret,
+          hasResendKey: !!data.email?.hasResendKey,
+          hasFromEmail: !!data.email?.hasFromEmail,
+          hasSupabaseKey: !!data.supabase?.hasServiceKey,
+          hasAdminUsername: !!data.auth?.hasAdminUsername,
+          hasAdminPassword: !!data.auth?.hasAdminPassword,
+          nodeEnv: data.nodeEnv,
+          fromEmail: data.email?.fromEmail,
+          supabaseUrl: data.supabase?.url
+        });
+      } catch (error) {
+        console.error('Failed to load environment status:', error);
+      }
+    };
+    loadEnvStatus();
     
     const interval = setInterval(() => {
       loadVisitorStats();
@@ -1520,7 +1556,12 @@ export default function AdminPanel() {
           >
             <Search className="w-4 h-4 mr-3" /> SEO Toolkit
           </Button>
-          <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5">
+          <Button 
+            variant={activeSection === "settings" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => setActiveSection("settings")}
+            data-testid="nav-settings"
+          >
             <Settings className="w-4 h-4 mr-3" /> Settings
           </Button>
         </nav>
@@ -3660,6 +3701,205 @@ export default function AdminPanel() {
                 <p className="text-gray-400">Rank Math Premium-style SEO management</p>
               </div>
               <SeoToolkit authFetch={authFetch} showToast={showToast} />
+            </div>
+          )}
+
+          {activeSection === "settings" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold flex items-center gap-3">
+                  <Settings className="w-8 h-8 text-blue-500" />
+                  System Settings
+                </h2>
+                <p className="text-gray-400">Manage system configuration and environment variables</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Environment Variables Status */}
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Lock className="w-5 h-5 text-blue-400" />
+                      Environment Variables Status
+                    </CardTitle>
+                    <CardDescription className="text-gray-400">
+                      These are configured in Cloudflare Workers/Pages dashboard
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                        <div>
+                          <p className="text-white font-medium">Stripe Secret Key</p>
+                          <p className="text-xs text-gray-400">STRIPE_SECRET_KEY</p>
+                        </div>
+                        <Badge className={envStatus?.hasStripeKey ? 'bg-green-500' : 'bg-red-500'}>
+                          {envStatus?.hasStripeKey ? 'Configured' : 'Missing'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                        <div>
+                          <p className="text-white font-medium">Stripe Webhook Secret</p>
+                          <p className="text-xs text-gray-400">STRIPE_WEBHOOK_SECRET</p>
+                        </div>
+                        <Badge className={envStatus?.hasWebhookSecret ? 'bg-green-500' : 'bg-red-500'}>
+                          {envStatus?.hasWebhookSecret ? 'Configured' : 'Missing'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                        <div>
+                          <p className="text-white font-medium">Resend API Key</p>
+                          <p className="text-xs text-gray-400">RESEND_API_KEY</p>
+                        </div>
+                        <Badge className={envStatus?.hasResendKey ? 'bg-green-500' : 'bg-red-500'}>
+                          {envStatus?.hasResendKey ? 'Configured' : 'Missing'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                        <div>
+                          <p className="text-white font-medium">Resend From Email</p>
+                          <p className="text-xs text-gray-400">RESEND_FROM_EMAIL</p>
+                        </div>
+                        <Badge className={envStatus?.hasFromEmail ? 'bg-green-500' : 'bg-red-500'}>
+                          {envStatus?.hasFromEmail ? 'Configured' : 'Missing'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                        <div>
+                          <p className="text-white font-medium">Supabase Service Key</p>
+                          <p className="text-xs text-gray-400">SUPABASE_SERVICE_KEY</p>
+                        </div>
+                        <Badge className={envStatus?.hasSupabaseKey ? 'bg-green-500' : 'bg-yellow-500'}>
+                          {envStatus?.hasSupabaseKey ? 'Configured' : 'Using Anon Key'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                        <div>
+                          <p className="text-white font-medium">Admin Username</p>
+                          <p className="text-xs text-gray-400">ADMIN_USERNAME</p>
+                        </div>
+                        <Badge className={envStatus?.hasAdminUsername ? 'bg-green-500' : 'bg-yellow-500'}>
+                          {envStatus?.hasAdminUsername ? 'Configured' : 'Using Default'}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t border-gray-700">
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
+                        onClick={() => window.open('https://dash.cloudflare.com/', '_blank')}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Open Cloudflare Dashboard
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* System Information */}
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-green-400" />
+                      System Information
+                    </CardTitle>
+                    <CardDescription className="text-gray-400">
+                      Current system status and configuration
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                        <span className="text-gray-300">Environment</span>
+                        <Badge className={envStatus?.nodeEnv === 'production' ? 'bg-green-500' : 'bg-yellow-500'}>
+                          {envStatus?.nodeEnv || 'Not Set'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                        <span className="text-gray-300">From Email</span>
+                        <span className="text-white font-mono text-sm">{envStatus?.fromEmail || 'Not Set'}</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                        <span className="text-gray-300">Supabase URL</span>
+                        <span className="text-white font-mono text-xs truncate max-w-[200px]" title={envStatus?.supabaseUrl}>
+                          {envStatus?.supabaseUrl || 'Not Set'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t border-gray-700">
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
+                        onClick={async () => {
+                          try {
+                            const response = await authFetch('/api/debug');
+                            const data = await response.json();
+                            setEnvStatus({
+                              hasStripeKey: !!data.stripe?.hasSecretKey,
+                              hasWebhookSecret: !!data.stripe?.hasWebhookSecret,
+                              hasResendKey: !!data.email?.hasResendKey,
+                              hasFromEmail: !!data.email?.hasFromEmail,
+                              hasSupabaseKey: !!data.supabase?.hasServiceKey,
+                              hasAdminUsername: !!data.auth?.hasAdminUsername,
+                              hasAdminPassword: !!data.auth?.hasAdminPassword,
+                              nodeEnv: data.nodeEnv,
+                              fromEmail: data.email?.fromEmail,
+                              supabaseUrl: data.supabase?.url
+                            });
+                            showToast('Environment status refreshed', 'success');
+                          } catch (error) {
+                            showToast('Failed to refresh status', 'error');
+                          }
+                        }}
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Refresh Status
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Quick Actions */}
+                <Card className="bg-gray-800 border-gray-700 lg:col-span-2">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Zap className="w-5 h-5 text-yellow-400" />
+                      Quick Actions
+                    </CardTitle>
+                    <CardDescription className="text-gray-400">
+                      Common administrative tasks
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Button 
+                        variant="outline" 
+                        className="border-gray-600 text-gray-300 hover:bg-gray-700 flex flex-col h-auto py-4"
+                        onClick={() => setActiveSection("dashboard")}
+                      >
+                        <Activity className="w-6 h-6 mb-2" />
+                        View Dashboard
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="border-gray-600 text-gray-300 hover:bg-gray-700 flex flex-col h-auto py-4"
+                        onClick={() => setActiveSection("fulfillment")}
+                      >
+                        <Truck className="w-6 h-6 mb-2" />
+                        Manage Orders
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="border-gray-600 text-gray-300 hover:bg-gray-700 flex flex-col h-auto py-4"
+                        onClick={() => setActiveSection("customers")}
+                      >
+                        <Users className="w-6 h-6 mb-2" />
+                        Manage Customers
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           )}
         </div>

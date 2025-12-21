@@ -435,11 +435,27 @@ export default function MainStore() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white">
+    <div className="min-h-screen bg-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white pb-16 md:pb-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productListData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData) }} />
       
+      {/* Customer Support Banner - Top */}
+      <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-red-500 text-white py-2 px-4 text-center" data-testid="banner-support-top">
+        <div className="container mx-auto flex items-center justify-center gap-2 flex-wrap text-sm md:text-base">
+          <Mail className="w-4 h-4 md:w-5 md:h-5" />
+          <span className="font-medium">Customer Support:</span>
+          <a 
+            href="mailto:reloadedfiretvteam@gmail.com" 
+            className="font-bold text-white hover:text-orange-100 underline decoration-2 underline-offset-2 transition-colors"
+            data-testid="link-support-email-top"
+          >
+            reloadedfiretvteam@gmail.com
+          </a>
+          <span className="hidden md:inline">• 24/7 Support</span>
+        </div>
+      </div>
+
       {/* Sticky Sale Banner */}
       <div className="bg-gradient-to-r from-green-600 via-green-500 to-emerald-500 text-white py-2 px-4 text-center font-bold animate-pulse" data-testid="banner-sale">
         <div className="container mx-auto flex items-center justify-center gap-3 flex-wrap">
@@ -1445,12 +1461,28 @@ export default function MainStore() {
         </div>
       </section>
 
+      {/* Customer Support Email Banner - Fixed at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-orange-600 via-orange-500 to-red-500 text-white py-3 px-4 z-[99] border-t-2 border-orange-400/50 shadow-2xl">
+        <div className="container mx-auto flex items-center justify-center gap-3 flex-wrap">
+          <Mail className="w-5 h-5" />
+          <span className="text-sm md:text-base font-medium">Need Help? Email us:</span>
+          <a 
+            href="mailto:reloadedfiretvteam@gmail.com" 
+            className="font-bold text-white hover:text-orange-100 underline decoration-2 underline-offset-2 transition-colors text-sm md:text-base"
+            data-testid="link-support-email"
+          >
+            reloadedfiretvteam@gmail.com
+          </a>
+          <span className="hidden md:inline text-sm">• 24/7 Customer Support</span>
+        </div>
+      </div>
+
       {/* WhatsApp Chat Widget - Higher z-index to stay above all CTAs */}
       <a 
         href="https://wa.me/15853037381" 
         target="_blank" 
         rel="noopener noreferrer"
-        className="fixed bottom-20 md:bottom-6 right-6 z-[100]"
+        className="fixed bottom-16 md:bottom-20 right-6 z-[100]"
         data-testid="link-whatsapp"
         aria-label="Chat with us on WhatsApp"
       >
