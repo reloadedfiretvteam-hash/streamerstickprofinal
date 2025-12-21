@@ -4,10 +4,6 @@ import { supabase } from '../lib/supabase';
 import BitcoinPaymentFlow from '../components/BitcoinPaymentFlow';
 import CashAppPaymentFlow from '../components/CashAppPaymentFlow';
 import StripePaymentForm from '../components/StripePaymentForm';
-<<<<<<< HEAD
-=======
-import FreeTrialCheckout from '../components/FreeTrialCheckout';
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 import Footer from '../components/Footer';
 
 interface CartItem {
@@ -614,7 +610,6 @@ export default function NewCheckoutPage() {
                       <CreditCard className="w-6 h-6 text-blue-600" />
                       Secure Card Payment
                     </h2>
-<<<<<<< HEAD
                     
                     {paymentError && (
                       <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
@@ -632,12 +627,20 @@ export default function NewCheckoutPage() {
                         clientSecret={clientSecret}
                         onSuccess={async (paymentIntentId) => {
                           try {
+                            const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+                            const orderItems = cart.map(item => ({
+                              product_id: item.product.id,
+                              product_name: item.product.name,
+                              quantity: item.quantity,
+                              unit_price: parseFloat(item.product.sale_price || item.product.price),
+                              total_price: parseFloat(item.product.sale_price || item.product.price) * item.quantity
+                            }));
+
                             // Save order to Supabase
                             const { data, error } = await supabase
                               .from('orders')
-                              .insert([{
-=======
-                    {!stripeClientSecret ? (
+                              .insert({
+                                order_number: orderNumber,
                       <div>
                         <p className="text-gray-600 mb-4">Click below to initialize secure payment</p>
                         <button
@@ -708,46 +711,28 @@ export default function NewCheckoutPage() {
                               .from('orders')
                               .insert({
                                 order_number: orderNumber,
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
                                 customer_name: customerInfo.name,
                                 customer_email: customerInfo.email,
                                 customer_phone: customerInfo.phone,
                                 shipping_address: `${customerInfo.address}, ${customerInfo.city}, ${customerInfo.state} ${customerInfo.zip}`,
-<<<<<<< HEAD
-=======
                                 subtotal: calculateTotal(),
                                 tax: 0,
                                 total: calculateTotal(),
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
                                 total_amount: calculateTotal().toString(),
                                 payment_method: 'stripe',
                                 payment_intent_id: paymentIntentId,
                                 payment_status: 'completed',
-<<<<<<< HEAD
-                                status: 'processing',
-                                items: cart.map(item => ({
-                                  product_id: item.product.id,
-                                  product_name: item.product.name,
-                                  quantity: item.quantity,
-                                  price: item.product.price
-                                }))
-                              }])
-                              .select();
-
-=======
                                 order_status: 'processing',
                                 status: 'processing',
                                 items: orderItems,
                                 notes: `Payment method: stripe, Payment Intent ID: ${paymentIntentId}`
                               })
                               .select();
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
                             if (error) throw error;
                             const orderCode = (data && data.length > 0 && data[0].id) ? String(data[0].id) : `STRIPE-${Date.now()}`;
                             handleOrderComplete(orderCode);
                           } catch (error) {
                             console.error('Order creation failed:', error);
-<<<<<<< HEAD
                             alert('Payment processed but order creation failed. Please contact support.');
                           }
                         }}
@@ -767,20 +752,6 @@ export default function NewCheckoutPage() {
                         setCurrentStep(2);
                         setClientSecret(null);
                         setPaymentError(null);
-=======
-                            alert('Payment succeeded but order creation failed. Please contact support.');
-                          }
-                        }}
-                        onError={(error) => {
-                          alert(`Payment failed: ${error}`);
-                        }}
-                      />
-                    )}
-                    <button
-                      onClick={() => {
-                        setCurrentStep(2);
-                        setStripeClientSecret(null);
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
                       }}
                       className="mt-6 w-full bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 transition-all"
                     >

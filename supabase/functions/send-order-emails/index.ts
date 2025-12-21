@@ -160,7 +160,6 @@ Deno.serve(async (req: Request) => {
     }
 
     const payload: OrderEmailPayload = await req.json();
-<<<<<<< HEAD
     console.log(`📧 Processing order email for: ${payload.orderCode}`);
 
     // Get default FROM email
@@ -233,74 +232,12 @@ Deno.serve(async (req: Request) => {
       console.warn("⚠️ Admin email failed but customer email was sent");
     } else {
       console.log(`✅ Admin email sent! Resend ID: ${adminEmailData.id}`);
-=======
-    console.log(`Processing order email for: ${payload.orderCode}`);
-    
-    // Generate appropriate email based on payment method
-    let customerEmailContent: string;
-    let emailSubject: string;
-    
-    if (payload.paymentMethod === 'stripe' || payload.paymentMethod === 'Stripe') {
-      customerEmailContent = generateCustomerStripeEmail(payload);
-      emailSubject = `Order Confirmation - ${payload.orderCode} - Stream Stick Pro`;
-    } else if (payload.paymentMethod === 'Bitcoin') {
-      customerEmailContent = generateCustomerBitcoinEmail(payload);
-      emailSubject = `Bitcoin Payment Instructions - ${payload.orderCode}`;
-    } else {
-      customerEmailContent = generateCustomerCashAppEmail(payload);
-      emailSubject = `Cash App Payment Instructions - ${payload.orderCode}`;
-    }
-    
-    const adminEmailContent = generateAdminNotificationEmail(payload);
-    
-    console.log('Sending order emails for:', payload.orderCode);
-
-    // Initialize Resend with API key from environment
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    
-    if (!resendApiKey) {
-      console.error("RESEND_API_KEY not configured");
-      throw new Error("Email service not configured. Please add RESEND_API_KEY to Supabase secrets.");
-    }
-
-    const resend = new Resend(resendApiKey);
-
-    // Send email to customer
-    const { data: customerData, error: customerError } = await resend.emails.send({
-      from: "Stream Stick Pro <onboarding@resend.dev>", // Change to your verified domain
-      to: payload.customerEmail,
-      subject: emailSubject,
-      html: customerEmailContent,
-    });
-
-    if (customerError) {
-      console.error("Failed to send customer email:", customerError);
-      throw new Error(`Failed to send customer email: ${customerError.message}`);
-    }
-
-    console.log("Customer email sent successfully:", customerData?.id);
-
-    // Send notification to admin
-    const { data: adminData, error: adminError } = await resend.emails.send({
-      from: "Stream Stick Pro <onboarding@resend.dev>", // Change to your verified domain
-      to: payload.adminEmail,
-      subject: `New Order: ${payload.orderCode}`,
-      html: adminEmailContent,
-    });
-
-    if (adminError) {
-      console.error("Failed to send admin email:", adminError);
-      // Don't throw - customer email was sent successfully
-    } else {
-      console.log("Admin email sent successfully:", adminData?.id);
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
     }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         orderCode: payload.orderCode,
-<<<<<<< HEAD
         customerEmailId: customerEmailData.id,
         adminEmailId: adminEmailData.id || null,
         message: "Emails sent successfully"
@@ -318,24 +255,7 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({ 
         success: false, 
         error: errorMessage 
-      }), 
-=======
-        message: "Order emails sent successfully",
-        customerEmail: payload.customerEmail,
-        customerEmailId: customerData?.id,
-        adminEmailId: adminData?.id,
-      }), 
-      { 
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
-      }
-    );
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error in send-order-emails:', errorMessage);
-    return new Response(
-      JSON.stringify({ success: false, error: errorMessage }), 
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, "Content-Type": "application/json" } 

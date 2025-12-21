@@ -59,11 +59,7 @@ const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '')
   .map((host: string) => host.trim().toLowerCase())
   .filter(Boolean);
 
-<<<<<<< HEAD
 // Optional: comma‑separated list of secure checkout hosts.
-=======
-// Optional: comma‑separated list of secure/Stripe-only hosts.
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 // Example value in env: secure.streamstickpro.com
 const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || '')
   .split(',')
@@ -105,11 +101,7 @@ function App() {
 
     setIsConciergeDomain(isConciergeHost || isConciergePath);
 
-<<<<<<< HEAD
     // Secure domain: lock to secure checkout experience.
-=======
-    // Secure domain: lock to Stripe checkout experience.
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
     const isSecureHost =
       secureHosts.length > 0 &&
       secureHosts.some((allowedHost: string) => hostname === allowedHost || hostname.includes(allowedHost));
@@ -187,24 +179,8 @@ function App() {
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-<<<<<<< HEAD
-  // Secure domain: show secure checkout only.
-  if (isSecureDomain) {
-    return (
-      <ErrorBoundary>
-        <SecureCheckoutPage />
-      </ErrorBoundary>
-    );
-  }
-
-  // Concierge domain: dedicated concierge landing experience.
-  if (isConciergeDomain) {
-    return <ConciergePage />;
-  }
-=======
   // Note: Secure domain and concierge domain routing is now handled by AppRouter
   // This App component is only for the main homepage
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 
   return (
     <ErrorBoundary>
