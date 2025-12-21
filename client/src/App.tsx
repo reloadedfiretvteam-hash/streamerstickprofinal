@@ -12,6 +12,7 @@ import AdminPanel from "@/pages/AdminPanel";
 import Checkout from "@/pages/Checkout";
 import Success from "@/pages/Success";
 import Blog from "@/pages/Blog";
+import Shop from "@/pages/Shop";
 import CustomerLogin from "@/pages/CustomerLogin";
 import CustomerPortal from "@/pages/CustomerPortal";
 import ForgotPassword from "@/pages/ForgotPassword";
@@ -46,6 +47,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={MainStore} />
+      <Route path="/shop" component={Shop} />
       <Route path="/shadow-services" component={ShadowStore} />
       <Route path="/admin" component={AdminPanel} />
       <Route path="/checkout" component={Checkout} />

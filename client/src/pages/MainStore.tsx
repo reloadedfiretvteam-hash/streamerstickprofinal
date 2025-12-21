@@ -369,7 +369,7 @@ export default function MainStore() {
     }
   };
 
-  const scrollToShop = () => navigateToSection('shop');
+  const scrollToShop = () => setLocation('/shop');
   const scrollToAbout = () => navigateToSection('about');
   const scrollToFaq = () => navigateToSection('faq');
 

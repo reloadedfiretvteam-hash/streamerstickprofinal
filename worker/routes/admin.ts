@@ -679,5 +679,87 @@ export function createAdminRoutes() {
     }
   });
 
+  // Blog admin endpoints
+  app.get('/blog/posts', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const posts = await storage.getBlogPosts();
+      return c.json({ data: posts });
+    } catch (error: any) {
+      console.error("Error fetching blog posts:", error);
+      return c.json({ error: "Failed to fetch blog posts" }, 500);
+    }
+  });
+
+  app.post('/blog/posts', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const body = await c.req.json();
+      const post = await storage.createBlogPost(body);
+      return c.json({ data: post });
+    } catch (error: any) {
+      console.error("Error creating blog post:", error);
+      return c.json({ error: `Failed to create blog post: ${error.message}` }, 500);
+    }
+  });
+
+  app.put('/blog/posts/:id', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const body = await c.req.json();
+      const post = await storage.updateBlogPost(c.req.param('id'), body);
+      return c.json({ data: post });
+    } catch (error: any) {
+      console.error("Error updating blog post:", error);
+      return c.json({ error: `Failed to update blog post: ${error.message}` }, 500);
+    }
+  });
+
+  app.delete('/blog/posts/:id', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      await storage.deleteBlogPost(c.req.param('id'));
+      return c.json({ success: true });
+    } catch (error: any) {
+      console.error("Error deleting blog post:", error);
+      return c.json({ error: `Failed to delete blog post: ${error.message}` }, 500);
+    }
+  });
+
+  app.post('/blog/ai/generate', async (c) => {
+    try {
+      // For now, return an error since AI generation requires external API
+      // This endpoint should be implemented with actual AI service integration
+      return c.json({ 
+        error: "AI content generation not yet implemented. Please create posts manually." 
+      }, 501);
+    } catch (error: any) {
+      console.error("Error generating AI content:", error);
+      return c.json({ error: "Failed to generate AI content" }, 500);
+    }
+  });
+
+  // GitHub endpoints (placeholder - requires GitHub token configuration)
+  app.get('/github/status', async (c) => {
+    return c.json({ 
+      connected: false, 
+      error: "GitHub integration requires GITHUB_TOKEN environment variable" 
+    });
+  });
+
+  app.get('/github/repos', async (c) => {
+    return c.json({ 
+      data: [],
+      error: "GitHub integration requires GITHUB_TOKEN environment variable" 
+    });
+  });
+
+  app.post('/github/push', async (c) => {
+    return c.json({ 
+      success: false,
+      error: "GitHub push requires GITHUB_TOKEN environment variable" 
+    }, 501);
+  });
+
   return app;
 }
