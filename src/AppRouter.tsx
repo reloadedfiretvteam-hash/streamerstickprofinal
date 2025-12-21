@@ -5,6 +5,7 @@ import RealAdminDashboard from './pages/RealAdminDashboard';
 import OrderTracking from './pages/OrderTracking';
 import FAQPage from './pages/FAQPage';
 import EnhancedBlogPost from './pages/EnhancedBlogPost';
+import SEOAdPage from './pages/SEOAdPage';
 import ShopPage from './pages/ShopPage';
 import NewCheckoutPage from './pages/NewCheckoutPage';
 import CompleteCheckoutPage from './pages/CompleteCheckoutPage';
@@ -21,11 +22,6 @@ function isStripePaymentHost(): boolean {
   return stripeHosts.includes(host);
 }
 
-<<<<<<< HEAD
-=======
-// Note: Square integration removed - Stripe only
-
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 export default function AppRouter() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -47,11 +43,6 @@ export default function AppRouter() {
     return <StripeSecureCheckoutPage />;
   }
 
-<<<<<<< HEAD
-=======
-  // Square integration removed - Stripe only
-
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
   if (currentPath === '/shop' || currentPath === '/shop/') {
     return <ShopPage />;
   }
@@ -123,6 +114,11 @@ export default function AppRouter() {
 
   if (currentPath.startsWith('/blog/') && currentPath !== '/blog/') {
     return <EnhancedBlogPost />;
+  }
+
+  // SEO Ads routing - /ads/[slug]
+  if (currentPath.startsWith('/ads/') && currentPath !== '/ads/') {
+    return <SEOAdPage />;
   }
 
   return <App />;
