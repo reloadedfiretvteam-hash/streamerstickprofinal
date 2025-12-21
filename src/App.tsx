@@ -17,6 +17,7 @@ import LegalDisclaimer from './components/LegalDisclaimer';
 import EmailCaptureBottom from './components/EmailCaptureBottom';
 import Footer from './components/Footer';
 import EmailPopup from './components/EmailPopup';
+import ContactFormModal from './components/ContactFormModal';
 import CheckoutCart from './components/CheckoutCart';
 import SEOHead from './components/SEOHead';
 import VisitorTracker from './components/VisitorTracker';
@@ -67,6 +68,18 @@ const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || '')
 
 function App() {
   const [isConciergeDomain, setIsConciergeDomain] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
+  // Listen for custom event to open contact modal from anywhere
+  useEffect(() => {
+    const handleOpenContactModal = () => {
+      setIsContactModalOpen(true);
+    };
+    window.addEventListener('openContactModal', handleOpenContactModal);
+    return () => {
+      window.removeEventListener('openContactModal', handleOpenContactModal);
+    };
+  }, []);
   const [isSecureDomain, setIsSecureDomain] = useState(false);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [emailCaptured, setEmailCaptured] = useState(false);
@@ -218,8 +231,13 @@ function App() {
         <FAQ />
         <EmailCaptureBottom onEmailCapture={handleEmailCapture} />
         <LegalDisclaimer />
-        <Footer />
+        <Footer onContactClick={() => setIsContactModalOpen(true)} />
         <StickyBuyButton />
+
+        <ContactFormModal
+          isOpen={isContactModalOpen}
+          onClose={() => setIsContactModalOpen(false)}
+        />
 
         {showEmailPopup && !emailCaptured && (
           <EmailPopup
