@@ -188,43 +188,74 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
     }
   }
 
+  // Ensure we have customer email - use session email as fallback before updating
+  const customerEmail = order.customerEmail || session.customer_details?.email;
+  if (!customerEmail) {
+    console.error(`[EMAIL] ERROR: No customer email found for order ${order.id}`);
+    console.error(`[EMAIL] Order email: ${order.customerEmail}`);
+    console.error(`[EMAIL] Session email: ${session.customer_details?.email}`);
+    // Still update the order as paid even if email is missing
+    await storage.updateOrder(order.id, updateData);
+    return;
+  }
+
+  // Add email to update data if it was missing
+  if (!order.customerEmail && customerEmail) {
+    updateData.customerEmail = customerEmail;
+    console.log(`[EMAIL] Adding email from session to order update: ${customerEmail}`);
+  }
+
   await storage.updateOrder(order.id, updateData);
   console.log(`[CHECKOUT] Order ${order.id} marked as paid`);
 
+  // Fetch the updated order with the correct email
   const updatedOrder = await storage.getOrder(order.id);
-  if (updatedOrder) {
-    console.log(`[EMAIL] Starting email delivery for order ${order.id}`);
-    
-    // Send order confirmation
-    try {
-      await sendOrderConfirmation(updatedOrder, env);
-      console.log(`[EMAIL] Order confirmation sent to ${updatedOrder.customerEmail}`);
-    } catch (error: any) {
-      console.error(`[EMAIL] ERROR sending order confirmation: ${error.message}`);
-    }
-    
-    // Send owner notification
-    try {
-      await sendOwnerOrderNotification(updatedOrder, env);
-      console.log(`[EMAIL] Owner notification sent`);
-    } catch (error: any) {
-      console.error(`[EMAIL] ERROR sending owner notification: ${error.message}`);
-    }
-    
-    // Send credentials if not already sent
-    if (!updatedOrder.credentialsSent) {
-      try {
-        await sendCredentialsEmail(updatedOrder, env, storage);
-        console.log(`[EMAIL] Credentials sent to ${updatedOrder.customerEmail}`);
-      } catch (error: any) {
-        console.error(`[EMAIL] ERROR sending credentials: ${error.message}`);
-      }
-    } else {
-      console.log(`[EMAIL] Credentials already sent for order ${order.id}`);
-    }
-    
-    console.log(`[CHECKOUT] Completed processing order ${order.id}`);
+  if (!updatedOrder) {
+    console.error(`[CHECKOUT] ERROR: Could not retrieve updated order ${order.id}`);
+    return;
   }
+
+  // Double-check email exists (should always be there now)
+  if (!updatedOrder.customerEmail) {
+    console.error(`[EMAIL] ERROR: Order ${order.id} still missing email after update`);
+    return;
+  }
+
+  console.log(`[EMAIL] Starting email delivery for order ${order.id}`);
+  console.log(`[EMAIL] Sending to: ${updatedOrder.customerEmail}`);
+  
+  // Send order confirmation
+  try {
+    await sendOrderConfirmation(updatedOrder, env);
+    console.log(`[EMAIL] Order confirmation sent to ${updatedOrder.customerEmail}`);
+  } catch (error: any) {
+    console.error(`[EMAIL] ERROR sending order confirmation: ${error.message}`);
+    console.error(`[EMAIL] Error stack: ${error.stack}`);
+  }
+  
+  // Send owner notification
+  try {
+    await sendOwnerOrderNotification(updatedOrder, env);
+    console.log(`[EMAIL] Owner notification sent`);
+  } catch (error: any) {
+    console.error(`[EMAIL] ERROR sending owner notification: ${error.message}`);
+    console.error(`[EMAIL] Error stack: ${error.stack}`);
+  }
+  
+  // Send credentials if not already sent
+  if (!updatedOrder.credentialsSent) {
+    try {
+      await sendCredentialsEmail(updatedOrder, env, storage);
+      console.log(`[EMAIL] Credentials sent to ${updatedOrder.customerEmail}`);
+    } catch (error: any) {
+      console.error(`[EMAIL] ERROR sending credentials: ${error.message}`);
+      console.error(`[EMAIL] Error stack: ${error.stack}`);
+    }
+  } else {
+    console.log(`[EMAIL] Credentials already sent for order ${order.id}`);
+  }
+  
+  console.log(`[CHECKOUT] Completed processing order ${order.id}`);
 }
 
 async function handlePaymentSucceeded(paymentIntent: any, storage: Storage, env: Env) {

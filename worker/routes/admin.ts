@@ -19,6 +19,80 @@ export function createAdminRoutes() {
     }
   });
 
+  app.get('/orders/stats', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const allOrders = await storage.getAllOrders();
+      
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+      
+      const paidOrders = allOrders.filter(o => o.status === 'paid');
+      const pendingOrders = allOrders.filter(o => o.status === 'pending');
+      
+      const ordersToday = allOrders.filter(o => o.createdAt && new Date(o.createdAt) >= today);
+      const ordersThisWeek = allOrders.filter(o => o.createdAt && new Date(o.createdAt) >= weekAgo);
+      const ordersThisMonth = allOrders.filter(o => o.createdAt && new Date(o.createdAt) >= monthAgo);
+      
+      const revenueToday = ordersToday
+        .filter(o => o.status === 'paid')
+        .reduce((sum, o) => sum + (o.amount || 0), 0);
+      const revenueThisWeek = ordersThisWeek
+        .filter(o => o.status === 'paid')
+        .reduce((sum, o) => sum + (o.amount || 0), 0);
+      const revenueThisMonth = ordersThisMonth
+        .filter(o => o.status === 'paid')
+        .reduce((sum, o) => sum + (o.amount || 0), 0);
+      const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+      
+      const firestickOrders = allOrders.filter(o => 
+        o.realProductId?.includes('firestick') || o.realProductName?.toLowerCase().includes('fire stick')
+      );
+      const pendingFulfillments = firestickOrders.filter(o => 
+        o.status === 'paid' && (!o.fulfillmentStatus || o.fulfillmentStatus === 'pending')
+      );
+      
+      const recentOrders = allOrders
+        .filter(o => o.createdAt)
+        .sort((a, b) => {
+          const dateA = new Date(a.createdAt!).getTime();
+          const dateB = new Date(b.createdAt!).getTime();
+          return dateB - dateA;
+        })
+        .slice(0, 10)
+        .map(o => ({
+          id: o.id,
+          customerEmail: o.customerEmail,
+          customerName: o.customerName,
+          productName: o.realProductName,
+          amount: o.amount,
+          status: o.status,
+          fulfillmentStatus: o.fulfillmentStatus,
+          createdAt: o.createdAt,
+        }));
+      
+      return c.json({
+        data: {
+          totalOrders: allOrders.length,
+          ordersToday: ordersToday.length,
+          ordersThisWeek: ordersThisWeek.length,
+          ordersThisMonth: ordersThisMonth.length,
+          totalRevenue,
+          revenueToday,
+          revenueThisWeek,
+          revenueThisMonth,
+          pendingFulfillments: pendingFulfillments.length,
+          recentOrders,
+        }
+      });
+    } catch (error: any) {
+      console.error("Error fetching order stats:", error);
+      return c.json({ error: "Failed to fetch order statistics" }, 500);
+    }
+  });
+
   app.put('/orders/:id', async (c) => {
     try {
       const storage = getStorage(c.env);
@@ -603,6 +677,191 @@ export function createAdminRoutes() {
       console.error("Error fixing missing credentials:", error);
       return c.json({ error: "Failed to fix missing credentials" }, 500);
     }
+  });
+
+  // Blog admin endpoints
+  app.get('/blog/posts', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      // For admin, we need all posts (published and unpublished)
+      // Use service key to bypass RLS and get all posts
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const { data, error } = await supabase.from('blog_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      const posts = (data || []).map((d: any) => ({
+        id: d.id,
+        title: d.title,
+        slug: d.slug,
+        excerpt: d.excerpt,
+        content: d.content,
+        category: d.category,
+        featured: d.featured || false,
+        published: d.is_published || false,
+        keywords: d.keywords,
+        metaDescription: d.meta_description,
+        publishedAt: d.published_at,
+        createdAt: d.created_at,
+      }));
+      
+      return c.json({ data: posts });
+    } catch (error: any) {
+      console.error("Error fetching blog posts:", error);
+      return c.json({ error: `Failed to fetch blog posts: ${error.message}` }, 500);
+    }
+  });
+
+  app.post('/blog/posts', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const body = await c.req.json();
+      
+      // Generate slug from title if not provided
+      const slug = body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      
+      const { data, error } = await supabase.from('blog_posts').insert({
+        title: body.title,
+        slug: slug,
+        excerpt: body.excerpt || '',
+        content: body.content || '',
+        category: body.category || 'Guides',
+        featured: body.featured || false,
+        is_published: body.published !== undefined ? body.published : false,
+        keywords: body.keywords || '',
+        meta_description: body.metaDescription || '',
+        published_at: body.published ? new Date().toISOString() : null,
+      }).select().single();
+      
+      if (error) throw error;
+      
+      return c.json({ 
+        data: {
+          id: data.id,
+          title: data.title,
+          slug: data.slug,
+          excerpt: data.excerpt,
+          content: data.content,
+          category: data.category,
+          featured: data.featured,
+          published: data.is_published,
+          keywords: data.keywords,
+          metaDescription: data.meta_description,
+          publishedAt: data.published_at,
+        }
+      });
+    } catch (error: any) {
+      console.error("Error creating blog post:", error);
+      return c.json({ error: `Failed to create blog post: ${error.message}` }, 500);
+    }
+  });
+
+  app.put('/blog/posts/:id', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const body = await c.req.json();
+      const id = c.req.param('id');
+      
+      const updateData: any = {};
+      if (body.title !== undefined) updateData.title = body.title;
+      if (body.slug !== undefined) updateData.slug = body.slug;
+      if (body.excerpt !== undefined) updateData.excerpt = body.excerpt;
+      if (body.content !== undefined) updateData.content = body.content;
+      if (body.category !== undefined) updateData.category = body.category;
+      if (body.featured !== undefined) updateData.featured = body.featured;
+      if (body.published !== undefined) {
+        updateData.is_published = body.published;
+        if (body.published && !updateData.published_at) {
+          updateData.published_at = new Date().toISOString();
+        }
+      }
+      if (body.keywords !== undefined) updateData.keywords = body.keywords;
+      if (body.metaDescription !== undefined) updateData.meta_description = body.metaDescription;
+      
+      const { data, error } = await supabase.from('blog_posts')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      return c.json({ 
+        data: {
+          id: data.id,
+          title: data.title,
+          slug: data.slug,
+          excerpt: data.excerpt,
+          content: data.content,
+          category: data.category,
+          featured: data.featured,
+          published: data.is_published,
+          keywords: data.keywords,
+          metaDescription: data.meta_description,
+          publishedAt: data.published_at,
+        }
+      });
+    } catch (error: any) {
+      console.error("Error updating blog post:", error);
+      return c.json({ error: `Failed to update blog post: ${error.message}` }, 500);
+    }
+  });
+
+  app.delete('/blog/posts/:id', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const id = c.req.param('id');
+      
+      const { error } = await supabase.from('blog_posts').delete().eq('id', id);
+      
+      if (error) throw error;
+      
+      return c.json({ success: true });
+    } catch (error: any) {
+      console.error("Error deleting blog post:", error);
+      return c.json({ error: `Failed to delete blog post: ${error.message}` }, 500);
+    }
+  });
+
+  app.post('/blog/ai/generate', async (c) => {
+    try {
+      // For now, return an error since AI generation requires external API
+      // This endpoint should be implemented with actual AI service integration
+      return c.json({ 
+        error: "AI content generation not yet implemented. Please create posts manually." 
+      }, 501);
+    } catch (error: any) {
+      console.error("Error generating AI content:", error);
+      return c.json({ error: "Failed to generate AI content" }, 500);
+    }
+  });
+
+  // GitHub endpoints (placeholder - requires GitHub token configuration)
+  app.get('/github/status', async (c) => {
+    return c.json({ 
+      connected: false, 
+      error: "GitHub integration requires GITHUB_TOKEN environment variable" 
+    });
+  });
+
+  app.get('/github/repos', async (c) => {
+    return c.json({ 
+      data: [],
+      error: "GitHub integration requires GITHUB_TOKEN environment variable" 
+    });
+  });
+
+  app.post('/github/push', async (c) => {
+    return c.json({ 
+      success: false,
+      error: "GitHub push requires GITHUB_TOKEN environment variable" 
+    }, 501);
   });
 
   return app;

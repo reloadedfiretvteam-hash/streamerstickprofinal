@@ -12,6 +12,12 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
     console.error('RESEND_API_KEY not configured - skipping order confirmation email');
     return;
   }
+  
+  if (!order.customerEmail) {
+    console.error(`[EMAIL] Cannot send order confirmation: missing customerEmail for order ${order.id}`);
+    return;
+  }
+  
   const resend = new Resend(env.RESEND_API_KEY);
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
 
@@ -59,6 +65,12 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
     console.error('RESEND_API_KEY not configured - skipping credentials email');
     return;
   }
+  
+  if (!order.customerEmail) {
+    console.error(`[EMAIL] Cannot send credentials: missing customerEmail for order ${order.id}`);
+    return;
+  }
+  
   const resend = new Resend(env.RESEND_API_KEY);
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
 
@@ -153,6 +165,12 @@ export async function sendRenewalConfirmationEmail(order: Order, env: Env): Prom
     console.error('RESEND_API_KEY not configured - skipping renewal email');
     return;
   }
+  
+  if (!order.customerEmail) {
+    console.error(`[EMAIL] Cannot send renewal confirmation: missing customerEmail for order ${order.id}`);
+    return;
+  }
+  
   const resend = new Resend(env.RESEND_API_KEY);
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
 
@@ -271,6 +289,12 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
     console.error('RESEND_API_KEY not configured - skipping owner notification');
     return;
   }
+  
+  // Owner notification doesn't need customer email, but log if order email is missing
+  if (!order.customerEmail) {
+    console.warn(`[EMAIL] Order ${order.id} missing customerEmail, sending owner notification anyway`);
+  }
+  
   const resend = new Resend(env.RESEND_API_KEY);
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
 

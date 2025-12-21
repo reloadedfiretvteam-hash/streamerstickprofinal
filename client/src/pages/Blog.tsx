@@ -244,6 +244,49 @@ export default function Blog() {
             data-testid="text-blog-content"
           />
 
+          {/* Call to Action Section - Always show */}
+          <div className="border-t border-gray-700 pt-12 mt-12 mb-8">
+            <div className="bg-gradient-to-r from-orange-600/20 via-red-600/20 to-purple-600/20 rounded-xl border border-orange-500/30 p-8">
+              <div className="text-center">
+                <h2 className="text-3xl font-bold text-white mb-4">Ready to Start Streaming?</h2>
+                <p className="text-gray-300 mb-6 text-lg">
+                  Explore our products, start a free trial, or return to our homepage to learn more.
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Button 
+                    size="lg" 
+                    className="bg-orange-600 hover:bg-orange-700"
+                    onClick={() => setLocation("/shop")}
+                    data-testid="button-cta-shop"
+                  >
+                    <Flame className="w-5 h-5 mr-2" />
+                    View All Products
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline"
+                    className="border-green-500 text-green-400 hover:bg-green-500/10"
+                    onClick={() => setLocation("/?section=free-trial")}
+                    data-testid="button-cta-trial"
+                  >
+                    <Zap className="w-5 h-5 mr-2" />
+                    Start Free Trial
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline"
+                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                    onClick={() => setLocation("/")}
+                    data-testid="button-cta-home"
+                  >
+                    <Tv className="w-5 h-5 mr-2" />
+                    Go to Homepage
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Related Products Section - Internal Linking */}
           {(() => {
             const linkedProducts = selectedPost.linkedProductIds && selectedPost.linkedProductIds.length > 0
@@ -268,8 +311,7 @@ export default function Blog() {
                       whileHover={{ y: -3, scale: 1.02 }}
                       className="cursor-pointer"
                       onClick={() => {
-                        setLocation("/?section=shop");
-                        setTimeout(() => window.dispatchEvent(new Event('scrollToSection')), 100);
+                        setLocation("/shop");
                       }}
                       data-testid={`card-related-product-${product.id}`}
                     >
@@ -293,6 +335,10 @@ export default function Blog() {
                             <Button 
                               size="sm" 
                               className="bg-orange-600 hover:bg-orange-700"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setLocation("/shop");
+                              }}
                               data-testid={`button-view-product-${product.id}`}
                             >
                               View Details
@@ -304,27 +350,6 @@ export default function Blog() {
                   ))}
                 </div>
 
-                {/* CTA Section */}
-                <div className="mt-8 p-6 bg-gradient-to-r from-orange-600/20 to-red-600/20 rounded-xl border border-orange-500/30">
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-white mb-1">Ready to Cut the Cord?</h3>
-                      <p className="text-gray-300">Be streaming in 10 minutes! Your StreamStick includes login credentials, a quick setup video, and 24/7 support. Live TV, Movies, Series, and comprehensive sports coverage await!</p>
-                    </div>
-                    <Button 
-                      size="lg" 
-                      className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap"
-                      onClick={() => {
-                        setLocation("/?section=shop");
-                        setTimeout(() => window.dispatchEvent(new Event('scrollToSection')), 100);
-                      }}
-                      data-testid="button-shop-now"
-                    >
-                      <Flame className="w-4 h-4 mr-2" />
-                      Shop Now
-                    </Button>
-                  </div>
-                </div>
               </div>
             );
           })()}
@@ -503,6 +528,47 @@ export default function Blog() {
             </div>
           </>
         )}
+
+        {/* CTA Section at bottom of blog listing */}
+        <div className="mt-16 pt-12 border-t border-gray-700">
+          <div className="bg-gradient-to-r from-orange-600/20 via-red-600/20 to-purple-600/20 rounded-xl border border-orange-500/30 p-8 text-center">
+            <h2 className="text-3xl font-bold text-white mb-4">Ready to Start Streaming?</h2>
+            <p className="text-gray-300 mb-6 text-lg max-w-2xl mx-auto">
+              Explore our products, start a free trial, or return to our homepage to learn more about StreamStick Pro.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Button 
+                size="lg" 
+                className="bg-orange-600 hover:bg-orange-700"
+                onClick={() => setLocation("/shop")}
+                data-testid="button-blog-cta-shop"
+              >
+                <Flame className="w-5 h-5 mr-2" />
+                View All Products
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="border-green-500 text-green-400 hover:bg-green-500/10"
+                onClick={() => setLocation("/?section=free-trial")}
+                data-testid="button-blog-cta-trial"
+              >
+                <Zap className="w-5 h-5 mr-2" />
+                Start Free Trial
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                onClick={() => setLocation("/")}
+                data-testid="button-blog-cta-home"
+              >
+                <Tv className="w-5 h-5 mr-2" />
+                Go to Homepage
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -395,6 +395,66 @@ export type UpdateBlogPost = z.infer<typeof updateBlogPostSchema>;
 export type BlogPost = typeof blogPosts.$inferSelect;
 
 // ============================================
+// SEO AD CONTENT PIECES (Social Media Ad Style)
+// ============================================
+
+export const seoAds = pgTable("seo_ads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  category: text("category").notNull(), // device-comparison, app-comparison, service-comparison, content-access
+  content: text("content").notNull(), // HTML/JSON content
+  excerpt: text("excerpt"),
+  
+  // SEO Fields
+  primaryKeyword: text("primary_keyword").notNull(),
+  secondaryKeywords: text("secondary_keywords"), // JSON array
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  
+  // Visual/Ad Elements
+  featuredImage: text("featured_image"),
+  galleryImages: text("gallery_images"), // JSON array
+  comparisonData: text("comparison_data"), // JSON for comparison tables
+  productLinks: text("product_links"), // JSON array of product IDs/URLs
+  
+  // Ad-Style Features
+  ctaText: text("cta_text").default("Shop Now"),
+  ctaLink: text("cta_link"),
+  badgeLabels: text("badge_labels"), // JSON array (Best Value, Popular, etc.)
+  socialProof: text("social_proof"), // JSON for testimonials/stats
+  
+  // Status
+  published: boolean("published").default(false),
+  featured: boolean("featured").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("seo_ads_slug_idx").on(table.slug),
+  index("seo_ads_category_idx").on(table.category),
+  index("seo_ads_published_idx").on(table.published),
+  index("seo_ads_featured_idx").on(table.featured),
+  index("seo_ads_keyword_idx").on(table.primaryKeyword),
+]);
+
+export const insertSeoAdSchema = createInsertSchema(seoAds).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateSeoAdSchema = createInsertSchema(seoAds).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).partial();
+
+export type InsertSeoAd = z.infer<typeof insertSeoAdSchema>;
+export type UpdateSeoAd = z.infer<typeof updateSeoAdSchema>;
+export type SeoAd = typeof seoAds.$inferSelect;
+
+// ============================================
 // SEO TOOLKIT TABLES (Rank Math Premium Clone)
 // ============================================
 
