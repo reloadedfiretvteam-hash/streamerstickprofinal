@@ -864,5 +864,135 @@ export function createAdminRoutes() {
     }, 501);
   });
 
+  // SEO Ads admin endpoints
+  app.get('/seo-ads', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const { data, error } = await supabase.from('seo_ads')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      const ads = (data || []).map((d: any) => ({
+        id: d.id,
+        title: d.title,
+        slug: d.slug,
+        category: d.category,
+        excerpt: d.excerpt,
+        primaryKeyword: d.primary_keyword,
+        featured: d.featured || false,
+        published: d.published || false,
+        createdAt: d.created_at,
+        updatedAt: d.updated_at,
+      }));
+      
+      return c.json({ data: ads });
+    } catch (error: any) {
+      console.error("Error fetching SEO ads:", error);
+      return c.json({ error: `Failed to fetch SEO ads: ${error.message}` }, 500);
+    }
+  });
+
+  app.post('/seo-ads', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const body = await c.req.json();
+      
+      const slug = body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      
+      const { data, error } = await supabase.from('seo_ads').insert({
+        title: body.title,
+        slug: slug,
+        category: body.category || 'device-comparison',
+        content: body.content || '',
+        excerpt: body.excerpt || '',
+        primary_keyword: body.primaryKeyword || '',
+        secondary_keywords: body.secondaryKeywords ? JSON.stringify(body.secondaryKeywords) : null,
+        meta_title: body.metaTitle || body.title,
+        meta_description: body.metaDescription || body.excerpt,
+        featured_image: body.featuredImage || null,
+        gallery_images: body.galleryImages ? JSON.stringify(body.galleryImages) : null,
+        comparison_data: body.comparisonData ? JSON.stringify(body.comparisonData) : null,
+        product_links: body.productLinks ? JSON.stringify(body.productLinks) : null,
+        cta_text: body.ctaText || 'Shop Now',
+        cta_link: body.ctaLink || '/shop',
+        badge_labels: body.badgeLabels ? JSON.stringify(body.badgeLabels) : null,
+        social_proof: body.socialProof ? JSON.stringify(body.socialProof) : null,
+        published: body.published !== undefined ? body.published : false,
+        featured: body.featured || false,
+      }).select().single();
+      
+      if (error) throw error;
+      
+      return c.json({ data });
+    } catch (error: any) {
+      console.error("Error creating SEO ad:", error);
+      return c.json({ error: `Failed to create SEO ad: ${error.message}` }, 500);
+    }
+  });
+
+  app.put('/seo-ads/:id', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const body = await c.req.json();
+      const id = c.req.param('id');
+      
+      const updateData: any = {};
+      if (body.title !== undefined) updateData.title = body.title;
+      if (body.slug !== undefined) updateData.slug = body.slug;
+      if (body.category !== undefined) updateData.category = body.category;
+      if (body.content !== undefined) updateData.content = body.content;
+      if (body.excerpt !== undefined) updateData.excerpt = body.excerpt;
+      if (body.primaryKeyword !== undefined) updateData.primary_keyword = body.primaryKeyword;
+      if (body.secondaryKeywords !== undefined) updateData.secondary_keywords = JSON.stringify(body.secondaryKeywords);
+      if (body.metaTitle !== undefined) updateData.meta_title = body.metaTitle;
+      if (body.metaDescription !== undefined) updateData.meta_description = body.metaDescription;
+      if (body.featuredImage !== undefined) updateData.featured_image = body.featuredImage;
+      if (body.galleryImages !== undefined) updateData.gallery_images = JSON.stringify(body.galleryImages);
+      if (body.comparisonData !== undefined) updateData.comparison_data = JSON.stringify(body.comparisonData);
+      if (body.productLinks !== undefined) updateData.product_links = JSON.stringify(body.productLinks);
+      if (body.ctaText !== undefined) updateData.cta_text = body.ctaText;
+      if (body.ctaLink !== undefined) updateData.cta_link = body.ctaLink;
+      if (body.badgeLabels !== undefined) updateData.badge_labels = JSON.stringify(body.badgeLabels);
+      if (body.socialProof !== undefined) updateData.social_proof = JSON.stringify(body.socialProof);
+      if (body.published !== undefined) updateData.published = body.published;
+      if (body.featured !== undefined) updateData.featured = body.featured;
+      
+      const { data, error } = await supabase.from('seo_ads')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      return c.json({ data });
+    } catch (error: any) {
+      console.error("Error updating SEO ad:", error);
+      return c.json({ error: `Failed to update SEO ad: ${error.message}` }, 500);
+    }
+  });
+
+  app.delete('/seo-ads/:id', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const id = c.req.param('id');
+      
+      const { error } = await supabase.from('seo_ads').delete().eq('id', id);
+      
+      if (error) throw error;
+      
+      return c.json({ success: true });
+    } catch (error: any) {
+      console.error("Error deleting SEO ad:", error);
+      return c.json({ error: `Failed to delete SEO ad: ${error.message}` }, 500);
+    }
+  });
+
   return app;
 }

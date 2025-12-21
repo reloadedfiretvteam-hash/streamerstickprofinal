@@ -11,6 +11,8 @@ import { createCustomerRoutes } from './routes/customers';
 import { createTrialRoutes } from './routes/trial';
 import { createAuthRoutes, authMiddleware } from './routes/auth';
 import { createBlogRoutes } from './routes/blog';
+import { createSeoAdRoutes } from './routes/seo-ads';
+import { createAIAssistantRoutes } from './routes/ai-assistant';
 
 export interface Env {
   DATABASE_URL: string;
@@ -25,6 +27,10 @@ export interface Env {
   ADMIN_USERNAME?: string;
   ADMIN_PASSWORD?: string;
   JWT_SECRET?: string;
+  GITHUB_TOKEN?: string;
+  OPENAI_API_KEY?: string;
+  CLOUDFLARE_API_TOKEN?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
   NODE_ENV?: string;
   ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
@@ -49,6 +55,8 @@ app.route('/api/track', createVisitorRoutes());
 app.route('/api/customer', createCustomerRoutes());
 app.route('/api/free-trial', createTrialRoutes());
 app.route('/api/blog', createBlogRoutes());
+app.route('/api/seo-ads', createSeoAdRoutes());
+app.route('/api/ai-assistant', createAIAssistantRoutes());
 
 app.post('/api/track-cart', async (c) => {
   try {

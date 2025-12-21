@@ -65,6 +65,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase, getStorageUrl, formatPriceDisplay, centsToDollars, dollarsToCents } from "@/lib/supabase";
 import SeoToolkit from "@/components/seo/SeoToolkit";
+import AIAssistant from "@/components/AIAssistant";
 
 interface VisitorStats {
   totalVisitors: number;
@@ -358,6 +359,10 @@ export default function AdminPanel() {
   const [savingBlogPost, setSavingBlogPost] = useState(false);
   const [keywordInput, setKeywordInput] = useState("");
 
+  const [seoAds, setSeoAds] = useState<any[]>([]);
+  const [loadingSeoAds, setLoadingSeoAds] = useState(true);
+  const [seoAdSearchTerm, setSeoAdSearchTerm] = useState("");
+
   const [githubStatus, setGithubStatus] = useState<{ connected: boolean; username?: string; avatarUrl?: string; error?: string } | null>(null);
   const [githubRepos, setGithubRepos] = useState<Array<{ id: number; name: string; fullName: string; private: boolean; defaultBranch: string; htmlUrl: string }>>([]);
   const [loadingGithub, setLoadingGithub] = useState(false);
@@ -630,6 +635,39 @@ export default function AdminPanel() {
       console.error('Error loading blog posts:', error);
     } finally {
       setLoadingBlogPosts(false);
+    }
+  };
+
+  const loadSeoAds = async () => {
+    setLoadingSeoAds(true);
+    try {
+      const response = await authFetch('/api/admin/seo-ads');
+      const result = await response.json();
+      if (result.data) {
+        setSeoAds(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading SEO ads:', error);
+    } finally {
+      setLoadingSeoAds(false);
+    }
+  };
+
+  const deleteSeoAd = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this SEO ad?')) return;
+    try {
+      const response = await authFetch(`/api/admin/seo-ads/${id}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        showToast('SEO ad deleted successfully', 'success');
+        loadSeoAds();
+      } else {
+        showToast('Failed to delete SEO ad', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting SEO ad:', error);
+      showToast('Failed to delete SEO ad', 'error');
     }
   };
 
@@ -1541,6 +1579,22 @@ export default function AdminPanel() {
             )}
           </Button>
           <Button 
+            variant={activeSection === "seo-ads" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => {
+              setActiveSection("seo-ads");
+              loadSeoAds();
+            }}
+            data-testid="nav-seo-ads"
+          >
+            <Target className="w-4 h-4 mr-3" /> SEO Ads
+            {seoAds.length > 0 && (
+              <Badge className="ml-auto bg-orange-500 text-white text-xs">
+                {seoAds.length}
+              </Badge>
+            )}
+          </Button>
+          <Button 
             variant={activeSection === "github" ? "secondary" : "ghost"} 
             className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
             onClick={() => { setActiveSection("github"); loadGithubStatus(); }}
@@ -1555,6 +1609,14 @@ export default function AdminPanel() {
             data-testid="nav-seo"
           >
             <Search className="w-4 h-4 mr-3" /> SEO Toolkit
+          </Button>
+          <Button 
+            variant={activeSection === "ai-assistant" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => setActiveSection("ai-assistant")}
+            data-testid="nav-ai-assistant"
+          >
+            <Sparkles className="w-4 h-4 mr-3" /> AI Assistant
           </Button>
           <Button 
             variant={activeSection === "settings" ? "secondary" : "ghost"} 
@@ -3701,6 +3763,121 @@ export default function AdminPanel() {
                 <p className="text-gray-400">Rank Math Premium-style SEO management</p>
               </div>
               <SeoToolkit authFetch={authFetch} showToast={showToast} />
+            </div>
+          )}
+
+          {activeSection === "ai-assistant" && (
+            <div>
+              <AIAssistant authFetch={authFetch} showToast={showToast} />
+            </div>
+          )}
+
+          {activeSection === "seo-ads" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold flex items-center gap-3">
+                    <Target className="w-8 h-8 text-orange-500" />
+                    SEO Ads Management
+                  </h2>
+                  <p className="text-gray-400">Manage SEO-optimized ad-style content pieces</p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={loadSeoAds}
+                  className="border-gray-600 text-gray-300"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Search SEO ads..."
+                    value={seoAdSearchTerm}
+                    onChange={(e) => setSeoAdSearchTerm(e.target.value)}
+                    className="pl-10 bg-gray-700 border-gray-600 text-white"
+                  />
+                </div>
+              </div>
+
+              {loadingSeoAds ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+                </div>
+              ) : seoAds.filter(ad => 
+                !seoAdSearchTerm || 
+                ad.title?.toLowerCase().includes(seoAdSearchTerm.toLowerCase()) ||
+                ad.primaryKeyword?.toLowerCase().includes(seoAdSearchTerm.toLowerCase())
+              ).length === 0 ? (
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardContent className="p-12 text-center">
+                    <Target className="w-16 h-16 mx-auto text-gray-600 mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-300 mb-2">No SEO ads yet</h3>
+                    <p className="text-gray-500 mb-6">SEO ads will appear here once created</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {seoAds.filter(ad => 
+                    !seoAdSearchTerm || 
+                    ad.title?.toLowerCase().includes(seoAdSearchTerm.toLowerCase()) ||
+                    ad.primaryKeyword?.toLowerCase().includes(seoAdSearchTerm.toLowerCase())
+                  ).map((ad) => (
+                    <Card key={ad.id} className="bg-gray-800 border-gray-700 hover:border-orange-500/50 transition-colors">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="text-lg font-semibold text-white truncate">{ad.title}</h3>
+                              {ad.featured && (
+                                <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Featured</Badge>
+                              )}
+                              {ad.published ? (
+                                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Published</Badge>
+                              ) : (
+                                <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">Draft</Badge>
+                              )}
+                            </div>
+                            <p className="text-gray-400 text-sm line-clamp-2 mb-3">{ad.excerpt}</p>
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <Hash className="w-3 h-3" />
+                                {ad.category}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Target className="w-3 h-3" />
+                                {ad.primaryKeyword}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(`/seo-ads/${ad.slug}`, '_blank')}
+                              className="border-gray-600 text-gray-300 hover:text-white"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => deleteSeoAd(ad.id)}
+                              className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

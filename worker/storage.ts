@@ -583,6 +583,79 @@ export function createStorage(config: StorageConfig) {
       };
     },
 
+    // SEO Ads methods
+    async getSeoAds(): Promise<any[]> {
+      const { data } = await supabase.from('seo_ads')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false });
+      return (data || []).map((d: any) => this.mapSeoAdFromDb(d));
+    },
+
+    async getFeaturedSeoAds(limit: number = 6): Promise<any[]> {
+      const { data } = await supabase.from('seo_ads')
+        .select('*')
+        .eq('published', true)
+        .eq('featured', true)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      return (data || []).map((d: any) => this.mapSeoAdFromDb(d));
+    },
+
+    async getSeoAdBySlug(slug: string): Promise<any | undefined> {
+      const { data } = await supabase.from('seo_ads')
+        .select('*')
+        .eq('slug', slug)
+        .eq('published', true)
+        .single();
+      return data ? this.mapSeoAdFromDb(data) : undefined;
+    },
+
+    async getSeoAdsByCategory(category: string): Promise<any[]> {
+      const { data } = await supabase.from('seo_ads')
+        .select('*')
+        .eq('published', true)
+        .eq('category', category)
+        .order('created_at', { ascending: false });
+      return (data || []).map((d: any) => this.mapSeoAdFromDb(d));
+    },
+
+    async searchSeoAds(query: string): Promise<any[]> {
+      const { data } = await supabase.from('seo_ads')
+        .select('*')
+        .eq('published', true)
+        .or(`title.ilike.%${query}%,excerpt.ilike.%${query}%,primary_keyword.ilike.%${query}%`)
+        .order('created_at', { ascending: false });
+      return (data || []).map((d: any) => this.mapSeoAdFromDb(d));
+    },
+
+    mapSeoAdFromDb(data: any): any {
+      return {
+        id: data.id,
+        title: data.title,
+        slug: data.slug,
+        category: data.category,
+        content: data.content,
+        excerpt: data.excerpt,
+        primaryKeyword: data.primary_keyword,
+        secondaryKeywords: data.secondary_keywords ? (typeof data.secondary_keywords === 'string' ? JSON.parse(data.secondary_keywords) : data.secondary_keywords) : [],
+        metaTitle: data.meta_title,
+        metaDescription: data.meta_description,
+        featuredImage: data.featured_image,
+        galleryImages: data.gallery_images ? (typeof data.gallery_images === 'string' ? JSON.parse(data.gallery_images) : data.gallery_images) : [],
+        comparisonData: data.comparison_data ? (typeof data.comparison_data === 'string' ? JSON.parse(data.comparison_data) : data.comparison_data) : null,
+        productLinks: data.product_links ? (typeof data.product_links === 'string' ? JSON.parse(data.product_links) : data.product_links) : [],
+        ctaText: data.cta_text,
+        ctaLink: data.cta_link,
+        badgeLabels: data.badge_labels ? (typeof data.badge_labels === 'string' ? JSON.parse(data.badge_labels) : data.badge_labels) : [],
+        socialProof: data.social_proof ? (typeof data.social_proof === 'string' ? JSON.parse(data.social_proof) : data.social_proof) : null,
+        featured: data.featured || false,
+        published: data.published || false,
+        createdAt: data.created_at ? new Date(data.created_at) : null,
+        updatedAt: data.updated_at ? new Date(data.updated_at) : null,
+      };
+    },
+
     async trackAbandonedCart(cart: {
       email: string;
       customerName?: string | null;
