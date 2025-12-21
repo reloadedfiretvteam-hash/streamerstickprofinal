@@ -683,20 +683,77 @@ export function createAdminRoutes() {
   app.get('/blog/posts', async (c) => {
     try {
       const storage = getStorage(c.env);
-      const posts = await storage.getBlogPosts();
+      // For admin, we need all posts (published and unpublished)
+      // Use service key to bypass RLS and get all posts
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const { data, error } = await supabase.from('blog_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      const posts = (data || []).map((d: any) => ({
+        id: d.id,
+        title: d.title,
+        slug: d.slug,
+        excerpt: d.excerpt,
+        content: d.content,
+        category: d.category,
+        featured: d.featured || false,
+        published: d.is_published || false,
+        keywords: d.keywords,
+        metaDescription: d.meta_description,
+        publishedAt: d.published_at,
+        createdAt: d.created_at,
+      }));
+      
       return c.json({ data: posts });
     } catch (error: any) {
       console.error("Error fetching blog posts:", error);
-      return c.json({ error: "Failed to fetch blog posts" }, 500);
+      return c.json({ error: `Failed to fetch blog posts: ${error.message}` }, 500);
     }
   });
 
   app.post('/blog/posts', async (c) => {
     try {
-      const storage = getStorage(c.env);
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       const body = await c.req.json();
-      const post = await storage.createBlogPost(body);
-      return c.json({ data: post });
+      
+      // Generate slug from title if not provided
+      const slug = body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      
+      const { data, error } = await supabase.from('blog_posts').insert({
+        title: body.title,
+        slug: slug,
+        excerpt: body.excerpt || '',
+        content: body.content || '',
+        category: body.category || 'Guides',
+        featured: body.featured || false,
+        is_published: body.published !== undefined ? body.published : false,
+        keywords: body.keywords || '',
+        meta_description: body.metaDescription || '',
+        published_at: body.published ? new Date().toISOString() : null,
+      }).select().single();
+      
+      if (error) throw error;
+      
+      return c.json({ 
+        data: {
+          id: data.id,
+          title: data.title,
+          slug: data.slug,
+          excerpt: data.excerpt,
+          content: data.content,
+          category: data.category,
+          featured: data.featured,
+          published: data.is_published,
+          keywords: data.keywords,
+          metaDescription: data.meta_description,
+          publishedAt: data.published_at,
+        }
+      });
     } catch (error: any) {
       console.error("Error creating blog post:", error);
       return c.json({ error: `Failed to create blog post: ${error.message}` }, 500);
@@ -705,10 +762,50 @@ export function createAdminRoutes() {
 
   app.put('/blog/posts/:id', async (c) => {
     try {
-      const storage = getStorage(c.env);
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       const body = await c.req.json();
-      const post = await storage.updateBlogPost(c.req.param('id'), body);
-      return c.json({ data: post });
+      const id = c.req.param('id');
+      
+      const updateData: any = {};
+      if (body.title !== undefined) updateData.title = body.title;
+      if (body.slug !== undefined) updateData.slug = body.slug;
+      if (body.excerpt !== undefined) updateData.excerpt = body.excerpt;
+      if (body.content !== undefined) updateData.content = body.content;
+      if (body.category !== undefined) updateData.category = body.category;
+      if (body.featured !== undefined) updateData.featured = body.featured;
+      if (body.published !== undefined) {
+        updateData.is_published = body.published;
+        if (body.published && !updateData.published_at) {
+          updateData.published_at = new Date().toISOString();
+        }
+      }
+      if (body.keywords !== undefined) updateData.keywords = body.keywords;
+      if (body.metaDescription !== undefined) updateData.meta_description = body.metaDescription;
+      
+      const { data, error } = await supabase.from('blog_posts')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      return c.json({ 
+        data: {
+          id: data.id,
+          title: data.title,
+          slug: data.slug,
+          excerpt: data.excerpt,
+          content: data.content,
+          category: data.category,
+          featured: data.featured,
+          published: data.is_published,
+          keywords: data.keywords,
+          metaDescription: data.meta_description,
+          publishedAt: data.published_at,
+        }
+      });
     } catch (error: any) {
       console.error("Error updating blog post:", error);
       return c.json({ error: `Failed to update blog post: ${error.message}` }, 500);
@@ -717,8 +814,14 @@ export function createAdminRoutes() {
 
   app.delete('/blog/posts/:id', async (c) => {
     try {
-      const storage = getStorage(c.env);
-      await storage.deleteBlogPost(c.req.param('id'));
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const id = c.req.param('id');
+      
+      const { error } = await supabase.from('blog_posts').delete().eq('id', id);
+      
+      if (error) throw error;
+      
       return c.json({ success: true });
     } catch (error: any) {
       console.error("Error deleting blog post:", error);
