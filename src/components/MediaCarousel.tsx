@@ -21,8 +21,8 @@ export default function MediaCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slides, setSlides] = useState<CarouselSlide[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mediaItems, setMediaItems] = useState<any[]>([]);
 
-<<<<<<< HEAD
   // Load carousel slides from database
   useEffect(() => {
     loadCarouselSlides();
@@ -39,59 +39,46 @@ export default function MediaCarousel() {
       if (error) {
         console.error('Error loading carousel slides:', error);
         // Fallback to hardcoded images if table doesn't exist yet
-        setSlides([]);
+        setMediaItems(getFallbackItems());
       } else if (data && data.length > 0) {
         setSlides(data);
+        // Convert database slides to media items format
+        const items = data.map(slide => ({
+          id: slide.id,
+          type: 'media',
+          title: slide.title,
+          description: slide.description,
+          image: slide.image_url.startsWith('http') ? slide.image_url : getStorageUrl('images', slide.image_url),
+          link: slide.link_url || null,
+          buttonText: slide.button_text || 'Learn More'
+        }));
+        setMediaItems(items);
       } else {
         // If no slides in database, use fallback hardcoded images
-        setSlides([]);
+        setMediaItems(getFallbackItems());
       }
     } catch (error) {
       console.error('Error loading carousel:', error);
-      setSlides([]);
+      setMediaItems(getFallbackItems());
     } finally {
       setLoading(false);
     }
   };
 
-  // Create media items from database slides or use fallback
-  const getMediaItems = () => {
-    if (slides.length > 0) {
-      // Use database slides
-      return slides.map(slide => ({
-        type: 'media',
-        title: slide.title,
-        description: slide.description,
-        image: slide.image_url,
-        link: slide.link_url,
-        buttonText: slide.button_text || 'Learn More'
-      }));
-    } else {
-      // Fallback to hardcoded images (for backward compatibility)
-      return [
-        { type: 'movie', title: 'Action Movies 2024', image: getStorageUrl('images', 'Playback-Tile-1024x512.webp'), year: '2024' },
-        { type: 'movie', title: 'Thriller & Horror', image: getStorageUrl('images', 'Movies-categories_11zon-1024x512.webp'), year: '2024' },
-        { type: 'series', title: 'Top US Series', image: getStorageUrl('images', 'IPTVSmarters TV IMAG.jpg'), year: '2024' },
-        { type: 'series', title: 'Trending Shows', image: getStorageUrl('images', 'iptv3.jpg'), year: '2024' },
-        { type: 'series', title: 'Binge-Worthy Series', image: getStorageUrl('images', 'OIP (11) websit pic.jpg'), year: '2024' },
-        { type: 'sport', title: 'NFL All Teams Live', image: getStorageUrl('images', 'c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg'), logo: '🏈' },
-        { type: 'sport', title: 'MLB All 30 Teams', image: getStorageUrl('images', 'BASEBALL.webp'), logo: '⚾' },
-        { type: 'sport', title: 'NBA All Games', image: getStorageUrl('images', 'downloadBASKET BALL.jpg'), logo: '🏀' },
-        { type: 'sport', title: 'UFC & Boxing PPV', image: getStorageUrl('images', 'UFC.jpg'), logo: '🥊' },
-      ];
-    }
+  // Fallback items if database is empty
+  const getFallbackItems = () => {
+    return [
+      { type: 'movie', title: 'Action Movies 2024', image: getStorageUrl('images', 'Playback-Tile-1024x512.webp'), year: '2024' },
+      { type: 'movie', title: 'Thriller & Horror', image: getStorageUrl('images', 'Movies-categories_11zon-1024x512.webp'), year: '2024' },
+      { type: 'series', title: 'Top US Series', image: getStorageUrl('images', 'IPTVSmarters TV IMAG.jpg'), year: '2024' },
+      { type: 'series', title: 'Trending Shows', image: getStorageUrl('images', 'iptv3.jpg'), year: '2024' },
+      { type: 'series', title: 'Binge-Worthy Series', image: getStorageUrl('images', 'OIP (11) websit pic.jpg'), year: '2024' },
+      { type: 'sport', title: 'NFL All Teams Live', image: getStorageUrl('images', 'c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg'), logo: '🏈' },
+      { type: 'sport', title: 'MLB All 30 Teams', image: getStorageUrl('images', 'BASEBALL.webp'), logo: '⚾' },
+      { type: 'sport', title: 'NBA All Games', image: getStorageUrl('images', 'downloadBASKET BALL.jpg'), logo: '🏀' },
+      { type: 'sport', title: 'UFC & Boxing PPV', image: getStorageUrl('images', 'UFC.jpg'), logo: '🥊' },
+    ];
   };
-
-  const mediaItems = getMediaItems();
-=======
-  // SPORTS ONLY - Football, Baseball, Basketball, UFC from Supabase storage
-  const mediaItems = [
-    { type: 'sport', title: 'NFL All Teams Live', image: getStorageUrl('images', 'c643f060-ea1b-462f-8509-ea17b005318aNFL.jpg'), logo: '🏈' },
-    { type: 'sport', title: 'MLB All 30 Teams', image: getStorageUrl('images', 'BASEBALL.webp'), logo: '⚾' },
-    { type: 'sport', title: 'NBA All Games', image: getStorageUrl('images', 'downloadBASKET BALL.jpg'), logo: '🏀' },
-    { type: 'sport', title: 'UFC & Boxing PPV', image: getStorageUrl('images', 'UFC.jpg'), logo: '🥊' },
-  ];
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 
   useEffect(() => {
     if (mediaItems.length === 0) return;
