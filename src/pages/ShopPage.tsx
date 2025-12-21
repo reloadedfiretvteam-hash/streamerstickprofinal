@@ -4,6 +4,7 @@ import { ShoppingCart, Search, Filter, Star, CreditCard } from 'lucide-react';
 import Footer from '../components/Footer';
 import CustomerReviewsSection from '../components/CustomerReviewsSection';
 import ValidatedImage from '../components/ValidatedImage';
+import Navigation from '../components/Navigation';
 import { handleBuyClick } from '../utils/paymentLinks';
 
 // Fallback images
@@ -289,27 +290,10 @@ export default function ShopPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Header */}
-      <nav className="bg-gray-900 text-white sticky top-0 z-50 shadow-lg">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <a href="/" className="flex items-center gap-2 hover:text-orange-400 transition-colors">
-              <span className="text-xl font-bold">← Back to Home</span>
-            </a>
-            <a
-              href="/checkout"
-              className="relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-lg transition-all transform hover:scale-105 font-semibold shadow-lg"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              <span>Cart</span>
-              {cartItemCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold animate-pulse">
-                  {cartItemCount}
-                </span>
-              )}
-            </a>
-          </div>
-        </div>
-      </nav>
+      <Navigation 
+        cartItemCount={cartItemCount} 
+        onCartClick={() => window.location.href = '/checkout'} 
+      />
 
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white py-8">
