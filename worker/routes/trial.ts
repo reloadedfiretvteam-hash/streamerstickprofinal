@@ -83,22 +83,34 @@ export function createTrialRoutes() {
             
             <p>Thank you for trying StreamStickPro! ${isExistingUser ? 'Your existing account has been extended for a 36-hour trial.' : 'Here are your <strong>36-hour free trial</strong> credentials:'}</p>
             
-            <div style="background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%); padding: 25px; border-radius: 12px; margin: 20px 0; color: white;">
-              <h2 style="margin-top: 0; color: white;">Your Trial Credentials</h2>
-              <p style="font-size: 16px;"><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #fef08a;">${IPTV_PORTAL_URL}</a></p>
-              <p style="font-size: 18px;"><strong>Username:</strong> ${trialCredentials.username}</p>
-              ${!isExistingUser ? `<p style="font-size: 18px;"><strong>Password:</strong> ${trialCredentials.password}</p>` : '<p style="font-size: 14px;">(Use your existing password)</p>'}
+            <div style="background: #f9fafb; border: 2px solid #9333ea; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h2 style="margin-top: 0; color: #9333ea;">Your Trial Credentials</h2>
+              <div style="margin: 15px 0;">
+                <p><strong>Username:</strong> <span style="font-family: monospace; font-size: 16px; color: #9333ea; font-weight: bold;">${trialCredentials.username}</span></p>
+                ${!isExistingUser ? `<p><strong>Password:</strong> <span style="font-family: monospace; font-size: 16px; color: #9333ea; font-weight: bold;">${trialCredentials.password}</span></p>` : '<p style="font-size: 14px;">(Use your existing password)</p>'}
+              </div>
+            </div>
+            
+            <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0 0 10px 0;"><strong>Service Portal URL:</strong></p>
+              <p style="margin: 0;"><a href="${IPTV_PORTAL_URL}" style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 18px;" target="_blank">${IPTV_PORTAL_URL}</a></p>
+              <p style="margin: 10px 0 0 0; font-size: 14px;">Use the credentials above to log in to your service portal.</p>
+            </div>
+
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0 0 10px 0;"><strong>📺 Setup Tutorial Video:</strong></p>
+              <p style="margin: 0;"><a href="${SETUP_VIDEO_URL}" style="color: #d97706; text-decoration: none; font-weight: bold;" target="_blank">Watch YouTube Setup Tutorial →</a></p>
+              <p style="margin: 10px 0 0 0; font-size: 14px;">Follow along with our step-by-step video guide to get started.</p>
             </div>
             
             <div style="background: #f3e8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="color: #7c3aed; margin-top: 0;">Quick Setup Guide:</h3>
+              <h3 style="color: #7c3aed; margin-top: 0;">Quick Setup Steps:</h3>
               <ol style="color: #4c1d95;">
                 <li>Download IPTV Smarters or TiviMate app on your device</li>
                 <li>Enter the portal URL: ${IPTV_PORTAL_URL}</li>
                 <li>Enter your username and password above</li>
                 <li>Enjoy 18,000+ live channels for FREE!</li>
               </ol>
-              <p><strong>Watch our setup video:</strong> <a href="${SETUP_VIDEO_URL}" style="color: #7c3aed;">${SETUP_VIDEO_URL}</a></p>
             </div>
             
             <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
@@ -148,10 +160,12 @@ export function createTrialRoutes() {
             </div>
             ` : ''}
             
-            <div style="background: #e0e7ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h2 style="margin-top: 0; color: #4338ca;">Trial Credentials Sent</h2>
-              <p><strong>Username:</strong> ${trialCredentials.username}</p>
-              ${!isExistingUser ? `<p><strong>Password:</strong> ${trialCredentials.password}</p>` : '<p>(Using existing password)</p>'}
+            <div style="background: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+              <h2 style="margin-top: 0; color: #15803d;">Trial Credentials Sent</h2>
+              <p><strong>Username:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${trialCredentials.username}</code></p>
+              ${!isExistingUser ? `<p><strong>Password:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${trialCredentials.password}</code></p>` : '<p>(Using existing password)</p>'}
+              <p><strong>Service Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #15803d;">${IPTV_PORTAL_URL}</a></p>
+              <p><strong>Setup Video:</strong> <a href="${SETUP_VIDEO_URL}" style="color: #15803d;">${SETUP_VIDEO_URL}</a></p>
               <p><strong>Expires:</strong> 36 hours from signup</p>
             </div>
             
