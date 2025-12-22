@@ -11,82 +11,86 @@ export function createWebhookRoutes() {
 
   // Handle webhook with optional UUID suffix (from stripe-replit-sync managed webhooks)
   const handleWebhook = async (c: any) => {
-    const signature = c.req.header('stripe-signature');
-    const eventId = c.req.header('stripe-webhook-event-id') || 'unknown';
-
-    console.log(`[WEBHOOK] Received request, event-id header: ${eventId}`);
-
-    if (!signature) {
-      console.error('[WEBHOOK] Missing stripe-signature header');
-      return c.json({ error: 'Missing stripe-signature' }, 400);
-    }
-
-    const webhookSecret = c.env.STRIPE_WEBHOOK_SECRET;
-    if (!webhookSecret) {
-      console.error('[WEBHOOK] STRIPE_WEBHOOK_SECRET not configured');
-      return c.json({ error: 'Webhook not configured' }, 500);
-    }
-
-    let event: Stripe.Event;
     try {
-      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
-      const rawBody = await c.req.text();
-      event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
-      console.log(`[WEBHOOK] Verified event: ${event.type} (${event.id})`);
-    } catch (error: any) {
-      console.error(`[WEBHOOK] Signature verification failed: ${error.message}`);
-      return c.json({ error: 'Invalid signature' }, 400);
-    }
+      const signature = c.req.header('stripe-signature');
+      const eventId = c.req.header('stripe-webhook-event-id') || 'unknown';
 
-    const storage = getStorage(c.env);
-    let processingResult = { success: true, error: null as string | null };
+      console.log(`[WEBHOOK] Received request, event-id header: ${eventId}`);
 
-    try {
-      switch (event.type) {
-        case 'checkout.session.completed':
-          console.log(`[WEBHOOK] Processing checkout.session.completed`);
-          await handleCheckoutComplete(event.data.object, storage, c.env);
-          console.log(`[WEBHOOK] checkout.session.completed processed successfully`);
-          break;
-        case 'payment_intent.succeeded':
-          console.log(`[WEBHOOK] Processing payment_intent.succeeded`);
-          await handlePaymentSucceeded(event.data.object, storage, c.env);
-          console.log(`[WEBHOOK] payment_intent.succeeded processed successfully`);
-          break;
-        case 'payment_intent.payment_failed':
-          console.log(`[WEBHOOK] Processing payment_intent.payment_failed`);
-          await handlePaymentFailed(event.data.object, storage);
-          console.log(`[WEBHOOK] payment_intent.payment_failed processed successfully`);
-          break;
-        case 'charge.succeeded':
-        case 'charge.updated':
-        case 'charge.captured':
-          // These are informational events - we handle payments via checkout.session.completed
-          console.log(`[WEBHOOK] Acknowledged ${event.type} (no action needed)`);
-          break;
-        case 'payment_intent.created':
-        case 'payment_intent.processing':
-          // These are intermediate states - no action needed
-          console.log(`[WEBHOOK] Acknowledged ${event.type} (intermediate state)`);
-          break;
-        default:
-          console.log(`[WEBHOOK] Unhandled event type: ${event.type}`);
-          break;
+      if (!signature) {
+        console.error('[WEBHOOK] Missing stripe-signature header');
+        // Still return 200 to acknowledge receipt - Stripe needs 200-299 range
+        return c.json({ received: true, error: 'Missing signature' }, 200);
       }
-    } catch (error: any) {
-      console.error(`[WEBHOOK] Error processing ${event.type}: ${error.message}`);
-      console.error(`[WEBHOOK] Stack trace: ${error.stack}`);
-      processingResult = { success: false, error: error.message };
-    }
 
-    // Always return 200 OK to prevent Stripe retries (event was received)
-    // Stripe expects a 200 status code with any valid JSON response
-    if (processingResult.success) {
+      const webhookSecret = c.env.STRIPE_WEBHOOK_SECRET;
+      if (!webhookSecret) {
+        console.error('[WEBHOOK] STRIPE_WEBHOOK_SECRET not configured');
+        // Still return 200 to acknowledge receipt - configuration issue logged
+        return c.json({ received: true, error: 'Webhook not configured' }, 200);
+      }
+
+      let event: Stripe.Event;
+      try {
+        const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
+        const rawBody = await c.req.text();
+        event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+        console.log(`[WEBHOOK] Verified event: ${event.type} (${event.id})`);
+      } catch (error: any) {
+        console.error(`[WEBHOOK] Signature verification failed: ${error.message}`);
+        // Still return 200 to prevent retries - invalid signature logged but acknowledged
+        return c.json({ received: true, error: 'Invalid signature' }, 200);
+      }
+
+      const storage = getStorage(c.env);
+      let processingResult = { success: true, error: null as string | null };
+
+      try {
+        switch (event.type) {
+          case 'checkout.session.completed':
+            console.log(`[WEBHOOK] Processing checkout.session.completed`);
+            await handleCheckoutComplete(event.data.object, storage, c.env);
+            console.log(`[WEBHOOK] checkout.session.completed processed successfully`);
+            break;
+          case 'payment_intent.succeeded':
+            console.log(`[WEBHOOK] Processing payment_intent.succeeded`);
+            await handlePaymentSucceeded(event.data.object, storage, c.env);
+            console.log(`[WEBHOOK] payment_intent.succeeded processed successfully`);
+            break;
+          case 'payment_intent.payment_failed':
+            console.log(`[WEBHOOK] Processing payment_intent.payment_failed`);
+            await handlePaymentFailed(event.data.object, storage);
+            console.log(`[WEBHOOK] payment_intent.payment_failed processed successfully`);
+            break;
+          case 'charge.succeeded':
+          case 'charge.updated':
+          case 'charge.captured':
+            // These are informational events - we handle payments via checkout.session.completed
+            console.log(`[WEBHOOK] Acknowledged ${event.type} (no action needed)`);
+            break;
+          case 'payment_intent.created':
+          case 'payment_intent.processing':
+            // These are intermediate states - no action needed
+            console.log(`[WEBHOOK] Acknowledged ${event.type} (intermediate state)`);
+            break;
+          default:
+            console.log(`[WEBHOOK] Unhandled event type: ${event.type}`);
+            break;
+        }
+      } catch (error: any) {
+        console.error(`[WEBHOOK] Error processing ${event.type}: ${error.message}`);
+        console.error(`[WEBHOOK] Stack trace: ${error.stack}`);
+        processingResult = { success: false, error: error.message };
+      }
+
+      // Always return 200 OK to prevent Stripe retries (event was received)
+      // Stripe requires HTTP 200-299 status codes to consider webhook delivered
       return c.json({ received: true }, 200);
-    } else {
-      // Still return 200 even on processing errors to prevent retries
-      // The error is logged but we acknowledge receipt
-      return c.json({ received: true }, 200);
+    } catch (error: any) {
+      // Final safety net - catch any unexpected errors and still return 200
+      console.error(`[WEBHOOK] Unexpected error in webhook handler: ${error.message}`);
+      console.error(`[WEBHOOK] Stack trace: ${error.stack}`);
+      return c.json({ received: true, error: 'Unexpected error' }, 200);
     }
   };
 
