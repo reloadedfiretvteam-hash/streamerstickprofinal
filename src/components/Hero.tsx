@@ -1,4 +1,4 @@
-import { ShoppingCart, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getStorageUrl } from '../lib/supabase';
 import { supabase } from '../lib/supabase';
@@ -77,10 +77,6 @@ export default function Hero() {
     // If all variations fail, use the original as fallback
     setHeroImageUrl(getStorageUrl('images', 'hero-firestick-breakout.jpg'));
   };
-  const goToShop = () => {
-    window.location.href = '/shop';
-  };
-
   const scrollToAbout = () => {
     document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -141,15 +137,7 @@ export default function Hero() {
             18,000+ live channels • 60,000+ movies & shows • All sports & PPV events
           </p>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8 animate-slide-up animation-delay-400">
-            <button
-              onClick={goToShop}
-              className="group px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-xl font-bold text-lg transition-all transform hover:scale-105 hover:shadow-2xl shadow-orange-500/50 inline-flex items-center justify-center gap-3"
-            >
-              <ShoppingCart className="w-6 h-6 group-hover:animate-bounce" />
-              Shop Now
-              <span className="bg-white/20 rounded-full px-3 py-1 text-xs font-semibold">Save up to 50%</span>
-            </button>
+          <div className="flex justify-center mb-8 animate-slide-up animation-delay-400">
             <button
               onClick={scrollToAbout}
               className="px-8 py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 border-2 border-white/20 hover:border-white/40 rounded-xl font-bold text-lg transition-all inline-flex items-center justify-center gap-2"
