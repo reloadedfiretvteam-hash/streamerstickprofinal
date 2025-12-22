@@ -79,16 +79,14 @@ export function createWebhookRoutes() {
       processingResult = { success: false, error: error.message };
     }
 
-    // Always return 200 to prevent Stripe retries (event was received)
+    // Always return 200 OK to prevent Stripe retries (event was received)
+    // Stripe expects a 200 status code with any valid JSON response
     if (processingResult.success) {
-      return c.json({ received: true, event: event.type, status: 'processed' });
+      return c.json({ received: true }, 200);
     } else {
-      return c.json({ 
-        received: true, 
-        event: event.type, 
-        status: 'error', 
-        error: processingResult.error 
-      });
+      // Still return 200 even on processing errors to prevent retries
+      // The error is logged but we acknowledge receipt
+      return c.json({ received: true }, 200);
     }
   };
 
