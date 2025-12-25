@@ -105,20 +105,31 @@ export async function submitUrlToIndexNow(url: string): Promise<IndexNowResponse
 }
 
 /**
- * Submit product page URL to IndexNow
- * @param productSlug - Product slug (e.g., 'firestick-4k')
+ * Submit shop page to IndexNow when products are updated
+ * Since products are displayed on /shop page, submitting the shop page URL
+ * will notify search engines to re-crawl and discover new/updated products
  */
-export async function submitProductToIndexNow(productSlug: string): Promise<IndexNowResponse> {
-  const productUrl = `/shop/${productSlug}`;
-  return submitUrlToIndexNow(productUrl);
+export async function submitShopPageToIndexNow(): Promise<IndexNowResponse> {
+  return submitUrlToIndexNow('/shop');
 }
 
 /**
- * Submit multiple product URLs at once
+ * Submit product page URL to IndexNow (deprecated - use submitShopPageToIndexNow)
+ * Products are displayed on /shop page, not individual product pages
+ * @deprecated Use submitShopPageToIndexNow() instead
+ */
+export async function submitProductToIndexNow(productSlug: string): Promise<IndexNowResponse> {
+  // Submit shop page since products are listed there
+  return submitShopPageToIndexNow();
+}
+
+/**
+ * Submit multiple product URLs at once (deprecated - use submitShopPageToIndexNow)
+ * @deprecated Use submitShopPageToIndexNow() instead
  */
 export async function submitProductsToIndexNow(productSlugs: string[]): Promise<IndexNowResponse> {
-  const productUrls = productSlugs.map(slug => `/shop/${slug}`);
-  return submitToIndexNow(productUrls);
+  // Submit shop page since products are listed there
+  return submitShopPageToIndexNow();
 }
 
 /**

@@ -1187,13 +1187,12 @@ export default function AdminPanel() {
         if (synced) {
           showToast('Product updated successfully! Shadow product synced.', 'success');
           
-          // Submit to IndexNow after successful update
+          // Submit shop page to IndexNow after successful update
           try {
-            const { submitProductToIndexNow } = await import('@/lib/indexnow');
-            const productSlug = editingProduct.slug || editingProduct.id;
-            const result = await submitProductToIndexNow(productSlug);
+            const { submitShopPageToIndexNow } = await import('@/lib/indexnow');
+            const result = await submitShopPageToIndexNow();
             if (result.success) {
-              console.log('IndexNow: Product URL submitted successfully');
+              console.log('IndexNow: Shop page submitted successfully');
             } else {
               console.warn('IndexNow submission warning:', result.message);
             }
@@ -1221,13 +1220,12 @@ export default function AdminPanel() {
         if (synced) {
           showToast('Product created successfully! Shadow product synced.', 'success');
           
-          // Submit to IndexNow after successful creation
+          // Submit shop page to IndexNow after successful creation
           try {
-            const { submitProductToIndexNow } = await import('@/lib/indexnow');
-            const productSlug = newProduct.slug || newProduct.id;
-            const result = await submitProductToIndexNow(productSlug);
+            const { submitShopPageToIndexNow } = await import('@/lib/indexnow');
+            const result = await submitShopPageToIndexNow();
             if (result.success) {
-              console.log('IndexNow: New product URL submitted successfully');
+              console.log('IndexNow: Shop page submitted successfully');
             } else {
               console.warn('IndexNow submission warning:', result.message);
             }
