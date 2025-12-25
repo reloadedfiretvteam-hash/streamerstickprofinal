@@ -25,7 +25,19 @@ export function FreeTrial() {
   const [error, setError] = useState("");
 
   const handleCountryOptionChange = (option: keyof typeof countryOptions, checked: boolean) => {
-    setCountryOptions(prev => ({ ...prev, [option]: checked }));
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FreeTrial.tsx:28',message:'handleCountryOptionChange called',data:{option,checked,currentState:countryOptions},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    setCountryOptions(prev => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FreeTrial.tsx:30',message:'setCountryOptions before update',data:{prevState:prev,newValue:checked},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      const newState = { ...prev, [option]: checked };
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FreeTrial.tsx:33',message:'setCountryOptions after update',data:{newState},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      return newState;
+    });
   };
 
   const buildCountryPreference = () => {
@@ -103,12 +115,20 @@ export function FreeTrial() {
     );
   }
 
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FreeTrial.tsx:106',message:'Component render',data:{countryOptions,success,loading,error},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+  // #endregion
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="max-w-4xl mx-auto mb-12 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 border-2 border-purple-500/50 rounded-2xl overflow-hidden"
       data-testid="free-trial-box"
+      onAnimationStart={() => {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FreeTrial.tsx:110',message:'Framer Motion animation start',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
+      }}
     >
       <div className="grid md:grid-cols-5 gap-0">
         <div className="md:col-span-2 relative h-48 md:h-auto">
@@ -185,29 +205,32 @@ export function FreeTrial() {
               </Label>
               <div className="grid grid-cols-3 gap-2">
                 <div 
-                  className={`flex items-center space-x-2 p-3 rounded-lg border transition-all cursor-pointer ${
+                  className={`flex items-center space-x-2 p-3 rounded-lg border transition-all ${
                     countryOptions.usaOnly 
                       ? "border-purple-500 bg-purple-500/20" 
                       : "border-gray-600 hover:border-gray-500"
                   }`}
-                  onClick={() => handleCountryOptionChange("usaOnly", !countryOptions.usaOnly)}
                   data-testid="checkbox-trial-usa-only"
                 >
                   <Checkbox 
                     checked={countryOptions.usaOnly}
-                    onCheckedChange={(checked) => handleCountryOptionChange("usaOnly", !!checked)}
+                    onCheckedChange={(checked) => {
+                      // #region agent log
+                      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'FreeTrial.tsx:198',message:'Checkbox onCheckedChange fired',data:{checked,currentValue:countryOptions.usaOnly},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+                      // #endregion
+                      handleCountryOptionChange("usaOnly", !!checked);
+                    }}
                     id="trial-usa-only"
                   />
                   <Label htmlFor="trial-usa-only" className="cursor-pointer text-sm">USA Only</Label>
                 </div>
                 
                 <div 
-                  className={`flex items-center space-x-2 p-3 rounded-lg border transition-all cursor-pointer ${
+                  className={`flex items-center space-x-2 p-3 rounded-lg border transition-all ${
                     countryOptions.usaCanadaUk 
                       ? "border-purple-500 bg-purple-500/20" 
                       : "border-gray-600 hover:border-gray-500"
                   }`}
-                  onClick={() => handleCountryOptionChange("usaCanadaUk", !countryOptions.usaCanadaUk)}
                   data-testid="checkbox-trial-usa-canada-uk"
                 >
                   <Checkbox 
@@ -219,12 +242,11 @@ export function FreeTrial() {
                 </div>
                 
                 <div 
-                  className={`flex items-center space-x-2 p-3 rounded-lg border transition-all cursor-pointer ${
+                  className={`flex items-center space-x-2 p-3 rounded-lg border transition-all ${
                     countryOptions.allCountries 
                       ? "border-purple-500 bg-purple-500/20" 
                       : "border-gray-600 hover:border-gray-500"
                   }`}
-                  onClick={() => handleCountryOptionChange("allCountries", !countryOptions.allCountries)}
                   data-testid="checkbox-trial-all-countries"
                 >
                   <Checkbox 

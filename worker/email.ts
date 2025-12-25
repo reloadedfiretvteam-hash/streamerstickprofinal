@@ -70,62 +70,49 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
   const resend = new Resend(env.RESEND_API_KEY);
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
 
-  const credentials = order.generatedUsername && order.generatedPassword
-    ? { username: order.generatedUsername, password: order.generatedPassword }
-    : generateCredentials(order);
+  // Use existing credentials or generate new ones and save them
+  let credentials: { username: string; password: string };
+  if (order.generatedUsername && order.generatedPassword) {
+    credentials = { username: order.generatedUsername, password: order.generatedPassword };
+  } else {
+    // Generate unique credentials and save them to the order
+    credentials = await generateUniqueCredentials(order, storage);
+    await storage.updateOrder(order.id, {
+      generatedUsername: credentials.username,
+      generatedPassword: credentials.password,
+    });
+    console.log(`[EMAIL] Generated and saved credentials for order ${order.id}: ${credentials.username}`);
+  }
 
   const productIds = order.realProductId?.split(',') || [];
   const hasIPTV = productIds.some(id => id.trim().startsWith('iptv-'));
   const hasFireStick = productIds.some(id => id.trim().startsWith('firestick-'));
+  const hasAnyDigitalProduct = hasIPTV || hasFireStick;
 
-  let productInstructions = '';
-  if (hasIPTV) {
-    productInstructions = `
-      <div style="background: #f9fafb; border: 2px solid #f97316; border-radius: 8px; padding: 20px; margin: 20px 0;">
-        <h2 style="margin-top: 0; color: #f97316;">Your Login Credentials</h2>
-        <div style="margin: 15px 0;">
-          <p><strong>Username:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${credentials.username}</span></p>
-          <p><strong>Password:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${credentials.password}</span></p>
-        </div>
+  // Default credentials section that always includes credentials
+  const defaultCredentialsSection = `
+    <div style="background: #f9fafb; border: 2px solid #f97316; border-radius: 8px; padding: 20px; margin: 20px 0;">
+      <h2 style="margin-top: 0; color: #f97316;">Your Login Credentials</h2>
+      <div style="margin: 15px 0;">
+        <p><strong>Username:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${credentials.username}</span></p>
+        <p><strong>Password:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${credentials.password}</span></p>
       </div>
-      
-      <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0 0 10px 0;"><strong>Service Portal URL:</strong></p>
-        <p style="margin: 0;"><a href="${IPTV_PORTAL_URL}" style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 18px;">${IPTV_PORTAL_URL}</a></p>
-        <p style="margin: 10px 0 0 0; font-size: 14px;">Use the credentials above to log in to your service portal.</p>
-      </div>
+    </div>
+    
+    <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
+      <p style="margin: 0 0 10px 0;"><strong>Service Portal URL:</strong></p>
+      <p style="margin: 0;"><a href="${IPTV_PORTAL_URL}" style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 18px;">${IPTV_PORTAL_URL}</a></p>
+      <p style="margin: 10px 0 0 0; font-size: 14px;">Use the credentials above to log in to your service portal.</p>
+    </div>
 
-      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0 0 10px 0;"><strong>📺 Setup Tutorial Video:</strong></p>
-        <p style="margin: 0;"><a href="${SETUP_VIDEO_URL}" style="color: #d97706; text-decoration: none; font-weight: bold;" target="_blank">Watch YouTube Setup Tutorial →</a></p>
-        <p style="margin: 10px 0 0 0; font-size: 14px;">Follow along with our step-by-step video guide to get started.</p>
-      </div>
-    `;
-  }
-  
-  if (hasFireStick) {
-    productInstructions = `
-      <div style="background: #f9fafb; border: 2px solid #f97316; border-radius: 8px; padding: 20px; margin: 20px 0;">
-        <h2 style="margin-top: 0; color: #f97316;">Your Login Credentials</h2>
-        <div style="margin: 15px 0;">
-          <p><strong>Username:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${credentials.username}</span></p>
-          <p><strong>Password:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${credentials.password}</span></p>
-        </div>
-      </div>
-      
-      <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0 0 10px 0;"><strong>Service Portal URL:</strong></p>
-        <p style="margin: 0;"><a href="${IPTV_PORTAL_URL}" style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 18px;">${IPTV_PORTAL_URL}</a></p>
-        <p style="margin: 10px 0 0 0; font-size: 14px;">Use the credentials above to log in to your service portal.</p>
-      </div>
+    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+      <p style="margin: 0 0 10px 0;"><strong>📺 Setup Tutorial Video:</strong></p>
+      <p style="margin: 0;"><a href="${SETUP_VIDEO_URL}" style="color: #d97706; text-decoration: none; font-weight: bold;" target="_blank">Watch YouTube Setup Tutorial →</a></p>
+      <p style="margin: 10px 0 0 0; font-size: 14px;">Follow along with our step-by-step video guide to get started.</p>
+    </div>
+  `;
 
-      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-        <p style="margin: 0 0 10px 0;"><strong>📺 Setup Tutorial Video:</strong></p>
-        <p style="margin: 0;"><a href="${SETUP_VIDEO_URL}" style="color: #d97706; text-decoration: none; font-weight: bold;" target="_blank">Watch YouTube Setup Tutorial →</a></p>
-        <p style="margin: 10px 0 0 0; font-size: 14px;">Follow along with our step-by-step video guide to get started.</p>
-      </div>
-    `;
-  }
+  let productInstructions = defaultCredentialsSection;
 
   try {
     await resend.emails.send({
