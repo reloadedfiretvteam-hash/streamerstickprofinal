@@ -9,13 +9,15 @@ const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
 
 export async function sendOrderConfirmation(order: Order, env: Env): Promise<void> {
   if (!env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY not configured - skipping order confirmation email');
-    return;
+    const error = 'RESEND_API_KEY not configured in Cloudflare Workers - cannot send order confirmation email';
+    console.error(`[EMAIL] ${error}`);
+    throw new Error(error);
   }
   
   if (!order.customerEmail) {
-    console.error(`[EMAIL] Cannot send order confirmation: missing customerEmail for order ${order.id}`);
-    return;
+    const error = `Cannot send order confirmation: missing customerEmail for order ${order.id}`;
+    console.error(`[EMAIL] ${error}`);
+    throw new Error(error);
   }
   
   const resend = new Resend(env.RESEND_API_KEY);
@@ -23,11 +25,12 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
 
   const priceFormatted = (order.amount / 100).toFixed(2);
   
-  await resend.emails.send({
-    from: fromEmail,
-    to: order.customerEmail,
-    subject: `Order Confirmation - ${order.realProductName}`,
-    html: `
+  try {
+    await resend.emails.send({
+      from: fromEmail,
+      to: order.customerEmail,
+      subject: `Order Confirmation - ${order.realProductName}`,
+      html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #1a1a1a;">Thank You for Your Order!</h1>
         
@@ -50,9 +53,12 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
         <p>Best regards,<br>StreamStickPro Team</p>
       </div>
     `,
-  });
-
-  console.log(`Order confirmation email sent to ${order.customerEmail}`);
+    });
+    console.log(`[EMAIL] Order confirmation email sent successfully to ${order.customerEmail}`);
+  } catch (error: any) {
+    console.error(`[EMAIL] Failed to send order confirmation email to ${order.customerEmail}:`, error.message);
+    throw new Error(`Failed to send order confirmation email: ${error.message}`);
+  }
 }
 
 export async function sendCredentialsEmail(order: Order, env: Env, storage: Storage): Promise<void> {
@@ -62,13 +68,15 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
   }
 
   if (!env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY not configured - skipping credentials email');
-    return;
+    const error = 'RESEND_API_KEY not configured in Cloudflare Workers - cannot send credentials email';
+    console.error(`[EMAIL] ${error}`);
+    throw new Error(error);
   }
   
   if (!order.customerEmail) {
-    console.error(`[EMAIL] Cannot send credentials: missing customerEmail for order ${order.id}`);
-    return;
+    const error = `Cannot send credentials: missing customerEmail for order ${order.id}`;
+    console.error(`[EMAIL] ${error}`);
+    throw new Error(error);
   }
   
   const resend = new Resend(env.RESEND_API_KEY);
@@ -131,11 +139,12 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
     `;
   }
 
-  await resend.emails.send({
-    from: fromEmail,
-    to: order.customerEmail,
-    subject: `Your Login Credentials - ${order.realProductName}`,
-    html: `
+  try {
+    await resend.emails.send({
+      from: fromEmail,
+      to: order.customerEmail,
+      subject: `Your Login Credentials - ${order.realProductName}`,
+      html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #1a1a1a;">Your Credentials Are Ready!</h1>
         
@@ -154,21 +163,26 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
         <p>Best regards,<br>StreamStickPro Team</p>
       </div>
     `,
-  });
-
-  await storage.updateOrder(order.id, { credentialsSent: true });
-  console.log(`Credentials email sent to ${order.customerEmail}`);
+    });
+    await storage.updateOrder(order.id, { credentialsSent: true });
+    console.log(`[EMAIL] Credentials email sent successfully to ${order.customerEmail}`);
+  } catch (error: any) {
+    console.error(`[EMAIL] Failed to send credentials email to ${order.customerEmail}:`, error.message);
+    throw new Error(`Failed to send credentials email: ${error.message}`);
+  }
 }
 
 export async function sendRenewalConfirmationEmail(order: Order, env: Env): Promise<void> {
   if (!env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY not configured - skipping renewal email');
-    return;
+    const error = 'RESEND_API_KEY not configured in Cloudflare Workers - cannot send renewal email';
+    console.error(`[EMAIL] ${error}`);
+    throw new Error(error);
   }
   
   if (!order.customerEmail) {
-    console.error(`[EMAIL] Cannot send renewal confirmation: missing customerEmail for order ${order.id}`);
-    return;
+    const error = `Cannot send renewal confirmation: missing customerEmail for order ${order.id}`;
+    console.error(`[EMAIL] ${error}`);
+    throw new Error(error);
   }
   
   const resend = new Resend(env.RESEND_API_KEY);
@@ -177,11 +191,12 @@ export async function sendRenewalConfirmationEmail(order: Order, env: Env): Prom
   const priceFormatted = (order.amount / 100).toFixed(2);
   const existingUsername = order.existingUsername || 'your current username';
 
-  await resend.emails.send({
-    from: fromEmail,
-    to: order.customerEmail,
-    subject: `Subscription Renewed! - ${order.realProductName}`,
-    html: `
+  try {
+    await resend.emails.send({
+      from: fromEmail,
+      to: order.customerEmail,
+      subject: `Subscription Renewed! - ${order.realProductName}`,
+      html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #1a1a1a;">🎉 Your Subscription Has Been Extended!</h1>
         
@@ -213,9 +228,12 @@ export async function sendRenewalConfirmationEmail(order: Order, env: Env): Prom
         <p>Best regards,<br>StreamStickPro Team</p>
       </div>
     `,
-  });
-
-  console.log(`Renewal confirmation email sent to ${order.customerEmail}`);
+    });
+    console.log(`[EMAIL] Renewal confirmation email sent successfully to ${order.customerEmail}`);
+  } catch (error: any) {
+    console.error(`[EMAIL] Failed to send renewal confirmation email to ${order.customerEmail}:`, error.message);
+    throw new Error(`Failed to send renewal confirmation email: ${error.message}`);
+  }
 }
 
 export function generateCredentials(order: Order): { username: string; password: string } {
@@ -286,8 +304,9 @@ export async function generateUniqueCredentials(order: Order, storage: Storage):
 
 export async function sendOwnerOrderNotification(order: Order, env: Env): Promise<void> {
   if (!env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY not configured - skipping owner notification');
-    return;
+    const error = 'RESEND_API_KEY not configured in Cloudflare Workers - cannot send owner notification email';
+    console.error(`[EMAIL] ${error}`);
+    throw new Error(error);
   }
   
   // Owner notification doesn't need customer email, but log if order email is missing
@@ -339,11 +358,12 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
         </div>
   `;
   
-  await resend.emails.send({
-    from: fromEmail,
-    to: OWNER_EMAIL,
-    subject: `${emoji} ${orderTypeEmoji} ${orderTypeLabel} - $${priceFormatted} - ${order.realProductName}`,
-    html: `
+  try {
+    await resend.emails.send({
+      from: fromEmail,
+      to: OWNER_EMAIL,
+      subject: `${emoji} ${orderTypeEmoji} ${orderTypeLabel} - $${priceFormatted} - ${order.realProductName}`,
+      html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: ${headerColor}; padding: 20px; border-radius: 12px 12px 0 0;">
           <h1 style="color: white; margin: 0;">💰 ${isRenewal ? 'Subscription Renewal!' : 'New Paid Order!'}</h1>
@@ -397,7 +417,10 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
         </p>
       </div>
     `,
-  });
-
-  console.log(`Owner notification sent for order ${order.id} to ${OWNER_EMAIL}`);
+    });
+    console.log(`[EMAIL] Owner notification sent successfully for order ${order.id} to ${OWNER_EMAIL}`);
+  } catch (error: any) {
+    console.error(`[EMAIL] Failed to send owner notification email for order ${order.id}:`, error.message);
+    throw new Error(`Failed to send owner notification email: ${error.message}`);
+  }
 }
