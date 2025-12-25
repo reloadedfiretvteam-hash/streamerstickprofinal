@@ -8,12 +8,6 @@ const IPTV_PORTAL_URL = 'http://ky-tv.cc';
 const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
 
 export async function sendOrderConfirmation(order: Order, env: Env): Promise<void> {
-  if (!env.RESEND_API_KEY) {
-    const error = 'RESEND_API_KEY not configured in Cloudflare Workers - cannot send order confirmation email';
-    console.error(`[EMAIL] ${error}`);
-    throw new Error(error);
-  }
-  
   if (!order.customerEmail) {
     const error = `Cannot send order confirmation: missing customerEmail for order ${order.id}`;
     console.error(`[EMAIL] ${error}`);
@@ -67,12 +61,6 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
     return;
   }
 
-  if (!env.RESEND_API_KEY) {
-    const error = 'RESEND_API_KEY not configured in Cloudflare Workers - cannot send credentials email';
-    console.error(`[EMAIL] ${error}`);
-    throw new Error(error);
-  }
-  
   if (!order.customerEmail) {
     const error = `Cannot send credentials: missing customerEmail for order ${order.id}`;
     console.error(`[EMAIL] ${error}`);
@@ -173,12 +161,6 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
 }
 
 export async function sendRenewalConfirmationEmail(order: Order, env: Env): Promise<void> {
-  if (!env.RESEND_API_KEY) {
-    const error = 'RESEND_API_KEY not configured in Cloudflare Workers - cannot send renewal email';
-    console.error(`[EMAIL] ${error}`);
-    throw new Error(error);
-  }
-  
   if (!order.customerEmail) {
     const error = `Cannot send renewal confirmation: missing customerEmail for order ${order.id}`;
     console.error(`[EMAIL] ${error}`);
@@ -303,12 +285,6 @@ export async function generateUniqueCredentials(order: Order, storage: Storage):
 }
 
 export async function sendOwnerOrderNotification(order: Order, env: Env): Promise<void> {
-  if (!env.RESEND_API_KEY) {
-    const error = 'RESEND_API_KEY not configured in Cloudflare Workers - cannot send owner notification email';
-    console.error(`[EMAIL] ${error}`);
-    throw new Error(error);
-  }
-  
   // Owner notification doesn't need customer email, but log if order email is missing
   if (!order.customerEmail) {
     console.warn(`[EMAIL] Order ${order.id} missing customerEmail, sending owner notification anyway`);
