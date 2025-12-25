@@ -13,7 +13,8 @@ import { createAuthRoutes, authMiddleware } from './routes/auth';
 import { createBlogRoutes } from './routes/blog';
 
 export interface Env {
-  DATABASE_URL: string;
+  // Database connection uses Supabase client (VITE_SUPABASE_URL + SUPABASE_SERVICE_KEY)
+  // DATABASE_URL is not used - removed to avoid confusion
   STRIPE_SECRET_KEY: string;
   STRIPE_PUBLISHABLE_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
