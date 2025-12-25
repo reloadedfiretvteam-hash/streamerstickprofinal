@@ -1186,6 +1186,21 @@ export default function AdminPanel() {
         const synced = await syncToShadowProduct(editingProduct);
         if (synced) {
           showToast('Product updated successfully! Shadow product synced.', 'success');
+          
+          // Submit to IndexNow after successful update
+          try {
+            const { submitProductToIndexNow } = await import('@/lib/indexnow');
+            const productSlug = editingProduct.slug || editingProduct.id;
+            const result = await submitProductToIndexNow(productSlug);
+            if (result.success) {
+              console.log('IndexNow: Product URL submitted successfully');
+            } else {
+              console.warn('IndexNow submission warning:', result.message);
+            }
+          } catch (err) {
+            console.error('IndexNow submission error:', err);
+            // Don't fail the save if IndexNow fails
+          }
         } else {
           showToast('Product updated but shadow sync failed. Please try again.', 'error');
         }
@@ -1205,6 +1220,21 @@ export default function AdminPanel() {
         const synced = await syncToShadowProduct({ ...editingProduct, id: newProduct.id });
         if (synced) {
           showToast('Product created successfully! Shadow product synced.', 'success');
+          
+          // Submit to IndexNow after successful creation
+          try {
+            const { submitProductToIndexNow } = await import('@/lib/indexnow');
+            const productSlug = newProduct.slug || newProduct.id;
+            const result = await submitProductToIndexNow(productSlug);
+            if (result.success) {
+              console.log('IndexNow: New product URL submitted successfully');
+            } else {
+              console.warn('IndexNow submission warning:', result.message);
+            }
+          } catch (err) {
+            console.error('IndexNow submission error:', err);
+            // Don't fail the save if IndexNow fails
+          }
         } else {
           showToast('Product created but shadow sync failed. Please try again.', 'error');
         }
