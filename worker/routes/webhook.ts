@@ -225,6 +225,86 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
 
   console.log(`[EMAIL] Starting email delivery for order ${order.id}`);
   console.log(`[EMAIL] Sending to: ${updatedOrder.customerEmail}`);
+  console.log(`[EMAIL] RESEND_API_KEY configured: ${!!env.RESEND_API_KEY}`);
+  console.log(`[EMAIL] RESEND_FROM_EMAIL: ${env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com'}`);
+  
+  // Send order confirmation
+  try {
+    console.log(`[EMAIL] Attempting to send order confirmation...`);
+    await sendOrderConfirmation(updatedOrder, env);
+    console.log(`[EMAIL] ✅ Order confirmation sent successfully to ${updatedOrder.customerEmail}`);
+  } catch (error: any) {
+    console.error(`[EMAIL] ❌ ERROR sending order confirmation: ${error.message}`);
+    console.error(`[EMAIL] Error details:`, error);
+    console.error(`[EMAIL] Error stack: ${error.stack}`);
+  }
+  
+  // Send owner notification
+  try {
+    console.log(`[EMAIL] Attempting to send owner notification...`);
+    await sendOwnerOrderNotification(updatedOrder, env);
+    console.log(`[EMAIL] ✅ Owner notification sent successfully`);
+  } catch (error: any) {
+    console.error(`[EMAIL] ❌ ERROR sending owner notification: ${error.message}`);
+    console.error(`[EMAIL] Error details:`, error);
+    console.error(`[EMAIL] Error stack: ${error.stack}`);
+  }
+  
+  // Send credentials if not already sent
+  if (!updatedOrder.credentialsSent) {
+    try {
+      console.log(`[EMAIL] Attempting to send credentials email...`);
+      await sendCredentialsEmail(updatedOrder, env, storage);
+      console.log(`[EMAIL] ✅ Credentials sent successfully to ${updatedOrder.customerEmail}`);
+    } catch (error: any) {
+      console.error(`[EMAIL] ❌ ERROR sending credentials: ${error.message}`);
+      console.error(`[EMAIL] Error details:`, error);
+      console.error(`[EMAIL] Error stack: ${error.stack}`);
+    }
+  } else {
+    console.log(`[EMAIL] Credentials already sent for order ${order.id}`);
+  }
+  
+  console.log(`[CHECKOUT] Completed processing order ${order.id}`);
+}
+
+async function handlePaymentSucceeded(paymentIntent: any, storage: Storage, env: Env) {
+  console.log(`[PAYMENT] Payment succeeded: ${paymentIntent.id}`);
+  
+  const order = await storage.getOrderByPaymentIntent(paymentIntent.id);
+  if (!order) {
+    console.error(`[PAYMENT] ERROR: No order found for payment intent: ${paymentIntent.id}`);
+    return;
+  }
+
+  console.log(`[PAYMENT] Found order: ${order.id} for ${order.customerEmail}`);
+  
+  const updateData: any = {
+    status: 'paid',
+    stripePaymentIntentId: paymentIntent.id,
+  };
+
+  // Update order if not already paid
+  if (order.status !== 'paid') {
+    await storage.updateOrder(order.id, updateData);
+    console.log(`[PAYMENT] Order ${order.id} marked as paid via payment_intent.succeeded`);
+  }
+
+  // Fetch updated order
+  const updatedOrder = await storage.getOrder(order.id);
+  if (!updatedOrder) {
+    console.error(`[PAYMENT] ERROR: Could not retrieve updated order ${order.id}`);
+    return;
+  }
+
+  // Ensure we have customer email
+  if (!updatedOrder.customerEmail) {
+    console.error(`[EMAIL] ERROR: Order ${order.id} missing customerEmail`);
+    return;
+  }
+
+  console.log(`[EMAIL] Starting email delivery for order ${order.id}`);
+  console.log(`[EMAIL] Sending to: ${updatedOrder.customerEmail}`);
   
   // Send order confirmation
   try {
@@ -256,34 +336,8 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
   } else {
     console.log(`[EMAIL] Credentials already sent for order ${order.id}`);
   }
-  
-  console.log(`[CHECKOUT] Completed processing order ${order.id}`);
-}
 
-async function handlePaymentSucceeded(paymentIntent: any, storage: Storage, env: Env) {
-  console.log(`Payment succeeded: ${paymentIntent.id}`);
-  
-  const order = await storage.getOrderByPaymentIntent(paymentIntent.id);
-  if (!order) {
-    return;
-  }
-
-  if (order.status !== 'paid') {
-    await storage.updateOrder(order.id, {
-      status: 'paid',
-    });
-    console.log(`Order ${order.id} marked as paid via payment_intent.succeeded`);
-
-    const updatedOrder = await storage.getOrder(order.id);
-    if (updatedOrder) {
-      try {
-        await sendOrderConfirmation(updatedOrder, env);
-        await sendOwnerOrderNotification(updatedOrder, env);
-      } catch (error) {
-        console.error('Error sending emails:', error);
-      }
-    }
-  }
+  console.log(`[PAYMENT] Completed processing order ${order.id}`);
 }
 
 async function handlePaymentFailed(paymentIntent: any, storage: Storage) {
