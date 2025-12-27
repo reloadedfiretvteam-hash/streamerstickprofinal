@@ -146,7 +146,17 @@ export function CartDrawer() {
                             type="button"
                             aria-label="Remove item from cart"
                             className="h-10 px-3 sm:px-2 sm:h-8 flex items-center justify-center gap-1.5 text-red-400 hover:text-red-300 active:bg-red-950/70 hover:bg-red-950/50 rounded-lg transition-colors border border-red-500/30 hover:border-red-500/60 text-sm font-medium touch-manipulation whitespace-nowrap"
-                            onClick={() => removeItem(item.id)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              // #region agent log
+                              fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'CartDrawer.tsx:143',message:'Remove button clicked',data:{itemId:item.id,itemName:item.name,currentItemsCount:items.length},timestamp:Date.now(),sessionId:'debug-session',runId:'cart-remove-test',hypothesisId:'A'})}).catch(()=>{});
+                              // #endregion
+                              removeItem(item.id);
+                              // #region agent log
+                              fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'CartDrawer.tsx:148',message:'Remove item called',data:{itemId:item.id},timestamp:Date.now(),sessionId:'debug-session',runId:'cart-remove-test',hypothesisId:'A'})}).catch(()=>{});
+                              // #endregion
+                            }}
                             data-testid={`button-remove-${item.id}`}
                           >
                             <Trash2 className="w-4 h-4 flex-shrink-0" />
