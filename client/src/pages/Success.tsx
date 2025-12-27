@@ -42,17 +42,29 @@ export default function Success() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId }),
               })
-              .then(res => res.json())
+              .then(res => {
+                if (!res.ok) {
+                  throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                return res.json();
+              })
               .then(emailResult => {
                 if (emailResult.success) {
                   console.log('✅ Emails sent successfully:', emailResult.results);
+                  console.log('✅ Order confirmation:', emailResult.results.orderConfirmation);
+                  console.log('✅ Credentials:', emailResult.results.credentials);
+                  console.log('✅ Owner notification:', emailResult.results.ownerNotification);
                 } else {
-                  console.warn('⚠️ Some emails may not have sent:', emailResult);
+                  console.error('❌ Email sending failed:', emailResult);
+                  if (emailResult.errors && emailResult.errors.length > 0) {
+                    console.error('❌ Errors:', emailResult.errors);
+                  }
                 }
               })
               .catch(err => {
-                console.error('Error sending emails:', err);
-                // Don't show error to user - emails may still be sent via webhook
+                console.error('❌ Error calling send-emails endpoint:', err);
+                console.error('❌ This means emails were NOT sent. Check network tab and server logs.');
+                // Don't show error to user - but log it clearly
               });
             }
           }

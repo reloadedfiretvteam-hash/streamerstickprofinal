@@ -198,6 +198,12 @@ export function createCheckoutRoutes() {
         }
       }
 
+      // Verify order has required fields
+      if (!order.customerEmail) {
+        console.error(`[EMAIL] Order ${order.id} missing customerEmail`);
+        return c.json({ error: "Order missing customer email" }, 400);
+      }
+
       // Import email functions
       const { sendOrderConfirmation, sendCredentialsEmail, sendOwnerOrderNotification } = await import('../email');
 
@@ -210,36 +216,50 @@ export function createCheckoutRoutes() {
 
       // Send order confirmation
       try {
+        console.log(`[EMAIL] Attempting to send order confirmation for order ${order.id}`);
+        console.log(`[EMAIL] Order details:`, {
+          id: order.id,
+          email: order.customerEmail,
+          amount: order.amount,
+          productName: order.realProductName,
+          hasResendKey: !!c.env.RESEND_API_KEY,
+        });
         await sendOrderConfirmation(order, c.env);
         results.orderConfirmation = true;
-        console.log(`[EMAIL] Order confirmation sent to ${order.customerEmail}`);
+        console.log(`[EMAIL] ✅ Order confirmation sent to ${order.customerEmail}`);
       } catch (error: any) {
         results.errors.push(`Order confirmation: ${error.message}`);
-        console.error(`[EMAIL] Failed to send order confirmation:`, error);
+        console.error(`[EMAIL] ❌ Failed to send order confirmation:`, error);
+        console.error(`[EMAIL] Error stack:`, error.stack);
       }
 
       // Send owner notification
       try {
+        console.log(`[EMAIL] Attempting to send owner notification for order ${order.id}`);
         await sendOwnerOrderNotification(order, c.env);
         results.ownerNotification = true;
-        console.log(`[EMAIL] Owner notification sent`);
+        console.log(`[EMAIL] ✅ Owner notification sent`);
       } catch (error: any) {
         results.errors.push(`Owner notification: ${error.message}`);
-        console.error(`[EMAIL] Failed to send owner notification:`, error);
+        console.error(`[EMAIL] ❌ Failed to send owner notification:`, error);
+        console.error(`[EMAIL] Error stack:`, error.stack);
       }
 
       // Send credentials if not already sent
       if (!order.credentialsSent) {
         try {
+          console.log(`[EMAIL] Attempting to send credentials for order ${order.id}`);
           await sendCredentialsEmail(order, c.env, storage);
           results.credentials = true;
-          console.log(`[EMAIL] Credentials sent to ${order.customerEmail}`);
+          console.log(`[EMAIL] ✅ Credentials sent to ${order.customerEmail}`);
         } catch (error: any) {
           results.errors.push(`Credentials: ${error.message}`);
-          console.error(`[EMAIL] Failed to send credentials:`, error);
+          console.error(`[EMAIL] ❌ Failed to send credentials:`, error);
+          console.error(`[EMAIL] Error stack:`, error.stack);
         }
       } else {
         results.credentials = true; // Already sent
+        console.log(`[EMAIL] Credentials already sent for order ${order.id}`);
       }
 
       return c.json({ 
