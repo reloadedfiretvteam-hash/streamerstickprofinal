@@ -530,6 +530,12 @@ export function createAdminRoutes() {
   // Enhanced customer orders endpoint (including free trials)
   app.get('/customers/orders-comprehensive', async (c) => {
     try {
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'admin.ts:531',message:'Fetching comprehensive orders',timestamp:Date.now(),sessionId:'debug-session',runId:'admin-debug',hypothesisId:'Q'})}).catch(()=>{});
+      }
+      // #endregion
+      
       const storage = getStorage(c.env);
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
@@ -537,12 +543,24 @@ export function createAdminRoutes() {
       // Get all paid orders
       const allOrders = await storage.getAllOrders();
       
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'admin.ts:538',message:'Got orders from storage',data:{orderCount:allOrders.length},timestamp:Date.now(),sessionId:'debug-session',runId:'admin-debug',hypothesisId:'R'})}).catch(()=>{});
+      }
+      // #endregion
+      
       // Get free trials from orders table (where payment_method = 'free-trial' or amount = 0)
-      const { data: trialOrders } = await supabase
+      const { data: trialOrders, error: trialError } = await supabase
         .from('orders')
         .select('*')
         .or('payment_method.eq.free-trial,amount.eq.0')
         .order('created_at', { ascending: false });
+      
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'admin.ts:545',message:'Queried trial orders',data:{trialCount:trialOrders?.length||0,error:trialError?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'admin-debug',hypothesisId:'S'})}).catch(()=>{});
+      }
+      // #endregion
       
       // Combine and format
       const paidOrdersFormatted = allOrders.map(order => ({

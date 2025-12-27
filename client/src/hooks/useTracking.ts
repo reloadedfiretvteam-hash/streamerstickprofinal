@@ -27,7 +27,13 @@ export function useTracking() {
         const referrer = document.referrer || null;
         const userAgent = navigator.userAgent;
 
-        await apiCall('/api/track', {
+        // #region agent log
+        if (typeof fetch !== 'undefined') {
+          fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useTracking.ts:24',message:'About to track page view',data:{sessionId,pageUrl:currentPath},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'A'})}).catch(()=>{});
+        }
+        // #endregion
+
+        const response = await apiCall('/api/track', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -37,7 +43,18 @@ export function useTracking() {
             userAgent,
           }),
         });
-      } catch (error) {
+
+        // #region agent log
+        if (typeof fetch !== 'undefined') {
+          fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useTracking.ts:40',message:'Track API call completed',data:{ok:response.ok,status:response.status},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'B'})}).catch(()=>{});
+        }
+        // #endregion
+      } catch (error: any) {
+        // #region agent log
+        if (typeof fetch !== 'undefined') {
+          fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useTracking.ts:46',message:'Track API call failed',data:{error:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'C'})}).catch(()=>{});
+        }
+        // #endregion
         console.warn('Failed to track page view:', error);
       }
     };

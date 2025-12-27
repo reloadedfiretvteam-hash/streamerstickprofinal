@@ -7,11 +7,28 @@ export function createVisitorRoutes() {
 
   app.post('/', async (c) => {
     try {
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'visitors.ts:8',message:'Visitor tracking endpoint called',timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'D'})}).catch(()=>{});
+      }
+      // #endregion
+      
       const storage = getStorage(c.env);
       const body = await c.req.json();
       const { sessionId, pageUrl, referrer, userAgent } = body;
 
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'visitors.ts:16',message:'Received tracking data',data:{hasSessionId:!!sessionId,hasPageUrl:!!pageUrl,pageUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'E'})}).catch(()=>{});
+      }
+      // #endregion
+
       if (!sessionId || !pageUrl) {
+        // #region agent log
+        if (typeof fetch !== 'undefined') {
+          fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'visitors.ts:22',message:'Missing required fields',data:{hasSessionId:!!sessionId,hasPageUrl:!!pageUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'F'})}).catch(()=>{});
+        }
+        // #endregion
         return c.json({ error: "Session ID and page URL are required" }, 400);
       }
 
@@ -21,7 +38,13 @@ export function createVisitorRoutes() {
 
       const cfData = (c.req.raw as any).cf || {};
       
-      await storage.trackVisitor({
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'visitors.ts:32',message:'About to call storage.trackVisitor',data:{sessionId,pageUrl,ipAddress},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'G'})}).catch(()=>{});
+      }
+      // #endregion
+      
+      const visitor = await storage.trackVisitor({
         sessionId,
         pageUrl,
         referrer: referrer || null,
@@ -39,8 +62,19 @@ export function createVisitorRoutes() {
         isProxy: false,
       });
 
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'visitors.ts:50',message:'Visitor tracked successfully',data:{visitorId:visitor.id},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'H'})}).catch(()=>{});
+      }
+      // #endregion
+
       return c.json({ success: true });
     } catch (error: any) {
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'visitors.ts:57',message:'Visitor tracking error',data:{error:error.message,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'I'})}).catch(()=>{});
+      }
+      // #endregion
       console.error("Error tracking visitor:", error);
       return c.json({ error: "Failed to track visitor" }, 500);
     }

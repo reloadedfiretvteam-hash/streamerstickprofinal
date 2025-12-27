@@ -305,6 +305,12 @@ export function createStorage(config: StorageConfig) {
     },
 
     async trackVisitor(visitor: InsertVisitor): Promise<Visitor> {
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'storage.ts:307',message:'trackVisitor called',data:{sessionId:visitor.sessionId,pageUrl:visitor.pageUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'J'})}).catch(()=>{});
+      }
+      // #endregion
+      
       const dbVisitor = {
         session_id: visitor.sessionId,
         page_url: visitor.pageUrl,
@@ -322,8 +328,25 @@ export function createStorage(config: StorageConfig) {
         isp: visitor.isp,
         is_proxy: visitor.isProxy,
       };
+
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'storage.ts:327',message:'About to insert visitor to Supabase',data:{sessionId:dbVisitor.session_id,pageUrl:dbVisitor.page_url},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'K'})}).catch(()=>{});
+      }
+      // #endregion
+
       const { data, error } = await supabase.from('visitors').insert(dbVisitor).select().single();
-      if (error) throw error;
+      
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'storage.ts:331',message:'Supabase insert result',data:{success:!error,error:error?.message,hasData:!!data},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'L'})}).catch(()=>{});
+      }
+      // #endregion
+      
+      if (error) {
+        console.error('Error inserting visitor:', error);
+        throw error;
+      }
       return this.mapVisitorFromDb(data);
     },
 
