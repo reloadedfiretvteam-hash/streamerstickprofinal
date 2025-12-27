@@ -1889,6 +1889,27 @@ export default function AdminPanel() {
                     >
                       <RefreshCw className="w-4 h-4 mr-2" /> Refresh Stats
                     </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
+                      onClick={async () => {
+                        try {
+                          const response = await authFetch('/api/reminders/send-reminders', {
+                            method: 'POST',
+                          });
+                          const result = await response.json();
+                          if (result.success) {
+                            showToast(`Reminders sent! ${result.results?.sent || 0} emails sent.`, 'success');
+                          } else {
+                            showToast('Failed to send reminders', 'error');
+                          }
+                        } catch (error: any) {
+                          showToast('Error sending reminders: ' + (error.message || 'Unknown error'), 'error');
+                        }
+                      }}
+                    >
+                      <Mail className="w-4 h-4 mr-2" /> Send Reminders
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
