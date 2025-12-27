@@ -376,10 +376,32 @@ export function createStorage(config: StorageConfig) {
       const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
       const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
 
-      const { data: allVisitors } = await supabase.from('visitors')
+      const { data: allVisitors, error: queryError } = await supabase
+        .from('visitors')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(5000);
+      
+      // #region agent log
+      console.log('[VISITOR_STATS] Query result', { 
+        count: allVisitors?.length || 0, 
+        error: queryError?.message,
+        errorCode: queryError?.code,
+        sampleVisitor: allVisitors?.[0]
+      });
+      // #endregion
+      
+      if (queryError) {
+        console.error('[VISITOR_STATS] Error fetching visitors:', queryError);
+        // Return empty stats instead of throwing
+        return {
+          totalVisitors: 0,
+          todayVisitors: 0,
+          weekVisitors: 0,
+          onlineNow: 0,
+          recentVisitors: [],
+        };
+      }
       
       const visitors = (allVisitors || []).map((d: any) => this.mapVisitorFromDb(d));
       
