@@ -114,25 +114,50 @@ app.get('/api/health', (c) => {
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       
-      // Check if visitors table exists and get schema
-      const { data: tableInfo, error: tableError } = await supabase.rpc('exec_sql', {
-        query: `
-          SELECT column_name, data_type, is_nullable 
-          FROM information_schema.columns 
-          WHERE table_name = 'visitors' 
-          ORDER BY ordinal_position;
-        `
-      }).catch(() => ({ data: null, error: { message: 'Cannot query table schema directly' } }));
-      
       // Try to query visitors table
       const { data: visitors, error: queryError, count } = await supabase
         .from('visitors')
         .select('*', { count: 'exact' })
         .limit(5);
       
-      // Try a test insert (then rollback)
-      const testVisitor = {
-        session_id: 'test-session-debug',
+      // Try a test insert with minimal required fields first
+      const testVisitorMinimal = {
+        session_id: 'test-session-debug-' + Date.now(),
+        page_url: '/test',
+        referrer: null,
+        user_agent: 'Debug-Test',
+      };
+      
+      let insertTestMinimal = { success: false, error: '', errorCode: '' };
+      try {
+        const { data: insertedMinimal, error: insertErrorMinimal } = await supabase
+          .from('visitors')
+          .insert(testVisitorMinimal)
+          .select()
+          .single();
+        
+        if (!insertErrorMinimal && insertedMinimal) {
+          // Delete the test record
+          await supabase.from('visitors').delete().eq('id', insertedMinimal.id);
+          insertTestMinimal = { success: true, error: '', errorCode: '' };
+        } else {
+          insertTestMinimal = { 
+            success: false, 
+            error: insertErrorMinimal?.message || 'Unknown error',
+            errorCode: insertErrorMinimal?.code || ''
+          };
+        }
+      } catch (err: any) {
+        insertTestMinimal = { 
+          success: false, 
+          error: err.message || String(err),
+          errorCode: err.code || ''
+        };
+      }
+      
+      // Try a test insert with all columns
+      const testVisitorFull = {
+        session_id: 'test-session-full-' + Date.now(),
         page_url: '/test',
         referrer: null,
         user_agent: 'Debug-Test',
@@ -149,60 +174,80 @@ app.get('/api/health', (c) => {
         is_proxy: false,
       };
       
-      let insertTest = { success: false, error: '' };
-      try {
-        const { data: inserted, error: insertError } = await supabase
-          .from('visitors')
-          .insert(testVisitor)
-          .select()
-          .single();
-        
-        if (!insertError && inserted) {
-          // Delete the test record
-          await supabase.from('visitors').delete().eq('id', inserted.id);
-          insertTest = { success: true, error: '' };
-        } else {
-          insertTest = { success: false, error: insertError?.message || 'Unknown error' };
+      let insertTestFull = { success: false, error: '', errorCode: '' };
+      if (insertTestMinimal.success) {
+        try {
+          const { data: insertedFull, error: insertErrorFull } = await supabase
+            .from('visitors')
+            .insert(testVisitorFull)
+            .select()
+            .single();
+          
+          if (!insertErrorFull && insertedFull) {
+            // Delete the test record
+            await supabase.from('visitors').delete().eq('id', insertedFull.id);
+            insertTestFull = { success: true, error: '', errorCode: '' };
+          } else {
+            insertTestFull = { 
+              success: false, 
+              error: insertErrorFull?.message || 'Unknown error',
+              errorCode: insertErrorFull?.code || ''
+            };
+          }
+        } catch (err: any) {
+          insertTestFull = { 
+            success: false, 
+            error: err.message || String(err),
+            errorCode: err.code || ''
+          };
         }
-      } catch (err: any) {
-        insertTest = { success: false, error: err.message || String(err) };
       }
+      
+      // Check which columns exist by trying to select them
+      const sampleVisitor = visitors && visitors.length > 0 ? visitors[0] : null;
+      const hasColumns = {
+        ip_address: sampleVisitor?.ip_address !== undefined,
+        country: sampleVisitor?.country !== undefined,
+        country_code: sampleVisitor?.country_code !== undefined,
+        region: sampleVisitor?.region !== undefined,
+        region_code: sampleVisitor?.region_code !== undefined,
+        city: sampleVisitor?.city !== undefined,
+        latitude: sampleVisitor?.latitude !== undefined,
+        longitude: sampleVisitor?.longitude !== undefined,
+        timezone: sampleVisitor?.timezone !== undefined,
+        isp: sampleVisitor?.isp !== undefined,
+        is_proxy: sampleVisitor?.is_proxy !== undefined,
+      };
+      
+      const missingColumns = Object.entries(hasColumns)
+        .filter(([_, exists]) => !exists)
+        .map(([col, _]) => col);
       
       return c.json({
         tableExists: !queryError || queryError.code !== '42P01',
         visitorCount: count || 0,
-        sampleVisitors: visitors || [],
-        insertTest,
+        sampleVisitorCount: visitors?.length || 0,
+        insertTestMinimal,
+        insertTestFull,
+        hasColumns,
+        missingColumns,
         errors: {
           query: queryError?.message,
           code: queryError?.code,
           hint: queryError?.hint,
         },
-        migrationStatus: {
-          hasIpAddress: tableInfo?.some((col: any) => col.column_name === 'ip_address') || false,
-          hasCountry: tableInfo?.some((col: any) => col.column_name === 'country') || false,
-          hasRegion: tableInfo?.some((col: any) => col.column_name === 'region') || false,
-          missingColumns: [
-            'ip_address',
-            'country',
-            'country_code',
-            'region',
-            'region_code',
-            'city',
-            'latitude',
-            'longitude',
-            'timezone',
-            'isp',
-            'is_proxy'
-          ].filter(col => !tableInfo?.some((t: any) => t.column_name === col)),
-        },
-        recommendation: insertTest.success 
-          ? 'Visitor tracking should work. Check if frontend is calling /api/track endpoint.'
-          : insertTest.error.includes('column') 
-            ? 'Run migration 20250115000001_add_missing_visitor_columns.sql in Supabase SQL Editor'
-            : insertTest.error.includes('permission') || insertTest.error.includes('policy')
-              ? 'Check RLS policies allow inserts. Run the migration to update policies.'
-              : `Error: ${insertTest.error}. Check Supabase logs for details.`
+        recommendation: 
+          queryError?.code === '42P01' 
+            ? 'Table "visitors" does not exist. Run the initial migration: 20251101185416_create_inferno_tv_tables.sql'
+            : insertTestFull.success 
+              ? 'Visitor tracking should work. Check if frontend is calling /api/track endpoint.'
+              : insertTestFull.error.includes('column') || insertTestFull.errorCode === '42703'
+                ? `Missing columns: ${missingColumns.join(', ')}. Run migration 20250115000001_add_missing_visitor_columns.sql in Supabase SQL Editor`
+                : insertTestFull.error.includes('permission') || insertTestFull.error.includes('policy') || insertTestFull.errorCode === '42501'
+                  ? 'Check RLS policies allow inserts. The migration should fix this, but verify the policy exists.'
+                  : insertTestMinimal.success
+                    ? 'Table works with minimal columns. Additional columns may be missing. Run migration 20250115000001_add_missing_visitor_columns.sql'
+                    : `Error: ${insertTestMinimal.error}. Check Supabase logs for details. Code: ${insertTestMinimal.errorCode}`
       });
     } catch (error: any) {
       return c.json({ error: error.message, stack: error.stack }, 500);
