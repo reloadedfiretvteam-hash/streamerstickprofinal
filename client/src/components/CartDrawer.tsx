@@ -83,76 +83,78 @@ export function CartDrawer() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20, height: 0 }}
                     transition={{ duration: 0.2, delay: index * 0.05 }}
-                    className="flex gap-4 py-4 border-b border-gray-800 last:border-0"
+                    className="flex flex-col sm:flex-row gap-3 py-4 border-b border-gray-800 last:border-0"
                     data-testid={`cart-item-${item.id}`}
                   >
-                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-800 flex-shrink-0">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzMzMyIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
-                        }}
-                      />
-                    </div>
+                    <div className="flex gap-3 flex-1 min-w-0">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-800 flex-shrink-0">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzMzMyIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
+                          }}
+                        />
+                      </div>
 
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-white text-sm leading-tight truncate" data-testid={`text-item-name-${item.id}`}>
-                        {item.name}
-                      </p>
-                      <p className="text-orange-400 font-bold mt-1" data-testid={`text-item-price-${item.id}`}>
-                        ${item.price.toFixed(2)}
-                      </p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start gap-2 mb-1">
+                          <p className="font-medium text-white text-sm leading-tight truncate flex-1" data-testid={`text-item-name-${item.id}`}>
+                            {item.name}
+                          </p>
+                          <p className="font-bold text-white text-base sm:text-lg whitespace-nowrap" data-testid={`text-item-total-${item.id}`}>
+                            ${(item.price * item.quantity).toFixed(2)}
+                          </p>
+                        </div>
+                        <p className="text-orange-400 font-bold text-sm mb-3" data-testid={`text-item-price-${item.id}`}>
+                          ${item.price.toFixed(2)} each
+                        </p>
 
-                      <div className="flex items-center gap-2 mt-2">
-                        <div className="flex items-center bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex items-center bg-gray-800 rounded-lg">
+                            <button
+                              type="button"
+                              aria-label="Decrease quantity"
+                              className="h-10 w-10 sm:h-8 sm:w-8 flex items-center justify-center text-gray-300 hover:text-white active:bg-gray-600 hover:bg-gray-700 rounded-l-lg transition-colors touch-manipulation"
+                              onClick={() => {
+                                if (item.quantity > 1) {
+                                  updateQuantity(item.id, item.quantity - 1);
+                                } else {
+                                  removeItem(item.id);
+                                }
+                              }}
+                              data-testid={`button-decrease-${item.id}`}
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-10 sm:w-8 text-center text-sm font-medium" data-testid={`text-quantity-${item.id}`}>
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              aria-label="Increase quantity"
+                              className="h-10 w-10 sm:h-8 sm:w-8 flex items-center justify-center text-gray-300 hover:text-white active:bg-gray-600 hover:bg-gray-700 rounded-r-lg transition-colors touch-manipulation"
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              data-testid={`button-increase-${item.id}`}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
                           <button
                             type="button"
-                            aria-label="Decrease quantity"
-                            className="h-8 w-8 flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700 rounded-l-lg transition-colors"
-                            onClick={() => {
-                              if (item.quantity > 1) {
-                                updateQuantity(item.id, item.quantity - 1);
-                              } else {
-                                removeItem(item.id);
-                              }
-                            }}
-                            data-testid={`button-decrease-${item.id}`}
+                            aria-label="Remove item from cart"
+                            className="h-10 px-3 sm:px-2 sm:h-8 flex items-center justify-center gap-1.5 text-red-400 hover:text-red-300 active:bg-red-950/70 hover:bg-red-950/50 rounded-lg transition-colors border border-red-500/30 hover:border-red-500/60 text-sm font-medium touch-manipulation whitespace-nowrap"
+                            onClick={() => removeItem(item.id)}
+                            data-testid={`button-remove-${item.id}`}
                           >
-                            <Minus className="w-4 h-4" />
-                          </button>
-                          <span className="w-8 text-center text-sm font-medium" data-testid={`text-quantity-${item.id}`}>
-                            {item.quantity}
-                          </span>
-                          <button
-                            type="button"
-                            aria-label="Increase quantity"
-                            className="h-8 w-8 flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700 rounded-r-lg transition-colors"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            data-testid={`button-increase-${item.id}`}
-                          >
-                            <Plus className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4 flex-shrink-0" />
+                            <span className="sm:hidden">Remove</span>
+                            <span className="hidden sm:inline">Remove</span>
                           </button>
                         </div>
-                        <button
-                          type="button"
-                          aria-label="Remove item from cart"
-                          className="px-3 py-1.5 flex items-center justify-center gap-1.5 text-red-400 hover:text-red-300 hover:bg-red-950/50 rounded-lg transition-colors border border-red-500/30 hover:border-red-500/60 text-sm font-medium"
-                          onClick={() => removeItem(item.id)}
-                          data-testid={`button-remove-${item.id}`}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          <span className="hidden sm:inline">Remove</span>
-                        </button>
                       </div>
-                    </div>
-
-                    <div className="text-right">
-                      <p className="font-bold text-white" data-testid={`text-item-total-${item.id}`}>
-                        ${(item.price * item.quantity).toFixed(2)}
-                      </p>
                     </div>
                   </motion.div>
                 ))}
