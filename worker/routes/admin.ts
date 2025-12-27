@@ -374,30 +374,14 @@ export function createAdminRoutes() {
 
   app.get('/visitors/stats', async (c) => {
     try {
-      // #region agent log
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'admin.ts:375',message:'Fetching visitor stats',timestamp:Date.now(),sessionId:'debug-session',runId:'admin-debug',hypothesisId:'I'})}).catch(()=>{});
-      }
-      // #endregion
-      
       const storage = getStorage(c.env);
       const stats = await storage.getVisitorStats();
-      
-      // #region agent log
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'admin.ts:382',message:'Got basic stats from storage',data:{totalVisitors:stats.totalVisitors,todayVisitors:stats.todayVisitors,onlineNow:stats.onlineNow},timestamp:Date.now(),sessionId:'debug-session',runId:'admin-debug',hypothesisId:'J'})}).catch(()=>{});
-      }
-      // #endregion
       
       // Enhance with additional analytics
       // Use service key explicitly to bypass RLS
       const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY;
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
-      
-      // #region agent log
-      console.log('[ADMIN_VISITOR_STATS] Using service key:', !!c.env.SUPABASE_SERVICE_KEY, 'Key length:', serviceKey?.length);
-      // #endregion
       
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -412,22 +396,9 @@ export function createAdminRoutes() {
         .order('created_at', { ascending: false })
         .limit(5000);
       
-      // #region agent log
-      console.log('[ADMIN_VISITOR_STATS] Query result:', {
-        visitorCount: allVisitors?.length || 0,
-        error: visitorsError?.message,
-        errorCode: visitorsError?.code,
-        errorHint: visitorsError?.hint,
-        hasServiceKey: !!c.env.SUPABASE_SERVICE_KEY,
-      });
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'admin.ts:400',message:'Queried visitors table',data:{visitorCount:allVisitors?.length||0,error:visitorsError?.message,errorCode:visitorsError?.code,hasServiceKey:!!c.env.SUPABASE_SERVICE_KEY},timestamp:Date.now(),sessionId:'debug-session',runId:'admin-debug',hypothesisId:'K'})}).catch(()=>{});
-      }
-      // #endregion
-      
       if (visitorsError) {
         console.error('[ADMIN_VISITOR_STATS] Error fetching visitors:', visitorsError);
-        // Return basic stats even if detailed query fails, but include error info
+        // Return basic stats even if detailed query fails
         return c.json({
           data: {
             ...stats,
@@ -441,11 +412,6 @@ export function createAdminRoutes() {
             monthVisitors: 0,
             error: visitorsError.message,
             errorCode: visitorsError.code,
-            errorHint: visitorsError.hint,
-            debug: {
-              hasServiceKey: !!c.env.SUPABASE_SERVICE_KEY,
-              usingServiceKey: !!c.env.SUPABASE_SERVICE_KEY,
-            }
           }
         });
       }

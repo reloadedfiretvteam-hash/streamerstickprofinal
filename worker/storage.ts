@@ -305,12 +305,6 @@ export function createStorage(config: StorageConfig) {
     },
 
     async trackVisitor(visitor: InsertVisitor): Promise<Visitor> {
-      // #region agent log
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'storage.ts:307',message:'trackVisitor called',data:{sessionId:visitor.sessionId,pageUrl:visitor.pageUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'J'})}).catch(()=>{});
-      }
-      // #endregion
-      
       const dbVisitor = {
         session_id: visitor.sessionId,
         page_url: visitor.pageUrl,
@@ -329,12 +323,6 @@ export function createStorage(config: StorageConfig) {
         is_proxy: visitor.isProxy,
       };
 
-      // #region agent log
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'storage.ts:327',message:'About to insert visitor to Supabase',data:{sessionId:dbVisitor.session_id,pageUrl:dbVisitor.page_url},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'K'})}).catch(()=>{});
-      }
-      // #endregion
-
       // Try insert - if columns don't exist, fall back to minimal insert
       let { data, error } = await supabase.from('visitors').insert(dbVisitor).select().single();
       
@@ -351,10 +339,6 @@ export function createStorage(config: StorageConfig) {
         data = retryResult.data;
         error = retryResult.error;
       }
-      
-      // #region agent log
-      console.log('[VISITOR_TRACK] Supabase insert result:', { success: !error, error: error?.message, hasData: !!data });
-      // #endregion
       
       if (error) {
         console.error('[VISITOR_TRACK] Error inserting visitor:', error);
@@ -394,15 +378,6 @@ export function createStorage(config: StorageConfig) {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(5000);
-      
-      // #region agent log
-      console.log('[VISITOR_STATS] Query result', { 
-        count: allVisitors?.length || 0, 
-        error: queryError?.message,
-        errorCode: queryError?.code,
-        sampleVisitor: allVisitors?.[0]
-      });
-      // #endregion
       
       if (queryError) {
         console.error('[VISITOR_STATS] Error fetching visitors:', queryError);
