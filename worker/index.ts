@@ -11,6 +11,7 @@ import { createCustomerRoutes } from './routes/customers';
 import { createTrialRoutes } from './routes/trial';
 import { createAuthRoutes, authMiddleware } from './routes/auth';
 import { createBlogRoutes } from './routes/blog';
+import { createReminderRoutes } from './routes/reminders';
 
 export interface Env {
   // Database connection uses Supabase client (VITE_SUPABASE_URL + SUPABASE_SERVICE_KEY)
@@ -50,6 +51,7 @@ app.route('/api/track', createVisitorRoutes());
 app.route('/api/customer', createCustomerRoutes());
 app.route('/api/free-trial', createTrialRoutes());
 app.route('/api/blog', createBlogRoutes());
+app.route('/api/reminders', createReminderRoutes());
 
 app.post('/api/track-cart', async (c) => {
   try {

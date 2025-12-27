@@ -376,10 +376,227 @@ export function createAdminRoutes() {
     try {
       const storage = getStorage(c.env);
       const stats = await storage.getVisitorStats();
-      return c.json({ data: stats });
+      
+      // Enhance with additional analytics
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+      
+      // Get detailed visitor data
+      const { data: allVisitors } = await supabase
+        .from('visitors')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5000);
+      
+      const visitors = allVisitors || [];
+      
+      // Country breakdown
+      const countryCounts: Record<string, number> = {};
+      const regionCounts: Record<string, number> = {};
+      const cityCounts: Record<string, number> = {};
+      const pageCounts: Record<string, number> = {};
+      
+      visitors.forEach((v: any) => {
+        if (v.country) countryCounts[v.country] = (countryCounts[v.country] || 0) + 1;
+        if (v.region) regionCounts[v.region] = (regionCounts[v.region] || 0) + 1;
+        if (v.city) cityCounts[v.city] = (cityCounts[v.city] || 0) + 1;
+        if (v.page_url) {
+          const page = new URL(v.page_url, 'https://streamstickpro.com').pathname;
+          pageCounts[page] = (pageCounts[page] || 0) + 1;
+        }
+      });
+      
+      // Device type detection
+      const deviceBreakdown = { desktop: 0, mobile: 0, tablet: 0, bot: 0 };
+      visitors.forEach((v: any) => {
+        const ua = (v.user_agent || '').toLowerCase();
+        if (ua.includes('bot') || ua.includes('crawler') || ua.includes('spider')) {
+          deviceBreakdown.bot++;
+        } else if (ua.includes('tablet')) {
+          deviceBreakdown.tablet++;
+        } else if (ua.includes('mobile')) {
+          deviceBreakdown.mobile++;
+        } else {
+          deviceBreakdown.desktop++;
+        }
+      });
+      
+      // Hourly distribution (last 24 hours)
+      const hourlyDistribution: Record<number, number> = {};
+      for (let i = 0; i < 24; i++) hourlyDistribution[i] = 0;
+      
+      const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      visitors
+        .filter((v: any) => v.created_at && new Date(v.created_at) >= last24Hours)
+        .forEach((v: any) => {
+          const hour = new Date(v.created_at).getHours();
+          hourlyDistribution[hour] = (hourlyDistribution[hour] || 0) + 1;
+        });
+      
+      // Live visitors (active in last 5 minutes)
+      const liveVisitors = visitors
+        .filter((v: any) => v.created_at && new Date(v.created_at) >= fiveMinutesAgo)
+        .slice(0, 20)
+        .map((v: any) => ({
+          id: v.id,
+          pageUrl: v.page_url,
+          country: v.country,
+          city: v.city,
+          region: v.region,
+          userAgent: v.user_agent,
+          createdAt: v.created_at,
+          referrer: v.referrer,
+        }));
+      
+      return c.json({
+        data: {
+          ...stats,
+          countryBreakdown: Object.entries(countryCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 20)
+            .map(([name, count]) => ({ name, count })),
+          regionBreakdown: Object.entries(regionCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 20)
+            .map(([name, count]) => ({ name, count })),
+          cityBreakdown: Object.entries(cityCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 20)
+            .map(([name, count]) => ({ name, count })),
+          pageBreakdown: Object.entries(pageCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 20)
+            .map(([name, count]) => ({ name, count })),
+          deviceBreakdown,
+          hourlyDistribution: Object.entries(hourlyDistribution).map(([hour, count]) => ({
+            hour: parseInt(hour),
+            count,
+          })),
+          liveVisitors,
+          monthVisitors: visitors.filter((v: any) => 
+            v.created_at && new Date(v.created_at) >= monthAgo
+          ).length,
+        }
+      });
     } catch (error: any) {
       console.error("Error fetching visitor stats:", error);
       return c.json({ error: "Failed to fetch visitor stats" }, 500);
+    }
+  });
+
+  // Enhanced customer orders endpoint (including free trials)
+  app.get('/customers/orders-comprehensive', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      
+      // Get all paid orders
+      const allOrders = await storage.getAllOrders();
+      
+      // Get free trials from orders table (where payment_method = 'free-trial' or amount = 0)
+      const { data: trialOrders } = await supabase
+        .from('orders')
+        .select('*')
+        .or('payment_method.eq.free-trial,amount.eq.0')
+        .order('created_at', { ascending: false });
+      
+      // Combine and format
+      const paidOrdersFormatted = allOrders.map(order => ({
+        id: order.id,
+        type: 'paid',
+        customerEmail: order.customerEmail,
+        customerName: order.customerName,
+        productName: order.realProductName,
+        amount: order.amount / 100,
+        status: order.status,
+        createdAt: order.createdAt,
+        credentialsSent: order.credentialsSent,
+        generatedUsername: order.generatedUsername,
+        isRenewal: order.isRenewal,
+      }));
+      
+      const trialOrdersFormatted = (trialOrders || []).map((order: any) => ({
+        id: order.id,
+        type: 'free-trial',
+        customerEmail: order.customer_email,
+        customerName: order.customer_name,
+        productName: 'Free Trial - 36 Hours',
+        amount: 0,
+        status: order.payment_status === 'completed' ? 'completed' : 'pending',
+        createdAt: order.created_at,
+        credentialsSent: !!order.iptv_credentials,
+        generatedUsername: order.iptv_credentials?.username || null,
+        expiresAt: order.iptv_credentials?.expires_at || null,
+        isRenewal: false,
+      }));
+      
+      // Combine and sort by date
+      const allCustomerOrders = [...paidOrdersFormatted, ...trialOrdersFormatted]
+        .sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
+          return dateB - dateA;
+        });
+      
+      // Statistics
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+      
+      const ordersToday = allCustomerOrders.filter(o => 
+        o.createdAt && new Date(o.createdAt) >= today
+      );
+      const ordersThisWeek = allCustomerOrders.filter(o => 
+        o.createdAt && new Date(o.createdAt) >= weekAgo
+      );
+      const ordersThisMonth = allCustomerOrders.filter(o => 
+        o.createdAt && new Date(o.createdAt) >= monthAgo
+      );
+      
+      const revenueThisMonth = allCustomerOrders
+        .filter(o => o.type === 'paid' && o.status === 'paid' && o.createdAt && new Date(o.createdAt) >= monthAgo)
+        .reduce((sum, o) => sum + o.amount, 0);
+      
+      const totalRevenue = allCustomerOrders
+        .filter(o => o.type === 'paid' && o.status === 'paid')
+        .reduce((sum, o) => sum + o.amount, 0);
+      
+      const paidCount = allCustomerOrders.filter(o => o.type === 'paid').length;
+      const trialCount = allCustomerOrders.filter(o => o.type === 'free-trial').length;
+      const conversionRate = trialCount > 0 
+        ? ((paidCount / (paidCount + trialCount)) * 100).toFixed(1)
+        : '0.0';
+      
+      return c.json({
+        data: {
+          orders: allCustomerOrders,
+          statistics: {
+            totalOrders: allCustomerOrders.length,
+            paidOrders: paidCount,
+            freeTrials: trialCount,
+            ordersToday: ordersToday.length,
+            ordersThisWeek: ordersThisWeek.length,
+            ordersThisMonth: ordersThisMonth.length,
+            revenueThisMonth: revenueThisMonth,
+            totalRevenue: totalRevenue,
+            conversionRate: parseFloat(conversionRate),
+            pendingCredentials: allCustomerOrders.filter(o => 
+              o.status === 'paid' || o.status === 'completed' && !o.credentialsSent
+            ).length,
+          },
+        }
+      });
+    } catch (error: any) {
+      console.error("Error fetching comprehensive customer orders:", error);
+      return c.json({ error: "Failed to fetch customer orders" }, 500);
     }
   });
 
