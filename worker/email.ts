@@ -276,10 +276,6 @@ export async function sendRenewalConfirmationEmail(order: Order, env: Env): Prom
   }
   // #endregion
   console.log(`[EMAIL] ✅ Renewal confirmation email sent successfully to ${order.customerEmail} via ${result.provider}`);
-  } catch (error: any) {
-    console.error(`[EMAIL] Failed to send renewal confirmation email to ${order.customerEmail}:`, error.message);
-    throw new Error(`Failed to send renewal confirmation email: ${error.message}`);
-  }
 }
 
 export function generateCredentials(order: Order): { username: string; password: string } {
