@@ -455,11 +455,35 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
           StreamStickPro Order Notification System
         </p>
       </div>
-    `,
-    });
-    console.log(`[EMAIL] Owner notification sent successfully for order ${order.id} to ${OWNER_EMAIL}`);
-  } catch (error: any) {
-    console.error(`[EMAIL] Failed to send owner notification email for order ${order.id}:`, error.message);
-    throw new Error(`Failed to send owner notification email: ${error.message}`);
+  `;
+
+  // #region agent log
+  if (typeof fetch !== 'undefined') {
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:458',message:'Sending owner notification via unified email system',data:{orderId:order.id,to:OWNER_EMAIL,hasResendKey:!!env.RESEND_API_KEY},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
   }
+  // #endregion
+
+  const result = await sendEmail({
+    to: OWNER_EMAIL,
+    from: fromEmail,
+    subject: `${emoji} ${orderTypeEmoji} ${orderTypeLabel} - $${priceFormatted} - ${order.realProductName}`,
+    html: emailHtml,
+  }, env);
+
+  if (!result.success) {
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:468',message:'Owner notification email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
+    }
+    // #endregion
+    console.error(`[EMAIL] Failed to send owner notification email for order ${order.id} via ${result.provider}: ${result.error}`);
+    throw new Error(`Failed to send owner notification email: ${result.error}`);
+  }
+
+  // #region agent log
+  if (typeof fetch !== 'undefined') {
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:476',message:'Owner notification email sent successfully',data:{orderId:order.id,to:OWNER_EMAIL,provider:result.provider},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+  }
+  // #endregion
+  console.log(`[EMAIL] ✅ Owner notification sent successfully for order ${order.id} to ${OWNER_EMAIL} via ${result.provider}`);
 }
