@@ -109,6 +109,106 @@ app.get('/api/health', (c) => {
     });
   });
 
+  app.get('/api/debug/visitors', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      
+      // Check if visitors table exists and get schema
+      const { data: tableInfo, error: tableError } = await supabase.rpc('exec_sql', {
+        query: `
+          SELECT column_name, data_type, is_nullable 
+          FROM information_schema.columns 
+          WHERE table_name = 'visitors' 
+          ORDER BY ordinal_position;
+        `
+      }).catch(() => ({ data: null, error: { message: 'Cannot query table schema directly' } }));
+      
+      // Try to query visitors table
+      const { data: visitors, error: queryError, count } = await supabase
+        .from('visitors')
+        .select('*', { count: 'exact' })
+        .limit(5);
+      
+      // Try a test insert (then rollback)
+      const testVisitor = {
+        session_id: 'test-session-debug',
+        page_url: '/test',
+        referrer: null,
+        user_agent: 'Debug-Test',
+        ip_address: '127.0.0.1',
+        country: 'US',
+        country_code: 'US',
+        region: 'Test',
+        region_code: 'TS',
+        city: 'Test City',
+        latitude: '0',
+        longitude: '0',
+        timezone: 'UTC',
+        isp: 'Test ISP',
+        is_proxy: false,
+      };
+      
+      let insertTest = { success: false, error: '' };
+      try {
+        const { data: inserted, error: insertError } = await supabase
+          .from('visitors')
+          .insert(testVisitor)
+          .select()
+          .single();
+        
+        if (!insertError && inserted) {
+          // Delete the test record
+          await supabase.from('visitors').delete().eq('id', inserted.id);
+          insertTest = { success: true, error: '' };
+        } else {
+          insertTest = { success: false, error: insertError?.message || 'Unknown error' };
+        }
+      } catch (err: any) {
+        insertTest = { success: false, error: err.message || String(err) };
+      }
+      
+      return c.json({
+        tableExists: !queryError || queryError.code !== '42P01',
+        visitorCount: count || 0,
+        sampleVisitors: visitors || [],
+        insertTest,
+        errors: {
+          query: queryError?.message,
+          code: queryError?.code,
+          hint: queryError?.hint,
+        },
+        migrationStatus: {
+          hasIpAddress: tableInfo?.some((col: any) => col.column_name === 'ip_address') || false,
+          hasCountry: tableInfo?.some((col: any) => col.column_name === 'country') || false,
+          hasRegion: tableInfo?.some((col: any) => col.column_name === 'region') || false,
+          missingColumns: [
+            'ip_address',
+            'country',
+            'country_code',
+            'region',
+            'region_code',
+            'city',
+            'latitude',
+            'longitude',
+            'timezone',
+            'isp',
+            'is_proxy'
+          ].filter(col => !tableInfo?.some((t: any) => t.column_name === col)),
+        },
+        recommendation: insertTest.success 
+          ? 'Visitor tracking should work. Check if frontend is calling /api/track endpoint.'
+          : insertTest.error.includes('column') 
+            ? 'Run migration 20250115000001_add_missing_visitor_columns.sql in Supabase SQL Editor'
+            : insertTest.error.includes('permission') || insertTest.error.includes('policy')
+              ? 'Check RLS policies allow inserts. Run the migration to update policies.'
+              : `Error: ${insertTest.error}. Check Supabase logs for details.`
+      });
+    } catch (error: any) {
+      return c.json({ error: error.message, stack: error.stack }, 500);
+    }
+  });
+
   app.get('/api/debug', async (c) => {
   const supabaseUrl = c.env.VITE_SUPABASE_URL || '';
   const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY || '';
