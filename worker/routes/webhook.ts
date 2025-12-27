@@ -15,10 +15,18 @@ export function createWebhookRoutes() {
       const signature = c.req.header('stripe-signature');
       const eventId = c.req.header('stripe-webhook-event-id') || 'unknown';
 
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:16',message:'Webhook received',data:{hasSignature:!!signature,eventId,hasWebhookSecret:!!c.env.STRIPE_WEBHOOK_SECRET,hasResendKey:!!c.env.RESEND_API_KEY,hasFromEmail:!!c.env.RESEND_FROM_EMAIL},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       console.log(`[WEBHOOK] Received request, event-id header: ${eventId}`);
+      console.log(`[WEBHOOK] RESEND_API_KEY configured: ${!!c.env.RESEND_API_KEY}`);
+      console.log(`[WEBHOOK] RESEND_FROM_EMAIL: ${c.env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com'}`);
 
       if (!signature) {
         console.error('[WEBHOOK] Missing stripe-signature header');
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:26',message:'Missing signature',data:{eventId},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
         // Still return 200 to acknowledge receipt - Stripe needs 200-299 range
         return c.json({ received: true, error: 'Missing signature' }, 200);
       }
@@ -26,6 +34,9 @@ export function createWebhookRoutes() {
       const webhookSecret = c.env.STRIPE_WEBHOOK_SECRET;
       if (!webhookSecret) {
         console.error('[WEBHOOK] STRIPE_WEBHOOK_SECRET not configured');
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:34',message:'Webhook secret missing',data:{eventId},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
         // Still return 200 to acknowledge receipt - configuration issue logged
         return c.json({ received: true, error: 'Webhook not configured' }, 200);
       }
@@ -35,9 +46,15 @@ export function createWebhookRoutes() {
         const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
         const rawBody = await c.req.text();
         event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:42',message:'Event verified',data:{eventType:event.type,eventId:event.id,hasDataObject:!!event.data.object},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         console.log(`[WEBHOOK] Verified event: ${event.type} (${event.id})`);
       } catch (error: any) {
         console.error(`[WEBHOOK] Signature verification failed: ${error.message}`);
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:47',message:'Signature verification failed',data:{error:error.message,eventId},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
         // Still return 200 to prevent retries - invalid signature logged but acknowledged
         return c.json({ received: true, error: 'Invalid signature' }, 200);
       }
@@ -48,13 +65,25 @@ export function createWebhookRoutes() {
       try {
         switch (event.type) {
           case 'checkout.session.completed':
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:54',message:'Processing checkout.session.completed',data:{sessionId:event.data.object.id,paymentIntent:event.data.object.payment_intent,customerEmail:event.data.object.customer_details?.email},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
             console.log(`[WEBHOOK] Processing checkout.session.completed`);
             await handleCheckoutComplete(event.data.object, storage, c.env);
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:58',message:'checkout.session.completed processed',data:{sessionId:event.data.object.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
             console.log(`[WEBHOOK] checkout.session.completed processed successfully`);
             break;
           case 'payment_intent.succeeded':
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:61',message:'Processing payment_intent.succeeded',data:{paymentIntentId:event.data.object.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
             console.log(`[WEBHOOK] Processing payment_intent.succeeded`);
             await handlePaymentSucceeded(event.data.object, storage, c.env);
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:65',message:'payment_intent.succeeded processed',data:{paymentIntentId:event.data.object.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
             console.log(`[WEBHOOK] payment_intent.succeeded processed successfully`);
             break;
           case 'payment_intent.payment_failed':
@@ -74,10 +103,16 @@ export function createWebhookRoutes() {
             console.log(`[WEBHOOK] Acknowledged ${event.type} (intermediate state)`);
             break;
           default:
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:78',message:'Unhandled event type',data:{eventType:event.type},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'E'})}).catch(()=>{});
+            // #endregion
             console.log(`[WEBHOOK] Unhandled event type: ${event.type}`);
             break;
         }
       } catch (error: any) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:81',message:'Error processing event',data:{eventType:event.type,error:error.message,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'F'})}).catch(()=>{});
+        // #endregion
         console.error(`[WEBHOOK] Error processing ${event.type}: ${error.message}`);
         console.error(`[WEBHOOK] Stack trace: ${error.stack}`);
         processingResult = { success: false, error: error.message };
@@ -88,6 +123,9 @@ export function createWebhookRoutes() {
       return c.json({ received: true }, 200);
     } catch (error: any) {
       // Final safety net - catch any unexpected errors and still return 200
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:90',message:'Unexpected webhook error',data:{error:error.message,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'G'})}).catch(()=>{});
+      // #endregion
       console.error(`[WEBHOOK] Unexpected error in webhook handler: ${error.message}`);
       console.error(`[WEBHOOK] Stack trace: ${error.stack}`);
       return c.json({ received: true, error: 'Unexpected error' }, 200);
@@ -102,12 +140,18 @@ export function createWebhookRoutes() {
 }
 
 async function handleCheckoutComplete(session: any, storage: Storage, env: Env) {
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:105',message:'handleCheckoutComplete started',data:{sessionId:session.id,paymentIntent:session.payment_intent,customerEmail:session.customer_details?.email,hasResendKey:!!env.RESEND_API_KEY},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
   console.log(`[CHECKOUT] Session completed: ${session.id}`);
   console.log(`[CHECKOUT] Payment intent: ${session.payment_intent}`);
   console.log(`[CHECKOUT] Customer email: ${session.customer_details?.email}`);
   
   const order = await storage.getOrderByCheckoutSession(session.id);
   if (!order) {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:112',message:'No order found for session',data:{sessionId:session.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'H'})}).catch(()=>{});
+    // #endregion
     console.error(`[CHECKOUT] ERROR: No order found for session: ${session.id}`);
     return;
   }
@@ -223,6 +267,9 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
     return;
   }
 
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:226',message:'Starting email delivery',data:{orderId:order.id,customerEmail:updatedOrder.customerEmail,hasResendKey:!!env.RESEND_API_KEY,fromEmail:env.RESEND_FROM_EMAIL||'noreply@streamstickpro.com',credentialsSent:updatedOrder.credentialsSent},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
   console.log(`[EMAIL] Starting email delivery for order ${order.id}`);
   console.log(`[EMAIL] Sending to: ${updatedOrder.customerEmail}`);
   console.log(`[EMAIL] RESEND_API_KEY configured: ${!!env.RESEND_API_KEY}`);
@@ -230,10 +277,19 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
   
   // Send order confirmation
   try {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:234',message:'Calling sendOrderConfirmation',data:{orderId:updatedOrder.id,customerEmail:updatedOrder.customerEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     console.log(`[EMAIL] Attempting to send order confirmation...`);
     await sendOrderConfirmation(updatedOrder, env);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:237',message:'Order confirmation sent successfully',data:{orderId:updatedOrder.id,customerEmail:updatedOrder.customerEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     console.log(`[EMAIL] ✅ Order confirmation sent successfully to ${updatedOrder.customerEmail}`);
   } catch (error: any) {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:240',message:'Order confirmation failed',data:{orderId:updatedOrder.id,error:error.message,errorStack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'I'})}).catch(()=>{});
+    // #endregion
     console.error(`[EMAIL] ❌ ERROR sending order confirmation: ${error.message}`);
     console.error(`[EMAIL] Error details:`, error);
     console.error(`[EMAIL] Error stack: ${error.stack}`);
@@ -241,10 +297,19 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
   
   // Send owner notification
   try {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:244',message:'Calling sendOwnerOrderNotification',data:{orderId:updatedOrder.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     console.log(`[EMAIL] Attempting to send owner notification...`);
     await sendOwnerOrderNotification(updatedOrder, env);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:247',message:'Owner notification sent successfully',data:{orderId:updatedOrder.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     console.log(`[EMAIL] ✅ Owner notification sent successfully`);
   } catch (error: any) {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:250',message:'Owner notification failed',data:{orderId:updatedOrder.id,error:error.message,errorStack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'J'})}).catch(()=>{});
+    // #endregion
     console.error(`[EMAIL] ❌ ERROR sending owner notification: ${error.message}`);
     console.error(`[EMAIL] Error details:`, error);
     console.error(`[EMAIL] Error stack: ${error.stack}`);
@@ -253,18 +318,33 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
   // Send credentials if not already sent
   if (!updatedOrder.credentialsSent) {
     try {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:256',message:'Calling sendCredentialsEmail',data:{orderId:updatedOrder.id,customerEmail:updatedOrder.customerEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       console.log(`[EMAIL] Attempting to send credentials email...`);
       await sendCredentialsEmail(updatedOrder, env, storage);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:259',message:'Credentials email sent successfully',data:{orderId:updatedOrder.id,customerEmail:updatedOrder.customerEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       console.log(`[EMAIL] ✅ Credentials sent successfully to ${updatedOrder.customerEmail}`);
     } catch (error: any) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:262',message:'Credentials email failed',data:{orderId:updatedOrder.id,error:error.message,errorStack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'K'})}).catch(()=>{});
+      // #endregion
       console.error(`[EMAIL] ❌ ERROR sending credentials: ${error.message}`);
       console.error(`[EMAIL] Error details:`, error);
       console.error(`[EMAIL] Error stack: ${error.stack}`);
     }
   } else {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:266',message:'Credentials already sent',data:{orderId:order.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'L'})}).catch(()=>{});
+    // #endregion
     console.log(`[EMAIL] Credentials already sent for order ${order.id}`);
   }
   
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'webhook.ts:268',message:'Checkout complete finished',data:{orderId:order.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
   console.log(`[CHECKOUT] Completed processing order ${order.id}`);
 }
 

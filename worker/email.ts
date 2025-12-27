@@ -8,8 +8,29 @@ const IPTV_PORTAL_URL = 'http://ky-tv.cc';
 const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
 
 export async function sendOrderConfirmation(order: Order, env: Env): Promise<void> {
+  // #region agent log
+  if (typeof fetch !== 'undefined') {
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:10',message:'sendOrderConfirmation called',data:{orderId:order.id,customerEmail:order.customerEmail,hasResendKey:!!env.RESEND_API_KEY,hasFromEmail:!!env.RESEND_FROM_EMAIL},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+  }
+  // #endregion
   if (!order.customerEmail) {
     const error = `Cannot send order confirmation: missing customerEmail for order ${order.id}`;
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:13',message:'Missing customer email',data:{orderId:order.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'M'})}).catch(()=>{});
+    }
+    // #endregion
+    console.error(`[EMAIL] ${error}`);
+    throw new Error(error);
+  }
+  
+  if (!env.RESEND_API_KEY) {
+    const error = `Cannot send order confirmation: RESEND_API_KEY not configured`;
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:20',message:'RESEND_API_KEY missing',data:{orderId:order.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'N'})}).catch(()=>{});
+    }
+    // #endregion
     console.error(`[EMAIL] ${error}`);
     throw new Error(error);
   }
@@ -20,6 +41,11 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
   const priceFormatted = (order.amount / 100).toFixed(2);
   
   try {
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:28',message:'Calling resend.emails.send',data:{orderId:order.id,from:fromEmail,to:order.customerEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+    }
+    // #endregion
     await resend.emails.send({
       from: fromEmail,
       to: order.customerEmail,
@@ -48,8 +74,18 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
       </div>
     `,
     });
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:52',message:'Order confirmation email sent successfully',data:{orderId:order.id,customerEmail:order.customerEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+    }
+    // #endregion
     console.log(`[EMAIL] Order confirmation email sent successfully to ${order.customerEmail}`);
   } catch (error: any) {
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:55',message:'Order confirmation email failed',data:{orderId:order.id,error:error.message,errorStack:error.stack,errorType:error.constructor.name},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
+    }
+    // #endregion
     console.error(`[EMAIL] Failed to send order confirmation email to ${order.customerEmail}:`, error.message);
     throw new Error(`Failed to send order confirmation email: ${error.message}`);
   }
