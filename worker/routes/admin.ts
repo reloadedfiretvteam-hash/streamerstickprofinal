@@ -374,8 +374,20 @@ export function createAdminRoutes() {
 
   app.get('/visitors/stats', async (c) => {
     try {
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'admin.ts:375',message:'Fetching visitor stats',timestamp:Date.now(),sessionId:'debug-session',runId:'admin-debug',hypothesisId:'I'})}).catch(()=>{});
+      }
+      // #endregion
+      
       const storage = getStorage(c.env);
       const stats = await storage.getVisitorStats();
+      
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'admin.ts:382',message:'Got basic stats from storage',data:{totalVisitors:stats.totalVisitors,todayVisitors:stats.todayVisitors,onlineNow:stats.onlineNow},timestamp:Date.now(),sessionId:'debug-session',runId:'admin-debug',hypothesisId:'J'})}).catch(()=>{});
+      }
+      // #endregion
       
       // Enhance with additional analytics
       const { createClient } = await import('@supabase/supabase-js');
@@ -388,11 +400,36 @@ export function createAdminRoutes() {
       const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
       
       // Get detailed visitor data
-      const { data: allVisitors } = await supabase
+      const { data: allVisitors, error: visitorsError } = await supabase
         .from('visitors')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(5000);
+      
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'admin.ts:400',message:'Queried visitors table',data:{visitorCount:allVisitors?.length||0,error:visitorsError?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'admin-debug',hypothesisId:'K'})}).catch(()=>{});
+      }
+      // #endregion
+      
+      if (visitorsError) {
+        console.error('Error fetching visitors:', visitorsError);
+        // Return basic stats even if detailed query fails
+        return c.json({
+          data: {
+            ...stats,
+            countryBreakdown: [],
+            regionBreakdown: [],
+            cityBreakdown: [],
+            pageBreakdown: [],
+            deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0, bot: 0 },
+            hourlyDistribution: Array.from({ length: 24 }, (_, i) => ({ hour: i, count: 0 })),
+            liveVisitors: [],
+            monthVisitors: 0,
+            error: visitorsError.message,
+          }
+        });
+      }
       
       const visitors = allVisitors || [];
       

@@ -89,6 +89,7 @@ export default function ModernLiveVisitors() {
         }
         // #endregion
         console.error('Failed to fetch visitor stats:', response.status, errorText);
+        setData(null);
         return;
       }
       
