@@ -18,8 +18,13 @@ export function useTracking() {
   useEffect(() => {
     const currentPath = location + window.location.search;
     
-    if (lastTrackedPath.current === currentPath) return;
+    if (lastTrackedPath.current === currentPath) {
+      console.log('[FRONTEND_TRACK] Skipping duplicate path:', currentPath);
+      return;
+    }
     lastTrackedPath.current = currentPath;
+
+    console.log('[FRONTEND_TRACK] Starting tracking for path:', currentPath);
 
     const trackPageView = async () => {
       try {
