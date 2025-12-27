@@ -138,12 +138,13 @@ export function CartDrawer() {
                         </div>
                         <button
                           type="button"
-                          aria-label="Remove item"
-                          className="h-8 w-8 flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-950/50 rounded-lg transition-colors"
+                          aria-label="Remove item from cart"
+                          className="px-3 py-1.5 flex items-center justify-center gap-1.5 text-red-400 hover:text-red-300 hover:bg-red-950/50 rounded-lg transition-colors border border-red-500/30 hover:border-red-500/60 text-sm font-medium"
                           onClick={() => removeItem(item.id)}
                           data-testid={`button-remove-${item.id}`}
                         >
                           <Trash2 className="w-4 h-4" />
+                          <span className="hidden sm:inline">Remove</span>
                         </button>
                       </div>
                     </div>
