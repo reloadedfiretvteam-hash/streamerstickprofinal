@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Menu, X, Flame, ShoppingCart, ChevronRight, Tv, Wifi, BookOpen, HelpCircle, Home } from "lucide-react";
+import { Menu, X, Flame, ShoppingCart, ChevronRight, Tv, Wifi, BookOpen, HelpCircle, Home, Mail } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +38,14 @@ export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq }: MobileNa
     { label: "How It Works", icon: ChevronRight, action: () => navigateToSection("about") },
     { label: "Blog", icon: BookOpen, action: () => setLocation("/blog") },
     { label: "Support & FAQ", icon: HelpCircle, action: () => navigateToSection("faq") },
+    { 
+      label: "Customer Support", 
+      icon: Mail, 
+      action: () => {
+        window.location.href = "mailto:reloadedfiretvteam@gmail.com?subject=Customer Support Request";
+        setIsOpen(false);
+      } 
+    },
   ];
 
   return (
