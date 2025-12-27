@@ -83,13 +83,37 @@ export default function ModernLiveVisitors() {
       
       if (!response.ok) {
         const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText };
+        }
         // #region agent log
+        console.error('[MODERN_VISITORS] API response error:', { status: response.status, error: errorData });
         if (typeof fetch !== 'undefined') {
-          fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ModernLiveVisitors.tsx:78',message:'API response error',data:{status:response.status,error:errorText},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-debug',hypothesisId:'D'})}).catch(()=>{});
+          fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ModernLiveVisitors.tsx:78',message:'API response error',data:{status:response.status,error:errorData},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-debug',hypothesisId:'D'})}).catch(()=>{});
         }
         // #endregion
-        console.error('Failed to fetch visitor stats:', response.status, errorText);
-        setData(null);
+        console.error('Failed to fetch visitor stats:', response.status, errorData);
+        // Set error state instead of null
+        setData({
+          totalVisitors: 0,
+          todayVisitors: 0,
+          weekVisitors: 0,
+          onlineNow: 0,
+          liveVisitors: [],
+          countryBreakdown: [],
+          regionBreakdown: [],
+          cityBreakdown: [],
+          pageBreakdown: [],
+          deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0, bot: 0 },
+          hourlyDistribution: [],
+          monthVisitors: 0,
+          error: errorData.error || errorText,
+          errorCode: errorData.errorCode,
+          errorHint: errorData.errorHint,
+        });
         return;
       }
       
