@@ -159,5 +159,99 @@ export function createCheckoutRoutes() {
     }
   });
 
+  // Direct email endpoint - separate from webhooks (like free trials)
+  app.post('/send-emails', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const body = await c.req.json();
+      const { sessionId, orderId } = body;
+
+      let order;
+      if (sessionId) {
+        order = await storage.getOrderByCheckoutSession(sessionId);
+      } else if (orderId) {
+        order = await storage.getOrder(orderId);
+      } else {
+        return c.json({ error: "sessionId or orderId required" }, 400);
+      }
+
+      if (!order) {
+        return c.json({ error: "Order not found" }, 404);
+      }
+
+      // Verify payment was successful
+      if (order.status !== 'paid') {
+        // Try to verify with Stripe if we have a session
+        if (sessionId) {
+          const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
+          const session = await stripe.checkout.sessions.retrieve(sessionId);
+          if (session.payment_status !== 'paid') {
+            return c.json({ error: "Payment not completed" }, 400);
+          }
+          // Update order status if needed
+          if (order.status !== 'paid') {
+            await storage.updateOrder(order.id, { status: 'paid' });
+            order = await storage.getOrder(order.id);
+          }
+        } else {
+          return c.json({ error: "Payment not completed" }, 400);
+        }
+      }
+
+      // Import email functions
+      const { sendOrderConfirmation, sendCredentialsEmail, sendOwnerOrderNotification } = await import('../email');
+
+      const results = {
+        orderConfirmation: false,
+        credentials: false,
+        ownerNotification: false,
+        errors: [] as string[],
+      };
+
+      // Send order confirmation
+      try {
+        await sendOrderConfirmation(order, c.env);
+        results.orderConfirmation = true;
+        console.log(`[EMAIL] Order confirmation sent to ${order.customerEmail}`);
+      } catch (error: any) {
+        results.errors.push(`Order confirmation: ${error.message}`);
+        console.error(`[EMAIL] Failed to send order confirmation:`, error);
+      }
+
+      // Send owner notification
+      try {
+        await sendOwnerOrderNotification(order, c.env);
+        results.ownerNotification = true;
+        console.log(`[EMAIL] Owner notification sent`);
+      } catch (error: any) {
+        results.errors.push(`Owner notification: ${error.message}`);
+        console.error(`[EMAIL] Failed to send owner notification:`, error);
+      }
+
+      // Send credentials if not already sent
+      if (!order.credentialsSent) {
+        try {
+          await sendCredentialsEmail(order, c.env, storage);
+          results.credentials = true;
+          console.log(`[EMAIL] Credentials sent to ${order.customerEmail}`);
+        } catch (error: any) {
+          results.errors.push(`Credentials: ${error.message}`);
+          console.error(`[EMAIL] Failed to send credentials:`, error);
+        }
+      } else {
+        results.credentials = true; // Already sent
+      }
+
+      return c.json({ 
+        success: true,
+        results,
+        message: "Emails sent successfully"
+      });
+    } catch (error: any) {
+      console.error("Error sending emails:", error);
+      return c.json({ error: "Failed to send emails", details: error.message }, 500);
+    }
+  });
+
   return app;
 }
