@@ -335,22 +335,35 @@ export function createStorage(config: StorageConfig) {
       }
       // #endregion
 
-      const { data, error } = await supabase.from('visitors').insert(dbVisitor).select().single();
+      // Try insert - if columns don't exist, fall back to minimal insert
+      let { data, error } = await supabase.from('visitors').insert(dbVisitor).select().single();
+      
+      // If column error, try minimal insert (backward compatibility)
+      if (error && (error.code === '42703' || error.message.includes('column'))) {
+        console.warn('[VISITOR_TRACK] Column error, trying minimal insert:', error.message);
+        const minimalVisitor = {
+          session_id: dbVisitor.session_id,
+          page_url: dbVisitor.page_url,
+          referrer: dbVisitor.referrer,
+          user_agent: dbVisitor.user_agent,
+        };
+        const retryResult = await supabase.from('visitors').insert(minimalVisitor).select().single();
+        data = retryResult.data;
+        error = retryResult.error;
+      }
       
       // #region agent log
-      console.log('[VISITOR_TRACK] Supabase insert result:', { success: !error, error: error?.message, hasData: !!data, visitorData: dbVisitor });
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'storage.ts:331',message:'Supabase insert result',data:{success:!error,error:error?.message,hasData:!!data},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'L'})}).catch(()=>{});
-      }
+      console.log('[VISITOR_TRACK] Supabase insert result:', { success: !error, error: error?.message, hasData: !!data });
       // #endregion
       
       if (error) {
         console.error('[VISITOR_TRACK] Error inserting visitor:', error);
-        console.error('[VISITOR_TRACK] Error details:', JSON.stringify(error, null, 2));
-        console.error('[VISITOR_TRACK] Visitor data attempted:', JSON.stringify(dbVisitor, null, 2));
         throw error;
       }
-      return this.mapVisitorFromDb(data);
+      
+      // Map back with all fields, using defaults for missing columns
+      const mapped = this.mapVisitorFromDb(data);
+      return mapped;
     },
 
     async getVisitors(since?: Date): Promise<Visitor[]> {
