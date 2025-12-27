@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import type { Order } from '../shared/schema';
 import type { Storage } from './storage';
 import type { Env } from './index';
+import { sendEmail } from './email-providers';
 
 const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
 const IPTV_PORTAL_URL = 'http://ky-tv.cc';
@@ -24,71 +25,62 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
     throw new Error(error);
   }
   
-  if (!env.RESEND_API_KEY) {
-    const error = `Cannot send order confirmation: RESEND_API_KEY not configured`;
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:20',message:'RESEND_API_KEY missing',data:{orderId:order.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'N'})}).catch(()=>{});
-    }
-    // #endregion
-    console.error(`[EMAIL] ${error}`);
-    throw new Error(error);
-  }
-  
-  const resend = new Resend(env.RESEND_API_KEY);
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
-
   const priceFormatted = (order.amount / 100).toFixed(2);
   
-  try {
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:28',message:'Calling resend.emails.send',data:{orderId:order.id,from:fromEmail,to:order.customerEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
-    }
-    // #endregion
-    await resend.emails.send({
-      from: fromEmail,
-      to: order.customerEmail,
-      subject: `Order Confirmation - ${order.realProductName}`,
-      html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #1a1a1a;">Thank You for Your Order!</h1>
-        
-        <p>Hi ${order.customerName || 'Valued Customer'},</p>
-        
-        <p>Your order has been confirmed and is being processed.</p>
-        
-        <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h2 style="margin-top: 0; color: #333;">Order Details</h2>
-          <p><strong>Order ID:</strong> ${order.id}</p>
-          <p><strong>Product:</strong> ${order.realProductName}</p>
-          <p><strong>Amount:</strong> $${priceFormatted}</p>
-          ${order.countryPreference ? `<p><strong>Channel Preferences:</strong> ${order.countryPreference}</p>` : ''}
-        </div>
-        
-        <p>You will receive your login credentials in a separate email within the next 5 minutes.</p>
-        
-        <p>If you have any questions, please don't hesitate to reach out.</p>
-        
-        <p>Best regards,<br>StreamStickPro Team</p>
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a1a1a;">Thank You for Your Order!</h1>
+      
+      <p>Hi ${order.customerName || 'Valued Customer'},</p>
+      
+      <p>Your order has been confirmed and is being processed.</p>
+      
+      <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h2 style="margin-top: 0; color: #333;">Order Details</h2>
+        <p><strong>Order ID:</strong> ${order.id}</p>
+        <p><strong>Product:</strong> ${order.realProductName}</p>
+        <p><strong>Amount:</strong> $${priceFormatted}</p>
+        ${order.countryPreference ? `<p><strong>Channel Preferences:</strong> ${order.countryPreference}</p>` : ''}
       </div>
-    `,
-    });
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:52',message:'Order confirmation email sent successfully',data:{orderId:order.id,customerEmail:order.customerEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
-    }
-    // #endregion
-    console.log(`[EMAIL] Order confirmation email sent successfully to ${order.customerEmail}`);
-  } catch (error: any) {
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:55',message:'Order confirmation email failed',data:{orderId:order.id,error:error.message,errorStack:error.stack,errorType:error.constructor.name},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
-    }
-    // #endregion
-    console.error(`[EMAIL] Failed to send order confirmation email to ${order.customerEmail}:`, error.message);
-    throw new Error(`Failed to send order confirmation email: ${error.message}`);
+      
+      <p>You will receive your login credentials in a separate email within the next 5 minutes.</p>
+      
+      <p>If you have any questions, please don't hesitate to reach out.</p>
+      
+      <p>Best regards,<br>StreamStickPro Team</p>
+    </div>
+  `;
+  
+  // #region agent log
+  if (typeof fetch !== 'undefined') {
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:28',message:'Sending order confirmation via unified email system',data:{orderId:order.id,from:fromEmail,to:order.customerEmail,hasResendKey:!!env.RESEND_API_KEY},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
   }
+  // #endregion
+  
+  const result = await sendEmail({
+    to: order.customerEmail,
+    from: fromEmail,
+    subject: `Order Confirmation - ${order.realProductName}`,
+    html: emailHtml,
+  }, env);
+  
+  if (!result.success) {
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:58',message:'Order confirmation email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
+    }
+    // #endregion
+    console.error(`[EMAIL] Failed to send order confirmation email to ${order.customerEmail} via ${result.provider}: ${result.error}`);
+    throw new Error(`Failed to send order confirmation email: ${result.error}`);
+  }
+  
+  // #region agent log
+  if (typeof fetch !== 'undefined') {
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:65',message:'Order confirmation email sent successfully',data:{orderId:order.id,customerEmail:order.customerEmail,provider:result.provider},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+  }
+  // #endregion
+  console.log(`[EMAIL] ✅ Order confirmation email sent successfully to ${order.customerEmail} via ${result.provider}`);
 }
 
 export async function sendCredentialsEmail(order: Order, env: Env, storage: Storage): Promise<void> {
@@ -98,12 +90,16 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
   }
 
   if (!order.customerEmail) {
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:100',message:'Missing customer email for credentials',data:{orderId:order.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'M'})}).catch(()=>{});
+    }
+    // #endregion
     const error = `Cannot send credentials: missing customerEmail for order ${order.id}`;
     console.error(`[EMAIL] ${error}`);
     throw new Error(error);
   }
   
-  const resend = new Resend(env.RESEND_API_KEY);
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
 
   // Use existing credentials or generate new ones and save them
@@ -150,91 +146,136 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
 
   let productInstructions = defaultCredentialsSection;
 
-  try {
-    await resend.emails.send({
-      from: fromEmail,
-      to: order.customerEmail,
-      subject: `Your Login Credentials - ${order.realProductName}`,
-      html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #1a1a1a;">Your Credentials Are Ready!</h1>
-        
-        <p>Hi ${order.customerName || 'Valued Customer'},</p>
-        
-        <p>Here are your login credentials for ${order.realProductName}:</p>
-        
-        ${productInstructions}
-        
-        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
-          <strong>Important:</strong> Please save these credentials in a safe place. Do not share them with anyone.
-        </div>
-        
-        <p>If you need any assistance, please don't hesitate to reach out.</p>
-        
-        <p>Best regards,<br>StreamStickPro Team</p>
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a1a1a;">Your Credentials Are Ready!</h1>
+      
+      <p>Hi ${order.customerName || 'Valued Customer'},</p>
+      
+      <p>Here are your login credentials for ${order.realProductName}:</p>
+      
+      ${productInstructions}
+      
+      <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+        <strong>Important:</strong> Please save these credentials in a safe place. Do not share them with anyone.
       </div>
-    `,
-    });
-    await storage.updateOrder(order.id, { credentialsSent: true });
-    console.log(`[EMAIL] Credentials email sent successfully to ${order.customerEmail}`);
-  } catch (error: any) {
-    console.error(`[EMAIL] Failed to send credentials email to ${order.customerEmail}:`, error.message);
-    throw new Error(`Failed to send credentials email: ${error.message}`);
+      
+      <p>If you need any assistance, please don't hesitate to reach out.</p>
+      
+      <p>Best regards,<br>StreamStickPro Team</p>
+    </div>
+  `;
+
+  // #region agent log
+  if (typeof fetch !== 'undefined') {
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:148',message:'Sending credentials email via unified email system',data:{orderId:order.id,to:order.customerEmail,hasResendKey:!!env.RESEND_API_KEY},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
   }
+  // #endregion
+
+  const result = await sendEmail({
+    to: order.customerEmail,
+    from: fromEmail,
+    subject: `Your Login Credentials - ${order.realProductName}`,
+    html: emailHtml,
+  }, env);
+
+  if (!result.success) {
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:165',message:'Credentials email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
+    }
+    // #endregion
+    console.error(`[EMAIL] Failed to send credentials email to ${order.customerEmail} via ${result.provider}: ${result.error}`);
+    throw new Error(`Failed to send credentials email: ${result.error}`);
+  }
+
+  await storage.updateOrder(order.id, { credentialsSent: true });
+  // #region agent log
+  if (typeof fetch !== 'undefined') {
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:173',message:'Credentials email sent successfully',data:{orderId:order.id,customerEmail:order.customerEmail,provider:result.provider},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+  }
+  // #endregion
+  console.log(`[EMAIL] ✅ Credentials email sent successfully to ${order.customerEmail} via ${result.provider}`);
 }
 
 export async function sendRenewalConfirmationEmail(order: Order, env: Env): Promise<void> {
   if (!order.customerEmail) {
     const error = `Cannot send renewal confirmation: missing customerEmail for order ${order.id}`;
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:183',message:'Missing customer email for renewal',data:{orderId:order.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'M'})}).catch(()=>{});
+    }
+    // #endregion
     console.error(`[EMAIL] ${error}`);
     throw new Error(error);
   }
   
-  const resend = new Resend(env.RESEND_API_KEY);
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
-
   const priceFormatted = (order.amount / 100).toFixed(2);
   const existingUsername = order.existingUsername || 'your current username';
 
-  try {
-    await resend.emails.send({
-      from: fromEmail,
-      to: order.customerEmail,
-      subject: `Subscription Renewed! - ${order.realProductName}`,
-      html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #1a1a1a;">🎉 Your Subscription Has Been Extended!</h1>
-        
-        <p>Hi ${order.customerName || 'Valued Customer'},</p>
-        
-        <p>Great news! Your IPTV subscription has been successfully renewed.</p>
-        
-        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 25px; border-radius: 12px; margin: 20px 0; color: white;">
-          <h2 style="margin-top: 0; color: white;">Renewal Confirmed</h2>
-          <p style="font-size: 16px;"><strong>Product:</strong> ${order.realProductName}</p>
-          <p style="font-size: 16px;"><strong>Amount Paid:</strong> $${priceFormatted}</p>
-          <p style="font-size: 16px;"><strong>Your Username:</strong> ${existingUsername}</p>
-        </div>
-        
-        <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7;">
-          <h3 style="margin-top: 0; color: #0369a1;">Your Existing Credentials Still Work!</h3>
-          <p>You can continue using your current login credentials. No changes needed!</p>
-          <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #0369a1;">${IPTV_PORTAL_URL}</a></p>
-          <p><strong>Username:</strong> ${existingUsername}</p>
-          <p><strong>Password:</strong> (same as before)</p>
-        </div>
-        
-        <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
-          <strong>✅ What's Next:</strong> Your subscription is now extended. Just keep streaming - no action required!
-        </div>
-        
-        <p>Thank you for being a loyal customer! If you have any questions, please don't hesitate to reach out.</p>
-        
-        <p>Best regards,<br>StreamStickPro Team</p>
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a1a1a;">🎉 Your Subscription Has Been Extended!</h1>
+      
+      <p>Hi ${order.customerName || 'Valued Customer'},</p>
+      
+      <p>Great news! Your IPTV subscription has been successfully renewed.</p>
+      
+      <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 25px; border-radius: 12px; margin: 20px 0; color: white;">
+        <h2 style="margin-top: 0; color: white;">Renewal Confirmed</h2>
+        <p style="font-size: 16px;"><strong>Product:</strong> ${order.realProductName}</p>
+        <p style="font-size: 16px;"><strong>Amount Paid:</strong> $${priceFormatted}</p>
+        <p style="font-size: 16px;"><strong>Your Username:</strong> ${existingUsername}</p>
       </div>
-    `,
-    });
-    console.log(`[EMAIL] Renewal confirmation email sent successfully to ${order.customerEmail}`);
+      
+      <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7;">
+        <h3 style="margin-top: 0; color: #0369a1;">Your Existing Credentials Still Work!</h3>
+        <p>You can continue using your current login credentials. No changes needed!</p>
+        <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #0369a1;">${IPTV_PORTAL_URL}</a></p>
+        <p><strong>Username:</strong> ${existingUsername}</p>
+        <p><strong>Password:</strong> (same as before)</p>
+      </div>
+      
+      <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+        <strong>✅ What's Next:</strong> Your subscription is now extended. Just keep streaming - no action required!
+      </div>
+      
+      <p>Thank you for being a loyal customer! If you have any questions, please don't hesitate to reach out.</p>
+      
+      <p>Best regards,<br>StreamStickPro Team</p>
+    </div>
+  `;
+
+  // #region agent log
+  if (typeof fetch !== 'undefined') {
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:208',message:'Sending renewal confirmation via unified email system',data:{orderId:order.id,to:order.customerEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+  }
+  // #endregion
+
+  const result = await sendEmail({
+    to: order.customerEmail,
+    from: fromEmail,
+    subject: `Subscription Renewed! - ${order.realProductName}`,
+    html: emailHtml,
+  }, env);
+
+  if (!result.success) {
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:218',message:'Renewal confirmation email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
+    }
+    // #endregion
+    console.error(`[EMAIL] Failed to send renewal confirmation email to ${order.customerEmail} via ${result.provider}: ${result.error}`);
+    throw new Error(`Failed to send renewal confirmation email: ${result.error}`);
+  }
+
+  // #region agent log
+  if (typeof fetch !== 'undefined') {
+    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:226',message:'Renewal confirmation email sent successfully',data:{orderId:order.id,customerEmail:order.customerEmail,provider:result.provider},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
+  }
+  // #endregion
+  console.log(`[EMAIL] ✅ Renewal confirmation email sent successfully to ${order.customerEmail} via ${result.provider}`);
   } catch (error: any) {
     console.error(`[EMAIL] Failed to send renewal confirmation email to ${order.customerEmail}:`, error.message);
     throw new Error(`Failed to send renewal confirmation email: ${error.message}`);
@@ -311,9 +352,13 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
   // Owner notification doesn't need customer email, but log if order email is missing
   if (!order.customerEmail) {
     console.warn(`[EMAIL] Order ${order.id} missing customerEmail, sending owner notification anyway`);
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:235',message:'Order missing customer email, sending owner notification anyway',data:{orderId:order.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'M'})}).catch(()=>{});
+    }
+    // #endregion
   }
   
-  const resend = new Resend(env.RESEND_API_KEY);
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
 
   const priceFormatted = (order.amount / 100).toFixed(2);
@@ -357,12 +402,7 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
         </div>
   `;
   
-  try {
-    await resend.emails.send({
-      from: fromEmail,
-      to: OWNER_EMAIL,
-      subject: `${emoji} ${orderTypeEmoji} ${orderTypeLabel} - $${priceFormatted} - ${order.realProductName}`,
-      html: `
+  const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: ${headerColor}; padding: 20px; border-radius: 12px 12px 0 0;">
           <h1 style="color: white; margin: 0;">💰 ${isRenewal ? 'Subscription Renewal!' : 'New Paid Order!'}</h1>
