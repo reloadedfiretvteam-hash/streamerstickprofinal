@@ -58,17 +58,28 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
   }
   // #endregion
   
-  const result = await sendEmail({
-    to: order.customerEmail,
-    from: fromEmail,
-    subject: `Order Confirmation - ${order.realProductName}`,
-    html: emailHtml,
-  }, env);
+  let result;
+  try {
+    result = await sendEmail({
+      to: order.customerEmail,
+      from: fromEmail,
+      subject: `Order Confirmation - ${order.realProductName}`,
+      html: emailHtml,
+    }, env);
+  } catch (error: any) {
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:62',message:'sendEmail threw unexpected exception',data:{orderId:order.id,error:error.message,errorStack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'E'})}).catch(()=>{});
+    }
+    // #endregion
+    console.error(`[EMAIL] Unexpected error calling sendEmail for order confirmation: ${error.message}`);
+    throw new Error(`Failed to send order confirmation email: ${error.message}`);
+  }
   
   if (!result.success) {
     // #region agent log
     if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:58',message:'Order confirmation email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:75',message:'Order confirmation email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
     }
     // #endregion
     console.error(`[EMAIL] Failed to send order confirmation email to ${order.customerEmail} via ${result.provider}: ${result.error}`);
@@ -172,17 +183,28 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
   }
   // #endregion
 
-  const result = await sendEmail({
-    to: order.customerEmail,
-    from: fromEmail,
-    subject: `Your Login Credentials - ${order.realProductName}`,
-    html: emailHtml,
-  }, env);
+  let result;
+  try {
+    result = await sendEmail({
+      to: order.customerEmail,
+      from: fromEmail,
+      subject: `Your Login Credentials - ${order.realProductName}`,
+      html: emailHtml,
+    }, env);
+  } catch (error: any) {
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:182',message:'sendEmail threw unexpected exception',data:{orderId:order.id,error:error.message,errorStack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'E'})}).catch(()=>{});
+    }
+    // #endregion
+    console.error(`[EMAIL] Unexpected error calling sendEmail for credentials: ${error.message}`);
+    throw new Error(`Failed to send credentials email: ${error.message}`);
+  }
 
   if (!result.success) {
     // #region agent log
     if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:165',message:'Credentials email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:195',message:'Credentials email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
     }
     // #endregion
     console.error(`[EMAIL] Failed to send credentials email to ${order.customerEmail} via ${result.provider}: ${result.error}`);
@@ -253,17 +275,28 @@ export async function sendRenewalConfirmationEmail(order: Order, env: Env): Prom
   }
   // #endregion
 
-  const result = await sendEmail({
-    to: order.customerEmail,
-    from: fromEmail,
-    subject: `Subscription Renewed! - ${order.realProductName}`,
-    html: emailHtml,
-  }, env);
+  let result;
+  try {
+    result = await sendEmail({
+      to: order.customerEmail,
+      from: fromEmail,
+      subject: `Subscription Renewed! - ${order.realProductName}`,
+      html: emailHtml,
+    }, env);
+  } catch (error: any) {
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:262',message:'sendEmail threw unexpected exception',data:{orderId:order.id,error:error.message,errorStack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'E'})}).catch(()=>{});
+    }
+    // #endregion
+    console.error(`[EMAIL] Unexpected error calling sendEmail for renewal confirmation: ${error.message}`);
+    throw new Error(`Failed to send renewal confirmation email: ${error.message}`);
+  }
 
   if (!result.success) {
     // #region agent log
     if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:218',message:'Renewal confirmation email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:275',message:'Renewal confirmation email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
     }
     // #endregion
     console.error(`[EMAIL] Failed to send renewal confirmation email to ${order.customerEmail} via ${result.provider}: ${result.error}`);
@@ -453,14 +486,30 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
       </div>
   `;
 
-  const result = await sendEmail({
-    to: OWNER_EMAIL,
-    from: fromEmail,
-    subject: `${emoji} ${orderTypeEmoji} ${orderTypeLabel} - $${priceFormatted} - ${order.realProductName}`,
-    html: emailHtml,
-  }, env);
+  let result;
+  try {
+    result = await sendEmail({
+      to: OWNER_EMAIL,
+      from: fromEmail,
+      subject: `${emoji} ${orderTypeEmoji} ${orderTypeLabel} - $${priceFormatted} - ${order.realProductName}`,
+      html: emailHtml,
+    }, env);
+  } catch (error: any) {
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:462',message:'sendEmail threw unexpected exception',data:{orderId:order.id,error:error.message,errorStack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'E'})}).catch(()=>{});
+    }
+    // #endregion
+    console.error(`[EMAIL] Unexpected error calling sendEmail for owner notification: ${error.message}`);
+    throw new Error(`Failed to send owner notification email: ${error.message}`);
+  }
 
   if (!result.success) {
+    // #region agent log
+    if (typeof fetch !== 'undefined') {
+      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:475',message:'Owner notification email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
+    }
+    // #endregion
     console.error(`[EMAIL] Failed to send owner notification email for order ${order.id} via ${result.provider}: ${result.error}`);
     throw new Error(`Failed to send owner notification email: ${result.error}`);
   }
