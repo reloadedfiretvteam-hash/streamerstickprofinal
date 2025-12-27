@@ -75,6 +75,8 @@ export function createReminderRoutes() {
       }
       
       // Process trial orders
+      const trialOrdersToUpdate: Array<{ id: string; remindersSent: string[] }> = [];
+      
       for (const trialOrder of trialOrders || []) {
         if (!trialOrder.customer_email || trialOrder.payment_status !== 'completed') continue;
         
@@ -87,6 +89,9 @@ export function createReminderRoutes() {
         if (daysSinceOrder >= REMINDER_SCHEDULE.firstReminder && daysSinceOrder < REMINDER_SCHEDULE.secondReminder) {
           const remindersSent = trialOrder.metadata?.remindersSent || [];
           if (!remindersSent.includes('first')) {
+            const newRemindersSent = [...remindersSent, 'first'];
+            trialOrdersToUpdate.push({ id: trialOrder.id, remindersSent: newRemindersSent });
+            
             ordersToRemind.push({ 
               order: {
                 id: trialOrder.id,
@@ -99,6 +104,7 @@ export function createReminderRoutes() {
               type: 'first',
               daysSinceOrder,
               isTrial: true,
+              trialOrderId: trialOrder.id,
             });
           }
         }
