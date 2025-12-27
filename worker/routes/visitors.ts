@@ -69,17 +69,28 @@ export function createVisitorRoutes() {
       }
       // #endregion
 
-      return c.json({ success: true });
+      return c.json({ success: true, visitorId: visitor.id });
     } catch (error: any) {
       // #region agent log
       console.error('[VISITOR_TRACK] Exception in visitor tracking:', error);
       console.error('[VISITOR_TRACK] Stack:', error.stack);
+      console.error('[VISITOR_TRACK] Error code:', error.code);
+      console.error('[VISITOR_TRACK] Error hint:', error.hint);
       if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'visitors.ts:57',message:'Visitor tracking error',data:{error:error.message,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'I'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'visitors.ts:57',message:'Visitor tracking error',data:{error:error.message,code:error.code,hint:error.hint,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'I'})}).catch(()=>{});
       }
       // #endregion
       console.error("Error tracking visitor:", error);
-      return c.json({ error: "Failed to track visitor", details: error.message }, 500);
+      return c.json({ 
+        error: "Failed to track visitor", 
+        details: error.message,
+        code: error.code,
+        hint: error.hint,
+        suggestion: error.code === '42P01' ? 'Table "visitors" does not exist. Run migrations.' :
+                   error.code === '42703' ? 'Column does not exist. Run migration 20250115000001_add_missing_visitor_columns.sql' :
+                   error.code === '42501' ? 'Permission denied. Check RLS policies allow anonymous inserts.' :
+                   'Check Cloudflare Worker logs for details'
+      }, 500);
     }
   });
 
