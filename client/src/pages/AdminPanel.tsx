@@ -48,7 +48,8 @@ import {
   Github,
   GitBranch,
   CloudUpload,
-  CheckCheck
+  CheckCheck,
+  Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +66,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase, getStorageUrl, formatPriceDisplay, centsToDollars, dollarsToCents } from "@/lib/supabase";
 import SeoToolkit from "@/components/seo/SeoToolkit";
+import ModernLiveVisitors from "@/components/admin/ModernLiveVisitors";
+import ComprehensiveOrderData from "@/components/admin/ComprehensiveOrderData";
 
 interface VisitorStats {
   totalVisitors: number;
@@ -1945,6 +1948,19 @@ export default function AdminPanel() {
           )}
 
           {activeSection === "visitors" && (
+            <div className="bg-white dark:bg-gray-900 rounded-lg p-6">
+              <ModernLiveVisitors />
+            </div>
+          )}
+
+          {activeSection === "orders" && (
+            <div className="bg-white dark:bg-gray-900 rounded-lg p-6">
+              <ComprehensiveOrderData />
+            </div>
+          )}
+
+          {/* Legacy visitors section (replaced above, keeping for reference) */}
+          {false && activeSection === "visitors_old" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
