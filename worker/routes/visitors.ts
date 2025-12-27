@@ -10,6 +10,56 @@ export function createVisitorRoutes() {
     return c.json({ status: 'ok', message: 'Visitor tracking endpoint is active' });
   });
 
+  // Test endpoint - manually insert a visitor to verify database works
+  app.post('/test', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const testVisitor = await storage.trackVisitor({
+        sessionId: 'test-' + Date.now(),
+        pageUrl: 'https://streamstickpro.com/test',
+        referrer: 'https://test.com',
+        userAgent: 'Test-Agent',
+        ipAddress: '127.0.0.1',
+        country: 'US',
+        countryCode: 'US',
+        region: 'Test',
+        regionCode: 'TS',
+        city: 'Test City',
+        latitude: '0',
+        longitude: '0',
+        timezone: 'UTC',
+        isp: 'Test ISP',
+        isProxy: false,
+      });
+      
+      // Now try to read it back
+      const stats = await storage.getVisitorStats();
+      
+      return c.json({
+        success: true,
+        inserted: {
+          id: testVisitor.id,
+          sessionId: testVisitor.sessionId,
+          pageUrl: testVisitor.pageUrl,
+        },
+        stats: {
+          totalVisitors: stats.totalVisitors,
+          todayVisitors: stats.todayVisitors,
+          recentCount: stats.recentVisitors.length,
+        },
+        message: 'Test visitor inserted and read back successfully'
+      });
+    } catch (error: any) {
+      return c.json({
+        success: false,
+        error: error.message,
+        code: error.code,
+        hint: error.hint,
+        message: 'Failed to insert test visitor. Check migration has been run.'
+      }, 500);
+    }
+  });
+
   app.post('/', async (c) => {
     try {
       // #region agent log
