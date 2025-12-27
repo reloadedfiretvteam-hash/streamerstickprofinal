@@ -1525,6 +1525,14 @@ export default function AdminPanel() {
             <Users className="w-4 h-4 mr-3" /> Live Visitors
           </Button>
           <Button 
+            variant={activeSection === "orders" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => setActiveSection("orders")}
+            data-testid="nav-orders"
+          >
+            <ShoppingCart className="w-4 h-4 mr-3" /> Customer Orders
+          </Button>
+          <Button 
             variant={activeSection === "visual-editor" ? "secondary" : "ghost"} 
             className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
             onClick={() => setActiveSection("visual-editor")}
