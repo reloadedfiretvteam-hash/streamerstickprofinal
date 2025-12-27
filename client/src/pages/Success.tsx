@@ -27,11 +27,34 @@ export default function Success() {
     const sessionId = params.get("session_id");
     
     if (sessionId) {
+      // Fetch order details
       fetch(`/api/checkout/session/${sessionId}`)
         .then(res => res.json())
         .then(data => {
           if (data.order) {
             setOrderDetails(data);
+            
+            // Send emails directly (separate from webhooks, like free trials)
+            // Only send if payment was successful
+            if (data.paymentStatus === 'paid') {
+              fetch(`/api/checkout/send-emails`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId }),
+              })
+              .then(res => res.json())
+              .then(emailResult => {
+                if (emailResult.success) {
+                  console.log('✅ Emails sent successfully:', emailResult.results);
+                } else {
+                  console.warn('⚠️ Some emails may not have sent:', emailResult);
+                }
+              })
+              .catch(err => {
+                console.error('Error sending emails:', err);
+                // Don't show error to user - emails may still be sent via webhook
+              });
+            }
           }
           setLoading(false);
         })

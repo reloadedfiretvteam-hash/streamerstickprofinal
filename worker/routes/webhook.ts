@@ -9,6 +9,17 @@ type Storage = ReturnType<typeof getStorage>;
 export function createWebhookRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
+  // Test endpoint to verify webhook is reachable
+  app.post('/test', async (c) => {
+    return c.json({ 
+      message: 'Webhook endpoint is reachable',
+      timestamp: new Date().toISOString(),
+      url: c.req.url,
+      method: c.req.method,
+      note: 'If Stripe webhooks are not working, verify Stripe Dashboard → Webhooks → URL is: https://secure.streamstickpro.com/api/stripe/webhook'
+    });
+  });
+
   // Handle webhook with optional UUID suffix (from stripe-replit-sync managed webhooks)
   const handleWebhook = async (c: any) => {
     try {
