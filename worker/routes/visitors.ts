@@ -5,6 +5,11 @@ import type { Env } from '../index';
 export function createVisitorRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
+  // Health check endpoint for visitor tracking
+  app.get('/health', async (c) => {
+    return c.json({ status: 'ok', message: 'Visitor tracking endpoint is active' });
+  });
+
   app.post('/', async (c) => {
     try {
       // #region agent log
