@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { apiCall } from '@/lib/api';
 import { 
   Eye, 
   Globe, 
@@ -50,18 +51,77 @@ export default function ModernLiveVisitors() {
   const fetchVisitorData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/visitors/stats', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('custom_admin_token')}`,
-        },
+      
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ModernLiveVisitors.tsx:52',message:'Starting to fetch visitor data',data:{endpoint:'/api/admin/visitors/stats'},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-debug',hypothesisId:'A'})}).catch(()=>{});
+      }
+      // #endregion
+      
+      const token = localStorage.getItem('custom_admin_token');
+      
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ModernLiveVisitors.tsx:59',message:'Token retrieved',data:{hasToken:!!token},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-debug',hypothesisId:'B'})}).catch(()=>{});
+      }
+      // #endregion
+      
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await apiCall('/api/admin/visitors/stats', {
+        headers,
       });
+      
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ModernLiveVisitors.tsx:71',message:'API response received',data:{status:response.status,statusText:response.statusText,ok:response.ok},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-debug',hypothesisId:'C'})}).catch(()=>{});
+      }
+      // #endregion
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        // #region agent log
+        if (typeof fetch !== 'undefined') {
+          fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ModernLiveVisitors.tsx:78',message:'API response error',data:{status:response.status,error:errorText},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-debug',hypothesisId:'D'})}).catch(()=>{});
+        }
+        // #endregion
+        console.error('Failed to fetch visitor stats:', response.status, errorText);
+        return;
+      }
+      
       const result = await response.json();
       
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ModernLiveVisitors.tsx:88',message:'JSON parsed',data:{hasData:!!result.data,hasError:!!result.error,keys:Object.keys(result)},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-debug',hypothesisId:'E'})}).catch(()=>{});
+      }
+      // #endregion
+      
       if (result.data) {
+        // #region agent log
+        if (typeof fetch !== 'undefined') {
+          fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ModernLiveVisitors.tsx:93',message:'Setting visitor data',data:{totalVisitors:result.data.totalVisitors,todayVisitors:result.data.todayVisitors,onlineNow:result.data.onlineNow},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-debug',hypothesisId:'F'})}).catch(()=>{});
+        }
+        // #endregion
         setData(result.data);
         setLastUpdate(new Date());
+      } else {
+        // #region agent log
+        if (typeof fetch !== 'undefined') {
+          fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ModernLiveVisitors.tsx:99',message:'No data in response',data:{result},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-debug',hypothesisId:'G'})}).catch(()=>{});
+        }
+        // #endregion
+        console.warn('No data in visitor stats response:', result);
       }
-    } catch (error) {
+    } catch (error: any) {
+      // #region agent log
+      if (typeof fetch !== 'undefined') {
+        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ModernLiveVisitors.tsx:106',message:'Exception caught',data:{error:error.message,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-debug',hypothesisId:'H'})}).catch(()=>{});
+      }
+      // #endregion
       console.error('Error fetching visitor data:', error);
     } finally {
       setLoading(false);

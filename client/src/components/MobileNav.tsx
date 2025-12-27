@@ -42,8 +42,7 @@ export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq }: MobileNa
       label: "Customer Support", 
       icon: Mail, 
       action: () => {
-        const subject = encodeURIComponent("Customer Support Request");
-        window.location.href = `mailto:reloadedfiretvteam@gmail.com?subject=${subject}`;
+        window.location.href = "mailto:reloadedfiretvteam@gmail.com?subject=Customer Support Request";
         setIsOpen(false);
       } 
     },
