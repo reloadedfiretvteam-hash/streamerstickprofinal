@@ -88,7 +88,26 @@ app.get('/api/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.0.1' });
 });
 
-app.get('/api/debug', async (c) => {
+  app.get('/api/debug/webhook-test', async (c) => {
+    // Test endpoint to verify webhook configuration
+    return c.json({
+      webhookEndpoint: 'https://secure.streamstickpro.com/api/stripe/webhook',
+      hasWebhookSecret: !!c.env.STRIPE_WEBHOOK_SECRET,
+      hasResendKey: !!c.env.RESEND_API_KEY,
+      hasFromEmail: !!c.env.RESEND_FROM_EMAIL,
+      fromEmail: c.env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com',
+      message: 'If emails not working, check Stripe Dashboard → Webhooks → URL should be: https://secure.streamstickpro.com/api/stripe/webhook',
+      instructions: [
+        '1. Go to Stripe Dashboard → Webhooks',
+        '2. Verify webhook URL is: https://secure.streamstickpro.com/api/stripe/webhook',
+        '3. If URL contains "supabase.co", DELETE it and create new webhook',
+        '4. Ensure events include: checkout.session.completed and payment_intent.succeeded',
+        '5. Copy webhook signing secret (whsec_...) and add as STRIPE_WEBHOOK_SECRET in Cloudflare',
+      ],
+    });
+  });
+
+  app.get('/api/debug', async (c) => {
   const supabaseUrl = c.env.VITE_SUPABASE_URL || '';
   const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY || '';
   
