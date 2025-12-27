@@ -8,6 +8,7 @@ export function createVisitorRoutes() {
   app.post('/', async (c) => {
     try {
       // #region agent log
+      console.log('[VISITOR_TRACK] Endpoint called');
       if (typeof fetch !== 'undefined') {
         fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'visitors.ts:8',message:'Visitor tracking endpoint called',timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'D'})}).catch(()=>{});
       }
@@ -71,12 +72,14 @@ export function createVisitorRoutes() {
       return c.json({ success: true });
     } catch (error: any) {
       // #region agent log
+      console.error('[VISITOR_TRACK] Exception in visitor tracking:', error);
+      console.error('[VISITOR_TRACK] Stack:', error.stack);
       if (typeof fetch !== 'undefined') {
         fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'visitors.ts:57',message:'Visitor tracking error',data:{error:error.message,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'visitor-track-debug',hypothesisId:'I'})}).catch(()=>{});
       }
       // #endregion
       console.error("Error tracking visitor:", error);
-      return c.json({ error: "Failed to track visitor" }, 500);
+      return c.json({ error: "Failed to track visitor", details: error.message }, 500);
     }
   });
 
