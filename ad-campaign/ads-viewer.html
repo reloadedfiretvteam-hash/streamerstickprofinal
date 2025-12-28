@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamStickPro - All 30 Ads Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #0066FF 0%, #6633FF 100%);
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 20px;
+            opacity: 0.9;
+        }
+        
+        .ads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .ad-card {
+            background: #2a2a2a;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s;
+        }
+        
+        .ad-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .ad-preview {
+            width: 100%;
+            height: 600px;
+            position: relative;
+            background: linear-gradient(135deg, #0066FF 0%, #6633FF 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow: hidden;
+        }
+        
+        .ad-title {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+            z-index: 2;
+        }
+        
+        .ad-device {
+            width: 150px;
+            height: 300px;
+            background: linear-gradient(180deg, #FF6600 0%, #CC3300 100%);
+            border-radius: 15px;
+            margin: 20px 0;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(255, 102, 0, 0.5);
+            animation: glow 2s ease-in-out infinite;
+            z-index: 2;
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 10px 30px rgba(255, 102, 0, 0.5); }
+            50% { box-shadow: 0 10px 50px rgba(255, 102, 0, 0.8); }
+        }
+        
+        .ad-url {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            margin-top: 20px;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+            z-index: 2;
+        }
+        
+        .ad-info {
+            padding: 20px;
+        }
+        
+        .ad-info h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #0066FF;
+        }
+        
+        .ad-info p {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.8;
+        }
+        
+        .floating-icons {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        
+        .floating-icon {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        .export-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            background: #00CC66;
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 204, 102, 0.5);
+            z-index: 1000;
+        }
+        
+        .export-btn:hover {
+            background: #00AA55;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎬 StreamStickPro Ad Campaign</h1>
+        <p>30 Visual Ad Previews - Click any ad to view full size</p>
+    </div>
+    
+    <div class="ads-grid" id="adsGrid"></div>
+    
+    <button class="export-btn" onclick="exportAllAds()">📥 Export All Ads</button>
+    
+    <script>
+        const ads = [
+            {
+                id: 1,
+                title: "Unlimited Entertainment",
+                device: "Firestick",
+                description: "Transform your Firestick into an entertainment powerhouse with thousands of movies, TV shows, and live sports.",
+                color: "linear-gradient(135deg, #0066FF 0%, #6633FF 100%)"
+            },
+            {
+                id: 2,
+                title: "Smart TV Revolution",
+                device: "ONN Android Box",
+                description: "Turn any TV into a Smart TV with the ONN Android Box. Access thousands of apps instantly.",
+                color: "linear-gradient(135deg, #00CC66 0%, #0066FF 100%)"
+            },
+            {
+                id: 3,
+                title: "Cut the Cord Forever",
+                device: "Firestick",
+                description: "Save $1000+ per year by cutting cable. Your Firestick has everything cable offers and more.",
+                color: "linear-gradient(135deg, #FF6600 0%, #CC3300 100%)"
+            },
+            {
+                id: 4,
+                title: "Live Sports Anytime",
+                device: "Firestick",
+                description: "Never miss a game! Watch live NFL, NBA, MLB, NHL, and international sports 24/7.",
+                color: "linear-gradient(135deg, #0066FF 0%, #FF6600 100%)"
+            },
+            {
+                id: 5,
+                title: "Premium Channels Free",
+                device: "Firestick",
+                description: "Access HBO, Showtime, Starz, and Cinemax without expensive subscriptions.",
+                color: "linear-gradient(135deg, #6633FF 0%, #FFD700 100%)"
+            },
+            {
+                id: 6,
+                title: "Family Entertainment Hub",
+                device: "Smart TV",
+                description: "Thousands of kids' shows, family movies, and educational content. Safe viewing for the whole family.",
+                color: "linear-gradient(135deg, #FF66CC 0%, #0066FF 100%)"
+            },
+            {
+                id: 7,
+                title: "International Channels",
+                device: "Android Box",
+                description: "Watch channels from 50+ countries. UK, Canada, India, Mexico, and more.",
+                color: "linear-gradient(135deg, #00CC66 0%, #0066FF 100%)"
+            },
+            {
+                id: 8,
+                title: "Movie Theater at Home",
+                device: "Firestick",
+                description: "Watch the latest blockbuster movies the day they're released. Your personal cinema.",
+                color: "linear-gradient(135deg, #6633FF 0%, #FF6600 100%)"
+            },
+            {
+                id: 9,
+                title: "Easy Setup in 5 Minutes",
+                device: "Firestick",
+                description: "Get streaming in just 5 minutes. Simple step-by-step guide. No technical skills needed.",
+                color: "linear-gradient(135deg, #00CC66 0%, #FFD700 100%)"
+            },
+            {
+                id: 10,
+                title: "24/7 Live TV",
+                device: "Android Box",
+                description: "Never miss live TV. Watch 24/7 live news, sports, entertainment, and more.",
+                color: "linear-gradient(135deg, #0066FF 0%, #00CC66 100%)"
+            },
+            {
+                id: 11,
+                title: "ONN Box Maximum Power",
+                device: "ONN Android Box",
+                description: "Unlock the full potential of your ONN Android Box. Thousands of apps and streaming services.",
+                color: "linear-gradient(135deg, #00CC66 0%, #0066FF 100%)"
+            },
+            {
+                id: 12,
+                title: "Binge-Watch Paradise",
+                device: "Firestick",
+                description: "Access the world's largest streaming library. Binge entire seasons. No limits, no waiting.",
+                color: "linear-gradient(135deg, #6633FF 0%, #FF66CC 100%)"
+            },
+            {
+                id: 13,
+                title: "Smart TV Upgrade",
+                device: "Android Box",
+                description: "Don't buy a new Smart TV! Upgrade your existing TV with an Android Box for a fraction of the cost.",
+                color: "linear-gradient(135deg, #0066FF 0%, #00CC66 100%)"
+            },
+            {
+                id: 14,
+                title: "No More Buffering",
+                device: "Firestick",
+                description: "Smooth, uninterrupted streaming. HD quality, instant loading, perfect playback.",
+                color: "linear-gradient(135deg, #00CC66 0%, #FFD700 100%)"
+            },
+            {
+                id: 15,
+                title: "Gaming on Big Screen",
+                device: "Smart TV",
+                description: "Turn your Smart TV into a gaming console. Play thousands of Android games on the big screen.",
+                color: "linear-gradient(135deg, #FF6600 0%, #6633FF 100%)"
+            },
+            {
+                id: 16,
+                title: "News & Weather Updates",
+                device: "Firestick",
+                description: "Stay informed with live news and weather. Access CNN, BBC, Weather Channel, and more.",
+                color: "linear-gradient(135deg, #0066FF 0%, #00CC66 100%)"
+            },
+            {
+                id: 17,
+                title: "Music Streaming Hub",
+                device: "Smart TV",
+                description: "Stream Spotify, Apple Music, YouTube Music, and more. Your music hub at home.",
+                color: "linear-gradient(135deg, #FF66CC 0%, #6633FF 100%)"
+            },
+            {
+                id: 18,
+                title: "Documentary Library",
+                device: "Android Box",
+                description: "Thousands of documentaries and educational content. Learn while you watch.",
+                color: "linear-gradient(135deg, #00CC66 0%, #0066FF 100%)"
+            },
+            {
+                id: 19,
+                title: "Comedy Specials",
+                device: "Firestick",
+                description: "Laugh out loud with unlimited comedy specials. Comedy Central, Netflix stand-up, and more.",
+                color: "linear-gradient(135deg, #FFD700 0%, #FF6600 100%)"
+            },
+            {
+                id: 20,
+                title: "Kids Safe Zone",
+                device: "Smart TV",
+                description: "Safe viewing for kids. Thousands of age-appropriate shows with easy parental controls.",
+                color: "linear-gradient(135deg, #FF66CC 0%, #0066FF 100%)"
+            },
+            {
+                id: 21,
+                title: "Cooking Shows",
+                device: "Firestick",
+                description: "Master the kitchen with unlimited cooking shows. Food Network, Cooking Channel, and more.",
+                color: "linear-gradient(135deg, #FF6600 0%, #CC3300 100%)"
+            },
+            {
+                id: 22,
+                title: "Fitness at Home",
+                device: "Smart TV",
+                description: "Transform your living room into a gym. Thousands of workout videos and fitness programs.",
+                color: "linear-gradient(135deg, #00CC66 0%, #0066FF 100%)"
+            },
+            {
+                id: 23,
+                title: "Travel the World",
+                device: "Android Box",
+                description: "Explore the world from your couch. Travel shows, documentaries, and virtual tours.",
+                color: "linear-gradient(135deg, #0066FF 0%, #00CC66 100%)"
+            },
+            {
+                id: 24,
+                title: "Classic TV Shows",
+                device: "Firestick",
+                description: "Relive your favorite classic TV shows. Decades of television history at your fingertips.",
+                color: "linear-gradient(135deg, #6633FF 0%, #FFD700 100%)"
+            },
+            {
+                id: 25,
+                title: "Horror & Thriller",
+                device: "Smart TV",
+                description: "Get your scare on! Thousands of horror and thriller movies. All the chills you can handle.",
+                color: "linear-gradient(135deg, #CC3300 0%, #6633FF 100%)"
+            },
+            {
+                id: 26,
+                title: "Anime Collection",
+                device: "Android Box",
+                description: "Access the world's largest anime collection. Thousands of series, movies, and exclusives.",
+                color: "linear-gradient(135deg, #FF66CC 0%, #6633FF 100%)"
+            },
+            {
+                id: 27,
+                title: "Reality TV",
+                device: "Firestick",
+                description: "Binge-watch all your favorite reality TV shows. Competition shows, lifestyle series, and more.",
+                color: "linear-gradient(135deg, #FF6600 0%, #FFD700 100%)"
+            },
+            {
+                id: 28,
+                title: "Sci-Fi & Fantasy",
+                device: "Smart TV",
+                description: "Explore galaxies and magical worlds. Thousands of sci-fi and fantasy movies and shows.",
+                color: "linear-gradient(135deg, #6633FF 0%, #0066FF 100%)"
+            },
+            {
+                id: 29,
+                title: "Action Movies",
+                device: "Firestick",
+                description: "Get your adrenaline fix! Thousands of action movies. Explosions, car chases, epic battles.",
+                color: "linear-gradient(135deg, #CC3300 0%, #FF6600 100%)"
+            },
+            {
+                id: 30,
+                title: "Complete System Guide",
+                device: "All Devices",
+                description: "Complete setup guide for Firestick, Android Box, and Smart TV. Everything in one place.",
+                color: "linear-gradient(135deg, #0066FF 0%, #00CC66 0%, #FFD700 100%)"
+            }
+        ];
+        
+        function createAdCard(ad) {
+            const card = document.createElement('div');
+            card.className = 'ad-card';
+            card.onclick = () => openFullAd(ad);
+            
+            const icons = ['📺', '🎬', '⚡', '🔥', '💎', '🎮', '🌟', '📱', '🎯', '🚀'];
+            const randomIcons = [];
+            for (let i = 0; i < 8; i++) {
+                randomIcons.push(icons[Math.floor(Math.random() * icons.length)]);
+            }
+            
+            card.innerHTML = `
+                <div class="ad-preview" style="background: ${ad.color}">
+                    <div class="floating-icons">
+                        ${randomIcons.map((icon, i) => `
+                            <div class="floating-icon" style="
+                                left: ${10 + i * 12}%;
+                                top: ${10 + (i % 3) * 30}%;
+                                animation-delay: ${i * 0.3}s;
+                                font-size: 40px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                            ">${icon}</div>
+                        `).join('')}
+                    </div>
+                    <div class="ad-title">${ad.title}</div>
+                    <div class="ad-device"></div>
+                    <div class="ad-url">StreamStickPro.com</div>
+                </div>
+                <div class="ad-info">
+                    <h3>Ad #${ad.id}: ${ad.title}</h3>
+                    <p><strong>Device:</strong> ${ad.device}</p>
+                    <p>${ad.description}</p>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        function renderAds() {
+            const grid = document.getElementById('adsGrid');
+            ads.forEach(ad => {
+                grid.appendChild(createAdCard(ad));
+            });
+        }
+        
+        function openFullAd(ad) {
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${ad.title} - StreamStickPro Ad</title>
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body {
+                            font-family: Arial, sans-serif;
+                            background: ${ad.color};
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            min-height: 100vh;
+                            color: #fff;
+                        }
+                        .ad-container {
+                            width: 1080px;
+                            height: 1920px;
+                            position: relative;
+                            background: ${ad.color};
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            padding: 40px;
+                        }
+                        .ad-title {
+                            font-size: 72px;
+                            font-weight: bold;
+                            text-align: center;
+                            margin-bottom: 40px;
+                            text-shadow: 2px 2px 20px rgba(0,0,0,0.5);
+                        }
+                        .ad-device {
+                            width: 200px;
+                            height: 400px;
+                            background: linear-gradient(180deg, #FF6600 0%, #CC3300 100%);
+                            border-radius: 20px;
+                            margin: 40px 0;
+                            box-shadow: 0 20px 60px rgba(255,102,0,0.6);
+                            animation: glow 2s ease-in-out infinite;
+                        }
+                        @keyframes glow {
+                            0%, 100% { box-shadow: 0 20px 60px rgba(255,102,0,0.6); }
+                            50% { box-shadow: 0 20px 100px rgba(255,102,0,1); }
+                        }
+                        .ad-url {
+                            font-size: 64px;
+                            font-weight: bold;
+                            color: #FFD700;
+                            text-align: center;
+                            margin-top: 40px;
+                            text-shadow: 2px 2px 20px rgba(0,0,0,0.8);
+                            animation: bounce 2s ease-in-out infinite;
+                        }
+                        @keyframes bounce {
+                            0%, 100% { transform: translateY(0); }
+                            50% { transform: translateY(-15px); }
+                        }
+                        .ad-description {
+                            font-size: 32px;
+                            text-align: center;
+                            margin-top: 40px;
+                            opacity: 0.9;
+                            max-width: 900px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="ad-container">
+                        <div class="ad-title">${ad.title}</div>
+                        <div class="ad-device"></div>
+                        <div class="ad-url">StreamStickPro.com</div>
+                        <div class="ad-description">${ad.description}</div>
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+        
+        function exportAllAds() {
+            alert('To export ads:\n\n1. Right-click each ad and "Save Image As"\n2. Or use browser screenshot tools\n3. Or use screen recording software\n\nEach ad is 1080x1920 pixels (perfect for TikTok/YouTube Shorts)');
+        }
+        
+        // Render all ads on page load
+        renderAds();
+    </script>
+</body>
+</html>
+

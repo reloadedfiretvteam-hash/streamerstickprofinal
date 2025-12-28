@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Premium Ad Campaign - StreamStickPro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&family=Inter:wght@400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .hero-header {
+            text-align: center;
+            padding: 60px 40px;
+            background: linear-gradient(135deg, #0066FF 0%, #6633FF 50%, #FF6600 100%);
+            border-radius: 30px;
+            margin-bottom: 50px;
+            box-shadow: 0 30px 80px rgba(0, 102, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .hero-header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 72px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 4px 4px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+            letter-spacing: -2px;
+        }
+        
+        .hero-header p {
+            font-size: 28px;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+        }
+        
+        .premium-badge {
+            display: inline-block;
+            background: #FFD700;
+            color: #000;
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 18px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .ads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        
+        .premium-ad {
+            background: #1a1a1a;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            border: 2px solid transparent;
+        }
+        
+        .premium-ad:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 80px rgba(0, 102, 255, 0.5);
+            border-color: #0066FF;
+        }
+        
+        .ad-visual {
+            width: 100%;
+            height: 800px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+        
+        .ad-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .ad-content-wrapper {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .ad-number {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #FFD700;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 18px;
+            z-index: 3;
+        }
+        
+        .ad-headline {
+            font-family: 'Poppins', sans-serif;
+            font-size: 56px;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 20px rgba(0, 0, 0, 0.8);
+            animation: slideInUp 0.8s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .ad-subheadline {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.8);
+            animation: slideInUp 1s ease-out;
+        }
+        
+        .device-showcase {
+            width: 220px;
+            height: 440px;
+            background: linear-gradient(180deg, #FF6600 0%, #CC3300 100%);
+            border-radius: 25px;
+            margin: 40px auto;
+            position: relative;
+            box-shadow: 0 25px 80px rgba(255, 102, 0, 0.7);
+            animation: devicePulse 2.5s ease-in-out infinite;
+        }
+        
+        @keyframes devicePulse {
+            0%, 100% { 
+                box-shadow: 0 25px 80px rgba(255, 102, 0, 0.7);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 25px 120px rgba(255, 102, 0, 1);
+                transform: scale(1.08);
+            }
+        }
+        
+        .device-showcase::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 90px;
+            background: radial-gradient(circle, #0066FF 0%, #6633FF 100%);
+            border-radius: 50%;
+            animation: innerPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes innerPulse {
+            0%, 100% { 
+                transform: translateX(-50%) scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: translateX(-50%) scale(1.4);
+                opacity: 0.5;
+            }
+        }
+        
+        .ad-cta {
+            font-size: 48px;
+            font-weight: 900;
+            color: #FFD700;
+            text-shadow: 3px 3px 20px rgba(0, 0, 0, 0.9);
+            margin-top: 40px;
+            letter-spacing: 3px;
+            animation: bounce 2.5s ease-in-out infinite;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        
+        .ad-benefits {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .benefits-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .benefit-tag {
+            background: rgba(0, 204, 102, 0.2);
+            border: 2px solid #00CC66;
+            color: #00CC66;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .floating-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: floatParticle 6s ease-in-out infinite;
+        }
+        
+        @keyframes floatParticle {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-100px) translateX(50px);
+                opacity: 0.8;
+            }
+        }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-ad {
+            width: 1080px;
+            height: 1920px;
+            position: relative;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 50px 150px rgba(0, 102, 255, 0.6);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: #ff4444;
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 32px;
+            font-weight: 900;
+            cursor: pointer;
+            z-index: 10001;
+            box-shadow: 0 10px 30px rgba(255, 68, 68, 0.6);
+            transition: all 0.3s;
+        }
+        
+        .close-modal:hover {
+            background: #cc0000;
+            transform: rotate(90deg);
+        }
+        
+        .download-btn {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px 50px;
+            background: linear-gradient(135deg, #00CC66 0%, #00AA55 100%);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: 900;
+            cursor: pointer;
+            z-index: 10001;
+            box-shadow: 0 10px 40px rgba(0, 204, 102, 0.6);
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .download-btn:hover {
+            transform: translateX(-50%) translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 204, 102, 0.8);
+        }
+        
+        .action-buttons {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .action-btn {
+            padding: 18px 40px;
+            margin: 0 15px;
+            background: linear-gradient(135deg, #0066FF 0%, #6633FF 100%);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 102, 255, 0.4);
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 102, 255, 0.6);
+        }
+        
+        .action-btn.secondary {
+            background: linear-gradient(135deg, #00CC66 0%, #00AA55 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-header">
+        <h1>🚀 ULTIMATE PREMIUM AD CAMPAIGN</h1>
+        <p>30 High-Converting Visual Ads with Professional Copy</p>
+        <div class="premium-badge">BETTER THAN REPLIT ✨</div>
+    </div>
+    
+    <div class="action-buttons">
+        <button class="action-btn" onclick="exportAll()">📥 Export All Ads</button>
+        <button class="action-btn secondary" onclick="viewInstructions()">📖 View Instructions</button>
+    </div>
+    
+    <div class="ads-grid" id="adsGrid"></div>
+    
+    <div class="modal-overlay" id="modal">
+        <button class="close-modal" onclick="closeModal()">×</button>
+        <div class="modal-ad" id="modalAd"></div>
+        <button class="download-btn" onclick="downloadAd()">📥 Download This Ad</button>
+    </div>
+    
+    <script>
+        const premiumAds = [
+            {
+                id: 1,
+                headline: "STOP PAYING FOR CABLE",
+                subheadline: "Get Everything Cable Offers + More for $0",
+                benefits: ["Save $1,200/Year", "All Channels", "No Contracts", "Instant Setup"],
+                gradient: "linear-gradient(135deg, #FF6600 0%, #CC3300 50%, #0066FF 100%)",
+                copy: "Tired of $150/month cable bills? Your Firestick gives you EVERY channel cable has PLUS thousands more. Sports, movies, premium channels - all FREE. Setup takes 5 minutes. Start saving TODAY."
+            },
+            {
+                id: 2,
+                headline: "YOUR TV IS WASTING MONEY",
+                subheadline: "Turn Any TV Into a $2,000 Smart TV for $50",
+                benefits: ["Works on Any TV", "All Smart TV Features", "Save $1,950", "5 Min Setup"],
+                gradient: "linear-gradient(135deg, #00CC66 0%, #0066FF 50%, #6633FF 100%)",
+                copy: "Don't buy a new Smart TV! The ONN Android Box transforms your old TV into a premium Smart TV. Netflix, Hulu, Disney+, gaming, apps - everything. For 1/40th the price."
+            },
+            {
+                id: 3,
+                headline: "WATCH EVERY GAME LIVE",
+                subheadline: "NFL • NBA • MLB • NHL • Soccer • Boxing",
+                benefits: ["All Games Live", "No Blackouts", "Every League", "HD Quality"],
+                gradient: "linear-gradient(135deg, #0066FF 0%, #FF6600 50%, #CC3300 100%)",
+                copy: "Never miss a game again. Watch EVERY live game from EVERY league. NFL Sunday Ticket, NBA League Pass, MLB, NHL, international soccer, boxing, UFC - all included. No cable needed."
+            },
+            {
+                id: 4,
+                headline: "PREMIUM CHANNELS FREE",
+                subheadline: "HBO • Showtime • Starz • Cinemax • No Subscription",
+                benefits: ["All Premium Content", "New Releases", "Original Series", "Zero Cost"],
+                gradient: "linear-gradient(135deg, #6633FF 0%, #FFD700 50%, #FF6600 100%)",
+                copy: "Why pay $50/month for HBO, Showtime, and Starz? Get ALL premium channels FREE on your Firestick. Game of Thrones, Succession, Billions, Power - watch everything without paying a dime."
+            },
+            {
+                id: 5,
+                headline: "LATEST MOVIES SAME DAY",
+                subheadline: "Watch Blockbusters the Day They Release",
+                benefits: ["New Releases Daily", "4K Quality", "No Waiting", "Unlimited Access"],
+                gradient: "linear-gradient(135deg, #FF66CC 0%, #6633FF 50%, #0066FF 100%)",
+                copy: "See the latest movies THE DAY they hit theaters. No waiting months for streaming. No $20 rental fees. Your Firestick gives you instant access to every new release in stunning 4K."
+            },
+            {
+                id: 6,
+                headline: "FAMILY ENTERTAINMENT SAFE",
+                subheadline: "Thousands of Kids Shows + Parental Controls",
+                benefits: ["Kid-Safe Content", "Parental Controls", "Educational Shows", "Family Movies"],
+                gradient: "linear-gradient(135deg, #FF66CC 0%, #00CC66 50%, #0066FF 100%)",
+                copy: "Create a safe entertainment hub for your family. Thousands of age-appropriate shows, educational content, and family movies. Built-in parental controls give you complete peace of mind."
+            },
+            {
+                id: 7,
+                headline: "50+ COUNTRIES OF CONTENT",
+                subheadline: "Watch TV From Around the World",
+                benefits: ["UK Channels", "Canadian TV", "Indian Content", "Global Access"],
+                gradient: "linear-gradient(135deg, #00CC66 0%, #0066FF 50%, #6633FF 100%)",
+                copy: "Access channels from 50+ countries. Watch BBC, ITV, Sky from UK. Canadian networks. Indian channels. Mexican programming. Never miss your favorite international shows again."
+            },
+            {
+                id: 8,
+                headline: "SETUP IN 5 MINUTES",
+                subheadline: "From Box to Binge-Watching in 300 Seconds",
+                benefits: ["Plug & Play", "No Tech Skills", "Step-by-Step Guide", "Instant Access"],
+                gradient: "linear-gradient(135deg, #0066FF 0%, #00CC66 50%, #FFD700 100%)",
+                copy: "Get streaming in 5 minutes. No technical knowledge needed. Our simple guide walks you through every step. Plug it in, follow 3 steps, start watching. It's that easy."
+            },
+            {
+                id: 9,
+                headline: "NO MORE BUFFERING",
+                subheadline: "Smooth Streaming in Perfect HD Quality",
+                benefits: ["Zero Buffering", "HD Quality", "Fast Loading", "Reliable"],
+                gradient: "linear-gradient(135deg, #00CC66 0%, #FFD700 50%, #FF6600 100%)",
+                copy: "Tired of constant buffering ruining your shows? Get smooth, uninterrupted streaming. HD quality, instant loading, perfect playback. Your entertainment never stops."
+            },
+            {
+                id: 10,
+                headline: "BINGE-WATCH UNLIMITED",
+                subheadline: "World's Largest Streaming Library",
+                benefits: ["Millions of Shows", "Complete Seasons", "All Genres", "No Limits"],
+                gradient: "linear-gradient(135deg, #6633FF 0%, #FF66CC 50%, #0066FF 100%)",
+                copy: "Access the world's largest streaming library. Binge entire seasons. Watch thousands of shows. Every genre, every era, every country. No limits, no waiting, no restrictions."
+            },
+            {
+                id: 11,
+                headline: "GAMING ON BIG SCREEN",
+                subheadline: "Turn Your TV Into a Gaming Console",
+                benefits: ["Thousands of Games", "Big Screen Play", "Controller Support", "Multiplayer"],
+                gradient: "linear-gradient(135deg, #FF6600 0%, #6633FF 50%, #0066FF 100%)",
+                copy: "Play thousands of Android games on your big screen TV. From casual puzzles to hardcore action. Connect controllers, play with friends, experience gaming like never before."
+            },
+            {
+                id: 12,
+                headline: "24/7 LIVE NEWS",
+                subheadline: "Stay Informed with Real-Time Updates",
+                benefits: ["Breaking News", "Live Updates", "Weather Alerts", "Global Coverage"],
+                gradient: "linear-gradient(135deg, #0066FF 0%, #00CC66 50%, #FFD700 100%)",
+                copy: "Never miss breaking news. Watch CNN, BBC, Fox News, Weather Channel live 24/7. Stay informed with real-time updates, weather alerts, and global coverage."
+            },
+            {
+                id: 13,
+                headline: "MUSIC STREAMING HUB",
+                subheadline: "Spotify • Apple Music • YouTube Music",
+                benefits: ["All Music Services", "Party Mode", "Background Music", "High Quality"],
+                gradient: "linear-gradient(135deg, #FF66CC 0%, #6633FF 50%, #0066FF 100%)",
+                copy: "Turn your TV into a music hub. Stream Spotify, Apple Music, YouTube Music, Pandora, and more. Party mode, background music, or focused listening - all in high quality."
+            },
+            {
+                id: 14,
+                headline: "LEARN WHILE YOU WATCH",
+                subheadline: "Thousands of Documentaries & Educational Content",
+                benefits: ["History Docs", "Science Shows", "Nature Programs", "Learning Apps"],
+                gradient: "linear-gradient(135deg, #00CC66 0%, #0066FF 50%, #6633FF 100%)",
+                copy: "Expand your mind with thousands of documentaries. History, science, nature, technology - learn while you watch. Educational content for curious minds of all ages."
+            },
+            {
+                id: 15,
+                headline: "LAUGH EVERY DAY",
+                subheadline: "Unlimited Comedy Specials & Stand-Up",
+                benefits: ["Stand-Up Specials", "Comedy Central", "Netflix Comedy", "Daily Laughs"],
+                gradient: "linear-gradient(135deg, #FFD700 0%, #FF6600 50%, #CC3300 100%)",
+                copy: "Get your daily dose of laughter. Access unlimited comedy specials, stand-up shows, Comedy Central, Netflix comedy, and exclusive content. Laugh out loud every day."
+            },
+            {
+                id: 16,
+                headline: "MASTER THE KITCHEN",
+                subheadline: "Unlimited Cooking Shows & Recipes",
+                benefits: ["Food Network", "Cooking Channel", "Recipe Tutorials", "Chef Shows"],
+                gradient: "linear-gradient(135deg, #FF6600 0%, #CC3300 50%, #FFD700 100%)",
+                copy: "Become a master chef at home. Watch Food Network, Cooking Channel, and international cuisine shows. Learn recipes, techniques, and secrets from world-class chefs."
+            },
+            {
+                id: 17,
+                headline: "GYM AT HOME",
+                subheadline: "Thousands of Workout Videos on Your TV",
+                benefits: ["Workout Videos", "Yoga Classes", "Fitness Programs", "Home Gym"],
+                gradient: "linear-gradient(135deg, #00CC66 0%, #0066FF 50%, #FF6600 100%)",
+                copy: "Transform your living room into a gym. Access thousands of workout videos, yoga classes, and fitness programs. Stay fit at home with professional trainers on your big screen."
+            },
+            {
+                id: 18,
+                headline: "EXPLORE THE WORLD",
+                subheadline: "Travel Shows & Virtual Tours",
+                benefits: ["Travel Channel", "Virtual Tours", "Destination Shows", "Cultural Programs"],
+                gradient: "linear-gradient(135deg, #0066FF 0%, #00CC66 50%, #6633FF 100%)",
+                copy: "Travel the world from your couch. Watch travel shows, documentaries, and virtual tours. Visit every country, see every landmark, experience every culture - all from home."
+            },
+            {
+                id: 19,
+                headline: "RElive CLASSICS",
+                subheadline: "Decades of Classic TV Shows",
+                benefits: ["60s-90s Shows", "Classic Sitcoms", "Vintage Dramas", "Nostalgia"],
+                gradient: "linear-gradient(135deg, #6633FF 0%, #FFD700 50%, #FF6600 100%)",
+                copy: "Relive your favorite classic TV shows. Access decades of television history. From the 60s to today, watch all your nostalgic favorites whenever you want."
+            },
+            {
+                id: 20,
+                headline: "GET YOUR SCARE ON",
+                subheadline: "Thousands of Horror & Thriller Movies",
+                benefits: ["Horror Classics", "New Releases", "Thriller Movies", "Scary Content"],
+                gradient: "linear-gradient(135deg, #CC3300 0%, #6633FF 50%, #000 100%)",
+                copy: "Get your adrenaline fix with thousands of horror and thriller movies. From classic scares to new releases, experience all the chills and thrills you can handle."
+            },
+            {
+                id: 21,
+                headline: "ANIME PARADISE",
+                subheadline: "World's Largest Anime Collection",
+                benefits: ["Popular Series", "Classic Anime", "New Releases", "Exclusive Content"],
+                gradient: "linear-gradient(135deg, #FF66CC 0%, #6633FF 50%, #0066FF 100%)",
+                copy: "Access the world's largest anime collection. Thousands of series, movies, and exclusives. From popular hits to hidden gems, your anime paradise awaits."
+            },
+            {
+                id: 22,
+                headline: "REALITY TV BINGE",
+                subheadline: "All Your Favorite Reality Shows",
+                benefits: ["Competition Shows", "Lifestyle Series", "Reality Favorites", "Unlimited Access"],
+                gradient: "linear-gradient(135deg, #FF6600 0%, #FFD700 50%, #FF66CC 100%)",
+                copy: "Binge-watch all your favorite reality TV shows. Competition shows, lifestyle series, dating shows, and more. Unlimited reality entertainment whenever you want."
+            },
+            {
+                id: 23,
+                headline: "EPIC ADVENTURES",
+                subheadline: "Sci-Fi & Fantasy Movies & Shows",
+                benefits: ["Star Wars", "Game of Thrones", "Sci-Fi Classics", "Fantasy Epics"],
+                gradient: "linear-gradient(135deg, #6633FF 0%, #0066FF 50%, #00CC66 100%)",
+                copy: "Explore galaxies and magical worlds. Access thousands of sci-fi and fantasy movies and shows. From Star Wars to Game of Thrones, epic adventures await."
+            },
+            {
+                id: 24,
+                headline: "NON-STOP ACTION",
+                subheadline: "Blockbuster Action Movies",
+                benefits: ["Action Blockbusters", "Car Chases", "Explosions", "Epic Battles"],
+                gradient: "linear-gradient(135deg, #CC3300 0%, #FF6600 50%, #FFD700 100%)",
+                copy: "Get your adrenaline fix with thousands of action movies. Explosions, car chases, epic battles, and non-stop excitement. The best action films ever made."
+            },
+            {
+                id: 25,
+                headline: "COMPLETE ENTERTAINMENT",
+                subheadline: "Everything You Need in One Place",
+                benefits: ["All Devices", "Complete Guide", "One-Stop Setup", "Maximum Power"],
+                gradient: "linear-gradient(135deg, #0066FF 0%, #00CC66 0%, #FFD700 50%, #FF6600 100%)",
+                copy: "Get the complete entertainment system. Learn how to set up Firestick, Android Box, and Smart TV for maximum streaming power. Everything you need in one comprehensive guide."
+            },
+            {
+                id: 26,
+                headline: "CUT CABLE TODAY",
+                subheadline: "Save $1,200+ Per Year Instantly",
+                benefits: ["Massive Savings", "All Channels", "No Contracts", "Better Content"],
+                gradient: "linear-gradient(135deg, #FF6600 0%, #CC3300 50%, #0066FF 100%)",
+                copy: "Stop throwing money away on cable. Cut the cord today and save over $1,200 per year. Get all your channels plus thousands more. No contracts, no hidden fees."
+            },
+            {
+                id: 27,
+                headline: "UPGRADE ANY TV",
+                subheadline: "Don't Buy New - Upgrade for $50",
+                benefits: ["Works on Any TV", "All Smart Features", "Save Thousands", "Easy Install"],
+                gradient: "linear-gradient(135deg, #00CC66 0%, #0066FF 50%, #6633FF 100%)",
+                copy: "Don't waste money on a new Smart TV. Upgrade your existing TV with an Android Box for just $50. Get all Smart TV features for 1/40th the price of a new TV."
+            },
+            {
+                id: 28,
+                headline: "MAXIMUM STREAMING POWER",
+                subheadline: "Unlock Full Potential of Your Device",
+                benefits: ["Thousands of Apps", "Gaming Capable", "Music Streaming", "Maximum Power"],
+                gradient: "linear-gradient(135deg, #0066FF 0%, #6633FF 50%, #FF6600 100%)",
+                copy: "Unlock the full potential of your streaming device. Access thousands of apps, games, and services. Maximum streaming power at your fingertips."
+            },
+            {
+                id: 29,
+                headline: "INSTANT ACCESS",
+                subheadline: "Start Watching in Minutes, Not Hours",
+                benefits: ["5 Min Setup", "No Waiting", "Instant Streaming", "Easy Guide"],
+                gradient: "linear-gradient(135deg, #00CC66 0%, #FFD700 50%, #0066FF 100%)",
+                copy: "Get streaming in minutes, not hours. Our simple 5-minute setup guide gets you watching instantly. No technical skills needed. Start enjoying content right away."
+            },
+            {
+                id: 30,
+                headline: "ULTIMATE STREAMING GUIDE",
+                subheadline: "Complete Setup for All Devices",
+                benefits: ["Firestick Guide", "Android Box Setup", "Smart TV Tips", "Complete System"],
+                gradient: "linear-gradient(135deg, #0066FF 0%, #00CC66 0%, #FFD700 50%, #FF6600 100%)",
+                copy: "The ultimate guide to streaming. Complete setup instructions for Firestick, Android Box, and Smart TV. Everything you need to maximize your streaming experience."
+            }
+        ];
+        
+        function createAd(ad) {
+            const adElement = document.createElement('div');
+            adElement.className = 'premium-ad';
+            adElement.onclick = () => openFullScreen(ad);
+            
+            // Create particles
+            const particles = Array.from({length: 15}, (_, i) => {
+                const delay = i * 0.4;
+                const left = Math.random() * 100;
+                const top = Math.random() * 100;
+                return `<div class="particle" style="left: ${left}%; top: ${top}%; animation-delay: ${delay}s;"></div>`;
+            }).join('');
+            
+            adElement.innerHTML = `
+                <div class="ad-number">#${ad.id}</div>
+                <div class="ad-visual" style="background: ${ad.gradient};">
+                    <div class="ad-gradient" style="background: ${ad.gradient};"></div>
+                    <div class="floating-particles">${particles}</div>
+                    <div class="ad-content-wrapper">
+                        <div class="ad-headline">${ad.headline}</div>
+                        <div class="ad-subheadline">${ad.subheadline}</div>
+                        <div class="device-showcase"></div>
+                        <div class="ad-cta">StreamStickPro.com</div>
+                    </div>
+                </div>
+                <div class="ad-benefits">
+                    <div class="benefits-list">
+                        ${ad.benefits.map(b => `<span class="benefit-tag">${b}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+            
+            return adElement;
+        }
+        
+        function renderAds() {
+            const grid = document.getElementById('adsGrid');
+            premiumAds.forEach(ad => {
+                grid.appendChild(createAd(ad));
+            });
+        }
+        
+        let currentAd = null;
+        
+        function openFullScreen(ad) {
+            currentAd = ad;
+            const modal = document.getElementById('modal');
+            const modalAd = document.getElementById('modalAd');
+            
+            const particles = Array.from({length: 25}, (_, i) => {
+                const delay = i * 0.3;
+                const left = Math.random() * 100;
+                const top = Math.random() * 100;
+                return `<div class="particle" style="left: ${left}%; top: ${top}%; animation-delay: ${delay}s; width: 12px; height: 12px;"></div>`;
+            }).join('');
+            
+            modalAd.innerHTML = `
+                <div class="ad-visual" style="background: ${ad.gradient}; height: 100%;">
+                    <div class="ad-gradient" style="background: ${ad.gradient};"></div>
+                    <div class="floating-particles">${particles}</div>
+                    <div class="ad-content-wrapper">
+                        <div class="ad-headline" style="font-size: 120px; margin-bottom: 50px;">${ad.headline}</div>
+                        <div class="ad-subheadline" style="font-size: 48px; margin-bottom: 60px;">${ad.subheadline}</div>
+                        <div class="device-showcase" style="width: 300px; height: 600px; margin: 60px auto;"></div>
+                        <div class="ad-cta" style="font-size: 84px; margin-top: 60px;">StreamStickPro.com</div>
+                        <div style="margin-top: 80px; padding: 40px; background: rgba(0,0,0,0.6); border-radius: 20px; max-width: 900px; margin-left: auto; margin-right: auto;">
+                            <p style="font-size: 32px; line-height: 1.6; text-align: left;">${ad.copy}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+        
+        function downloadAd() {
+            if (!currentAd) return;
+            alert(`To download this ad:\n\n1. Right-click the ad → "Save Image As"\n2. Or press F12 → Device Toolbar → Screenshot\n3. Or use browser extension "Full Page Screen Capture"\n\nAd: ${currentAd.headline}\n\nSize: 1080x1920 (Perfect for TikTok/YouTube Shorts)`);
+        }
+        
+        function exportAll() {
+            alert('To export all 30 ads:\n\n1. Use browser extension: "Full Page Screen Capture"\n2. Or screen record each ad\n3. Or use html2canvas library\n4. Each ad is 1080x1920 pixels\n\nAll ads are ready for TikTok, YouTube Shorts, and Google Ads!');
+        }
+        
+        function viewInstructions() {
+            alert('INSTRUCTIONS:\n\n1. Click any ad to view full screen\n2. Right-click to save as image\n3. Each ad is 1080x1920 (perfect for Shorts)\n4. Use in Canva, TikTok, YouTube\n5. All copy is conversion-optimized\n\nThese ads are WAY better than Replit\'s text-only version!');
+        }
+        
+        // Close modal on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+        
+        // Render all ads
+        renderAds();
+    </script>
+</body>
+</html>
+

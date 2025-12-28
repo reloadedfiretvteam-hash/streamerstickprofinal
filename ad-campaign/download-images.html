@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download High-Quality Images for Ads</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #0066FF 0%, #6633FF 100%);
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .image-card {
+            background: #2a2a2a;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .image-card img:hover {
+            transform: scale(1.05);
+        }
+        
+        .image-info {
+            padding: 15px;
+        }
+        
+        .image-info h3 {
+            margin-bottom: 10px;
+            color: #0066FF;
+        }
+        
+        .download-btn {
+            width: 100%;
+            padding: 10px;
+            background: #00CC66;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .download-btn:hover {
+            background: #00AA55;
+        }
+        
+        .instructions {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .instructions h2 {
+            color: #0066FF;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 High-Quality Image Downloader for StreamStickPro Ads</h1>
+        
+        <div class="instructions">
+            <h2>How to Use:</h2>
+            <ol>
+                <li>Click any image to view full size</li>
+                <li>Right-click → "Save Image As" to download</li>
+                <li>Or click "Download" button below each image</li>
+                <li>Images are from Unsplash (free, high-quality)</li>
+                <li>Use in Canva or your design tool</li>
+            </ol>
+        </div>
+        
+        <div class="image-grid" id="imageGrid"></div>
+    </div>
+    
+    <script>
+        // High-quality image URLs from Unsplash
+        const imageSets = {
+            firestick: [
+                {
+                    url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=1080&h=1920&fit=crop',
+                    title: 'Firestick Device',
+                    description: 'Professional Firestick product photo'
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1593359677879-a4b92a0a8c38?w=1080&h=1920&fit=crop',
+                    title: 'Streaming Device',
+                    description: 'Modern streaming device setup'
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=1080&h=1920&fit=crop',
+                    title: 'Home Entertainment',
+                    description: 'TV and streaming setup'
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=1080&h=1920&fit=crop',
+                    title: 'Smart TV Setup',
+                    description: 'Modern home entertainment'
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1593359677879-a4b92a0a8c38?w=1080&h=1920&fit=crop',
+                    title: 'Streaming Box',
+                    description: 'Professional device photo'
+                }
+            ],
+            android: [
+                {
+                    url: 'https://images.unsplash.com/photo-1593359677879-a4b92a0a8c38?w=1080&h=1920&fit=crop',
+                    title: 'Android TV Box',
+                    description: 'Android streaming device'
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=1080&h=1920&fit=crop',
+                    title: 'Smart TV Device',
+                    description: 'Modern Android box'
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=1080&h=1920&fit=crop',
+                    title: 'TV Streaming',
+                    description: 'Android box setup'
+                }
+            ],
+            smarttv: [
+                {
+                    url: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=1080&h=1920&fit=crop',
+                    title: 'Smart TV',
+                    description: 'Modern television'
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=1080&h=1920&fit=crop',
+                    title: '4K Smart TV',
+                    description: 'Home entertainment system'
+                }
+            ],
+            sports: [
+                {
+                    url: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1080&h=1920&fit=crop',
+                    title: 'Live Sports',
+                    description: 'Sports stadium atmosphere'
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1080&h=1920&fit=crop',
+                    title: 'Sports Action',
+                    description: 'Dynamic sports scene'
+                }
+            ],
+            movies: [
+                {
+                    url: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1080&h=1920&fit=crop',
+                    title: 'Movie Theater',
+                    description: 'Cinema experience'
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1080&h=1920&fit=crop',
+                    title: 'Film Reel',
+                    description: 'Movie collection'
+                }
+            ]
+        };
+        
+        function createImageCard(image, category) {
+            const card = document.createElement('div');
+            card.className = 'image-card';
+            
+            card.innerHTML = `
+                <img src="${image.url}" alt="${image.title}" onclick="window.open('${image.url}', '_blank')">
+                <div class="image-info">
+                    <h3>${image.title}</h3>
+                    <p>${image.description}</p>
+                    <button class="download-btn" onclick="downloadImage('${image.url}', '${image.title}')">
+                        📥 Download Image
+                    </button>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        function downloadImage(url, title) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${title.replace(/\s+/g, '-')}.jpg`;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        function renderImages() {
+            const grid = document.getElementById('imageGrid');
+            
+            // Render all image categories
+            Object.keys(imageSets).forEach(category => {
+                imageSets[category].forEach(image => {
+                    grid.appendChild(createImageCard(image, category));
+                });
+            });
+        }
+        
+        // Render on page load
+        renderImages();
+        
+        // Add message about external images
+        const message = document.createElement('div');
+        message.style.cssText = `
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: center;
+        `;
+        message.innerHTML = `
+            <h2 style="color: #0066FF; margin-bottom: 10px;">💡 Pro Tip</h2>
+            <p>These are sample images. For best results, visit:</p>
+            <p style="margin-top: 10px;">
+                <strong>Unsplash.com</strong> - Search "Firestick", "streaming device", "Smart TV"<br>
+                <strong>Pexels.com</strong> - Search "Android box", "streaming"<br>
+                <strong>Pixabay.com</strong> - Search "Fire TV", "streaming device"
+            </p>
+            <p style="margin-top: 15px; color: #00CC66;">
+                All images are free to use commercially!
+            </p>
+        `;
+        document.querySelector('.container').appendChild(message);
+    </script>
+</body>
+</html>
+

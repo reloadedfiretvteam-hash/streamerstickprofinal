@@ -98,7 +98,11 @@ export function createVisitorRoutes() {
       });
 
       console.log('[VISITOR_TRACK] Successfully tracked visitor:', visitor.id);
-      return c.json({ success: true, visitorId: visitor.id });
+      return c.json({ 
+        success: true, 
+        visitorId: visitor.id,
+        message: 'Visitor tracked successfully'
+      });
     } catch (error: any) {
       console.error("[VISITOR_TRACK] Error tracking visitor:", error);
       console.error("[VISITOR_TRACK] Error details:", {

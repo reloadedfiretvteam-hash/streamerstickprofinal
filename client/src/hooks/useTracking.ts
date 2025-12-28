@@ -50,7 +50,22 @@ export function useTracking() {
           } catch {
             responseData = { error: responseText };
           }
+          console.error('[VISITOR_TRACK] Tracking failed:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: responseData.error || responseText,
+            details: responseData.details,
+            code: responseData.code,
+            hint: responseData.hint,
+            suggestion: responseData.suggestion
+          });
           throw new Error(`Tracking failed: ${response.status} ${responseData.error || responseText}`);
+        }
+
+        // Verify success response
+        const result = await response.json().catch(() => ({}));
+        if (result.success) {
+          console.log('[VISITOR_TRACK] Successfully tracked page view:', result.visitorId);
         }
       } catch (error: any) {
         // Log error for debugging but don't interrupt user experience

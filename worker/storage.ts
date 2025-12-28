@@ -368,20 +368,56 @@ export function createStorage(config: StorageConfig) {
       onlineNow: number;
       recentVisitors: Visitor[];
     }> {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+      try {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
 
-      const { data: allVisitors, error: queryError } = await supabase
-        .from('visitors')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5000);
-      
-      if (queryError) {
-        console.error('[VISITOR_STATS] Error fetching visitors:', queryError);
-        // Return empty stats instead of throwing
+        // Use existing supabase client (already configured with service key)
+        const { data: allVisitors, error: queryError } = await supabase
+          .from('visitors')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5000);
+        
+        if (queryError) {
+          console.error('[VISITOR_STATS] Error fetching visitors:', queryError);
+          // Return empty stats instead of throwing
+          return {
+            totalVisitors: 0,
+            todayVisitors: 0,
+            weekVisitors: 0,
+            onlineNow: 0,
+            recentVisitors: [],
+          };
+        }
+        
+        const visitors = (allVisitors || []).map((d: any) => this.mapVisitorFromDb(d));
+        
+        const totalVisitors = visitors.length;
+        const todayVisitors = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= today).length;
+        const weekVisitors = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= weekAgo).length;
+        const onlineNow = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= fiveMinutesAgo).length;
+        const recentVisitors = visitors.slice(0, 50);
+
+        console.log('[VISITOR_STATS] Stats calculated:', {
+          totalVisitors,
+          todayVisitors,
+          weekVisitors,
+          onlineNow,
+          recentCount: recentVisitors.length
+        });
+
+        return {
+          totalVisitors,
+          todayVisitors,
+          weekVisitors,
+          onlineNow,
+          recentVisitors,
+        };
+      } catch (error: any) {
+        console.error('[VISITOR_STATS] Unexpected error:', error);
         return {
           totalVisitors: 0,
           todayVisitors: 0,
@@ -390,22 +426,6 @@ export function createStorage(config: StorageConfig) {
           recentVisitors: [],
         };
       }
-      
-      const visitors = (allVisitors || []).map((d: any) => this.mapVisitorFromDb(d));
-      
-      const totalVisitors = visitors.length;
-      const todayVisitors = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= today).length;
-      const weekVisitors = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= weekAgo).length;
-      const onlineNow = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= fiveMinutesAgo).length;
-      const recentVisitors = visitors.slice(0, 50);
-
-      return {
-        totalVisitors,
-        todayVisitors,
-        weekVisitors,
-        onlineNow,
-        recentVisitors,
-      };
     },
 
     async getPageEdits(pageId: string): Promise<PageEdit[]> {

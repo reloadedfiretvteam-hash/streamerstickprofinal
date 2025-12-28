@@ -1,0 +1,30 @@
+═══════════════════════════════════════════════════════════════
+  HOW TO VIEW YOUR 30 VISUAL ADS
+═══════════════════════════════════════════════════════════════
+
+1. EXTRACT the zip file
+2. OPEN "ads-viewer.html" in your web browser
+   (Double-click the file or right-click → Open With → Browser)
+3. You'll see all 30 ads displayed visually
+4. CLICK any ad to see it full screen
+5. Take screenshots or screen record to save as images/videos
+
+═══════════════════════════════════════════════════════════════
+
+The ads-viewer.html file shows:
+✓ All 30 ads with colors and animations
+✓ Click any ad to view full size (1080x1920)
+✓ Perfect for TikTok/YouTube Shorts format
+✓ Ready to screenshot or screen record
+
+═══════════════════════════════════════════════════════════════
+
+To create actual image files:
+1. Open ads-viewer.html in browser
+2. Click an ad to view full screen
+3. Press F12 (Developer Tools)
+4. Use browser screenshot tool
+5. Or use screen recording software
+
+═══════════════════════════════════════════════════════════════
+
