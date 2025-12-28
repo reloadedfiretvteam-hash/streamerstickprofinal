@@ -64,12 +64,21 @@ export function createCheckoutRoutes() {
       const realProductNames = productsWithQuantity.map(p => p.product.name).join(', ');
       const shadowProductIds = productsWithQuantity.map(p => p.product.shadowProductId || '').join(',');
 
+      // Determine shipping requirements:
+      // - Shipping REQUIRED for Firestick and ONN devices
+      // - Shipping OPTIONAL for premium TV subscriptions (IPTV)
       const hasPhysicalProduct = productsWithQuantity.some(({ product }) => {
         const name = (product.name || '').toLowerCase();
         const id = (product.id || '').toLowerCase();
-        return name.includes('fire') || name.includes('stick') || name.includes('firestick') ||
-               name.includes('onn') || name.includes('android') || name.includes('device') ||
-               id.includes('firestick') || id.includes('android-onn');
+        // Only require shipping for actual physical devices (Firestick, ONN)
+        // NOT for IPTV subscriptions
+        return (name.includes('fire') && (name.includes('stick') || name.includes('device'))) ||
+               (name.includes('stick') && name.includes('device')) ||
+               name.includes('onn') || 
+               name.includes('android-onn') ||
+               id.includes('firestick') || 
+               id.includes('android-onn') ||
+               id.includes('onn-');
       });
 
       const sessionConfig: any = {

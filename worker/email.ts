@@ -9,18 +9,8 @@ const IPTV_PORTAL_URL = 'http://ky-tv.cc';
 const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
 
 export async function sendOrderConfirmation(order: Order, env: Env): Promise<void> {
-  // #region agent log
-  if (typeof fetch !== 'undefined') {
-    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:10',message:'sendOrderConfirmation called',data:{orderId:order.id,customerEmail:order.customerEmail,hasResendKey:!!env.RESEND_API_KEY,hasFromEmail:!!env.RESEND_FROM_EMAIL},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
-  }
-  // #endregion
   if (!order.customerEmail) {
     const error = `Cannot send order confirmation: missing customerEmail for order ${order.id}`;
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:13',message:'Missing customer email',data:{orderId:order.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'M'})}).catch(()=>{});
-    }
-    // #endregion
     console.error(`[EMAIL] ${error}`);
     throw new Error(error);
   }
@@ -52,12 +42,6 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
     </div>
   `;
   
-  // #region agent log
-  if (typeof fetch !== 'undefined') {
-    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:28',message:'Sending order confirmation via unified email system',data:{orderId:order.id,from:fromEmail,to:order.customerEmail,hasResendKey:!!env.RESEND_API_KEY},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
-  }
-  // #endregion
-  
   let result;
   try {
     result = await sendEmail({
@@ -67,30 +51,15 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
       html: emailHtml,
     }, env);
   } catch (error: any) {
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:62',message:'sendEmail threw unexpected exception',data:{orderId:order.id,error:error.message,errorStack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'E'})}).catch(()=>{});
-    }
-    // #endregion
     console.error(`[EMAIL] Unexpected error calling sendEmail for order confirmation: ${error.message}`);
     throw new Error(`Failed to send order confirmation email: ${error.message}`);
   }
-  
+
   if (!result.success) {
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:75',message:'Order confirmation email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
-    }
-    // #endregion
     console.error(`[EMAIL] Failed to send order confirmation email to ${order.customerEmail} via ${result.provider}: ${result.error}`);
     throw new Error(`Failed to send order confirmation email: ${result.error}`);
   }
-  
-  // #region agent log
-  if (typeof fetch !== 'undefined') {
-    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:65',message:'Order confirmation email sent successfully',data:{orderId:order.id,customerEmail:order.customerEmail,provider:result.provider},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
-  }
-  // #endregion
+
   console.log(`[EMAIL] ✅ Order confirmation email sent successfully to ${order.customerEmail} via ${result.provider}`);
 }
 
@@ -101,11 +70,6 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
   }
 
   if (!order.customerEmail) {
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:100',message:'Missing customer email for credentials',data:{orderId:order.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'M'})}).catch(()=>{});
-    }
-    // #endregion
     const error = `Cannot send credentials: missing customerEmail for order ${order.id}`;
     console.error(`[EMAIL] ${error}`);
     throw new Error(error);
@@ -177,12 +141,6 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
     </div>
   `;
 
-  // #region agent log
-  if (typeof fetch !== 'undefined') {
-    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:148',message:'Sending credentials email via unified email system',data:{orderId:order.id,to:order.customerEmail,hasResendKey:!!env.RESEND_API_KEY},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
-  }
-  // #endregion
-
   let result;
   try {
     result = await sendEmail({
@@ -192,42 +150,22 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
       html: emailHtml,
     }, env);
   } catch (error: any) {
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:182',message:'sendEmail threw unexpected exception',data:{orderId:order.id,error:error.message,errorStack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'E'})}).catch(()=>{});
-    }
-    // #endregion
     console.error(`[EMAIL] Unexpected error calling sendEmail for credentials: ${error.message}`);
     throw new Error(`Failed to send credentials email: ${error.message}`);
   }
 
   if (!result.success) {
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:195',message:'Credentials email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
-    }
-    // #endregion
     console.error(`[EMAIL] Failed to send credentials email to ${order.customerEmail} via ${result.provider}: ${result.error}`);
     throw new Error(`Failed to send credentials email: ${result.error}`);
   }
 
   await storage.updateOrder(order.id, { credentialsSent: true });
-  // #region agent log
-  if (typeof fetch !== 'undefined') {
-    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:173',message:'Credentials email sent successfully',data:{orderId:order.id,customerEmail:order.customerEmail,provider:result.provider},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
-  }
-  // #endregion
   console.log(`[EMAIL] ✅ Credentials email sent successfully to ${order.customerEmail} via ${result.provider}`);
 }
 
 export async function sendRenewalConfirmationEmail(order: Order, env: Env): Promise<void> {
   if (!order.customerEmail) {
     const error = `Cannot send renewal confirmation: missing customerEmail for order ${order.id}`;
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:183',message:'Missing customer email for renewal',data:{orderId:order.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'M'})}).catch(()=>{});
-    }
-    // #endregion
     console.error(`[EMAIL] ${error}`);
     throw new Error(error);
   }
@@ -269,12 +207,6 @@ export async function sendRenewalConfirmationEmail(order: Order, env: Env): Prom
     </div>
   `;
 
-  // #region agent log
-  if (typeof fetch !== 'undefined') {
-    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:208',message:'Sending renewal confirmation via unified email system',data:{orderId:order.id,to:order.customerEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
-  }
-  // #endregion
-
   let result;
   try {
     result = await sendEmail({
@@ -284,30 +216,15 @@ export async function sendRenewalConfirmationEmail(order: Order, env: Env): Prom
       html: emailHtml,
     }, env);
   } catch (error: any) {
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:262',message:'sendEmail threw unexpected exception',data:{orderId:order.id,error:error.message,errorStack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'E'})}).catch(()=>{});
-    }
-    // #endregion
     console.error(`[EMAIL] Unexpected error calling sendEmail for renewal confirmation: ${error.message}`);
     throw new Error(`Failed to send renewal confirmation email: ${error.message}`);
   }
 
   if (!result.success) {
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:275',message:'Renewal confirmation email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
-    }
-    // #endregion
     console.error(`[EMAIL] Failed to send renewal confirmation email to ${order.customerEmail} via ${result.provider}: ${result.error}`);
     throw new Error(`Failed to send renewal confirmation email: ${result.error}`);
   }
 
-  // #region agent log
-  if (typeof fetch !== 'undefined') {
-    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:226',message:'Renewal confirmation email sent successfully',data:{orderId:order.id,customerEmail:order.customerEmail,provider:result.provider},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'A'})}).catch(()=>{});
-  }
-  // #endregion
   console.log(`[EMAIL] ✅ Renewal confirmation email sent successfully to ${order.customerEmail} via ${result.provider}`);
 }
 
@@ -381,11 +298,6 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
   // Owner notification doesn't need customer email, but log if order email is missing
   if (!order.customerEmail) {
     console.warn(`[EMAIL] Order ${order.id} missing customerEmail, sending owner notification anyway`);
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:235',message:'Order missing customer email, sending owner notification anyway',data:{orderId:order.id},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'M'})}).catch(()=>{});
-    }
-    // #endregion
   }
   
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
@@ -495,21 +407,11 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
       html: emailHtml,
     }, env);
   } catch (error: any) {
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:462',message:'sendEmail threw unexpected exception',data:{orderId:order.id,error:error.message,errorStack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'E'})}).catch(()=>{});
-    }
-    // #endregion
     console.error(`[EMAIL] Unexpected error calling sendEmail for owner notification: ${error.message}`);
     throw new Error(`Failed to send owner notification email: ${error.message}`);
   }
 
   if (!result.success) {
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email.ts:475',message:'Owner notification email failed',data:{orderId:order.id,provider:result.provider,error:result.error},timestamp:Date.now(),sessionId:'debug-session',runId:'email-debug',hypothesisId:'O'})}).catch(()=>{});
-    }
-    // #endregion
     console.error(`[EMAIL] Failed to send owner notification email for order ${order.id} via ${result.provider}: ${result.error}`);
     throw new Error(`Failed to send owner notification email: ${result.error}`);
   }
