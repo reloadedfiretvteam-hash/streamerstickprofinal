@@ -67,8 +67,11 @@ export function createVisitorRoutes() {
       const { sessionId, pageUrl, referrer, userAgent } = body;
 
       if (!sessionId || !pageUrl) {
+        console.warn('[VISITOR_TRACK] Missing required fields:', { hasSessionId: !!sessionId, hasPageUrl: !!pageUrl });
         return c.json({ error: "Session ID and page URL are required" }, 400);
       }
+
+      console.log('[VISITOR_TRACK] Tracking visitor:', { sessionId, pageUrl: pageUrl.substring(0, 50) });
 
       const ipAddress = c.req.header('cf-connecting-ip') || 
                         c.req.header('x-forwarded-for')?.split(',')[0] || 
@@ -94,9 +97,16 @@ export function createVisitorRoutes() {
         isProxy: false,
       });
 
+      console.log('[VISITOR_TRACK] Successfully tracked visitor:', visitor.id);
       return c.json({ success: true, visitorId: visitor.id });
     } catch (error: any) {
-      console.error("Error tracking visitor:", error);
+      console.error("[VISITOR_TRACK] Error tracking visitor:", error);
+      console.error("[VISITOR_TRACK] Error details:", {
+        message: error.message,
+        code: error.code,
+        hint: error.hint,
+        stack: error.stack?.substring(0, 200)
+      });
       return c.json({ 
         error: "Failed to track visitor", 
         details: error.message,

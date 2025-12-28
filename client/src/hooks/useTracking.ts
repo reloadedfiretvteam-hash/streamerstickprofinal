@@ -53,8 +53,9 @@ export function useTracking() {
           throw new Error(`Tracking failed: ${response.status} ${responseData.error || responseText}`);
         }
       } catch (error: any) {
-        // Silently fail - don't interrupt user experience
-        console.warn('Failed to track page view:', error.message);
+        // Log error for debugging but don't interrupt user experience
+        console.warn('[VISITOR_TRACK] Failed to track page view:', error.message);
+        // Don't throw - tracking failures shouldn't break the app
       }
     };
 
