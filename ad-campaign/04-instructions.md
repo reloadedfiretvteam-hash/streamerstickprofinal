@@ -85,3 +85,5 @@ This package contains 30 animated ad scripts for TikTok, YouTube Shorts, and Goo
 
 Good luck with your campaign! 🚀
 
+
+

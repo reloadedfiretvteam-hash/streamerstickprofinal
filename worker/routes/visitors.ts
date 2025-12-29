@@ -95,20 +95,13 @@ export function createVisitorRoutes() {
 
   app.post('/', async (c) => {
     try {
-      // Use service key explicitly to bypass RLS for inserts
-      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY;
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
-      
+      const storage = getStorage(c.env);
       const body = await c.req.json();
       const { sessionId, pageUrl, referrer, userAgent } = body;
 
       if (!sessionId || !pageUrl) {
-        console.warn('[VISITOR_TRACK] Missing required fields:', { hasSessionId: !!sessionId, hasPageUrl: !!pageUrl });
         return c.json({ error: "Session ID and page URL are required" }, 400);
       }
-
-      console.log('[VISITOR_TRACK] Tracking visitor:', { sessionId, pageUrl: pageUrl.substring(0, 50) });
 
       const ipAddress = c.req.header('cf-connecting-ip') || 
                         c.req.header('x-forwarded-for')?.split(',')[0] || 
@@ -116,73 +109,27 @@ export function createVisitorRoutes() {
 
       const cfData = (c.req.raw as any).cf || {};
       
-      // Insert directly using Supabase client with service key (bypasses RLS)
-      const dbVisitor = {
-        session_id: sessionId,
-        page_url: pageUrl,
+      const visitor = await storage.trackVisitor({
+        sessionId,
+        pageUrl,
         referrer: referrer || null,
-        user_agent: userAgent || c.req.header('user-agent') || null,
-        ip_address: ipAddress,
+        userAgent: userAgent || c.req.header('user-agent') || null,
+        ipAddress,
         country: cfData.country || null,
-        country_code: cfData.country || null,
+        countryCode: cfData.country || null,
         region: cfData.region || null,
-        region_code: cfData.regionCode || null,
+        regionCode: cfData.regionCode || null,
         city: cfData.city || null,
         latitude: cfData.latitude?.toString() || null,
         longitude: cfData.longitude?.toString() || null,
         timezone: cfData.timezone || null,
         isp: cfData.asOrganization || null,
-        is_proxy: false,
-      };
-
-      // Try full insert first
-      let { data: insertedVisitor, error: insertError } = await supabase
-        .from('visitors')
-        .insert(dbVisitor)
-        .select()
-        .single();
-
-      // If full insert fails due to missing columns, try minimal insert
-      if (insertError && (insertError.code === '42703' || insertError.message.includes('column'))) {
-        console.warn('[VISITOR_TRACK] Column error, trying minimal insert:', insertError.message);
-        const minimalVisitor = {
-          session_id: dbVisitor.session_id,
-          page_url: dbVisitor.page_url,
-          referrer: dbVisitor.referrer,
-          user_agent: dbVisitor.user_agent,
-        };
-        const retryResult = await supabase
-          .from('visitors')
-          .insert(minimalVisitor)
-          .select()
-          .single();
-        insertedVisitor = retryResult.data;
-        insertError = retryResult.error;
-      }
-
-      if (insertError) {
-        console.error('[VISITOR_TRACK] Insert error:', insertError);
-        throw insertError;
-      }
-
-      if (!insertedVisitor) {
-        throw new Error('Visitor insert succeeded but no data returned');
-      }
-
-      console.log('[VISITOR_TRACK] Successfully tracked visitor:', insertedVisitor.id);
-      return c.json({ 
-        success: true, 
-        visitorId: insertedVisitor.id,
-        message: 'Visitor tracked successfully'
+        isProxy: false,
       });
+
+      return c.json({ success: true, visitorId: visitor.id });
     } catch (error: any) {
-      console.error("[VISITOR_TRACK] Error tracking visitor:", error);
-      console.error("[VISITOR_TRACK] Error details:", {
-        message: error.message,
-        code: error.code,
-        hint: error.hint,
-        stack: error.stack?.substring(0, 200)
-      });
+      console.error("Error tracking visitor:", error);
       return c.json({ 
         error: "Failed to track visitor", 
         details: error.message,

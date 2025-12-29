@@ -324,8 +324,6 @@ export function createStorage(config: StorageConfig) {
       };
 
       // Try insert - if columns don't exist, fall back to minimal insert
-      // Note: supabase client is already initialized with service key (from getStorageConfig)
-      // which should bypass RLS policies
       let { data, error } = await supabase.from('visitors').insert(dbVisitor).select().single();
       
       // If column error, try minimal insert (backward compatibility)
@@ -344,13 +342,7 @@ export function createStorage(config: StorageConfig) {
       
       if (error) {
         console.error('[VISITOR_TRACK] Error inserting visitor:', error);
-        console.error('[VISITOR_TRACK] Error code:', error.code);
-        console.error('[VISITOR_TRACK] Error hint:', error.hint);
         throw error;
-      }
-      
-      if (!data) {
-        throw new Error('Visitor insert succeeded but no data returned');
       }
       
       // Map back with all fields, using defaults for missing columns

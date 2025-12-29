@@ -236,3 +236,5 @@ Before using images, verify:
 - **Upwork**: Find freelance designers
 - **Canva Pro**: Access to premium templates ($12.99/month)
 
+
+

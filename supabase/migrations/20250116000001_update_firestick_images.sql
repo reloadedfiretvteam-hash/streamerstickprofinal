@@ -47,6 +47,7 @@ WHERE (name ILIKE '%fire stick hd%'
        OR slug ILIKE '%fire-stick-hd%'
        OR slug ILIKE '%fire-stick-original%')
   AND name NOT ILIKE '%4k%'
+  AND name NOT ILIKE '%max%'
   AND image_url IS NOT NULL;
 
 UPDATE products_full
@@ -73,6 +74,7 @@ WHERE pi.product_id = pf.id
        OR pf.slug ILIKE '%fire-stick-hd%'
        OR pf.slug ILIKE '%fire-stick-original%')
   AND pf.name NOT ILIKE '%4k%'
+  AND pf.name NOT ILIKE '%max%'
   AND pi.is_primary = true;
 
 UPDATE product_images pi
