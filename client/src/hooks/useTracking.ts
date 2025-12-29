@@ -14,22 +14,31 @@ function getSessionId(): string {
 export function useTracking() {
   const [location] = useLocation();
   const lastTrackedPath = useRef<string | null>(null);
+  const isTracking = useRef(false);
 
   useEffect(() => {
     const currentPath = location + window.location.search;
     
-    // Skip if we already tracked this path
-    if (lastTrackedPath.current === currentPath) {
+    // Skip if we already tracked this path or if tracking is in progress
+    if (lastTrackedPath.current === currentPath || isTracking.current) {
       return;
     }
     lastTrackedPath.current = currentPath;
 
     const trackPageView = async () => {
+      // Prevent duplicate tracking
+      if (isTracking.current) {
+        return;
+      }
+      isTracking.current = true;
+
       try {
         const sessionId = getSessionId();
         const referrer = document.referrer || null;
         const userAgent = navigator.userAgent;
         const fullUrl = window.location.href;
+
+        console.log('[VISITOR_TRACK] Attempting to track page view:', { sessionId, pageUrl: fullUrl.substring(0, 50) });
 
         const response = await apiCall('/api/track', {
           method: 'POST',
@@ -65,15 +74,27 @@ export function useTracking() {
         // Verify success response
         const result = await response.json().catch(() => ({}));
         if (result.success) {
-          console.log('[VISITOR_TRACK] Successfully tracked page view:', result.visitorId);
+          console.log('[VISITOR_TRACK] ✅ Successfully tracked page view:', result.visitorId);
+        } else {
+          console.warn('[VISITOR_TRACK] ⚠️ Tracking response missing success flag:', result);
         }
       } catch (error: any) {
         // Log error for debugging but don't interrupt user experience
-        console.warn('[VISITOR_TRACK] Failed to track page view:', error.message);
+        console.error('[VISITOR_TRACK] ❌ Failed to track page view:', error.message);
+        console.error('[VISITOR_TRACK] Error details:', error);
         // Don't throw - tracking failures shouldn't break the app
+      } finally {
+        isTracking.current = false;
       }
     };
 
-    trackPageView();
+    // Small delay to ensure page is fully loaded
+    const timeoutId = setTimeout(() => {
+      trackPageView();
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [location]);
 }

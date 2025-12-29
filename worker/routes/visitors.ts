@@ -13,34 +13,67 @@ export function createVisitorRoutes() {
   // Test endpoint - manually insert a visitor to verify database works
   app.post('/test', async (c) => {
     try {
-      const storage = getStorage(c.env);
-      const testVisitor = await storage.trackVisitor({
-        sessionId: 'test-' + Date.now(),
-        pageUrl: 'https://streamstickpro.com/test',
+      // Use service key explicitly to bypass RLS
+      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
+      
+      const testVisitorData = {
+        session_id: 'test-' + Date.now(),
+        page_url: 'https://streamstickpro.com/test',
         referrer: 'https://test.com',
-        userAgent: 'Test-Agent',
-        ipAddress: '127.0.0.1',
+        user_agent: 'Test-Agent',
+        ip_address: '127.0.0.1',
         country: 'US',
-        countryCode: 'US',
+        country_code: 'US',
         region: 'Test',
-        regionCode: 'TS',
+        region_code: 'TS',
         city: 'Test City',
         latitude: '0',
         longitude: '0',
         timezone: 'UTC',
         isp: 'Test ISP',
-        isProxy: false,
-      });
+        is_proxy: false,
+      };
+      
+      // Try full insert first
+      let { data: insertedVisitor, error: insertError } = await supabase
+        .from('visitors')
+        .insert(testVisitorData)
+        .select()
+        .single();
+      
+      // If full insert fails, try minimal
+      if (insertError && (insertError.code === '42703' || insertError.message.includes('column'))) {
+        const minimalVisitor = {
+          session_id: testVisitorData.session_id,
+          page_url: testVisitorData.page_url,
+          referrer: testVisitorData.referrer,
+          user_agent: testVisitorData.user_agent,
+        };
+        const retryResult = await supabase
+          .from('visitors')
+          .insert(minimalVisitor)
+          .select()
+          .single();
+        insertedVisitor = retryResult.data;
+        insertError = retryResult.error;
+      }
+      
+      if (insertError || !insertedVisitor) {
+        throw insertError || new Error('Insert failed but no error returned');
+      }
       
       // Now try to read it back
+      const storage = getStorage(c.env);
       const stats = await storage.getVisitorStats();
       
       return c.json({
         success: true,
         inserted: {
-          id: testVisitor.id,
-          sessionId: testVisitor.sessionId,
-          pageUrl: testVisitor.pageUrl,
+          id: insertedVisitor.id,
+          sessionId: insertedVisitor.session_id,
+          pageUrl: insertedVisitor.page_url,
         },
         stats: {
           totalVisitors: stats.totalVisitors,
@@ -62,7 +95,11 @@ export function createVisitorRoutes() {
 
   app.post('/', async (c) => {
     try {
-      const storage = getStorage(c.env);
+      // Use service key explicitly to bypass RLS for inserts
+      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
+      
       const body = await c.req.json();
       const { sessionId, pageUrl, referrer, userAgent } = body;
 
@@ -79,28 +116,63 @@ export function createVisitorRoutes() {
 
       const cfData = (c.req.raw as any).cf || {};
       
-      const visitor = await storage.trackVisitor({
-        sessionId,
-        pageUrl,
+      // Insert directly using Supabase client with service key (bypasses RLS)
+      const dbVisitor = {
+        session_id: sessionId,
+        page_url: pageUrl,
         referrer: referrer || null,
-        userAgent: userAgent || c.req.header('user-agent') || null,
-        ipAddress,
+        user_agent: userAgent || c.req.header('user-agent') || null,
+        ip_address: ipAddress,
         country: cfData.country || null,
-        countryCode: cfData.country || null,
+        country_code: cfData.country || null,
         region: cfData.region || null,
-        regionCode: cfData.regionCode || null,
+        region_code: cfData.regionCode || null,
         city: cfData.city || null,
         latitude: cfData.latitude?.toString() || null,
         longitude: cfData.longitude?.toString() || null,
         timezone: cfData.timezone || null,
         isp: cfData.asOrganization || null,
-        isProxy: false,
-      });
+        is_proxy: false,
+      };
 
-      console.log('[VISITOR_TRACK] Successfully tracked visitor:', visitor.id);
+      // Try full insert first
+      let { data: insertedVisitor, error: insertError } = await supabase
+        .from('visitors')
+        .insert(dbVisitor)
+        .select()
+        .single();
+
+      // If full insert fails due to missing columns, try minimal insert
+      if (insertError && (insertError.code === '42703' || insertError.message.includes('column'))) {
+        console.warn('[VISITOR_TRACK] Column error, trying minimal insert:', insertError.message);
+        const minimalVisitor = {
+          session_id: dbVisitor.session_id,
+          page_url: dbVisitor.page_url,
+          referrer: dbVisitor.referrer,
+          user_agent: dbVisitor.user_agent,
+        };
+        const retryResult = await supabase
+          .from('visitors')
+          .insert(minimalVisitor)
+          .select()
+          .single();
+        insertedVisitor = retryResult.data;
+        insertError = retryResult.error;
+      }
+
+      if (insertError) {
+        console.error('[VISITOR_TRACK] Insert error:', insertError);
+        throw insertError;
+      }
+
+      if (!insertedVisitor) {
+        throw new Error('Visitor insert succeeded but no data returned');
+      }
+
+      console.log('[VISITOR_TRACK] Successfully tracked visitor:', insertedVisitor.id);
       return c.json({ 
         success: true, 
-        visitorId: visitor.id,
+        visitorId: insertedVisitor.id,
         message: 'Visitor tracked successfully'
       });
     } catch (error: any) {
