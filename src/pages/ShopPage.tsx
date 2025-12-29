@@ -89,8 +89,10 @@ export default function ShopPage() {
               imageUrl = getStorageUrl('images', 'firestick 4k max.jpg');
             } else if (product.name?.toLowerCase().includes('4k')) {
               imageUrl = getStorageUrl('images', 'firestick 4k.jpg');
+            } else if (product.name?.toLowerCase().includes('original')) {
+              imageUrl = getStorageUrl('images', 'firestick original.jpg');
             } else {
-              imageUrl = getStorageUrl('images', 'firestick hd.jpg');
+              imageUrl = getStorageUrl('images', 'firestick original.jpg');
             }
           } else {
             imageUrl = getStorageUrl('images', 'iptv-subscription.jpg');
