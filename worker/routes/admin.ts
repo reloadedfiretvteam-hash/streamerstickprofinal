@@ -434,17 +434,37 @@ export function createAdminRoutes() {
         }
       });
       
-      // Device type detection
+      // Device type detection - improved logic
       const deviceBreakdown = { desktop: 0, mobile: 0, tablet: 0, bot: 0 };
       visitors.forEach((v: any) => {
         const ua = (v.user_agent || '').toLowerCase();
-        if (ua.includes('bot') || ua.includes('crawler') || ua.includes('spider')) {
+        
+        // Check for bots first
+        if (ua.includes('bot') || ua.includes('crawler') || ua.includes('spider') || 
+            ua.includes('googlebot') || ua.includes('bingbot') || ua.includes('slurp')) {
           deviceBreakdown.bot++;
-        } else if (ua.includes('tablet')) {
+        } 
+        // Check for tablets (iPad, Android tablets, etc.)
+        else if (ua.includes('ipad') || 
+                 (ua.includes('android') && !ua.includes('mobile')) ||
+                 ua.includes('tablet') ||
+                 ua.includes('playbook') ||
+                 ua.includes('kindle')) {
           deviceBreakdown.tablet++;
-        } else if (ua.includes('mobile')) {
+        } 
+        // Check for mobile devices (iPhone, Android phones, etc.)
+        else if (ua.includes('mobile') || 
+                 ua.includes('iphone') || 
+                 ua.includes('ipod') ||
+                 (ua.includes('android') && ua.includes('mobile')) ||
+                 ua.includes('blackberry') ||
+                 ua.includes('windows phone') ||
+                 ua.includes('opera mini') ||
+                 ua.includes('iemobile')) {
           deviceBreakdown.mobile++;
-        } else {
+        } 
+        // Default to desktop
+        else {
           deviceBreakdown.desktop++;
         }
       });
