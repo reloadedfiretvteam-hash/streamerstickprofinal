@@ -52,9 +52,23 @@ export function useTracking() {
           }
           throw new Error(`Tracking failed: ${response.status} ${responseData.error || responseText}`);
         }
+        
+        // Parse and log success
+        try {
+          const result = await response.json();
+          if (import.meta.env.DEV) {
+            console.log('✅ Visitor tracked successfully:', result);
+          }
+        } catch {
+          // Response might be empty, that's okay
+        }
       } catch (error: any) {
-        // Silently fail - don't interrupt user experience
-        console.warn('Failed to track page view:', error.message);
+        // Log errors for debugging but don't interrupt user experience
+        console.error('❌ Failed to track page view:', {
+          error: error.message,
+          url: window.location.href,
+          sessionId: getSessionId()
+        });
       }
     };
 
