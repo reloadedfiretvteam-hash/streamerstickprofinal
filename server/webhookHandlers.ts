@@ -1,7 +1,6 @@
 import { getStripeSync, getUncachableStripeClient } from './stripeClient';
 import { storage } from './storage';
 import { EmailService } from './emailService';
-import { handlePaidCheckoutSession, handlePaymentIntentSucceeded } from './paymentWebhookHandler';
 import type { Order } from '@shared/schema';
 import * as bcrypt from 'bcryptjs';
 
@@ -62,15 +61,9 @@ export class WebhookHandlers {
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object;
         
-        // First, send payment confirmation emails via dedicated handler
-        try {
-          await handlePaymentIntentSucceeded(paymentIntent);
-        } catch (error: any) {
-          console.error(`[WEBHOOK] Error in payment email handler:`, error.message);
-          // Continue with order processing even if email fails
-        }
-        
-        // Then, handle order updates (existing logic)
+        // Handle order updates and confirmation emails
+        // EmailService.sendOrderConfirmation is called inside handlePaymentSucceeded
+        // It uses realProductName from the database order (not metadata/URLs)
         await WebhookHandlers.handlePaymentSucceeded(paymentIntent);
         break;
       }
@@ -173,18 +166,19 @@ export class WebhookHandlers {
     const updatedOrder = await storage.getOrder(order.id);
     if (updatedOrder) {
       try {
-        // Note: Payment confirmation emails are already sent by handlePaidCheckoutSession
-        // These are additional detailed emails with credentials
-        // Only send if this is a paid purchase (not free trial)
+        // Only send emails for paid purchases (not free trials)
         if (session.payment_status === 'paid' && session.amount_total && session.amount_total > 0) {
-          // Send detailed order confirmation (may include additional info)
-          // Owner notification already sent by payment handler, but this one has more details
+          // Send order confirmation email to customer (uses realProductName from database)
+          await EmailService.sendOrderConfirmation(updatedOrder);
+          
+          // Send detailed owner notification
           await EmailService.sendOwnerOrderNotification(updatedOrder);
+          
           // Schedule credentials email (separate from payment confirmation)
           await EmailService.scheduleCredentialsEmail(updatedOrder.id);
         }
       } catch (error) {
-        console.error('Error sending additional emails:', error);
+        console.error('Error sending confirmation emails:', error);
       }
     }
   }
@@ -206,17 +200,19 @@ export class WebhookHandlers {
       const updatedOrder = await storage.getOrder(order.id);
       if (updatedOrder) {
         try {
-          // Note: Payment confirmation emails are already sent by handlePaymentIntentSucceeded
-          // These are additional detailed emails with credentials
-          // Only send if this is a paid purchase
+          // Only send emails for paid purchases
           if (paymentIntent.amount_received && paymentIntent.amount_received > 0) {
-            // Send detailed owner notification (may include additional info)
+            // Send order confirmation email to customer (uses realProductName from database)
+            await EmailService.sendOrderConfirmation(updatedOrder);
+            
+            // Send detailed owner notification
             await EmailService.sendOwnerOrderNotification(updatedOrder);
+            
             // Schedule credentials email (separate from payment confirmation)
             await EmailService.scheduleCredentialsEmail(updatedOrder.id);
           }
         } catch (error) {
-          console.error('Error sending additional emails:', error);
+          console.error('Error sending confirmation emails:', error);
         }
       }
     }
