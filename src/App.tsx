@@ -32,6 +32,7 @@ import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
 // ConciergePage and SecureCheckoutPage removed - handled by AppRouter instead
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
+import { useTrackView } from './lib/useTrackView';
 
 interface CartItem {
   id: string;
@@ -191,6 +192,8 @@ function App() {
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+  // Track page views for analytics
+  useTrackView();
 
   return (
     <ErrorBoundary>

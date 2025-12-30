@@ -14,6 +14,7 @@ import IPTVServicesPage from './pages/IPTVServicesPage';
 import StripeSecureCheckoutPage from './pages/StripeSecureCheckoutPage';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import StripeConnectionTest from './pages/StripeConnectionTest';
+import AnalyticsAdmin from './pages/AnalyticsAdmin';
 
 // Check if current host is a Stripe payment subdomain
 function isStripePaymentHost(): boolean {
@@ -119,6 +120,15 @@ export default function AppRouter() {
   // SEO Ads routing - /ads/[slug]
   if (currentPath.startsWith('/ads/') && currentPath !== '/ads/') {
     return <SEOAdPage />;
+  }
+
+  // Analytics admin route - requires authentication
+  if (currentPath === '/admin/analytics' || currentPath === '/admin/analytics/') {
+    if (isAuthenticated) {
+      return <AnalyticsAdmin />;
+    }
+    window.location.href = '/admin';
+    return null;
   }
 
   return <App />;
