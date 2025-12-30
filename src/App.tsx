@@ -32,7 +32,7 @@ import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
 // ConciergePage and SecureCheckoutPage removed - handled by AppRouter instead
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
-import { useTrackView } from './lib/useTrackView';
+// useTrackView moved to AppRouter to track all routes
 
 interface CartItem {
   id: string;
@@ -192,8 +192,8 @@ function App() {
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Track page views for analytics
-  useTrackView();
+  // Note: Page view tracking is now handled at the AppRouter level
+  // to ensure all routes are tracked, not just the home page
 
   return (
     <ErrorBoundary>

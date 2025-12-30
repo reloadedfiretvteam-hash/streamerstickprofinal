@@ -15,6 +15,7 @@ import StripeSecureCheckoutPage from './pages/StripeSecureCheckoutPage';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import StripeConnectionTest from './pages/StripeConnectionTest';
 import AnalyticsAdmin from './pages/AnalyticsAdmin';
+import { useTrackView } from './lib/useTrackView';
 
 // Check if current host is a Stripe payment subdomain
 function isStripePaymentHost(): boolean {
@@ -26,6 +27,9 @@ function isStripePaymentHost(): boolean {
 export default function AppRouter() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Track all page views for analytics (must be at router level to track all routes)
+  useTrackView();
 
   useEffect(() => {
     const handlePopState = () => {
