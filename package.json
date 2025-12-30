@@ -118,8 +118,5 @@
     "@types/react-dom": "^19.2.0",
     "@types/ws": "^8.5.13",
     "drizzle-kit": "^0.31.4"
-  },
-  "optionalDependencies": {
-    "bufferutil": "^4.1.0"
   }
 }
