@@ -1,353 +1,377 @@
 import { useState, useEffect } from 'react';
-import { Users, Eye, Globe, Clock, TrendingUp, MapPin, Monitor, Smartphone, Tablet, Activity } from 'lucide-react';
+import { 
+  Eye, 
+  Globe, 
+  MapPin, 
+  Monitor, 
+  Smartphone, 
+  Tablet, 
+  RefreshCw, 
+  TrendingUp,
+  Clock,
+  ExternalLink,
+  Activity,
+  Users
+} from 'lucide-react';
 
-interface VisitorStats {
+interface VisitorData {
   totalVisitors: number;
   todayVisitors: number;
   weekVisitors: number;
   monthVisitors: number;
   onlineNow: number;
-  topCountries: Array<{ country: string; count: number }>;
-  deviceBreakdown: { desktop: number; mobile: number; tablet: number };
-  recentVisitors: Array<{
+  deviceBreakdown: { desktop: number; mobile: number; tablet: number; bot: number };
+  countryBreakdown: Array<{ name: string; count: number }>;
+  regionBreakdown: Array<{ name: string; count: number }>;
+  cityBreakdown: Array<{ name: string; count: number }>;
+  pageBreakdown: Array<{ name: string; count: number }>;
+  hourlyDistribution: Array<{ hour: number; count: number }>;
+  liveVisitors: Array<{
     id: string;
-    page_url: string;
+    pageUrl: string;
+    country: string | null;
+    city: string | null;
+    region: string | null;
+    userAgent: string;
+    createdAt: string;
     referrer: string | null;
-    user_agent: string;
-    created_at: string;
   }>;
 }
 
 export default function LiveVisitorStatistics() {
-  const [stats, setStats] = useState<VisitorStats>({
-    totalVisitors: 0,
-    todayVisitors: 0,
-    weekVisitors: 0,
-    monthVisitors: 0,
-    onlineNow: 0,
-    topCountries: [],
-    deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
-    recentVisitors: []
-  });
+  const [data, setData] = useState<VisitorData | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [autoRefresh, setAutoRefresh] = useState(true);
 
-  useEffect(() => {
-    loadStats();
-    // Refresh every 30 seconds for real-time updates
-    const interval = setInterval(() => {
-      loadStats();
-      setLastUpdate(new Date());
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadStats = async () => {
+  const fetchVisitorData = async () => {
     try {
       setLoading(true);
       
-      // Use the original working endpoint - /api/admin/visitors/stats
-      // This is the Express server route that was working 6 days ago
-      console.log('[LiveVisitorStatistics] Fetching stats from /api/admin/visitors/stats');
       const response = await fetch('/api/admin/visitors/stats');
-      
-      console.log('[LiveVisitorStatistics] Response status:', response.status);
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('[LiveVisitorStatistics] Response error:', response.status, errorText);
-        throw new Error(`Failed to fetch visitor stats: ${response.status} - ${errorText}`);
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText };
+        }
+        console.error('Failed to fetch visitor stats:', response.status, errorData);
+        setData({
+          totalVisitors: 0,
+          todayVisitors: 0,
+          weekVisitors: 0,
+          onlineNow: 0,
+          liveVisitors: [],
+          countryBreakdown: [],
+          regionBreakdown: [],
+          cityBreakdown: [],
+          pageBreakdown: [],
+          deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0, bot: 0 },
+          hourlyDistribution: [],
+          monthVisitors: 0,
+        });
+        return;
       }
       
       const result = await response.json();
-      console.log('[LiveVisitorStatistics] Received data:', result);
       
-      if (!result.data) {
-        console.error('[LiveVisitorStatistics] No data in response:', result);
-        throw new Error('No data returned from API');
+      if (result.data) {
+        setData(result.data);
+        setLastUpdate(new Date());
+      } else {
+        console.warn('No data in visitor stats response:', result);
       }
-
-      const apiData = result.data;
-      
-      // Calculate device breakdown from recent visitors
-      const deviceBreakdown = {
-        desktop: (apiData.recentVisitors || []).filter((v: any) => {
-          const ua = (v.userAgent || '').toLowerCase();
-          return !ua.includes('mobile') && !ua.includes('tablet');
-        }).length,
-        mobile: (apiData.recentVisitors || []).filter((v: any) => {
-          const ua = (v.userAgent || '').toLowerCase();
-          return ua.includes('mobile') && !ua.includes('tablet');
-        }).length,
-        tablet: (apiData.recentVisitors || []).filter((v: any) => {
-          const ua = (v.userAgent || '').toLowerCase();
-          return ua.includes('tablet');
-        }).length
-      };
-
-      // Map top countries from API data 
-      // Original server/geoLocationService.ts returns {name, count} format
-      // Component expects {country, count} format
-      const topCountries = (apiData.topCountries || apiData.countryBreakdown || []).map((c: any) => ({
-        country: c.country || c.name || 'Unknown',
-        count: c.count || 0
-      })).slice(0, 5);
-
-      // Map recent visitors from API data
-      // Drizzle returns camelCase (pageUrl, userAgent, createdAt)
-      // Component expects snake_case (page_url, user_agent, created_at)
-      const recentVisitors = (apiData.recentVisitors || []).slice(0, 10).map((v: any) => {
-        // Handle createdAt - Drizzle may return Date object or string
-        let createdAtStr: string;
-        if (v.createdAt) {
-          createdAtStr = v.createdAt instanceof Date 
-            ? v.createdAt.toISOString() 
-            : (typeof v.createdAt === 'string' ? v.createdAt : new Date().toISOString());
-        } else if (v.created_at) {
-          createdAtStr = typeof v.created_at === 'string' ? v.created_at : new Date().toISOString();
-        } else {
-          createdAtStr = new Date().toISOString();
-        }
-        
-        return {
-          id: v.id || 'unknown',
-          page_url: v.pageUrl || v.page_url || '/',
-          referrer: v.referrer || null,
-          user_agent: v.userAgent || v.user_agent || 'Unknown',
-          created_at: createdAtStr
-        };
-      });
-
-      setStats({
-        totalVisitors: apiData.totalVisitors || 0,
-        todayVisitors: apiData.todayVisitors || 0,
-        weekVisitors: apiData.weekVisitors || 0,
-        monthVisitors: apiData.monthVisitors || 0,
-        onlineNow: apiData.onlineNow || 0,
-        topCountries,
-        deviceBreakdown,
-        recentVisitors
-      });
-      console.log('[LiveVisitorStatistics] Stats updated successfully');
     } catch (error: any) {
-      console.error('[LiveVisitorStatistics] Error loading visitor statistics:', error);
-      console.error('[LiveVisitorStatistics] Error details:', error.message, error.stack);
-      // Set empty stats on error instead of keeping old data
-      setStats({
-        totalVisitors: 0,
-        todayVisitors: 0,
-        weekVisitors: 0,
-        monthVisitors: 0,
-        onlineNow: 0,
-        topCountries: [],
-        deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
-        recentVisitors: []
-      });
+      console.error('Error fetching visitor data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
+  useEffect(() => {
+    fetchVisitorData();
     
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
-  };
+    if (autoRefresh) {
+      const interval = setInterval(fetchVisitorData, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [autoRefresh]);
 
-  const getDeviceIcon = (userAgent: string) => {
-    const ua = userAgent.toLowerCase();
-    if (ua.includes('mobile')) return <Smartphone className="w-4 h-4" />;
-    if (ua.includes('tablet')) return <Tablet className="w-4 h-4" />;
-    return <Monitor className="w-4 h-4" />;
-  };
-
-  if (loading && stats.totalVisitors === 0) {
+  if (loading && !data) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-32 bg-gray-200 rounded"></div>
-        </div>
+      <div className="flex items-center justify-center p-8">
+        <RefreshCw className="h-6 w-6 animate-spin text-gray-400" />
       </div>
     );
   }
 
+  if (!data) {
+    return <div className="text-center p-8 text-gray-500">No visitor data available</div>;
+  }
+
+  const deviceTotal = data.deviceBreakdown.desktop + data.deviceBreakdown.mobile + data.deviceBreakdown.tablet;
+  const devicePercentages = {
+    desktop: deviceTotal > 0 ? (data.deviceBreakdown.desktop / deviceTotal * 100).toFixed(1) : '0',
+    mobile: deviceTotal > 0 ? (data.deviceBreakdown.mobile / deviceTotal * 100).toFixed(1) : '0',
+    tablet: deviceTotal > 0 ? (data.deviceBreakdown.tablet / deviceTotal * 100).toFixed(1) : '0',
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header with stats */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Activity className="w-6 h-6 text-orange-500" />
-            Live Visitor Statistics
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Last updated: {lastUpdate.toLocaleTimeString()} • Auto-refreshes every 30 seconds
+          <h2 className="text-2xl font-bold text-gray-900">Live Visitor Analytics</h2>
+          <p className="text-sm text-gray-500">
+            Last updated: {lastUpdate.toLocaleTimeString()}
           </p>
         </div>
-        <button
-          onClick={loadStats}
-          className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2"
-        >
-          <TrendingUp className="w-4 h-4" />
-          Refresh Now
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm"
+          >
+            <RefreshCw className={`h-4 w-4 ${autoRefresh ? 'animate-spin' : ''}`} />
+            {autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
+          </button>
+          <button 
+            onClick={fetchVisitorData}
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh Now
+          </button>
+        </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white shadow-lg">
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <div className="flex items-center justify-between mb-2">
-            <Users className="w-8 h-8 opacity-80" />
-            <span className="text-2xl font-bold">{stats.totalVisitors.toLocaleString()}</span>
+            <h3 className="text-sm font-medium text-gray-700">Online Now</h3>
+            <Activity className="h-5 w-5 text-green-500" />
           </div>
-          <p className="text-blue-100 text-sm">Total Visitors</p>
+          <div className="text-2xl font-bold text-green-600">{data.onlineNow}</div>
+          <p className="text-xs text-gray-500 mt-1">Active in last 5 minutes</p>
         </div>
 
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white shadow-lg">
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <div className="flex items-center justify-between mb-2">
-            <Eye className="w-8 h-8 opacity-80" />
-            <span className="text-2xl font-bold">{stats.todayVisitors.toLocaleString()}</span>
+            <h3 className="text-sm font-medium text-gray-700">Today</h3>
+            <Clock className="h-5 w-5 text-blue-500" />
           </div>
-          <p className="text-green-100 text-sm">Today</p>
+          <div className="text-2xl font-bold">{data.todayVisitors}</div>
+          <p className="text-xs text-gray-500 mt-1">
+            {data.weekVisitors > 0 ? `+${((data.todayVisitors / data.weekVisitors) * 100).toFixed(0)}% vs weekly avg` : 'No weekly data'}
+          </p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white shadow-lg">
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <div className="flex items-center justify-between mb-2">
-            <Clock className="w-8 h-8 opacity-80" />
-            <span className="text-2xl font-bold">{stats.weekVisitors.toLocaleString()}</span>
+            <h3 className="text-sm font-medium text-gray-700">This Week</h3>
+            <TrendingUp className="h-5 w-5 text-purple-500" />
           </div>
-          <p className="text-purple-100 text-sm">This Week</p>
+          <div className="text-2xl font-bold">{data.weekVisitors}</div>
+          <p className="text-xs text-gray-500 mt-1">{data.monthVisitors} this month</p>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-lg p-6 text-white shadow-lg">
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <div className="flex items-center justify-between mb-2">
-            <Activity className="w-8 h-8 opacity-80" />
-            <span className="text-2xl font-bold">{stats.onlineNow.toLocaleString()}</span>
+            <h3 className="text-sm font-medium text-gray-700">Total</h3>
+            <Globe className="h-5 w-5 text-orange-500" />
           </div>
-          <p className="text-orange-100 text-sm">Online Now</p>
+          <div className="text-2xl font-bold">{data.totalVisitors.toLocaleString()}</div>
+          <p className="text-xs text-gray-500 mt-1">All-time visitors</p>
         </div>
       </div>
 
-      {/* Device Breakdown & Top Countries */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Monitor className="w-5 h-5 text-orange-500" />
-            Device Breakdown
-          </h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Monitor className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700">Desktop</span>
-              </div>
-              <span className="font-semibold text-gray-900">{stats.deviceBreakdown.desktop}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Smartphone className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700">Mobile</span>
-              </div>
-              <span className="font-semibold text-gray-900">{stats.deviceBreakdown.mobile}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Tablet className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-700">Tablet</span>
-              </div>
-              <span className="font-semibold text-gray-900">{stats.deviceBreakdown.tablet}</span>
-            </div>
-          </div>
+      {/* Tabs for different views */}
+      <div className="space-y-4">
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8">
+            <button className="border-b-2 border-orange-500 py-2 px-1 text-sm font-medium text-gray-900">
+              Live Visitors
+            </button>
+            <button className="border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+              Devices
+            </button>
+            <button className="border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+              Locations
+            </button>
+            <button className="border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+              Pages
+            </button>
+          </nav>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Globe className="w-5 h-5 text-orange-500" />
-            Top Countries
-          </h3>
-          <div className="space-y-3">
-            {stats.topCountries.length > 0 ? (
-              stats.topCountries.map((country, idx) => (
-                <div key={idx} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-700">{country.country}</span>
-                  </div>
-                  <span className="font-semibold text-gray-900">{country.count}</span>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500 text-sm">No country data available</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Visitors */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Users className="w-5 h-5 text-orange-500" />
-          Recent Visitors
-        </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-2 px-4 text-sm font-semibold text-gray-700">Device</th>
-                <th className="text-left py-2 px-4 text-sm font-semibold text-gray-700">Page</th>
-                <th className="text-left py-2 px-4 text-sm font-semibold text-gray-700">Referrer</th>
-                <th className="text-left py-2 px-4 text-sm font-semibold text-gray-700">Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats.recentVisitors.length > 0 ? (
-                stats.recentVisitors.map((visitor, idx) => (
-                  <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        {getDeviceIcon(visitor.user_agent)}
-                        <span className="text-sm">{visitor.user_agent.substring(0, 30)}...</span>
+        {/* Live Visitors */}
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Live Visitors ({data.liveVisitors.length})</h3>
+          <p className="text-sm text-gray-500 mb-4">Visitors active in the last 5 minutes</p>
+          {data.liveVisitors.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No active visitors at the moment
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {data.liveVisitors.map((visitor) => (
+                <div
+                  key={visitor.id}
+                  className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+                    <div>
+                      <div className="font-medium text-sm text-gray-900">
+                        {visitor.city || visitor.region || visitor.country || 'Unknown Location'}
                       </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-sm text-gray-700">{visitor.page_url.substring(0, 40)}</span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-sm text-gray-500">
-                        {visitor.referrer ? visitor.referrer.substring(0, 30) : 'Direct'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-sm text-gray-500">{formatTime(visitor.created_at)}</span>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={4} className="py-8 text-center text-gray-500">
-                    No visitors tracked yet. Visitors will appear here as they browse your site.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                      <div className="text-xs text-gray-500 truncate max-w-[300px]">
+                        {visitor.pageUrl}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500 border border-gray-200 px-2 py-1 rounded">
+                      {new Date(visitor.createdAt).toLocaleTimeString()}
+                    </span>
+                    <ExternalLink className="h-4 w-4 text-gray-400" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Devices */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Monitor className="h-5 w-5" />
+              Desktop
+            </h3>
+            <div className="text-3xl font-bold">{data.deviceBreakdown.desktop}</div>
+            <div className="text-sm text-gray-500 mt-1">{devicePercentages.desktop}% of traffic</div>
+            <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-blue-500 rounded-full transition-all"
+                style={{ width: `${devicePercentages.desktop}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Smartphone className="h-5 w-5" />
+              Mobile
+            </h3>
+            <div className="text-3xl font-bold">{data.deviceBreakdown.mobile}</div>
+            <div className="text-sm text-gray-500 mt-1">{devicePercentages.mobile}% of traffic</div>
+            <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-green-500 rounded-full transition-all"
+                style={{ width: `${devicePercentages.mobile}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Tablet className="h-5 w-5" />
+              Tablet
+            </h3>
+            <div className="text-3xl font-bold">{data.deviceBreakdown.tablet}</div>
+            <div className="text-sm text-gray-500 mt-1">{devicePercentages.tablet}% of traffic</div>
+            <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-purple-500 rounded-full transition-all"
+                style={{ width: `${devicePercentages.tablet}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Locations */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              Top Countries
+            </h3>
+            <div className="space-y-2">
+              {data.countryBreakdown.slice(0, 10).map((country, idx) => (
+                <div key={country.name} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs">
+                      {idx + 1}
+                    </span>
+                    <span className="text-sm text-gray-700">{country.name}</span>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{country.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Top Regions
+            </h3>
+            <div className="space-y-2">
+              {data.regionBreakdown.slice(0, 10).map((region, idx) => (
+                <div key={region.name} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs">
+                      {idx + 1}
+                    </span>
+                    <span className="text-sm text-gray-700 truncate">{region.name}</span>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{region.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Top Cities
+            </h3>
+            <div className="space-y-2">
+              {data.cityBreakdown.slice(0, 10).map((city, idx) => (
+                <div key={city.name} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-xs">
+                      {idx + 1}
+                    </span>
+                    <span className="text-sm text-gray-700 truncate">{city.name}</span>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{city.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Pages */}
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Most Visited Pages</h3>
+          <div className="space-y-2">
+            {data.pageBreakdown.map((page, idx) => (
+              <div key={page.name} className="flex items-center justify-between p-2 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <span className="border border-gray-300 px-2 py-1 rounded text-xs">{idx + 1}</span>
+                  <span className="text-sm font-mono text-gray-700">{page.name}</span>
+                </div>
+                <span className="text-sm font-medium text-gray-900 bg-gray-100 px-2 py-1 rounded">{page.count} visits</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
-
-
-
-
