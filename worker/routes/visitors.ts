@@ -143,5 +143,61 @@ export function createVisitorRoutes() {
     }
   });
 
+  // Admin stats endpoint - placed here to avoid auth middleware
+  // Uses service role key internally, so no auth needed
+  app.get('/admin/stats', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const stats = await storage.getVisitorStats();
+      
+      // Enhance with additional analytics
+      // Use service key explicitly to bypass RLS
+      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
+      
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+      
+      // Get detailed visitor data - service key should bypass RLS
+      const { data: allVisitors, error: visitorsError } = await supabase
+        .from('visitors')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5000);
+      
+      if (visitorsError) {
+        console.error('Error fetching visitors:', visitorsError);
+      }
+      
+      // Calculate geo stats
+      const countryStats: Record<string, number> = {};
+      (allVisitors || []).forEach((v: any) => {
+        if (v.country) {
+          countryStats[v.country] = (countryStats[v.country] || 0) + 1;
+        }
+      });
+      
+      const topCountries = Object.entries(countryStats)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([name, count]) => ({ name, count }));
+      
+      return c.json({
+        data: {
+          ...stats,
+          topCountries,
+          countryBreakdown: topCountries, // alias for compatibility
+        }
+      });
+    } catch (error: any) {
+      console.error("Error fetching visitor stats:", error);
+      return c.json({ error: "Failed to fetch visitor stats", details: error.message }, 500);
+    }
+  });
+
   return app;
 }

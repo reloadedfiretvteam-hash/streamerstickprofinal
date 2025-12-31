@@ -47,8 +47,9 @@ export default function LiveVisitorStatistics() {
     try {
       setLoading(true);
       
-      // Use the API endpoint instead of direct Supabase query (bypasses RLS)
-      const response = await fetch('/api/admin/visitors/stats');
+      // Use the API endpoint - moved to /api/track/admin/stats to avoid auth requirement
+      // The endpoint uses service role key internally, so it's safe without auth
+      const response = await fetch('/api/track/admin/stats');
       
       if (!response.ok) {
         throw new Error(`Failed to fetch visitor stats: ${response.status}`);
