@@ -147,22 +147,37 @@ export function createVisitorRoutes() {
   // Uses service role key internally, so no auth needed
   app.get('/admin/stats', async (c) => {
     try {
-      console.log('[VISITOR_STATS] Endpoint called');
+      console.log('[VISITOR_STATS] Endpoint called at', new Date().toISOString());
       
       if (!c.env.VITE_SUPABASE_URL) {
+        console.error('[VISITOR_STATS] Missing VITE_SUPABASE_URL');
         return c.json({ error: 'Supabase URL not configured' }, 500);
       }
       
       const storage = getStorage(c.env);
       console.log('[VISITOR_STATS] Storage initialized');
       
-      const stats = await storage.getVisitorStats();
-      console.log('[VISITOR_STATS] Stats retrieved:', {
-        total: stats.totalVisitors,
-        today: stats.todayVisitors,
-        week: stats.weekVisitors,
-        month: stats.monthVisitors
-      });
+      let stats;
+      try {
+        stats = await storage.getVisitorStats();
+        console.log('[VISITOR_STATS] Stats retrieved:', {
+          total: stats.totalVisitors,
+          today: stats.todayVisitors,
+          week: stats.weekVisitors,
+          month: stats.monthVisitors || 0
+        });
+      } catch (statsError: any) {
+        console.error('[VISITOR_STATS] Error getting stats:', statsError);
+        // Return empty stats instead of failing completely
+        stats = {
+          totalVisitors: 0,
+          todayVisitors: 0,
+          weekVisitors: 0,
+          monthVisitors: 0,
+          onlineNow: 0,
+          recentVisitors: []
+        };
+      }
       
       // Enhance with additional analytics
       // Use service key explicitly to bypass RLS
@@ -210,19 +225,26 @@ export function createVisitorRoutes() {
       
       console.log('[VISITOR_STATS] Returning response with', {
         totalVisitors: finalStats.totalVisitors,
-        recentCount: finalStats.recentVisitors?.length || 0
+        recentCount: finalStats.recentVisitors?.length || 0,
+        monthVisitors: finalStats.monthVisitors
       });
       
-      return c.json({
+      const response = {
         data: finalStats
-      });
+      };
+      
+      console.log('[VISITOR_STATS] Response prepared, sending JSON');
+      return c.json(response);
     } catch (error: any) {
-      console.error("[VISITOR_STATS] Error fetching visitor stats:", error);
+      console.error("[VISITOR_STATS] Unexpected error:", error);
+      console.error("[VISITOR_STATS] Error message:", error.message);
       console.error("[VISITOR_STATS] Error stack:", error.stack);
+      
+      // Always return JSON, even on error
       return c.json({ 
         error: "Failed to fetch visitor stats", 
-        details: error.message,
-        stack: error.stack 
+        details: error.message || 'Unknown error',
+        timestamp: new Date().toISOString()
       }, 500);
     }
   });
