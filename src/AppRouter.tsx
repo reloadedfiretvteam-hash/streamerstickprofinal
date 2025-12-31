@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import App from './App';
 import UnifiedAdminLogin from './pages/UnifiedAdminLogin';
 import RealAdminDashboard from './pages/RealAdminDashboard';
@@ -14,7 +14,6 @@ import IPTVServicesPage from './pages/IPTVServicesPage';
 import StripeSecureCheckoutPage from './pages/StripeSecureCheckoutPage';
 import SecureCheckoutPage from './pages/SecureCheckoutPage';
 import StripeConnectionTest from './pages/StripeConnectionTest';
-import AnalyticsAdmin from './pages/AnalyticsAdmin';
 
 // Check if current host is a Stripe payment subdomain
 function isStripePaymentHost(): boolean {
@@ -26,40 +25,6 @@ function isStripePaymentHost(): boolean {
 export default function AppRouter() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const previousPathRef = useRef<string>(window.location.pathname);
-
-  // Track page views whenever currentPath changes
-  useEffect(() => {
-    const trackView = async (path: string) => {
-      try {
-        // Get or create session ID
-        const storageKey = 'analytics_session_id';
-        let sessionId = localStorage.getItem(storageKey);
-        if (!sessionId) {
-          sessionId = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-          localStorage.setItem(storageKey, sessionId);
-        }
-        
-        await fetch('/api/track-view', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            path, 
-            sessionId 
-          })
-        });
-      } catch (e) {
-        // Silently fail - analytics shouldn't break the app
-        console.error('Analytics tracking failed:', e);
-      }
-    };
-    
-    // Track initial page load and route changes
-    if (currentPath && currentPath !== previousPathRef.current) {
-      previousPathRef.current = currentPath;
-      trackView(currentPath);
-    }
-  }, [currentPath]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -70,10 +35,7 @@ export default function AppRouter() {
     setIsAuthenticated(token === 'authenticated');
 
     window.addEventListener('popstate', handlePopState);
-    
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   // Handle Stripe payment subdomain (pay.streamstickpro.com)
@@ -157,15 +119,6 @@ export default function AppRouter() {
   // SEO Ads routing - /ads/[slug]
   if (currentPath.startsWith('/ads/') && currentPath !== '/ads/') {
     return <SEOAdPage />;
-  }
-
-  // Analytics admin route - requires authentication
-  if (currentPath === '/admin/analytics' || currentPath === '/admin/analytics/') {
-    if (isAuthenticated) {
-      return <AnalyticsAdmin />;
-    }
-    window.location.href = '/admin';
-    return null;
   }
 
   return <App />;
