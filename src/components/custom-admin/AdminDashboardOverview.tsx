@@ -424,6 +424,11 @@ export default function AdminDashboardOverview() {
           </div>
         </div>
       </div>
+
+      {/* Live Visitor Statistics */}
+      <div className="mt-8">
+        <LiveVisitorStatistics />
+      </div>
     </div>
   );
 }
