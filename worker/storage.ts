@@ -365,6 +365,7 @@ export function createStorage(config: StorageConfig) {
       totalVisitors: number;
       todayVisitors: number;
       weekVisitors: number;
+      monthVisitors: number;
       onlineNow: number;
       recentVisitors: Visitor[];
     }> {
@@ -372,6 +373,7 @@ export function createStorage(config: StorageConfig) {
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const monthAgo = new Date(now.getFullYear(), now.getMonth(), 1);
         const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
 
         // Use existing supabase client (already configured with service key)
@@ -398,6 +400,7 @@ export function createStorage(config: StorageConfig) {
         const totalVisitors = visitors.length;
         const todayVisitors = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= today).length;
         const weekVisitors = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= weekAgo).length;
+        const monthVisitors = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= monthAgo).length;
         const onlineNow = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= fiveMinutesAgo).length;
         const recentVisitors = visitors.slice(0, 50);
 
@@ -405,6 +408,7 @@ export function createStorage(config: StorageConfig) {
           totalVisitors,
           todayVisitors,
           weekVisitors,
+          monthVisitors,
           onlineNow,
           recentCount: recentVisitors.length
         });
@@ -413,6 +417,7 @@ export function createStorage(config: StorageConfig) {
           totalVisitors,
           todayVisitors,
           weekVisitors,
+          monthVisitors,
           onlineNow,
           recentVisitors,
         };
@@ -422,6 +427,7 @@ export function createStorage(config: StorageConfig) {
           totalVisitors: 0,
           todayVisitors: 0,
           weekVisitors: 0,
+          monthVisitors: 0,
           onlineNow: 0,
           recentVisitors: [],
         };
