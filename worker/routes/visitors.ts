@@ -147,8 +147,22 @@ export function createVisitorRoutes() {
   // Uses service role key internally, so no auth needed
   app.get('/admin/stats', async (c) => {
     try {
+      console.log('[VISITOR_STATS] Endpoint called');
+      
+      if (!c.env.VITE_SUPABASE_URL) {
+        return c.json({ error: 'Supabase URL not configured' }, 500);
+      }
+      
       const storage = getStorage(c.env);
+      console.log('[VISITOR_STATS] Storage initialized');
+      
       const stats = await storage.getVisitorStats();
+      console.log('[VISITOR_STATS] Stats retrieved:', {
+        total: stats.totalVisitors,
+        today: stats.todayVisitors,
+        week: stats.weekVisitors,
+        month: stats.monthVisitors
+      });
       
       // Enhance with additional analytics
       // Use service key explicitly to bypass RLS
@@ -194,12 +208,22 @@ export function createVisitorRoutes() {
         countryBreakdown: topCountries, // alias for compatibility
       };
       
+      console.log('[VISITOR_STATS] Returning response with', {
+        totalVisitors: finalStats.totalVisitors,
+        recentCount: finalStats.recentVisitors?.length || 0
+      });
+      
       return c.json({
         data: finalStats
       });
     } catch (error: any) {
-      console.error("Error fetching visitor stats:", error);
-      return c.json({ error: "Failed to fetch visitor stats", details: error.message }, 500);
+      console.error("[VISITOR_STATS] Error fetching visitor stats:", error);
+      console.error("[VISITOR_STATS] Error stack:", error.stack);
+      return c.json({ 
+        error: "Failed to fetch visitor stats", 
+        details: error.message,
+        stack: error.stack 
+      }, 500);
     }
   });
 
