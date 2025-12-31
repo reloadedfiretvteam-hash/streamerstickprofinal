@@ -5,6 +5,7 @@ import {
   Mail, FileText, Tag, Activity, CheckCircle,
   AlertCircle, Clock, Star, Zap
 } from 'lucide-react';
+import LiveVisitorStatistics from './LiveVisitorStatistics';
 
 interface Stats {
   totalProducts: number;
