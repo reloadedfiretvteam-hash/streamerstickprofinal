@@ -31,15 +31,18 @@ export default function VisitorTracker() {
 
   // Also track when location changes (for SPA navigation)
   useEffect(() => {
+    let lastTrackedPath = window.location.pathname + window.location.search + window.location.hash;
+    sessionStorage.setItem('last_tracked_path', lastTrackedPath);
+    
     const interval = setInterval(() => {
       const currentPath = window.location.pathname + window.location.search + window.location.hash;
-      const lastPath = sessionStorage.getItem('last_tracked_path');
       
-      if (currentPath !== lastPath) {
+      if (currentPath !== lastTrackedPath) {
         trackVisitor();
+        lastTrackedPath = currentPath;
         sessionStorage.setItem('last_tracked_path', currentPath);
       }
-    }, 1000); // Check every second for path changes
+    }, 2000); // Check every 2 seconds for path changes (reduced frequency)
 
     return () => clearInterval(interval);
   }, []);
