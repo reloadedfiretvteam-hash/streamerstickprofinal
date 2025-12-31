@@ -286,9 +286,14 @@ function DashboardOverview({ setActiveView }: { setActiveView: (view: string) =>
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-xl shadow-md p-6">
+      <div className="bg-white rounded-xl shadow-md p-6 mb-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Activity</h2>
         <p className="text-gray-600">Activity tracking coming soon...</p>
+      </div>
+
+      {/* Live Visitor Statistics */}
+      <div className="mt-8">
+        <LiveVisitorStatistics />
       </div>
     </div>
   );
