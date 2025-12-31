@@ -41,45 +41,90 @@ export default function AppRouter() {
 
   // Handle Stripe payment subdomain (pay.streamstickpro.com)
   if (isStripePaymentHost()) {
-    return <StripeSecureCheckoutPage />;
+    return (
+      <>
+        <VisitorTracker />
+        <StripeSecureCheckoutPage />
+      </>
+    );
   }
 
   if (currentPath === '/shop' || currentPath === '/shop/') {
-    return <ShopPage />;
+    return (
+      <>
+        <VisitorTracker />
+        <ShopPage />
+      </>
+    );
   }
 
   // Fire Sticks page route
   if (currentPath === '/fire-sticks' || currentPath === '/fire-sticks/') {
-    return <FireSticksPage />;
+    return (
+      <>
+        <VisitorTracker />
+        <FireSticksPage />
+      </>
+    );
   }
 
   // IPTV Services page route
   if (currentPath === '/iptv-services' || currentPath === '/iptv-services/') {
-    return <IPTVServicesPage />;
+    return (
+      <>
+        <VisitorTracker />
+        <IPTVServicesPage />
+      </>
+    );
   }
 
   if (currentPath === '/checkout' || currentPath === '/checkout/') {
-    return <CompleteCheckoutPage />;
+    return (
+      <>
+        <VisitorTracker />
+        <CompleteCheckoutPage />
+      </>
+    );
   }
 
   // Legacy checkout route
   if (currentPath === '/old-checkout' || currentPath === '/old-checkout/') {
-    return <NewCheckoutPage />;
+    return (
+      <>
+        <VisitorTracker />
+        <NewCheckoutPage />
+      </>
+    );
   }
 
   // Secure/Shadow checkout route - uses shadow products for Carnage/compliance
   if (currentPath === '/secure-checkout' || currentPath === '/secure-checkout/') {
-    return <SecureCheckoutPage />;
+    return (
+      <>
+        <VisitorTracker />
+        <SecureCheckoutPage />
+      </>
+    );
   }
 
   // Stripe checkout route - /stripe-checkout or /stripe-checkout/:productId
   if (currentPath === '/stripe-checkout' || currentPath === '/stripe-checkout/' || currentPath.startsWith('/stripe-checkout/')) {
-    return <StripeSecureCheckoutPage />;
+    return (
+      <>
+        <VisitorTracker />
+        <StripeSecureCheckoutPage />
+      </>
+    );
   }
 
   if (currentPath === '/custom-admin/dashboard') {
     if (isAuthenticated) {
-      return <RealAdminDashboard />;
+      return (
+        <>
+          <VisitorTracker />
+          <RealAdminDashboard />
+        </>
+      );
     }
     window.location.href = '/';
     return null;
@@ -89,32 +134,67 @@ export default function AppRouter() {
   if (currentPath === '/admin' || currentPath === '/admin/' || currentPath === '/admin/dashboard' ||
       currentPath === '/custom-admin' || currentPath === '/custom-admin/') {
     if (isAuthenticated) {
-      return <RealAdminDashboard />;
+      return (
+        <>
+          <VisitorTracker />
+          <RealAdminDashboard />
+        </>
+      );
     }
-    return <UnifiedAdminLogin />;
+    return (
+      <>
+        <VisitorTracker />
+        <UnifiedAdminLogin />
+      </>
+    );
   }
 
   if (currentPath === '/track-order' || currentPath === '/track-order/') {
-    return <OrderTracking />;
+    return (
+      <>
+        <VisitorTracker />
+        <OrderTracking />
+      </>
+    );
   }
 
   if (currentPath === '/faq' || currentPath === '/faq/') {
-    return <FAQPage />;
+    return (
+      <>
+        <VisitorTracker />
+        <FAQPage />
+      </>
+    );
   }
 
   // Stripe connection test page
   if (currentPath === '/test-stripe' || currentPath === '/test-stripe/') {
-    return <StripeConnectionTest />;
+    return (
+      <>
+        <VisitorTracker />
+        <StripeConnectionTest />
+      </>
+    );
   }
 
   // Blog post routing
   if (currentPath.startsWith('/blog/tag/') && currentPath !== '/blog/tag/') {
     // Tag page - will be handled by a new component or EnhancedBlogPost
-    return <EnhancedBlogPost />;
+    return (
+      <>
+        <VisitorTracker />
+        <EnhancedBlogPost />
+      </>
+    );
   }
 
   if (currentPath.startsWith('/blog/') && currentPath !== '/blog/') {
-    return <EnhancedBlogPost />;
+    return (
+      <>
+        <VisitorTracker />
+        <EnhancedBlogPost />
+      </>
+    );
   }
 
   // SEO Ads routing - /ads/[slug]
