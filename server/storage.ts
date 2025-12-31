@@ -290,12 +290,14 @@ export class DatabaseStorage implements IStorage {
     totalVisitors: number;
     todayVisitors: number;
     weekVisitors: number;
+    monthVisitors: number;
     onlineNow: number;
     recentVisitors: Visitor[];
   }> {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(now.getFullYear(), now.getMonth(), 1);
     const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
 
     const allVisitors = await db.select().from(visitors).orderBy(desc(visitors.createdAt)).limit(5000);
@@ -303,6 +305,7 @@ export class DatabaseStorage implements IStorage {
     const totalVisitors = allVisitors.length;
     const todayVisitors = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= today).length;
     const weekVisitors = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= weekAgo).length;
+    const monthVisitors = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= monthAgo).length;
     const onlineNow = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= fiveMinutesAgo).length;
     const recentVisitors = allVisitors.slice(0, 50);
 
@@ -310,6 +313,7 @@ export class DatabaseStorage implements IStorage {
       totalVisitors,
       todayVisitors,
       weekVisitors,
+      monthVisitors,
       onlineNow,
       recentVisitors,
     };
