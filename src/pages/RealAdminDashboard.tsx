@@ -19,6 +19,7 @@ import AdvancedAnalytics from '../components/custom-admin/AdvancedAnalytics';
 import CategoryManager from '../components/custom-admin/CategoryManager';
 import BulkEmailManager from '../components/custom-admin/BulkEmailManager';
 import SiteSettingsManager from '../components/custom-admin/SiteSettingsManager';
+import LiveVisitorStatistics from '../components/custom-admin/LiveVisitorStatistics';
 
 export default function RealAdminDashboard() {
   const [activeView, setActiveView] = useState('dashboard');
