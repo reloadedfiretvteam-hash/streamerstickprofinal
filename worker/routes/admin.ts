@@ -521,9 +521,11 @@ export function createAdminRoutes() {
             count,
           })),
           liveVisitors,
-          monthVisitors: visitors.filter((v: any) => 
+          monthVisitors: stats.monthVisitors || visitors.filter((v: any) => 
             v.created_at && new Date(v.created_at) >= monthAgo
           ).length,
+          // Ensure topCountries matches original format from server/geoLocationService.ts
+          // Original returns {name, count}, keep that format for compatibility
         }
       });
     } catch (error: any) {
