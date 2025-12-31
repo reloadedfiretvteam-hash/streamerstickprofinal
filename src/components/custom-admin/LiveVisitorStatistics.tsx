@@ -84,14 +84,30 @@ export default function LiveVisitorStatistics() {
         count: c.count || 0
       })).slice(0, 5);
 
-      // Map recent visitors from API data (API returns camelCase, keep it camelCase)
-      const recentVisitors = (apiData.recentVisitors || []).slice(0, 10).map((v: any) => ({
-        id: v.id || 'unknown',
-        page_url: v.pageUrl || v.page_url || '/',
-        referrer: v.referrer || null,
-        user_agent: v.userAgent || v.user_agent || 'Unknown',
-        created_at: v.createdAt || v.created_at || new Date().toISOString()
-      }));
+      // Map recent visitors from API data
+      // Drizzle returns camelCase (pageUrl, userAgent, createdAt)
+      // Component expects snake_case (page_url, user_agent, created_at)
+      const recentVisitors = (apiData.recentVisitors || []).slice(0, 10).map((v: any) => {
+        // Handle createdAt - Drizzle may return Date object or string
+        let createdAtStr: string;
+        if (v.createdAt) {
+          createdAtStr = v.createdAt instanceof Date 
+            ? v.createdAt.toISOString() 
+            : (typeof v.createdAt === 'string' ? v.createdAt : new Date().toISOString());
+        } else if (v.created_at) {
+          createdAtStr = typeof v.created_at === 'string' ? v.created_at : new Date().toISOString();
+        } else {
+          createdAtStr = new Date().toISOString();
+        }
+        
+        return {
+          id: v.id || 'unknown',
+          page_url: v.pageUrl || v.page_url || '/',
+          referrer: v.referrer || null,
+          user_agent: v.userAgent || v.user_agent || 'Unknown',
+          created_at: createdAtStr
+        };
+      });
 
       setStats({
         totalVisitors: apiData.totalVisitors || 0,
