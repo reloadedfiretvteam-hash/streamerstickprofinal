@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Users, Eye, Globe, Clock, TrendingUp, MapPin, Monitor, Smartphone, Tablet, Activity } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
 
 interface VisitorStats {
   totalVisitors: number;
@@ -47,120 +46,76 @@ export default function LiveVisitorStatistics() {
   const loadStats = async () => {
     try {
       setLoading(true);
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
-
-      // Try multiple visitor table names
-      let visitorsData: any[] = [];
-      let error = null;
-
-      // Try 'visitors' table first
-      const { data: visitors1, error: err1 } = await supabase
-        .from('visitors')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!err1 && visitors1) {
-        visitorsData = visitors1;
-      } else {
-        // Try 'visitor_analytics' table
-        const { data: visitors2, error: err2 } = await supabase
-          .from('visitor_analytics')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (!err2 && visitors2) {
-          visitorsData = visitors2.map(v => ({
-            ...v,
-            page_url: v.page_view || '/',
-            referrer: v.referrer || null,
-            user_agent: v.device_type || 'Unknown'
-          }));
-        } else {
-          // Try 'visitor_tracking' table
-          const { data: visitors3, error: err3 } = await supabase
-            .from('visitor_tracking')
-            .select('*')
-            .order('entry_time', { ascending: false });
-
-          if (!err3 && visitors3) {
-            visitorsData = visitors3.map(v => ({
-              ...v,
-              page_url: v.landing_page || '/',
-              referrer: v.referrer_url || null,
-              user_agent: v.user_agent || 'Unknown',
-              created_at: v.entry_time
-            }));
-          } else {
-            error = err3;
-          }
-        }
+      
+      // Use the API endpoint instead of direct Supabase query (bypasses RLS)
+      const response = await fetch('/api/admin/visitors/stats');
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch visitor stats: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (!result.data) {
+        throw new Error('No data returned from API');
       }
 
-      if (error) {
-        console.error('Error loading visitors:', error);
-        setLoading(false);
-        return;
-      }
-
-      // Calculate statistics
-      const totalVisitors = visitorsData.length;
-      const todayVisitors = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= today).length;
-      const weekVisitors = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= weekAgo).length;
-      const monthVisitors = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= monthAgo).length;
-      const onlineNow = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= fiveMinutesAgo).length;
-
-      // Device breakdown
+      const apiData = result.data;
+      
+      // Calculate device breakdown from recent visitors
       const deviceBreakdown = {
-        desktop: visitorsData.filter(v => {
-          const ua = (v.user_agent || '').toLowerCase();
+        desktop: (apiData.recentVisitors || []).filter((v: any) => {
+          const ua = (v.userAgent || '').toLowerCase();
           return !ua.includes('mobile') && !ua.includes('tablet');
         }).length,
-        mobile: visitorsData.filter(v => {
-          const ua = (v.user_agent || '').toLowerCase();
+        mobile: (apiData.recentVisitors || []).filter((v: any) => {
+          const ua = (v.userAgent || '').toLowerCase();
           return ua.includes('mobile') && !ua.includes('tablet');
         }).length,
-        tablet: visitorsData.filter(v => {
-          const ua = (v.user_agent || '').toLowerCase();
+        tablet: (apiData.recentVisitors || []).filter((v: any) => {
+          const ua = (v.userAgent || '').toLowerCase();
           return ua.includes('tablet');
         }).length
       };
 
-      // Top countries (if available)
-      const countryCounts: Record<string, number> = {};
-      visitorsData.forEach(v => {
-        const country = v.country || 'Unknown';
-        countryCounts[country] = (countryCounts[country] || 0) + 1;
-      });
-      const topCountries = Object.entries(countryCounts)
-        .map(([country, count]) => ({ country, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
+      // Map top countries from API data
+      const topCountries = (apiData.topCountries || apiData.countryBreakdown || []).map((c: any) => ({
+        country: c.country || c.name || 'Unknown',
+        count: c.count || 0
+      })).slice(0, 5);
 
-      // Recent visitors (last 10)
-      const recentVisitors = visitorsData.slice(0, 10).map(v => ({
-        id: v.id || v.visitor_id || 'unknown',
-        page_url: v.page_url || v.page_view || v.landing_page || '/',
-        referrer: v.referrer || v.referrer_url || null,
-        user_agent: v.user_agent || 'Unknown',
-        created_at: v.created_at || v.entry_time || new Date().toISOString()
+      // Map recent visitors from API data
+      const recentVisitors = (apiData.recentVisitors || []).slice(0, 10).map((v: any) => ({
+        id: v.id || 'unknown',
+        page_url: v.pageUrl || '/',
+        referrer: v.referrer || null,
+        user_agent: v.userAgent || 'Unknown',
+        created_at: v.createdAt || new Date().toISOString()
       }));
 
       setStats({
-        totalVisitors,
-        todayVisitors,
-        weekVisitors,
-        monthVisitors,
-        onlineNow,
+        totalVisitors: apiData.totalVisitors || 0,
+        todayVisitors: apiData.todayVisitors || 0,
+        weekVisitors: apiData.weekVisitors || 0,
+        monthVisitors: apiData.monthVisitors || 0,
+        onlineNow: apiData.onlineNow || 0,
         topCountries,
         deviceBreakdown,
         recentVisitors
       });
     } catch (error) {
       console.error('Error loading visitor statistics:', error);
+      // Set empty stats on error instead of keeping old data
+      setStats({
+        totalVisitors: 0,
+        todayVisitors: 0,
+        weekVisitors: 0,
+        monthVisitors: 0,
+        onlineNow: 0,
+        topCountries: [],
+        deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
+        recentVisitors: []
+      });
     } finally {
       setLoading(false);
     }
