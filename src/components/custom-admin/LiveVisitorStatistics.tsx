@@ -47,13 +47,9 @@ export default function LiveVisitorStatistics() {
     try {
       setLoading(true);
       
-      // Use the API endpoint - try /api/admin/visitors/stats first (requires auth but more reliable)
-      // Fallback to /api/track/admin/stats if that fails
-      let response = await fetch('/api/admin/visitors/stats');
-      if (!response.ok && response.status === 401) {
-        // If auth fails, try the track endpoint
-        response = await fetch('/api/track/admin/stats');
-      }
+      // Use the API endpoint - /api/track/admin/stats doesn't require auth
+      // It uses service role key internally, so it's safe
+      const response = await fetch('/api/track/admin/stats');
       
       if (!response.ok) {
         throw new Error(`Failed to fetch visitor stats: ${response.status}`);
