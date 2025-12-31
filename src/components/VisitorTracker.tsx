@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { supabase } from '../lib/supabase';
 
 export default function VisitorTracker() {
   useEffect(() => {
@@ -9,37 +8,25 @@ export default function VisitorTracker() {
   const trackVisitor = async () => {
     try {
       const sessionId = getOrCreateSessionId();
-      getOrCreateVisitorId();
+      const pageUrl = window.location.href;
+      const referrer = document.referrer || null;
+      const userAgent = navigator.userAgent;
 
-      const { data, error } = await supabase
-        .from('visitors')
-        .insert({
-          session_id: sessionId,
-          page_url: window.location.href,
-          referrer: document.referrer || null,
-          user_agent: navigator.userAgent
+      // Call the API endpoint instead of inserting directly to Supabase
+      await fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          pageUrl,
+          referrer,
+          userAgent
         })
-        .select()
-        .maybeSingle();
-
-      if (!error && data) {
-        sessionStorage.setItem('visitor_tracking_id', data.id);
-        trackPageView(data.id, sessionId);
-      }
-
-      window.addEventListener('beforeunload', () => {
-        updateSessionEnd(data?.id);
       });
-
     } catch (error) {
+      // Silently fail - visitor tracking shouldn't break the site
       console.error('Visitor tracking error:', error);
     }
-  };
-
-  const trackPageView = async (_visitorTrackingId: string, _sessionId: string) => {
-  };
-
-  const updateSessionEnd = async (_visitorTrackingId: string | undefined) => {
   };
 
   const getOrCreateSessionId = (): string => {
@@ -49,15 +36,6 @@ export default function VisitorTracker() {
       sessionStorage.setItem('session_id', sessionId);
     }
     return sessionId;
-  };
-
-  const getOrCreateVisitorId = (): string => {
-    let visitorId = localStorage.getItem('visitor_id');
-    if (!visitorId) {
-      visitorId = `visitor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem('visitor_id', visitorId);
-    }
-    return visitorId;
   };
 
   return null;
