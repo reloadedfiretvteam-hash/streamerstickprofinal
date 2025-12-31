@@ -47,10 +47,10 @@ export default function LiveVisitorStatistics() {
     try {
       setLoading(true);
       
-      // Use the API endpoint - /api/track/admin/stats doesn't require auth
-      // It uses service role key internally, so it's safe
-      console.log('[LiveVisitorStatistics] Fetching stats from /api/track/admin/stats');
-      const response = await fetch('/api/track/admin/stats');
+      // Use the original working endpoint - /api/admin/visitors/stats
+      // This is the Express server route that was working 6 days ago
+      console.log('[LiveVisitorStatistics] Fetching stats from /api/admin/visitors/stats');
+      const response = await fetch('/api/admin/visitors/stats');
       
       console.log('[LiveVisitorStatistics] Response status:', response.status);
       
@@ -86,7 +86,9 @@ export default function LiveVisitorStatistics() {
         }).length
       };
 
-      // Map top countries from API data (getGeoStats returns {name, count}, component expects {country, count})
+      // Map top countries from API data 
+      // Original server/geoLocationService.ts returns {name, count} format
+      // Component expects {country, count} format
       const topCountries = (apiData.topCountries || apiData.countryBreakdown || []).map((c: any) => ({
         country: c.country || c.name || 'Unknown',
         count: c.count || 0
