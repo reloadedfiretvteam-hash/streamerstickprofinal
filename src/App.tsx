@@ -200,7 +200,7 @@ function App() {
       <SEOHead />
       <GoogleAnalytics />
       <StructuredData />
-      <VisitorTracker />
+      {/* VisitorTracker moved to AppRouter to ensure it tracks all routes */}
       <div className="min-h-screen bg-gray-900">
         <Navigation
           cartItemCount={cartItemCount}

@@ -78,19 +78,19 @@ export default function LiveVisitorStatistics() {
         }).length
       };
 
-      // Map top countries from API data
+      // Map top countries from API data (getGeoStats returns {name, count}, component expects {country, count})
       const topCountries = (apiData.topCountries || apiData.countryBreakdown || []).map((c: any) => ({
         country: c.country || c.name || 'Unknown',
         count: c.count || 0
       })).slice(0, 5);
 
-      // Map recent visitors from API data
+      // Map recent visitors from API data (API returns camelCase, keep it camelCase)
       const recentVisitors = (apiData.recentVisitors || []).slice(0, 10).map((v: any) => ({
         id: v.id || 'unknown',
-        page_url: v.pageUrl || '/',
+        page_url: v.pageUrl || v.page_url || '/',
         referrer: v.referrer || null,
-        user_agent: v.userAgent || 'Unknown',
-        created_at: v.createdAt || new Date().toISOString()
+        user_agent: v.userAgent || v.user_agent || 'Unknown',
+        created_at: v.createdAt || v.created_at || new Date().toISOString()
       }));
 
       setStats({
