@@ -186,12 +186,16 @@ export function createVisitorRoutes() {
         .slice(0, 10)
         .map(([name, count]) => ({ name, count }));
       
+      // Ensure monthVisitors is included (storage.getVisitorStats should return it)
+      const finalStats = {
+        ...stats,
+        monthVisitors: stats.monthVisitors || 0, // Ensure it exists
+        topCountries,
+        countryBreakdown: topCountries, // alias for compatibility
+      };
+      
       return c.json({
-        data: {
-          ...stats,
-          topCountries,
-          countryBreakdown: topCountries, // alias for compatibility
-        }
+        data: finalStats
       });
     } catch (error: any) {
       console.error("Error fetching visitor stats:", error);
