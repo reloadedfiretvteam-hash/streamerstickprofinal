@@ -49,15 +49,22 @@ export default function LiveVisitorStatistics() {
       
       // Use the API endpoint - /api/track/admin/stats doesn't require auth
       // It uses service role key internally, so it's safe
+      console.log('[LiveVisitorStatistics] Fetching stats from /api/track/admin/stats');
       const response = await fetch('/api/track/admin/stats');
       
+      console.log('[LiveVisitorStatistics] Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error(`Failed to fetch visitor stats: ${response.status}`);
+        const errorText = await response.text();
+        console.error('[LiveVisitorStatistics] Response error:', response.status, errorText);
+        throw new Error(`Failed to fetch visitor stats: ${response.status} - ${errorText}`);
       }
       
       const result = await response.json();
+      console.log('[LiveVisitorStatistics] Received data:', result);
       
       if (!result.data) {
+        console.error('[LiveVisitorStatistics] No data in response:', result);
         throw new Error('No data returned from API');
       }
 
@@ -120,8 +127,10 @@ export default function LiveVisitorStatistics() {
         deviceBreakdown,
         recentVisitors
       });
-    } catch (error) {
-      console.error('Error loading visitor statistics:', error);
+      console.log('[LiveVisitorStatistics] Stats updated successfully');
+    } catch (error: any) {
+      console.error('[LiveVisitorStatistics] Error loading visitor statistics:', error);
+      console.error('[LiveVisitorStatistics] Error details:', error.message, error.stack);
       // Set empty stats on error instead of keeping old data
       setStats({
         totalVisitors: 0,
