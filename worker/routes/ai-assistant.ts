@@ -1376,9 +1376,6 @@ async function executeDatabaseAction(action: any, env: Env): Promise<any> {
           message: `Available tables: orders, products, customers, blog_posts, seo_ads`,
           error: `Table '${action.table}' not recognized`
         };
-      } catch (error: any) {
-        return { error: `Database query failed: ${error.message}` };
-      }
 
       case 'analyze':
         try {
