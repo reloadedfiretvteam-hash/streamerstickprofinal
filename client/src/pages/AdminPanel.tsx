@@ -71,24 +71,16 @@ interface VisitorStats {
   totalVisitors: number;
   todayVisitors: number;
   weekVisitors: number;
+  monthVisitors: number;
   onlineNow: number;
+  topCountries: Array<{ country: string; count: number }>;
   deviceBreakdown: { desktop: number; mobile: number; tablet: number };
-  topCountries: Array<{ name: string; count: number }>;
-  topRegions: Array<{ name: string; count: number }>;
-  topCities: Array<{ name: string; count: number }>;
   recentVisitors: Array<{
     id: string;
-    pageUrl: string;
+    page_url: string;
     referrer: string | null;
-    userAgent: string;
-    ipAddress: string | null;
-    country: string | null;
-    countryCode: string | null;
-    region: string | null;
-    city: string | null;
-    timezone: string | null;
-    isProxy: boolean | null;
-    createdAt: string;
+    user_agent: string;
+    created_at: string;
   }>;
 }
 
@@ -287,11 +279,10 @@ export default function AdminPanel() {
     totalVisitors: 0,
     todayVisitors: 0,
     weekVisitors: 0,
+    monthVisitors: 0,
     onlineNow: 0,
-    deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
     topCountries: [],
-    topRegions: [],
-    topCities: [],
+    deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
     recentVisitors: []
   });
   const [loadingStats, setLoadingStats] = useState(true);
@@ -537,55 +528,118 @@ export default function AdminPanel() {
   const loadVisitorStats = async () => {
     try {
       setLoadingStats(true);
-      
-      const response = await authFetch('/api/admin/visitors/stats');
-      const result = await response.json();
-      
-      if (result.data) {
-        const { totalVisitors, todayVisitors, weekVisitors, onlineNow, recentVisitors, topCountries, topRegions, topCities } = result.data;
-        
-        const deviceBreakdown = {
-          desktop: recentVisitors.filter((v: any) => {
-            const ua = (v.userAgent || '').toLowerCase();
-            return !ua.includes('mobile') && !ua.includes('tablet');
-          }).length,
-          mobile: recentVisitors.filter((v: any) => {
-            const ua = (v.userAgent || '').toLowerCase();
-            return ua.includes('mobile') && !ua.includes('tablet');
-          }).length,
-          tablet: recentVisitors.filter((v: any) => {
-            const ua = (v.userAgent || '').toLowerCase();
-            return ua.includes('tablet');
-          }).length
-        };
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
 
-        const mappedRecentVisitors = recentVisitors.map((v: any) => ({
-          id: v.id || 'unknown',
-          pageUrl: v.pageUrl || '/',
-          referrer: v.referrer || null,
-          userAgent: v.userAgent || 'Unknown',
-          ipAddress: v.ipAddress || null,
-          country: v.country || null,
-          countryCode: v.countryCode || null,
-          region: v.region || null,
-          city: v.city || null,
-          timezone: v.timezone || null,
-          isProxy: v.isProxy || false,
-          createdAt: v.createdAt || new Date().toISOString()
-        }));
+      // Try multiple visitor table names
+      let visitorsData: any[] = [];
+      let error = null;
 
-        setVisitorStats({
-          totalVisitors,
-          todayVisitors,
-          weekVisitors,
-          onlineNow,
-          deviceBreakdown,
-          topCountries: topCountries || [],
-          topRegions: topRegions || [],
-          topCities: topCities || [],
-          recentVisitors: mappedRecentVisitors
-        });
+      // Try 'visitors' table first
+      const { data: visitors1, error: err1 } = await supabase
+        .from('visitors')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!err1 && visitors1) {
+        visitorsData = visitors1;
+      } else {
+        // Try 'visitor_analytics' table
+        const { data: visitors2, error: err2 } = await supabase
+          .from('visitor_analytics')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!err2 && visitors2) {
+          visitorsData = visitors2.map((v: any) => ({
+            ...v,
+            page_url: v.page_view || '/',
+            referrer: v.referrer || null,
+            user_agent: v.device_type || 'Unknown'
+          }));
+        } else {
+          // Try 'visitor_tracking' table
+          const { data: visitors3, error: err3 } = await supabase
+            .from('visitor_tracking')
+            .select('*')
+            .order('entry_time', { ascending: false });
+
+          if (!err3 && visitors3) {
+            visitorsData = visitors3.map((v: any) => ({
+              ...v,
+              page_url: v.landing_page || '/',
+              referrer: v.referrer_url || null,
+              user_agent: v.user_agent || 'Unknown',
+              created_at: v.entry_time
+            }));
+          } else {
+            error = err3;
+          }
+        }
       }
+
+      if (error) {
+        console.error('Error loading visitors:', error);
+        setLoadingStats(false);
+        return;
+      }
+
+      // Calculate statistics
+      const totalVisitors = visitorsData.length;
+      const todayVisitors = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= today).length;
+      const weekVisitors = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= weekAgo).length;
+      const monthVisitors = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= monthAgo).length;
+      const onlineNow = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= fiveMinutesAgo).length;
+
+      // Device breakdown
+      const deviceBreakdown = {
+        desktop: visitorsData.filter(v => {
+          const ua = (v.user_agent || '').toLowerCase();
+          return !ua.includes('mobile') && !ua.includes('tablet');
+        }).length,
+        mobile: visitorsData.filter(v => {
+          const ua = (v.user_agent || '').toLowerCase();
+          return ua.includes('mobile') && !ua.includes('tablet');
+        }).length,
+        tablet: visitorsData.filter(v => {
+          const ua = (v.user_agent || '').toLowerCase();
+          return ua.includes('tablet');
+        }).length
+      };
+
+      // Top countries (if available)
+      const countryCounts: Record<string, number> = {};
+      visitorsData.forEach(v => {
+        const country = v.country || 'Unknown';
+        countryCounts[country] = (countryCounts[country] || 0) + 1;
+      });
+      const topCountries = Object.entries(countryCounts)
+        .map(([country, count]) => ({ country, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+      // Recent visitors (last 10)
+      const recentVisitors = visitorsData.slice(0, 10).map(v => ({
+        id: v.id || v.visitor_id || 'unknown',
+        page_url: v.page_url || v.page_view || v.landing_page || '/',
+        referrer: v.referrer || v.referrer_url || null,
+        user_agent: v.user_agent || 'Unknown',
+        created_at: v.created_at || v.entry_time || new Date().toISOString()
+      }));
+
+      setVisitorStats({
+        totalVisitors,
+        todayVisitors,
+        weekVisitors,
+        monthVisitors,
+        onlineNow,
+        topCountries,
+        deviceBreakdown,
+        recentVisitors
+      });
     } catch (error) {
       console.error('Error loading visitor statistics:', error);
     } finally {
@@ -2030,72 +2084,59 @@ export default function AdminPanel() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="bg-gray-800 border-gray-700">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2 text-white text-lg">
-                      <Globe className="w-5 h-5 text-blue-400" />
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <Monitor className="w-5 h-5 text-orange-500" />
+                      Device Breakdown
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Monitor className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-300">Desktop</span>
+                      </div>
+                      <span className="font-semibold text-white">{visitorStats.deviceBreakdown.desktop}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Smartphone className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-300">Mobile</span>
+                      </div>
+                      <span className="font-semibold text-white">{visitorStats.deviceBreakdown.mobile}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Tablet className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-300">Tablet</span>
+                      </div>
+                      <span className="font-semibold text-white">{visitorStats.deviceBreakdown.tablet}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <Globe className="w-5 h-5 text-orange-500" />
                       Top Countries
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-3">
                     {visitorStats.topCountries.length > 0 ? (
-                      <div className="space-y-2">
-                        {visitorStats.topCountries.slice(0, 5).map((item, idx) => (
-                          <div key={idx} className="flex justify-between items-center">
-                            <span className="text-gray-300">{item.name}</span>
-                            <Badge variant="secondary" className="bg-blue-500/20 text-blue-300">{item.count}</Badge>
+                      visitorStats.topCountries.map((country, idx) => (
+                        <div key={idx} className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-gray-400" />
+                            <span className="text-gray-300">{country.country}</span>
                           </div>
-                        ))}
-                      </div>
+                          <span className="font-semibold text-white">{country.count}</span>
+                        </div>
+                      ))
                     ) : (
-                      <p className="text-gray-500 text-sm">No location data yet</p>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gray-800 border-gray-700">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2 text-white text-lg">
-                      <MapPin className="w-5 h-5 text-green-400" />
-                      Top States/Regions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {visitorStats.topRegions.length > 0 ? (
-                      <div className="space-y-2">
-                        {visitorStats.topRegions.slice(0, 5).map((item, idx) => (
-                          <div key={idx} className="flex justify-between items-center">
-                            <span className="text-gray-300">{item.name}</span>
-                            <Badge variant="secondary" className="bg-green-500/20 text-green-300">{item.count}</Badge>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 text-sm">No location data yet</p>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gray-800 border-gray-700">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2 text-white text-lg">
-                      <MapPin className="w-5 h-5 text-purple-400" />
-                      Top Cities
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {visitorStats.topCities.length > 0 ? (
-                      <div className="space-y-2">
-                        {visitorStats.topCities.slice(0, 5).map((item, idx) => (
-                          <div key={idx} className="flex justify-between items-center">
-                            <span className="text-gray-300">{item.name}</span>
-                            <Badge variant="secondary" className="bg-purple-500/20 text-purple-300">{item.count}</Badge>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 text-sm">No location data yet</p>
+                      <p className="text-gray-500 text-sm">No country data available</p>
                     )}
                   </CardContent>
                 </Card>
@@ -2107,16 +2148,12 @@ export default function AdminPanel() {
                     <Users className="w-5 h-5 text-orange-500" />
                     Recent Visitors
                   </CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Real-time visitor tracking with location data
-                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow className="border-gray-700">
-                          <TableHead className="text-gray-400">Location</TableHead>
                           <TableHead className="text-gray-400">Device</TableHead>
                           <TableHead className="text-gray-400">Page</TableHead>
                           <TableHead className="text-gray-400">Referrer</TableHead>
@@ -2125,42 +2162,26 @@ export default function AdminPanel() {
                       </TableHeader>
                       <TableBody>
                         {visitorStats.recentVisitors.length > 0 ? (
-                          visitorStats.recentVisitors.slice(0, 20).map((visitor, idx) => (
+                          visitorStats.recentVisitors.map((visitor, idx) => (
                             <TableRow key={idx} className="border-gray-700 hover:bg-gray-700/50">
                               <TableCell className="text-gray-300">
-                                <div className="flex items-center gap-2">
-                                  <Globe className="w-4 h-4 text-blue-400" />
-                                  <div className="flex flex-col">
-                                    <span className="text-sm font-medium">
-                                      {visitor.city || visitor.region || 'Unknown'}
-                                      {visitor.region && visitor.city ? `, ${visitor.region}` : ''}
-                                    </span>
-                                    <span className="text-xs text-gray-500">
-                                      {visitor.country || 'Unknown Country'}
-                                      {visitor.isProxy && <Badge variant="destructive" className="ml-2 text-xs py-0">VPN</Badge>}
-                                    </span>
-                                  </div>
+                                <div className="flex items-center gap-2 text-gray-300">
+                                  {getDeviceIcon(visitor.user_agent)}
+                                  <span className="text-sm truncate max-w-[150px]">{visitor.user_agent.substring(0, 30)}...</span>
                                 </div>
                               </TableCell>
-                              <TableCell className="text-gray-300">
-                                <div className="flex items-center gap-2">
-                                  {getDeviceIcon(visitor.userAgent)}
-                                  <span className="text-sm truncate max-w-[100px]">
-                                    {visitor.userAgent.includes('Mobile') ? 'Mobile' : 
-                                     visitor.userAgent.includes('Tablet') ? 'Tablet' : 'Desktop'}
-                                  </span>
-                                </div>
+                              <TableCell className="text-gray-300">{visitor.page_url.substring(0, 40)}</TableCell>
+                              <TableCell className="text-gray-400">
+                                <span className="text-sm">
+                                  {visitor.referrer ? visitor.referrer.substring(0, 30) : 'Direct'}
+                                </span>
                               </TableCell>
-                              <TableCell className="text-gray-300 max-w-[150px] truncate">{visitor.pageUrl}</TableCell>
-                              <TableCell className="text-gray-400 max-w-[120px] truncate">
-                                {visitor.referrer ? visitor.referrer.replace(/^https?:\/\//, '').split('/')[0] : 'Direct'}
-                              </TableCell>
-                              <TableCell className="text-gray-400 whitespace-nowrap">{formatTime(visitor.createdAt)}</TableCell>
+                              <TableCell className="text-gray-400 whitespace-nowrap">{formatTime(visitor.created_at)}</TableCell>
                             </TableRow>
                           ))
                         ) : (
                           <TableRow>
-                            <TableCell colSpan={5} className="py-8 text-center text-gray-400">
+                            <TableCell colSpan={4} className="py-8 text-center text-gray-400">
                               No visitors tracked yet. Visitors will appear here as they browse your site.
                             </TableCell>
                           </TableRow>
