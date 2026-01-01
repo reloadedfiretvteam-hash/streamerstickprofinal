@@ -4,6 +4,7 @@ import { ShoppingCart, Search, Filter, Star, CreditCard } from 'lucide-react';
 import Footer from '../components/Footer';
 import CustomerReviewsSection from '../components/CustomerReviewsSection';
 import ValidatedImage from '../components/ValidatedImage';
+import Navigation from '../components/Navigation';
 import { handleBuyClick } from '../utils/paymentLinks';
 
 // Fallback images
@@ -88,8 +89,10 @@ export default function ShopPage() {
               imageUrl = getStorageUrl('images', 'firestick 4k max.jpg');
             } else if (product.name?.toLowerCase().includes('4k')) {
               imageUrl = getStorageUrl('images', 'firestick 4k.jpg');
+            } else if (product.name?.toLowerCase().includes('original')) {
+              imageUrl = getStorageUrl('images', 'firestick original.jpg');
             } else {
-              imageUrl = getStorageUrl('images', 'firestick hd.jpg');
+              imageUrl = getStorageUrl('images', 'firestick original.jpg');
             }
           } else {
             imageUrl = getStorageUrl('images', 'iptv-subscription.jpg');
@@ -219,6 +222,8 @@ export default function ShopPage() {
     localStorage.setItem('cart', JSON.stringify(newCart));
   };
 
+  const [addedToCartMessage, setAddedToCartMessage] = useState<string | null>(null);
+
   const addToCart = (product: Product) => {
     const existing = cart.find(item => item.product.id === product.id);
     let newCart;
@@ -234,8 +239,8 @@ export default function ShopPage() {
     }
 
     saveCart(newCart);
-    // Redirect to checkout immediately
-    window.location.href = '/checkout';
+    setAddedToCartMessage(`${product.name} added to cart!`);
+    setTimeout(() => setAddedToCartMessage(null), 3000);
   };
 
   const filterAndSortProducts = () => {
@@ -286,24 +291,37 @@ export default function ShopPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Navigation Header */}
+      <Navigation 
+        cartItemCount={cartItemCount} 
+        onCartClick={() => window.location.href = '/checkout'} 
+      />
+
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white py-8">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">Shop All Products</h1>
-              <p className="text-orange-100">Browse our complete collection</p>
-            </div>
-            <a
-              href="/checkout"
-              className="bg-white text-orange-600 px-6 py-3 rounded-lg font-semibold hover:bg-orange-50 transition-all flex items-center gap-2"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              Cart ({cartItemCount})
-            </a>
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-2">Shop All Products</h1>
+            <p className="text-orange-100 text-lg">Browse our complete collection of Fire Sticks and IPTV subscriptions</p>
           </div>
         </div>
       </div>
+
+      {/* Added to Cart Notification */}
+      {addedToCartMessage && (
+        <div className="fixed top-20 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-in-right">
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="w-5 h-5" />
+            <span>{addedToCartMessage}</span>
+            <a
+              href="/checkout"
+              className="ml-4 underline font-semibold hover:text-green-200"
+            >
+              View Cart →
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Filters & Search */}
       <div className="bg-white shadow-sm border-b sticky top-0 z-10">

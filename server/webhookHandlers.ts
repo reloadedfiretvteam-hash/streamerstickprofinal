@@ -42,12 +42,31 @@ export class WebhookHandlers {
     console.log(`Processing webhook event: ${event.type}`);
 
     switch (event.type) {
-      case 'checkout.session.completed':
-        await WebhookHandlers.handleCheckoutComplete(event.data.object);
+      case 'checkout.session.completed': {
+        const session = event.data.object;
+        
+        // First, send payment confirmation emails via dedicated handler (for paid purchases only)
+        // This uses Resend and only handles paid purchases, not free trials
+        try {
+          await handlePaidCheckoutSession(session);
+        } catch (error: any) {
+          console.error(`[WEBHOOK] Error in payment email handler:`, error.message);
+          // Continue with order processing even if email fails
+        }
+        
+        // Then, handle order updates and credentials (existing logic)
+        await WebhookHandlers.handleCheckoutComplete(session);
         break;
-      case 'payment_intent.succeeded':
-        await WebhookHandlers.handlePaymentSucceeded(event.data.object);
+      }
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data.object;
+        
+        // Handle order updates and confirmation emails
+        // EmailService.sendOrderConfirmation is called inside handlePaymentSucceeded
+        // It uses realProductName from the database order (not metadata/URLs)
+        await WebhookHandlers.handlePaymentSucceeded(paymentIntent);
         break;
+      }
       case 'payment_intent.payment_failed':
         await WebhookHandlers.handlePaymentFailed(event.data.object);
         break;
@@ -147,11 +166,19 @@ export class WebhookHandlers {
     const updatedOrder = await storage.getOrder(order.id);
     if (updatedOrder) {
       try {
-        await EmailService.sendOrderConfirmation(updatedOrder);
-        await EmailService.sendOwnerOrderNotification(updatedOrder);
-        await EmailService.scheduleCredentialsEmail(updatedOrder.id);
+        // Only send emails for paid purchases (not free trials)
+        if (session.payment_status === 'paid' && session.amount_total && session.amount_total > 0) {
+          // Send order confirmation email to customer (uses realProductName from database)
+          await EmailService.sendOrderConfirmation(updatedOrder);
+          
+          // Send detailed owner notification
+          await EmailService.sendOwnerOrderNotification(updatedOrder);
+          
+          // Schedule credentials email (separate from payment confirmation)
+          await EmailService.scheduleCredentialsEmail(updatedOrder.id);
+        }
       } catch (error) {
-        console.error('Error sending emails:', error);
+        console.error('Error sending confirmation emails:', error);
       }
     }
   }
@@ -173,11 +200,19 @@ export class WebhookHandlers {
       const updatedOrder = await storage.getOrder(order.id);
       if (updatedOrder) {
         try {
-          await EmailService.sendOrderConfirmation(updatedOrder);
-          await EmailService.sendOwnerOrderNotification(updatedOrder);
-          await EmailService.scheduleCredentialsEmail(updatedOrder.id);
+          // Only send emails for paid purchases
+          if (paymentIntent.amount_received && paymentIntent.amount_received > 0) {
+            // Send order confirmation email to customer (uses realProductName from database)
+            await EmailService.sendOrderConfirmation(updatedOrder);
+            
+            // Send detailed owner notification
+            await EmailService.sendOwnerOrderNotification(updatedOrder);
+            
+            // Schedule credentials email (separate from payment confirmation)
+            await EmailService.scheduleCredentialsEmail(updatedOrder.id);
+          }
         } catch (error) {
-          console.error('Error sending emails:', error);
+          console.error('Error sending confirmation emails:', error);
         }
       }
     }

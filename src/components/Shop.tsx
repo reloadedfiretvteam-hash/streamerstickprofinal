@@ -209,62 +209,21 @@ export default function Shop({ onAddToCart }: ShopProps) {
           // Get image - check if it's from Supabase bucket or local
           let productImage = p.main_image || '';
 
-<<<<<<< HEAD
-          // Skip broken URLs (20-byte images often have suspicious patterns)
-          const isBrokenUrl = productImage && (
-            productImage.includes('20%20bytes') ||
-            productImage.includes('20 bytes') ||
-            productImage.length < 20 || // Too short to be valid
-            (productImage.startsWith('http') && productImage.includes('placeholder')) ||
-            productImage.trim() === ''
-          );
-
-          // If image is just a filename (no protocol), use Supabase storage with 'images' bucket
-          if (productImage && !isBrokenUrl && !productImage.startsWith('http') && !productImage.startsWith('/')) {
-            productImage = getStorageUrl('images', productImage);
-          }
-          // If no image, broken URL, or placeholder, use type-specific fallback from Supabase storage
-          else if (!productImage || isBrokenUrl || productImage.includes('placeholder') || productImage.includes('pexels')) {
-=======
-          // Helper function to generate filename variations (synchronous)
-          const getImageVariations = (baseFilename: string): string[] => {
-            const variations: string[] = [baseFilename]; // Original first
-            
-            // Case variations
-            variations.push(baseFilename.toLowerCase());
-            variations.push(baseFilename.toUpperCase());
-            
-            // Space variations
-            variations.push(baseFilename.replace(/\s+/g, '-'));
-            variations.push(baseFilename.replace(/\s+/g, '_'));
-            
-            // Add extensions if missing
-            if (!baseFilename.match(/\.(jpg|jpeg|png|webp)$/i)) {
-              variations.push(`${baseFilename}.jpg`);
-              variations.push(`${baseFilename}.png`);
-              variations.push(`${baseFilename.toLowerCase()}.jpg`);
-              variations.push(`${baseFilename.replace(/\s+/g, '-')}.jpg`);
-            }
-            
-            return [...new Set(variations)]; // Remove duplicates
-          };
-
           // If image is just a filename (no protocol), use Supabase storage
           if (productImage && !productImage.startsWith('http') && !productImage.startsWith('/')) {
-            // Use the exact filename - ValidatedImage component will handle validation
-            // and try fallbacks if needed
             productImage = getStorageUrl('images', productImage);
           }
           // If no image or image is placeholder/empty, use type-specific fallback
           else if (!productImage || productImage.trim() === '' || productImage.includes('placeholder') || productImage.includes('pexels')) {
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
             if (isFirestick) {
               if (p.name.toLowerCase().includes('4k max')) {
                 productImage = getStorageUrl('images', 'firestick 4k max.jpg');
               } else if (p.name.toLowerCase().includes('4k')) {
                 productImage = getStorageUrl('images', 'firestick 4k.jpg');
+              } else if (p.name.toLowerCase().includes('original')) {
+                productImage = getStorageUrl('images', 'firestick original.jpg');
               } else {
-                productImage = getStorageUrl('images', 'firestick hd.jpg');
+                productImage = getStorageUrl('images', 'firestick original.jpg');
               }
             } else {
               productImage = getStorageUrl('images', 'iptv-subscription.jpg');

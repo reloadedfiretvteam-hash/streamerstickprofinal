@@ -17,7 +17,7 @@ async function main() {
     STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || '',
     RESEND_API_KEY: process.env.RESEND_API_KEY,
-    RESEND_FROM_EMAIL: 'orders@streamstickpro.com',
+    RESEND_FROM_EMAIL: 'noreply@streamstickpro.com',  // Fixed: Matches wrangler.toml and actual code usage
     VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL,
     VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY,
     SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY || '',

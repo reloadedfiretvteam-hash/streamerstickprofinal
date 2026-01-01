@@ -23,7 +23,13 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
           <div className="hidden md:flex items-center gap-6">
             <a
               href="/"
-              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              onClick={(e) => { 
+                if (window.location.pathname === '/') {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                // Otherwise let the link navigate normally
+              }}
               className="hover:text-orange-400 transition-colors font-semibold"
             >
               Home
@@ -86,7 +92,13 @@ export default function Navigation({ cartItemCount = 0, onCartClick }: Navigatio
           <div className="md:hidden pb-4 space-y-3 bg-gray-800 rounded-lg p-4 mt-2">
             <a
               href="/"
-              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); setIsMenuOpen(false); }}
+              onClick={(e) => { 
+                if (window.location.pathname === '/') {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                setIsMenuOpen(false);
+              }}
               className="block py-2 hover:text-orange-400 transition-colors font-semibold"
             >
               Home

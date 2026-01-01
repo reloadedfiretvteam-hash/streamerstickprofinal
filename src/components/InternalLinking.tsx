@@ -33,7 +33,7 @@ const internalLinks: InternalLink[] = [
   {
     title: 'IPTV Subscriptions',
     description: 'Premium IPTV plans with 18,000+ live channels',
-    href: '#shop',
+    href: '/shop',
     icon: Tv,
     category: 'Products'
   },

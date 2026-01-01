@@ -9,86 +9,101 @@ type Storage = ReturnType<typeof getStorage>;
 export function createWebhookRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
+  // Test endpoint to verify webhook is reachable
+  app.post('/test', async (c) => {
+    return c.json({ 
+      message: 'Webhook endpoint is reachable',
+      timestamp: new Date().toISOString(),
+      url: c.req.url,
+      method: c.req.method,
+      note: 'If Stripe webhooks are not working, verify Stripe Dashboard → Webhooks → URL is: https://secure.streamstickpro.com/api/stripe/webhook'
+    });
+  });
+
   // Handle webhook with optional UUID suffix (from stripe-replit-sync managed webhooks)
   const handleWebhook = async (c: any) => {
-    const signature = c.req.header('stripe-signature');
-    const eventId = c.req.header('stripe-webhook-event-id') || 'unknown';
-
-    console.log(`[WEBHOOK] Received request, event-id header: ${eventId}`);
-
-    if (!signature) {
-      console.error('[WEBHOOK] Missing stripe-signature header');
-      return c.json({ error: 'Missing stripe-signature' }, 400);
-    }
-
-    const webhookSecret = c.env.STRIPE_WEBHOOK_SECRET;
-    if (!webhookSecret) {
-      console.error('[WEBHOOK] STRIPE_WEBHOOK_SECRET not configured');
-      return c.json({ error: 'Webhook not configured' }, 500);
-    }
-
-    let event: Stripe.Event;
     try {
-      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
-      const rawBody = await c.req.text();
-      event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
-      console.log(`[WEBHOOK] Verified event: ${event.type} (${event.id})`);
-    } catch (error: any) {
-      console.error(`[WEBHOOK] Signature verification failed: ${error.message}`);
-      return c.json({ error: 'Invalid signature' }, 400);
-    }
+      const signature = c.req.header('stripe-signature');
+      const eventId = c.req.header('stripe-webhook-event-id') || 'unknown';
 
-    const storage = getStorage(c.env);
-    let processingResult = { success: true, error: null as string | null };
+      console.log(`[WEBHOOK] Received request, event-id header: ${eventId}`);
+      console.log(`[WEBHOOK] RESEND_API_KEY configured: ${!!c.env.RESEND_API_KEY}`);
+      console.log(`[WEBHOOK] RESEND_FROM_EMAIL: ${c.env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com'}`);
 
-    try {
-      switch (event.type) {
-        case 'checkout.session.completed':
-          console.log(`[WEBHOOK] Processing checkout.session.completed`);
-          await handleCheckoutComplete(event.data.object, storage, c.env);
-          console.log(`[WEBHOOK] checkout.session.completed processed successfully`);
-          break;
-        case 'payment_intent.succeeded':
-          console.log(`[WEBHOOK] Processing payment_intent.succeeded`);
-          await handlePaymentSucceeded(event.data.object, storage, c.env);
-          console.log(`[WEBHOOK] payment_intent.succeeded processed successfully`);
-          break;
-        case 'payment_intent.payment_failed':
-          console.log(`[WEBHOOK] Processing payment_intent.payment_failed`);
-          await handlePaymentFailed(event.data.object, storage);
-          console.log(`[WEBHOOK] payment_intent.payment_failed processed successfully`);
-          break;
-        case 'charge.succeeded':
-        case 'charge.updated':
-        case 'charge.captured':
-          // These are informational events - we handle payments via checkout.session.completed
-          console.log(`[WEBHOOK] Acknowledged ${event.type} (no action needed)`);
-          break;
-        case 'payment_intent.created':
-        case 'payment_intent.processing':
-          // These are intermediate states - no action needed
-          console.log(`[WEBHOOK] Acknowledged ${event.type} (intermediate state)`);
-          break;
-        default:
-          console.log(`[WEBHOOK] Unhandled event type: ${event.type}`);
-          break;
+      if (!signature) {
+        console.error('[WEBHOOK] Missing stripe-signature header');
+        // Still return 200 to acknowledge receipt - Stripe needs 200-299 range
+        return c.json({ received: true, error: 'Missing signature' }, 200);
       }
-    } catch (error: any) {
-      console.error(`[WEBHOOK] Error processing ${event.type}: ${error.message}`);
-      console.error(`[WEBHOOK] Stack trace: ${error.stack}`);
-      processingResult = { success: false, error: error.message };
-    }
 
-    // Always return 200 to prevent Stripe retries (event was received)
-    if (processingResult.success) {
-      return c.json({ received: true, event: event.type, status: 'processed' });
-    } else {
-      return c.json({ 
-        received: true, 
-        event: event.type, 
-        status: 'error', 
-        error: processingResult.error 
-      });
+      const webhookSecret = c.env.STRIPE_WEBHOOK_SECRET;
+      if (!webhookSecret) {
+        console.error('[WEBHOOK] STRIPE_WEBHOOK_SECRET not configured');
+        // Still return 200 to acknowledge receipt - configuration issue logged
+        return c.json({ received: true, error: 'Webhook not configured' }, 200);
+      }
+
+      let event: Stripe.Event;
+      try {
+        const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
+        const rawBody = await c.req.text();
+        event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+        console.log(`[WEBHOOK] Verified event: ${event.type} (${event.id})`);
+      } catch (error: any) {
+        console.error(`[WEBHOOK] Signature verification failed: ${error.message}`);
+        // Still return 200 to prevent retries - invalid signature logged but acknowledged
+        return c.json({ received: true, error: 'Invalid signature' }, 200);
+      }
+
+      const storage = getStorage(c.env);
+      let processingResult = { success: true, error: null as string | null };
+
+      try {
+        switch (event.type) {
+          case 'checkout.session.completed':
+            console.log(`[WEBHOOK] Processing checkout.session.completed`);
+            await handleCheckoutComplete(event.data.object, storage, c.env);
+            console.log(`[WEBHOOK] checkout.session.completed processed successfully`);
+            break;
+          case 'payment_intent.succeeded':
+            console.log(`[WEBHOOK] Processing payment_intent.succeeded`);
+            await handlePaymentSucceeded(event.data.object, storage, c.env);
+            console.log(`[WEBHOOK] payment_intent.succeeded processed successfully`);
+            break;
+          case 'payment_intent.payment_failed':
+            console.log(`[WEBHOOK] Processing payment_intent.payment_failed`);
+            await handlePaymentFailed(event.data.object, storage);
+            console.log(`[WEBHOOK] payment_intent.payment_failed processed successfully`);
+            break;
+          case 'charge.succeeded':
+          case 'charge.updated':
+          case 'charge.captured':
+            // These are informational events - we handle payments via checkout.session.completed
+            console.log(`[WEBHOOK] Acknowledged ${event.type} (no action needed)`);
+            break;
+          case 'payment_intent.created':
+          case 'payment_intent.processing':
+            // These are intermediate states - no action needed
+            console.log(`[WEBHOOK] Acknowledged ${event.type} (intermediate state)`);
+            break;
+          default:
+            console.log(`[WEBHOOK] Unhandled event type: ${event.type}`);
+            break;
+        }
+      } catch (error: any) {
+        console.error(`[WEBHOOK] Error processing ${event.type}: ${error.message}`);
+        console.error(`[WEBHOOK] Stack trace: ${error.stack}`);
+        processingResult = { success: false, error: error.message };
+      }
+
+      // Always return 200 OK to prevent Stripe retries (event was received)
+      // Stripe requires HTTP 200-299 status codes to consider webhook delivered
+      return c.json({ received: true }, 200);
+    } catch (error: any) {
+      // Final safety net - catch any unexpected errors and still return 200
+      console.error(`[WEBHOOK] Unexpected error in webhook handler: ${error.message}`);
+      console.error(`[WEBHOOK] Stack trace: ${error.stack}`);
+      return c.json({ received: true, error: 'Unexpected error' }, 200);
     }
   };
 
@@ -223,6 +238,62 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
 
   console.log(`[EMAIL] Starting email delivery for order ${order.id}`);
   console.log(`[EMAIL] Sending to: ${updatedOrder.customerEmail}`);
+  console.log(`[EMAIL] RESEND_API_KEY configured: ${!!env.RESEND_API_KEY}`);
+  console.log(`[EMAIL] RESEND_FROM_EMAIL: ${env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com'}`);
+  
+  // Note: Emails are sent via the /api/checkout/send-emails endpoint called from the success page
+  // This webhook handler only updates order status - keeping webhook and email separate as requested
+  // Send owner notification immediately (this is critical for knowing when products are sold)
+  try {
+    console.log(`[EMAIL] Attempting to send owner notification...`);
+    await sendOwnerOrderNotification(updatedOrder, env);
+    console.log(`[EMAIL] ✅ Owner notification sent successfully`);
+  } catch (error: any) {
+    console.error(`[EMAIL] ❌ ERROR sending owner notification: ${error.message}`);
+    console.error(`[EMAIL] Error details:`, error);
+    console.error(`[EMAIL] Error stack: ${error.stack}`);
+  }
+  
+  console.log(`[CHECKOUT] Completed processing order ${order.id}`);
+}
+
+async function handlePaymentSucceeded(paymentIntent: any, storage: Storage, env: Env) {
+  console.log(`[PAYMENT] Payment succeeded: ${paymentIntent.id}`);
+  
+  const order = await storage.getOrderByPaymentIntent(paymentIntent.id);
+  if (!order) {
+    console.error(`[PAYMENT] ERROR: No order found for payment intent: ${paymentIntent.id}`);
+    return;
+  }
+
+  console.log(`[PAYMENT] Found order: ${order.id} for ${order.customerEmail}`);
+  
+  const updateData: any = {
+    status: 'paid',
+    stripePaymentIntentId: paymentIntent.id,
+  };
+
+  // Update order if not already paid
+  if (order.status !== 'paid') {
+    await storage.updateOrder(order.id, updateData);
+    console.log(`[PAYMENT] Order ${order.id} marked as paid via payment_intent.succeeded`);
+  }
+
+  // Fetch updated order
+  const updatedOrder = await storage.getOrder(order.id);
+  if (!updatedOrder) {
+    console.error(`[PAYMENT] ERROR: Could not retrieve updated order ${order.id}`);
+    return;
+  }
+
+  // Ensure we have customer email
+  if (!updatedOrder.customerEmail) {
+    console.error(`[EMAIL] ERROR: Order ${order.id} missing customerEmail`);
+    return;
+  }
+
+  console.log(`[EMAIL] Starting email delivery for order ${order.id}`);
+  console.log(`[EMAIL] Sending to: ${updatedOrder.customerEmail}`);
   
   // Send order confirmation
   try {
@@ -254,34 +325,8 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
   } else {
     console.log(`[EMAIL] Credentials already sent for order ${order.id}`);
   }
-  
-  console.log(`[CHECKOUT] Completed processing order ${order.id}`);
-}
 
-async function handlePaymentSucceeded(paymentIntent: any, storage: Storage, env: Env) {
-  console.log(`Payment succeeded: ${paymentIntent.id}`);
-  
-  const order = await storage.getOrderByPaymentIntent(paymentIntent.id);
-  if (!order) {
-    return;
-  }
-
-  if (order.status !== 'paid') {
-    await storage.updateOrder(order.id, {
-      status: 'paid',
-    });
-    console.log(`Order ${order.id} marked as paid via payment_intent.succeeded`);
-
-    const updatedOrder = await storage.getOrder(order.id);
-    if (updatedOrder) {
-      try {
-        await sendOrderConfirmation(updatedOrder, env);
-        await sendOwnerOrderNotification(updatedOrder, env);
-      } catch (error) {
-        console.error('Error sending emails:', error);
-      }
-    }
-  }
+  console.log(`[PAYMENT] Completed processing order ${order.id}`);
 }
 
 async function handlePaymentFailed(paymentIntent: any, storage: Storage) {

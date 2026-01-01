@@ -2,57 +2,65 @@ import { Resend } from 'resend';
 import type { Order } from '../shared/schema';
 import type { Storage } from './storage';
 import type { Env } from './index';
+import { sendEmail } from './email-providers';
 
 const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
 const IPTV_PORTAL_URL = 'http://ky-tv.cc';
 const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
 
 export async function sendOrderConfirmation(order: Order, env: Env): Promise<void> {
-  if (!env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY not configured - skipping order confirmation email');
-    return;
-  }
-  
   if (!order.customerEmail) {
-    console.error(`[EMAIL] Cannot send order confirmation: missing customerEmail for order ${order.id}`);
-    return;
+    const error = `Cannot send order confirmation: missing customerEmail for order ${order.id}`;
+    console.error(`[EMAIL] ${error}`);
+    throw new Error(error);
   }
   
-  const resend = new Resend(env.RESEND_API_KEY);
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
-
   const priceFormatted = (order.amount / 100).toFixed(2);
   
-  await resend.emails.send({
-    from: fromEmail,
-    to: order.customerEmail,
-    subject: `Order Confirmation - ${order.realProductName}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #1a1a1a;">Thank You for Your Order!</h1>
-        
-        <p>Hi ${order.customerName || 'Valued Customer'},</p>
-        
-        <p>Your order has been confirmed and is being processed.</p>
-        
-        <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h2 style="margin-top: 0; color: #333;">Order Details</h2>
-          <p><strong>Order ID:</strong> ${order.id}</p>
-          <p><strong>Product:</strong> ${order.realProductName}</p>
-          <p><strong>Amount:</strong> $${priceFormatted}</p>
-          ${order.countryPreference ? `<p><strong>Channel Preferences:</strong> ${order.countryPreference}</p>` : ''}
-        </div>
-        
-        <p>You will receive your login credentials in a separate email within the next 5 minutes.</p>
-        
-        <p>If you have any questions, please don't hesitate to reach out.</p>
-        
-        <p>Best regards,<br>StreamStickPro Team</p>
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a1a1a;">Thank You for Your Order!</h1>
+      
+      <p>Hi ${order.customerName || 'Valued Customer'},</p>
+      
+      <p>Your order has been confirmed and is being processed.</p>
+      
+      <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h2 style="margin-top: 0; color: #333;">Order Details</h2>
+        <p><strong>Order ID:</strong> ${order.id}</p>
+        <p><strong>Product:</strong> ${order.realProductName}</p>
+        <p><strong>Amount:</strong> $${priceFormatted}</p>
+        ${order.countryPreference ? `<p><strong>Channel Preferences:</strong> ${order.countryPreference}</p>` : ''}
       </div>
-    `,
-  });
+      
+      <p>You will receive your login credentials in a separate email within the next 5 minutes.</p>
+      
+      <p>If you have any questions, please don't hesitate to reach out.</p>
+      
+      <p>Best regards,<br>StreamStickPro Team</p>
+    </div>
+  `;
+  
+  let result;
+  try {
+    result = await sendEmail({
+      to: order.customerEmail,
+      from: fromEmail,
+      subject: `Order Confirmation - ${order.realProductName}`,
+      html: emailHtml,
+    }, env);
+  } catch (error: any) {
+    console.error(`[EMAIL] Unexpected error calling sendEmail for order confirmation: ${error.message}`);
+    throw new Error(`Failed to send order confirmation email: ${error.message}`);
+  }
 
-  console.log(`Order confirmation email sent to ${order.customerEmail}`);
+  if (!result.success) {
+    console.error(`[EMAIL] Failed to send order confirmation email to ${order.customerEmail} via ${result.provider}: ${result.error}`);
+    throw new Error(`Failed to send order confirmation email: ${result.error}`);
+  }
+
+  console.log(`[EMAIL] ✅ Order confirmation email sent successfully to ${order.customerEmail} via ${result.provider}`);
 }
 
 export async function sendCredentialsEmail(order: Order, env: Env, storage: Storage): Promise<void> {
@@ -61,155 +69,163 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
     return;
   }
 
-  if (!env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY not configured - skipping credentials email');
-    return;
-  }
-  
   if (!order.customerEmail) {
-    console.error(`[EMAIL] Cannot send credentials: missing customerEmail for order ${order.id}`);
-    return;
+    const error = `Cannot send credentials: missing customerEmail for order ${order.id}`;
+    console.error(`[EMAIL] ${error}`);
+    throw new Error(error);
   }
   
-  const resend = new Resend(env.RESEND_API_KEY);
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
 
-  const credentials = order.generatedUsername && order.generatedPassword
-    ? { username: order.generatedUsername, password: order.generatedPassword }
-    : generateCredentials(order);
+  // Use existing credentials or generate new ones and save them
+  let credentials: { username: string; password: string };
+  if (order.generatedUsername && order.generatedPassword) {
+    credentials = { username: order.generatedUsername, password: order.generatedPassword };
+  } else {
+    // Generate unique credentials and save them to the order
+    credentials = await generateUniqueCredentials(order, storage);
+    await storage.updateOrder(order.id, {
+      generatedUsername: credentials.username,
+      generatedPassword: credentials.password,
+    });
+    console.log(`[EMAIL] Generated and saved credentials for order ${order.id}: ${credentials.username}`);
+  }
 
   const productIds = order.realProductId?.split(',') || [];
   const hasIPTV = productIds.some(id => id.trim().startsWith('iptv-'));
   const hasFireStick = productIds.some(id => id.trim().startsWith('firestick-'));
+  const hasAnyDigitalProduct = hasIPTV || hasFireStick;
 
-  let productInstructions = '';
-  if (hasIPTV) {
-    productInstructions = `
-      <div style="background: #e8f4fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <h2 style="margin-top: 0; color: #0066cc;">IPTV Setup Instructions</h2>
-        <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}">${IPTV_PORTAL_URL}</a></p>
-        <p><strong>Username:</strong> ${credentials.username}</p>
-        <p><strong>Password:</strong> ${credentials.password}</p>
-        
-        <h3 style="color: #0066cc;">How to Setup:</h3>
-        <ol>
-          <li>Download IPTV Smarters or TiviMate app on your device</li>
-          <li>Enter the portal URL: ${IPTV_PORTAL_URL}</li>
-          <li>Enter your username and password</li>
-          <li>Start streaming!</li>
-        </ol>
-        
-        <p><strong>Watch our setup video:</strong> <a href="${SETUP_VIDEO_URL}">${SETUP_VIDEO_URL}</a></p>
+  // Default credentials section that always includes credentials
+  const defaultCredentialsSection = `
+    <div style="background: #f9fafb; border: 2px solid #f97316; border-radius: 8px; padding: 20px; margin: 20px 0;">
+      <h2 style="margin-top: 0; color: #f97316;">Your Login Credentials</h2>
+      <div style="margin: 15px 0;">
+        <p><strong>Username:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${credentials.username}</span></p>
+        <p><strong>Password:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${credentials.password}</span></p>
       </div>
-    `;
-  }
-  
-  if (hasFireStick) {
-    productInstructions += `
-      <div style="background: #fff7ed; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <h2 style="margin-top: 0; color: #ea580c;">Fire Stick Setup Instructions</h2>
-        <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}">${IPTV_PORTAL_URL}</a></p>
-        <p><strong>Username:</strong> ${credentials.username}</p>
-        <p><strong>Password:</strong> ${credentials.password}</p>
-        
-        <h3 style="color: #ea580c;">How to Setup Your Device:</h3>
-        <ol>
-          <li>Your Fire Stick will arrive pre-configured</li>
-          <li>Simply plug it into your TV</li>
-          <li>Connect to your WiFi</li>
-          <li>Open the IPTV app and enter your credentials</li>
-        </ol>
-        
-        <p><strong>Watch our setup video:</strong> <a href="${SETUP_VIDEO_URL}">${SETUP_VIDEO_URL}</a></p>
+    </div>
+    
+    <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
+      <p style="margin: 0 0 10px 0;"><strong>Service Portal URL:</strong></p>
+      <p style="margin: 0;"><a href="${IPTV_PORTAL_URL}" style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 18px;">${IPTV_PORTAL_URL}</a></p>
+      <p style="margin: 10px 0 0 0; font-size: 14px;">Use the credentials above to log in to your service portal.</p>
+    </div>
+
+    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+      <p style="margin: 0 0 10px 0;"><strong>📺 Setup Tutorial Video:</strong></p>
+      <p style="margin: 0;"><a href="${SETUP_VIDEO_URL}" style="color: #d97706; text-decoration: none; font-weight: bold;" target="_blank">Watch YouTube Setup Tutorial →</a></p>
+      <p style="margin: 10px 0 0 0; font-size: 14px;">Follow along with our step-by-step video guide to get started.</p>
+    </div>
+  `;
+
+  let productInstructions = defaultCredentialsSection;
+
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a1a1a;">Your Credentials Are Ready!</h1>
+      
+      <p>Hi ${order.customerName || 'Valued Customer'},</p>
+      
+      <p>Here are your login credentials for ${order.realProductName}:</p>
+      
+      ${productInstructions}
+      
+      <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+        <strong>Important:</strong> Please save these credentials in a safe place. Do not share them with anyone.
       </div>
-    `;
+      
+      <p>If you need any assistance, please don't hesitate to reach out.</p>
+      
+      <p>Best regards,<br>StreamStickPro Team</p>
+    </div>
+  `;
+
+  let result;
+  try {
+    result = await sendEmail({
+      to: order.customerEmail,
+      from: fromEmail,
+      subject: `Your Login Credentials - ${order.realProductName}`,
+      html: emailHtml,
+    }, env);
+  } catch (error: any) {
+    console.error(`[EMAIL] Unexpected error calling sendEmail for credentials: ${error.message}`);
+    throw new Error(`Failed to send credentials email: ${error.message}`);
   }
 
-  await resend.emails.send({
-    from: fromEmail,
-    to: order.customerEmail,
-    subject: `Your Login Credentials - ${order.realProductName}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #1a1a1a;">Your Credentials Are Ready!</h1>
-        
-        <p>Hi ${order.customerName || 'Valued Customer'},</p>
-        
-        <p>Here are your login credentials for ${order.realProductName}:</p>
-        
-        ${productInstructions}
-        
-        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
-          <strong>Important:</strong> Please save these credentials in a safe place. Do not share them with anyone.
-        </div>
-        
-        <p>If you need any assistance, please don't hesitate to reach out.</p>
-        
-        <p>Best regards,<br>StreamStickPro Team</p>
-      </div>
-    `,
-  });
+  if (!result.success) {
+    console.error(`[EMAIL] Failed to send credentials email to ${order.customerEmail} via ${result.provider}: ${result.error}`);
+    throw new Error(`Failed to send credentials email: ${result.error}`);
+  }
 
   await storage.updateOrder(order.id, { credentialsSent: true });
-  console.log(`Credentials email sent to ${order.customerEmail}`);
+  console.log(`[EMAIL] ✅ Credentials email sent successfully to ${order.customerEmail} via ${result.provider}`);
 }
 
 export async function sendRenewalConfirmationEmail(order: Order, env: Env): Promise<void> {
-  if (!env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY not configured - skipping renewal email');
-    return;
-  }
-  
   if (!order.customerEmail) {
-    console.error(`[EMAIL] Cannot send renewal confirmation: missing customerEmail for order ${order.id}`);
-    return;
+    const error = `Cannot send renewal confirmation: missing customerEmail for order ${order.id}`;
+    console.error(`[EMAIL] ${error}`);
+    throw new Error(error);
   }
   
-  const resend = new Resend(env.RESEND_API_KEY);
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
-
   const priceFormatted = (order.amount / 100).toFixed(2);
   const existingUsername = order.existingUsername || 'your current username';
 
-  await resend.emails.send({
-    from: fromEmail,
-    to: order.customerEmail,
-    subject: `Subscription Renewed! - ${order.realProductName}`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #1a1a1a;">🎉 Your Subscription Has Been Extended!</h1>
-        
-        <p>Hi ${order.customerName || 'Valued Customer'},</p>
-        
-        <p>Great news! Your IPTV subscription has been successfully renewed.</p>
-        
-        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 25px; border-radius: 12px; margin: 20px 0; color: white;">
-          <h2 style="margin-top: 0; color: white;">Renewal Confirmed</h2>
-          <p style="font-size: 16px;"><strong>Product:</strong> ${order.realProductName}</p>
-          <p style="font-size: 16px;"><strong>Amount Paid:</strong> $${priceFormatted}</p>
-          <p style="font-size: 16px;"><strong>Your Username:</strong> ${existingUsername}</p>
-        </div>
-        
-        <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7;">
-          <h3 style="margin-top: 0; color: #0369a1;">Your Existing Credentials Still Work!</h3>
-          <p>You can continue using your current login credentials. No changes needed!</p>
-          <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #0369a1;">${IPTV_PORTAL_URL}</a></p>
-          <p><strong>Username:</strong> ${existingUsername}</p>
-          <p><strong>Password:</strong> (same as before)</p>
-        </div>
-        
-        <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
-          <strong>✅ What's Next:</strong> Your subscription is now extended. Just keep streaming - no action required!
-        </div>
-        
-        <p>Thank you for being a loyal customer! If you have any questions, please don't hesitate to reach out.</p>
-        
-        <p>Best regards,<br>StreamStickPro Team</p>
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="color: #1a1a1a;">🎉 Your Subscription Has Been Extended!</h1>
+      
+      <p>Hi ${order.customerName || 'Valued Customer'},</p>
+      
+      <p>Great news! Your IPTV subscription has been successfully renewed.</p>
+      
+      <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 25px; border-radius: 12px; margin: 20px 0; color: white;">
+        <h2 style="margin-top: 0; color: white;">Renewal Confirmed</h2>
+        <p style="font-size: 16px;"><strong>Product:</strong> ${order.realProductName}</p>
+        <p style="font-size: 16px;"><strong>Amount Paid:</strong> $${priceFormatted}</p>
+        <p style="font-size: 16px;"><strong>Your Username:</strong> ${existingUsername}</p>
       </div>
-    `,
-  });
+      
+      <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7;">
+        <h3 style="margin-top: 0; color: #0369a1;">Your Existing Credentials Still Work!</h3>
+        <p>You can continue using your current login credentials. No changes needed!</p>
+        <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #0369a1;">${IPTV_PORTAL_URL}</a></p>
+        <p><strong>Username:</strong> ${existingUsername}</p>
+        <p><strong>Password:</strong> (same as before)</p>
+      </div>
+      
+      <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+        <strong>✅ What's Next:</strong> Your subscription is now extended. Just keep streaming - no action required!
+      </div>
+      
+      <p>Thank you for being a loyal customer! If you have any questions, please don't hesitate to reach out.</p>
+      
+      <p>Best regards,<br>StreamStickPro Team</p>
+    </div>
+  `;
 
-  console.log(`Renewal confirmation email sent to ${order.customerEmail}`);
+  let result;
+  try {
+    result = await sendEmail({
+      to: order.customerEmail,
+      from: fromEmail,
+      subject: `Subscription Renewed! - ${order.realProductName}`,
+      html: emailHtml,
+    }, env);
+  } catch (error: any) {
+    console.error(`[EMAIL] Unexpected error calling sendEmail for renewal confirmation: ${error.message}`);
+    throw new Error(`Failed to send renewal confirmation email: ${error.message}`);
+  }
+
+  if (!result.success) {
+    console.error(`[EMAIL] Failed to send renewal confirmation email to ${order.customerEmail} via ${result.provider}: ${result.error}`);
+    throw new Error(`Failed to send renewal confirmation email: ${result.error}`);
+  }
+
+  console.log(`[EMAIL] ✅ Renewal confirmation email sent successfully to ${order.customerEmail} via ${result.provider}`);
 }
 
 export function generateCredentials(order: Order): { username: string; password: string } {
@@ -279,17 +295,11 @@ export async function generateUniqueCredentials(order: Order, storage: Storage):
 }
 
 export async function sendOwnerOrderNotification(order: Order, env: Env): Promise<void> {
-  if (!env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY not configured - skipping owner notification');
-    return;
-  }
-  
   // Owner notification doesn't need customer email, but log if order email is missing
   if (!order.customerEmail) {
     console.warn(`[EMAIL] Order ${order.id} missing customerEmail, sending owner notification anyway`);
   }
   
-  const resend = new Resend(env.RESEND_API_KEY);
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
 
   const priceFormatted = (order.amount / 100).toFixed(2);
@@ -333,11 +343,7 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
         </div>
   `;
   
-  await resend.emails.send({
-    from: fromEmail,
-    to: OWNER_EMAIL,
-    subject: `${emoji} ${orderTypeEmoji} ${orderTypeLabel} - $${priceFormatted} - ${order.realProductName}`,
-    html: `
+  const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: ${headerColor}; padding: 20px; border-radius: 12px 12px 0 0;">
           <h1 style="color: white; margin: 0;">💰 ${isRenewal ? 'Subscription Renewal!' : 'New Paid Order!'}</h1>
@@ -390,8 +396,25 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
           StreamStickPro Order Notification System
         </p>
       </div>
-    `,
-  });
+  `;
 
-  console.log(`Owner notification sent for order ${order.id} to ${OWNER_EMAIL}`);
+  let result;
+  try {
+    result = await sendEmail({
+      to: OWNER_EMAIL,
+      from: fromEmail,
+      subject: `${emoji} ${orderTypeEmoji} ${orderTypeLabel} - $${priceFormatted} - ${order.realProductName}`,
+      html: emailHtml,
+    }, env);
+  } catch (error: any) {
+    console.error(`[EMAIL] Unexpected error calling sendEmail for owner notification: ${error.message}`);
+    throw new Error(`Failed to send owner notification email: ${error.message}`);
+  }
+
+  if (!result.success) {
+    console.error(`[EMAIL] Failed to send owner notification email for order ${order.id} via ${result.provider}: ${result.error}`);
+    throw new Error(`Failed to send owner notification email: ${result.error}`);
+  }
+
+  console.log(`[EMAIL] ✅ Owner notification sent successfully for order ${order.id} to ${OWNER_EMAIL} via ${result.provider}`);
 }

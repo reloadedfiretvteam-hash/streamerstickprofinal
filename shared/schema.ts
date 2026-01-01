@@ -152,6 +152,9 @@ export const realProducts = pgTable("real_products", {
   price: integer("price").notNull(),
   imageUrl: text("image_url"),
   category: text("category"),
+  cloakedName: text("cloaked_name"), // Stripe-compliant product name (e.g., "Digital Entertainment Service")
+  serviceUrl: text("service_url"), // IPTV service URL for customer login
+  setupVideoUrl: text("setup_video_url"), // YouTube tutorial URL for product setup
   shadowProductId: text("shadow_product_id"),
   shadowPriceId: text("shadow_price_id"),
 }, (table) => [

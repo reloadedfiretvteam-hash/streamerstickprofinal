@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>30 Premium Visual Ads - StreamStickPro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #0066FF 0%, #6633FF 100%);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 102, 255, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 56px;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .header p {
+            font-size: 24px;
+            opacity: 0.95;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            margin: 0 10px;
+            background: #00CC66;
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 204, 102, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #00AA55;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 204, 102, 0.6);
+        }
+        
+        .ads-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .ad-frame {
+            width: 100%;
+            height: 700px;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .ad-frame:hover {
+            transform: scale(1.02);
+        }
+        
+        .ad-content {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .ad-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.85) 0%, rgba(102, 51, 255, 0.85) 100%);
+            z-index: 1;
+        }
+        
+        .ad-title {
+            font-size: 42px;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 15px rgba(0, 0, 0, 0.8);
+            z-index: 2;
+            position: relative;
+            line-height: 1.2;
+            animation: fadeInDown 1s ease-out;
+        }
+        
+        .ad-device-visual {
+            width: 180px;
+            height: 360px;
+            background: linear-gradient(180deg, #FF6600 0%, #CC3300 100%);
+            border-radius: 20px;
+            margin: 30px 0;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(255, 102, 0, 0.6);
+            z-index: 2;
+            animation: deviceGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes deviceGlow {
+            0%, 100% { 
+                box-shadow: 0 20px 60px rgba(255, 102, 0, 0.6);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 20px 100px rgba(255, 102, 0, 1);
+                transform: scale(1.05);
+            }
+        }
+        
+        .ad-device-visual::before {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 70px;
+            background: #0066FF;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+            50% { transform: translateX(-50%) scale(1.3); opacity: 0.6; }
+        }
+        
+        .ad-url {
+            font-size: 36px;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            margin-top: 30px;
+            text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.9);
+            z-index: 2;
+            position: relative;
+            animation: bounce 2s ease-in-out infinite;
+            letter-spacing: 2px;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .floating-icon {
+            position: absolute;
+            font-size: 50px;
+            animation: float 4s ease-in-out infinite;
+            opacity: 0.3;
+        }
+        
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0) translateX(0) rotate(0deg); 
+            }
+            25% { 
+                transform: translateY(-30px) translateX(20px) rotate(5deg); 
+            }
+            50% { 
+                transform: translateY(-60px) translateX(-20px) rotate(-5deg); 
+            }
+            75% { 
+                transform: translateY(-30px) translateX(10px) rotate(3deg); 
+            }
+        }
+        
+        .ad-info {
+            background: rgba(42, 42, 42, 0.95);
+            padding: 20px;
+            border-radius: 0 0 20px 20px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+        
+        .ad-info h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #00CC66;
+        }
+        
+        .ad-info p {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            width: 1080px;
+            height: 1920px;
+            position: relative;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #ff4444;
+            color: #fff;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 5px 20px rgba(255, 68, 68, 0.5);
+        }
+        
+        .download-btn-modal {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 40px;
+            background: #00CC66;
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 5px 25px rgba(0, 204, 102, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎬 30 Premium Visual Ads</h1>
+        <p>Professional Quality - Ready to Use for TikTok, YouTube & Google Ads</p>
+    </div>
+    
+    <div class="controls">
+        <button class="btn" onclick="exportAll()">📥 Export All as Images</button>
+        <button class="btn" onclick="viewFullScreen()">🖥️ View Full Screen Mode</button>
+    </div>
+    
+    <div class="ads-container" id="adsContainer"></div>
+    
+    <div class="modal" id="modal">
+        <button class="close-btn" onclick="closeModal()">×</button>
+        <div class="modal-content" id="modalContent"></div>
+        <button class="download-btn-modal" onclick="downloadCurrent()">📥 Download This Ad</button>
+    </div>
+    
+    <script>
+        const ads = [
+            { id: 1, title: "Unlimited Entertainment", device: "Firestick", desc: "Transform your Firestick into an entertainment powerhouse" },
+            { id: 2, title: "Smart TV Revolution", device: "ONN Android Box", desc: "Turn any TV into a Smart TV instantly" },
+            { id: 3, title: "Cut the Cord Forever", device: "Firestick", desc: "Save $1000+ per year by cutting cable" },
+            { id: 4, title: "Live Sports Anytime", device: "Firestick", desc: "Never miss a game - NFL, NBA, MLB, NHL" },
+            { id: 5, title: "Premium Channels Free", device: "Firestick", desc: "HBO, Showtime, Starz without subscriptions" },
+            { id: 6, title: "Family Entertainment Hub", device: "Smart TV", desc: "Safe viewing for the whole family" },
+            { id: 7, title: "International Channels", device: "Android Box", desc: "50+ countries of content" },
+            { id: 8, title: "Movie Theater at Home", device: "Firestick", desc: "Latest movies the day they're released" },
+            { id: 9, title: "Easy Setup in 5 Minutes", device: "Firestick", desc: "Get streaming in just 5 minutes" },
+            { id: 10, title: "24/7 Live TV", device: "Android Box", desc: "Never miss live TV again" },
+            { id: 11, title: "ONN Box Maximum Power", device: "ONN Android Box", desc: "Unlock full streaming potential" },
+            { id: 12, title: "Binge-Watch Paradise", device: "Firestick", desc: "World's largest streaming library" },
+            { id: 13, title: "Smart TV Upgrade", device: "Android Box", desc: "Upgrade any TV for a fraction of the cost" },
+            { id: 14, title: "No More Buffering", device: "Firestick", desc: "Smooth, uninterrupted streaming" },
+            { id: 15, title: "Gaming on Big Screen", device: "Smart TV", desc: "Turn your TV into a gaming console" },
+            { id: 16, title: "News & Weather Updates", device: "Firestick", desc: "Stay informed 24/7" },
+            { id: 17, title: "Music Streaming Hub", device: "Smart TV", desc: "Your music hub at home" },
+            { id: 18, title: "Documentary Library", device: "Android Box", desc: "Learn while you watch" },
+            { id: 19, title: "Comedy Specials", device: "Firestick", desc: "Laugh out loud daily" },
+            { id: 20, title: "Kids Safe Zone", device: "Smart TV", desc: "Safe viewing for kids" },
+            { id: 21, title: "Cooking Shows", device: "Firestick", desc: "Master the kitchen" },
+            { id: 22, title: "Fitness at Home", device: "Smart TV", desc: "Gym at home" },
+            { id: 23, title: "Travel the World", device: "Android Box", desc: "Explore from your couch" },
+            { id: 24, title: "Classic TV Shows", desc: "Relive your favorites" },
+            { id: 25, title: "Horror & Thriller", device: "Smart TV", desc: "Get your scare on" },
+            { id: 26, title: "Anime Collection", device: "Android Box", desc: "World's largest anime library" },
+            { id: 27, title: "Reality TV", device: "Firestick", desc: "Binge all your favorites" },
+            { id: 28, title: "Sci-Fi & Fantasy", device: "Smart TV", desc: "Epic adventures await" },
+            { id: 29, title: "Action Movies", device: "Firestick", desc: "Non-stop excitement" },
+            { id: 30, title: "Complete System Guide", device: "All Devices", desc: "Everything in one place" }
+        ];
+        
+        const gradients = [
+            'linear-gradient(135deg, #0066FF 0%, #6633FF 100%)',
+            'linear-gradient(135deg, #00CC66 0%, #0066FF 100%)',
+            'linear-gradient(135deg, #FF6600 0%, #CC3300 100%)',
+            'linear-gradient(135deg, #6633FF 0%, #FFD700 100%)',
+            'linear-gradient(135deg, #FF66CC 0%, #0066FF 100%)',
+            'linear-gradient(135deg, #0066FF 0%, #00CC66 100%)',
+            'linear-gradient(135deg, #FFD700 0%, #FF6600 100%)',
+            'linear-gradient(135deg, #CC3300 0%, #6633FF 100%)'
+        ];
+        
+        const icons = ['📺', '🎬', '⚡', '🔥', '💎', '🎮', '🌟', '📱', '🎯', '🚀', '🏆', '💰', '🎁', '💪', '🎨'];
+        
+        function createAd(ad) {
+            const frame = document.createElement('div');
+            frame.className = 'ad-frame';
+            frame.onclick = () => openFullScreen(ad);
+            
+            const gradient = gradients[ad.id % gradients.length];
+            
+            frame.innerHTML = `
+                <div class="ad-content" style="background: ${gradient};">
+                    <div class="ad-overlay"></div>
+                    <div class="floating-elements">
+                        ${Array.from({length: 8}, (_, i) => `
+                            <div class="floating-icon" style="
+                                left: ${10 + i * 12}%;
+                                top: ${10 + (i % 3) * 30}%;
+                                animation-delay: ${i * 0.5}s;
+                            ">${icons[i % icons.length]}</div>
+                        `).join('')}
+                    </div>
+                    <div class="ad-title">${ad.title}</div>
+                    <div class="ad-device-visual"></div>
+                    <div class="ad-url">StreamStickPro.com</div>
+                </div>
+                <div class="ad-info">
+                    <h3>Ad #${ad.id}: ${ad.title}</h3>
+                    <p><strong>Device:</strong> ${ad.device || 'All Devices'}</p>
+                    <p>${ad.desc}</p>
+                </div>
+            `;
+            
+            return frame;
+        }
+        
+        function renderAds() {
+            const container = document.getElementById('adsContainer');
+            ads.forEach(ad => {
+                container.appendChild(createAd(ad));
+            });
+        }
+        
+        function openFullScreen(ad) {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modalContent');
+            const gradient = gradients[ad.id % gradients.length];
+            
+            modalContent.innerHTML = `
+                <div class="ad-content" style="background: ${gradient};">
+                    <div class="ad-overlay"></div>
+                    <div class="floating-elements">
+                        ${Array.from({length: 12}, (_, i) => `
+                            <div class="floating-icon" style="
+                                left: ${5 + i * 8}%;
+                                top: ${5 + (i % 4) * 25}%;
+                                animation-delay: ${i * 0.3}s;
+                                font-size: 60px;
+                            ">${icons[i % icons.length]}</div>
+                        `).join('')}
+                    </div>
+                    <div class="ad-title" style="font-size: 96px;">${ad.title}</div>
+                    <div class="ad-device-visual" style="width: 240px; height: 480px;"></div>
+                    <div class="ad-url" style="font-size: 72px;">StreamStickPro.com</div>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+            currentAd = ad;
+        }
+        
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+        
+        let currentAd = null;
+        
+        function downloadCurrent() {
+            if (!currentAd) return;
+            alert(`To download:\n\n1. Right-click the ad\n2. Select "Save Image As"\n3. Or use browser screenshot (F12 → Device Toolbar)\n\nAd: ${currentAd.title}`);
+        }
+        
+        function exportAll() {
+            alert('To export all ads:\n\n1. Use browser extension like "Full Page Screen Capture"\n2. Or screen record each ad\n3. Or use online tools like html2canvas\n\nEach ad is 1080x1920 pixels - perfect for TikTok/YouTube Shorts!');
+        }
+        
+        function viewFullScreen() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            }
+        }
+        
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+        
+        // Render all ads
+        renderAds();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

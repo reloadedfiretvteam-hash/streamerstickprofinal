@@ -5,6 +5,7 @@ import {
   Mail, FileText, Tag, Activity, CheckCircle,
   AlertCircle, Clock, Star, Zap
 } from 'lucide-react';
+import LiveVisitorStatistics from './LiveVisitorStatistics';
 
 interface Stats {
   totalProducts: number;
@@ -422,6 +423,11 @@ export default function AdminDashboardOverview() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Live Visitor Statistics */}
+      <div className="mt-8">
+        <LiveVisitorStatistics />
       </div>
     </div>
   );

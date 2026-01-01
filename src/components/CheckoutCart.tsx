@@ -3,11 +3,6 @@ import { X, Plus, Minus, Copy, Check, DollarSign, Wallet, ShoppingBag, CreditCar
 import { supabase } from '../lib/supabase';
 import OrderConfirmation from './OrderConfirmation';
 import LegalDisclaimer from './LegalDisclaimer';
-<<<<<<< HEAD
-import StripePaymentForm from './StripePaymentForm';
-=======
-// Stripe payment handled via order completion
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 import ValidatedImage from './ValidatedImage';
 
 // Fallback image for cart items
@@ -31,11 +26,7 @@ interface Props {
 }
 
 export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem, onClearCart }: Props) {
-<<<<<<< HEAD
-  const [paymentMethod, setPaymentMethod] = useState<'cashapp' | 'bitcoin' | 'stripe'>('cashapp');
-=======
   const [paymentMethod, setPaymentMethod] = useState<'cashapp' | 'bitcoin' | 'stripe'>('stripe');
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
   const [btcPrice, setBtcPrice] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [copiedField, setCopiedField] = useState('');
@@ -594,7 +585,6 @@ Customer has been sent complete payment instructions including their unique purc
                     <p className="text-gray-400 text-sm mb-4">
                       Secure payment processing powered by Stripe
                     </p>
-<<<<<<< HEAD
                     
                     {paymentError && (
                       <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg flex items-start gap-2">
@@ -660,14 +650,6 @@ Customer has been sent complete payment instructions including their unique purc
                         }}
                       />
                     )}
-=======
-                    <div className="text-white">
-                      <p className="mb-4">Stripe payment will be processed after order creation.</p>
-                      <p className="text-sm text-gray-400 mb-4">
-                        Complete your order below and Stripe payment will be handled securely.
-                      </p>
-                    </div>
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
                   </div>
                 )}
 

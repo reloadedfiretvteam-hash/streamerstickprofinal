@@ -2771,5 +2771,9 @@ Host: https://streamstickpro.com
   // Register SEO Toolkit Routes (Rank Math Premium Clone)
   registerSeoRoutes(app);
 
+  // Register Analytics Routes
+  const { registerAnalyticsRoutes } = await import('./routes-analytics');
+  registerAnalyticsRoutes(app);
+
   return httpServer;
 }

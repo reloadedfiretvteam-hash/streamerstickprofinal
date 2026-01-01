@@ -18,7 +18,10 @@ export function useTracking() {
   useEffect(() => {
     const currentPath = location + window.location.search;
     
-    if (lastTrackedPath.current === currentPath) return;
+    // Skip if we already tracked this path
+    if (lastTrackedPath.current === currentPath) {
+      return;
+    }
     lastTrackedPath.current = currentPath;
 
     const trackPageView = async () => {
@@ -26,19 +29,46 @@ export function useTracking() {
         const sessionId = getSessionId();
         const referrer = document.referrer || null;
         const userAgent = navigator.userAgent;
+        const fullUrl = window.location.href;
 
-        await apiCall('/api/track', {
+        const response = await apiCall('/api/track', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             sessionId,
-            pageUrl: currentPath,
+            pageUrl: fullUrl,
             referrer,
             userAgent,
           }),
         });
-      } catch (error) {
-        console.warn('Failed to track page view:', error);
+
+        if (!response.ok) {
+          const responseText = await response.text();
+          let responseData;
+          try {
+            responseData = JSON.parse(responseText);
+          } catch {
+            responseData = { error: responseText };
+          }
+          throw new Error(`Tracking failed: ${response.status} ${responseData.error || responseText}`);
+        }
+        
+        // Parse and log success
+        try {
+          const result = await response.json();
+          if (import.meta.env.DEV) {
+            console.log('✅ Visitor tracked successfully:', result);
+          }
+        } catch {
+          // Response might be empty, that's okay
+        }
+      } catch (error: any) {
+        // Log errors for debugging but don't interrupt user experience
+        console.error('❌ Failed to track page view:', {
+          error: error.message,
+          url: window.location.href,
+          sessionId: getSessionId()
+        });
       }
     };
 

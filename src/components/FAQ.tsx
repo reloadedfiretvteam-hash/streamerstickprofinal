@@ -158,12 +158,15 @@ export default function FAQ() {
             <p className="text-gray-600 mb-6">
               Our customer support team is available 24/7 to help you with any questions or concerns.
             </p>
-            <a
-              href="mailto:reloadedfiretvteam@gmail.com"
+            <button
+              onClick={() => {
+                const event = new CustomEvent('openContactModal');
+                window.dispatchEvent(event);
+              }}
               className="inline-block px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl font-semibold transition-all transform hover:scale-105"
             >
               Contact Support
-            </a>
+            </button>
           </div>
         </div>
       </div>

@@ -107,14 +107,14 @@ export default function WhatYouGetVideo({ videoUrl }: WhatYouGetVideoProps) {
 
           <div className="mt-12 text-center">
             <a
-              href="#shop"
+              href="/shop"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold text-lg rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-orange-500/50"
             >
               <Play className="w-5 h-5" />
-              See Products Below
+              Shop All Products
             </a>
             <p className="text-blue-200 text-sm mt-3">
-              Scroll down to explore our Fire Stick packages
+              Browse our complete collection of Fire Sticks and IPTV subscriptions
             </p>
           </div>
         </div>

@@ -6,7 +6,6 @@ import About from './components/About';
 import WhyChooseUs from './components/WhyChooseUs';
 import Shop from './components/Shop';
 import MediaCarousel from './components/MediaCarousel';
-// IPTVPreviewVideo removed - duplicate "See What You Get" section
 // The video is now displayed only in the WhatYouGetVideo component
 import WhatYouGetVideo from './components/WhatYouGetVideo';
 import WhatIsIPTV from './components/WhatIsIPTV';
@@ -18,6 +17,7 @@ import LegalDisclaimer from './components/LegalDisclaimer';
 import EmailCaptureBottom from './components/EmailCaptureBottom';
 import Footer from './components/Footer';
 import EmailPopup from './components/EmailPopup';
+import ContactFormModal from './components/ContactFormModal';
 import CheckoutCart from './components/CheckoutCart';
 import SEOHead from './components/SEOHead';
 import VisitorTracker from './components/VisitorTracker';
@@ -32,6 +32,7 @@ import FeatureIconRow from './components/FeatureIconRow';
 import HowItWorksSteps from './components/HowItWorksSteps';
 // ConciergePage and SecureCheckoutPage removed - handled by AppRouter instead
 import { useAnalytics, trackEmailCapture } from './hooks/useAnalytics';
+// useTrackView moved to AppRouter to track all routes
 
 interface CartItem {
   id: string;
@@ -59,11 +60,7 @@ const conciergeHosts = (import.meta.env.VITE_CONCIERGE_HOSTS || '')
   .map((host: string) => host.trim().toLowerCase())
   .filter(Boolean);
 
-<<<<<<< HEAD
 // Optional: comma‑separated list of secure checkout hosts.
-=======
-// Optional: comma‑separated list of secure/Stripe-only hosts.
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 // Example value in env: secure.streamstickpro.com
 const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || '')
   .split(',')
@@ -72,6 +69,18 @@ const secureHosts = (import.meta.env.VITE_SECURE_HOSTS || '')
 
 function App() {
   const [isConciergeDomain, setIsConciergeDomain] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
+  // Listen for custom event to open contact modal from anywhere
+  useEffect(() => {
+    const handleOpenContactModal = () => {
+      setIsContactModalOpen(true);
+    };
+    window.addEventListener('openContactModal', handleOpenContactModal);
+    return () => {
+      window.removeEventListener('openContactModal', handleOpenContactModal);
+    };
+  }, []);
   const [isSecureDomain, setIsSecureDomain] = useState(false);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [emailCaptured, setEmailCaptured] = useState(false);
@@ -105,11 +114,7 @@ function App() {
 
     setIsConciergeDomain(isConciergeHost || isConciergePath);
 
-<<<<<<< HEAD
     // Secure domain: lock to secure checkout experience.
-=======
-    // Secure domain: lock to Stripe checkout experience.
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
     const isSecureHost =
       secureHosts.length > 0 &&
       secureHosts.some((allowedHost: string) => hostname === allowedHost || hostname.includes(allowedHost));
@@ -187,31 +192,15 @@ function App() {
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-<<<<<<< HEAD
-  // Secure domain: show secure checkout only.
-  if (isSecureDomain) {
-    return (
-      <ErrorBoundary>
-        <SecureCheckoutPage />
-      </ErrorBoundary>
-    );
-  }
-
-  // Concierge domain: dedicated concierge landing experience.
-  if (isConciergeDomain) {
-    return <ConciergePage />;
-  }
-=======
-  // Note: Secure domain and concierge domain routing is now handled by AppRouter
-  // This App component is only for the main homepage
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
+  // Note: Page view tracking is now handled at the AppRouter level
+  // to ensure all routes are tracked, not just the home page
 
   return (
     <ErrorBoundary>
       <SEOHead />
       <GoogleAnalytics />
       <StructuredData />
-      <VisitorTracker />
+      {/* VisitorTracker moved to AppRouter to ensure it tracks all routes */}
       <div className="min-h-screen bg-gray-900">
         <Navigation
           cartItemCount={cartItemCount}
@@ -245,8 +234,13 @@ function App() {
         <FAQ />
         <EmailCaptureBottom onEmailCapture={handleEmailCapture} />
         <LegalDisclaimer />
-        <Footer />
+        <Footer onContactClick={() => setIsContactModalOpen(true)} />
         <StickyBuyButton />
+
+        <ContactFormModal
+          isOpen={isContactModalOpen}
+          onClose={() => setIsContactModalOpen(false)}
+        />
 
         {showEmailPopup && !emailCaptured && (
           <EmailPopup

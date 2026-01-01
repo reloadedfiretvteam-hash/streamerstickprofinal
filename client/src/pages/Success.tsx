@@ -27,11 +27,46 @@ export default function Success() {
     const sessionId = params.get("session_id");
     
     if (sessionId) {
+      // Fetch order details
       fetch(`/api/checkout/session/${sessionId}`)
         .then(res => res.json())
         .then(data => {
           if (data.order) {
             setOrderDetails(data);
+            
+            // Send emails directly (separate from webhooks, like free trials)
+            // Only send if payment was successful
+            if (data.paymentStatus === 'paid') {
+              fetch(`/api/checkout/send-emails`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId }),
+              })
+              .then(res => {
+                if (!res.ok) {
+                  throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                return res.json();
+              })
+              .then(emailResult => {
+                if (emailResult.success) {
+                  console.log('✅ Emails sent successfully:', emailResult.results);
+                  console.log('✅ Order confirmation:', emailResult.results.orderConfirmation);
+                  console.log('✅ Credentials:', emailResult.results.credentials);
+                  console.log('✅ Owner notification:', emailResult.results.ownerNotification);
+                } else {
+                  console.error('❌ Email sending failed:', emailResult);
+                  if (emailResult.errors && emailResult.errors.length > 0) {
+                    console.error('❌ Errors:', emailResult.errors);
+                  }
+                }
+              })
+              .catch(err => {
+                console.error('❌ Error calling send-emails endpoint:', err);
+                console.error('❌ This means emails were NOT sent. Check network tab and server logs.');
+                // Don't show error to user - but log it clearly
+              });
+            }
           }
           setLoading(false);
         })

@@ -1,12 +1,4 @@
-import { ShoppingCart, Play } from 'lucide-react';
-<<<<<<< HEAD
-import { getStorageUrl, supabase } from '../lib/supabase';
-import { useEffect, useState } from 'react';
-
-export default function Hero() {
-  const [heroImageUrl, setHeroImageUrl] = useState<string>(getStorageUrl('images', 'hero-firestick-breakout.jpg'));
-  const [imageError, setImageError] = useState(false);
-=======
+import { Play } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getStorageUrl } from '../lib/supabase';
 import { supabase } from '../lib/supabase';
@@ -14,6 +6,7 @@ import { supabase } from '../lib/supabase';
 export default function Hero() {
   // Start with a default image URL to prevent blank flash
   const [heroImageUrl, setHeroImageUrl] = useState<string>(getStorageUrl('images', 'hero-firestick-breakout.jpg'));
+  const [imageError, setImageError] = useState(false);
   
   // Try multiple hero image filename variations
   const heroImageVariations = [
@@ -25,48 +18,19 @@ export default function Hero() {
     'Hero-Image.jpg',
     'hero-firestick-breakout.jpg', // Original fallback
   ];
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
 
   useEffect(() => {
     loadHeroImage();
   }, []);
 
   const loadHeroImage = async () => {
-<<<<<<< HEAD
-    try {
-      // Try to load from database first
-      const { data, error } = await supabase
-=======
     // First, try to get from section_images table if it exists
     try {
       const { data } = await supabase
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
         .from('section_images')
         .select('image_url')
         .eq('section_name', 'hero')
         .single();
-<<<<<<< HEAD
-
-      if (!error && data && data.image_url) {
-        // If image_url is just a filename (no http/https), use getStorageUrl
-        if (!data.image_url.startsWith('http')) {
-          const url = getStorageUrl('images', data.image_url);
-          setHeroImageUrl(url);
-        } else {
-          setHeroImageUrl(data.image_url);
-        }
-      } else {
-        // If table doesn't exist or no data, silently use fallback
-        // This is normal if SQL hasn't been run yet
-        console.log('Hero: Using default image (section_images table may not exist yet)');
-      }
-    } catch (error) {
-      // Table doesn't exist - this is OK, use fallback
-      console.log('Hero: Using default image - section_images table not found');
-    }
-  };
-
-=======
       
       if (data?.image_url) {
         const url = data.image_url.startsWith('http') 
@@ -113,11 +77,6 @@ export default function Hero() {
     // If all variations fail, use the original as fallback
     setHeroImageUrl(getStorageUrl('images', 'hero-firestick-breakout.jpg'));
   };
->>>>>>> 3a623832d6a312e37476e1680a1e40c0a75617e7
-  const goToShop = () => {
-    window.location.href = '/shop';
-  };
-
   const scrollToAbout = () => {
     document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -178,15 +137,7 @@ export default function Hero() {
             18,000+ live channels • 60,000+ movies & shows • All sports & PPV events
           </p>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8 animate-slide-up animation-delay-400">
-            <button
-              onClick={goToShop}
-              className="group px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-xl font-bold text-lg transition-all transform hover:scale-105 hover:shadow-2xl shadow-orange-500/50 inline-flex items-center justify-center gap-3"
-            >
-              <ShoppingCart className="w-6 h-6 group-hover:animate-bounce" />
-              Shop Now
-              <span className="bg-white/20 rounded-full px-3 py-1 text-xs font-semibold">Save up to 50%</span>
-            </button>
+          <div className="flex justify-center mb-8 animate-slide-up animation-delay-400">
             <button
               onClick={scrollToAbout}
               className="px-8 py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 border-2 border-white/20 hover:border-white/40 rounded-xl font-bold text-lg transition-all inline-flex items-center justify-center gap-2"

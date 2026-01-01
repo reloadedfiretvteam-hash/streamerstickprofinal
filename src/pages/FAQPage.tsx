@@ -1,6 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
 import { useEffect } from 'react';
 import Footer from '../components/Footer';
+import ContactForm from '../components/ContactForm';
 
 export default function FAQPage() {
   useEffect(() => {
@@ -140,15 +141,9 @@ export default function FAQPage() {
           </button>
         </div>
 
-        {/* Contact Support */}
-        <div className="mt-12 text-center">
-          <p className="text-gray-400 mb-4">Questions or concerns?</p>
-          <a
-            href="mailto:reloadedfiretvteam@gmail.com"
-            className="text-orange-400 hover:text-orange-300 font-semibold text-lg underline"
-          >
-            Contact Support: reloadedfiretvteam@gmail.com
-          </a>
+        {/* Contact Support Form */}
+        <div className="mt-12">
+          <ContactForm defaultEmail="reloadedfiretvteam@gmail.com" />
         </div>
       </main>
 

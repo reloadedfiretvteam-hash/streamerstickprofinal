@@ -45,6 +45,7 @@ import SystemHealthCheck from '../components/custom-admin/SystemHealthCheck';
 import CompleteSEOManager from '../components/custom-admin/CompleteSEOManager';
 import ElementorStylePageBuilder from '../components/custom-admin/ElementorStylePageBuilder';
 import RankMathProSEOManager from '../components/custom-admin/RankMathProSEOManager';
+import SEOAdsManager from '../components/custom-admin/SEOAdsManager';
 import UltraProductManager from '../components/custom-admin/UltraProductManager';
 import MarketingAutomation from '../components/custom-admin/MarketingAutomation';
 import AdvancedFormBuilder from '../components/custom-admin/AdvancedFormBuilder';
@@ -205,6 +206,7 @@ export default function UnifiedAdminDashboard() {
 
     // SEO & Marketing
     { id: 'seo-dashboard', title: 'SEO Dashboard', icon: TrendingUp, color: 'from-cyan-500 to-blue-600', description: 'Complete SEO management with Rank Math', component: MathRankSEODashboard, category: 'seo', featured: true },
+    { id: 'seo-ads', title: 'SEO Ads Manager', icon: Image, color: 'from-purple-500 to-pink-600', description: 'Manage 50+ SEO-optimized ad pages with images linking to home page', component: SEOAdsManager, category: 'seo', featured: true },
     { id: 'rankmath-seo', title: 'Rank Math Pro SEO', icon: TrendingUp, color: 'from-orange-500 to-red-600', description: 'Advanced SEO optimization tool', component: RankMathProSEOManager, category: 'seo', featured: true },
     { id: 'complete-seo', title: 'Complete SEO Manager', icon: Search, color: 'from-green-500 to-teal-600', description: 'Full-featured SEO management system', component: CompleteSEOManager, category: 'seo' },
     { id: 'seo-settings', title: 'SEO Settings', icon: Search, color: 'from-purple-500 to-indigo-600', description: 'Configure SEO preferences', component: SimpleSEOManager, category: 'seo' },

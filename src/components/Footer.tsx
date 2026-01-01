@@ -1,7 +1,11 @@
 import { Mail, DollarSign, CreditCard, Flame } from 'lucide-react';
 import AdminFooterLoginButton from './AdminFooterLoginButton';
 
-export default function Footer() {
+interface FooterProps {
+  onContactClick?: () => void;
+}
+
+export default function Footer({ onContactClick }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -17,14 +21,21 @@ export default function Footer() {
               Premium IPTV streaming with 18,000+ channels and 60,000+ movies & series. Jailbroken Fire Sticks available.
             </p>
             <div className="flex gap-3">
-              <a href="mailto:reloadedfiretvteam@gmail.com" className="w-10 h-10 bg-gray-800 hover:bg-orange-600 rounded-lg flex items-center justify-center transition-colors">
+              <button
+                onClick={() => onContactClick?.()}
+                className="w-10 h-10 bg-gray-800 hover:bg-orange-600 rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Contact support"
+              >
                 <Mail className="w-5 h-5" />
-              </a>
+              </button>
             </div>
             <div className="mt-4">
-              <a href="mailto:reloadedfiretvteam@gmail.com" className="text-sm text-orange-400 hover:text-orange-300">
+              <button
+                onClick={() => onContactClick?.()}
+                className="text-sm text-orange-400 hover:text-orange-300 cursor-pointer text-left"
+              >
                 reloadedfiretvteam@gmail.com
-              </a>
+              </button>
             </div>
           </div>
 
@@ -58,7 +69,14 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><a href="/faq" className="hover:text-orange-400 transition-colors">FAQ</a></li>
               <li><a href="/track-order" className="hover:text-orange-400 transition-colors">Track Order</a></li>
-              <li><a href="mailto:reloadedfiretvteam@gmail.com" className="hover:text-orange-400 transition-colors">Contact Us</a></li>
+              <li>
+                <button
+                  onClick={() => onContactClick?.()}
+                  className="hover:text-orange-400 transition-colors text-left"
+                >
+                  Contact Us
+                </button>
+              </li>
               <li>
                 <AdminFooterLoginButton />
               </li>

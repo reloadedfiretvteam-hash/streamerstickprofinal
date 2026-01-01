@@ -27,7 +27,6 @@ import { StickyMobileCTA, ScrollToTopButton } from "@/components/StickyMobileCTA
 import { SEOSchema } from "@/components/SEOSchema";
 import { ProductQuickView, QuickViewButton } from "@/components/ProductQuickView";
 import { MobileNav } from "@/components/MobileNav";
-import { CountdownTimer } from "@/components/CountdownTimer";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { FloatingCTA } from "@/components/FloatingCTA";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
@@ -440,36 +439,6 @@ export default function MainStore() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productListData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData) }} />
       
-      {/* Customer Support Banner - Top */}
-      <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-red-500 text-white py-2 px-4 text-center" data-testid="banner-support-top">
-        <div className="container mx-auto flex items-center justify-center gap-2 flex-wrap text-sm md:text-base">
-          <Mail className="w-4 h-4 md:w-5 md:h-5" />
-          <span className="font-medium">Customer Support:</span>
-          <a 
-            href="mailto:reloadedfiretvteam@gmail.com" 
-            className="font-bold text-white hover:text-orange-100 underline decoration-2 underline-offset-2 transition-colors"
-            data-testid="link-support-email-top"
-          >
-            reloadedfiretvteam@gmail.com
-          </a>
-          <span className="hidden md:inline">• 24/7 Support</span>
-        </div>
-      </div>
-
-      {/* Sticky Sale Banner */}
-      <div className="bg-gradient-to-r from-green-600 via-green-500 to-emerald-500 text-white py-2 px-4 text-center font-bold animate-pulse" data-testid="banner-sale">
-        <div className="container mx-auto flex items-center justify-center gap-3 flex-wrap">
-          <Gift className="w-5 h-5" />
-          <span className="text-sm md:text-base">🔥 LIMITED TIME SALE: Buy 2+ Fire Sticks Save 10% • Buy 3+ Save 15%! 🔥</span>
-          <button 
-            onClick={scrollToShop}
-            className="bg-white text-green-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-green-100 transition-colors"
-            data-testid="button-shop-sale"
-          >
-            Shop Now →
-          </button>
-        </div>
-      </div>
 
       {/* FAQ schema is already in index.html - don't duplicate */}
       
@@ -583,7 +552,7 @@ export default function MainStore() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-lg sm:text-xl md:text-2xl text-orange-100 mb-8 max-w-3xl mx-auto"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-orange-100 mb-6 md:mb-8 max-w-3xl mx-auto px-4"
             >
               Extensive live content • Thousands of movies & shows • Comprehensive sports coverage
             </motion.p>
@@ -592,7 +561,7 @@ export default function MainStore() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-col sm:flex-row justify-center gap-4 mb-8"
+              className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-6 md:mb-8 px-4"
             >
               <button
                 onClick={scrollToShop}
@@ -655,9 +624,6 @@ export default function MainStore() {
 
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none"></div>
       </section>
-
-      {/* Countdown Timer */}
-      <CountdownTimer />
 
       {/* Trust Badges */}
       <TrustBadges />
