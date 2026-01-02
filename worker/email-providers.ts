@@ -16,51 +16,15 @@ export interface EmailResult {
 
 /**
  * Unified email sending with multiple provider fallbacks
- * Tries MailChannels (Cloudflare) first, then Resend
+ * Tries Resend first (more reliable delivery), then MailChannels as fallback
  */
 export async function sendEmail(options: EmailOptions, env: Env): Promise<EmailResult> {
   const fromEmail = options.from || env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
   
-  // Try MailChannels first (Cloudflare built-in, free, reliable)
-  try {
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email-providers.ts:18',message:'Attempting MailChannels email',data:{to:options.to,subject:options.subject,from:fromEmail},timestamp:Date.now(),sessionId:'debug-session',runId:'email-provider-test',hypothesisId:'A'})}).catch(()=>{});
-    }
-    // #endregion
-    
-    const mailChannelsResult = await sendViaMailChannels({
-      ...options,
-      from: fromEmail,
-    });
-    
-    if (mailChannelsResult.success) {
-      // #region agent log
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email-providers.ts:28',message:'MailChannels email sent successfully',data:{to:options.to},timestamp:Date.now(),sessionId:'debug-session',runId:'email-provider-test',hypothesisId:'A'})}).catch(()=>{});
-      }
-      // #endregion
-      return mailChannelsResult;
-    }
-    
-    console.warn(`[EMAIL] MailChannels failed, trying Resend: ${mailChannelsResult.error}`);
-  } catch (error: any) {
-    console.warn(`[EMAIL] MailChannels error: ${error.message}`);
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-      fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email-providers.ts:38',message:'MailChannels threw error, trying Resend',data:{error:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'email-provider-test',hypothesisId:'A'})}).catch(()=>{});
-    }
-    // #endregion
-  }
-
-  // Fallback to Resend
+  // Try Resend first (better deliverability for customer emails)
   if (env.RESEND_API_KEY) {
     try {
-      // #region agent log
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email-providers.ts:47',message:'Attempting Resend email',data:{to:options.to,subject:options.subject,hasResendKey:!!env.RESEND_API_KEY},timestamp:Date.now(),sessionId:'debug-session',runId:'email-provider-test',hypothesisId:'B'})}).catch(()=>{});
-      }
-      // #endregion
+      console.log(`[EMAIL] Attempting Resend email to ${options.to}`);
       
       const resendResult = await sendViaResend({
         ...options,
@@ -68,35 +32,40 @@ export async function sendEmail(options: EmailOptions, env: Env): Promise<EmailR
       }, env);
       
       if (resendResult.success) {
-        // #region agent log
-        if (typeof fetch !== 'undefined') {
-          fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email-providers.ts:57',message:'Resend email sent successfully',data:{to:options.to},timestamp:Date.now(),sessionId:'debug-session',runId:'email-provider-test',hypothesisId:'B'})}).catch(()=>{});
-        }
-        // #endregion
+        console.log(`[EMAIL] Resend email sent successfully to ${options.to}`);
         return resendResult;
       }
       
-      console.warn(`[EMAIL] Resend failed: ${resendResult.error}`);
+      console.warn(`[EMAIL] Resend failed, trying MailChannels: ${resendResult.error}`);
     } catch (error: any) {
       console.error(`[EMAIL] Resend error: ${error.message}`);
-      // #region agent log
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email-providers.ts:67',message:'Resend threw error',data:{error:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'email-provider-test',hypothesisId:'B'})}).catch(()=>{});
-      }
-      // #endregion
     }
   } else {
-    console.warn(`[EMAIL] RESEND_API_KEY not configured, skipping Resend fallback`);
+    console.warn(`[EMAIL] RESEND_API_KEY not configured, trying MailChannels`);
+  }
+
+  // Fallback to MailChannels (Cloudflare built-in)
+  try {
+    console.log(`[EMAIL] Attempting MailChannels email to ${options.to}`);
+    
+    const mailChannelsResult = await sendViaMailChannels({
+      ...options,
+      from: fromEmail,
+    });
+    
+    if (mailChannelsResult.success) {
+      console.log(`[EMAIL] MailChannels email sent to ${options.to}`);
+      return mailChannelsResult;
+    }
+    
+    console.warn(`[EMAIL] MailChannels failed: ${mailChannelsResult.error}`);
+  } catch (error: any) {
+    console.warn(`[EMAIL] MailChannels error: ${error.message}`);
   }
 
   // All providers failed
-  const errorMsg = 'All email providers failed. MailChannels and Resend both unavailable.';
+  const errorMsg = 'All email providers failed. Resend and MailChannels both unavailable.';
   console.error(`[EMAIL] ${errorMsg}`);
-  // #region agent log
-  if (typeof fetch !== 'undefined') {
-    fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'email-providers.ts:78',message:'All email providers failed',data:{to:options.to,hasResendKey:!!env.RESEND_API_KEY},timestamp:Date.now(),sessionId:'debug-session',runId:'email-provider-test',hypothesisId:'C'})}).catch(()=>{});
-  }
-  // #endregion
   return {
     success: false,
     provider: 'none',
