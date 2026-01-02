@@ -143,9 +143,7 @@ export function createVisitorRoutes() {
     }
   });
 
-  // Admin stats endpoint - placed here to avoid auth middleware
-  // Uses service role key internally, so no auth needed
-  app.get('/admin/stats', async (c) => {
+  app.get('/stats', async (c) => {
     try {
       console.log('[VISITOR_STATS] Endpoint called at', new Date().toISOString());
       
