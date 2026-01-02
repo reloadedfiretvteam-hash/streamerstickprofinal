@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import Stripe from 'stripe';
 import { getStorage } from '../helpers';
-import { sendCredentialsEmail } from '../email';
+import { sendCredentialsEmail, sendOrderConfirmation } from '../email';
 import { createCustomerSchema, updateCustomerSchema } from '../../shared/schema';
 import type { Env } from '../index';
 
@@ -130,6 +130,33 @@ export function createAdminRoutes() {
     } catch (error: any) {
       console.error("Error resending credentials:", error);
       return c.json({ error: "Failed to resend credentials" }, 500);
+    }
+  });
+
+  app.post('/orders/:id/resend-email', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const order = await storage.getOrder(c.req.param('id'));
+      if (!order) {
+        return c.json({ error: "Order not found" }, 404);
+      }
+
+      const body = await c.req.json().catch(() => ({}));
+      if (body.email) {
+        order.customerEmail = body.email;
+      }
+
+      if (!order.customerEmail) {
+        return c.json({ error: "No customer email available" }, 400);
+      }
+
+      await sendOrderConfirmation(order, c.env);
+      await sendCredentialsEmail(order, c.env, storage);
+
+      return c.json({ success: true, message: "Confirmation email resent successfully" });
+    } catch (error: any) {
+      console.error("Error resending confirmation email:", error);
+      return c.json({ error: "Failed to resend confirmation email: " + error.message }, 500);
     }
   });
 
@@ -816,6 +843,53 @@ export function createAdminRoutes() {
     } catch (error: any) {
       console.error("Error deleting customer:", error);
       return c.json({ error: "Failed to delete customer" }, 500);
+    }
+  });
+
+  app.post('/customers/:id/resend-welcome', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const customer = await storage.getCustomer(c.req.param('id'));
+      if (!customer) {
+        return c.json({ error: "Customer not found" }, 404);
+      }
+
+      const body = await c.req.json().catch(() => ({}));
+      const targetEmail = body.email || customer.email;
+
+      if (!targetEmail) {
+        return c.json({ error: "No email address available" }, 400);
+      }
+
+      const orders = await storage.getOrdersByEmail(targetEmail);
+      const latestOrder = orders.length > 0 ? orders[orders.length - 1] : null;
+
+      if (latestOrder) {
+        await sendCredentialsEmail(latestOrder, c.env, storage);
+      } else {
+        const syntheticOrder = {
+          id: `welcome-${customer.id}`,
+          customerEmail: targetEmail,
+          customerName: customer.fullName || customer.username,
+          realProductName: 'Account Access',
+          realProductId: 'welcome',
+          amount: 0,
+          status: 'paid' as const,
+          stripePaymentIntentId: null,
+          stripeCheckoutSessionId: null,
+          createdAt: new Date().toISOString(),
+          credentialsSent: false,
+          fulfillmentStatus: null,
+          amazonOrderId: null,
+          countryPreference: null,
+        };
+        await sendCredentialsEmail(syntheticOrder as any, c.env, storage);
+      }
+
+      return c.json({ success: true, message: "Welcome email resent successfully" });
+    } catch (error: any) {
+      console.error("Error resending welcome email:", error);
+      return c.json({ error: "Failed to resend welcome email: " + error.message }, 500);
     }
   });
 

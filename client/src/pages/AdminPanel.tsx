@@ -48,7 +48,16 @@ import {
   Github,
   GitBranch,
   CloudUpload,
-  CheckCheck
+  CheckCheck,
+  Zap,
+  Mail,
+  RotateCcw,
+  ArrowUpRight,
+  Timer,
+  MousePointer,
+  Navigation,
+  Percent,
+  Download
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1122,6 +1131,56 @@ export default function AdminPanel() {
     } catch (error) {
       console.error('Error resetting customer password:', error);
       showToast('Failed to reset password', 'error');
+    }
+  };
+
+  const [resendingEmail, setResendingEmail] = useState<string | null>(null);
+
+  const resendConfirmationEmail = async (orderId: string, customerEmail: string) => {
+    setResendingEmail(orderId);
+    try {
+      const response = await authFetch(`/api/admin/orders/${orderId}/resend-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: customerEmail }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showToast('Confirmation email resent successfully!', 'success');
+      } else {
+        showToast(result.error || 'Failed to resend email', 'error');
+      }
+    } catch (error) {
+      console.error('Error resending email:', error);
+      showToast('Failed to resend confirmation email', 'error');
+    } finally {
+      setResendingEmail(null);
+    }
+  };
+
+  const resendWelcomeEmail = async (customerId: string, customerEmail: string) => {
+    setResendingEmail(customerId);
+    try {
+      const response = await authFetch(`/api/admin/customers/${customerId}/resend-welcome`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: customerEmail }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showToast('Welcome email resent to customer!', 'success');
+      } else {
+        showToast(result.error || 'Failed to resend welcome email', 'error');
+      }
+    } catch (error) {
+      console.error('Error resending welcome email:', error);
+      showToast('Failed to resend welcome email', 'error');
+    } finally {
+      setResendingEmail(null);
     }
   };
 
@@ -3025,14 +3084,15 @@ export default function AdminPanel() {
                           ) : customerOrders.length === 0 ? (
                             <p className="text-gray-500 text-sm text-center py-4">No orders found</p>
                           ) : (
-                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                            <div className="space-y-2 max-h-64 overflow-y-auto">
                               {customerOrders.map((order) => (
-                                <div key={order.id} className="bg-gray-700/50 rounded-lg p-3 text-sm">
-                                  <div className="flex justify-between items-start">
+                                <div key={order.id} className="bg-gray-700/50 rounded-lg p-3 text-sm border border-gray-600/50">
+                                  <div className="flex justify-between items-start mb-2">
                                     <div>
                                       <p className="text-white font-medium">{order.realProductName || 'Product'}</p>
-                                      <p className="text-gray-400 text-xs">
-                                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Unknown date'}
+                                      <p className="text-gray-400 text-xs flex items-center gap-1">
+                                        <Timer className="w-3 h-3" />
+                                        {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Unknown date'}
                                       </p>
                                     </div>
                                     <div className="text-right">
@@ -3045,6 +3105,23 @@ export default function AdminPanel() {
                                         {order.status || 'pending'}
                                       </Badge>
                                     </div>
+                                  </div>
+                                  <div className="flex justify-end pt-2 border-t border-gray-600/30">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => resendConfirmationEmail(order.id, selectedCustomer.email)}
+                                      disabled={resendingEmail === order.id}
+                                      className="text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                                      data-testid={`button-resend-email-${order.id}`}
+                                    >
+                                      {resendingEmail === order.id ? (
+                                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                      ) : (
+                                        <Mail className="w-3 h-3 mr-1" />
+                                      )}
+                                      Resend Confirmation
+                                    </Button>
                                   </div>
                                 </div>
                               ))}
@@ -3073,6 +3150,21 @@ export default function AdminPanel() {
                               <X className="w-4 h-4" />
                             </Button>
                           </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => resendWelcomeEmail(selectedCustomer.id, selectedCustomer.email)}
+                            disabled={resendingEmail === selectedCustomer.id}
+                            className="w-full border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
+                            data-testid="button-resend-welcome"
+                          >
+                            {resendingEmail === selectedCustomer.id ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <Mail className="w-4 h-4 mr-2" />
+                            )}
+                            Resend Welcome Email
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"
