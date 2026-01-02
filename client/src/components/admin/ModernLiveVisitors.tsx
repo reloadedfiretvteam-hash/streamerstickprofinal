@@ -52,7 +52,7 @@ export default function ModernLiveVisitors() {
     try {
       setLoading(true);
       
-      const token = localStorage.getItem('custom_admin_token');
+      const token = localStorage.getItem('admin_auth_token');
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -62,37 +62,11 @@ export default function ModernLiveVisitors() {
         headers,
       });
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch {
-          errorData = { error: errorText };
-        }
-        console.error('Failed to fetch visitor stats:', response.status, errorData);
-        // Set error state instead of null
-        setData({
-          totalVisitors: 0,
-          todayVisitors: 0,
-          weekVisitors: 0,
-          onlineNow: 0,
-          liveVisitors: [],
-          countryBreakdown: [],
-          regionBreakdown: [],
-          cityBreakdown: [],
-          pageBreakdown: [],
-          deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0, bot: 0 },
-          hourlyDistribution: [],
-          monthVisitors: 0,
-          error: errorData.error || errorText,
-          errorCode: errorData.errorCode,
-          errorHint: errorData.errorHint,
-        });
-        return;
-      }
-      
       const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || `Failed to fetch stats: ${response.status}`);
+      }
       
       if (result.data) {
         setData(result.data);
