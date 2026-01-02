@@ -52,6 +52,7 @@ app.use('/api/admin/*', authMiddleware);
 app.route('/api/admin', createAdminRoutes());
 app.route('/api/stripe', createWebhookRoutes());
 app.route('/api/track', createVisitorRoutes());
+app.route('/api/admin/visitors', createVisitorRoutes());
 app.route('/api/customer', createCustomerRoutes());
 app.route('/api/free-trial', createTrialRoutes());
 app.route('/api/blog', createBlogRoutes());
