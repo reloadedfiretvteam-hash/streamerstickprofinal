@@ -26,12 +26,6 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
       
-      - name: Run Database Migration
-        run: npx tsx scripts/run-supabase-migration.ts
-        env:
-          SUPABASE_DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        continue-on-error: true
-      
       - name: Build for Cloudflare Workers
         run: npx tsx script/build-worker.ts
         env:
