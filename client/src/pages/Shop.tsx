@@ -269,17 +269,180 @@ export default function Shop() {
             </p>
           </motion.div>
 
+          {/* IPTV Live TV Plans - DISPLAYED FIRST (Most Popular) */}
+          <div className="mb-20">
+            <h3 className="text-3xl md:text-4xl font-bold mb-4 text-center flex items-center justify-center gap-3">
+              <Zap className="w-8 h-8 text-blue-500" />
+              Premium Live TV Subscriptions
+            </h3>
+            <p className="text-center text-gray-300 mb-8 max-w-2xl mx-auto">
+              Choose your subscription length and number of devices. Multi-device plans let you stream on multiple TVs, phones, or tablets at the same time!
+            </p>
+            
+            {/* Free Trial Box */}
+            <FreeTrial />
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {iptvPricingMatrix.map((plan, index) => {
+                const deviceCount = selectedDevices[plan.duration];
+                const selectedPrice = plan.prices.find(p => p.devices === deviceCount) || plan.prices[0];
+                const cardGradients = [
+                  'from-slate-800 via-slate-900 to-gray-900',
+                  'from-blue-950/50 via-slate-900 to-gray-900',
+                  'from-cyan-950/50 via-slate-900 to-gray-900',
+                  'from-emerald-950/50 via-slate-900 to-gray-900'
+                ];
+                
+                return (
+                  <div
+                    key={plan.duration}
+                    className={`relative rounded-2xl overflow-hidden transform transition-all duration-300 group ${
+                      plan.popular 
+                        ? 'ring-4 ring-blue-500 shadow-2xl shadow-blue-500/50 scale-105' 
+                        : 'hover:shadow-2xl hover:shadow-blue-500/20'
+                    }`}
+                    data-testid={`card-product-iptv-${plan.duration}`}
+                  >
+                    <div className={`absolute inset-0 bg-gradient-to-b ${cardGradients[index]} opacity-95`} />
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent opacity-50" />
+                    <div className={`absolute inset-0 border-2 ${
+                      plan.popular 
+                        ? 'border-blue-500/50' 
+                        : plan.duration === '1yr' 
+                          ? 'border-green-500/30 hover:border-green-500/60' 
+                          : 'border-slate-700/50 hover:border-blue-500/50'
+                    } rounded-2xl transition-colors duration-300`} />
+                    
+                    {plan.popular && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
+                        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
+                          <Star className="w-4 h-4 fill-current" />
+                          POPULAR
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="relative z-10">
+                      <div className="relative h-40 overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-60" />
+                        <img
+                          src={iptvImg}
+                          alt={`Live TV ${plan.durationLabel} Plan`}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          loading="lazy"
+                          width={300}
+                          height={160}
+                        />
+                        <div className={`absolute top-4 right-4 z-20 px-3 py-1 rounded-full font-bold text-xs shadow-lg ${
+                          plan.duration === '1yr' 
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' 
+                            : plan.popular 
+                              ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
+                              : 'bg-orange-500 text-white'
+                        }`}>
+                          {plan.badge}
+                        </div>
+                        {(plan.duration === "6mo" || plan.duration === "1yr") && (
+                          <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs shadow-lg">
+                            SAVE 10%
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-5">
+                        <h4 className="text-xl font-bold mb-2 text-white">{plan.durationLabel} Live TV</h4>
+                        <p className="text-gray-300 text-xs mb-4 line-clamp-2">{plan.description}</p>
+
+                        <div className="mb-4">
+                          <label className="text-sm text-gray-300 mb-2 block">Number of Devices:</label>
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map((num) => (
+                              <button
+                                key={num}
+                                onClick={() => setSelectedDevices(prev => ({ ...prev, [plan.duration]: num }))}
+                                className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                                  deviceCount === num
+                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
+                                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                }`}
+                                data-testid={`button-device-${plan.duration}-${num}`}
+                                aria-label={`Select ${num} device${num > 1 ? 's' : ''}`}
+                                aria-pressed={deviceCount === num}
+                              >
+                                {num}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="mb-4">
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400" data-testid={`text-price-iptv-${plan.duration}`}>
+                              ${selectedPrice.price}
+                            </span>
+                            <span className="text-gray-300 text-sm">
+                              / {plan.durationLabel.toLowerCase()}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-300 mt-1">
+                            {deviceCount} device{deviceCount > 1 ? 's' : ''} included
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => addItem({
+                            id: selectedPrice.productId,
+                            name: `Live TV ${plan.durationLabel} - ${deviceCount} Device${deviceCount > 1 ? 's' : ''}`,
+                            price: selectedPrice.price,
+                            image: iptvImg,
+                            description: plan.description,
+                            features: plan.features,
+                            category: 'iptv',
+                            badge: plan.badge,
+                          } as Product)}
+                          className="w-full py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/30"
+                          data-testid={`button-add-iptv-${plan.duration}`}
+                        >
+                          <ShoppingCart className="w-4 h-4" />
+                          Subscribe Now
+                        </button>
+
+                        <div className="space-y-1.5">
+                          {plan.features.slice(0, 4).map((feature, idx) => (
+                            <div key={idx} className="flex items-start gap-2">
+                              <Check className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
+                              <span className="text-blue-100 text-xs">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Sports Carousel */}
+          <SportsCarousel />
+
+          {/* Demo Video */}
+          <DemoVideo />
+
           {/* Fire Stick Tier Comparison Table */}
-          <div className="mb-12">
+          <div className="mt-16 mb-12">
             <ComparisonTable />
           </div>
 
-          {/* Fire Sticks */}
+          {/* Pre-Loaded Fire Stick Devices - DISPLAYED SECOND */}
           <div className="mb-16">
-            <h3 className="text-3xl font-bold mb-8 text-center flex items-center justify-center gap-3">
+            <h3 className="text-3xl md:text-4xl font-bold mb-4 text-center flex items-center justify-center gap-3">
               <Flame className="w-8 h-8 text-orange-500" />
-              Choose Your Fire Stick
+              Pre-Loaded Fire Stick Devices
             </h3>
+            <p className="text-center text-gray-300 mb-8 max-w-2xl mx-auto">
+              Each device comes pre-configured with 1 Year of Live TV service included. Just plug in and start streaming!
+            </p>
             <div className="grid md:grid-cols-3 gap-8">
               {firestickProducts.map((product, index) => {
                 const cardGradients = [
@@ -488,165 +651,6 @@ export default function Shop() {
             </div>
           </div>
 
-          {/* Sports Carousel */}
-          <SportsCarousel />
-
-          {/* Demo Video */}
-          <DemoVideo />
-
-          {/* Live TV Plans */}
-          <div className="mt-20">
-            <h3 className="text-3xl font-bold mb-4 text-center flex items-center justify-center gap-3">
-              <Zap className="w-8 h-8 text-blue-500" />
-              Live TV Plans Only
-            </h3>
-            <p className="text-center text-gray-300 mb-8 max-w-2xl mx-auto">
-              Choose your subscription length and number of devices. Multi-device plans let you stream on multiple TVs, phones, or tablets at the same time!
-            </p>
-            
-            {/* Free Trial Box */}
-            <FreeTrial />
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {iptvPricingMatrix.map((plan, index) => {
-                const deviceCount = selectedDevices[plan.duration];
-                const selectedPrice = plan.prices.find(p => p.devices === deviceCount) || plan.prices[0];
-                const cardGradients = [
-                  'from-slate-800 via-slate-900 to-gray-900',
-                  'from-blue-950/50 via-slate-900 to-gray-900',
-                  'from-cyan-950/50 via-slate-900 to-gray-900',
-                  'from-emerald-950/50 via-slate-900 to-gray-900'
-                ];
-                
-                return (
-                  <div
-                    key={plan.duration}
-                    className={`relative rounded-2xl overflow-hidden transform transition-all duration-300 group ${
-                      plan.popular 
-                        ? 'ring-4 ring-blue-500 shadow-2xl shadow-blue-500/50 scale-105' 
-                        : 'hover:shadow-2xl hover:shadow-blue-500/20'
-                    }`}
-                    data-testid={`card-product-iptv-${plan.duration}`}
-                  >
-                    <div className={`absolute inset-0 bg-gradient-to-b ${cardGradients[index]} opacity-95`} />
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent opacity-50" />
-                    <div className={`absolute inset-0 border-2 ${
-                      plan.popular 
-                        ? 'border-blue-500/50' 
-                        : plan.duration === '1yr' 
-                          ? 'border-green-500/30 hover:border-green-500/60' 
-                          : 'border-slate-700/50 hover:border-blue-500/50'
-                    } rounded-2xl transition-colors duration-300`} />
-                    
-                    {plan.popular && (
-                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
-                        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
-                          <Star className="w-4 h-4 fill-current" />
-                          POPULAR
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="relative z-10">
-                      <div className="relative h-40 overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-60" />
-                        <img
-                          src={iptvImg}
-                          alt={`Live TV ${plan.durationLabel} Plan`}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          loading="lazy"
-                          width={300}
-                          height={160}
-                        />
-                        <div className={`absolute top-4 right-4 z-20 px-3 py-1 rounded-full font-bold text-xs shadow-lg ${
-                          plan.duration === '1yr' 
-                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' 
-                            : plan.popular 
-                              ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
-                              : 'bg-orange-500 text-white'
-                        }`}>
-                          {plan.badge}
-                        </div>
-                        {(plan.duration === "6mo" || plan.duration === "1yr") && (
-                          <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs shadow-lg">
-                            SAVE 10%
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="p-5">
-                        <h4 className="text-xl font-bold mb-2 text-white">{plan.durationLabel} Live TV</h4>
-                        <p className="text-gray-300 text-xs mb-4 line-clamp-2">{plan.description}</p>
-
-                        <div className="mb-4">
-                          <label className="text-sm text-gray-300 mb-2 block">Number of Devices:</label>
-                          <div className="flex gap-1">
-                            {[1, 2, 3, 4, 5].map((num) => (
-                              <button
-                                key={num}
-                                onClick={() => setSelectedDevices(prev => ({ ...prev, [plan.duration]: num }))}
-                                className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-                                  deviceCount === num
-                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
-                                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                                }`}
-                                data-testid={`button-device-${plan.duration}-${num}`}
-                                aria-label={`Select ${num} device${num > 1 ? 's' : ''}`}
-                                aria-pressed={deviceCount === num}
-                              >
-                                {num}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="mb-4">
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400" data-testid={`text-price-iptv-${plan.duration}`}>
-                              ${selectedPrice.price}
-                            </span>
-                            <span className="text-gray-300 text-sm">
-                              / {plan.durationLabel.toLowerCase()}
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-300 mt-1">
-                            {deviceCount} device{deviceCount > 1 ? 's' : ''} included
-                          </p>
-                        </div>
-
-                        <button
-                          onClick={() => addItem({
-                            id: selectedPrice.productId,
-                            name: `Live TV ${plan.durationLabel} - ${deviceCount} Device${deviceCount > 1 ? 's' : ''}`,
-                            price: selectedPrice.price,
-                            image: iptvImg,
-                            description: plan.description,
-                            features: plan.features,
-                            category: 'iptv',
-                            badge: plan.badge,
-                          } as Product)}
-                          className="w-full py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/30"
-                          data-testid={`button-add-iptv-${plan.duration}`}
-                        >
-                          <ShoppingCart className="w-4 h-4" />
-                          Subscribe Now
-                        </button>
-
-                        <div className="space-y-1.5">
-                          {plan.features.slice(0, 4).map((feature, idx) => (
-                            <div key={idx} className="flex items-start gap-2">
-                              <Check className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
-                              <span className="text-blue-100 text-xs">{feature}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </div>
       </section>
 
