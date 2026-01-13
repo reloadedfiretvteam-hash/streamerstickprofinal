@@ -19,6 +19,9 @@ const firestick4kImg = `${SUPABASE_BASE}/71+Pvh7WB6L._AC_SL1500__1764978938770.j
 const firestick4kMaxImg = `${SUPABASE_BASE}/71E1te69hZL._AC_SL1500__1764978938773.jpg`;
 const iptvImg = `${SUPABASE_BASE}/iptv-subscription.jpg`;
 
+// Force new bundle - v2.0.$(date +%s)
+const SHOP_VERSION = "2.0.1736762400";
+
 interface Product {
   id: string;
   name: string;
