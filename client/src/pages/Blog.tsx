@@ -129,13 +129,13 @@ export default function Blog() {
 
     const baseUrl = 'https://streamstickpro.com';
     const defaultDescription = 'Guides, tips, and everything you need to know about cord cutting and streaming';
-    const defaultTitle = 'Blog | StreamStickPro - Cord Cutting Guides & Tips';
+    const defaultTitle = 'Posts | StreamStickPro - Cord Cutting Guides & Tips';
     
     if (params.slug && posts.length > 0) {
       const postFromSlug = posts.find(p => p.slug === params.slug);
       if (postFromSlug) {
         setSelectedPost(postFromSlug);
-        document.title = `${postFromSlug.title} | StreamStickPro Blog`;
+        document.title = `${postFromSlug.title} | StreamStickPro Posts`;
         
         setMetaTag('description', postFromSlug.excerpt);
         setMetaTag('robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
@@ -384,7 +384,7 @@ export default function Blog() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Blog",
-        "name": "StreamStickPro Blog",
+        "name": "StreamStickPro Posts",
         "description": "Guides, tips, and news about streaming devices and Live TV",
         "url": "https://streamstickpro.com/blog",
         "blogPost": posts.map(post => ({
@@ -408,7 +408,7 @@ export default function Blog() {
             animate={{ opacity: 1, y: 0 }}
             data-testid="heading-blog-title"
           >
-            StreamStickPro Blog
+            StreamStickPro Posts
           </motion.h1>
           <motion.p 
             className="text-lg text-gray-100 text-center max-w-2xl"
@@ -425,11 +425,11 @@ export default function Blog() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {loading ? (
           <div className="text-center py-12" data-testid="text-loading">
-            <p className="text-gray-300">Loading blog posts...</p>
+            <p className="text-gray-300">Loading posts...</p>
           </div>
         ) : posts.length === 0 ? (
           <div className="text-center py-12" data-testid="text-no-posts">
-            <p className="text-gray-300">No blog posts available yet.</p>
+            <p className="text-gray-300">No posts available yet.</p>
           </div>
         ) : (
           <>

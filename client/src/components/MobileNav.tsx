@@ -36,7 +36,7 @@ export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq }: MobileNa
     { label: "Fire Sticks", icon: Tv, action: () => navigateToSection("shop") },
     { label: "IPTV Plans", icon: Wifi, action: () => navigateToSection("shop") },
     { label: "How It Works", icon: ChevronRight, action: () => navigateToSection("about") },
-    { label: "Blog", icon: BookOpen, action: () => setLocation("/blog") },
+    { label: "Posts", icon: BookOpen, action: () => setLocation("/blog") },
     { label: "Support & FAQ", icon: HelpCircle, action: () => navigateToSection("faq") },
     { 
       label: "Customer Support", 

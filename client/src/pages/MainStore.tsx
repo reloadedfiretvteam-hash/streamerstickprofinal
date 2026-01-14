@@ -504,7 +504,7 @@ export default function MainStore() {
           <div className="flex items-center gap-4">
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToAbout} data-testid="nav-how-it-works">How It Works</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToShop} data-testid="nav-shop">Shop</Button>
-            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setLocation("/blog")} data-testid="button-blog">Blog</Button>
+            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setLocation("/blog")} data-testid="button-blog">Posts</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToFaq} data-testid="button-support">Support</Button>
             <Button 
               onClick={openWishlist} 
