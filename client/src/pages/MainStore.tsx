@@ -447,7 +447,23 @@ export default function MainStore() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white pb-32 md:pb-20">
+    <div className="min-h-screen bg-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white pb-32 md:pb-20 relative">
+      {/* Fixed Hero Background - Always Visible While Scrolling */}
+      <div 
+        className="fixed inset-0 z-0 pointer-events-none"
+        style={{
+          backgroundImage: `url(${heroImg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-black/80" />
+      </div>
+
+      {/* Content Layer */}
+      <div className="relative z-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productListData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData) }} />
@@ -461,7 +477,26 @@ export default function MainStore() {
           <div className="flex items-center gap-3">
             <MobileNav scrollToShop={scrollToShop} scrollToAbout={scrollToAbout} scrollToFaq={scrollToFaq} />
             <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
-              <Flame className="w-7 h-7 text-orange-500" />
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 0.95, 1.05, 1],
+                  opacity: [1, 0.8, 1, 0.9, 1],
+                  filter: [
+                    "brightness(1)",
+                    "brightness(1.3)",
+                    "brightness(1.1)",
+                    "brightness(1.2)",
+                    "brightness(1)"
+                  ]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <Flame className="w-7 h-7 text-orange-500" />
+              </motion.div>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Stream Stick Pro</span>
             </div>
           </div>
@@ -506,30 +541,7 @@ export default function MainStore() {
       {/* Main Content */}
       <main id="main-content" role="main">
       {/* Hero Section */}
-      <section ref={heroRef} className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white overflow-hidden min-h-[600px] flex items-center">
-        <motion.div 
-          className="absolute inset-0 overflow-hidden"
-          style={{ y: heroY, opacity: heroOpacity }}
-        >
-          <img
-            src={heroImg}
-            alt="StreamStickPro 2025 - Get Fully Loaded in 10 Minutes"
-            className="w-full h-full object-cover object-center"
-            loading="eager"
-            width={1920}
-            height={600}
-            fetchPriority="high"
-            decoding="async"
-            style={{ transform: 'scale(1.25)', transformOrigin: 'center center', contentVisibility: 'auto' }}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              if (target.src !== fallbackHeroImg) {
-                target.src = fallbackHeroImg;
-              }
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
-        </motion.div>
+      <section ref={heroRef} className="relative text-white overflow-hidden min-h-[600px] flex items-center z-10">
 
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-20"></div>
 
