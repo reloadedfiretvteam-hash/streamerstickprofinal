@@ -41,7 +41,7 @@ const iptvImg = `${SUPABASE_BASE}/iptv-subscription.jpg`;
 const fallbackHeroImg = `${SUPABASE_BASE}/stock_images/amazon_fire_tv_stick_cc445778.jpg`;
 const heroImg = `${SUPABASE_BASE}/hero-firestick-breakout.jpg`;
 const productBenefitList = [
-  "18k Channels Worldwide",
+  "18,000 live channels worldwide",
   "+24k VODs and Series",
   "PPV Channels (UFC, NFL…)",
   "No Freezing",
@@ -377,9 +377,13 @@ export default function MainStore() {
     }
   };
 
-  const scrollToShop = () => setLocation('/shop');
+  const scrollToShop = () => navigateToSection('shop');
   const scrollToAbout = () => navigateToSection('about');
   const scrollToFaq = () => navigateToSection('faq');
+  const scrollToHome = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const scrollToFreeTrial = () => navigateToSection('shop');
 
   const firestickProducts = products.filter(p => p.category === 'firestick');
   const iptvProducts = products.filter(p => p.category === 'iptv');
@@ -926,6 +930,15 @@ export default function MainStore() {
                           </p>
                         </div>
 
+                        <div className="space-y-1.5 mb-4">
+                          {productBenefitList.map((feature, idx) => (
+                            <div key={idx} className="flex items-start gap-2">
+                              <Check className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
+                              <span className="text-blue-100 text-xs">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+
                         <button
                           onClick={() => addItem({
                             id: selectedPrice.productId,
@@ -941,17 +954,8 @@ export default function MainStore() {
                           data-testid={`button-add-iptv-${plan.duration}`}
                         >
                           <ShoppingCart className="w-4 h-4" />
-                          Buy Now
+                          Subscribe Now
                         </button>
-
-                        <div className="space-y-1.5">
-                          {productBenefitList.map((feature, idx) => (
-                            <div key={idx} className="flex items-start gap-2">
-                              <Check className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
-                              <span className="text-blue-100 text-xs">{feature}</span>
-                            </div>
-                          ))}
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -1280,6 +1284,15 @@ export default function MainStore() {
                         })()}
                       </div>
 
+                      <div className="space-y-3 mb-6">
+                        {productBenefitList.map((feature, idx) => (
+                          <div key={idx} className="flex items-start gap-3">
+                            <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                            <span className="text-blue-100 text-sm">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+
                       <div className="flex gap-2 mb-6">
                         <button
                           onClick={() => {
@@ -1297,15 +1310,6 @@ export default function MainStore() {
                           <ShoppingCart className="w-5 h-5" />
                           Buy Now
                         </button>
-                      </div>
-
-                      <div className="space-y-3">
-                        {productBenefitList.map((feature, idx) => (
-                          <div key={idx} className="flex items-start gap-3">
-                            <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                            <span className="text-blue-100 text-sm">{feature}</span>
-                          </div>
-                        ))}
                       </div>
                     </div>
                   </div>
