@@ -138,11 +138,14 @@ export default function Blog() {
         document.title = `${postFromSlug.title} | StreamStickPro Blog`;
         
         setMetaTag('description', postFromSlug.excerpt);
+        setMetaTag('robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
         setCanonical(`${baseUrl}/blog/${postFromSlug.slug}`);
         setMetaTag('og:title', postFromSlug.title, true);
         setMetaTag('og:description', postFromSlug.excerpt, true);
         setMetaTag('og:url', `${baseUrl}/blog/${postFromSlug.slug}`, true);
         setMetaTag('og:type', 'article', true);
+        setMetaTag('og:site_name', 'StreamStickPro', true);
+        setMetaTag('twitter:card', 'summary_large_image');
         setMetaTag('twitter:title', postFromSlug.title);
         setMetaTag('twitter:description', postFromSlug.excerpt);
         setMetaTag('article:published_time', postFromSlug.date, true);
@@ -194,8 +197,26 @@ export default function Blog() {
           "headline": selectedPost.title,
           "description": selectedPost.excerpt,
           "datePublished": selectedPost.date,
-          "author": { "@type": "Organization", "name": "StreamStickPro" },
-          "articleBody": selectedPost.content
+          "dateModified": selectedPost.date,
+          "author": { 
+            "@type": "Organization", 
+            "name": "StreamStickPro",
+            "url": "https://streamstickpro.com"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "StreamStickPro",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://streamstickpro.com/logo.png"
+            }
+          },
+          "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": `https://streamstickpro.com/blog/${selectedPost.slug}`
+          },
+          "articleBody": selectedPost.content,
+          "url": `https://streamstickpro.com/blog/${selectedPost.slug}`
         }) }} />
         
         <nav className="border-b border-gray-800 sticky top-0 z-10 bg-gray-900/95 backdrop-blur">

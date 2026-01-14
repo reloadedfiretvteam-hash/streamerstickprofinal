@@ -2306,6 +2306,7 @@ export async function registerRoutes(
       
       const staticPages = [
         { url: "/", priority: "1.0", changefreq: "daily" },
+        { url: "/shop", priority: "0.9", changefreq: "daily" },
         { url: "/blog", priority: "0.9", changefreq: "daily" },
         { url: "/checkout", priority: "0.7", changefreq: "weekly" },
       ];
