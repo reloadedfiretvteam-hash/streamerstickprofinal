@@ -8,15 +8,9 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Mobile-first: Larger base text for readability */
+/* Mobile-first: consistent base size to reduce wrapping issues */
 html {
-  font-size: 18px; /* Larger base for mobile */
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px; /* Standard on desktop */
-  }
+  font-size: 16px;
 }
 
 /* Ensure buttons and interactive elements are touch-friendly on mobile */
@@ -26,14 +20,6 @@ html {
     min-width: 48px;
   }
   
-  /* Larger tap targets */
-  .text-sm {
-    font-size: 1rem !important;
-  }
-  
-  .text-xs {
-    font-size: 0.875rem !important;
-  }
 }
 
 @theme inline {

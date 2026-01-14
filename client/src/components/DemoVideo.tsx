@@ -3,7 +3,7 @@ import { Play, Pause, Volume2, VolumeX, Maximize, Tv, Zap, Star } from "lucide-r
 import { motion } from "framer-motion";
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
-const iptvCoverImg = `${SUPABASE_BASE}/OIF_1764979270800.jpg`;
+const iptvCoverImg = `/opengraph.jpg`;
 const demoVideoSrc = `${SUPABASE_BASE}/demo-video.mp4`;
 
 export function DemoVideo() {
@@ -103,6 +103,10 @@ export function DemoVideo() {
                     <Play className="w-10 h-10 text-white fill-white ml-1" />
                   </div>
                 </motion.div>
+                
+                <div className="absolute top-6 right-6 z-20 bg-black/60 text-white text-xs md:text-sm px-3 py-1.5 rounded-full border border-white/20">
+                  Click to Play Video
+                </div>
 
                 <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
                   <div className="flex items-center gap-3 mb-2">

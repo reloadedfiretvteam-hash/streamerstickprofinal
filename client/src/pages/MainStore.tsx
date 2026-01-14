@@ -37,9 +37,18 @@ const firestick4kImg = `${SUPABASE_BASE}/71+Pvh7WB6L._AC_SL1500__1764978938770.j
 const firestick4kMaxImg = `${SUPABASE_BASE}/71E1te69hZL._AC_SL1500__1764978938773.jpg`;
 const onn4kImg = `${SUPABASE_BASE}/s-l1600onnbok_1766008738774.webp`;
 const onn4kProImg = `${SUPABASE_BASE}/OIPonnbox4k_1766008832103.webp`;
-const iptvImg = `${SUPABASE_BASE}/OIF_1764979270800.jpg`;
+const iptvImg = `${SUPABASE_BASE}/iptv-subscription.jpg`;
 const fallbackHeroImg = `${SUPABASE_BASE}/stock_images/amazon_fire_tv_stick_cc445778.jpg`;
 const heroImg = `${SUPABASE_BASE}/hero-firestick-breakout.jpg`;
+const productBenefitList = [
+  "18k Channels Worldwide",
+  "+24k VODs and Series",
+  "PPV Channels (UFC, NFL…)",
+  "No Freezing",
+  "Regular Updates",
+  "M3U Delivered Instantly",
+  "24/7 Support"
+];
 
 interface Product {
   id: string;
@@ -70,7 +79,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     durationLabel: "1 Month",
     badge: "STARTER",
     description: "Premium Live TV streaming plan with extensive content library, thousands of movies & TV shows, and comprehensive sports coverage.",
-    features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support"],
+    features: productBenefitList,
     prices: [
       { devices: 1, price: 15, productId: "iptv-1mo-1d" },
       { devices: 2, price: 25, productId: "iptv-1mo-2d" },
@@ -85,7 +94,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     badge: "POPULAR",
     popular: true,
     description: "Save more with 3 months! Premium Live TV plan with extensive content library, thousands of movies & shows, and comprehensive sports coverage.",
-    features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support"],
+    features: productBenefitList,
     prices: [
       { devices: 1, price: 25, productId: "iptv-3mo-1d" },
       { devices: 2, price: 40, productId: "iptv-3mo-2d" },
@@ -99,7 +108,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     durationLabel: "6 Months",
     badge: "GREAT VALUE",
     description: "10% OFF! 6-month premium Live TV streaming plan with extensive content library, thousands of movies & shows, and comprehensive sports coverage.",
-    features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "VIP Customer Support"],
+    features: productBenefitList,
     prices: [
       { devices: 1, price: 40, productId: "iptv-6mo-1d" },
       { devices: 2, price: 65, productId: "iptv-6mo-2d" },
@@ -113,7 +122,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     durationLabel: "1 Year",
     badge: "BEST VALUE",
     description: "Best deal - Full year premium Live TV plan with extensive content library, thousands of movies & shows, and comprehensive sports coverage!",
-    features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Premium VIP Support", "Setup Assistance Included"],
+    features: productBenefitList,
     prices: [
       { devices: 1, price: 65, productId: "iptv-1yr-1d" },
       { devices: 2, price: 100, productId: "iptv-1yr-2d" },
@@ -130,7 +139,7 @@ const defaultProducts: Product[] = [
     name: "StreamStick Starter Kit",
     price: 130,
     description: "Get fully loaded in just 10 minutes! Your Fire Stick arrives ready - simply plug in, enter your credentials (sent instantly after purchase), and follow our quick setup video. You'll unlock an extensive live content library, thousands of movies & TV shows, and comprehensive sports coverage including NFL, NBA, UFC, and live events. Includes 1 Year Live TV plan and 24/7 customer support.",
-    features: ["1080p Full HD Resolution", "Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "Get Fully Loaded Fast", "24/7 Customer Support"],
+    features: productBenefitList,
     image: firestickHdImg,
     category: "firestick",
     badge: "STARTER"
@@ -140,7 +149,7 @@ const defaultProducts: Product[] = [
     name: "StreamStick 4K Kit",
     price: 140,
     description: "Best-selling Fire Stick - get fully loaded in 10 minutes! Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision. Enjoy an extensive live content library, thousands of movies & TV shows, and all major sports - NFL, NBA, UFC, and live events. Includes 1 Year premium Live TV plan and 24/7 support.",
-    features: ["4K Ultra HD Resolution", "Dolby Vision & HDR10+", "Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "Premium Live TV Included", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "24/7 Customer Support"],
+    features: productBenefitList,
     image: firestick4kImg,
     category: "firestick",
     badge: "BEST VALUE",
@@ -151,7 +160,7 @@ const defaultProducts: Product[] = [
     name: "StreamStick Max Kit",
     price: 150,
     description: "Ultimate 4K Max with Wi-Fi 6E - get fully loaded in just 10 minutes! Your device arrives ready. Plug in, use your instant credentials, follow our quick setup video, and experience breathtaking 4K with Dolby Atmos sound. Access an extensive live content library, thousands of movies & shows, and all major sports. Includes 1 Year premium Live TV plan and priority 24/7 support.",
-    features: ["4K Ultra HD with Wi-Fi 6E", "Dolby Vision, Atmos & HDR10+", "Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "Premium Live TV Included", "Works on Multiple Devices", "Instant Credential Delivery", "10-Minute Easy Setup", "Priority 24/7 Support"],
+    features: productBenefitList,
     image: firestick4kMaxImg,
     category: "firestick",
     badge: "PREMIUM"
@@ -161,7 +170,7 @@ const defaultProducts: Product[] = [
     name: "ONN 4K Streaming Device Kit",
     price: 140,
     description: "Upgrade from Fire Stick to Android! The ONN 4K Streaming Device with Google TV delivers the same great features you love, plus built-in storage for live DVR recording. Get fully loaded in 10 minutes - plug in, enter your instant credentials, and access an extensive live content library, thousands of movies & shows, and comprehensive sports coverage. Includes 1 Year Live TV plan and 24/7 support.",
-    features: ["4K Ultra HD with Google TV", "Built-in DVR Recording Storage", "Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "Google Assistant Built-in", "Chromecast Built-in", "Instant Credential Delivery", "10-Minute Easy Setup", "24/7 Customer Support"],
+    features: productBenefitList,
     image: onn4kImg,
     category: "firestick",
     badge: "ANDROID"
@@ -171,7 +180,7 @@ const defaultProducts: Product[] = [
     name: "ONN 4K Ultra HD Pro Kit",
     price: 160,
     description: "The ultimate Android streaming upgrade! ONN 4K Ultra HD Pro features expanded storage for extensive DVR recording, Google TV interface, and premium performance. Get fully loaded in 10 minutes - plug in, use your instant credentials, and experience crystal-clear 4K with Dolby Audio. Access an extensive live content library, thousands of movies & shows, and all major sports. Includes 1 Year premium Live TV plan and priority 24/7 support.",
-    features: ["4K Ultra HD with Dolby Audio", "Expanded DVR Recording Storage", "Premium Performance Processor", "Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "Google Assistant & Chromecast", "Instant Credential Delivery", "10-Minute Easy Setup", "Priority 24/7 Support"],
+    features: productBenefitList,
     image: onn4kProImg,
     category: "firestick",
     badge: "ANDROID PRO"
@@ -434,7 +443,7 @@ export default function MainStore() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white pb-16 md:pb-20">
+    <div className="min-h-screen bg-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white pb-32 md:pb-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productListData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData) }} />
@@ -791,6 +800,169 @@ export default function MainStore() {
             </p>
           </motion.div>
 
+          {/* Live TV Plans */}
+          <div className="mt-6 mb-16">
+            <h3 className="text-3xl font-bold mb-4 text-center flex items-center justify-center gap-3">
+              <Zap className="w-8 h-8 text-blue-500" />
+              Live TV Plans & Free Trial
+            </h3>
+            <p className="text-center text-gray-300 mb-8 max-w-2xl mx-auto">
+              Choose your subscription length and number of devices. Multi-device plans let you stream on multiple TVs, phones, or tablets at the same time!
+            </p>
+            
+            {/* Free Trial Box */}
+            <FreeTrial />
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {iptvPricingMatrix.map((plan, index) => {
+                const deviceCount = selectedDevices[plan.duration];
+                const selectedPrice = plan.prices.find(p => p.devices === deviceCount) || plan.prices[0];
+                const cardGradients = [
+                  'from-slate-800 via-slate-900 to-gray-900',
+                  'from-blue-950/50 via-slate-900 to-gray-900',
+                  'from-cyan-950/50 via-slate-900 to-gray-900',
+                  'from-emerald-950/50 via-slate-900 to-gray-900'
+                ];
+                
+                return (
+                  <div
+                    key={plan.duration}
+                    className={`relative rounded-2xl overflow-hidden transition-all duration-300 group ${
+                      plan.popular 
+                        ? 'ring-2 ring-blue-400 shadow-2xl shadow-blue-500/40' 
+                        : 'hover:shadow-xl hover:shadow-blue-500/20'
+                    }`}
+                    data-testid={`card-product-iptv-${plan.duration}`}
+                  >
+                    <div className={`absolute inset-0 bg-gradient-to-b ${cardGradients[index]} opacity-95`} />
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent opacity-50" />
+                    <div className={`absolute inset-0 border-2 ${
+                      plan.popular 
+                        ? 'border-blue-500/50' 
+                        : plan.duration === '1yr' 
+                          ? 'border-green-500/30 hover:border-green-500/60' 
+                          : 'border-slate-700/50 hover:border-blue-500/50'
+                    } rounded-2xl transition-colors duration-300`} />
+                    
+                    {plan.popular && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
+                        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
+                          <Star className="w-4 h-4 fill-current" />
+                          POPULAR
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="relative z-10">
+                      <div className="relative h-40 overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-60" />
+                        <img
+                          src={iptvImg}
+                          alt={`Live TV ${plan.durationLabel} Plan`}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          loading="lazy"
+                          width={300}
+                          height={160}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            if (target.src !== fallbackHeroImg) {
+                              target.src = fallbackHeroImg;
+                            }
+                          }}
+                        />
+                        <div className={`absolute top-4 right-4 z-20 px-3 py-1 rounded-full font-bold text-xs shadow-lg ${
+                          plan.duration === '1yr' 
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' 
+                            : plan.popular 
+                              ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
+                              : 'bg-orange-500 text-white'
+                        }`}>
+                          {plan.badge}
+                        </div>
+                        {(plan.duration === "6mo" || plan.duration === "1yr") && (
+                          <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs shadow-lg">
+                            SAVE 10%
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-5">
+                        <h4 className="text-xl font-bold mb-2 text-white">{plan.durationLabel} Live TV</h4>
+                        <p className="text-gray-300 text-xs mb-4 line-clamp-2">{plan.description}</p>
+
+                        <div className="mb-4">
+                          <label className="text-sm text-gray-300 mb-2 block">Number of Devices:</label>
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map((num) => (
+                              <button
+                                key={num}
+                                onClick={() => setSelectedDevices(prev => ({ ...prev, [plan.duration]: num }))}
+                                className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                                  deviceCount === num
+                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
+                                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                }`}
+                                data-testid={`button-device-${plan.duration}-${num}`}
+                                aria-label={`Select ${num} device${num > 1 ? 's' : ''}`}
+                                aria-pressed={deviceCount === num}
+                              >
+                                {num}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="mb-4">
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400" data-testid={`text-price-iptv-${plan.duration}`}>
+                              ${selectedPrice.price}
+                            </span>
+                            <span className="text-gray-300 text-sm">
+                              / {plan.durationLabel.toLowerCase()}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-300 mt-1">
+                            {deviceCount} device{deviceCount > 1 ? 's' : ''} included
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => addItem({
+                            id: selectedPrice.productId,
+                            name: `Live TV ${plan.durationLabel} - ${deviceCount} Device${deviceCount > 1 ? 's' : ''}`,
+                            price: selectedPrice.price,
+                            image: iptvImg,
+                            description: plan.description,
+                            features: plan.features,
+                            category: 'iptv',
+                            badge: plan.badge,
+                          } as Product)}
+                          className="w-full py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/30"
+                          data-testid={`button-add-iptv-${plan.duration}`}
+                        >
+                          <ShoppingCart className="w-4 h-4" />
+                          Buy Now
+                        </button>
+
+                        <div className="space-y-1.5">
+                          {productBenefitList.map((feature, idx) => (
+                            <div key={idx} className="flex items-start gap-2">
+                              <Check className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
+                              <span className="text-blue-100 text-xs">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* What You Get Video */}
+          <DemoVideo />
+
           {/* Fire Stick Tier Comparison Table */}
           <motion.div 
             className="mb-12 overflow-x-auto"
@@ -953,10 +1125,10 @@ export default function MainStore() {
                 return (
                 <div
                   key={product.id}
-                  className={`relative rounded-2xl overflow-hidden transform transition-all duration-500 hover:scale-105 group ${
+                  className={`relative rounded-2xl overflow-hidden transition-all duration-300 group ${
                     product.popular 
-                      ? 'ring-4 ring-orange-500 scale-105 shadow-2xl shadow-orange-500/50' 
-                      : `hover:shadow-2xl ${glowColors[index]}`
+                      ? 'ring-2 ring-orange-400 shadow-2xl shadow-orange-500/40' 
+                      : `hover:shadow-xl ${glowColors[index]}`
                   }`}
                   data-testid={`card-product-${product.id}`}
                 >
@@ -980,7 +1152,7 @@ export default function MainStore() {
                   <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-tr-full" />
                   
                   {/* Animated border glow on hover */}
-                  <div className={`absolute inset-0 border-2 ${borderColors[index]} rounded-2xl transition-all duration-500 group-hover:shadow-[inset_0_0_20px_rgba(249,115,22,0.1)]`} />
+                  <div className={`absolute inset-0 border ${borderColors[index]} rounded-2xl transition-all duration-300 group-hover:shadow-[inset_0_0_16px_rgba(249,115,22,0.08)]`} />
                   
                   {product.popular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
@@ -1123,12 +1295,12 @@ export default function MainStore() {
                           data-testid={`button-add-${product.id}`}
                         >
                           <ShoppingCart className="w-5 h-5" />
-                          Add {firestickQuantities[product.id] > 1 ? `${firestickQuantities[product.id]} ` : ''}to Cart
+                          Buy Now
                         </button>
                       </div>
 
                       <div className="space-y-3">
-                        {product.features.slice(0, 6).map((feature, idx) => (
+                        {productBenefitList.map((feature, idx) => (
                           <div key={idx} className="flex items-start gap-3">
                             <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
                             <span className="text-blue-100 text-sm">{feature}</span>
@@ -1143,165 +1315,44 @@ export default function MainStore() {
             </div>
           </div>
 
+          {/* Fire Stick Details */}
+          <section className="py-10">
+            <div className="max-w-5xl mx-auto">
+              <div className="grid gap-6 lg:grid-cols-2">
+                <div className="rounded-2xl bg-slate-900/60 border border-white/10 p-6 md:p-8">
+                  <h3 className="text-2xl md:text-3xl font-bold text-orange-400 mb-4">
+                    Unleash Endless Entertainment w/ the Amazon Fire Stick
+                  </h3>
+                  <p className="text-gray-300 mb-4">
+                    Experience a world of endless entertainment possibilities with the Amazon Fire Stick, available exclusively on our website. This powerful device transforms any TV into a smart TV, giving you access to your favorite streaming services, apps, games, and more—all from the comfort of your home.
+                  </p>
+                  <p className="text-gray-300 mb-4">
+                    These home cinema style platforms will give you a truckload of Movies & TV Shows. Classics & new releases searchable by “most popular, in theaters, top rated, horror, family, comedy, adventure and more!
+                  </p>
+                  <p className="text-gray-300">
+                    We have done all the hard work ahead of time and made screen recorded tutorial videos for the most common requests from customers! Anytime you may need assistance, we offer lifetime customer support with the purchase of our devices.
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-900/60 border border-white/10 p-6 md:p-8">
+                  <h3 className="text-2xl md:text-3xl font-bold text-orange-400 mb-4">
+                    Exclusive Educational Videos
+                  </h3>
+                  <p className="text-gray-300 mb-6">
+                    When you purchase the Fire Stick from us, you will also receive access to a series of educational videos that demonstrate how to maximize your device's potential. These videos provide step-by-step instructions on how to customize your Fire Stick experience.
+                  </p>
+                  <h4 className="text-xl font-bold text-orange-400 mb-3">
+                    Important Legal Notice
+                  </h4>
+                  <p className="text-gray-300">
+                    Please be aware that while our educational videos are designed to help you make the most of your device, we cannot verify the legality of any 3rd party applications mentioned. These apps are developed and maintained by independent entities over which we have no control. It is crucial that you conduct your own research and due diligence before downloading, installing, and using any 3rd party applications to ensure that they comply with all applicable laws and regulations.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Sports Carousel */}
           <SportsCarousel />
-
-          {/* Demo Video */}
-          <DemoVideo />
-
-          {/* Live TV Plans */}
-          <div className="mt-20">
-            <h3 className="text-3xl font-bold mb-4 text-center flex items-center justify-center gap-3">
-              <Zap className="w-8 h-8 text-blue-500" />
-              Live TV Plans Only
-            </h3>
-            <p className="text-center text-gray-300 mb-8 max-w-2xl mx-auto">
-              Choose your subscription length and number of devices. Multi-device plans let you stream on multiple TVs, phones, or tablets at the same time!
-            </p>
-            
-            {/* Free Trial Box */}
-            <FreeTrial />
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {iptvPricingMatrix.map((plan, index) => {
-                const deviceCount = selectedDevices[plan.duration];
-                const selectedPrice = plan.prices.find(p => p.devices === deviceCount) || plan.prices[0];
-                const cardGradients = [
-                  'from-slate-800 via-slate-900 to-gray-900',
-                  'from-blue-950/50 via-slate-900 to-gray-900',
-                  'from-cyan-950/50 via-slate-900 to-gray-900',
-                  'from-emerald-950/50 via-slate-900 to-gray-900'
-                ];
-                
-                return (
-                  <div
-                    key={plan.duration}
-                    className={`relative rounded-2xl overflow-hidden transform transition-all duration-300 group ${
-                      plan.popular 
-                        ? 'ring-4 ring-blue-500 shadow-2xl shadow-blue-500/50 scale-105' 
-                        : 'hover:shadow-2xl hover:shadow-blue-500/20'
-                    }`}
-                    data-testid={`card-product-iptv-${plan.duration}`}
-                  >
-                    <div className={`absolute inset-0 bg-gradient-to-b ${cardGradients[index]} opacity-95`} />
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent opacity-50" />
-                    <div className={`absolute inset-0 border-2 ${
-                      plan.popular 
-                        ? 'border-blue-500/50' 
-                        : plan.duration === '1yr' 
-                          ? 'border-green-500/30 hover:border-green-500/60' 
-                          : 'border-slate-700/50 hover:border-blue-500/50'
-                    } rounded-2xl transition-colors duration-300`} />
-                    
-                    {plan.popular && (
-                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
-                        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
-                          <Star className="w-4 h-4 fill-current" />
-                          POPULAR
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="relative z-10">
-                      <div className="relative h-40 overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-60" />
-                        <img
-                          src={iptvImg}
-                          alt={`Live TV ${plan.durationLabel} Plan`}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          loading="lazy"
-                          width={300}
-                          height={160}
-                        />
-                        <div className={`absolute top-4 right-4 z-20 px-3 py-1 rounded-full font-bold text-xs shadow-lg ${
-                          plan.duration === '1yr' 
-                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' 
-                            : plan.popular 
-                              ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
-                              : 'bg-orange-500 text-white'
-                        }`}>
-                          {plan.badge}
-                        </div>
-                        {(plan.duration === "6mo" || plan.duration === "1yr") && (
-                          <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs shadow-lg">
-                            SAVE 10%
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="p-5">
-                        <h4 className="text-xl font-bold mb-2 text-white">{plan.durationLabel} Live TV</h4>
-                        <p className="text-gray-300 text-xs mb-4 line-clamp-2">{plan.description}</p>
-
-                        <div className="mb-4">
-                          <label className="text-sm text-gray-300 mb-2 block">Number of Devices:</label>
-                          <div className="flex gap-1">
-                            {[1, 2, 3, 4, 5].map((num) => (
-                              <button
-                                key={num}
-                                onClick={() => setSelectedDevices(prev => ({ ...prev, [plan.duration]: num }))}
-                                className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-                                  deviceCount === num
-                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
-                                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                                }`}
-                                data-testid={`button-device-${plan.duration}-${num}`}
-                                aria-label={`Select ${num} device${num > 1 ? 's' : ''}`}
-                                aria-pressed={deviceCount === num}
-                              >
-                                {num}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="mb-4">
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400" data-testid={`text-price-iptv-${plan.duration}`}>
-                              ${selectedPrice.price}
-                            </span>
-                            <span className="text-gray-300 text-sm">
-                              / {plan.durationLabel.toLowerCase()}
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-300 mt-1">
-                            {deviceCount} device{deviceCount > 1 ? 's' : ''} included
-                          </p>
-                        </div>
-
-                        <button
-                          onClick={() => addItem({
-                            id: selectedPrice.productId,
-                            name: `Live TV ${plan.durationLabel} - ${deviceCount} Device${deviceCount > 1 ? 's' : ''}`,
-                            price: selectedPrice.price,
-                            image: iptvImg,
-                            description: plan.description,
-                            features: plan.features,
-                            category: 'iptv',
-                            badge: plan.badge,
-                          } as Product)}
-                          className="w-full py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/30"
-                          data-testid={`button-add-iptv-${plan.duration}`}
-                        >
-                          <ShoppingCart className="w-4 h-4" />
-                          Subscribe Now
-                        </button>
-
-                        <div className="space-y-1.5">
-                          {plan.features.slice(0, 4).map((feature, idx) => (
-                            <div key={idx} className="flex items-start gap-2">
-                              <Check className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
-                              <span className="text-blue-100 text-xs">{feature}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </div>
       </section>
 
