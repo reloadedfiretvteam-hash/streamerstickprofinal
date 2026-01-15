@@ -155,6 +155,26 @@ app.get('/api/debug', async (c) => {
   });
 });
 
+// Cron trigger handler for email campaigns (called every 6 hours)
+app.get('/cron/email-campaigns', async (c) => {
+  try {
+    // Call the email campaign processing endpoint internally
+    const baseUrl = new URL(c.req.url).origin;
+    const response = await fetch(`${baseUrl}/api/email-campaigns/process-scheduled`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const result = await response.json();
+    return c.json(result);
+  } catch (error: any) {
+    console.error('Cron job error:', error);
+    return c.json({ error: error.message }, 500);
+  }
+});
+
 // Sitemap route - must be before catch-all
 app.get('/sitemap.xml', async (c) => {
   try {
