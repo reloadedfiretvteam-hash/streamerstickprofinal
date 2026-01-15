@@ -385,8 +385,8 @@ export default function AdminPanel() {
     supabaseUrl?: string;
   } | null>(null);
 
-  const showToast = (message: string, type: 'success' | 'error') => {
-    setToast({ message, type });
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ message, type: type === 'info' ? 'success' : type });
     setTimeout(() => setToast(null), 3000);
   };
 
@@ -3203,27 +3203,58 @@ export default function AdminPanel() {
                   <p className="text-gray-400">Create and manage blog posts with AI assistance</p>
                 </div>
                 {blogView === 'list' && (
-                  <Button
-                    onClick={() => {
-                      setBlogView('create');
-                      setEditingBlogPost({
-                        title: '',
-                        slug: '',
-                        excerpt: '',
-                        content: '',
-                        category: 'streaming',
-                        featured: false,
-                        published: false,
-                        keywords: []
-                      });
-                      setGeneratedContent(null);
-                    }}
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-                    data-testid="button-new-blog"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Blog Post
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={async () => {
+                        if (!confirm('🚀 Generate 200+ SEO Campaign Posts?\n\nThis will create highly optimized posts targeting high-traffic keywords for maximum visibility. This may take a few minutes.')) {
+                          return;
+                        }
+                        try {
+                          showToast('Generating SEO campaign posts... This may take a few minutes.', 'success');
+                          const response = await authFetch('/api/admin/generate-seo-campaign', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                          });
+                          const result = await response.json();
+                          if (response.ok) {
+                            showToast(`✅ Successfully generated ${result.data?.success || 0} SEO campaign posts!`, 'success');
+                            loadBlogPosts();
+                          } else {
+                            showToast(result.error || 'Failed to generate SEO posts', 'error');
+                          }
+                        } catch (error: any) {
+                          console.error('Error generating SEO posts:', error);
+                          showToast('Failed to generate SEO posts', 'error');
+                        }
+                      }}
+                      className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                      data-testid="button-generate-seo-campaign"
+                    >
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      Generate SEO Campaign (200+ Posts)
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setBlogView('create');
+                        setEditingBlogPost({
+                          title: '',
+                          slug: '',
+                          excerpt: '',
+                          content: '',
+                          category: 'streaming',
+                          featured: false,
+                          published: false,
+                          keywords: []
+                        });
+                        setGeneratedContent(null);
+                      }}
+                      className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                      data-testid="button-new-blog"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      New Blog Post
+                    </Button>
+                  </div>
                 )}
                 {(blogView === 'create' || blogView === 'edit') && (
                   <Button
