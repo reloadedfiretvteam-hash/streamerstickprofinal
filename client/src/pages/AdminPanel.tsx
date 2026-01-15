@@ -577,32 +577,13 @@ export default function AdminPanel() {
       const result = await response.json();
       const data = result.data || result;
 
-      // Calculate yesterday and last week/month from the data we have
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const twoWeeksAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
-      const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-
-      // Get recent visitors to calculate historical stats
-      const recentVisitors = data.recentVisitors || data.liveVisitors || [];
-      
-      const yesterdayVisitors = recentVisitors.filter((v: any) => {
-        const visitDate = new Date(v.createdAt || v.created_at);
-        return visitDate >= yesterday && visitDate < today;
-      }).length;
-
-      const lastWeekVisitors = recentVisitors.filter((v: any) => {
-        const visitDate = new Date(v.createdAt || v.created_at);
-        return visitDate >= twoWeeksAgo && visitDate < weekAgo;
-      }).length;
-
-      const lastMonthVisitors = recentVisitors.filter((v: any) => {
-        const visitDate = new Date(v.createdAt || v.created_at);
-        return visitDate >= lastMonthStart && visitDate <= lastMonthEnd;
-      }).length;
+      // Note: Historical stats (yesterday, lastWeek, lastMonth) require full visitor data
+      // The API only returns recentVisitors (last 50), so we can't accurately calculate
+      // historical stats from limited data. These will be 0 unless API provides full dataset.
+      // For accurate historical stats, the API endpoint should calculate these server-side.
+      const yesterdayVisitors = 0; // API doesn't provide full historical data
+      const lastWeekVisitors = 0; // API doesn't provide full historical data
+      const lastMonthVisitors = 0; // API doesn't provide full historical data
 
       // Map country breakdown format
       const topCountries = (data.countryBreakdown || data.topCountries || []).map((c: any) => ({

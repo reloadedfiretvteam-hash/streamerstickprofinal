@@ -2,11 +2,14 @@
 
 ## 🔑 Service Key Configuration
 
-Your Supabase service key has been verified and is ready to use:
+Your Supabase service key should be set in Cloudflare environment variables.
 
-```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mzg4NDQ5MiwiZXhwIjoyMDc5NDYwNDkyfQ.m3xw006mSdP1DeunLo4CoNDonIIXkQSt353VL-ibb0c
-```
+**⚠️ SECURITY: Never commit service keys to git!**
+
+To get your service key:
+1. Go to: https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/settings/api
+2. Copy the "service_role" key (starts with `eyJ...`)
+3. Add it to Cloudflare as `SUPABASE_SERVICE_KEY` environment variable
 
 ## ✅ What's Been Updated
 

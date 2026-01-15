@@ -666,7 +666,7 @@ export default function MainStore() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">The Stream Stick Pro Difference</span>
             </h2>
-            <p className="text-gray-300 text-lg">See why customers choose us over the competition</p>
+            <p className="text-gray-200 text-lg">See why customers choose us over the competition</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
@@ -696,7 +696,7 @@ export default function MainStore() {
                 ].map((item, idx) => (
                   <li key={idx} className="flex items-start gap-3">
                     <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-300">{item}</span>
+                    <span className="text-gray-200">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -728,7 +728,7 @@ export default function MainStore() {
                 ].map((item, idx) => (
                   <li key={idx} className="flex items-start gap-3">
                     <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-300">{item}</span>
+                    <span className="text-gray-200">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -772,7 +772,7 @@ export default function MainStore() {
                 <Zap className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-4">Be Streaming in 10 Minutes</h3>
-              <p className="text-gray-300">Your StreamStick comes with instant login credentials and an easy 10-minute setup video. Start watching Live TV, Movies, Series & Sports today with 24/7 support ready when you need it.</p>
+              <p className="text-gray-200">Your StreamStick comes with instant login credentials and an easy 10-minute setup video. Start watching Live TV, Movies, Series & Sports today with 24/7 support ready when you need it.</p>
             </motion.div>
             <motion.div 
               variants={fadeInUp}
@@ -782,7 +782,7 @@ export default function MainStore() {
                 <Star className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-4">Premium Content</h3>
-              <p className="text-gray-300">Access an extensive live content library, thousands of movies, and comprehensive sports coverage.</p>
+              <p className="text-gray-200">Access an extensive live content library, thousands of movies, and comprehensive sports coverage.</p>
             </motion.div>
             <motion.div 
               variants={fadeInUp}
@@ -792,7 +792,7 @@ export default function MainStore() {
                 <Check className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-4">24/7 Support</h3>
-              <p className="text-gray-300">Our dedicated team is always available to help you with any questions or issues.</p>
+              <p className="text-gray-200">Our dedicated team is always available to help you with any questions or issues.</p>
             </motion.div>
           </motion.div>
         </div>
@@ -825,7 +825,7 @@ export default function MainStore() {
               <Zap className="w-8 h-8 text-blue-500" />
               Live TV Plans & Free Trial
             </h3>
-            <p className="text-center text-gray-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-center text-gray-200 mb-8 max-w-2xl mx-auto">
               Choose your subscription length and number of devices. Multi-device plans let you stream on multiple TVs, phones, or tablets at the same time!
             </p>
             
@@ -907,7 +907,7 @@ export default function MainStore() {
 
                       <div className="p-5">
                         <h4 className="text-xl font-bold mb-2 text-white">{plan.durationLabel} Live TV</h4>
-                        <p className="text-gray-300 text-xs mb-4 line-clamp-2">{plan.description}</p>
+                        <p className="text-gray-200 text-xs mb-4 line-clamp-2">{plan.description}</p>
 
                         <div className="mb-4">
                           <label className="text-sm text-gray-300 mb-2 block">Number of Devices:</label>

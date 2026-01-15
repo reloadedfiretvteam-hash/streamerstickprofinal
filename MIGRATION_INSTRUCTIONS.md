@@ -42,7 +42,9 @@ The service key is already configured in the code. For Cloudflare:
    - Workers & Pages → Your Project → Settings → Environment Variables
 
 2. **Add/Update:**
-   - `SUPABASE_SERVICE_KEY` = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mzg4NDQ5MiwiZXhwIjoyMDc5NDYwNDkyfQ.m3xw006mSdP1DeunLo4CoNDonIIXkQSt353VL-ibb0c`
+   - **Variable:** `SUPABASE_SERVICE_KEY`
+   - **Value:** Get from Supabase Dashboard → Settings → API → service_role key
+   - **⚠️ SECURITY: Never commit service keys to git!**
 
 ## ✅ Step 3: Activate Cron Trigger
 

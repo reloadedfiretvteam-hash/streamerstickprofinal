@@ -4,7 +4,16 @@
  */
 
 const SUPABASE_URL = 'https://emlqlmfzqsnqokrqvmcm.supabase.co';
-const SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mzg4NDQ5MiwiZXhwIjoyMDc5NDYwNDkyfQ.m3xw006mSdP1DeunLo4CoNDonIIXkQSt353VL-ibb0c';
+// ⚠️ SECURITY: Service key should come from environment variable, not hardcoded!
+// Get from: Supabase Dashboard → Settings → API → service_role key
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_SERVICE_KEY || '';
+
+if (!SERVICE_KEY) {
+  console.error('❌ ERROR: SUPABASE_SERVICE_KEY environment variable not set!');
+  console.error('   Get your service key from: https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/settings/api');
+  console.error('   Then set it: export SUPABASE_SERVICE_KEY="your-key-here"');
+  process.exit(1);
+}
 
 async function runMigration() {
   console.log('🔄 Running Email Campaign Migration...\n');

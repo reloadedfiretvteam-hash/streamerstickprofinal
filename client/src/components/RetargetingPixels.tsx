@@ -58,30 +58,39 @@ export default function RetargetingPixels() {
     // Google Ads (Google Tag Manager / gtag.js)
     const googleAdsId = import.meta.env.VITE_GOOGLE_ADS_ID;
     if (googleAdsId) {
-      // Load Google Tag Manager
-      const gtmScript = document.createElement('script');
-      gtmScript.async = true;
-      gtmScript.src = `https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`;
-      document.head.appendChild(gtmScript);
-
-      // Initialize gtag
+      // Initialize dataLayer first
       window.dataLayer = window.dataLayer || [];
       function gtag(...args: any[]) {
         window.dataLayer.push(args);
       }
       (window as any).gtag = gtag;
-      gtag('js', new Date());
-      gtag('config', googleAdsId, {
-        send_page_view: true,
-      });
-
-      // Track page views
-      gtag('event', 'page_view', {
-        page_path: window.location.pathname,
-        page_title: document.title,
-      });
       
-      console.log('✅ Google Ads pixel initialized:', googleAdsId);
+      // Load Google Tag Manager script and wait for it to load
+      const gtmScript = document.createElement('script');
+      gtmScript.async = true;
+      gtmScript.src = `https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`;
+      
+      // Wait for script to load before initializing
+      gtmScript.onload = () => {
+        gtag('js', new Date());
+        gtag('config', googleAdsId, {
+          send_page_view: true,
+        });
+
+        // Track page views after script is loaded
+        gtag('event', 'page_view', {
+          page_path: window.location.pathname,
+          page_title: document.title,
+        });
+        
+        console.log('✅ Google Ads pixel initialized:', googleAdsId);
+      };
+      
+      gtmScript.onerror = () => {
+        console.error('❌ Failed to load Google Tag Manager script');
+      };
+      
+      document.head.appendChild(gtmScript);
     }
 
     // Track page views on route changes
@@ -103,15 +112,29 @@ export default function RetargetingPixels() {
 
     // Listen for route changes (for SPA)
     window.addEventListener('popstate', handleRouteChange);
-    const originalPushState = history.pushState;
-    history.pushState = function (...args) {
-      originalPushState.apply(history, args);
-      setTimeout(handleRouteChange, 100);
-    };
+    
+    // Store original pushState with proper isolation
+    const originalPushState = history.pushState.bind(history);
+    let isOverridden = false;
+    
+    // Only override if not already overridden
+    if (!(history.pushState as any).__isOverridden) {
+      const wrappedPushState = function (...args: any[]) {
+        originalPushState(...args);
+        setTimeout(handleRouteChange, 100);
+      };
+      wrappedPushState.__isOverridden = true;
+      history.pushState = wrappedPushState;
+      isOverridden = true;
+    }
 
     return () => {
       window.removeEventListener('popstate', handleRouteChange);
-      history.pushState = originalPushState;
+      // Only restore if we were the ones who overrode it
+      if (isOverridden && (history.pushState as any).__isOverridden) {
+        history.pushState = originalPushState;
+        delete (history.pushState as any).__isOverridden;
+      }
     };
   }, []);
 
