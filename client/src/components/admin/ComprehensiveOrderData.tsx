@@ -68,12 +68,6 @@ export default function ComprehensiveOrderData() {
     try {
       setLoading(true);
       
-      // #region agent log
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ComprehensiveOrderData.tsx:67',message:'Fetching order data',timestamp:Date.now(),sessionId:'debug-session',runId:'order-debug',hypothesisId:'L'})}).catch(()=>{});
-      }
-      // #endregion
-      
       const { apiCall } = await import('@/lib/api');
       const token = localStorage.getItem('custom_admin_token');
       const headers: HeadersInit = {};
@@ -85,30 +79,13 @@ export default function ComprehensiveOrderData() {
         headers,
       });
       
-      // #region agent log
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ComprehensiveOrderData.tsx:81',message:'Order API response',data:{status:response.status,ok:response.ok},timestamp:Date.now(),sessionId:'debug-session',runId:'order-debug',hypothesisId:'M'})}).catch(()=>{});
-      }
-      // #endregion
-      
       if (!response.ok) {
         const errorText = await response.text();
-        // #region agent log
-        if (typeof fetch !== 'undefined') {
-          fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ComprehensiveOrderData.tsx:88',message:'Order API error',data:{status:response.status,error:errorText},timestamp:Date.now(),sessionId:'debug-session',runId:'order-debug',hypothesisId:'N'})}).catch(()=>{});
-        }
-        // #endregion
         console.error('Failed to fetch orders:', response.status, errorText);
         return;
       }
       
       const result = await response.json();
-      
-      // #region agent log
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ComprehensiveOrderData.tsx:97',message:'Order data parsed',data:{hasData:!!result.data,ordersCount:result.data?.orders?.length||0,hasStats:!!result.data?.statistics},timestamp:Date.now(),sessionId:'debug-session',runId:'order-debug',hypothesisId:'O'})}).catch(()=>{});
-      }
-      // #endregion
       
       if (result.data) {
         setOrders(result.data.orders || []);
@@ -117,11 +94,6 @@ export default function ComprehensiveOrderData() {
         console.warn('No data in order response:', result);
       }
     } catch (error: any) {
-      // #region agent log
-      if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ComprehensiveOrderData.tsx:108',message:'Order fetch exception',data:{error:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'order-debug',hypothesisId:'P'})}).catch(()=>{});
-      }
-      // #endregion
       console.error('Error fetching order data:', error);
     } finally {
       setLoading(false);

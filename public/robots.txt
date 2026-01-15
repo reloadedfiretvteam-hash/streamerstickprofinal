@@ -208,8 +208,3 @@ Crawl-delay: 2
 
 # Sitemaps (Very Important!)
 Sitemap: https://streamstickpro.com/sitemap.xml
-Sitemap: https://streamstickpro.com/sitemap-images.xml
-Sitemap: https://streamstickpro.com/sitemap-videos.xml
-
-# Host (Canonical Domain)
-Host: https://streamstickpro.com

@@ -90,18 +90,8 @@ export const useCart = create<CartState>()(
         return { items: [...state.items, { ...productToAdd, quantity }], isOpen: true };
       }),
       removeItem: (id) => {
-        // #region agent log
-        if (typeof window !== 'undefined') {
-          fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'store.ts:92',message:'removeItem called',data:{itemId:id,itemsBeforeRemove:get().items.length,itemsBeforeRemoveIds:get().items.map(i=>i.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'cart-remove-test',hypothesisId:'A'})}).catch(()=>{});
-        }
-        // #endregion
         set((state) => {
           const newItems = state.items.filter(i => i.id !== id);
-          // #region agent log
-          if (typeof window !== 'undefined') {
-            fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'store.ts:97',message:'Items after remove',data:{itemId:id,itemsAfterRemove:newItems.length,itemsAfterRemoveIds:newItems.map(i=>i.id),removed:state.items.length > newItems.length},timestamp:Date.now(),sessionId:'debug-session',runId:'cart-remove-test',hypothesisId:'A'})}).catch(()=>{});
-          }
-          // #endregion
           return { items: newItems };
         });
       },

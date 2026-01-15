@@ -149,13 +149,7 @@ export function CartDrawer() {
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              // #region agent log
-                              fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'CartDrawer.tsx:143',message:'Remove button clicked',data:{itemId:item.id,itemName:item.name,currentItemsCount:items.length},timestamp:Date.now(),sessionId:'debug-session',runId:'cart-remove-test',hypothesisId:'A'})}).catch(()=>{});
-                              // #endregion
                               removeItem(item.id);
-                              // #region agent log
-                              fetch('http://127.0.0.1:7242/ingest/3ee3ce10-6522-4415-a7f3-6907cd27670d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'CartDrawer.tsx:148',message:'Remove item called',data:{itemId:item.id},timestamp:Date.now(),sessionId:'debug-session',runId:'cart-remove-test',hypothesisId:'A'})}).catch(()=>{});
-                              // #endregion
                             }}
                             data-testid={`button-remove-${item.id}`}
                           >
