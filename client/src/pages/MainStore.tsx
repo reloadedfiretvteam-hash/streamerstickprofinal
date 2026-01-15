@@ -1622,8 +1622,8 @@ export default function MainStore() {
         isOpen={isQuickViewOpen} 
         onClose={closeQuickView} 
       />
-      </div>
       {/* End Content Layer */}
+      </div>
     </div>
   );
 }
