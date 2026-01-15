@@ -52,7 +52,7 @@ export default function ModernLiveVisitors() {
     try {
       setLoading(true);
       
-      const token = localStorage.getItem('admin_auth_token');
+      const token = localStorage.getItem('custom_admin_token');
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
