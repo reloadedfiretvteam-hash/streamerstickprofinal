@@ -451,7 +451,7 @@ export default function MainStore() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white pb-32 md:pb-20 relative">
-      {/* Fixed Hero Background - Always Visible While Scrolling */}
+      {/* Fixed Hero Background - Optimized for LCP */}
       <div 
         className="fixed inset-0 z-0 pointer-events-none"
         style={{
