@@ -13,6 +13,7 @@ import { createAuthRoutes, authMiddleware } from './routes/auth';
 import { createBlogRoutes } from './routes/blog';
 import { createSeoAdRoutes } from './routes/seo-ads';
 import { createAIAssistantRoutes } from './routes/ai-assistant';
+import { getStorage } from './helpers';
 
 export interface Env {
   DATABASE_URL: string;
@@ -150,6 +151,89 @@ app.get('/api/debug', async (c) => {
     },
     nodeEnv: c.env.NODE_ENV || 'not set',
   });
+});
+
+// Sitemap route - must be before catch-all
+app.get('/sitemap.xml', async (c) => {
+  try {
+    const baseUrl = 'https://streamstickpro.com';
+    const storage = getStorage(c.env);
+    
+    // Get blog posts and products
+    const blogPosts = await storage.getBlogPosts();
+    const products = await storage.getRealProducts();
+    
+    const staticPages = [
+      { url: '/', priority: '1.0', changefreq: 'daily' },
+      { url: '/shop', priority: '0.9', changefreq: 'daily' },
+      { url: '/blog', priority: '0.9', changefreq: 'daily' },
+      { url: '/checkout', priority: '0.7', changefreq: 'weekly' },
+    ];
+
+    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+`;
+    
+    // Add static pages
+    for (const page of staticPages) {
+      sitemap += `  <url>
+    <loc>${baseUrl}${page.url}</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>${page.changefreq}</changefreq>
+    <priority>${page.priority}</priority>
+  </url>
+`;
+    }
+
+    // Add blog posts
+    for (const post of blogPosts) {
+      if (post.published) {
+        const lastmod = post.publishedAt ? new Date(post.publishedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        sitemap += `  <url>
+    <loc>${baseUrl}/blog/${post.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+`;
+      }
+    }
+
+    // Add shop page (products are on the shop page)
+    sitemap += `  <url>
+    <loc>${baseUrl}/shop</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+`;
+
+    sitemap += `</urlset>`;
+
+    return c.text(sitemap, 200, {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+    });
+  } catch (error: any) {
+    console.error('Error generating sitemap:', error);
+    // Fallback to static file if dynamic generation fails
+    try {
+      const response = await c.env.ASSETS.fetch(new Request(new URL('/sitemap.xml', c.req.url)));
+      if (response.ok) {
+        return new Response(response.body, {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/xml; charset=utf-8',
+            'Cache-Control': 'public, max-age=3600',
+          },
+        });
+      }
+    } catch {
+      // If static file also fails, return error
+    }
+    return c.text('Error generating sitemap', 500);
+  }
 });
 
 app.get('*', async (c) => {
