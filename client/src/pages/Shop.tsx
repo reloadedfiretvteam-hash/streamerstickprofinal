@@ -279,7 +279,7 @@ export default function Shop() {
               <Zap className="w-8 h-8 text-blue-500" />
               Premium Live TV Subscriptions
             </h3>
-            <p className="text-center text-gray-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-center text-gray-200 mb-8 max-w-2xl mx-auto">
               Choose your subscription length and number of devices. Multi-device plans let you stream on multiple TVs, phones, or tablets at the same time!
             </p>
             
@@ -355,7 +355,7 @@ export default function Shop() {
 
                       <div className="p-5">
                         <h4 className="text-xl font-bold mb-2 text-white">{plan.durationLabel} Live TV</h4>
-                        <p className="text-gray-300 text-xs mb-4 line-clamp-2">{plan.description}</p>
+                        <p className="text-gray-200 text-xs mb-4 line-clamp-2">{plan.description}</p>
 
                         <div className="mb-4">
                           <label className="text-sm text-gray-300 mb-2 block">Number of Devices:</label>
