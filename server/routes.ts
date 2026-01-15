@@ -810,6 +810,21 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/admin/seed-seo-campaign", async (req, res) => {
+    try {
+      const { seedSEOCampaignPosts } = await import('./seedSEOCampaign');
+      const result = await seedSEOCampaignPosts();
+      res.json({ 
+        success: true, 
+        message: `SEO Campaign: Created ${result.created} posts, skipped ${result.skipped}, ${result.errors.length} errors`,
+        data: result
+      });
+    } catch (error: any) {
+      console.error("Error seeding SEO campaign posts:", error);
+      res.status(500).json({ error: `Failed to seed SEO campaign posts: ${error.message}` });
+    }
+  });
+
   app.put("/api/admin/fulfillment/:id", async (req, res) => {
     try {
       const { fulfillmentStatus, amazonOrderId } = req.body;
