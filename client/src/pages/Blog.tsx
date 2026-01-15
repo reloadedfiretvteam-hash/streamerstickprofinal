@@ -145,6 +145,12 @@ export default function Blog() {
         setMetaTag('og:url', `${baseUrl}/blog/${postFromSlug.slug}`, true);
         setMetaTag('og:type', 'article', true);
         setMetaTag('og:site_name', 'StreamStickPro', true);
+        if (postFromSlug.featuredImage || postFromSlug.image) {
+          const imageUrl = postFromSlug.featuredImage || postFromSlug.image || '';
+          setMetaTag('og:image', imageUrl, true);
+          setMetaTag('og:image:alt', postFromSlug.title, true);
+          setMetaTag('twitter:image', imageUrl);
+        }
         setMetaTag('twitter:card', 'summary_large_image');
         setMetaTag('twitter:title', postFromSlug.title);
         setMetaTag('twitter:description', postFromSlug.excerpt);

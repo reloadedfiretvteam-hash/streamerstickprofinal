@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { useTracking } from "@/hooks/useTracking";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 import MainStore from "@/pages/MainStore";
 import ShadowStore from "@/pages/ShadowStore";
@@ -81,11 +82,13 @@ function AppContent() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AppContent />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <AppContent />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
