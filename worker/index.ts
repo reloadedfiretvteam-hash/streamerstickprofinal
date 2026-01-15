@@ -13,6 +13,7 @@ import { createAuthRoutes, authMiddleware } from './routes/auth';
 import { createBlogRoutes } from './routes/blog';
 import { createSeoAdRoutes } from './routes/seo-ads';
 import { createAIAssistantRoutes } from './routes/ai-assistant';
+import { createEmailCampaignRoutes } from './routes/email-campaigns';
 import { getStorage } from './helpers';
 
 export interface Env {
@@ -59,6 +60,7 @@ app.route('/api/free-trial', createTrialRoutes());
 app.route('/api/blog', createBlogRoutes());
 app.route('/api/seo-ads', createSeoAdRoutes());
 app.route('/api/ai-assistant', createAIAssistantRoutes());
+app.route('/api/email-campaigns', createEmailCampaignRoutes());
 
 app.post('/api/track-cart', async (c) => {
   try {

@@ -271,6 +271,26 @@ export function createCheckoutRoutes() {
         console.log(`[EMAIL] Credentials already sent for order ${order.id}`);
       }
 
+      // Create email campaign for customer
+      try {
+        const campaignResponse = await fetch(`${c.req.url.split('/api/checkout')[0]}/api/email-campaigns/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerEmail: order.customerEmail,
+            customerName: order.customerName,
+            campaignType: 'purchase',
+            orderId: order.id,
+          }),
+        });
+        if (campaignResponse.ok) {
+          console.log(`[EMAIL_CAMPAIGN] ✅ Campaign created for ${order.customerEmail}`);
+        }
+      } catch (error: any) {
+        console.warn(`[EMAIL_CAMPAIGN] Failed to create campaign: ${error.message}`);
+        // Don't fail the request if campaign creation fails
+      }
+
       return c.json({ 
         success: true,
         results,

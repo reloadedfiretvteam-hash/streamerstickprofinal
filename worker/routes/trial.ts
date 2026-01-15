@@ -176,6 +176,27 @@ export function createTrialRoutes() {
 
       console.log(`Free trial credentials sent to ${email}, owner notified`);
 
+      // Create email campaign for free trial customer
+      try {
+        const trialId = `trial-${Date.now()}-${email.replace(/[^a-zA-Z0-9]/g, '')}`;
+        const campaignResponse = await fetch(`${c.req.url.split('/api/free-trial')[0]}/api/email-campaigns/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerEmail: email,
+            customerName: name,
+            campaignType: 'free_trial',
+            trialId: trialId,
+          }),
+        });
+        if (campaignResponse.ok) {
+          console.log(`[EMAIL_CAMPAIGN] ✅ Campaign created for trial customer ${email}`);
+        }
+      } catch (error: any) {
+        console.warn(`[EMAIL_CAMPAIGN] Failed to create campaign: ${error.message}`);
+        // Don't fail the request if campaign creation fails
+      }
+
       return c.json({ success: true, message: "Trial credentials sent" });
     } catch (error: any) {
       console.error("Error processing free trial:", error);

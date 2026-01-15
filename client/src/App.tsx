@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { useTracking } from "@/hooks/useTracking";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import RetargetingPixels from "@/components/RetargetingPixels";
 
 import MainStore from "@/pages/MainStore";
 import ShadowStore from "@/pages/ShadowStore";
@@ -72,6 +73,7 @@ function AppContent() {
   
   return (
     <>
+      <RetargetingPixels />
       <Toaster />
       <CartDrawer />
       <WishlistDrawer />
