@@ -2,9 +2,9 @@ import { storage } from "./storage";
 import { nanoid } from "nanoid";
 import { analyzeSeo } from "./seoAnalyzer";
 
-// High-traffic SEO keywords targeting maximum visibility
+// High-traffic SEO keywords targeting maximum visibility - AGGRESSIVE SEO CAMPAIGN
 const SEO_KEYWORDS = [
-  // Primary Keywords
+  // Primary Keywords (Highest Traffic)
   "best IPTV service",
   "IPTV service",
   "jailbroken fire stick",
@@ -35,12 +35,39 @@ const SEO_KEYWORDS = [
   "pre-loaded streaming device",
   "fire stick downloader app",
   
-  // Problem-solving keywords
+  // Problem-solving keywords (High Intent)
   "how to watch live TV without cable",
   "best alternative to cable TV",
   "how to stream sports for free",
   "cheapest way to watch TV",
   "fire stick troubleshooting",
+  
+  // Additional High-Value Keywords
+  "best IPTV for fire stick",
+  "IPTV service reviews",
+  "jailbroken fire stick reviews",
+  "pre-loaded fire stick reviews",
+  "best streaming service 2025",
+  "IPTV vs cable TV",
+  "fire stick IPTV setup",
+  "how to install IPTV on fire stick",
+  "best IPTV provider",
+  "affordable IPTV service",
+  "IPTV service comparison",
+  "fire stick streaming apps",
+  "best apps for fire stick",
+  "fire stick hacks",
+  "how to get free TV on fire stick",
+  "fire stick tips and tricks",
+  "best IPTV for sports",
+  "IPTV service with NFL",
+  "IPTV service with NBA",
+  "fire stick for beginners",
+  "cord cutting 2025",
+  "best way to cut cable",
+  "streaming TV guide",
+  "best streaming devices",
+  "fire stick alternatives",
 ];
 
 // Post templates optimized for SEO and CTR
