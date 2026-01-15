@@ -18,11 +18,24 @@ interface SEOPostTemplate {
   metaDescription?: string;
   linkedProductIds?: string[];
   featured?: boolean;
+  imageUrl?: string | null; // Real product image from homepage
 }
 
 const homepageLink = "https://streamstickpro.com";
 const shopLink = "https://streamstickpro.com/shop";
 const freeTrialLink = "https://streamstickpro.com/?section=free-trial";
+
+// Real product images from homepage
+const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
+const PRODUCT_IMAGES = {
+  firestickHd: `${SUPABASE_BASE}/OIP_(11)99_1764978938773.jpg`,
+  firestick4k: `${SUPABASE_BASE}/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg`,
+  firestick4kMax: `${SUPABASE_BASE}/71E1te69hZL._AC_SL1500__1764978938773.jpg`,
+  onn4k: `${SUPABASE_BASE}/s-l1600onnbok_1766008738774.webp`,
+  onn4kPro: `${SUPABASE_BASE}/OIPonnbox4k_1766008832103.webp`,
+  iptv: `${SUPABASE_BASE}/iptv-subscription.jpg`,
+  heroImage: `${SUPABASE_BASE}/hero-firestick-breakout.jpg`,
+};
 
 // Helper function to generate slug from title
 function generateSlug(title: string): string {
@@ -32,6 +45,35 @@ function generateSlug(title: string): string {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .substring(0, 100);
+}
+
+// Helper function to add product image to content
+function addProductImage(content: string, imageUrl?: string | null, altText: string = "StreamStickPro Product"): string {
+  if (!imageUrl) return content;
+  
+  // Insert image after the first heading
+  const firstHeadingIndex = content.indexOf('\n## ');
+  if (firstHeadingIndex > 0) {
+    const beforeImage = content.substring(0, firstHeadingIndex);
+    const afterImage = content.substring(firstHeadingIndex);
+    return `${beforeImage}
+
+![${altText}](${imageUrl})
+
+${afterImage}`;
+  }
+  
+  // If no second heading, add image after first line
+  const firstLineBreak = content.indexOf('\n');
+  if (firstLineBreak > 0) {
+    return `${content.substring(0, firstLineBreak)}
+
+![${altText}](${imageUrl})
+
+${content.substring(firstLineBreak + 1)}`;
+  }
+  
+  return content;
 }
 
 // Helper function to add homepage link to content
@@ -137,6 +179,7 @@ Ready to experience the **best IPTV service** available? [Visit StreamStickPro](
     category: "Reviews",
     keywords: ["best IPTV service", "IPTV service", "premium IPTV", "streaming service", "live TV"],
     featured: true,
+    imageUrl: PRODUCT_IMAGES.iptv, // Real IPTV product image
   },
   {
     title: "IPTV Service: Everything You Need to Know in 2025",
@@ -290,6 +333,7 @@ Experience the future of TV with StreamStickPro's premium **IPTV service**. Get 
     category: "Guides",
     keywords: ["IPTV service", "best IPTV", "streaming service", "live TV", "cord cutting"],
     featured: true,
+    imageUrl: PRODUCT_IMAGES.iptv, // Real IPTV product image
   },
   {
     title: "Jailbroken Fire Stick: Complete Guide 2025 - Setup, Apps & Benefits",
@@ -501,6 +545,7 @@ Get a **pre-loaded jailbroken Fire Stick** from StreamStickPro and start streami
     category: "Guides",
     keywords: ["jailbroken fire stick", "fire stick", "streaming device", "cord cutting", "IPTV"],
     featured: true,
+    imageUrl: PRODUCT_IMAGES.firestick4kMax, // Real Fire Stick 4K Max image
   },
 ];
 
@@ -660,6 +705,7 @@ Get your **pre-loaded Fire Stick** from StreamStickPro and start streaming today
       category: "Guides",
       keywords: ["pre-loaded fire sticks", "preloaded fire stick", "fire stick", "streaming device"],
       featured: true,
+      imageUrl: PRODUCT_IMAGES.firestick4kMax, // Real Fire Stick 4K Max image
     },
     {
       title: "Downloader App for Fire Stick: How to Install and Use in 2025",
@@ -876,6 +922,7 @@ If setting up apps yourself sounds complicated, consider a **pre-loaded Fire Sti
       category: "How-To",
       keywords: ["downloader app", "fire stick", "install apps", "streaming apps", "IPTV"],
       featured: false,
+      imageUrl: PRODUCT_IMAGES.firestick4k, // Real Fire Stick 4K image
     },
     {
       title: "Best IPTV Service for Fire Stick: Top 5 Options in 2025",
@@ -954,6 +1001,7 @@ Get the **best IPTV service for Fire Stick** from StreamStickPro. Start your fre
       category: "Reviews",
       keywords: ["best IPTV service", "IPTV service fire stick", "fire stick IPTV", "streaming service"],
       featured: true,
+      imageUrl: PRODUCT_IMAGES.iptv, // Real IPTV product image
     },
     {
       title: "Pre-Loaded Fire Sticks vs Regular Fire Stick: Which is Better?",
@@ -1113,6 +1161,7 @@ Either way, StreamStickPro has you covered with premium IPTV service!
       category: "Reviews",
       keywords: ["pre-loaded fire sticks", "regular fire stick", "fire stick comparison", "streaming device"],
       featured: false,
+      imageUrl: PRODUCT_IMAGES.firestick4kMax, // Real Fire Stick 4K Max image
     },
     {
       title: "How to Jailbreak Fire Stick: Step-by-Step Guide 2025",
@@ -1477,8 +1526,13 @@ export async function seedSEOCampaignPosts() {
           continue;
         }
 
+        // Add product image to content if available
+        let contentWithImage = postTemplate.imageUrl 
+          ? addProductImage(postTemplate.content, postTemplate.imageUrl, postTemplate.title)
+          : postTemplate.content;
+        
         // Add homepage link to content
-        const contentWithLinks = addHomepageLink(postTemplate.content);
+        const contentWithLinks = addHomepageLink(contentWithImage);
 
         // Calculate word count
         const wordCount = contentWithLinks.split(/\s+/).length;
@@ -1488,6 +1542,28 @@ export async function seedSEOCampaignPosts() {
         const metaTitle = postTemplate.metaTitle || `${postTemplate.title} | StreamStickPro`;
         const metaDescription = postTemplate.metaDescription || postTemplate.excerpt;
 
+        // Determine image based on keyword or use provided imageUrl
+        let postImageUrl = postTemplate.imageUrl || null;
+        
+        // If no image specified, assign based on keywords/content
+        if (!postImageUrl) {
+          const titleLower = postTemplate.title.toLowerCase();
+          const keywordsLower = postTemplate.keywords.join(' ').toLowerCase();
+          
+          if (keywordsLower.includes('fire stick') || titleLower.includes('fire stick')) {
+            // Assign Fire Stick images randomly
+            const fireStickImages = [PRODUCT_IMAGES.firestick4k, PRODUCT_IMAGES.firestick4kMax, PRODUCT_IMAGES.firestickHd];
+            postImageUrl = fireStickImages[Math.floor(Math.random() * fireStickImages.length)];
+          } else if (keywordsLower.includes('iptv') || titleLower.includes('iptv')) {
+            postImageUrl = PRODUCT_IMAGES.iptv;
+          } else if (keywordsLower.includes('onn') || titleLower.includes('onn')) {
+            postImageUrl = PRODUCT_IMAGES.onn4k;
+          } else {
+            // Default to IPTV or hero image
+            postImageUrl = Math.random() > 0.5 ? PRODUCT_IMAGES.iptv : PRODUCT_IMAGES.heroImage;
+          }
+        }
+
         // Create the post
         const post = await storage.insertBlogPost({
           title: postTemplate.title,
@@ -1495,7 +1571,7 @@ export async function seedSEOCampaignPosts() {
           excerpt: postTemplate.excerpt,
           content: contentWithLinks,
           category: postTemplate.category,
-          imageUrl: null, // Will be set later with product images
+          imageUrl: postImageUrl, // Real product image from homepage
           metaTitle: metaTitle,
           metaDescription: metaDescription,
           keywords: postTemplate.keywords,
