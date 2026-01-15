@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import { useTracking } from "@/hooks/useTracking";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import RetargetingPixels from "@/components/RetargetingPixels";
+import ExitIntentPopup from "@/components/ExitIntentPopup";
 
 import MainStore from "@/pages/MainStore";
 import ShadowStore from "@/pages/ShadowStore";
@@ -74,6 +75,12 @@ function AppContent() {
   return (
     <>
       <RetargetingPixels />
+      <ExitIntentPopup 
+        onClose={() => {}} 
+        onAction={() => {
+          // Optional: Scroll to shop section or open cart
+        }}
+      />
       <Toaster />
       <CartDrawer />
       <WishlistDrawer />

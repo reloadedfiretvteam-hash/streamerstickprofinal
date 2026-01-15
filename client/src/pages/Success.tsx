@@ -3,6 +3,7 @@ import { useLocation, useSearch } from "wouter";
 import { CheckCircle, ArrowRight, Download, Youtube, Mail, Clock, Zap, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { trackConversion } from "@/components/RetargetingPixels";
 
 interface OrderDetails {
   order: {
@@ -33,6 +34,15 @@ export default function Success() {
         .then(data => {
           if (data.order) {
             setOrderDetails(data);
+            
+            // Track purchase conversion for retargeting
+            if (data.paymentStatus === 'paid' && data.order.amount) {
+              const purchaseAmount = data.order.amount / 100; // Convert from cents to dollars
+              trackConversion('purchase', purchaseAmount, 'USD', {
+                order_id: data.order.id,
+                product_name: data.order.realProductName,
+              });
+            }
             
             // Send emails directly (separate from webhooks, like free trials)
             // Only send if payment was successful

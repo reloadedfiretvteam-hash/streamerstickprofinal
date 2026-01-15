@@ -1,5 +1,8 @@
 import { Smartphone, Monitor, Tv, Tablet } from 'lucide-react';
 
+const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
+const deviceCompatibilityImage = `${SUPABASE_BASE}/smart-iptv-compatibility.jpg`;
+
 export default function Devices() {
   const devices = [
     {
@@ -40,7 +43,7 @@ export default function Devices() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto mb-16">
           {devices.map((device, index) => (
             <div
               key={index}
@@ -55,6 +58,47 @@ export default function Devices() {
               <p className="text-gray-600">{device.description}</p>
             </div>
           ))}
+        </div>
+
+        {/* Device Compatibility Image Section */}
+        <div className="mb-16">
+          <div className="max-w-6xl mx-auto">
+            <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl p-8 md:p-12 shadow-2xl border border-gray-200">
+              <div className="text-center mb-8">
+                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                  Universal Compatibility
+                </h3>
+                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                  Our IPTV service works seamlessly across all major platforms and devices. 
+                  From smart TVs to streaming sticks, mobile devices to gaming consoles - we've got you covered.
+                </p>
+              </div>
+              
+              <div className="relative rounded-2xl overflow-hidden shadow-xl border-4 border-gray-200 bg-white">
+                <img 
+                  src={deviceCompatibilityImage}
+                  alt="IPTV Device Compatibility - Works on Smart TVs, Fire TV Stick, Android TV, Apple TV, Roku, Samsung, LG, NVIDIA Shield, Chromecast, and all mobile devices"
+                  className="w-full h-auto object-contain"
+                  loading="lazy"
+                  onError={(e) => {
+                    // Fallback if image doesn't load
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    const fallback = document.createElement('div');
+                    fallback.className = 'p-12 text-center text-gray-500';
+                    fallback.innerHTML = '<p>Device compatibility image loading...</p>';
+                    (e.target as HTMLImageElement).parentElement?.appendChild(fallback);
+                  }}
+                />
+              </div>
+              
+              <div className="mt-8 text-center">
+                <p className="text-sm text-gray-500">
+                  Compatible with: Android, iOS, Windows, macOS, Fire TV, Apple TV, Roku, 
+                  Samsung Smart TV, LG Smart TV, NVIDIA Shield, Chromecast, and more
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="mt-16 text-center">
