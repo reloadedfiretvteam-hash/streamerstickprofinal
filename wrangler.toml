@@ -24,3 +24,11 @@ SITE_URL = "https://streamstickpro.com"
 #   STRIPE_WEBHOOK_SECRET - Stripe webhook signing secret
 #   RESEND_API_KEY - Resend email API key
 #   SESSION_SECRET - Session encryption key
+#
+# Optional (for retargeting):
+#   VITE_GOOGLE_ADS_ID - Google Ads conversion tracking ID
+#   VITE_FACEBOOK_PIXEL_ID - Facebook Pixel ID
+
+# Cron Triggers - Process scheduled email campaigns every 6 hours
+[triggers]
+crons = ["0 */6 * * *"]
