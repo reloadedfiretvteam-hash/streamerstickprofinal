@@ -10,9 +10,10 @@ interface MobileNavProps {
   scrollToShop: () => void;
   scrollToAbout: () => void;
   scrollToFaq: () => void;
+  onSupportClick?: () => void;
 }
 
-export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq }: MobileNavProps) {
+export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq, onSupportClick }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [location, setLocation] = useLocation();
   const { items, openCart } = useCart();
@@ -42,7 +43,11 @@ export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq }: MobileNa
       label: "Customer Support", 
       icon: Mail, 
       action: () => {
-        window.location.href = "mailto:reloadedfiretvteam@gmail.com?subject=Customer Support Request";
+        if (onSupportClick) {
+          onSupportClick();
+        } else {
+          window.location.href = "mailto:reloadedfiretvteam@gmail.com?subject=Customer Support Request";
+        }
         setIsOpen(false);
       } 
     },

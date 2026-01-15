@@ -1,6 +1,9 @@
 /*
   # Create Admin Credentials Table
   
+  ⚠️  SECURITY NOTE: Do not commit secrets or tokens to this file.
+      Use environment variables or Supabase secrets instead.
+  
   1. New Table
     - admin_credentials: Stores admin usernames and login info
   

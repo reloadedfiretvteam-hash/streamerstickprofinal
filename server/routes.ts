@@ -2363,7 +2363,20 @@ export async function registerRoutes(
     <loc>${baseUrl}/blog/${post.slug}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.8</priority>`;
+          
+          // Add image to sitemap if available
+          if (post.image || post.featuredImage) {
+            const imageUrl = post.image || post.featuredImage || `${baseUrl}/og-image.png`;
+            sitemap += `
+    <image:image>
+      <image:loc>${imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl}`}</image:loc>
+      <image:title>${post.title || post.slug}</image:title>
+      <image:caption>${post.excerpt || post.description || ''}</image:caption>
+    </image:image>`;
+          }
+          
+          sitemap += `
   </url>
 `;
         }
@@ -2371,17 +2384,30 @@ export async function registerRoutes(
 
       for (const product of products) {
         sitemap += `  <url>
-    <loc>${baseUrl}/#product-${product.id}</loc>
+    <loc>${baseUrl}/shop</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.9</priority>`;
+        
+        // Add product image to sitemap if available
+        if (product.image || product.imageUrl) {
+          const imageUrl = product.image || product.imageUrl || `${baseUrl}/og-image.png`;
+          sitemap += `
+    <image:image>
+      <image:loc>${imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl}`}</image:loc>
+      <image:title>${product.name || 'Product'}</image:title>
+      <image:caption>${product.description || product.name || ''}</image:caption>
+    </image:image>`;
+        }
+        
+        sitemap += `
   </url>
 `;
       }
 
       sitemap += `</urlset>`;
 
-      res.set('Content-Type', 'application/xml');
+      res.set('Content-Type', 'application/xml; charset=utf-8');
       res.send(sitemap);
     } catch (error: any) {
       console.error("Error generating sitemap:", error);

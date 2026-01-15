@@ -1,18 +1,27 @@
-# Stream Stick Pro - Robots.txt
-# Updated: 2025-11-08
-# Purpose: Guide search engine crawlers for optimal indexing
+# StreamStickPro - Advanced Robots.txt
+# Updated: 2025-01-15
+# Purpose: Optimize indexing for all major search engines and AI crawlers
 
-# Global Rules
+# Global Rules - Allow all by default, block specific paths
 User-agent: *
 Allow: /
+Allow: /blog
+Allow: /blog/*
+Allow: /shop
+Allow: /products
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
+Disallow: /shadow-services
+Disallow: /checkout
+Disallow: /success
+Disallow: /cancel
+Disallow: /track-order?
 Disallow: /*.json$
 Disallow: /*?*sort=
 Disallow: /*?*filter=
-Disallow: /track-order?
-Disallow: /checkout?payment=
+Disallow: /*?*payment=
+Disallow: /*?*session=
 
 # Crawl Delay (Be nice to our server)
 Crawl-delay: 1
@@ -131,8 +140,76 @@ Disallow: /
 User-agent: SEMrushBot
 Disallow: /
 
+# AI Search Engine Crawlers (Allow for AI-powered search)
+User-agent: GPTBot
+Allow: /
+Allow: /blog
+Allow: /blog/*
+Disallow: /admin
+Disallow: /api/
+Crawl-delay: 1
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /blog
+Allow: /blog/*
+Disallow: /admin
+Disallow: /api/
+Crawl-delay: 1
+
+User-agent: Claude-Web
+Allow: /
+Allow: /blog
+Allow: /blog/*
+Disallow: /admin
+Disallow: /api/
+Crawl-delay: 1
+
+User-agent: Anthropic-AI
+Allow: /
+Allow: /blog
+Allow: /blog/*
+Disallow: /admin
+Disallow: /api/
+Crawl-delay: 1
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /blog
+Allow: /blog/*
+Disallow: /admin
+Disallow: /api/
+Crawl-delay: 1
+
+User-agent: Bytespider
+Allow: /
+Allow: /blog
+Disallow: /admin
+Disallow: /api/
+Crawl-delay: 1
+
+User-agent: CCBot
+Allow: /
+Allow: /blog
+Disallow: /admin
+Disallow: /api/
+Crawl-delay: 1
+
+# Additional Search Engines
+User-agent: Applebot
+Allow: /
+Allow: /blog
+Crawl-delay: 1
+
+User-agent: ia_archiver
+Allow: /
+Allow: /blog
+Crawl-delay: 2
+
 # Sitemaps (Very Important!)
 Sitemap: https://streamstickpro.com/sitemap.xml
+Sitemap: https://streamstickpro.com/sitemap-images.xml
+Sitemap: https://streamstickpro.com/sitemap-videos.xml
 
 # Host (Canonical Domain)
 Host: https://streamstickpro.com

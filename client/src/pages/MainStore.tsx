@@ -30,6 +30,7 @@ import { MobileNav } from "@/components/MobileNav";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { FloatingCTA } from "@/components/FloatingCTA";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
+import SupportMessageBox from "@/components/SupportMessageBox";
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
 const firestickHdImg = `${SUPABASE_BASE}/OIP_(11)99_1764978938773.jpg`;
@@ -207,6 +208,7 @@ export default function MainStore() {
   });
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
@@ -380,6 +382,7 @@ export default function MainStore() {
   const scrollToShop = () => navigateToSection('shop');
   const scrollToAbout = () => navigateToSection('about');
   const scrollToFaq = () => navigateToSection('faq');
+  const openSupport = () => setIsSupportOpen(true);
   const scrollToHome = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -475,7 +478,7 @@ export default function MainStore() {
       <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-gray-900/95 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <MobileNav scrollToShop={scrollToShop} scrollToAbout={scrollToAbout} scrollToFaq={scrollToFaq} />
+            <MobileNav scrollToShop={scrollToShop} scrollToAbout={scrollToAbout} scrollToFaq={scrollToFaq} onSupportClick={openSupport} />
             <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
               <motion.div
                 animate={{
@@ -505,7 +508,7 @@ export default function MainStore() {
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToAbout} data-testid="nav-how-it-works">How It Works</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToShop} data-testid="nav-shop">Shop</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={() => setLocation("/blog")} data-testid="button-blog">Posts</Button>
-            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={scrollToFaq} data-testid="button-support">Support</Button>
+            <Button variant="ghost" className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10" onClick={openSupport} data-testid="button-support">Support</Button>
             <Button 
               onClick={openWishlist} 
               variant="ghost"
@@ -1621,6 +1624,12 @@ export default function MainStore() {
         product={quickViewProduct} 
         isOpen={isQuickViewOpen} 
         onClose={closeQuickView} 
+      />
+
+      {/* Support Message Box */}
+      <SupportMessageBox 
+        isOpen={isSupportOpen} 
+        onClose={() => setIsSupportOpen(false)} 
       />
       </div>
     </div>
