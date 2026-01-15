@@ -799,6 +799,21 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/admin/generate-seo-campaign", async (req, res) => {
+    try {
+      const { generateSEOCampaignPosts } = await import('./generateSEOCampaignPosts');
+      const result = await generateSEOCampaignPosts();
+      res.json({ 
+        success: true, 
+        message: `Generated ${result.success} SEO campaign posts`,
+        data: result
+      });
+    } catch (error: any) {
+      console.error("Error generating SEO campaign posts:", error);
+      res.status(500).json({ error: `Failed to generate SEO posts: ${error.message}` });
+    }
+  });
+
   app.post("/api/admin/seed-blog-elite", async (req, res) => {
     try {
       const { seedMassiveBlog } = await import('./seedBlogEliteSEO');
