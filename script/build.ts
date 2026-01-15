@@ -78,13 +78,11 @@ async function buildCloudflare() {
       "/*.jpg", 
       "/*.svg", 
       "/*.ico", 
-      "/*.woff", 
+      "/*.woff",
       "/*.woff2",
-      "/*.xml",
       "/*.txt",
       "/googledf2a7b91b7b9494f.html",
       "/BingSiteAuth.xml",
-      "/sitemap.xml",
       "/robots.txt"
     ]
   };
