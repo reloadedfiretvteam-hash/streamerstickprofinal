@@ -548,157 +548,113 @@ export default function AdminPanel() {
   const loadVisitorStats = async () => {
     try {
       setLoadingStats(true);
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+      
+      // Use API endpoint instead of direct Supabase queries (bypasses RLS)
+      const response = await authFetch('/api/admin/visitors/stats');
 
-      // Try multiple visitor table names
-      let visitorsData: any[] = [];
-      let error = null;
-
-      // Try 'visitors' table first
-      const { data: visitors1, error: err1 } = await supabase
-        .from('visitors')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!err1 && visitors1) {
-        visitorsData = visitors1;
-      } else {
-        // Try 'visitor_analytics' table
-        const { data: visitors2, error: err2 } = await supabase
-          .from('visitor_analytics')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (!err2 && visitors2) {
-          visitorsData = visitors2.map((v: any) => ({
-            ...v,
-            page_url: v.page_view || '/',
-            referrer: v.referrer || null,
-            user_agent: v.device_type || 'Unknown'
-          }));
-        } else {
-          // Try 'visitor_tracking' table
-          const { data: visitors3, error: err3 } = await supabase
-            .from('visitor_tracking')
-            .select('*')
-            .order('entry_time', { ascending: false });
-
-          if (!err3 && visitors3) {
-            visitorsData = visitors3.map((v: any) => ({
-              ...v,
-              page_url: v.landing_page || '/',
-              referrer: v.referrer_url || null,
-              user_agent: v.user_agent || 'Unknown',
-              created_at: v.entry_time
-            }));
-          } else {
-            error = err3;
-          }
-        }
-      }
-
-      if (error) {
-        console.error('Error loading visitors:', error);
-        setLoadingStats(false);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to fetch visitor stats:', response.status, errorText);
+        // Set empty stats but don't fail completely - component stays visible
+        setVisitorStats({
+          totalVisitors: 0,
+          todayVisitors: 0,
+          yesterdayVisitors: 0,
+          weekVisitors: 0,
+          lastWeekVisitors: 0,
+          monthVisitors: 0,
+          lastMonthVisitors: 0,
+          onlineNow: 0,
+          topCountries: [],
+          topStates: [],
+          deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
+          recentVisitors: []
+        });
+        setLastUpdate(new Date());
         return;
       }
 
-      // Calculate statistics
-      const totalVisitors = visitorsData.length;
-      const todayVisitors = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= today).length;
-      const yesterdayVisitors = visitorsData.filter(v => {
-        const visitDate = new Date(v.created_at || v.entry_time);
-        return visitDate >= yesterday && visitDate < today;
-      }).length;
-      const weekVisitors = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= weekAgo).length;
+      const result = await response.json();
+      const data = result.data || result;
+
+      // Calculate yesterday and last week/month from the data we have
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
       const twoWeeksAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
-      const lastWeekVisitors = visitorsData.filter(v => {
-        const visitDate = new Date(v.created_at || v.entry_time);
-        return visitDate >= twoWeeksAgo && visitDate < weekAgo;
-      }).length;
-      const monthVisitors = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= monthAgo).length;
       const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
       const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-      const lastMonthVisitors = visitorsData.filter(v => {
-        const visitDate = new Date(v.created_at || v.entry_time);
+
+      // Get recent visitors to calculate historical stats
+      const recentVisitors = data.recentVisitors || data.liveVisitors || [];
+      
+      const yesterdayVisitors = recentVisitors.filter((v: any) => {
+        const visitDate = new Date(v.createdAt || v.created_at);
+        return visitDate >= yesterday && visitDate < today;
+      }).length;
+
+      const lastWeekVisitors = recentVisitors.filter((v: any) => {
+        const visitDate = new Date(v.createdAt || v.created_at);
+        return visitDate >= twoWeeksAgo && visitDate < weekAgo;
+      }).length;
+
+      const lastMonthVisitors = recentVisitors.filter((v: any) => {
+        const visitDate = new Date(v.createdAt || v.created_at);
         return visitDate >= lastMonthStart && visitDate <= lastMonthEnd;
       }).length;
-      const onlineNow = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= fiveMinutesAgo).length;
 
-      // Device breakdown
-      const deviceBreakdown = {
-        desktop: visitorsData.filter(v => {
-          const ua = (v.user_agent || '').toLowerCase();
-          return !ua.includes('mobile') && !ua.includes('tablet');
-        }).length,
-        mobile: visitorsData.filter(v => {
-          const ua = (v.user_agent || '').toLowerCase();
-          return ua.includes('mobile') && !ua.includes('tablet');
-        }).length,
-        tablet: visitorsData.filter(v => {
-          const ua = (v.user_agent || '').toLowerCase();
-          return ua.includes('tablet');
-        }).length
-      };
+      // Map country breakdown format
+      const topCountries = (data.countryBreakdown || data.topCountries || []).map((c: any) => ({
+        country: c.name || c.country || 'Unknown',
+        count: c.count || 0
+      }));
 
-      // Top countries (if available)
-      const countryCounts: Record<string, number> = {};
-      visitorsData.forEach(v => {
-        const country = v.country || 'Unknown';
-        countryCounts[country] = (countryCounts[country] || 0) + 1;
-      });
-      const topCountries = Object.entries(countryCounts)
-        .map(([country, count]) => ({ country, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10);
-
-      // Top states/regions (if available)
-      const stateCounts: Record<string, { state: string; country: string; count: number }> = {};
-      visitorsData.forEach(v => {
-        const state = v.region || 'Unknown';
-        const country = v.country || 'Unknown';
-        const key = `${country}::${state}`;
-        if (!stateCounts[key]) {
-          stateCounts[key] = { state, country, count: 0 };
-        }
-        stateCounts[key].count++;
-      });
-      const topStates = Object.values(stateCounts)
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 20);
-
-      // Recent visitors (last 100) with location data
-      const recentVisitors = visitorsData.slice(0, 100).map(v => ({
-        id: v.id || v.visitor_id || 'unknown',
-        page_url: v.page_url || v.page_view || v.landing_page || '/',
-        referrer: v.referrer || v.referrer_url || null,
-        user_agent: v.user_agent || 'Unknown',
-        created_at: v.created_at || v.entry_time || new Date().toISOString(),
+      // Map recent visitors format
+      const mappedRecentVisitors = (data.recentVisitors || data.liveVisitors || []).map((v: any) => ({
+        id: v.id || 'unknown',
+        page_url: v.pageUrl || v.page_url || '/',
+        referrer: v.referrer || null,
+        user_agent: v.userAgent || v.user_agent || 'Unknown',
+        created_at: v.createdAt || v.created_at || new Date().toISOString(),
         country: v.country || null,
         region: v.region || null,
         city: v.city || null,
       }));
 
       setVisitorStats({
-        totalVisitors,
-        todayVisitors,
+        totalVisitors: data.totalVisitors || 0,
+        todayVisitors: data.todayVisitors || 0,
         yesterdayVisitors,
-        weekVisitors,
+        weekVisitors: data.weekVisitors || 0,
         lastWeekVisitors,
-        monthVisitors,
+        monthVisitors: data.monthVisitors || 0,
         lastMonthVisitors,
-        onlineNow,
+        onlineNow: data.onlineNow || 0,
         topCountries,
-        topStates,
-        deviceBreakdown,
-        recentVisitors
+        topStates: [], // API doesn't provide this yet
+        deviceBreakdown: data.deviceBreakdown || { desktop: 0, mobile: 0, tablet: 0 },
+        recentVisitors: mappedRecentVisitors
       });
-    } catch (error) {
+      setLastUpdate(new Date());
+    } catch (error: any) {
       console.error('Error loading visitor statistics:', error);
+      // Set empty stats on error but keep component visible
+      setVisitorStats({
+        totalVisitors: 0,
+        todayVisitors: 0,
+        yesterdayVisitors: 0,
+        weekVisitors: 0,
+        lastWeekVisitors: 0,
+        monthVisitors: 0,
+        lastMonthVisitors: 0,
+        onlineNow: 0,
+        topCountries: [],
+        topStates: [],
+        deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
+        recentVisitors: []
+      });
+      setLastUpdate(new Date());
     } finally {
       setLoadingStats(false);
     }
