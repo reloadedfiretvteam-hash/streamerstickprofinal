@@ -1624,7 +1624,6 @@ export default function MainStore() {
       />
       </div>
       {/* End Content Layer */}
-      </div>
     </div>
   );
 }
