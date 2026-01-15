@@ -29,6 +29,7 @@ SITE_URL = "https://streamstickpro.com"
 #   VITE_GOOGLE_ADS_ID - Google Ads conversion tracking ID
 #   VITE_FACEBOOK_PIXEL_ID - Facebook Pixel ID
 
-# Cron Triggers - Process scheduled email campaigns every 6 hours
-[triggers]
-crons = ["0 */6 * * *"]
+# NOTE: Cron triggers for Cloudflare Pages must be configured in the Dashboard:
+#   Workers & Pages → Your Project → Settings → Triggers → Add Cron Trigger
+#   Schedule: 0 */6 * * * (every 6 hours)
+#   This will call /cron/email-campaigns endpoint automatically
