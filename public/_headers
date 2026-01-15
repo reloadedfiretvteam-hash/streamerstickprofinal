@@ -22,6 +22,11 @@
   
   # Performance Headers - Default for static assets
   Cache-Control: public, max-age=31536000, immutable
+  
+  # Preconnect to external domains for faster loading
+  Link: <https://emlqlmfzqsnqokrqvmcm.supabase.co>; rel=preconnect; crossorigin
+  Link: <https://js.stripe.com>; rel=preconnect
+  Link: <https://connect.facebook.net>; rel=preconnect
 
 /index.html
   # No cache for HTML
