@@ -219,6 +219,8 @@ export function createVisitorRoutes() {
         monthVisitors: stats.monthVisitors || 0, // Ensure it exists
         topCountries,
         countryBreakdown: topCountries, // alias for compatibility
+        deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0, bot: 0 }, // Default if not calculated
+        liveVisitors: stats.recentVisitors || [], // Map recentVisitors to liveVisitors
       };
       
       console.log('[VISITOR_STATS] Returning response with', {
