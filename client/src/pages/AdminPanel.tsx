@@ -79,10 +79,14 @@ import AIAssistant from "@/components/AIAssistant";
 interface VisitorStats {
   totalVisitors: number;
   todayVisitors: number;
+  yesterdayVisitors?: number;
   weekVisitors: number;
+  lastWeekVisitors?: number;
   monthVisitors: number;
+  lastMonthVisitors?: number;
   onlineNow: number;
   topCountries: Array<{ country: string; count: number }>;
+  topStates?: Array<{ state: string; country: string; count: number }>;
   deviceBreakdown: { desktop: number; mobile: number; tablet: number };
   recentVisitors: Array<{
     id: string;
@@ -90,6 +94,9 @@ interface VisitorStats {
     referrer: string | null;
     user_agent: string;
     created_at: string;
+    country?: string;
+    region?: string;
+    city?: string;
   }>;
 }
 
@@ -287,10 +294,14 @@ export default function AdminPanel() {
   const [visitorStats, setVisitorStats] = useState<VisitorStats>({
     totalVisitors: 0,
     todayVisitors: 0,
+    yesterdayVisitors: 0,
     weekVisitors: 0,
+    lastWeekVisitors: 0,
     monthVisitors: 0,
+    lastMonthVisitors: 0,
     onlineNow: 0,
     topCountries: [],
+    topStates: [],
     deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
     recentVisitors: []
   });
@@ -599,8 +610,23 @@ export default function AdminPanel() {
       // Calculate statistics
       const totalVisitors = visitorsData.length;
       const todayVisitors = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= today).length;
+      const yesterdayVisitors = visitorsData.filter(v => {
+        const visitDate = new Date(v.created_at || v.entry_time);
+        return visitDate >= yesterday && visitDate < today;
+      }).length;
       const weekVisitors = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= weekAgo).length;
+      const twoWeeksAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
+      const lastWeekVisitors = visitorsData.filter(v => {
+        const visitDate = new Date(v.created_at || v.entry_time);
+        return visitDate >= twoWeeksAgo && visitDate < weekAgo;
+      }).length;
       const monthVisitors = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= monthAgo).length;
+      const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+      const lastMonthVisitors = visitorsData.filter(v => {
+        const visitDate = new Date(v.created_at || v.entry_time);
+        return visitDate >= lastMonthStart && visitDate <= lastMonthEnd;
+      }).length;
       const onlineNow = visitorsData.filter(v => new Date(v.created_at || v.entry_time) >= fiveMinutesAgo).length;
 
       // Device breakdown
@@ -628,24 +654,46 @@ export default function AdminPanel() {
       const topCountries = Object.entries(countryCounts)
         .map(([country, count]) => ({ country, count }))
         .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
+        .slice(0, 10);
 
-      // Recent visitors (last 10)
-      const recentVisitors = visitorsData.slice(0, 10).map(v => ({
+      // Top states/regions (if available)
+      const stateCounts: Record<string, { state: string; country: string; count: number }> = {};
+      visitorsData.forEach(v => {
+        const state = v.region || 'Unknown';
+        const country = v.country || 'Unknown';
+        const key = `${country}::${state}`;
+        if (!stateCounts[key]) {
+          stateCounts[key] = { state, country, count: 0 };
+        }
+        stateCounts[key].count++;
+      });
+      const topStates = Object.values(stateCounts)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 20);
+
+      // Recent visitors (last 100) with location data
+      const recentVisitors = visitorsData.slice(0, 100).map(v => ({
         id: v.id || v.visitor_id || 'unknown',
         page_url: v.page_url || v.page_view || v.landing_page || '/',
         referrer: v.referrer || v.referrer_url || null,
         user_agent: v.user_agent || 'Unknown',
-        created_at: v.created_at || v.entry_time || new Date().toISOString()
+        created_at: v.created_at || v.entry_time || new Date().toISOString(),
+        country: v.country || null,
+        region: v.region || null,
+        city: v.city || null,
       }));
 
       setVisitorStats({
         totalVisitors,
         todayVisitors,
+        yesterdayVisitors,
         weekVisitors,
+        lastWeekVisitors,
         monthVisitors,
+        lastMonthVisitors,
         onlineNow,
         topCountries,
+        topStates,
         deviceBreakdown,
         recentVisitors
       });
@@ -2124,6 +2172,9 @@ export default function AdminPanel() {
                     <span className="text-2xl font-bold">{visitorStats.todayVisitors.toLocaleString()}</span>
                   </div>
                   <p className="text-green-100 text-sm">Today</p>
+                  {visitorStats.yesterdayVisitors !== undefined && visitorStats.yesterdayVisitors > 0 && (
+                    <p className="text-green-200 text-xs mt-1">Yesterday: {visitorStats.yesterdayVisitors.toLocaleString()}</p>
+                  )}
                 </div>
 
                 <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white shadow-lg">
@@ -2132,6 +2183,9 @@ export default function AdminPanel() {
                     <span className="text-2xl font-bold">{visitorStats.weekVisitors.toLocaleString()}</span>
                   </div>
                   <p className="text-purple-100 text-sm">This Week</p>
+                  {visitorStats.lastWeekVisitors !== undefined && visitorStats.lastWeekVisitors > 0 && (
+                    <p className="text-purple-200 text-xs mt-1">Last Week: {visitorStats.lastWeekVisitors.toLocaleString()}</p>
+                  )}
                 </div>
 
                 <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-lg p-6 text-white shadow-lg">
@@ -2140,6 +2194,36 @@ export default function AdminPanel() {
                     <span className="text-2xl font-bold">{visitorStats.onlineNow.toLocaleString()}</span>
                   </div>
                   <p className="text-orange-100 text-sm">Online Now</p>
+                </div>
+              </div>
+
+              {/* Historical Visitors Row */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Clock className="w-6 h-6 opacity-80" />
+                    <span className="text-xl font-bold">{visitorStats.yesterdayVisitors?.toLocaleString() || 0}</span>
+                  </div>
+                  <p className="text-indigo-100 text-sm">Yesterday</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Clock className="w-6 h-6 opacity-80" />
+                    <span className="text-xl font-bold">{visitorStats.monthVisitors.toLocaleString()}</span>
+                  </div>
+                  <p className="text-teal-100 text-sm">This Month</p>
+                  {visitorStats.lastMonthVisitors !== undefined && visitorStats.lastMonthVisitors > 0 && (
+                    <p className="text-teal-200 text-xs mt-1">Last Month: {visitorStats.lastMonthVisitors.toLocaleString()}</p>
+                  )}
+                </div>
+
+                <div className="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg p-6 text-white shadow-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Globe className="w-6 h-6 opacity-80" />
+                    <span className="text-xl font-bold">{visitorStats.topCountries.length}</span>
+                  </div>
+                  <p className="text-cyan-100 text-sm">Countries</p>
                 </div>
               </div>
 
@@ -2183,7 +2267,7 @@ export default function AdminPanel() {
                       Top Countries
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent className="space-y-3 max-h-[300px] overflow-y-auto">
                     {visitorStats.topCountries.length > 0 ? (
                       visitorStats.topCountries.map((country, idx) => (
                         <div key={idx} className="flex items-center justify-between">
@@ -2191,7 +2275,7 @@ export default function AdminPanel() {
                             <MapPin className="w-4 h-4 text-gray-400" />
                             <span className="text-gray-300">{country.country}</span>
                           </div>
-                          <span className="font-semibold text-white">{country.count}</span>
+                          <span className="font-semibold text-white">{country.count.toLocaleString()}</span>
                         </div>
                       ))
                     ) : (
@@ -2200,6 +2284,34 @@ export default function AdminPanel() {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Top States/Regions */}
+              {visitorStats.topStates && visitorStats.topStates.length > 0 && (
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <MapPin className="w-5 h-5 text-orange-500" />
+                      Top States/Regions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto">
+                      {visitorStats.topStates.map((state, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-gray-400" />
+                            <div>
+                              <span className="text-gray-300 font-medium">{state.state}</span>
+                              <span className="text-gray-500 text-xs ml-2">({state.country})</span>
+                            </div>
+                          </div>
+                          <span className="font-semibold text-white">{state.count.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
@@ -2214,6 +2326,7 @@ export default function AdminPanel() {
                       <TableHeader>
                         <TableRow className="border-gray-700">
                           <TableHead className="text-gray-400">Device</TableHead>
+                          <TableHead className="text-gray-400">Location</TableHead>
                           <TableHead className="text-gray-400">Page</TableHead>
                           <TableHead className="text-gray-400">Referrer</TableHead>
                           <TableHead className="text-gray-400">Time</TableHead>
@@ -2229,6 +2342,21 @@ export default function AdminPanel() {
                                   <span className="text-sm truncate max-w-[150px]">{visitor.user_agent.substring(0, 30)}...</span>
                                 </div>
                               </TableCell>
+                              <TableCell className="text-gray-300">
+                                {visitor.country || visitor.region || visitor.city ? (
+                                  <div className="text-sm">
+                                    {visitor.city && <span className="font-medium">{visitor.city}</span>}
+                                    {visitor.region && (
+                                      <span className="text-gray-400">, {visitor.region}</span>
+                                    )}
+                                    {visitor.country && (
+                                      <div className="text-xs text-gray-500 mt-0.5">{visitor.country}</div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-500 text-sm">Unknown</span>
+                                )}
+                              </TableCell>
                               <TableCell className="text-gray-300">{visitor.page_url.substring(0, 40)}</TableCell>
                               <TableCell className="text-gray-400">
                                 <span className="text-sm">
@@ -2240,7 +2368,7 @@ export default function AdminPanel() {
                           ))
                         ) : (
                           <TableRow>
-                            <TableCell colSpan={4} className="py-8 text-center text-gray-400">
+                            <TableCell colSpan={5} className="py-8 text-center text-gray-400">
                               No visitors tracked yet. Visitors will appear here as they browse your site.
                             </TableCell>
                           </TableRow>

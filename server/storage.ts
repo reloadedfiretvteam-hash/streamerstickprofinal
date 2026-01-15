@@ -289,33 +289,88 @@ export class DatabaseStorage implements IStorage {
   async getVisitorStats(): Promise<{
     totalVisitors: number;
     todayVisitors: number;
+    yesterdayVisitors: number;
     weekVisitors: number;
+    lastWeekVisitors: number;
     monthVisitors: number;
+    lastMonthVisitors: number;
     onlineNow: number;
     recentVisitors: Visitor[];
+    topCountries: Array<{ country: string; count: number }>;
+    topStates: Array<{ state: string; country: string; count: number }>;
   }> {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
     const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const twoWeeksAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
     const monthAgo = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
     const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
 
-    const allVisitors = await db.select().from(visitors).orderBy(desc(visitors.createdAt)).limit(5000);
+    const allVisitors = await db.select().from(visitors).orderBy(desc(visitors.createdAt)).limit(10000);
     
     const totalVisitors = allVisitors.length;
     const todayVisitors = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= today).length;
+    const yesterdayVisitors = allVisitors.filter(v => {
+      if (!v.createdAt) return false;
+      const visitDate = new Date(v.createdAt);
+      return visitDate >= yesterday && visitDate < today;
+    }).length;
     const weekVisitors = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= weekAgo).length;
+    const lastWeekVisitors = allVisitors.filter(v => {
+      if (!v.createdAt) return false;
+      const visitDate = new Date(v.createdAt);
+      return visitDate >= twoWeeksAgo && visitDate < weekAgo;
+    }).length;
     const monthVisitors = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= monthAgo).length;
+    const lastMonthVisitors = allVisitors.filter(v => {
+      if (!v.createdAt) return false;
+      const visitDate = new Date(v.createdAt);
+      return visitDate >= lastMonthStart && visitDate <= lastMonthEnd;
+    }).length;
     const onlineNow = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= fiveMinutesAgo).length;
-    const recentVisitors = allVisitors.slice(0, 50);
+    const recentVisitors = allVisitors.slice(0, 100);
+
+    // Calculate top countries
+    const countryCounts: Record<string, number> = {};
+    allVisitors.forEach(v => {
+      const country = v.country || 'Unknown';
+      countryCounts[country] = (countryCounts[country] || 0) + 1;
+    });
+    const topCountries = Object.entries(countryCounts)
+      .map(([country, count]) => ({ country, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Calculate top states/regions
+    const stateCounts: Record<string, { state: string; country: string; count: number }> = {};
+    allVisitors.forEach(v => {
+      const state = v.region || 'Unknown';
+      const country = v.country || 'Unknown';
+      const key = `${country}::${state}`;
+      if (!stateCounts[key]) {
+        stateCounts[key] = { state, country, count: 0 };
+      }
+      stateCounts[key].count++;
+    });
+    const topStates = Object.values(stateCounts)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 20);
 
     return {
       totalVisitors,
       todayVisitors,
+      yesterdayVisitors,
       weekVisitors,
+      lastWeekVisitors,
       monthVisitors,
+      lastMonthVisitors,
       onlineNow,
       recentVisitors,
+      topCountries,
+      topStates,
     };
   }
 
