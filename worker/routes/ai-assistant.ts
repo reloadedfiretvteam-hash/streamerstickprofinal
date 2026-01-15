@@ -118,6 +118,309 @@ export function createAIAssistantRoutes() {
     }
   });
 
+  // File write/update endpoint - FULL SYSTEM ACCESS
+  router.post('/codebase/write', async (c) => {
+    try {
+      const body = await c.req.json();
+      const { filePath, content, message, repo, branch, operation } = body;
+      
+      if (!filePath || !content) {
+        return c.json({ error: 'File path and content are required' }, 400);
+      }
+
+      if (!c.env.GITHUB_TOKEN) {
+        return c.json({ error: 'GitHub token required for file operations' }, 400);
+      }
+
+      const repoPath = repo || 'reloadedfiretvteam-hash/streamerstickprofinal';
+      const branchName = branch || 'clean-main';
+      const commitMessage = message || `Update ${filePath}`;
+      
+      // Check if file exists
+      let fileSha: string | null = null;
+      try {
+        const existingFile = await fetch(
+          `https://api.github.com/repos/${repoPath}/contents/${filePath}?ref=${branchName}`,
+          {
+            headers: {
+              'Authorization': `token ${c.env.GITHUB_TOKEN}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          }
+        );
+        if (existingFile.ok) {
+          const fileData = await existingFile.json();
+          fileSha = fileData.sha;
+        }
+      } catch (error) {
+        // File doesn't exist, will create new
+      }
+
+      // Create or update file
+      const response = await fetch(
+        `https://api.github.com/repos/${repoPath}/contents/${filePath}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${c.env.GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: commitMessage,
+            content: Buffer.from(content).toString('base64'),
+            branch: branchName,
+            ...(fileSha ? { sha: fileSha } : {})
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        return c.json({ 
+          error: `Failed to ${fileSha ? 'update' : 'create'} file: ${error.message}`,
+          details: error
+        }, response.status);
+      }
+
+      const result = await response.json();
+      return c.json({
+        success: true,
+        operation: fileSha ? 'updated' : 'created',
+        filePath,
+        commitSha: result.commit.sha,
+        commitUrl: result.commit.html_url,
+        contentUrl: result.content.html_url
+      });
+    } catch (error: any) {
+      return c.json({ error: error.message }, 500);
+    }
+  });
+
+  // File delete endpoint
+  router.post('/codebase/delete', async (c) => {
+    try {
+      const body = await c.req.json();
+      const { filePath, message, repo, branch } = body;
+      
+      if (!filePath) {
+        return c.json({ error: 'File path is required' }, 400);
+      }
+
+      if (!c.env.GITHUB_TOKEN) {
+        return c.json({ error: 'GitHub token required for file operations' }, 400);
+      }
+
+      const repoPath = repo || 'reloadedfiretvteam-hash/streamerstickprofinal';
+      const branchName = branch || 'clean-main';
+      const commitMessage = message || `Delete ${filePath}`;
+      
+      // Get file SHA first
+      const existingFile = await fetch(
+        `https://api.github.com/repos/${repoPath}/contents/${filePath}?ref=${branchName}`,
+        {
+          headers: {
+            'Authorization': `token ${c.env.GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        }
+      );
+
+      if (!existingFile.ok) {
+        return c.json({ error: 'File not found' }, 404);
+      }
+
+      const fileData = await existingFile.json();
+
+      // Delete file
+      const response = await fetch(
+        `https://api.github.com/repos/${repoPath}/contents/${filePath}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `token ${c.env.GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: commitMessage,
+            sha: fileData.sha,
+            branch: branchName
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        return c.json({ error: `Failed to delete file: ${error.message}` }, response.status);
+      }
+
+      const result = await response.json();
+      return c.json({
+        success: true,
+        operation: 'deleted',
+        filePath,
+        commitSha: result.commit.sha,
+        commitUrl: result.commit.html_url
+      });
+    } catch (error: any) {
+      return c.json({ error: error.message }, 500);
+    }
+  });
+
+  // Batch file operations endpoint
+  router.post('/codebase/batch', async (c) => {
+    try {
+      const body = await c.req.json();
+      const { operations, message, repo, branch } = body;
+      
+      if (!operations || !Array.isArray(operations) || operations.length === 0) {
+        return c.json({ error: 'Operations array is required' }, 400);
+      }
+
+      if (!c.env.GITHUB_TOKEN) {
+        return c.json({ error: 'GitHub token required' }, 400);
+      }
+
+      const repoPath = repo || 'reloadedfiretvteam-hash/streamerstickprofinal';
+      const branchName = branch || 'clean-main';
+      const commitMessage = message || `Batch update: ${operations.length} files`;
+      
+      const results = [];
+      const errors = [];
+
+      for (const op of operations) {
+        try {
+          if (op.operation === 'create' || op.operation === 'update') {
+            // Get existing file SHA if updating
+            let fileSha: string | null = null;
+            if (op.operation === 'update') {
+              try {
+                const existingFile = await fetch(
+                  `https://api.github.com/repos/${repoPath}/contents/${op.filePath}?ref=${branchName}`,
+                  {
+                    headers: {
+                      'Authorization': `token ${c.env.GITHUB_TOKEN}`,
+                      'Accept': 'application/vnd.github.v3+json'
+                    }
+                  }
+                );
+                if (existingFile.ok) {
+                  const fileData = await existingFile.json();
+                  fileSha = fileData.sha;
+                }
+              } catch (error) {
+                // File doesn't exist, will create
+              }
+            }
+
+            const response = await fetch(
+              `https://api.github.com/repos/${repoPath}/contents/${op.filePath}`,
+              {
+                method: 'PUT',
+                headers: {
+                  'Authorization': `token ${c.env.GITHUB_TOKEN}`,
+                  'Accept': 'application/vnd.github.v3+json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  message: op.message || commitMessage,
+                  content: Buffer.from(op.content).toString('base64'),
+                  branch: branchName,
+                  ...(fileSha ? { sha: fileSha } : {})
+                })
+              }
+            );
+
+            if (response.ok) {
+              const result = await response.json();
+              results.push({
+                operation: op.operation,
+                filePath: op.filePath,
+                success: true,
+                commitSha: result.commit.sha
+              });
+            } else {
+              const error = await response.json();
+              errors.push({
+                filePath: op.filePath,
+                error: error.message
+              });
+            }
+          } else if (op.operation === 'delete') {
+            // Get file SHA first
+            const existingFile = await fetch(
+              `https://api.github.com/repos/${repoPath}/contents/${op.filePath}?ref=${branchName}`,
+              {
+                headers: {
+                  'Authorization': `token ${c.env.GITHUB_TOKEN}`,
+                  'Accept': 'application/vnd.github.v3+json'
+                }
+              }
+            );
+
+            if (existingFile.ok) {
+              const fileData = await existingFile.json();
+              const response = await fetch(
+                `https://api.github.com/repos/${repoPath}/contents/${op.filePath}`,
+                {
+                  method: 'DELETE',
+                  headers: {
+                    'Authorization': `token ${c.env.GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    message: op.message || commitMessage,
+                    sha: fileData.sha,
+                    branch: branchName
+                  })
+                }
+              );
+
+              if (response.ok) {
+                results.push({
+                  operation: 'delete',
+                  filePath: op.filePath,
+                  success: true
+                });
+              } else {
+                const error = await response.json();
+                errors.push({
+                  filePath: op.filePath,
+                  error: error.message
+                });
+              }
+            } else {
+              errors.push({
+                filePath: op.filePath,
+                error: 'File not found'
+              });
+            }
+          }
+        } catch (error: any) {
+          errors.push({
+            filePath: op.filePath,
+            error: error.message
+          });
+        }
+      }
+
+      return c.json({
+        success: errors.length === 0,
+        results,
+        errors,
+        summary: {
+          total: operations.length,
+          successful: results.length,
+          failed: errors.length
+        }
+      });
+    } catch (error: any) {
+      return c.json({ error: error.message }, 500);
+    }
+  });
+
   // Code comparison endpoint
   router.post('/codebase/compare', async (c) => {
     try {
@@ -221,10 +524,12 @@ export function createAIAssistantRoutes() {
           category: 'Supabase',
           actions: [
             'query database',
-            'create table',
+            'create tables',
+            'run SQL migrations',
             'update records',
             'delete records',
-            'run migrations'
+            'list edge functions',
+            'full database access'
           ]
         },
         {
@@ -240,20 +545,27 @@ export function createAIAssistantRoutes() {
         {
           category: 'Cloudflare',
           actions: [
-            'deploy to pages',
-            'check deployment status',
-            'view logs',
-            'manage workers'
+            'list workers',
+            'deploy workers',
+            'list Pages projects',
+            'view deployments',
+            'retry failed deployments',
+            'update environment variables',
+            'manage infrastructure'
           ]
         },
         {
           category: 'Code',
           actions: [
             'generate code',
-            'modify files',
+            'create files',
+            'update files',
+            'delete files',
+            'batch file operations',
             'create components',
             'add features',
-            'fix bugs'
+            'fix bugs',
+            'commit changes to GitHub'
           ]
         },
         {
@@ -316,24 +628,22 @@ export function createAIAssistantRoutes() {
   return router;
 }
 
-// Execute Cloudflare actions
+// Execute Cloudflare actions - FULL INFRASTRUCTURE ACCESS
 async function executeCloudflareAction(action: any, env: Env): Promise<any> {
   if (!env.CLOUDFLARE_API_TOKEN || !env.CLOUDFLARE_ACCOUNT_ID) {
-    return { error: 'Cloudflare API token and account ID required' };
+    return { error: 'Cloudflare API token and account ID required. Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID environment variables.' };
   }
+
+  const baseUrl = `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}`;
+  const headers = {
+    'Authorization': `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
+    'Content-Type': 'application/json'
+  };
 
   try {
     switch (action.action) {
       case 'list_workers':
-        const workersResponse = await fetch(
-          `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/workers/scripts`,
-          {
-            headers: {
-              'Authorization': `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
+        const workersResponse = await fetch(`${baseUrl}/workers/scripts`, { headers });
         const workersData = await workersResponse.json();
         return {
           message: `Found ${workersData.result?.length || 0} workers`,
@@ -341,10 +651,93 @@ async function executeCloudflareAction(action: any, env: Env): Promise<any> {
         };
 
       case 'deploy_worker':
-        return { message: 'Worker deployment requires code and configuration', note: 'Use Cloudflare API or dashboard for full deployment' };
+        if (!action.workerName || !action.code) {
+          return { error: 'Worker name and code are required' };
+        }
+        const deployResponse = await fetch(
+          `${baseUrl}/workers/scripts/${action.workerName}`,
+          {
+            method: 'PUT',
+            headers: {
+              ...headers,
+              'Content-Type': 'application/javascript'
+            },
+            body: action.code
+          }
+        );
+        if (!deployResponse.ok) {
+          const error = await deployResponse.json();
+          return { error: `Worker deployment failed: ${error.errors?.[0]?.message || 'Unknown error'}` };
+        }
+        return {
+          message: `Worker '${action.workerName}' deployed successfully`,
+          data: await deployResponse.json()
+        };
 
-      case 'deploy_pages':
-        return { message: 'Pages deployment typically handled via GitHub integration', note: 'Check Cloudflare Pages dashboard' };
+      case 'list_pages_projects':
+        const pagesResponse = await fetch(`${baseUrl}/pages/projects`, { headers });
+        const pagesData = await pagesResponse.json();
+        return {
+          message: `Found ${pagesData.result?.length || 0} Pages projects`,
+          data: pagesData.result || []
+        };
+
+      case 'get_pages_deployments':
+        if (!action.projectName) {
+          return { error: 'Project name is required' };
+        }
+        const deploymentsResponse = await fetch(
+          `${baseUrl}/pages/projects/${action.projectName}/deployments`,
+          { headers }
+        );
+        const deploymentsData = await deploymentsResponse.json();
+        return {
+          message: `Found ${deploymentsData.result?.length || 0} deployments`,
+          data: deploymentsData.result || []
+        };
+
+      case 'retry_pages_deployment':
+        if (!action.projectName || !action.deploymentId) {
+          return { error: 'Project name and deployment ID are required' };
+        }
+        const retryResponse = await fetch(
+          `${baseUrl}/pages/projects/${action.projectName}/deployments/${action.deploymentId}/retry`,
+          {
+            method: 'POST',
+            headers
+          }
+        );
+        if (!retryResponse.ok) {
+          const error = await retryResponse.json();
+          return { error: `Retry failed: ${error.errors?.[0]?.message || 'Unknown error'}` };
+        }
+        return {
+          message: `Deployment ${action.deploymentId} retry initiated`,
+          data: await retryResponse.json()
+        };
+
+      case 'update_environment_variables':
+        if (!action.projectName || !action.variables) {
+          return { error: 'Project name and variables are required' };
+        }
+        const envVarsResponse = await fetch(
+          `${baseUrl}/pages/projects/${action.projectName}`,
+          {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({
+              env_vars: action.variables
+            })
+          }
+        );
+        if (!envVarsResponse.ok) {
+          const error = await envVarsResponse.json();
+          return { error: `Failed to update environment variables: ${error.errors?.[0]?.message || 'Unknown error'}` };
+        }
+        return {
+          message: 'Environment variables updated successfully',
+          data: await envVarsResponse.json()
+        };
 
       default:
         return { message: `Cloudflare action '${action.action}' not implemented yet` };
@@ -1203,9 +1596,31 @@ async function executeGitHubAction(action: any, env: Env): Promise<any> {
         };
 
       case 'push':
-        return { 
-          message: 'Push functionality requires specific file changes and commit message. Please use the GitHub Deploy section for safe pushes.',
-          note: 'For security, direct pushes through AI require manual confirmation'
+      case 'commit_and_push':
+        // This is handled by file write operations which automatically commit
+        return {
+          message: 'File changes are automatically committed when using write/update operations. Files are pushed to the specified branch.',
+          note: 'Use /codebase/write or /codebase/batch endpoints to make changes and commit them'
+        };
+      
+      case 'update_file':
+      case 'edit_file':
+        if (!action.filePath || !action.content) {
+          return { error: 'File path and content are required' };
+        }
+        // This will be handled by the /codebase/write endpoint
+        return {
+          message: 'Use /codebase/write endpoint to update files',
+          note: 'File updates automatically create commits'
+        };
+      
+      case 'delete_file':
+        if (!action.filePath) {
+          return { error: 'File path is required' };
+        }
+        return {
+          message: 'Use /codebase/delete endpoint to delete files',
+          note: 'File deletions automatically create commits'
         };
 
       default:

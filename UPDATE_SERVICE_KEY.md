@@ -43,8 +43,9 @@ node format-migration-for-supabase.js
 Add to Cloudflare Pages/Workers environment variables:
 
 - **Variable:** `SUPABASE_SERVICE_KEY`
-- **Value:** `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mzg4NDQ5MiwiZXhwIjoyMDc5NDYwNDkyfQ.m3xw006mSdP1DeunLo4CoNDonIIXkQSt353VL-ibb0c`
-- **Type:** Secret
+- **Value:** Get from Supabase Dashboard → Settings → API → service_role key
+- **Type:** Secret (encrypted)
+- **⚠️ SECURITY: Never commit service keys to git!**
 
 ### 3. Activate Cron Trigger
 

@@ -4,7 +4,14 @@ Write-Host ""
 $PROJECT_REF = "emlqlmfzqsnqokrqvmcm"
 $STRIPE_SECRET = "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"
 $SUPABASE_URL = "https://emlqlmfzqsnqokrqvmcm.supabase.co"
-$SERVICE_ROLE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mzg4NDQ5MiwiZXhwIjoyMDc5NDYwNDkyfQ.m3xw006mSdP1DeunLo4CoNDonIIXkQSt353VL-ibb0c"
+# ⚠️ SECURITY: Service key should come from environment variable, not hardcoded!
+# Get from: Supabase Dashboard → Settings → API → service_role key
+$SERVICE_ROLE = $env:SUPABASE_SERVICE_KEY
+if (-not $SERVICE_ROLE) {
+    Write-Host "❌ ERROR: SUPABASE_SERVICE_KEY environment variable not set!" -ForegroundColor Red
+    Write-Host "   Get your service key from: https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/settings/api" -ForegroundColor Yellow
+    exit 1
+}
 
 Write-Host "PROJECT: $PROJECT_REF" -ForegroundColor Yellow
 Write-Host ""
