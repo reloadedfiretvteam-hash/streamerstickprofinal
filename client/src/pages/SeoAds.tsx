@@ -125,22 +125,14 @@ export default function SeoAds() {
       tag.setAttribute('content', content);
     };
 
-    const setCanonical = (url: string) => {
-      let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-      if (!link) {
-        link = document.createElement('link');
-        link.setAttribute('rel', 'canonical');
-        document.head.appendChild(link);
-      }
-      link.setAttribute('href', url);
-    };
-
+    // Canonical tags are now handled by centralized CanonicalTag component
+    
     const baseUrl = 'https://streamstickpro.com';
     
     if (selectedAd) {
       document.title = selectedAd.metaTitle || `${selectedAd.title} | StreamStickPro`;
       setMetaTag('description', selectedAd.metaDescription || selectedAd.excerpt);
-      setCanonical(`${baseUrl}/seo-ads/${selectedAd.slug}`);
+      // Canonical tag handled by CanonicalTag component
       setMetaTag('og:title', selectedAd.title, true);
       setMetaTag('og:description', selectedAd.excerpt, true);
       setMetaTag('og:url', `${baseUrl}/seo-ads/${selectedAd.slug}`, true);
@@ -151,7 +143,7 @@ export default function SeoAds() {
     } else {
       document.title = 'SEO Guides & Comparisons | StreamStickPro';
       setMetaTag('description', 'Compare streaming devices, apps, and services. Find the best solutions for cord cutting and live TV streaming.');
-      setCanonical(`${baseUrl}/seo-ads`);
+      // Canonical tag handled by CanonicalTag component
     }
   }, [selectedAd]);
 

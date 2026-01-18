@@ -117,16 +117,9 @@ export default function Blog() {
       tag.setAttribute('content', content);
     };
 
-    const setCanonical = (url: string) => {
-      let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-      if (!link) {
-        link = document.createElement('link');
-        link.setAttribute('rel', 'canonical');
-        document.head.appendChild(link);
-      }
-      link.setAttribute('href', url);
-    };
-
+    // Canonical tags are now handled by centralized CanonicalTag component
+    // This ensures consistency across all pages
+    
     const baseUrl = 'https://streamstickpro.com';
     const defaultDescription = 'Guides, tips, and everything you need to know about cord cutting and streaming';
     const defaultTitle = 'Posts | StreamStickPro - Cord Cutting Guides & Tips';
@@ -139,7 +132,7 @@ export default function Blog() {
         
         setMetaTag('description', postFromSlug.excerpt);
         setMetaTag('robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
-        setCanonical(`${baseUrl}/blog/${postFromSlug.slug}`);
+        // Canonical tag handled by CanonicalTag component
         setMetaTag('og:title', postFromSlug.title, true);
         setMetaTag('og:description', postFromSlug.excerpt, true);
         setMetaTag('og:url', `${baseUrl}/blog/${postFromSlug.slug}`, true);
@@ -159,7 +152,7 @@ export default function Blog() {
         setSelectedPost(null);
         document.title = defaultTitle;
         setMetaTag('description', defaultDescription);
-        setCanonical(`${baseUrl}/blog`);
+        // Canonical tag handled by CanonicalTag component
         setMetaTag('og:title', defaultTitle, true);
         setMetaTag('og:description', defaultDescription, true);
         setMetaTag('og:url', `${baseUrl}/blog`, true);
@@ -171,7 +164,7 @@ export default function Blog() {
       setSelectedPost(null);
       document.title = defaultTitle;
       setMetaTag('description', defaultDescription);
-      setCanonical(`${baseUrl}/blog`);
+      // Canonical tag handled by CanonicalTag component
       setMetaTag('og:title', defaultTitle, true);
       setMetaTag('og:description', defaultDescription, true);
       setMetaTag('og:url', `${baseUrl}/blog`, true);

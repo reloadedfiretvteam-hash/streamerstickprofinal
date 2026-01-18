@@ -25,6 +25,7 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import RefundPolicy from "@/pages/RefundPolicy";
 import { CartDrawer } from "@/components/CartDrawer";
 import { WishlistDrawer } from "@/components/WishlistDrawer";
+import CanonicalTag from "@/components/CanonicalTag";
 
 const SECURE_HOSTS = (import.meta.env.VITE_SECURE_HOSTS || 'secure.streamstickpro.com').split(',').map((h: string) => h.trim().toLowerCase());
 
@@ -74,6 +75,7 @@ function AppContent() {
   
   return (
     <>
+      <CanonicalTag />
       <RetargetingPixels />
       <ExitIntentPopup 
         onClose={() => {}} 

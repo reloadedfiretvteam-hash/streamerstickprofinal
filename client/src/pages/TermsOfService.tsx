@@ -26,13 +26,7 @@ export default function TermsOfService() {
       tag.setAttribute('content', content);
     };
     
-    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', url);
+    // Canonical tag handled by centralized CanonicalTag component
     
     setMetaTag('description', description);
     setMetaTag('og:title', title, true);
