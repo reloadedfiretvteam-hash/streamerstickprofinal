@@ -62,13 +62,13 @@ export function ChannelLogos({ className = "" }: { className?: string }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
           <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
             <Tv className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-white">Extensive</div>
-            <div className="text-sm text-gray-300">Channel Library</div>
+            <div className="text-2xl font-bold text-white">18,000+</div>
+            <div className="text-sm text-gray-200">Live TV Channels</div>
           </div>
           <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
             <Film className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-white">Thousands</div>
-            <div className="text-sm text-gray-300">Movies & Shows</div>
+            <div className="text-2xl font-bold text-white">100,000+</div>
+            <div className="text-sm text-gray-200">Movies and Series</div>
           </div>
           <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
             <Trophy className="w-8 h-8 text-orange-400 mx-auto mb-2" />

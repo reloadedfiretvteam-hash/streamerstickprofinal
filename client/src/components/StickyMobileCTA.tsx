@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
-import { ShoppingCart, ArrowUp } from "lucide-react";
+import { ShoppingCart, ArrowUp, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/lib/store";
 
-export function StickyMobileCTA() {
+interface StickyMobileCTAProps {
+  onContact?: () => void;
+}
+
+export function StickyMobileCTA({ onContact }: StickyMobileCTAProps = {}) {
   const [visible, setVisible] = useState(false);
   const { items, openCart } = useCart();
 
@@ -31,11 +35,21 @@ export function StickyMobileCTA() {
           exit={{ y: 100, opacity: 0 }}
           className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
         >
-          <div className="bg-gray-900/95 backdrop-blur-md border-t border-white/10 px-4 py-3 safe-area-pb">
+          <div className="bg-gray-900/98 backdrop-blur-xl border-t-2 border-white/20 px-4 py-4 safe-area-pb shadow-2xl">
             <div className="flex gap-3">
+              {onContact && (
+                <button
+                  onClick={onContact}
+                  className="bg-white/20 hover:bg-white/30 border-2 border-white/30 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center shadow-lg transition-all"
+                  data-testid="sticky-contact-button"
+                  aria-label="Contact us"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                </button>
+              )}
               <button
                 onClick={scrollToShop}
-                className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30"
+                className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30 text-base"
                 data-testid="sticky-shop-button"
               >
                 <ShoppingCart className="w-5 h-5" />
@@ -44,7 +58,7 @@ export function StickyMobileCTA() {
               {items.length > 0 && (
                 <button
                   onClick={openCart}
-                  className="bg-white text-black font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2"
+                  className="bg-white text-black font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-base"
                   data-testid="sticky-cart-button"
                 >
                   Cart ({items.length})

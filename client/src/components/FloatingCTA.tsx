@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Zap, X } from "lucide-react";
+import { ShoppingCart, Zap, X, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FloatingCTAProps {
   onBuyNow?: () => void;
+  onContact?: () => void;
 }
 
-export function FloatingCTA({ onBuyNow }: FloatingCTAProps) {
+export function FloatingCTA({ onBuyNow, onContact }: FloatingCTAProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -68,18 +69,29 @@ export function FloatingCTA({ onBuyNow }: FloatingCTAProps) {
                       <Zap className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-white font-bold text-sm">Ready to Cut the Cord?</p>
-                    <p className="text-gray-300 text-xs">18,000+ channels from $15/mo</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-bold text-base">Ready to Cut the Cord?</p>
+                    <p className="text-gray-200 text-sm">18,000+ channels from $15/mo</p>
                   </div>
-                  <Button
-                    onClick={scrollToProducts}
-                    className="bg-gradient-to-r from-orange-500 to-purple-600 hover:from-orange-600 hover:to-purple-700 text-white font-bold px-6 shadow-lg"
-                    data-testid="button-floating-cta"
-                  >
-                    <ShoppingCart className="w-4 h-4 mr-2" />
-                    Shop Now
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={onContact}
+                      variant="outline"
+                      className="bg-white/10 hover:bg-white/20 border-white/30 text-white font-semibold px-4 shadow-lg"
+                      data-testid="button-floating-contact"
+                      title="Contact Us"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={scrollToProducts}
+                      className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold px-6 shadow-lg shadow-orange-500/30"
+                      data-testid="button-floating-cta"
+                    >
+                      <ShoppingCart className="w-4 h-4 mr-2" />
+                      Shop Now
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
