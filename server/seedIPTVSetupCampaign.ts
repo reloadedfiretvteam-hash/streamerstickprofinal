@@ -1410,6 +1410,106 @@ Google TV devices offer native IPTV support:
     });
   });
 
+  // Downloader App Additional Posts (10 more)
+  const downloaderTopics = [
+    { title: "Downloader App Not Working on Fire Stick - Fix Guide 2025", keywords: ["downloader not working", "fire stick downloader", "downloader troubleshooting"] },
+    { title: "How to Use Downloader App to Install APK Files on Fire Stick 2025", keywords: ["downloader apk", "install apk fire stick", "sideload apk"] },
+    { title: "Downloader App Settings - Best Configuration for Fire Stick 2025", keywords: ["downloader settings", "downloader configuration", "fire stick downloader"] },
+    { title: "Downloader App vs Sideload Launcher - Which is Better 2025", keywords: ["downloader vs sideload", "best sideload app", "fire stick sideload"] },
+    { title: "Downloader App Security - Safe APK Download Guide 2025", keywords: ["downloader security", "safe apk download", "fire stick safety"] },
+    { title: "Downloader App Alternatives - Top Sideloading Apps 2025", keywords: ["downloader alternatives", "sideload apps", "fire stick apps"] },
+    { title: "How to Clear Downloader App Cache on Fire Stick 2025", keywords: ["clear downloader cache", "fire stick cache", "downloader cleanup"] },
+    { title: "Downloader App for Android TV - Installation Guide 2025", keywords: ["downloader android tv", "android tv sideload", "google tv downloader"] },
+    { title: "Best URLs for Downloader App - Trusted APK Sources 2025", keywords: ["downloader urls", "apk download links", "trusted apk sources"] },
+    { title: "Downloader App Tips and Tricks - Advanced Guide 2025", keywords: ["downloader tips", "downloader tricks", "fire stick hacks"] },
+  ];
+
+  downloaderTopics.forEach((topic) => {
+    remainingPosts.push({
+      title: topic.title,
+      slug: generateSlug(topic.title),
+      excerpt: `Complete guide to ${topic.keywords[0]}. Learn how to use Downloader app effectively and safely on Fire Stick and other devices.`,
+      content: addHomepageLink(`# ${topic.title}
+
+The Downloader app is essential for sideloading apps on Fire Stick and Android TV devices. This guide covers everything you need to know.
+
+## Downloader App Overview
+
+Downloader is a powerful tool that enables you to install apps not available in official app stores. It's the most popular method for sideloading apps on Fire Stick.
+
+## Installation
+
+1. Search for "Downloader" in Amazon Appstore
+2. Install the official app by AFTVnews
+3. Enable Apps from Unknown Sources
+4. Open Downloader app
+
+## Usage Guide
+
+### Downloading Files
+1. Open Downloader app
+2. Enter URL in address bar
+3. Click Go to download
+4. Wait for download to complete
+
+### Installing APKs
+1. Download APK file using Downloader
+2. Click Install when download completes
+3. Confirm installation
+4. Open app from home screen
+
+## Safety Tips
+
+- ✅ Only download from trusted sources
+- ✅ Verify file size matches official version
+- ✅ Check URL before downloading
+- ✅ Clear downloads regularly
+- ❌ Avoid suspicious or modified files
+- ❌ Don't download from unknown websites
+
+## Troubleshooting
+
+**Downloader won't open?**
+- Restart Fire Stick
+- Clear app cache
+- Reinstall Downloader
+
+**Downloads failing?**
+- Check internet connection
+- Verify URL is correct
+- Try different download link
+- Clear Downloader cache
+
+**Installation blocked?**
+- Ensure Unknown Sources is enabled
+- Check device storage space
+- Verify APK file isn't corrupted
+
+## Advanced Features
+
+- URL shortening for easier entry
+- Bookmark favorite URLs
+- File browser for downloads
+- Web browser built-in
+
+## Best Practices
+
+1. Keep Downloader updated
+2. Only download from official sources
+3. Clear downloads folder regularly
+4. Verify APK signatures when possible
+5. Use trusted URL shorteners
+
+[Get Fire Stick with Downloader pre-installed](${SHOP_LINK}) and start sideloading apps immediately!`),
+      category: "Setup Guides",
+      keywords: topic.keywords,
+      linkedProductIds: ["firestick-4k"],
+      imageUrl: PRODUCT_IMAGES.firestick4k,
+      published: true,
+      publishedAt: new Date(),
+    });
+  });
+
   // Media Players & IPTV Players (10)
   const mediaPlayerTopics = [
     { title: "Best IPTV Media Players 2025 - Complete Comparison Guide", keywords: ["best iptv players", "iptv media players", "top iptv apps"] },
