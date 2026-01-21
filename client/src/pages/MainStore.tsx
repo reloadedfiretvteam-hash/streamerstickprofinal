@@ -22,7 +22,7 @@ import { TrustBadges, PaymentBadges, GuaranteeBadge } from "@/components/TrustBa
 import { ChannelLogos } from "@/components/ChannelLogos";
 import { SavingsCalculator } from "@/components/SavingsCalculator";
 import { StickyMobileCTA, ScrollToTopButton } from "@/components/StickyMobileCTA";
-import { SEOSchema } from "@/components/SEOSchema";
+import { SEOSchema, QASchema, ServiceSchema, ItemListSchema } from "@/components/SEOSchema";
 import { ProductQuickView, QuickViewButton } from "@/components/ProductQuickView";
 import { MobileNav } from "@/components/MobileNav";
 import { ComparisonTable } from "@/components/ComparisonTable";
@@ -469,8 +469,54 @@ export default function MainStore() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productListData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData) }} />
       
+      {/* Q&A Schema for Answer Engine Optimization (AEO) */}
+      <QASchema questions={[
+        {
+          question: "What is IPTV and how does it work?",
+          answer: "IPTV (Internet Protocol Television) is a streaming service that delivers live TV channels and on-demand content over the internet. Unlike traditional cable, IPTV works on any internet-connected device including Fire Sticks, Smart TVs, phones, and tablets. You receive login credentials that allow you to access 18,000+ live channels, 100,000+ movies and series instantly.",
+          dateCreated: new Date().toISOString()
+        },
+        {
+          question: "How do I set up IPTV on Fire Stick?",
+          answer: "Setting up IPTV on Fire Stick is simple. Purchase a pre-configured Fire Stick from StreamStickPro and it arrives ready to stream. You'll receive instant login credentials and setup video tutorials. Just plug in your Fire Stick, connect to WiFi, and follow the 10-minute tutorial to start streaming thousands of channels immediately.",
+          dateCreated: new Date().toISOString()
+        },
+        {
+          question: "What channels are included with IPTV service?",
+          answer: "Our IPTV service includes 18,000+ live TV channels worldwide covering all major categories: sports (NFL, NBA, MLB, UFC, boxing PPV), movies, news, entertainment, kids channels, international channels, and premium networks. Plus access to 100,000+ movies and TV series on-demand with regular updates.",
+          dateCreated: new Date().toISOString()
+        },
+        {
+          question: "Do I need a credit card for the free trial?",
+          answer: "No credit card required for our 36-hour free trial. Simply sign up with your email address to get instant access to all 18,000+ live channels and the complete content library. Experience the service risk-free before making any purchase commitment.",
+          dateCreated: new Date().toISOString()
+        },
+        {
+          question: "How much does IPTV cost compared to cable?",
+          answer: "IPTV is significantly cheaper than cable TV. Our plans start at just $15/month compared to cable which typically costs $100-200/month. With IPTV you get more channels, on-demand content, multi-device streaming, and save $1,000+ per year while accessing more entertainment options.",
+          dateCreated: new Date().toISOString()
+        }
+      ]} />
 
-      {/* FAQ schema is already in index.html - don't duplicate */}
+      {/* Service Schema for IPTV Service Offerings */}
+      <ServiceSchema 
+        name="Premium IPTV Streaming Service"
+        description="Access 18,000+ live TV channels, 100,000+ movies and series, all premium sports including NFL, NBA, MLB, UFC PPV events. Multi-device streaming with 24/7 support."
+        serviceType="IPTV Streaming Service"
+        areaServed="Worldwide"
+      />
+
+      {/* ItemList Schema for Product Listings */}
+      <ItemListSchema 
+        name="StreamStickPro Products"
+        description="Pre-configured Fire Sticks and IPTV subscription plans"
+        items={products.slice(0, 6).map(p => ({
+          name: p.name,
+          description: p.description,
+          url: `https://streamstickpro.com#${p.id}`,
+          image: p.image
+        }))}
+      />
       
       {/* Navigation */}
       <nav className="sticky top-0 z-50 w-full border-b border-white/30 bg-gray-800/98 backdrop-blur-xl shadow-xl">
@@ -560,8 +606,8 @@ export default function MainStore() {
               transition={{ duration: 0.5 }}
               className="mb-6"
             >
-              <span className="inline-block px-6 py-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full text-sm font-semibold text-orange-300 animate-pulse">
-                🔥 #1 Premium Streaming Provider
+              <span className="inline-block px-6 py-2 bg-gradient-to-r from-orange-500/30 to-red-500/30 backdrop-blur-sm border-2 border-orange-400/50 rounded-full text-sm font-bold text-orange-200 animate-pulse shadow-lg shadow-orange-500/30">
+                ⚡ Instant Setup • 🎯 Plug & Play • 🚀 Ready in Minutes
               </span>
             </motion.div>
 
@@ -582,21 +628,34 @@ export default function MainStore() {
               <span className="text-xl sm:text-2xl md:text-4xl text-blue-200">100,000+ Movies & Series</span>
             </motion.h1>
 
+            {/* Answer Block for AEO - Direct answer at top */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="max-w-4xl mx-auto px-4 mb-4"
+            >
+              <p className="text-base sm:text-lg md:text-xl text-gray-100 bg-blue-500/10 border-l-4 border-blue-400 pl-4 py-3 rounded-r-lg">
+                <strong className="text-white">What is StreamStickPro?</strong> StreamStickPro is a premium IPTV streaming service that delivers 18,000+ live TV channels and 100,000+ movies and series over the internet to any device. Unlike cable TV, StreamStickPro works on Fire Sticks, Smart TVs, phones, and tablets, providing instant access to premium content including all major sports, PPV events, and on-demand entertainment for a fraction of cable costs.
+              </p>
+            </motion.div>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white mb-2 md:mb-4 max-w-3xl mx-auto px-4 font-semibold"
+              className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white mb-2 md:mb-4 max-w-3xl mx-auto px-4 font-bold"
             >
-              Premium Live TV Streaming • Pre-Configured Devices • 24/7 Support
+              Cut Cable Forever • Unlimited Streaming • All Premium Content Included
             </motion.p>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.25 }}
-              className="text-base sm:text-lg md:text-xl text-gray-200 mb-6 md:mb-8 max-w-3xl mx-auto px-4"
+              className="text-base sm:text-lg md:text-xl text-gray-200 mb-6 md:mb-8 max-w-3xl mx-auto px-4 leading-relaxed"
             >
-              Get fully loaded in 10 minutes • All major sports included • No extra fees • Start streaming today!
+              <span className="font-semibold text-orange-300">✅ Fully Pre-Configured</span> • Devices arrive ready to stream • 
+              <span className="font-semibold text-green-300"> All Sports Channels</span> • UFC, NFL, NBA, MLB included • 
+              <span className="font-semibold text-blue-300"> Zero Hidden Fees</span> • One simple price, everything included
             </motion.p>
 
             <motion.div 
@@ -635,20 +694,10 @@ export default function MainStore() {
                 whileHover={{ scale: 1.05, borderColor: "rgba(249, 115, 22, 0.5)" }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="text-orange-400 font-bold text-lg" data-testid="text-customers">
-                  <AnimatedCounter end={2700} suffix="+" className="text-orange-400 font-bold text-lg" />
+                <div className="text-orange-400 font-bold text-lg">
+                  <AnimatedCounter end={18000} suffix="+" className="text-orange-400 font-bold text-lg" />
                 </div>
-                <div className="text-blue-200">Happy Customers</div>
-              </motion.div>
-              <motion.div 
-                className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10"
-                whileHover={{ scale: 1.05, borderColor: "rgba(249, 115, 22, 0.5)" }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <div className="text-orange-400 font-bold text-lg" data-testid="text-rating">
-                  <AnimatedCounter end={4.9} duration={1.5} decimals={1} className="text-orange-400 font-bold text-lg" />/5 ⭐
-                </div>
-                <div className="text-blue-200">Customer Rating</div>
+                <div className="text-blue-200">Live TV Channels</div>
               </motion.div>
               <motion.div 
                 className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10"
@@ -656,9 +705,19 @@ export default function MainStore() {
                 transition={{ type: "spring", stiffness: 300 }}
               >
                 <div className="text-orange-400 font-bold text-lg">
-                  <AnimatedCounter end={18000} suffix="+" className="text-orange-400 font-bold text-lg" />
+                  <AnimatedCounter end={100000} suffix="+" className="text-orange-400 font-bold text-lg" />
                 </div>
-                <div className="text-blue-200">Channels Available</div>
+                <div className="text-blue-200">Movies & Series</div>
+              </motion.div>
+              <motion.div 
+                className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10"
+                whileHover={{ scale: 1.05, borderColor: "rgba(249, 115, 22, 0.5)" }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <div className="text-orange-400 font-bold text-lg">
+                  <AnimatedCounter end={1000} suffix="+" className="text-orange-400 font-bold text-lg" />
+                </div>
+                <div className="text-blue-200">Dollars Saved vs Cable</div>
               </motion.div>
             </motion.div>
           </div>

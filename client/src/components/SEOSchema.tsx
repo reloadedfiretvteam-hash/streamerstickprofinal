@@ -234,3 +234,203 @@ export function HowToSchema({
 
   return null;
 }
+
+// Video Schema for 2025-2026 SEO (Answer Engine Optimization)
+export function VideoSchema({
+  name,
+  description,
+  thumbnailUrl,
+  uploadDate,
+  duration,
+  contentUrl,
+  embedUrl
+}: {
+  name: string;
+  description: string;
+  thumbnailUrl: string;
+  uploadDate: string;
+  duration?: string;
+  contentUrl?: string;
+  embedUrl?: string;
+}) {
+  useEffect(() => {
+    const existingScript = document.querySelector('script[data-seo-schema="video"]');
+    if (existingScript) existingScript.remove();
+
+    const videoSchema = {
+      "@context": "https://schema.org",
+      "@type": "VideoObject",
+      "name": name,
+      "description": description,
+      "thumbnailUrl": thumbnailUrl,
+      "uploadDate": uploadDate,
+      ...(duration && { "duration": duration }),
+      ...(contentUrl && { "contentUrl": contentUrl }),
+      ...(embedUrl && { "embedUrl": embedUrl }),
+      "publisher": {
+        "@type": "Organization",
+        "name": "StreamStickPro",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://streamstickpro.com/favicon.png"
+        }
+      }
+    };
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-seo-schema', 'video');
+    script.textContent = JSON.stringify(videoSchema);
+    document.head.appendChild(script);
+
+    return () => {
+      const scriptToRemove = document.querySelector('script[data-seo-schema="video"]');
+      if (scriptToRemove) scriptToRemove.remove();
+    };
+  }, [name, description, thumbnailUrl, uploadDate, duration, contentUrl, embedUrl]);
+
+  return null;
+}
+
+// Q&A Schema for Answer Engine Optimization (2025-2026)
+export function QASchema({
+  questions
+}: {
+  questions: { question: string; answer: string; author?: string; dateCreated?: string }[];
+}) {
+  const questionsMemo = useMemo(() => questions, [JSON.stringify(questions)]);
+
+  useEffect(() => {
+    const existingScript = document.querySelector('script[data-seo-schema="qa"]');
+    if (existingScript) existingScript.remove();
+
+    const qaSchema = {
+      "@context": "https://schema.org",
+      "@type": "QAPage",
+      "mainEntity": questionsMemo.map(q => ({
+        "@type": "Question",
+        "name": q.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": q.answer,
+          ...(q.author && { "author": { "@type": "Person", "name": q.author } }),
+          ...(q.dateCreated && { "dateCreated": q.dateCreated })
+        }
+      }))
+    };
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-seo-schema', 'qa');
+    script.textContent = JSON.stringify(qaSchema);
+    document.head.appendChild(script);
+
+    return () => {
+      const scriptToRemove = document.querySelector('script[data-seo-schema="qa"]');
+      if (scriptToRemove) scriptToRemove.remove();
+    };
+  }, [questionsMemo]);
+
+  return null;
+}
+
+// Service Schema for IPTV Service Offerings
+export function ServiceSchema({
+  name,
+  description,
+  serviceType,
+  areaServed,
+  provider
+}: {
+  name: string;
+  description: string;
+  serviceType: string;
+  areaServed?: string;
+  provider?: string;
+}) {
+  useEffect(() => {
+    const existingScript = document.querySelector('script[data-seo-schema="service"]');
+    if (existingScript) existingScript.remove();
+
+    const serviceSchema = {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": name,
+      "description": description,
+      "serviceType": serviceType,
+      "provider": {
+        "@type": "Organization",
+        "name": provider || "StreamStickPro",
+        "url": "https://streamstickpro.com"
+      },
+      ...(areaServed && {
+        "areaServed": {
+          "@type": "Country",
+          "name": areaServed
+        }
+      })
+    };
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-seo-schema', 'service');
+    script.textContent = JSON.stringify(serviceSchema);
+    document.head.appendChild(script);
+
+    return () => {
+      const scriptToRemove = document.querySelector('script[data-seo-schema="service"]');
+      if (scriptToRemove) scriptToRemove.remove();
+    };
+  }, [name, description, serviceType, areaServed, provider]);
+
+  return null;
+}
+
+// ItemList Schema for Product Listings (2025-2026)
+export function ItemListSchema({
+  name,
+  description,
+  items
+}: {
+  name: string;
+  description: string;
+  items: { name: string; description: string; url?: string; image?: string }[];
+}) {
+  const itemsMemo = useMemo(() => items, [JSON.stringify(items)]);
+
+  useEffect(() => {
+    const existingScript = document.querySelector('script[data-seo-schema="itemlist"]');
+    if (existingScript) existingScript.remove();
+
+    const itemListSchema = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": name,
+      "description": description,
+      "itemListElement": itemsMemo.map((item, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": "Product",
+          "name": item.name,
+          "description": item.description,
+          ...(item.url && { "url": item.url }),
+          ...(item.image && { "image": item.image })
+        }
+      }))
+    };
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-seo-schema', 'itemlist');
+    script.textContent = JSON.stringify(itemListSchema);
+    document.head.appendChild(script);
+
+    return () => {
+      const scriptToRemove = document.querySelector('script[data-seo-schema="itemlist"]');
+      if (scriptToRemove) scriptToRemove.remove();
+    };
+  }, [name, description, itemsMemo]);
+
+  return null;
+}
