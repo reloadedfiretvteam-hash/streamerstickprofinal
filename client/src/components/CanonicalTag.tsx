@@ -55,10 +55,7 @@ export default function CanonicalTag() {
     }
     ogUrl.content = canonicalUrl;
 
-    // Debug logging (remove in production if needed)
-    if (import.meta.env.DEV) {
-      console.log('Canonical URL set:', canonicalUrl);
-    }
+    // Debug logging disabled in production for cleaner console
 
   }, [location]);
 
