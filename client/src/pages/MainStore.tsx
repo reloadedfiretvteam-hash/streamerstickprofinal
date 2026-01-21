@@ -1594,7 +1594,8 @@ export default function MainStore() {
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
-                animate={isAboutInView ? { opacity: 1, y: 0 } : {}}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-8 border-2 border-blue-400/20 shadow-2xl shadow-blue-500/10 hover:border-blue-400/40 transition-all"
               >
@@ -1604,9 +1605,20 @@ export default function MainStore() {
                 </div>
                 <h3 className="text-xl font-black text-white mb-3">{item.title}</h3>
                 <p className="text-gray-200 leading-relaxed">{item.description}</p>
-                {/* Image placeholder - will show when images are added */}
-                <div className="mt-6 h-32 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl flex items-center justify-center border border-gray-600/30">
-                  <span className="text-gray-400 text-xs">Image: {item.image}</span>
+                {/* Image loads from Supabase when uploaded */}
+                <div className="mt-6 h-32 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl flex items-center justify-center border border-gray-600/30 overflow-hidden">
+                  <img 
+                    src={`https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/${item.image}`}
+                    alt={item.title}
+                    className="w-full h-full object-cover opacity-50 hover:opacity-100 transition-opacity"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      if (target.parentElement) {
+                        target.parentElement.innerHTML = `<span class="text-gray-400 text-xs text-center px-4">Upload image: ${item.image}</span>`;
+                      }
+                    }}
+                  />
                 </div>
               </motion.div>
             ))}
@@ -1656,15 +1668,26 @@ export default function MainStore() {
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}
-                animate={isAboutInView ? { opacity: 1, scale: 1 } : {}}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.5, delay: index * 0.15 }}
                 className={`bg-gradient-to-br ${item.color} backdrop-blur-2xl rounded-3xl p-8 border-2 ${item.border} shadow-2xl hover:scale-105 transition-all`}
               >
                 <div className="text-7xl mb-6">{item.visual}</div>
                 <h3 className="text-2xl font-black text-white mb-4">{item.title}</h3>
                 <p className="text-gray-200 text-lg leading-relaxed mb-6">{item.description}</p>
-                <div className="h-40 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl flex items-center justify-center border border-gray-600/30">
-                  <span className="text-gray-400 text-xs text-center px-4">Image: {item.image}</span>
+                {/* Image loads from Supabase when uploaded */}
+                <div className="h-40 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl flex items-center justify-center border border-gray-600/30 overflow-hidden">
+                  <img 
+                    src={getStorageUrl('images', item.image)} 
+                    alt={item.title}
+                    className="w-full h-full object-cover opacity-50 hover:opacity-100 transition-opacity"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.parentElement!.innerHTML = `<span class="text-gray-400 text-xs text-center px-4">Upload image: ${item.image}</span>`;
+                    }}
+                  />
                 </div>
               </motion.div>
             ))}
