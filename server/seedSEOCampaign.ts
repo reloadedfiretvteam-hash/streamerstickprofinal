@@ -1565,7 +1565,7 @@ export async function seedSEOCampaignPosts() {
         }
 
         // Create the post
-        const post = await storage.insertBlogPost({
+        const post = await storage.createBlogPost({
           title: postTemplate.title,
           slug: slug,
           excerpt: postTemplate.excerpt,

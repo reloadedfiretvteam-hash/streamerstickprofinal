@@ -1839,7 +1839,7 @@ export async function seedIPTVSetupCampaign() {
         }
 
         // Create the post
-        await storage.insertBlogPost({
+        await storage.createBlogPost({
           title: post.title,
           slug: post.slug,
           excerpt: post.excerpt,
