@@ -518,8 +518,8 @@ export default function MainStore() {
         }))}
       />
       
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 w-full border-b border-white/30 bg-gray-800/98 backdrop-blur-xl shadow-xl">
+      {/* Navigation - Elite Glassmorphism Design */}
+      <nav className="sticky top-0 z-50 w-full border-b border-white/20 bg-gradient-to-r from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-2xl shadow-2xl shadow-black/50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <MobileNav scrollToShop={scrollToShop} scrollToAbout={scrollToAbout} scrollToFaq={scrollToFaq} onSupportClick={openSupport} />
@@ -594,7 +594,8 @@ export default function MainStore() {
       {/* Main Content */}
       <main id="main-content" role="main">
       {/* Hero Section */}
-      <section ref={heroRef} className="relative text-white overflow-hidden min-h-[600px] flex items-center z-10">
+      {/* Elite Hero Section - Enhanced Visuals */}
+      <section ref={heroRef} className="relative text-white overflow-hidden min-h-[700px] md:min-h-[800px] flex items-center z-10">
 
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-20"></div>
 
@@ -611,33 +612,34 @@ export default function MainStore() {
               </span>
             </motion.div>
 
+            {/* Elite Bold Typography */}
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight"
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-[1.1] tracking-tight"
             >
-              <span className="text-white">Save $1,000+ Per Year</span>
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-orange-400">
-                vs Cable TV
+              <span className="block text-white drop-shadow-2xl mb-2">Save $1,000+</span>
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 via-orange-400 to-red-500 bg-[length:200%_100%] animate-gradient bg-clip-text mb-2">
+                Per Year vs Cable
               </span>
-              <br />
-              <span className="text-2xl sm:text-3xl md:text-5xl text-white mt-2">18,000+ Live Channels</span>
-              <br />
-              <span className="text-xl sm:text-2xl md:text-4xl text-blue-200">100,000+ Movies & Series</span>
+              <span className="block text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-white mt-4 font-bold">18,000+ Live Channels</span>
+              <span className="block text-2xl sm:text-3xl md:text-5xl lg:text-6xl text-blue-200 mt-2 font-bold">100,000+ Movies & Series</span>
             </motion.h1>
 
-            {/* Answer Block for AEO - Direct answer at top */}
+            {/* Elite Glassmorphism Answer Block for AEO */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.15 }}
-              className="max-w-4xl mx-auto px-4 mb-4"
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="max-w-5xl mx-auto px-4 mb-6"
             >
-              <p className="text-base sm:text-lg md:text-xl text-gray-100 bg-blue-500/10 border-l-4 border-blue-400 pl-4 py-3 rounded-r-lg">
-                <strong className="text-white">What is StreamStickPro?</strong> StreamStickPro is a premium IPTV streaming service that delivers 18,000+ live TV channels and 100,000+ movies and series over the internet to any device. Unlike cable TV, StreamStickPro works on Fire Sticks, Smart TVs, phones, and tablets, providing instant access to premium content including all major sports, PPV events, and on-demand entertainment for a fraction of cable costs.
-              </p>
+              <div className="bg-gradient-to-br from-blue-500/20 via-cyan-500/10 to-transparent backdrop-blur-2xl rounded-3xl border-2 border-blue-400/30 shadow-2xl shadow-blue-500/20 p-8 md:p-10">
+                <p className="text-lg sm:text-xl md:text-2xl text-white leading-relaxed font-medium">
+                  <strong className="text-2xl md:text-3xl font-black text-blue-200 block mb-3">What is StreamStickPro?</strong>
+                  <span className="text-gray-50">StreamStickPro is a premium IPTV streaming service that delivers <strong className="text-white font-bold">18,000+ live TV channels</strong> and <strong className="text-white font-bold">100,000+ movies and series</strong> over the internet to any device. Unlike cable TV, StreamStickPro works on Fire Sticks, Smart TVs, phones, and tablets, providing instant access to premium content including all major sports, PPV events, and on-demand entertainment for a fraction of cable costs.</span>
+                </p>
+              </div>
             </motion.div>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -664,23 +666,28 @@ export default function MainStore() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-6 md:mb-8 px-4"
             >
-              <button
+              {/* Elite Glassmorphism CTAs */}
+              <motion.button
                 onClick={scrollToShop}
-                className="group px-10 py-5 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-xl font-bold text-xl transition-all transform hover:scale-105 hover:shadow-2xl shadow-orange-500/50 inline-flex items-center justify-center gap-3 text-white"
+                className="group px-12 py-6 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 bg-[length:200%_100%] hover:bg-[position:100%_0] rounded-2xl font-black text-2xl transition-all duration-500 transform hover:scale-110 hover:shadow-2xl shadow-orange-500/60 inline-flex items-center justify-center gap-4 text-white border-2 border-orange-300/50"
                 data-testid="button-shop-now"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <ShoppingCart className="w-6 h-6 group-hover:animate-bounce" />
+                <ShoppingCart className="w-7 h-7 group-hover:animate-bounce" />
                 Get Started Now
-                <span className="bg-white/30 rounded-full px-4 py-1 text-sm font-semibold">Starting at $15/mo</span>
-              </button>
-              <button
+                <span className="bg-white/40 backdrop-blur-sm rounded-full px-5 py-2 text-base font-black border border-white/50">Starting at $15/mo</span>
+              </motion.button>
+              <motion.button
                 onClick={openSupport}
-                className="px-10 py-5 bg-white/20 backdrop-blur-sm hover:bg-white/30 border-2 border-white/30 hover:border-white/50 rounded-xl font-bold text-xl transition-all inline-flex items-center justify-center gap-2 text-white"
+                className="px-12 py-6 bg-gradient-to-br from-white/15 via-white/10 to-white/5 backdrop-blur-2xl hover:from-white/25 hover:via-white/15 hover:to-white/10 border-2 border-white/40 hover:border-white/60 rounded-2xl font-black text-2xl transition-all duration-300 inline-flex items-center justify-center gap-3 text-white shadow-xl shadow-white/10 hover:shadow-2xl hover:shadow-white/20"
                 data-testid="button-contact-hero"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <MessageCircle className="w-6 h-6" />
+                <MessageCircle className="w-7 h-7" />
                 Questions? Ask Us
-              </button>
+              </motion.button>
             </motion.div>
 
             <motion.div 
@@ -689,35 +696,36 @@ export default function MainStore() {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto text-sm md:text-base"
             >
+              {/* Elite Glassmorphism Cards */}
               <motion.div 
-                className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10"
-                whileHover={{ scale: 1.05, borderColor: "rgba(249, 115, 22, 0.5)" }}
-                transition={{ type: "spring", stiffness: 300 }}
+                className="bg-gradient-to-br from-orange-500/10 via-red-500/5 to-transparent backdrop-blur-xl rounded-2xl px-6 py-5 border border-orange-400/20 shadow-xl shadow-orange-500/10"
+                whileHover={{ scale: 1.08, borderColor: "rgba(249, 115, 22, 0.6)", boxShadow: "0 20px 40px rgba(249, 115, 22, 0.3)" }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
               >
-                <div className="text-orange-400 font-bold text-lg">
-                  <AnimatedCounter end={18000} suffix="+" className="text-orange-400 font-bold text-lg" />
+                <div className="text-orange-400 font-extrabold text-2xl md:text-3xl mb-1">
+                  <AnimatedCounter end={18000} suffix="+" className="text-orange-400 font-extrabold text-2xl md:text-3xl" />
                 </div>
-                <div className="text-blue-200">Live TV Channels</div>
+                <div className="text-blue-100 font-semibold text-sm md:text-base">Live TV Channels</div>
               </motion.div>
               <motion.div 
-                className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10"
-                whileHover={{ scale: 1.05, borderColor: "rgba(249, 115, 22, 0.5)" }}
-                transition={{ type: "spring", stiffness: 300 }}
+                className="bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-transparent backdrop-blur-xl rounded-2xl px-6 py-5 border border-purple-400/20 shadow-xl shadow-purple-500/10"
+                whileHover={{ scale: 1.08, borderColor: "rgba(168, 85, 247, 0.6)", boxShadow: "0 20px 40px rgba(168, 85, 247, 0.3)" }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
               >
-                <div className="text-orange-400 font-bold text-lg">
-                  <AnimatedCounter end={100000} suffix="+" className="text-orange-400 font-bold text-lg" />
+                <div className="text-purple-400 font-extrabold text-2xl md:text-3xl mb-1">
+                  <AnimatedCounter end={100000} suffix="+" className="text-purple-400 font-extrabold text-2xl md:text-3xl" />
                 </div>
-                <div className="text-blue-200">Movies & Series</div>
+                <div className="text-blue-100 font-semibold text-sm md:text-base">Movies & Series</div>
               </motion.div>
               <motion.div 
-                className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10"
-                whileHover={{ scale: 1.05, borderColor: "rgba(249, 115, 22, 0.5)" }}
-                transition={{ type: "spring", stiffness: 300 }}
+                className="bg-gradient-to-br from-green-500/10 via-emerald-500/5 to-transparent backdrop-blur-xl rounded-2xl px-6 py-5 border border-green-400/20 shadow-xl shadow-green-500/10"
+                whileHover={{ scale: 1.08, borderColor: "rgba(34, 197, 94, 0.6)", boxShadow: "0 20px 40px rgba(34, 197, 94, 0.3)" }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
               >
-                <div className="text-orange-400 font-bold text-lg">
-                  <AnimatedCounter end={1000} suffix="+" className="text-orange-400 font-bold text-lg" />
+                <div className="text-green-400 font-extrabold text-2xl md:text-3xl mb-1">
+                  <AnimatedCounter end={1000} suffix="+" className="text-green-400 font-extrabold text-2xl md:text-3xl" />
                 </div>
-                <div className="text-blue-200">Dollars Saved vs Cable</div>
+                <div className="text-blue-100 font-semibold text-sm md:text-base">Dollars Saved vs Cable</div>
               </motion.div>
             </motion.div>
           </div>
@@ -743,13 +751,14 @@ export default function MainStore() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* Competitors - Red/Bad */}
+            {/* Elite Glassmorphism Comparison - Competitors */}
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              className="bg-red-950/30 border-2 border-red-500/50 rounded-2xl p-8"
+              transition={{ duration: 0.6 }}
+              className="bg-gradient-to-br from-red-950/40 via-red-900/20 to-transparent backdrop-blur-2xl border-2 border-red-500/40 rounded-3xl p-10 shadow-2xl shadow-red-500/20"
               data-testid="comparison-competitors"
+              whileHover={{ scale: 1.02, borderColor: "rgba(239, 68, 68, 0.6)" }}
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
@@ -775,13 +784,14 @@ export default function MainStore() {
               </ul>
             </motion.div>
 
-            {/* StreamStickPro - Green/Good */}
+            {/* Elite Glassmorphism Comparison - StreamStickPro */}
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="bg-green-950/30 border-2 border-green-500/50 rounded-2xl p-8"
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="bg-gradient-to-br from-green-950/40 via-emerald-900/20 to-transparent backdrop-blur-2xl border-2 border-green-500/40 rounded-3xl p-10 shadow-2xl shadow-green-500/20 ring-2 ring-green-400/30"
               data-testid="comparison-streamstickpro"
+              whileHover={{ scale: 1.02, borderColor: "rgba(34, 197, 94, 0.6)", boxShadow: "0 25px 50px rgba(34, 197, 94, 0.3)" }}
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
@@ -837,35 +847,39 @@ export default function MainStore() {
             initial="hidden"
             animate={isAboutInView ? "visible" : "hidden"}
           >
+            {/* Elite Glassmorphism Feature Cards */}
             <motion.div 
               variants={fadeInUp}
-              className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-orange-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-orange-500/10"
+              className="bg-gradient-to-br from-orange-500/15 via-red-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-10 border-2 border-orange-400/30 shadow-2xl shadow-orange-500/20 hover:border-orange-400/60 transition-all duration-300 hover:scale-105 hover:shadow-orange-500/40"
+              whileHover={{ y: -5 }}
             >
-              <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mb-6">
-                <Zap className="w-7 h-7 text-white" />
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-orange-500/50">
+                <Zap className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Be Streaming in 10 Minutes</h3>
-              <p className="text-gray-200">Your StreamStick comes with instant login credentials and an easy 10-minute setup video. Start watching Live TV, Movies, Series & Sports today with 24/7 support ready when you need it.</p>
+              <h3 className="text-2xl font-black mb-4 text-white">Be Streaming in 10 Minutes</h3>
+              <p className="text-gray-100 text-lg leading-relaxed">Your StreamStick comes with instant login credentials and an easy 10-minute setup video. Start watching Live TV, Movies, Series & Sports today with 24/7 support ready when you need it.</p>
             </motion.div>
             <motion.div 
               variants={fadeInUp}
-              className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-orange-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-500/10"
+              className="bg-gradient-to-br from-blue-500/15 via-cyan-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-10 border-2 border-blue-400/30 shadow-2xl shadow-blue-500/20 hover:border-blue-400/60 transition-all duration-300 hover:scale-105 hover:shadow-blue-500/40"
+              whileHover={{ y: -5 }}
             >
-              <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-6">
-                <Star className="w-7 h-7 text-white" />
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/50">
+                <Star className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Premium Content</h3>
-              <p className="text-gray-200">Access an extensive live content library, thousands of movies, and comprehensive sports coverage.</p>
+              <h3 className="text-2xl font-black mb-4 text-white">Premium Content</h3>
+              <p className="text-gray-100 text-lg leading-relaxed">Access an extensive live content library, thousands of movies, and comprehensive sports coverage.</p>
             </motion.div>
             <motion.div 
               variants={fadeInUp}
-              className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-orange-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-green-500/10"
+              className="bg-gradient-to-br from-green-500/15 via-emerald-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-10 border-2 border-green-400/30 shadow-2xl shadow-green-500/20 hover:border-green-400/60 transition-all duration-300 hover:scale-105 hover:shadow-green-500/40"
+              whileHover={{ y: -5 }}
             >
-              <div className="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mb-6">
-                <Check className="w-7 h-7 text-white" />
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-green-500/50">
+                <Check className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-4">24/7 Support</h3>
-              <p className="text-gray-200">Our dedicated team is always available to help you with any questions or issues.</p>
+              <h3 className="text-2xl font-black mb-4 text-white">24/7 Support</h3>
+              <p className="text-gray-100 text-lg leading-relaxed">Our dedicated team is always available to help you with any questions or issues.</p>
             </motion.div>
           </motion.div>
         </div>
