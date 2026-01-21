@@ -1544,6 +1544,134 @@ export default function MainStore() {
         </div>
       </section>
 
+      {/* How It Works Section - NEW with Visual Elements */}
+      <section className="py-24 bg-gradient-to-b from-gray-800/80 to-gray-900/80">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 rounded-full px-6 py-2 mb-6">
+              <Zap className="w-5 h-5 text-blue-400" />
+              <span className="text-sm font-medium text-blue-300">SIMPLE PROCESS</span>
+            </div>
+            <h2 className="text-4xl md:text-6xl font-black mb-6">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">How It Works</span>
+            </h2>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+              Get started in minutes with our simple 4-step process
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            {[
+              { 
+                step: "1", 
+                title: "Choose Your Device", 
+                description: "Select from Fire Stick HD, 4K, or 4K Max. All devices come pre-configured and ready to use.",
+                icon: "📱",
+                image: "firestick-device-selection.jpg"
+              },
+              { 
+                step: "2", 
+                title: "Add IPTV Subscription", 
+                description: "Choose your Live TV plan - 1 month, 3 months, or save with longer plans. Multi-device options available.",
+                icon: "📺",
+                image: "iptv-subscription-selection.jpg"
+              },
+              { 
+                step: "3", 
+                title: "We Ship & Setup", 
+                description: "Your device arrives ready to use. All apps pre-installed, credentials included, zero configuration needed.",
+                icon: "🚀",
+                image: "device-setup-ready.jpg"
+              },
+              { 
+                step: "4", 
+                title: "Start Streaming", 
+                description: "Plug in, connect to WiFi, and start watching 18,000+ channels and 100,000+ movies instantly.",
+                icon: "🎬",
+                image: "streaming-content.jpg"
+              }
+            ].map((item, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                animate={isAboutInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-8 border-2 border-blue-400/20 shadow-2xl shadow-blue-500/10 hover:border-blue-400/40 transition-all"
+              >
+                <div className="text-6xl mb-4">{item.icon}</div>
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-black text-xl mb-4">
+                  {item.step}
+                </div>
+                <h3 className="text-xl font-black text-white mb-3">{item.title}</h3>
+                <p className="text-gray-200 leading-relaxed">{item.description}</p>
+                {/* Image placeholder - will show when images are added */}
+                <div className="mt-6 h-32 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl flex items-center justify-center border border-gray-600/30">
+                  <span className="text-gray-400 text-xs">Image: {item.image}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Visual Benefits Section - NEW */}
+      <section className="py-24 bg-gradient-to-b from-gray-900/80 to-gray-800/80">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-6xl font-black mb-6">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Why StreamStickPro?</span>
+            </h2>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+              The most comprehensive streaming solution available
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {[
+              {
+                title: "No Tech Skills Required",
+                description: "Everything pre-configured. No tutorials, no confusion. Plug and play.",
+                visual: "💻",
+                image: "no-tech-skills.jpg",
+                color: "from-green-500/15 to-emerald-500/5",
+                border: "border-green-400/30"
+              },
+              {
+                title: "Instant Access",
+                description: "Your credentials arrive instantly via email. Start streaming in minutes, not days.",
+                visual: "⚡",
+                image: "instant-access.jpg",
+                color: "from-yellow-500/15 to-orange-500/5",
+                border: "border-yellow-400/30"
+              },
+              {
+                title: "All Premium Content",
+                description: "18,000+ channels, 100,000+ movies, all sports including NFL, NBA, UFC PPV.",
+                visual: "🎯",
+                image: "premium-content.jpg",
+                color: "from-purple-500/15 to-pink-500/5",
+                border: "border-purple-400/30"
+              }
+            ].map((item, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={isAboutInView ? { opacity: 1, scale: 1 } : {}}
+                transition={{ duration: 0.5, delay: index * 0.15 }}
+                className={`bg-gradient-to-br ${item.color} backdrop-blur-2xl rounded-3xl p-8 border-2 ${item.border} shadow-2xl hover:scale-105 transition-all`}
+              >
+                <div className="text-7xl mb-6">{item.visual}</div>
+                <h3 className="text-2xl font-black text-white mb-4">{item.title}</h3>
+                <p className="text-gray-200 text-lg leading-relaxed mb-6">{item.description}</p>
+                <div className="h-40 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl flex items-center justify-center border border-gray-600/30">
+                  <span className="text-gray-400 text-xs text-center px-4">Image: {item.image}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section id="faq" className="py-20 bg-gray-800/50">
         <div className="container mx-auto px-4 max-w-3xl">
