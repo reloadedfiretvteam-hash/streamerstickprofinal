@@ -1610,6 +1610,201 @@ Common issues and solutions:
     });
   });
 
+  // TV Mate Dedicated Posts (5 posts) - ADDED FOR COMPLETE COVERAGE
+  const tvMateTopics = [
+    { title: "TV Mate IPTV Player - Complete Setup Guide for Fire Stick 2025", keywords: ["tv mate", "tivimate fire stick", "tivimate setup"] },
+    { title: "How to Install TV Mate on Android TV - Step-by-Step Tutorial 2025", keywords: ["tivimate android tv", "tv mate install", "android tv iptv"] },
+    { title: "TV Mate Premium Features - EPG, Recording, Multi-Device Setup 2025", keywords: ["tivimate premium", "tv mate features", "iptv recording"] },
+    { title: "TV Mate vs IPTV Smarters Pro - Which IPTV Player is Better 2025", keywords: ["tivimate vs smarters", "best iptv player", "tv mate comparison"] },
+    { title: "TV Mate Configuration - EPG Setup, M3U Playlist, Channel Organization 2025", keywords: ["tivimate epg", "tv mate m3u", "tivimate configuration"] },
+  ];
+
+  tvMateTopics.forEach((topic) => {
+    remainingPosts.push({
+      title: topic.title,
+      slug: generateSlug(topic.title),
+      excerpt: `Complete guide to ${topic.keywords[0]}. Learn installation, setup, and configuration for optimal IPTV streaming with TV Mate.`,
+      content: addHomepageLink(`# ${topic.title}
+
+TV Mate (TiviMate) is one of the most popular premium IPTV players, known for its beautiful interface and advanced features.
+
+## What is TV Mate?
+
+TV Mate, also known as TiviMate, is a premium IPTV player designed specifically for Android TV and Fire TV devices. It offers a cable-like experience with advanced features.
+
+### Key Features:
+- Beautiful, cable-like interface
+- Advanced EPG (Electronic Program Guide)
+- Recording capabilities
+- Multi-device support
+- Catch-up TV
+- Parental controls
+- Customizable themes
+
+## Installation Methods
+
+### Method 1: Downloader App (Recommended)
+1. Install Downloader app from Amazon App Store
+2. Open Downloader
+3. Enter TV Mate download URL
+4. Install APK file
+5. Launch TV Mate
+
+### Method 2: App Store (Limited Availability)
+TV Mate may be available in some regional app stores. Check your device's app store for availability.
+
+## Configuration Steps
+
+1. **Add Playlist:**
+   - Enter M3U playlist URL or upload file
+   - Enter EPG URL for program guide
+   - Configure authentication
+
+2. **Set Up EPG:**
+   - Add EPG source URL
+   - Configure timezone
+   - Enable automatic updates
+
+3. **Organize Channels:**
+   - Create favorite groups
+   - Organize by category
+   - Set channel order
+
+4. **Enable Premium Features:**
+   - Purchase TiviMate Premium
+   - Unlock recording
+   - Enable multi-device sync
+
+## Why Choose TV Mate?
+
+- **Premium Experience:** Cable-like interface
+- **Advanced Features:** Recording, catch-up, multi-device
+- **Regular Updates:** Active development
+- **Excellent EPG:** Best-in-class program guide
+
+## Comparison with Other Players
+
+**TV Mate vs IPTV Smarters Pro:**
+- TV Mate: Premium design, advanced features, paid
+- IPTV Smarters Pro: Free option, easier setup, beginner-friendly
+
+**Recommendation:** TV Mate for advanced users, IPTV Smarters Pro for beginners
+
+[Get IPTV subscription](${SHOP_LINK}) that works perfectly with TV Mate! [Start free trial](${FREE_TRIAL_LINK}) today!`),
+      category: "Setup Guides",
+      keywords: topic.keywords,
+      linkedProductIds: ["iptv-1mo-1d"],
+      imageUrl: PRODUCT_IMAGES.iptv,
+      published: true,
+      publishedAt: new Date(),
+    });
+  });
+
+  // App Store Installation Method Posts (5 posts) - ADDED FOR COMPLETE COVERAGE
+  const appStoreTopics = [
+    { title: "How to Install IPTV Apps from App Store - Google Play & Amazon Appstore Guide 2025", keywords: ["app store iptv", "google play iptv", "amazon appstore"] },
+    { title: "Best IPTV Apps Available in App Store - Top Rated IPTV Players 2025", keywords: ["iptv apps app store", "official iptv apps", "play store iptv"] },
+    { title: "App Store vs Sideloading - Which Method is Better for IPTV Apps 2025", keywords: ["app store vs sideload", "iptv installation methods", "official vs unofficial"] },
+    { title: "Google Play Store IPTV Apps - Official and Safe IPTV Players 2025", keywords: ["google play iptv", "play store apps", "official iptv apps"] },
+    { title: "Amazon Appstore IPTV Apps - Fire Stick App Store Installation 2025", keywords: ["amazon appstore iptv", "fire stick app store", "official fire tv apps"] },
+  ];
+
+  appStoreTopics.forEach((topic) => {
+    remainingPosts.push({
+      title: topic.title,
+      slug: generateSlug(topic.title),
+      excerpt: `Learn about ${topic.keywords[0]}. Discover safe, official methods for installing IPTV apps from app stores.`,
+      content: addHomepageLink(`# ${topic.title}
+
+Using app stores to install IPTV apps is the safest and most straightforward method. This guide covers all app store options.
+
+## App Store Installation Overview
+
+App stores like Google Play Store and Amazon Appstore provide official, verified IPTV apps. This method is safer than sideloading.
+
+### Advantages:
+- ✅ Official, verified apps
+- ✅ Automatic updates
+- ✅ Safe and secure
+- ✅ Easy installation
+- ✅ Customer reviews
+
+### Disadvantages:
+- ⚠️ Limited selection
+- ⚠️ Some apps may be geo-restricted
+- ⚠️ Not all IPTV players available
+
+## Google Play Store Method
+
+1. Open Google Play Store
+2. Search for "IPTV" or "IPTV player"
+3. Browse available apps
+4. Check ratings and reviews
+5. Install preferred app
+6. Configure with IPTV credentials
+
+### Popular Apps in Play Store:
+- IPTV Smarters Pro
+- Perfect Player
+- VLC Media Player
+- MX Player (with IPTV add-ons)
+
+## Amazon Appstore Method
+
+1. Open Amazon Appstore on Fire TV
+2. Search for IPTV apps
+3. Select compatible app
+4. Install directly
+5. Launch and configure
+
+### Popular Apps in Appstore:
+- Downloader (for sideloading other apps)
+- VLC Media Player
+- Some IPTV players (varies by region)
+
+## Finding IPTV Apps in App Stores
+
+**Search Terms:**
+- "IPTV player"
+- "IPTV app"
+- "Live TV player"
+- "M3U player"
+- "Streaming player"
+
+## App Store vs Sideloading
+
+### App Store:
+- ✅ Safe and verified
+- ✅ Easy updates
+- ✅ Official support
+- ❌ Limited options
+
+### Sideloading:
+- ✅ More app options
+- ✅ Access to premium players
+- ❌ Manual updates required
+- ❌ Potential security risks
+
+**Recommendation:** Use app store when possible, sideload for advanced options.
+
+## Tips for App Store Installation
+
+1. Read reviews before installing
+2. Check app permissions
+3. Verify developer credibility
+4. Look for regular updates
+5. Check compatibility with your device
+
+[Get pre-configured Fire Stick](${SHOP_LINK}) with all apps already installed! [Start streaming now](${HOMEPAGE_LINK})!`),
+      category: "Setup Guides",
+      keywords: topic.keywords,
+      linkedProductIds: ["firestick-4k"],
+      imageUrl: PRODUCT_IMAGES.firestick4k,
+      published: true,
+      publishedAt: new Date(),
+    });
+  });
+
   return remainingPosts;
 }
 
