@@ -1,0 +1,87 @@
+{
+  "rules": [
+    {
+      "id": "missing-canonical",
+      "name": "Missing canonical",
+      "check": "page.canonical == null && page.indexable == true",
+      "action": "addCanonical",
+      "severity": "error"
+    },
+    {
+      "id": "conflicting-canonical",
+      "name": "Conflicting canonical",
+      "check": "page.canonical != page.url && page.indexable == true",
+      "action": "report",
+      "severity": "warning"
+    },
+    {
+      "id": "broken-links",
+      "name": "Broken links (4xx/5xx)",
+      "check": "links.some(l => l.status >= 400)",
+      "action": "report",
+      "severity": "error"
+    },
+    {
+      "id": "redirect-chains",
+      "name": "Redirect chains (3+ hops)",
+      "check": "redirectChain.length >= 3",
+      "action": "report",
+      "severity": "warning"
+    },
+    {
+      "id": "thin-content-plan",
+      "name": "Thin content on plan-detail",
+      "check": "page.wordCount < 500 && page.template == 'plan-detail'",
+      "action": "queueContentExpansion",
+      "severity": "warning"
+    },
+    {
+      "id": "thin-content-device",
+      "name": "Thin content on device-detail",
+      "check": "page.wordCount < 400 && page.template == 'device-detail'",
+      "action": "queueContentExpansion",
+      "severity": "warning"
+    },
+    {
+      "id": "missing-h1",
+      "name": "Missing H1",
+      "check": "page.h1Count == 0",
+      "action": "report",
+      "severity": "error"
+    },
+    {
+      "id": "multiple-h1",
+      "name": "Multiple H1",
+      "check": "page.h1Count > 1",
+      "action": "report",
+      "severity": "warning"
+    },
+    {
+      "id": "product-schema-invalid",
+      "name": "Product schema missing required fields",
+      "check": "schemas.product && !hasRequiredProductFields(schemas.product)",
+      "action": "report",
+      "severity": "error"
+    },
+    {
+      "id": "lcp-threshold",
+      "name": "LCP exceeds 2.5s",
+      "check": "metrics.lcp > 2500",
+      "action": "report",
+      "severity": "warning"
+    },
+    {
+      "id": "cls-threshold",
+      "name": "CLS exceeds 0.1",
+      "check": "metrics.cls > 0.1",
+      "action": "report",
+      "severity": "warning"
+    }
+  ],
+  "thresholds": {
+    "word_count_plan": 500,
+    "word_count_device": 400,
+    "lcp_ms": 2500,
+    "cls": 0.1
+  }
+}

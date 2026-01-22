@@ -1,0 +1,131 @@
+# StreamStickPro.com – Site Map & IA Spec (pSEO blueprint)
+# Machine-readable config for templates, URL rules, internal linking.
+# Enforce: human-readable slugs, canonicals, click-depth ≤3 via hub pages.
+
+brand: StreamStickPro
+site_url: https://streamstickpro.com
+current_year: 2026
+
+sections:
+  - path: "/"
+    template: home
+    name: Home
+    description: Main offer, hero, trust, comparison. Start streaming in 10 minutes.
+    seo:
+      default_title: "StreamStickPro – Premium Streaming Devices & Live TV Plans"
+      default_description: "Get fully loaded in 10 minutes. Fire Sticks with Live TV – 18,000+ channels, 100,000+ movies. Instant credentials, easy setup, 24/7 support."
+
+  - path: "/shop"
+    template: shop
+    name: Shop
+    description: All devices and IPTV plans.
+    seo:
+      default_title: "Shop Streaming Devices & IPTV Plans | StreamStickPro"
+      default_description: "Fire Sticks, ONN boxes, and IPTV subscriptions. Multi-device plans, free trials, 24/7 support."
+
+  - path: "/devices/"
+    template: devices-archive
+    name: Devices
+    description: Overview of all streaming devices.
+    children:
+      - path: "/devices/fire-stick-4k/"
+        template: device-detail
+        slug: fire-stick-4k
+      - path: "/devices/fire-stick-4k-max/"
+        template: device-detail
+        slug: fire-stick-4k-max
+      - path: "/devices/fire-stick-hd/"
+        template: device-detail
+        slug: fire-stick-hd
+      - path: "/devices/onn-4k/"
+        template: device-detail
+        slug: onn-4k
+      - path: "/devices/onn-4k-pro/"
+        template: device-detail
+        slug: onn-4k-pro
+
+  - path: "/plans/"
+    template: plans-archive
+    name: Plans
+    description: IPTV plans and bundles.
+    children:
+      - path: "/plans/1-month-live-tv/"
+        template: plan-detail
+        slug: 1-month-live-tv
+      - path: "/plans/3-month-live-tv/"
+        template: plan-detail
+        slug: 3-month-live-tv
+      - path: "/plans/6-month-live-tv/"
+        template: plan-detail
+        slug: 6-month-live-tv
+      - path: "/plans/1-year-live-tv/"
+        template: plan-detail
+        slug: 1-year-live-tv
+
+  - path: "/trials/"
+    template: trials-overview
+    name: Free Trials
+    description: Free trial variations.
+    children:
+      - path: "/trials/free-trial/"
+        template: trial-detail
+        slug: free-trial
+
+  - path: "/setup/"
+    template: setup-overview
+    name: Setup Guides
+    description: Step-by-step setup per device.
+    children:
+      - path: "/setup/fire-stick-4k/"
+        template: setup-guide
+        slug: fire-stick-4k
+      - path: "/setup/iptv-smarters-pro/"
+        template: setup-guide
+        slug: iptv-smarters-pro
+      - path: "/setup/downloader/"
+        template: setup-guide
+        slug: downloader
+
+  - path: "/blog"
+    template: blog-index
+    name: Blog
+    description: Educational SEO content.
+  - path: "/blog/:slug"
+    template: blog-post
+    name: Blog Post
+
+  - path: "/channels/"
+    template: channels-overview
+    name: Channels
+    description: Sports, movies, kids, regions.
+    children:
+      - path: "/channels/sports/"
+        template: channel-category
+        slug: sports
+      - path: "/channels/movies/"
+        template: channel-category
+        slug: movies
+
+url_rules:
+  - id: no-query-core
+    rule: "Core pages must not use query parameters for primary content."
+  - id: hyphenated-slugs
+    rule: "Use human-readable, hyphenated slugs only."
+  - id: canonical-variants
+    rule: "Canonical tags for near-duplicate variants (e.g. ?utm_*)."
+  - id: click-depth
+    rule: "Money pages within 3 clicks from home via hub pages and HTML sitemaps."
+
+internal_linking:
+  - source_template: device-detail
+    target_templates: [plan-detail, setup-guide, devices-archive]
+    block_name: "Related plans, setup guide, more devices"
+  - source_template: plan-detail
+    target_templates: [device-detail, trials-overview, home]
+    block_name: "Recommended devices, free trial, home"
+  - source_template: blog-post
+    target_templates: [home, shop, setup-guide, plan-detail]
+    block_name: "Homepage, shop, setup guides, plans"
+  - source_template: setup-guide
+    target_templates: [device-detail, plan-detail, shop]
+    block_name: "Device page, plans, shop"

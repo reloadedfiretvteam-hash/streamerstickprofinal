@@ -105,6 +105,14 @@ async function buildCloudflare() {
     console.warn("Blog pre-rendering skipped (Supabase credentials may be missing)");
   }
 
+  console.log("Running SEO audit...");
+  try {
+    const { execSync } = await import("child_process");
+    execSync("npx tsx scripts/seo-audit.ts", { stdio: "inherit", cwd: process.cwd() });
+  } catch {
+    console.warn("SEO audit had findings (see report above) or script skipped.");
+  }
+
   console.log("Cloudflare Pages build complete!");
 }
 

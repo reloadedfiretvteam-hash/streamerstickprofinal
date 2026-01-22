@@ -1,0 +1,61 @@
+{
+  "global": {
+    "organization": {
+      "@type": "Organization",
+      "name": "StreamStickPro",
+      "url": "https://streamstickpro.com/",
+      "logo": "https://streamstickpro.com/favicon.png",
+      "sameAs": [],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "email": "support@streamstickpro.com",
+        "availableLanguage": "English"
+      }
+    },
+    "website": {
+      "@type": "WebSite",
+      "name": "StreamStickPro",
+      "url": "https://streamstickpro.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://streamstickpro.com/blog?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  },
+  "page_types": {
+    "home": {
+      "schemas": ["WebSite", "Organization", "Store", "FAQPage", "ItemList", "Product"],
+      "product_list": "all"
+    },
+    "device-detail": {
+      "schemas": ["Product", "HowTo", "FAQPage", "BreadcrumbList"],
+      "product_relation": "device"
+    },
+    "plan-detail": {
+      "schemas": ["Product", "Offer", "FAQPage", "BreadcrumbList"],
+      "product_relation": "plan"
+    },
+    "setup-guide": {
+      "schemas": ["HowTo", "VideoObject", "FAQPage", "BreadcrumbList"]
+    },
+    "blog-post": {
+      "schemas": ["BlogPosting", "Article", "BreadcrumbList"],
+      "optional": ["Product"]
+    },
+    "channel-category": {
+      "schemas": ["ItemList", "CollectionPage", "BreadcrumbList"]
+    }
+  },
+  "entity_linking": {
+    "Product": ["brand -> Organization", "offers -> Offer", "subjectOf -> HowTo"],
+    "Offer": ["seller -> Organization", "itemOffered -> Product"],
+    "HowTo": ["provider -> Organization"],
+    "BlogPosting": ["author -> Organization", "publisher -> Organization"]
+  },
+  "validation": {
+    "product_required": ["name", "description", "image", "offers", "offers.price", "offers.priceCurrency", "offers.availability", "offers.priceValidUntil"],
+    "offer_required": ["price", "priceCurrency", "availability", "seller"]
+  }
+}
