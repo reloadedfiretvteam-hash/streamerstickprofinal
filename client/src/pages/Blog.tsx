@@ -86,7 +86,7 @@ export default function Blog() {
             readTime: `${Math.ceil((post.content || "").split(" ").length / 200)} min read`,
             date: post.createdAt ? new Date(post.createdAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
             featured: post.featured || false,
-            image: "/api/placeholder/800/400",
+            image: post.imageUrl || post.image_url || "/api/placeholder/800/400",
             linkedProductIds: post.linkedProductIds || null
           }));
           setPosts(fetchedPosts);
@@ -252,14 +252,34 @@ export default function Blog() {
             <Badge variant="secondary" data-testid="badge-category">{selectedPost.category}</Badge>
           </div>
 
+          {/* Featured Image */}
+          {selectedPost.image && selectedPost.image !== "/api/placeholder/800/400" && (
+            <div className="mb-8 rounded-xl overflow-hidden border border-gray-700">
+              <img 
+                src={selectedPost.image} 
+                alt={selectedPost.title}
+                className="w-full h-auto max-h-96 object-cover"
+                loading="lazy"
+              />
+            </div>
+          )}
+
           <div 
-            className="prose prose-invert max-w-none mb-12"
+            className="max-w-none mb-12 text-gray-100"
+            style={{
+              fontSize: 'clamp(18px, 4vw, 20px)',
+              lineHeight: '1.8',
+              fontWeight: '400'
+            }}
             dangerouslySetInnerHTML={{ 
               __html: selectedPost.content
                 .replace(/\n\n/g, "</p><p>")
                 .replace(/^(.+)$/gm, match => !match.startsWith("<") ? match : match)
-                .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-                .replace(/^- (.+)$/gm, "<li>$1</li>")
+                .replace(/\*\*(.+?)\*\*/g, "<strong style='font-weight: 700; font-size: 1.1em;'>$1</strong>")
+                .replace(/^- (.+)$/gm, "<li style='margin-left: 1.5rem; margin-bottom: 0.5rem; font-size: 1em;'>$1</li>")
+                .replace(/^# (.+)$/gm, "<h1 style='font-size: clamp(28px, 6vw, 36px); font-weight: 800; margin-top: 2rem; margin-bottom: 1rem; line-height: 1.3; color: white;'>$1</h1>")
+                .replace(/^## (.+)$/gm, "<h2 style='font-size: clamp(24px, 5vw, 30px); font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; line-height: 1.4; color: white;'>$1</h2>")
+                .replace(/^### (.+)$/gm, "<h3 style='font-size: clamp(20px, 4vw, 24px); font-weight: 700; margin-top: 1.25rem; margin-bottom: 0.5rem; line-height: 1.4; color: white;'>$1</h3>")
             }}
             data-testid="text-blog-content"
           />
@@ -448,8 +468,17 @@ export default function Blog() {
                       data-testid={`card-featured-post-${post.id}`}
                     >
                       <Card className="h-full bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-orange-500 transition-colors overflow-hidden">
-                        <div className="h-48 bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center">
-                          <Tv className="w-16 h-16 text-orange-400 opacity-50" />
+                        <div className="h-48 bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center overflow-hidden">
+                          {post.image && post.image !== "/api/placeholder/800/400" ? (
+                            <img 
+                              src={post.image} 
+                              alt={post.title}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <Tv className="w-16 h-16 text-orange-400 opacity-50" />
+                          )}
                         </div>
                         <CardHeader>
                           <div className="flex items-center gap-2 mb-2">
