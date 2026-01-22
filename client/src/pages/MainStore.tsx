@@ -77,7 +77,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     duration: "1mo",
     durationLabel: "1 Month",
     badge: "STARTER",
-    description: "Premium Live TV streaming plan with extensive content library, thousands of movies & TV shows, and comprehensive sports coverage.",
+    description: "Premium Live TV streaming plan with 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
     features: productBenefitList,
     prices: [
       { devices: 1, price: 15, productId: "iptv-1mo-1d" },
@@ -92,7 +92,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     durationLabel: "3 Months",
     badge: "POPULAR",
     popular: true,
-    description: "Save more with 3 months! Premium Live TV plan with extensive content library, thousands of movies & shows, and comprehensive sports coverage.",
+    description: "Save more with 3 months! Premium Live TV plan with 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
     features: productBenefitList,
     prices: [
       { devices: 1, price: 25, productId: "iptv-3mo-1d" },
@@ -106,7 +106,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     duration: "6mo",
     durationLabel: "6 Months",
     badge: "GREAT VALUE",
-    description: "10% OFF! 6-month premium Live TV streaming plan with extensive content library, thousands of movies & shows, and comprehensive sports coverage.",
+    description: "10% OFF! 6-month premium Live TV streaming plan with 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
     features: productBenefitList,
     prices: [
       { devices: 1, price: 40, productId: "iptv-6mo-1d" },
@@ -137,7 +137,7 @@ const defaultProducts: Product[] = [
     id: "firestick-hd",
     name: "StreamStick Starter Kit",
     price: 130,
-    description: "Get fully loaded in just 10 minutes! Your Fire Stick arrives ready - simply plug in, enter your credentials (sent instantly after purchase), and follow our quick setup video. You'll unlock an extensive live content library, thousands of movies & TV shows, and comprehensive sports coverage including NFL, NBA, UFC, and live events. Includes 1 Year Live TV plan and 24/7 customer support.",
+    description: "Get fully loaded in just 10 minutes! Your Fire Stick arrives ready - simply plug in, enter your credentials (sent instantly after purchase), and follow our quick setup video. You'll unlock 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage including NFL, NBA, UFC, and live events. Includes 1 Year Live TV plan and 24/7 customer support.",
     features: productBenefitList,
     image: firestickHdImg,
     category: "firestick",
@@ -147,7 +147,7 @@ const defaultProducts: Product[] = [
     id: "firestick-4k",
     name: "StreamStick 4K Kit",
     price: 140,
-    description: "Best-selling Fire Stick - get fully loaded in 10 minutes! Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision. Enjoy an extensive live content library, thousands of movies & TV shows, and all major sports - NFL, NBA, UFC, and live events. Includes 1 Year premium Live TV plan and 24/7 support.",
+    description: "Best-selling Fire Stick - get fully loaded in 10 minutes! Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision. Enjoy 18,000+ live TV channels, 100,000+ movies & series, and all major sports - NFL, NBA, UFC, and live events. Includes 1 Year premium Live TV plan and 24/7 support.",
     features: productBenefitList,
     image: firestick4kImg,
     category: "firestick",
@@ -158,7 +158,7 @@ const defaultProducts: Product[] = [
     id: "firestick-4k-max",
     name: "StreamStick Max Kit",
     price: 150,
-    description: "Ultimate 4K Max with Wi-Fi 6E - get fully loaded in just 10 minutes! Your device arrives ready. Plug in, use your instant credentials, follow our quick setup video, and experience breathtaking 4K with Dolby Atmos sound. Access an extensive live content library, thousands of movies & shows, and all major sports. Includes 1 Year premium Live TV plan and priority 24/7 support.",
+    description: "Ultimate 4K Max with Wi-Fi 6E - get fully loaded in just 10 minutes! Your device arrives ready. Plug in, use your instant credentials, follow our quick setup video, and experience breathtaking 4K with Dolby Atmos sound. Access 18,000+ live TV channels, 100,000+ movies & series, and all major sports. Includes 1 Year premium Live TV plan and priority 24/7 support.",
     features: productBenefitList,
     image: firestick4kMaxImg,
     category: "firestick",
@@ -168,7 +168,7 @@ const defaultProducts: Product[] = [
     id: "android-onn-4k",
     name: "ONN 4K Streaming Device Kit",
     price: 140,
-    description: "Upgrade from Fire Stick to Android! The ONN 4K Streaming Device with Google TV delivers the same great features you love, plus built-in storage for live DVR recording. Get fully loaded in 10 minutes - plug in, enter your instant credentials, and access an extensive live content library, thousands of movies & shows, and comprehensive sports coverage. Includes 1 Year Live TV plan and 24/7 support.",
+    description: "Upgrade from Fire Stick to Android! The ONN 4K Streaming Device with Google TV delivers the same great features you love, plus built-in storage for live DVR recording. Get fully loaded in 10 minutes - plug in, enter your instant credentials, and access 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage. Includes 1 Year Live TV plan and 24/7 support.",
     features: productBenefitList,
     image: onn4kImg,
     category: "firestick",
@@ -178,7 +178,7 @@ const defaultProducts: Product[] = [
     id: "android-onn-pro",
     name: "ONN 4K Ultra HD Pro Kit",
     price: 160,
-    description: "The ultimate Android streaming upgrade! ONN 4K Ultra HD Pro features expanded storage for extensive DVR recording, Google TV interface, and premium performance. Get fully loaded in 10 minutes - plug in, use your instant credentials, and experience crystal-clear 4K with Dolby Audio. Access an extensive live content library, thousands of movies & shows, and all major sports. Includes 1 Year premium Live TV plan and priority 24/7 support.",
+    description: "The ultimate Android streaming upgrade! ONN 4K Ultra HD Pro features expanded storage for extensive DVR recording, Google TV interface, and premium performance. Get fully loaded in 10 minutes - plug in, use your instant credentials, and experience crystal-clear 4K with Dolby Audio. Access 18,000+ live TV channels, 100,000+ movies & series, and all major sports. Includes 1 Year premium Live TV plan and priority 24/7 support.",
     features: productBenefitList,
     image: onn4kProImg,
     category: "firestick",
@@ -394,7 +394,7 @@ export default function MainStore() {
     "@type": "WebSite",
     "name": "StreamStickPro",
     "url": "https://streamstickpro.com/",
-    "description": "Premium pre-configured streaming devices with Live TV plans - extensive content library, thousands of movies, comprehensive sports coverage",
+    "description": "Premium pre-configured streaming devices with Live TV plans - 18,000+ channels, 100,000+ movies & series, comprehensive sports coverage",
     "potentialAction": {
       "@type": "SearchAction",
       "target": "https://streamstickpro.com/?search={search_term_string}",
@@ -425,11 +425,6 @@ export default function MainStore() {
             "@type": "Organization",
             "name": "StreamStickPro"
           }
-        },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.9",
-          "reviewCount": "2847"
         }
       }
     }))
@@ -482,7 +477,7 @@ export default function MainStore() {
         },
         {
           question: "How do I set up IPTV on Fire Stick?",
-          answer: "Setting up IPTV on Fire Stick is simple. Purchase a pre-configured Fire Stick from StreamStickPro and it arrives ready to stream. You'll receive instant login credentials and setup video tutorials. Just plug in your Fire Stick, connect to WiFi, and follow the 10-minute tutorial to start streaming thousands of channels immediately.",
+          answer: "Setting up IPTV on Fire Stick is simple. Purchase a pre-configured Fire Stick from StreamStickPro and it arrives ready to stream. You'll receive instant login credentials and setup video tutorials. Just plug in your Fire Stick, connect to WiFi, and follow the 10-minute tutorial to start streaming 18,000+ channels immediately.",
           dateCreated: new Date().toISOString()
         },
         {
@@ -876,7 +871,7 @@ export default function MainStore() {
                 <Star className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-black mb-4 text-white">Premium Content</h3>
-              <p className="text-gray-100 text-lg leading-relaxed">Access an extensive live content library, thousands of movies, and comprehensive sports coverage.</p>
+              <p className="text-gray-100 text-lg leading-relaxed">Access 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.</p>
             </motion.div>
             <motion.div 
               variants={fadeInUp}
@@ -1156,7 +1151,7 @@ export default function MainStore() {
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-200">Thousands of Movies & Shows</td>
+                    <td className="p-4 text-gray-200">100,000+ Movies & Series</td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
@@ -1789,7 +1784,7 @@ export default function MainStore() {
                 <span className="text-xl font-bold text-white">Inferno TV</span>
               </div>
               <p className="text-sm text-gray-200 mb-4">
-                Premium Live TV streaming with extensive content library and thousands of movies & series. Pre-configured streaming devices available.
+                Premium Live TV streaming with 18,000+ channels and 100,000+ movies & series. Pre-configured streaming devices available.
               </p>
               <div className="flex gap-3">
                 <a href="mailto:reloadedfiretvteam@gmail.com" className="w-10 h-10 bg-gray-800 hover:bg-orange-600 rounded-lg flex items-center justify-center transition-colors" data-testid="link-email" aria-label="Email us">

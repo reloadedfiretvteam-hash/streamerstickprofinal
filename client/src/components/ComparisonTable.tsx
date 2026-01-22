@@ -3,8 +3,8 @@ import { Check, X, Tv, DollarSign, Zap } from "lucide-react";
 
 const comparisonData = [
   { feature: "Monthly Cost", streamstick: "$15/mo", cable: "$150+/mo", netflix: "$23/mo" },
-  { feature: "Live TV Channels", streamstick: "Extensive Library", cable: "200-300", netflix: false },
-  { feature: "Movies & Shows", streamstick: "Thousands", cable: "Limited", netflix: "15,000+" },
+  { feature: "Live TV Channels", streamstick: "18,000+", cable: "200-300", netflix: false },
+  { feature: "Movies & Shows", streamstick: "100,000+", cable: "Limited", netflix: "15,000+" },
   { feature: "Live Sports Coverage", streamstick: true, cable: "Extra $$", netflix: false },
   { feature: "No Contracts", streamstick: true, cable: false, netflix: true },
   { feature: "Works Anywhere", streamstick: true, cable: false, netflix: true },
@@ -39,7 +39,7 @@ export function ComparisonTable() {
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">
-              See Why 2,700+ Customers Made The Switch
+              See Why StreamStickPro Beats Cable & Netflix
             </span>
           </h2>
           <p className="text-lg text-gray-300 max-w-2xl mx-auto">

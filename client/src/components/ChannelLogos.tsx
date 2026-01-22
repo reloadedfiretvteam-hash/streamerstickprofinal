@@ -35,8 +35,8 @@ export function ChannelLogos({ className = "" }: { className?: string }) {
             <span className="text-sm font-medium text-blue-300">AVAILABLE CHANNELS</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-bold mb-2">
-            <span className="text-white">Access Our </span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Extensive Channel Library</span>
+            <span className="text-white">Access </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">18,000+ Live TV Channels</span>
           </h2>
           <p className="text-gray-300">All your favorite networks included</p>
         </div>

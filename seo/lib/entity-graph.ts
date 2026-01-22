@@ -73,13 +73,6 @@ export function productSchema(p: ProductInput) {
       priceValidUntil: PRICE_VALID_UNTIL,
       seller: { "@type": "Organization", name: ORG },
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.9",
-      reviewCount: "2847",
-      bestRating: "5",
-      worstRating: "1",
-    },
   };
 }
 

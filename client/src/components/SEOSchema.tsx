@@ -83,13 +83,6 @@ export function SEOSchema({ faq, products, breadcrumbs }: SEOSchemaProps) {
               "@type": "Organization",
               "name": "StreamStickPro"
             }
-          },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "reviewCount": "2847",
-            "bestRating": "5",
-            "worstRating": "1"
           }
         };
         const productScript = document.createElement('script');

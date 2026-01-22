@@ -113,6 +113,7 @@ export default function ExitIntentPopup({ onClose, onAction }: ExitIntentPopupPr
           size="icon"
           className="absolute top-2 right-2 text-white hover:bg-white/20 rounded-full"
           onClick={handleStay}
+          aria-label="Close"
         >
           <X className="h-5 w-5" />
         </Button>
@@ -134,7 +135,7 @@ export default function ExitIntentPopup({ onClose, onAction }: ExitIntentPopupPr
           </p>
           
           <p className="text-sm mb-6 text-white/80">
-            Thousands of channels • Premium quality • 24/7 support
+            18,000+ channels • 100,000+ movies & series • 24/7 support
           </p>
           
           <div className="space-y-3">

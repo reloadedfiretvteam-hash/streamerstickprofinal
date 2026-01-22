@@ -87,7 +87,7 @@ export default function Blog() {
             readTime: `${Math.ceil((post.content || "").split(" ").length / 200)} min read`,
             date: post.createdAt ? new Date(post.createdAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
             featured: post.featured || false,
-            image: post.imageUrl || post.image_url || "/api/placeholder/800/400",
+            image: post.imageUrl || post.image_url || "https://streamstickpro.com/opengraph.jpg",
             linkedProductIds: post.linkedProductIds || null
           }));
           setPosts(fetchedPosts);
@@ -254,7 +254,7 @@ export default function Blog() {
           </div>
 
           {/* Featured Image */}
-          {selectedPost.image && selectedPost.image !== "/api/placeholder/800/400" && (
+          {selectedPost.image && (
             <div className="mb-8 rounded-xl overflow-hidden border border-gray-700">
               <img 
                 src={selectedPost.image} 
@@ -487,7 +487,7 @@ export default function Blog() {
                     >
                       <Card className="h-full bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-orange-500 transition-colors overflow-hidden">
                         <div className="h-48 bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center overflow-hidden">
-                          {post.image && post.image !== "/api/placeholder/800/400" ? (
+                          {post.image ? (
                             <img 
                               src={post.image} 
                               alt={post.title}

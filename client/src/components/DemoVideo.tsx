@@ -119,14 +119,11 @@ export function DemoVideo() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-300">
-                    <span className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                      4.9 Rating
-                    </span>
-                    <span>•</span>
-                    <span>2,700+ Happy Customers</span>
-                    <span>•</span>
                     <span>24/7 Support</span>
+                    <span>•</span>
+                    <span>Instant Setup</span>
+                    <span>•</span>
+                    <span>18,000+ Channels</span>
                   </div>
                 </div>
               </div>
@@ -165,12 +162,12 @@ export function DemoVideo() {
           
           <div className="grid grid-cols-3 gap-4 mt-6">
             <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-orange-400">Extensive</div>
-              <div className="text-sm text-gray-300">Channel Library</div>
+              <div className="text-2xl font-bold text-orange-400">18,000+</div>
+              <div className="text-sm text-gray-300">Live TV Channels</div>
             </div>
             <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-blue-400">Thousands</div>
-              <div className="text-sm text-gray-300">Movies & Shows</div>
+              <div className="text-2xl font-bold text-blue-400">100,000+</div>
+              <div className="text-sm text-gray-300">Movies & Series</div>
             </div>
             <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 text-center">
               <div className="text-2xl font-bold text-purple-400">Full Sports</div>

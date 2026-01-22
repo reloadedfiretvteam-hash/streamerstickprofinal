@@ -50,8 +50,8 @@ const iptvPricingMatrix: IPTVPricing[] = [
     duration: "1mo",
     durationLabel: "1 Month",
     badge: "STARTER",
-    description: "Premium Live TV streaming plan with extensive content library, thousands of movies & TV shows, and comprehensive sports coverage.",
-    features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support"],
+    description: "Premium Live TV streaming plan with 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
+    features: ["18,000+ Live TV Channels", "100,000+ Movies & Series", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support"],
     prices: [
       { devices: 1, price: 15, productId: "iptv-1mo-1d" },
       { devices: 2, price: 25, productId: "iptv-1mo-2d" },
@@ -111,7 +111,7 @@ const defaultProducts: Product[] = [
     name: 'Fire Stick HD',
     price: 130,
     description: 'Full HD streaming device with 1 Year Live TV Plan included. Perfect entry-level option for crystal-clear streaming.',
-    features: ['1080p Full HD', '1 Year Live TV Included', 'Extensive Content Library', 'Thousands of Movies & Shows', 'Comprehensive Sports Coverage', '24/7 Customer Support'],
+    features: ['1080p Full HD', '1 Year Live TV Included', '18,000+ Live TV Channels', '100,000+ Movies & Series', 'Comprehensive Sports Coverage', '24/7 Customer Support'],
     image: firestickHdImg,
     category: 'firestick',
     badge: 'STARTER'
@@ -121,7 +121,7 @@ const defaultProducts: Product[] = [
     name: 'Fire Stick 4K',
     price: 140,
     description: '4K Ultra HD streaming device with 1 Year Live TV Plan included. Experience stunning picture quality with HDR support.',
-    features: ['4K Ultra HD', 'HDR Support', 'Dolby Vision & Atmos', '1 Year Live TV Included', 'Extensive Content Library', 'Thousands of Movies & Shows', 'Comprehensive Sports Coverage', '24/7 Customer Support'],
+    features: ['4K Ultra HD', 'HDR Support', 'Dolby Vision & Atmos', '1 Year Live TV Included', '18,000+ Live TV Channels', '100,000+ Movies & Series', 'Comprehensive Sports Coverage', '24/7 Customer Support'],
     image: firestick4kImg,
     category: 'firestick',
     badge: 'POPULAR',
