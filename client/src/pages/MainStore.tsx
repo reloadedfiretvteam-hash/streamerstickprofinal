@@ -554,14 +554,15 @@ export default function MainStore() {
           </div>
           
           <div className="flex items-center gap-4">
-            <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToAbout} data-testid="nav-how-it-works">How It Works</Button>
-            <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToShop} data-testid="nav-shop">Shop</Button>
+            <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToAbout} data-testid="nav-how-it-works" aria-label="Scroll to How It Works section">How It Works</Button>
+            <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToShop} data-testid="nav-shop" aria-label="Scroll to Shop section">Shop</Button>
             <Button 
               onClick={openSupport} 
               className="hidden md:flex bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-4 py-2 rounded-lg shadow-lg shadow-orange-500/30 transition-all transform hover:scale-105" 
               data-testid="button-contact-header"
+              aria-label="Contact us - open support message box"
             >
-              <MessageCircle className="w-4 h-4 mr-2" />
+              <MessageCircle className="w-4 h-4 mr-2" aria-hidden="true" />
               Contact Us
             </Button>
             <Button 
@@ -676,10 +677,11 @@ export default function MainStore() {
                 onClick={scrollToShop}
                 className="group px-12 py-6 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 bg-[length:200%_100%] hover:bg-[position:100%_0] rounded-2xl font-black text-2xl transition-all duration-500 transform hover:scale-110 hover:shadow-2xl shadow-orange-500/60 inline-flex items-center justify-center gap-4 text-white border-2 border-orange-300/50"
                 data-testid="button-shop-now"
+                aria-label="Get started now - view shop and plans"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <ShoppingCart className="w-7 h-7 group-hover:animate-bounce" />
+                <ShoppingCart className="w-7 h-7 group-hover:animate-bounce" aria-hidden="true" />
                 Get Started Now
                 <span className="bg-white/40 backdrop-blur-sm rounded-full px-5 py-2 text-base font-black border border-white/50">Starting at $15/mo</span>
               </motion.button>
@@ -687,10 +689,11 @@ export default function MainStore() {
                 onClick={openSupport}
                 className="px-12 py-6 bg-gradient-to-br from-white/15 via-white/10 to-white/5 backdrop-blur-2xl hover:from-white/25 hover:via-white/15 hover:to-white/10 border-2 border-white/40 hover:border-white/60 rounded-2xl font-black text-2xl transition-all duration-300 inline-flex items-center justify-center gap-3 text-white shadow-xl shadow-white/10 hover:shadow-2xl hover:shadow-white/20"
                 data-testid="button-contact-hero"
+                aria-label="Questions? Ask us - open contact support"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <MessageCircle className="w-7 h-7" />
+                <MessageCircle className="w-7 h-7" aria-hidden="true" />
                 Questions? Ask Us
               </motion.button>
             </motion.div>
@@ -1316,7 +1319,6 @@ export default function MainStore() {
                         }`}
                         data-testid={`button-wishlist-${product.id}`}
                         aria-label={isInWishlist(product.id) ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
-                        aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
                       >
                         <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
                       </button>
@@ -1341,8 +1343,6 @@ export default function MainStore() {
                                     : 'bg-white/10 text-gray-200 hover:bg-white/20'
                                 }`}
                                 data-testid={`button-qty-${product.id}-${qty}`}
-                                aria-label={`Select quantity ${qty}`}
-                                aria-pressed={firestickQuantities[product.id] === qty}
                                 aria-label={`Select quantity ${qty}`}
                                 aria-pressed={firestickQuantities[product.id] === qty}
                               >
