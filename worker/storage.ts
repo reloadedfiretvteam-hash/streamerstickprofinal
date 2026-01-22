@@ -364,6 +364,7 @@ export function createStorage(config: StorageConfig) {
     async getVisitorStats(): Promise<{
       totalVisitors: number;
       todayVisitors: number;
+      yesterdayVisitors: number;
       weekVisitors: number;
       monthVisitors: number;
       onlineNow: number;
@@ -372,60 +373,106 @@ export function createStorage(config: StorageConfig) {
       try {
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
         const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-        const monthAgo = new Date(now.getFullYear(), now.getMonth(), 1);
+        const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000); // 30 days ago, not first of month
         const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
 
-        // Use existing supabase client (already configured with service key)
-        const { data: allVisitors, error: queryError } = await supabase
+        // Use COUNT queries for accurate totals - much more efficient than loading all data
+        const todayISO = today.toISOString();
+        const yesterdayISO = yesterday.toISOString();
+        const weekAgoISO = weekAgo.toISOString();
+        const monthAgoISO = monthAgo.toISOString();
+        const fiveMinutesAgoISO = fiveMinutesAgo.toISOString();
+
+        // Get total count
+        const { count: totalVisitors, error: totalError } = await supabase
+          .from('visitors')
+          .select('*', { count: 'exact', head: true });
+        
+        if (totalError) {
+          console.error('[VISITOR_STATS] Error counting total visitors:', totalError);
+        }
+
+        // Get today's count
+        const { count: todayVisitors, error: todayError } = await supabase
+          .from('visitors')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', todayISO);
+        
+        if (todayError) {
+          console.error('[VISITOR_STATS] Error counting today visitors:', todayError);
+        }
+
+        // Get yesterday's count
+        const { count: yesterdayVisitors, error: yesterdayError } = await supabase
+          .from('visitors')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', yesterdayISO)
+          .lt('created_at', todayISO);
+        
+        if (yesterdayError) {
+          console.error('[VISITOR_STATS] Error counting yesterday visitors:', yesterdayError);
+        }
+
+        // Get week's count
+        const { count: weekVisitors, error: weekError } = await supabase
+          .from('visitors')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', weekAgoISO);
+        
+        if (weekError) {
+          console.error('[VISITOR_STATS] Error counting week visitors:', weekError);
+        }
+
+        // Get month's count (30 days)
+        const { count: monthVisitors, error: monthError } = await supabase
+          .from('visitors')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', monthAgoISO);
+        
+        if (monthError) {
+          console.error('[VISITOR_STATS] Error counting month visitors:', monthError);
+        }
+
+        // Get online now count (last 5 minutes)
+        const { count: onlineNow, error: onlineError } = await supabase
+          .from('visitors')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', fiveMinutesAgoISO);
+        
+        if (onlineError) {
+          console.error('[VISITOR_STATS] Error counting online visitors:', onlineError);
+        }
+
+        // Get recent visitors for display (only fetch what we need)
+        const { data: recentData, error: recentError } = await supabase
           .from('visitors')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(5000);
+          .limit(50);
         
-        if (queryError) {
-          console.error('[VISITOR_STATS] Error fetching visitors:', queryError);
-          // Return empty stats instead of throwing
-          return {
-            totalVisitors: 0,
-            todayVisitors: 0,
-            weekVisitors: 0,
-            onlineNow: 0,
-            recentVisitors: [],
-          };
-        }
-        
-        const visitors = (allVisitors || []).map((d: any) => this.mapVisitorFromDb(d));
-        
-        const totalVisitors = visitors.length;
-        const todayVisitors = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= today).length;
-        const weekVisitors = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= weekAgo).length;
-        const monthVisitors = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= monthAgo).length;
-        const onlineNow = visitors.filter((v: Visitor) => v.createdAt && new Date(v.createdAt) >= fiveMinutesAgo).length;
-        const recentVisitors = visitors.slice(0, 50);
+        const recentVisitors = recentError 
+          ? [] 
+          : (recentData || []).map((d: any) => this.mapVisitorFromDb(d));
 
-        console.log('[VISITOR_STATS] Stats calculated:', {
-          totalVisitors,
-          todayVisitors,
-          weekVisitors,
-          monthVisitors,
-          onlineNow,
-          recentCount: recentVisitors.length
-        });
-
-        return {
-          totalVisitors,
-          todayVisitors,
-          weekVisitors,
-          monthVisitors,
-          onlineNow,
+        const stats = {
+          totalVisitors: totalVisitors || 0,
+          todayVisitors: todayVisitors || 0,
+          yesterdayVisitors: yesterdayVisitors || 0,
+          weekVisitors: weekVisitors || 0,
+          monthVisitors: monthVisitors || 0,
+          onlineNow: onlineNow || 0,
           recentVisitors,
         };
+
+        return stats;
       } catch (error: any) {
         console.error('[VISITOR_STATS] Unexpected error:', error);
         return {
           totalVisitors: 0,
           todayVisitors: 0,
+          yesterdayVisitors: 0,
           weekVisitors: 0,
           monthVisitors: 0,
           onlineNow: 0,

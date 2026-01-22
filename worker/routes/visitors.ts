@@ -159,6 +159,7 @@ export function createVisitorRoutes() {
         stats = {
           totalVisitors: 0,
           todayVisitors: 0,
+          yesterdayVisitors: 0,
           weekVisitors: 0,
           monthVisitors: 0,
           onlineNow: 0,
@@ -202,9 +203,10 @@ export function createVisitorRoutes() {
         .slice(0, 10)
         .map(([name, count]) => ({ name, count }));
       
-      // Ensure monthVisitors is included (storage.getVisitorStats should return it)
+      // Ensure all stats are included
       const finalStats = {
         ...stats,
+        yesterdayVisitors: stats.yesterdayVisitors || 0, // Ensure it exists
         monthVisitors: stats.monthVisitors || 0, // Ensure it exists
         topCountries,
         countryBreakdown: topCountries, // alias for compatibility

@@ -1,4 +1,4 @@
-import { eq, desc, gte, and, ilike, or, lt } from "drizzle-orm";
+import { eq, desc, gte, and, ilike, or, lt, count } from "drizzle-orm";
 import { db } from "./db";
 import {
   type User,
@@ -304,38 +304,74 @@ export class DatabaseStorage implements IStorage {
     const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
     const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
     const twoWeeksAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
-    const monthAgo = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000); // 30 days ago, not first of month
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
     const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
 
-    const allVisitors = await db.select().from(visitors).orderBy(desc(visitors.createdAt)).limit(10000);
-    
-    const totalVisitors = allVisitors.length;
-    const todayVisitors = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= today).length;
-    const yesterdayVisitors = allVisitors.filter(v => {
-      if (!v.createdAt) return false;
-      const visitDate = new Date(v.createdAt);
-      return visitDate >= yesterday && visitDate < today;
-    }).length;
-    const weekVisitors = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= weekAgo).length;
-    const lastWeekVisitors = allVisitors.filter(v => {
-      if (!v.createdAt) return false;
-      const visitDate = new Date(v.createdAt);
-      return visitDate >= twoWeeksAgo && visitDate < weekAgo;
-    }).length;
-    const monthVisitors = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= monthAgo).length;
-    const lastMonthVisitors = allVisitors.filter(v => {
-      if (!v.createdAt) return false;
-      const visitDate = new Date(v.createdAt);
-      return visitDate >= lastMonthStart && visitDate <= lastMonthEnd;
-    }).length;
-    const onlineNow = allVisitors.filter(v => v.createdAt && new Date(v.createdAt) >= fiveMinutesAgo).length;
-    const recentVisitors = allVisitors.slice(0, 100);
+    // Use COUNT queries for accurate totals - much more efficient
+    const [totalResult] = await db.select({ count: count() }).from(visitors);
+    const totalVisitors = totalResult?.count || 0;
+
+    const [todayResult] = await db.select({ count: count() })
+      .from(visitors)
+      .where(gte(visitors.createdAt, today));
+    const todayVisitors = todayResult?.count || 0;
+
+    const [yesterdayResult] = await db.select({ count: count() })
+      .from(visitors)
+      .where(and(
+        gte(visitors.createdAt, yesterday),
+        lt(visitors.createdAt, today)
+      ));
+    const yesterdayVisitors = yesterdayResult?.count || 0;
+
+    const [weekResult] = await db.select({ count: count() })
+      .from(visitors)
+      .where(gte(visitors.createdAt, weekAgo));
+    const weekVisitors = weekResult?.count || 0;
+
+    const [lastWeekResult] = await db.select({ count: count() })
+      .from(visitors)
+      .where(and(
+        gte(visitors.createdAt, twoWeeksAgo),
+        lt(visitors.createdAt, weekAgo)
+      ));
+    const lastWeekVisitors = lastWeekResult?.count || 0;
+
+    const [monthResult] = await db.select({ count: count() })
+      .from(visitors)
+      .where(gte(visitors.createdAt, monthAgo));
+    const monthVisitors = monthResult?.count || 0;
+
+    const [lastMonthResult] = await db.select({ count: count() })
+      .from(visitors)
+      .where(and(
+        gte(visitors.createdAt, lastMonthStart),
+        lt(visitors.createdAt, lastMonthEnd)
+      ));
+    const lastMonthVisitors = lastMonthResult?.count || 0;
+
+    const [onlineResult] = await db.select({ count: count() })
+      .from(visitors)
+      .where(gte(visitors.createdAt, fiveMinutesAgo));
+    const onlineNow = onlineResult?.count || 0;
+
+    // Only fetch recent visitors for display (not all data)
+    const recentVisitors = await db.select()
+      .from(visitors)
+      .orderBy(desc(visitors.createdAt))
+      .limit(100);
+
+    // For top countries/states, we still need to fetch some data, but limit it
+    const visitorsForStats = await db.select()
+      .from(visitors)
+      .orderBy(desc(visitors.createdAt))
+      .limit(10000); // Reasonable limit for stats calculation
 
     // Calculate top countries
     const countryCounts: Record<string, number> = {};
-    allVisitors.forEach(v => {
+    visitorsForStats.forEach(v => {
       const country = v.country || 'Unknown';
       countryCounts[country] = (countryCounts[country] || 0) + 1;
     });
@@ -346,7 +382,7 @@ export class DatabaseStorage implements IStorage {
 
     // Calculate top states/regions
     const stateCounts: Record<string, { state: string; country: string; count: number }> = {};
-    allVisitors.forEach(v => {
+    visitorsForStats.forEach(v => {
       const state = v.region || 'Unknown';
       const country = v.country || 'Unknown';
       const key = `${country}::${state}`;
