@@ -416,9 +416,11 @@ export default function MainStore() {
         "image": product.image,
         "offers": {
           "@type": "Offer",
+          "url": `https://streamstickpro.com/#${product.id}`,
           "price": product.price,
           "priceCurrency": "USD",
           "availability": "https://schema.org/InStock",
+          "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           "seller": {
             "@type": "Organization",
             "name": "StreamStickPro"
@@ -514,7 +516,8 @@ export default function MainStore() {
           name: p.name,
           description: p.description,
           url: `https://streamstickpro.com#${p.id}`,
-          image: p.image
+          image: p.image,
+          price: p.price
         }))}
       />
       
