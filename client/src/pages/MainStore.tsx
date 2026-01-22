@@ -451,7 +451,7 @@ export default function MainStore() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white pb-32 md:pb-20 relative">
-      {/* Parallax Hero Background - Scrolls across entire website with lighter overlay */}
+      {/* Parallax Hero Background - Optimized with lazy loading and performance hints */}
       <div 
         className="fixed inset-0 z-0 pointer-events-none"
         style={{
@@ -460,6 +460,8 @@ export default function MainStore() {
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundAttachment: 'fixed',
+          willChange: 'transform', // Optimize for parallax
+          contentVisibility: 'auto', // Defer rendering until visible
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-black/35 via-black/25 to-black/45" />
@@ -1057,6 +1059,7 @@ export default function MainStore() {
                           } as Product)}
                           className="w-full py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/30"
                           data-testid={`button-add-iptv-${plan.duration}`}
+                          aria-label={`Add ${plan.durationLabel} Live TV plan for ${deviceCount} device${deviceCount > 1 ? 's' : ''} to cart`}
                         >
                           <ShoppingCart className="w-4 h-4" />
                           Subscribe Now
@@ -1312,6 +1315,7 @@ export default function MainStore() {
                             : 'bg-white/90 text-gray-700 hover:bg-red-500 hover:text-white'
                         }`}
                         data-testid={`button-wishlist-${product.id}`}
+                        aria-label={isInWishlist(product.id) ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
                         aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
                       >
                         <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
@@ -1337,6 +1341,8 @@ export default function MainStore() {
                                     : 'bg-white/10 text-gray-200 hover:bg-white/20'
                                 }`}
                                 data-testid={`button-qty-${product.id}-${qty}`}
+                                aria-label={`Select quantity ${qty}`}
+                                aria-pressed={firestickQuantities[product.id] === qty}
                                 aria-label={`Select quantity ${qty}`}
                                 aria-pressed={firestickQuantities[product.id] === qty}
                               >
@@ -1744,6 +1750,7 @@ export default function MainStore() {
             onClick={() => setIsSupportOpen(true)}
             className="font-bold text-white hover:text-orange-100 underline decoration-2 underline-offset-2 transition-colors text-base md:text-lg cursor-pointer bg-transparent border-none p-0 hover:bg-white/10 rounded px-2 py-1"
             data-testid="link-support-email"
+            aria-label="Open contact support message box"
           >
             reloadedfiretvteam@gmail.com
           </button>

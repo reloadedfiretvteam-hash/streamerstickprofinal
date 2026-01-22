@@ -39,12 +39,17 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    sourcemap: true, // Enable source maps for debugging
+    sourcemap: false, // Disable source maps in production for smaller bundle
     minify: 'terser', // Use terser for better minification
     terserOptions: {
       compress: {
         drop_console: true, // Remove console.log in production
         drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'], // Remove more console calls
+        passes: 2, // Multiple passes for better compression
+      },
+      mangle: {
+        safari10: true, // Fix Safari 10 issues
       },
     },
     rollupOptions: {
@@ -53,6 +58,8 @@ export default defineConfig({
           'react-vendor': ['react', 'react-dom'],
           'router-vendor': ['wouter'],
           'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          'animation-vendor': ['framer-motion'],
+          'icons-vendor': ['lucide-react'],
         },
         // Optimize chunk loading
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -61,6 +68,8 @@ export default defineConfig({
       },
     },
     chunkSizeWarningLimit: 1000,
+    cssCodeSplit: true, // Split CSS for better caching
+    reportCompressedSize: false, // Faster builds
   },
   server: {
     host: "0.0.0.0",
