@@ -328,6 +328,23 @@ export default function Blog() {
             </div>
           </div>
 
+          {/* Product Schema for Product-Linked Posts */}
+          {selectedPost.linkedProductIds && selectedPost.linkedProductIds.length > 0 && (
+            <SEOSchema 
+              products={products
+                .filter(p => selectedPost.linkedProductIds?.includes(p.id))
+                .map(p => ({
+                  name: p.name,
+                  description: p.description || selectedPost.excerpt,
+                  price: p.price,
+                  image: p.image,
+                  availability: 'InStock' as const,
+                  brand: 'StreamStickPro',
+                  sku: p.id
+                }))}
+            />
+          )}
+
           {/* Related Products Section - Internal Linking */}
           {(() => {
             const linkedProducts = selectedPost.linkedProductIds && selectedPost.linkedProductIds.length > 0
