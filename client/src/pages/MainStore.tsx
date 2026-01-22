@@ -1411,6 +1411,7 @@ export default function MainStore() {
                             const { unitPrice } = calculateFirestickPrice(product.price, qty);
                             addItemWithQuantity(product as any, qty, unitPrice);
                           }}
+                          aria-label={`Add ${product.name} to cart`}
                           className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${
                             product.popular
                               ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
