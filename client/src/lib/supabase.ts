@@ -115,7 +115,7 @@ export async function fetchBlogPosts(publishedOnly = true) {
     let query = supabase.from('blog_posts').select('*');
     
     if (publishedOnly) {
-      query = query.eq('is_published', true);
+      query = query.eq('published', true);
     }
     
     const { data, error } = await query.order('published_at', { ascending: false });
@@ -150,7 +150,7 @@ export async function fetchBlogPostBySlug(slug: string) {
       .from('blog_posts')
       .select('*')
       .eq('slug', slug)
-      .eq('is_published', true)
+      .eq('published', true)
       .single();
     
     if (error) throw error;
