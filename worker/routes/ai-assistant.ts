@@ -796,7 +796,7 @@ async function executeSQLAction(action: any, env: Env): Promise<any> {
 async function executeConflictAction(action: any, env: Env): Promise<any> {
   try {
     if (action.action === 'detect') {
-      const conflicts = await detectConflicts(env, action.type || 'all');
+      const conflicts = await detectConflicts(env, action.conflictType || 'all');
       return {
         message: conflicts.length > 0 ? `Found ${conflicts.length} conflicts` : 'No conflicts detected',
         data: { conflicts }
@@ -1397,7 +1397,7 @@ async function parseCommand(command: string, context: any, env: Env): Promise<an
       return { type: 'code', action: 'search_code', query: extractSearchQuery(command) };
     }
     if (lowerCommand.includes('component') || lowerCommand.includes('page')) {
-      return { type: 'code', action: 'create_component', name: extractComponentName(command), type: extractComponentType(command) };
+      return { type: 'code', action: 'create_component', name: extractComponentName(command), componentType: extractComponentType(command) };
     }
     if (lowerCommand.includes('feature') || lowerCommand.includes('function')) {
       return { type: 'code', action: 'create_feature', description: command };
@@ -1444,7 +1444,7 @@ async function parseCommand(command: string, context: any, env: Env): Promise<an
     if (lowerCommand.includes('fix') || lowerCommand.includes('resolve')) {
       return { type: 'conflict', action: 'fix', conflictId: extractConflictId(command) };
     }
-    return { type: 'conflict', action: 'detect', type: extractConflictType(command) };
+    return { type: 'conflict', action: 'detect', conflictType: extractConflictType(command) };
   }
 
   // Secrets/variables management
@@ -1977,13 +1977,13 @@ async function executeCodeAction(action: any, env: Env): Promise<any> {
           return { error: 'Component name is required' };
         }
         
-        const componentCode = await generateComponentCode(action.name, action.type, action.description, env);
+        const componentCode = await generateComponentCode(action.name, action.componentType, action.description, env);
         
         if (env.GITHUB_TOKEN && action.autoCreate) {
           try {
             const repo = action.repo || 'reloadedfiretvteam-hash/streamerstickprofinal';
             const branch = action.branch || 'clean-main';
-            const filePath = action.type === 'page' 
+            const filePath = action.componentType === 'page' 
               ? `client/src/pages/${action.name}.tsx`
               : `client/src/components/${action.name}.tsx`;
             
@@ -1993,13 +1993,13 @@ async function executeCodeAction(action: any, env: Env): Promise<any> {
               branch,
               filePath,
               componentCode,
-              `Add ${action.type}: ${action.name}`
+              `Add ${action.componentType}: ${action.name}`
             );
             
             return {
               message: `Component '${action.name}' created successfully on GitHub`,
               data: {
-                type: action.type || 'component',
+                type: action.componentType || 'component',
                 name: action.name,
                 location: filePath,
                 code: componentCode,

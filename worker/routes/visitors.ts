@@ -145,27 +145,16 @@ export function createVisitorRoutes() {
 
   app.get('/stats', async (c) => {
     try {
-      console.log('[VISITOR_STATS] Endpoint called at', new Date().toISOString());
-      
       if (!c.env.VITE_SUPABASE_URL) {
-        console.error('[VISITOR_STATS] Missing VITE_SUPABASE_URL');
         return c.json({ error: 'Supabase URL not configured' }, 500);
       }
       
       const storage = getStorage(c.env);
-      console.log('[VISITOR_STATS] Storage initialized');
-      
       let stats;
       try {
         stats = await storage.getVisitorStats();
-        console.log('[VISITOR_STATS] Stats retrieved:', {
-          total: stats.totalVisitors,
-          today: stats.todayVisitors,
-          week: stats.weekVisitors,
-          month: stats.monthVisitors || 0
-        });
       } catch (statsError: any) {
-        console.error('[VISITOR_STATS] Error getting stats:', statsError);
+        console.error('[VISITOR_STATS] Error getting stats:', statsError?.message || statsError);
         // Return empty stats instead of failing completely
         stats = {
           totalVisitors: 0,
@@ -197,7 +186,7 @@ export function createVisitorRoutes() {
         .limit(5000);
       
       if (visitorsError) {
-        console.error('Error fetching visitors:', visitorsError);
+        console.error('[VISITOR_STATS] Error fetching visitors:', visitorsError?.message || visitorsError);
       }
       
       // Calculate geo stats
@@ -223,22 +212,9 @@ export function createVisitorRoutes() {
         liveVisitors: stats.recentVisitors || [], // Map recentVisitors to liveVisitors
       };
       
-      console.log('[VISITOR_STATS] Returning response with', {
-        totalVisitors: finalStats.totalVisitors,
-        recentCount: finalStats.recentVisitors?.length || 0,
-        monthVisitors: finalStats.monthVisitors
-      });
-      
-      const response = {
-        data: finalStats
-      };
-      
-      console.log('[VISITOR_STATS] Response prepared, sending JSON');
-      return c.json(response);
+      return c.json({ data: finalStats });
     } catch (error: any) {
-      console.error("[VISITOR_STATS] Unexpected error:", error);
-      console.error("[VISITOR_STATS] Error message:", error.message);
-      console.error("[VISITOR_STATS] Error stack:", error.stack);
+      console.error('[VISITOR_STATS] Unexpected error:', error?.message || error);
       
       // Always return JSON, even on error
       return c.json({ 
