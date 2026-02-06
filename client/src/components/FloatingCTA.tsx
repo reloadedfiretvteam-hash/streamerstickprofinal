@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Zap, X, MessageCircle } from "lucide-react";
+import { ShoppingCart, Zap, X, MessageCircle, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FloatingCTAProps {
   onBuyNow?: () => void;
   onContact?: () => void;
+  onFreeTrial?: () => void;
 }
 
-export function FloatingCTA({ onBuyNow, onContact }: FloatingCTAProps) {
+export function FloatingCTA({ onBuyNow, onContact, onFreeTrial }: FloatingCTAProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -39,6 +40,18 @@ export function FloatingCTA({ onBuyNow, onContact }: FloatingCTAProps) {
       shopSection.scrollIntoView({ behavior: "smooth" });
     }
     if (onBuyNow) onBuyNow();
+  };
+
+  const scrollToFreeTrial = () => {
+    const shopSection = document.getElementById("shop");
+    if (shopSection) {
+      shopSection.scrollIntoView({ behavior: "smooth" });
+      // Scroll a bit more to show free trial box
+      setTimeout(() => {
+        window.scrollBy({ top: 200, behavior: "smooth" });
+      }, 500);
+    }
+    if (onFreeTrial) onFreeTrial();
   };
 
   return (
@@ -74,6 +87,15 @@ export function FloatingCTA({ onBuyNow, onContact }: FloatingCTAProps) {
                     <p className="text-gray-200 text-sm">18,000+ channels from $15/mo</p>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      onClick={scrollToFreeTrial}
+                      variant="outline"
+                      className="bg-purple-500/20 hover:bg-purple-500/30 border-purple-400/50 text-white font-semibold px-3 shadow-lg"
+                      data-testid="button-floating-trial"
+                      title="Free 36-Hour Trial"
+                    >
+                      <Gift className="w-4 h-4" />
+                    </Button>
                     <Button
                       onClick={onContact}
                       variant="outline"

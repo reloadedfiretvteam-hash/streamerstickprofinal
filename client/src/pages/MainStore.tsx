@@ -18,8 +18,9 @@ import { ExitPopup } from "@/components/ExitPopup";
 import { DemoVideo } from "@/components/DemoVideo";
 import { FreeTrial } from "@/components/FreeTrial";
 import { TrustBadges, PaymentBadges, GuaranteeBadge } from "@/components/TrustBadges";
-// Social proof components removed per user request
+import { TrustStats } from "@/components/SocialProof";
 import { ChannelLogos } from "@/components/ChannelLogos";
+import { DownloaderCodeSection } from "@/components/DownloaderCodeSection";
 import { SavingsCalculator } from "@/components/SavingsCalculator";
 import { StickyMobileCTA, ScrollToTopButton } from "@/components/StickyMobileCTA";
 import { SEOSchema, QASchema, ServiceSchema, ItemListSchema } from "@/components/SEOSchema";
@@ -681,6 +682,18 @@ export default function MainStore() {
                 <span className="bg-white/40 backdrop-blur-sm rounded-full px-5 py-2 text-base font-black border border-white/50">Starting at $15/mo</span>
               </motion.button>
               <motion.button
+                onClick={scrollToFreeTrial}
+                className="px-12 py-6 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 bg-[length:200%_100%] hover:bg-[position:100%_0] rounded-2xl font-black text-2xl transition-all duration-500 transform hover:scale-110 hover:shadow-2xl shadow-purple-500/60 inline-flex items-center justify-center gap-4 text-white border-2 border-purple-300/50"
+                data-testid="button-free-trial-hero"
+                aria-label="Start your free 36-hour trial - no credit card required"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Gift className="w-7 h-7 group-hover:animate-bounce" aria-hidden="true" />
+                FREE 36-Hour Trial
+                <span className="bg-white/40 backdrop-blur-sm rounded-full px-5 py-2 text-base font-black border border-white/50">No Credit Card</span>
+              </motion.button>
+              <motion.button
                 onClick={openSupport}
                 className="px-12 py-6 bg-gradient-to-br from-white/15 via-white/10 to-white/5 backdrop-blur-2xl hover:from-white/25 hover:via-white/15 hover:to-white/10 border-2 border-white/40 hover:border-white/60 rounded-2xl font-black text-2xl transition-all duration-300 inline-flex items-center justify-center gap-3 text-white shadow-xl shadow-white/10 hover:shadow-2xl hover:shadow-white/20"
                 data-testid="button-contact-hero"
@@ -739,6 +752,16 @@ export default function MainStore() {
 
       {/* Trust Badges */}
       <TrustBadges />
+
+      {/* Trust Stats */}
+      <div className="py-8 bg-gradient-to-r from-gray-800/50 via-gray-900/50 to-gray-800/50 border-y border-white/10">
+        <div className="container mx-auto px-4">
+          <TrustStats />
+        </div>
+      </div>
+
+      {/* Downloader Code & Reddit Section */}
+      <DownloaderCodeSection />
 
       {/* Channel Logos */}
       <ChannelLogos />
@@ -902,10 +925,10 @@ export default function MainStore() {
               <span className="text-sm font-medium text-orange-300">SHOP ALL PRODUCTS</span>
             </div>
             <h2 className="text-4xl md:text-6xl font-bold mb-6">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Premium Products</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Pre-Configured Fire Sticks & IPTV Plans</span>
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Browse our complete collection of pre-configured streaming devices and Live TV plans
+              Trusted by 2,700+ customers. Recommended on Reddit (r/firetvstick, r/IPTV). Pre-loaded devices with 18,000+ channels, 100,000+ movies, and instant setup. No downloader codes needed - everything ready to stream!
             </p>
           </motion.div>
 
@@ -1767,7 +1790,7 @@ export default function MainStore() {
           <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75"></div>
           <Button className="rounded-full w-16 h-16 shadow-2xl bg-green-500 hover:bg-green-600 border-4 border-white/30 relative z-10 transition-all transform hover:scale-110" data-testid="button-chat">
             <MessageCircle className="w-7 h-7 text-white" />
-          </Button>
+        </Button>
         </div>
         <div className="absolute right-20 top-1/2 -translate-y-1/2 bg-white text-gray-900 px-4 py-2 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-sm font-semibold pointer-events-none">
           Chat with us!
@@ -1855,7 +1878,7 @@ export default function MainStore() {
       <ExitPopup />
 
       {/* Floating CTA */}
-      <FloatingCTA onContact={openSupport} />
+      <FloatingCTA onContact={openSupport} onFreeTrial={scrollToFreeTrial} />
 
       {/* Sticky Mobile CTA */}
       <StickyMobileCTA onContact={openSupport} />

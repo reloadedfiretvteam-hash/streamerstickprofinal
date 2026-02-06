@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ShoppingCart, ArrowUp, MessageCircle } from "lucide-react";
+import { ShoppingCart, ArrowUp, MessageCircle, Gift } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/lib/store";
 
@@ -26,6 +26,16 @@ export function StickyMobileCTA({ onContact }: StickyMobileCTAProps = {}) {
     document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const scrollToFreeTrial = () => {
+    const shopSection = document.getElementById('shop');
+    if (shopSection) {
+      shopSection.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        window.scrollBy({ top: 200, behavior: 'smooth' });
+      }, 500);
+    }
+  };
+
   return (
     <AnimatePresence>
       {visible && (
@@ -36,11 +46,20 @@ export function StickyMobileCTA({ onContact }: StickyMobileCTAProps = {}) {
           className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
         >
           <div className="bg-gray-900/98 backdrop-blur-xl border-t-2 border-white/20 px-4 py-4 safe-area-pb shadow-2xl">
-            <div className="flex gap-3">
+            <div className="flex gap-2">
+              <button
+                onClick={scrollToFreeTrial}
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 px-3 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30 transition-all"
+                data-testid="sticky-trial-button"
+                aria-label="Free 36-hour trial"
+                title="Free Trial"
+              >
+                <Gift className="w-5 h-5" />
+              </button>
               {onContact && (
                 <button
                   onClick={onContact}
-                  className="bg-white/20 hover:bg-white/30 border-2 border-white/30 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center shadow-lg transition-all"
+                  className="bg-white/20 hover:bg-white/30 border-2 border-white/30 text-white font-bold py-3 px-3 rounded-xl flex items-center justify-center shadow-lg transition-all"
                   data-testid="sticky-contact-button"
                   aria-label="Contact us"
                 >
