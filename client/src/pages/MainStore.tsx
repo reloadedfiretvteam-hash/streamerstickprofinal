@@ -20,7 +20,7 @@ import { FreeTrial } from "@/components/FreeTrial";
 import { TrustBadges, PaymentBadges, GuaranteeBadge } from "@/components/TrustBadges";
 import { TrustStats } from "@/components/SocialProof";
 import { ChannelLogos } from "@/components/ChannelLogos";
-import { DownloaderCodeSection } from "@/components/DownloaderCodeSection";
+import { IPTVMediaPlayersSection } from "@/components/IPTVMediaPlayersSection";
 import { SavingsCalculator } from "@/components/SavingsCalculator";
 import { StickyMobileCTA, ScrollToTopButton } from "@/components/StickyMobileCTA";
 import { SEOSchema, QASchema, ServiceSchema, ItemListSchema } from "@/components/SEOSchema";
@@ -621,8 +621,11 @@ export default function MainStore() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-[1.1] tracking-tight"
             >
-              <span className="block text-white drop-shadow-2xl mb-2">Save $1,000+</span>
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 via-orange-400 to-red-500 bg-[length:200%_100%] animate-gradient bg-clip-text mb-2">
+                Best IPTV Service 2025
+              </span>
+              <span className="block text-white drop-shadow-2xl mb-2">Save $1,000+</span>
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-500 to-blue-400 bg-[length:200%_100%] animate-gradient bg-clip-text mb-2">
                 Per Year vs Cable
               </span>
               <span className="block text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-white mt-4 font-bold">18,000+ Live Channels</span>
@@ -760,8 +763,8 @@ export default function MainStore() {
         </div>
       </div>
 
-      {/* Downloader Code & Reddit Section */}
-      <DownloaderCodeSection />
+      {/* IPTV Media Players Section */}
+      <IPTVMediaPlayersSection />
 
       {/* Channel Logos */}
       <ChannelLogos />

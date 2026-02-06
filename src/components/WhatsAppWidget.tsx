@@ -21,7 +21,7 @@ export default function WhatsAppWidget() {
                   <MessageCircle className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900">Chat with us</h3>
+                  <h3 className="font-bold text-gray-900">Live Chat</h3>
                   <p className="text-sm text-gray-600">We reply instantly</p>
                 </div>
               </div>
@@ -52,7 +52,7 @@ export default function WhatsAppWidget() {
               className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
             >
               <MessageCircle className="w-5 h-5" />
-              Start WhatsApp Chat
+              Start Live Chat
             </button>
 
             <p className="text-xs text-gray-500 text-center mt-3">
@@ -64,7 +64,7 @@ export default function WhatsAppWidget() {
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center justify-center group relative"
-          aria-label="WhatsApp Chat"
+          aria-label="Live Chat"
         >
           <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse" />
 
@@ -83,7 +83,7 @@ export default function WhatsAppWidget() {
         className="fixed bottom-6 left-6 z-40 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 text-sm font-semibold md:hidden"
       >
         <MessageCircle className="w-4 h-4" />
-        WhatsApp Us
+        Live Chat
       </a>
     </>
   );
