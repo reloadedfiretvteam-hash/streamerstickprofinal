@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { apiCall } from "@/lib/api";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, Play, X, Gift, ChevronRight, Heart } from "lucide-react";
@@ -549,7 +549,10 @@ export default function MainStore() {
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Link href="/iptv-services"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">IPTV</span></Link>
+            <Link href="/iptv-firestick"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Firestick</span></Link>
+            <Link href="/firestick-devices"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Devices</span></Link>
             <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToAbout} data-testid="nav-how-it-works" aria-label="Scroll to How It Works section">How It Works</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToShop} data-testid="nav-shop" aria-label="Scroll to Shop section">Shop</Button>
             <Button 
@@ -622,7 +625,7 @@ export default function MainStore() {
               className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-[1.1] tracking-tight"
             >
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 via-orange-400 to-red-500 bg-[length:200%_100%] animate-gradient bg-clip-text mb-2">
-                Best IPTV Service 2025
+                Best IPTV Service 2026
               </span>
               <span className="block text-white drop-shadow-2xl mb-2">Save $1,000+</span>
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-500 to-blue-400 bg-[length:200%_100%] animate-gradient bg-clip-text mb-2">
@@ -1803,7 +1806,7 @@ export default function MainStore() {
       {/* Footer */}
       <footer className="bg-gray-800/80 backdrop-blur-sm text-gray-200 border-t border-white/20">
         <div className="container mx-auto px-4 py-12">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div className="grid md:grid-cols-5 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Flame className="w-8 h-8 text-orange-500" />
@@ -1864,7 +1867,7 @@ export default function MainStore() {
           <div className="border-t border-gray-800 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
               <p className="text-gray-200">
-                © {new Date().getFullYear()} Inferno TV. All rights reserved.
+                © {new Date().getFullYear()} StreamStickPro. All rights reserved.
               </p>
               <div className="flex items-center gap-6">
                 <span className="text-green-400 font-semibold">🔒 Secure Payment</span>

@@ -2,8 +2,37 @@ import { Hono } from 'hono';
 import Stripe from 'stripe';
 import { getStorage } from '../helpers';
 import { sendCredentialsEmail, sendOrderConfirmation } from '../email';
+import { sendEmail } from '../email-providers';
 import { createCustomerSchema, updateCustomerSchema } from '../../shared/schema';
 import type { Env } from '../index';
+
+const WEBSITE_REMINDER_HTML = (name: string) => `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%); padding: 28px; text-align: center; border-radius: 10px 10px 0 0;">
+    <h1 style="color: white; margin: 0;">StreamStickPro</h1>
+    <p style="color: rgba(255,255,255,0.95); margin: 8px 0 0 0;">We've updated our website for you</p>
+  </div>
+  <div style="background: #f9fafb; padding: 28px; border-radius: 0 0 10px 10px;">
+    <h2 style="color: #1a1a1a; margin-top: 0;">Hi ${name}!</h2>
+    <p>We wanted to remind you that <strong>StreamStickPro</strong> is here with a refreshed experience:</p>
+    <ul style="padding-left: 20px;">
+      <li><strong>New guides</strong> – Best IPTV for Firestick, devices, and more</li>
+      <li><strong>18,000+ live channels</strong> – Sports, movies, and TV</li>
+      <li><strong>Pre-configured Fire Sticks</strong> – Ready in about 10 minutes</li>
+      <li><strong>24/7 support</strong> – We're here when you need us</li>
+    </ul>
+    <p>Come see what's new and grab a plan or device:</p>
+    <div style="text-align: center; margin: 24px 0;">
+      <a href="https://streamstickpro.com" style="background: #ea580c; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Visit StreamStickPro →</a>
+    </div>
+    <p style="color: #666; font-size: 14px;">Thanks for being part of StreamStickPro.<br><strong>StreamStickPro Team</strong></p>
+  </div>
+  <p style="text-align: center; margin-top: 16px; color: #999; font-size: 12px;">You received this because you're a customer or signed up for a trial at StreamStickPro.</p>
+</body>
+</html>`;
 
 export function createAdminRoutes() {
   const app = new Hono<{ Bindings: Env }>();
@@ -668,6 +697,94 @@ export function createAdminRoutes() {
     } catch (error: any) {
       console.error("Error fetching comprehensive customer orders:", error);
       return c.json({ error: "Failed to fetch customer orders" }, 500);
+    }
+  });
+
+  // Send website-update reminder to all customers and free-trial users
+  app.post('/broadcast-email', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+
+      const emails = new Set<string>();
+
+      // From customers
+      const customers = await storage.getAllCustomers();
+      customers.forEach((cust: { email?: string }) => {
+        if (cust.email && cust.email.includes('@')) emails.add(cust.email.trim().toLowerCase());
+      });
+
+      // From orders (paid + trials)
+      const orders = await storage.getAllOrders();
+      orders.forEach((o: { customerEmail?: string }) => {
+        if (o.customerEmail && o.customerEmail.includes('@')) emails.add(o.customerEmail.trim().toLowerCase());
+      });
+
+      // From email_campaigns (trials / campaigns)
+      const { data: campaigns } = await supabase.from('email_campaigns').select('customer_email');
+      (campaigns || []).forEach((row: { customer_email?: string }) => {
+        if (row.customer_email && row.customer_email.includes('@')) emails.add(row.customer_email.trim().toLowerCase());
+      });
+
+      const list = Array.from(emails);
+      if (list.length === 0) {
+        return c.json({ success: true, sent: 0, failed: 0, total: 0, message: 'No recipient emails found.' });
+      }
+
+      const subject = "We've updated StreamStickPro – come see what's new";
+      let sent = 0;
+      let failed = 0;
+      const errors: string[] = [];
+
+      for (const to of list) {
+        const name = (customers.find((cust: { email?: string }) => cust.email?.toLowerCase() === to) as { fullName?: string } | undefined)?.fullName
+          || (orders.find((o: { customerEmail?: string }) => o.customerEmail?.toLowerCase() === to) as { customerName?: string } | undefined)?.customerName
+          || 'Valued Customer';
+        const result = await sendEmail({
+          to,
+          subject,
+          html: WEBSITE_REMINDER_HTML(name || 'Valued Customer'),
+        }, c.env);
+        if (result.success) sent++; else { failed++; errors.push(`${to}: ${result.error || 'unknown'}`); }
+        await new Promise(r => setTimeout(r, 250));
+      }
+
+      return c.json({
+        success: true,
+        sent,
+        failed,
+        total: list.length,
+        errors: errors.slice(0, 20),
+        message: `Website reminder sent to ${sent} of ${list.length} recipients.`,
+      });
+    } catch (error: any) {
+      console.error("Broadcast email error:", error);
+      return c.json({ error: "Failed to send broadcast", details: error.message }, 500);
+    }
+  });
+
+  app.get('/broadcast-email/preview', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const emails = new Set<string>();
+      const customers = await storage.getAllCustomers();
+      customers.forEach((cust: { email?: string }) => {
+        if (cust.email && cust.email.includes('@')) emails.add(cust.email.trim().toLowerCase());
+      });
+      const orders = await storage.getAllOrders();
+      orders.forEach((o: { customerEmail?: string }) => {
+        if (o.customerEmail && o.customerEmail.includes('@')) emails.add(o.customerEmail.trim().toLowerCase());
+      });
+      const { data: campaigns } = await supabase.from('email_campaigns').select('customer_email');
+      (campaigns || []).forEach((row: { customer_email?: string }) => {
+        if (row.customer_email && row.customer_email.includes('@')) emails.add(row.customer_email.trim().toLowerCase());
+      });
+      return c.json({ count: Array.from(emails).length });
+    } catch (error: any) {
+      return c.json({ error: error.message }, 500);
     }
   });
 

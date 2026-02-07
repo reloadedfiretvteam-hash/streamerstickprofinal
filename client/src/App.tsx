@@ -27,6 +27,11 @@ const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const TermsOfService = lazy(() => import("@/pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
 const RefundPolicy = lazy(() => import("@/pages/RefundPolicy"));
+const IptvServices = lazy(() => import("@/pages/IptvServices"));
+const IptvFirestick = lazy(() => import("@/pages/IptvFirestick"));
+const JailbrokenFireSticks = lazy(() => import("@/pages/JailbrokenFireSticks"));
+const FirestickDevices = lazy(() => import("@/pages/FirestickDevices"));
+const BestIptvFirestick = lazy(() => import("@/pages/BestIptvFirestick"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 // Loading fallback component
@@ -83,6 +88,11 @@ function Router() {
         <Route path="/terms" component={TermsOfService} />
         <Route path="/privacy" component={PrivacyPolicy} />
         <Route path="/refund" component={RefundPolicy} />
+        <Route path="/iptv-services" component={IptvServices} />
+        <Route path="/iptv-firestick" component={IptvFirestick} />
+        <Route path="/jailbroken-fire-sticks" component={JailbrokenFireSticks} />
+        <Route path="/firestick-devices" component={FirestickDevices} />
+        <Route path="/best-iptv-firestick" component={BestIptvFirestick} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

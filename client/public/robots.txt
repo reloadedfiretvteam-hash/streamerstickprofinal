@@ -21,7 +21,12 @@ User-agent: Googlebot
 Allow: /
 Allow: /blog
 Allow: /blog/*
-Crawl-delay: 0.5
+Allow: /iptv-services
+Allow: /iptv-firestick
+Allow: /jailbroken-fire-sticks
+Allow: /firestick-devices
+Allow: /best-iptv-firestick
+Allow: /shop
 
 User-agent: Googlebot-Image
 Allow: /
@@ -34,7 +39,12 @@ Allow: /*.webp
 User-agent: Bingbot
 Allow: /
 Allow: /blog
-Crawl-delay: 1
+Allow: /iptv-services
+Allow: /iptv-firestick
+Allow: /jailbroken-fire-sticks
+Allow: /firestick-devices
+Allow: /best-iptv-firestick
+Allow: /shop
 
 # AI Search Crawlers
 User-agent: GPTBot

@@ -383,6 +383,10 @@ export default function AdminPanel() {
   const [pushing, setPushing] = useState(false);
   const [pushResult, setPushResult] = useState<{ success: boolean; message: string; commitUrl?: string; filesCount?: number } | null>(null);
 
+  const [broadcastPreviewCount, setBroadcastPreviewCount] = useState<number | null>(null);
+  const [broadcastLoading, setBroadcastLoading] = useState(false);
+  const [broadcastResult, setBroadcastResult] = useState<{ sent: number; failed: number; total: number; message: string; errors?: string[] } | null>(null);
+
   const [envStatus, setEnvStatus] = useState<{
     hasStripeKey?: boolean;
     hasWebhookSecret?: boolean;
@@ -4242,6 +4246,79 @@ export default function AdminPanel() {
                         Refresh Status
                       </Button>
                     </div>
+                  </CardContent>
+                </Card>
+
+                {/* Email Broadcast - Website reminder to all customers & trials */}
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Mail className="w-5 h-5 text-orange-400" />
+                      Email Broadcast
+                    </CardTitle>
+                    <CardDescription className="text-gray-400">
+                      Send a website-update reminder to all customers and free-trial users
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {broadcastResult && (
+                      <div className="p-3 rounded-lg bg-gray-700/50 text-sm text-gray-200">
+                        <p>{broadcastResult.message}</p>
+                        {broadcastResult.errors && broadcastResult.errors.length > 0 && (
+                          <p className="mt-1 text-red-300 text-xs">First errors: {broadcastResult.errors.slice(0, 3).join('; ')}</p>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-gray-600 text-gray-300"
+                        onClick={async () => {
+                          try {
+                            const r = await authFetch('/api/admin/broadcast-email/preview');
+                            const d = await r.json();
+                            setBroadcastPreviewCount(d.count ?? 0);
+                            showToast(`Recipients: ${d.count ?? 0}`, 'info');
+                          } catch {
+                            showToast('Failed to load recipient count', 'error');
+                          }
+                        }}
+                      >
+                        Preview count
+                      </Button>
+                      {broadcastPreviewCount !== null && (
+                        <span className="text-gray-400 text-sm self-center">{broadcastPreviewCount} recipients</span>
+                      )}
+                    </div>
+                    <Button
+                      className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                      disabled={broadcastLoading}
+                      onClick={async () => {
+                        if (!confirm('Send website update reminder to ALL customers and free-trial users? This may take a minute.')) return;
+                        setBroadcastLoading(true);
+                        setBroadcastResult(null);
+                        try {
+                          const r = await authFetch('/api/admin/broadcast-email', { method: 'POST' });
+                          const d = await r.json();
+                          if (d.error) {
+                            showToast(d.error, 'error');
+                            setBroadcastResult({ sent: 0, failed: d.total ?? 0, total: d.total ?? 0, message: d.details || d.error, errors: d.errors });
+                          } else {
+                            setBroadcastResult({ sent: d.sent, failed: d.failed, total: d.total, message: d.message, errors: d.errors });
+                            showToast(d.message, 'success');
+                          }
+                        } catch (e) {
+                          showToast('Failed to send broadcast', 'error');
+                          setBroadcastResult({ sent: 0, failed: 0, total: 0, message: 'Request failed.' });
+                        } finally {
+                          setBroadcastLoading(false);
+                        }
+                      }}
+                    >
+                      {broadcastLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
+                      Send website reminder to all
+                    </Button>
                   </CardContent>
                 </Card>
 

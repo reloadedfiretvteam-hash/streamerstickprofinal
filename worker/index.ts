@@ -175,6 +175,23 @@ app.get('/cron/email-campaigns', async (c) => {
   }
 });
 
+// SEO 301 redirects (old URLs → pillar pages)
+const SEO_REDIRECTS: Record<string, string> = {
+  '/guides': '/iptv-services',
+  '/guide': '/iptv-services',
+  '/firestick': '/iptv-firestick',
+  '/jailbreak': '/jailbroken-fire-sticks',
+  '/devices': '/firestick-devices',
+};
+app.get('*', async (c, next) => {
+  const path = new URL(c.req.url).pathname;
+  const target = SEO_REDIRECTS[path];
+  if (target) {
+    return c.redirect(target, 301);
+  }
+  return next();
+});
+
 // Sitemap route - must be before catch-all
 app.get('/sitemap.xml', async (c) => {
   try {
@@ -189,6 +206,15 @@ app.get('/sitemap.xml', async (c) => {
       { url: '/', priority: '1.0', changefreq: 'daily' },
       { url: '/shop', priority: '0.9', changefreq: 'daily' },
       { url: '/blog', priority: '0.9', changefreq: 'daily' },
+      { url: '/free-trial', priority: '0.9', changefreq: 'weekly' },
+      { url: '/iptv-services', priority: '0.9', changefreq: 'weekly' },
+      { url: '/iptv-firestick', priority: '0.9', changefreq: 'weekly' },
+      { url: '/jailbroken-fire-sticks', priority: '0.9', changefreq: 'weekly' },
+      { url: '/firestick-devices', priority: '0.9', changefreq: 'weekly' },
+      { url: '/best-iptv-firestick', priority: '0.9', changefreq: 'weekly' },
+      { url: '/terms', priority: '0.5', changefreq: 'yearly' },
+      { url: '/privacy', priority: '0.5', changefreq: 'yearly' },
+      { url: '/refund', priority: '0.5', changefreq: 'yearly' },
       { url: '/checkout', priority: '0.7', changefreq: 'weekly' },
     ];
 

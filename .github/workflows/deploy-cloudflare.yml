@@ -62,3 +62,12 @@ jobs:
           VITE_SECURE_HOSTS: secure.streamstickpro.com
           VITE_STORAGE_BUCKET_NAME: imiges
           SITE_URL: https://streamstickpro.com
+
+      - name: Warm sitemap and notify search engines
+        run: |
+          SITE="https://streamstickpro.com"
+          SITEMAP="${SITE}/sitemap.xml"
+          curl -sSf -o /dev/null "${SITEMAP}" || true
+          curl -sSf -o /dev/null "https://www.bing.com/ping?sitemap=${SITEMAP}" || true
+          curl -sSf -o /dev/null "https://www.google.com/ping?sitemap=${SITEMAP}" || true
+        continue-on-error: true
