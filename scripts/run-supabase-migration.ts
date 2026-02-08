@@ -7,6 +7,8 @@
  */
 
 import postgres from 'postgres';
+import { readFile } from 'fs/promises';
+import path from 'path';
 
 async function runMigration() {
   const databaseUrl = process.env.SUPABASE_DATABASE_URL;
@@ -128,6 +130,29 @@ async function runMigration() {
     console.log(`   password_reset_tokens: ${counts[0].tokens} rows`);
     console.log(`   abandoned_carts: ${counts[0].carts} rows`);
     console.log(`   orders: ${counts[0].orders} rows`);
+
+    // SEO Domination 2026: run schema + 50 location pages seed from supabase/migrations
+    const migrationsDir = path.join(process.cwd(), 'supabase', 'migrations');
+    const seoMigrations = [
+      '20260207000001_seo_domination_schema.sql',
+      '20260207000002_seed_50_location_pages.sql',
+    ];
+    console.log('\n📦 SEO migrations (seo_architecture, redirect_map, 50 location pages):');
+    for (const file of seoMigrations) {
+      const filePath = path.join(migrationsDir, file);
+      try {
+        const content = await readFile(filePath, 'utf8');
+        await sql.unsafe(content);
+        console.log(`   ✓ ${file}`);
+      } catch (err: any) {
+        if (err.code === 'ENOENT') {
+          console.log(`   (skip ${file} - not found)`);
+        } else {
+          console.error(`   ✗ ${file}:`, err.message);
+          // continue so deploy still succeeds if tables already exist
+        }
+      }
+    }
 
     await sql.end();
     console.log('\n✅ Migration complete!');

@@ -61,10 +61,11 @@ async function buildProject() {
   });
 
   console.log("Creating _routes.json for Cloudflare Pages...");
+  // Worker must receive: API, redirects, sitemap, location pages (/l/*), and SPA fallback. Use include /* so redirects + sitemap.xml + /l/* hit worker.
   const routesJson = {
     version: 1,
-    include: ["/api/*", "/blog", "/blog/*", "/checkout", "/success", "/admin", "/admin/*", "/shadow-services"],
-    exclude: ["/assets/*", "/robots.txt", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.svg", "/*.ico", "/*.woff", "/*.woff2", "/BingSiteAuth.xml"]
+    include: ["/*"],
+    exclude: ["/assets/*", "/robots.txt", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif", "/*.webp", "/*.svg", "/*.ico", "/*.woff", "/*.woff2", "/*.ttf", "/BingSiteAuth.xml", "/googledf2a7b91b7b9494f.html", "/59748a36d4494392a7d863abcf2d3b52.txt", "/696320d78e6e55d1584eca38a9d864b5.txt"]
   };
   await writeFile("dist/_routes.json", JSON.stringify(routesJson, null, 2));
 

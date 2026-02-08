@@ -3,9 +3,10 @@
 ## Pre-deploy
 
 1. [ ] Run Supabase migration: `20260207000001_seo_domination_schema.sql` in SQL Editor.
-2. [ ] Optional: Run `docs/seo-domination-2026/seed-50-location-pages.sql` and `eeat-experts-seed.sql`.
+2. [ ] Run seed: `20260207000002_seed_50_location_pages.sql` (in migrations; or use docs seed). Optional: `eeat-experts-seed.sql`.
 3. [ ] Branch: deploy only from **clean-main**.
-4. [ ] Secrets in Cloudflare: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY, Stripe, etc. (see SECRETS_CHECKLIST.md).
+4. [ ] **All pages imported in App.tsx must be committed** (e.g. `client/src/pages/IptvMediaPlayers.tsx`). Missing files cause Cloudflare build ENOENT.
+5. [ ] Secrets in Cloudflare: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY, Stripe, etc. (see SECRETS_CHECKLIST.md).
 
 ## Deploy (GitHub Actions)
 
