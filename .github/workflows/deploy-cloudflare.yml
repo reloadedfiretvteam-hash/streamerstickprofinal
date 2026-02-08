@@ -7,8 +7,12 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches:
+      - main
       - clean-main
   workflow_dispatch:
+  schedule:
+    # Run daily at 2 AM UTC so seed runs even without a push (e.g. after you add/fix secrets)
+    - cron: '0 2 * * *'
 
 jobs:
   build-and-deploy:
@@ -38,15 +42,49 @@ jobs:
         continue-on-error: true
 
       - name: Seed 25K location pages (thousands of URLs for sitemap)
+        id: seed25k
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SERVICE_ROLL_KEY: ${{ secrets.SUPABASE_SERVICE_ROLL_KEY }}
         run: |
-          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_KEY" ]; then
-            echo "::warning:: 25K seed SKIPPED. Add GitHub Secrets (repo Settings → Secrets → Actions): VITE_SUPABASE_URL, SUPABASE_SERVICE_KEY. Then re-run this workflow or run locally: npx tsx scripts/seed-25k-location-pages.ts"
+          # Seed needs Supabase URL + service_role key (not anon). Accept SUPABASE_SERVICE_KEY, SUPABASE_SERVICE_ROLE_KEY, or typo SUPABASE_SERVICE_ROLL_KEY.
+          if [ -z "$SUPABASE_SERVICE_KEY" ]; then export SUPABASE_SERVICE_KEY="$SUPABASE_SERVICE_ROLE_KEY"; fi
+          if [ -z "$SUPABASE_SERVICE_KEY" ]; then export SUPABASE_SERVICE_KEY="$SUPABASE_SERVICE_ROLL_KEY"; fi
+          if [ -z "$VITE_SUPABASE_URL" ]; then
+            echo "::warning:: 25K seed SKIPPED. Add GitHub Secret VITE_SUPABASE_URL (Supabase project URL)."
+            echo "seed_skipped=1" >> $GITHUB_OUTPUT
+            echo "seed_message=25K seed SKIPPED (missing VITE_SUPABASE_URL)." >> $GITHUB_OUTPUT
             exit 0
           fi
+          if [ -z "$SUPABASE_SERVICE_KEY" ]; then
+            echo "::warning:: 25K seed SKIPPED. Add GitHub Secret SUPABASE_SERVICE_KEY, SUPABASE_SERVICE_ROLE_KEY, or SUPABASE_SERVICE_ROLL_KEY (Supabase service_role key, not anon key)."
+            echo "seed_skipped=1" >> $GITHUB_OUTPUT
+            echo "seed_message=25K seed SKIPPED (missing service_role key). Add one of the secrets above (Dashboard → Project Settings → API → service_role)." >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "seed_skipped=0" >> $GITHUB_OUTPUT
+          echo "Running 25K seed (Supabase URL from VITE_SUPABASE_URL)..."
           npx tsx scripts/seed-25k-location-pages.ts
+          echo "seed_message=25K seed finished. Check log above for 'Total inserted' and 'Total rows in seo_architecture'." >> $GITHUB_OUTPUT
+          echo "Seed step finished. See above for 'Total inserted' and 'Total rows in seo_architecture'."
+
+      - name: Report 25K seed status (SEO URLs)
+        if: always()
+        run: |
+          echo "## 25K location pages seed" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.seed25k.outputs.seed_skipped }}" = "1" ]; then
+            echo "⚠️ **SKIPPED** – ${{ steps.seed25k.outputs.seed_message }}" >> $GITHUB_STEP_SUMMARY
+            echo "To get **thousands of URLs** in your sitemap, add these GitHub Secrets and re-run the workflow:" >> $GITHUB_STEP_SUMMARY
+            echo "- \`VITE_SUPABASE_URL\` (Supabase project URL)" >> $GITHUB_STEP_SUMMARY
+            echo "- \`SUPABASE_SERVICE_KEY\` or \`SUPABASE_SERVICE_ROLE_KEY\` (Supabase **service_role** key, not anon)" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.seed25k.outputs.seed_skipped }}" = "0" ]; then
+            echo "✅ **RUN** – ${{ steps.seed25k.outputs.seed_message }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Step did not complete** (check logs above)." >> $GITHUB_STEP_SUMMARY
+          fi
       
       - name: Build for Cloudflare Workers
         run: npx tsx script/build-worker.ts
@@ -60,6 +98,8 @@ jobs:
           STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
           SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SERVICE_ROLL_KEY: ${{ secrets.SUPABASE_SERVICE_ROLL_KEY }}
           SUPABASE_DATABASE_URL: ${{ secrets.DATABASE_URL }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
