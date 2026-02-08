@@ -167,6 +167,16 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
           ${cleanContent}
         </div>
         
+        <div class="mt-8 p-4 bg-gray-800/50 rounded-xl border border-gray-700">
+          <h3 class="text-lg font-bold mb-2">Related guides</h3>
+          <p class="text-gray-400 text-sm mb-3">Explore more from StreamStickPro:</p>
+          <ul class="flex flex-wrap gap-3">
+            <li><a href="/iptv-services" class="text-orange-400 hover:underline">IPTV Services</a></li>
+            <li><a href="/jailbroken-fire-sticks" class="text-orange-400 hover:underline">Jailbroken Fire Sticks</a></li>
+            <li><a href="/iptv-firestick" class="text-orange-400 hover:underline">IPTV for Fire Stick</a></li>
+            <li><a href="/shop" class="text-orange-400 hover:underline">Shop</a></li>
+          </ul>
+        </div>
         <div class="mt-12 p-6 bg-gradient-to-r from-orange-600/20 to-red-600/20 rounded-xl border border-orange-500/30">
           <h3 class="text-xl font-bold mb-2">Ready to Cut the Cord?</h3>
           <p class="text-gray-300 mb-4">Get streaming in 10 minutes with our pre-configured Fire Sticks and IPTV subscriptions.</p>
@@ -180,8 +190,11 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
     <footer class="bg-gray-900 border-t border-white/10 py-8 mt-12">
       <div class="max-w-6xl mx-auto px-4 text-center text-gray-400">
         <p>&copy; 2025 StreamStickPro. All rights reserved.</p>
-        <div class="mt-4 flex justify-center gap-6">
-          <a href="/?section=shop" class="hover:text-orange-400">Shop</a>
+        <div class="mt-4 flex flex-wrap justify-center gap-4">
+          <a href="/" class="hover:text-orange-400">Home</a>
+          <a href="/shop" class="hover:text-orange-400">Shop</a>
+          <a href="/iptv-services" class="hover:text-orange-400">IPTV Services</a>
+          <a href="/jailbroken-fire-sticks" class="hover:text-orange-400">Jailbroken Fire Sticks</a>
           <a href="/blog" class="hover:text-orange-400">Blog</a>
         </div>
       </div>
