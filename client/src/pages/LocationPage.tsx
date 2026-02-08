@@ -77,13 +77,48 @@ export default function LocationPage() {
 
   useEffect(() => {
     if (!page) return;
-    document.title = (page.title || page.h1 || "IPTV & Jailbroken Fire Stick") + " | StreamStickPro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta && page.meta_description) meta.setAttribute("content", page.meta_description);
+    const title = (page.title || page.h1 || "IPTV & Jailbroken Fire Stick") + " | StreamStickPro";
+    const desc = (page.meta_description || page.p1_snippet || "").substring(0, 160);
+    const canonicalUrl = `${SITE_URL}/l/${country}/${pageType}/${slug}`;
+    const ogImage = `${SITE_URL}/opengraph.jpg`;
+
+    document.title = title;
+
+    const setMeta = (name: string, content: string, isProperty = false) => {
+      if (!content) return;
+      const attr = isProperty ? "property" : "name";
+      let el = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement;
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(attr, name);
+        document.head.appendChild(el);
+      }
+      el.content = content;
+    };
+
+    setMeta("description", desc);
+    setMeta("og:title", title, true);
+    setMeta("og:description", desc, true);
+    setMeta("og:url", canonicalUrl, true);
+    setMeta("og:type", "website", true);
+    setMeta("og:image", ogImage, true);
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", title);
+    setMeta("twitter:description", desc);
+    setMeta("twitter:image", ogImage);
+
+    let linkCanonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!linkCanonical) {
+      linkCanonical = document.createElement("link");
+      linkCanonical.rel = "canonical";
+      document.head.appendChild(linkCanonical);
+    }
+    linkCanonical.href = canonicalUrl;
+
     return () => {
       document.title = "StreamStickPro - Get Fully Loaded Streaming in 10 Minutes";
     };
-  }, [page]);
+  }, [page, country, pageType, slug]);
 
   if (loading) {
     return (

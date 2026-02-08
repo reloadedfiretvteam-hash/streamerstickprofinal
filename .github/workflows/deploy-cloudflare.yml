@@ -50,28 +50,37 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_SERVICE_ROLL_KEY: ${{ secrets.SUPABASE_SERVICE_ROLL_KEY }}
+          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           set -e
-          # FIX: Skip only if ALL key secrets are empty. Script reads SERVICE_KEY | ROLE_KEY | ROLL_KEY from env.
           HAS_URL="$([ -n "$VITE_SUPABASE_URL" ] && echo 1 || echo 0)"
           HAS_KEY="$([ -n "$SUPABASE_SERVICE_KEY" ] || [ -n "$SUPABASE_SERVICE_ROLE_KEY" ] || [ -n "$SUPABASE_SERVICE_ROLL_KEY" ] && echo 1 || echo 0)"
-          echo "Seed env check: VITE_SUPABASE_URL=${HAS_URL} (1=set), service_key_any=${HAS_KEY} (1=at least one set)"
-          if [ "$HAS_URL" = "0" ]; then
-            echo "::warning:: 25K seed SKIPPED. Add GitHub Secret VITE_SUPABASE_URL (Supabase project URL)."
+          HAS_DB_URL="$([ -n "$SUPABASE_DATABASE_URL" ] || [ -n "$DATABASE_URL" ] && echo 1 || echo 0)"
+          echo "Seed env: VITE_SUPABASE_URL=${HAS_URL}, service_key_any=${HAS_KEY}, DATABASE_URL_any=${HAS_DB_URL}"
+          if [ "$HAS_URL" = "0" ] && [ "$HAS_DB_URL" = "0" ]; then
+            echo "::warning:: 25K seed SKIPPED. Add VITE_SUPABASE_URL or SUPABASE_DATABASE_URL/DATABASE_URL."
             echo "seed_skipped=1" >> $GITHUB_OUTPUT
-            echo "seed_message=25K seed SKIPPED (missing VITE_SUPABASE_URL)." >> $GITHUB_OUTPUT
+            echo "seed_message=25K seed SKIPPED (missing URL and DATABASE_URL)." >> $GITHUB_OUTPUT
             exit 0
           fi
-          if [ "$HAS_KEY" = "0" ]; then
-            echo "::warning:: 25K seed SKIPPED. Add one of: SUPABASE_SERVICE_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_SERVICE_ROLL_KEY (service_role key, not anon)."
-            echo "seed_skipped=1" >> $GITHUB_OUTPUT
-            echo "seed_message=25K seed SKIPPED (missing service_role key)." >> $GITHUB_OUTPUT
+          if [ "$HAS_KEY" = "1" ] && [ "$HAS_URL" = "1" ]; then
+            echo "seed_skipped=0" >> $GITHUB_OUTPUT
+            echo "Running 25K seed (Supabase client)..."
+            npx tsx scripts/seed-25k-location-pages.ts
+            echo "seed_message=25K seed finished (Supabase client)." >> $GITHUB_OUTPUT
             exit 0
           fi
-          echo "seed_skipped=0" >> $GITHUB_OUTPUT
-          echo "Running 25K seed..."
-          npx tsx scripts/seed-25k-location-pages.ts
-          echo "seed_message=25K seed finished. See log for Total inserted and Total rows." >> $GITHUB_OUTPUT
+          if [ "$HAS_DB_URL" = "1" ]; then
+            echo "seed_skipped=0" >> $GITHUB_OUTPUT
+            echo "Running 25K seed (DATABASE_URL)..."
+            npx tsx scripts/seed-25k-via-database-url.ts
+            echo "seed_message=25K seed finished (DATABASE_URL)." >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "::warning:: 25K seed SKIPPED. Add SUPABASE_SERVICE_KEY (and VITE_SUPABASE_URL) or SUPABASE_DATABASE_URL/DATABASE_URL."
+          echo "seed_skipped=1" >> $GITHUB_OUTPUT
+          echo "seed_message=25K seed SKIPPED (need service key + URL or DATABASE_URL)." >> $GITHUB_OUTPUT
 
       - name: Report 25K seed status (SEO URLs)
         if: always()
@@ -79,9 +88,8 @@ jobs:
           echo "## 25K location pages seed" >> $GITHUB_STEP_SUMMARY
           if [ "${{ steps.seed25k.outputs.seed_skipped }}" = "1" ]; then
             echo "⚠️ **SKIPPED** – ${{ steps.seed25k.outputs.seed_message }}" >> $GITHUB_STEP_SUMMARY
-            echo "To get **thousands of URLs** in your sitemap, add these GitHub Secrets and re-run the workflow:" >> $GITHUB_STEP_SUMMARY
-            echo "- \`VITE_SUPABASE_URL\` (Supabase project URL)" >> $GITHUB_STEP_SUMMARY
-            echo "- \`SUPABASE_SERVICE_KEY\` or \`SUPABASE_SERVICE_ROLE_KEY\` (Supabase **service_role** key, not anon)" >> $GITHUB_STEP_SUMMARY
+            echo "To get **thousands of URLs** in your sitemap, add GitHub Secrets and re-run:" >> $GITHUB_STEP_SUMMARY
+            echo "- \`VITE_SUPABASE_URL\` + \`SUPABASE_SERVICE_KEY\` (or \`SUPABASE_SERVICE_ROLE_KEY\`), **or** \`SUPABASE_DATABASE_URL\` / \`DATABASE_URL\` (same as migrations)" >> $GITHUB_STEP_SUMMARY
           elif [ "${{ steps.seed25k.outputs.seed_skipped }}" = "0" ]; then
             echo "✅ **RUN** – ${{ steps.seed25k.outputs.seed_message }}" >> $GITHUB_STEP_SUMMARY
           else

@@ -457,31 +457,10 @@ function buildRows(locations: LocationRow[]): any[] {
 
 const BATCH = 200;
 
-async function main() {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    console.error("❌ Missing env. Set VITE_SUPABASE_URL (or SUPABASE_URL) and SUPABASE_SERVICE_KEY.");
-    console.error("   From Supabase: Dashboard → Project Settings → API (URL + service_role key).");
-    console.error("   Local: export VITE_SUPABASE_URL=... SUPABASE_SERVICE_KEY=... then run this script.");
-    process.exit(1);
-  }
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-  const redactedUrl = SUPABASE_URL.replace(/^https?:\/\/([^.]+\.)?/, "https://***.");
-  console.log("📍 Supabase project:", redactedUrl);
-
-  const { count: existingCount, error: countError } = await supabase
-    .from("seo_architecture")
-    .select("id", { count: "exact", head: true });
-  if (countError) {
-    console.error("❌ Table seo_architecture missing or not readable:", countError.message);
-    console.error("   Run migrations first (Deploy workflow runs them, or: npx tsx scripts/run-supabase-migration.ts with DATABASE_URL).");
-    process.exit(1);
-  }
-  console.log("   Existing rows in seo_architecture before seed:", existingCount ?? 0);
-
+/** Returns full array of rows to upsert (for use by seed-via-database-url or tests). */
+export function getSeedRows(): any[] {
   const locations = buildAllLocations();
-  const baseRows = locations.length * 3;
   const allRows = buildRows(locations);
-  // Add EXTRA_ROWS to hit exactly TARGET_NEW_ROWS (50 existing + 24,950 = 25,000 total)
   const faq = [
     { question: "What is IPTV?", answer: "IPTV delivers live TV over the internet. StreamStickPro offers 18,000+ channels for Fire Stick and Google TV." },
     { question: "Do you serve my area?", answer: "StreamStickPro serves the USA, Canada, and UK." },
@@ -510,6 +489,32 @@ async function main() {
       published: true,
     });
   }
+  return allRows;
+}
+
+async function main() {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    console.error("❌ Missing env. Set VITE_SUPABASE_URL (or SUPABASE_URL) and SUPABASE_SERVICE_KEY.");
+    console.error("   From Supabase: Dashboard → Project Settings → API (URL + service_role key).");
+    console.error("   Local: export VITE_SUPABASE_URL=... SUPABASE_SERVICE_KEY=... then run this script.");
+    process.exit(1);
+  }
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+  const redactedUrl = SUPABASE_URL.replace(/^https?:\/\/([^.]+\.)?/, "https://***.");
+  console.log("📍 Supabase project:", redactedUrl);
+
+  const { count: existingCount, error: countError } = await supabase
+    .from("seo_architecture")
+    .select("id", { count: "exact", head: true });
+  if (countError) {
+    console.error("❌ Table seo_architecture missing or not readable:", countError.message);
+    console.error("   Run migrations first (Deploy workflow runs them, or: npx tsx scripts/run-supabase-migration.ts with DATABASE_URL).");
+    process.exit(1);
+  }
+  console.log("   Existing rows in seo_architecture before seed:", existingCount ?? 0);
+
+  const locations = buildAllLocations();
+  const allRows = getSeedRows();
   const totalRows = allRows.length;
   console.log(`📍 Built ${locations.length} locations + ${EXTRA_ROWS} extra → ${totalRows} rows (target ${TARGET_NEW_ROWS} new)`);
   let inserted = 0;
@@ -545,7 +550,6 @@ async function main() {
   }
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+// Only run main when this file is executed directly (not when imported by seed-25k-via-database-url)
+const isEntry = process.argv[1]?.replace(/\\/g, "/").includes("seed-25k-location-pages");
+if (isEntry) main().catch((e) => { console.error(e); process.exit(1); });
