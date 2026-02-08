@@ -23,12 +23,20 @@ export default function Success() {
 
   useEffect(() => {
     document.title = "Order Confirmed | StreamStickPro";
-    
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute("content", "Your order is confirmed. StreamStickPro—Fire Sticks and IPTV with 18,000+ channels. Check your email for next steps.");
+    const robots = document.querySelector('meta[name="robots"]');
+    if (robots) robots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      if (robots) robots.setAttribute("content", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
+    };
+  }, []);
+
+  useEffect(() => {
     const params = new URLSearchParams(search);
     const sessionId = params.get("session_id");
     
     if (sessionId) {
-      // Fetch order details
       fetch(`/api/checkout/session/${sessionId}`)
         .then(res => res.json())
         .then(data => {

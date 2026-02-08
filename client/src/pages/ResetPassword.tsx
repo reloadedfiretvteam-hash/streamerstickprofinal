@@ -26,6 +26,17 @@ export default function ResetPassword() {
   const token = new URLSearchParams(search).get("token");
 
   useEffect(() => {
+    document.title = "Reset Password | StreamStickPro";
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute("content", "Set a new password for your StreamStickPro account.");
+    const robots = document.querySelector('meta[name="robots"]');
+    if (robots) robots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      if (robots) robots.setAttribute("content", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
+    };
+  }, []);
+
+  useEffect(() => {
     if (!token) {
       setIsVerifying(false);
       return;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { apiCall } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,17 @@ export default function CustomerLogin() {
     email: "",
     fullName: "",
   });
+
+  useEffect(() => {
+    document.title = "Customer Login | StreamStickPro";
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute("content", "Log in to your StreamStickPro account to view orders and IPTV credentials.");
+    const robots = document.querySelector('meta[name="robots"]');
+    if (robots) robots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      if (robots) robots.setAttribute("content", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
+    };
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

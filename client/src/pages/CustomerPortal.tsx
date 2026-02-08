@@ -93,6 +93,17 @@ export default function CustomerPortal() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
+    document.title = "My Account | StreamStickPro";
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute("content", "Manage your StreamStickPro account, orders, and IPTV credentials.");
+    const robots = document.querySelector('meta[name="robots"]');
+    if (robots) robots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      if (robots) robots.setAttribute("content", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
+    };
+  }, []);
+
+  useEffect(() => {
     const token = localStorage.getItem("customerToken");
     if (!token) {
       navigate("/customer-login");

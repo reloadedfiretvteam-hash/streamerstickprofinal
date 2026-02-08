@@ -65,6 +65,13 @@ export default function Checkout() {
 
   useEffect(() => {
     document.title = "Checkout | StreamStickPro";
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute("content", "Secure checkout for Fire Sticks and IPTV plans. StreamStickPro—18,000+ channels, 100,000+ movies. Free trial available.");
+    const robots = document.querySelector('meta[name="robots"]');
+    if (robots) robots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      if (robots) robots.setAttribute("content", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
+    };
   }, []);
 
   const hasIPTVProduct = items.some(item => 
