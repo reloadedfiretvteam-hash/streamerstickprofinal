@@ -848,20 +848,35 @@ export function createStorage(config: StorageConfig) {
     },
 
     // SEO Domination: seo_architecture (location/topic pages for sitemap + API)
+    // Paginate: Supabase/PostgREST returns max 1000 rows per request, so fetch in chunks to get up to 25K.
     async getSeoPagesForSitemap(limit: number = 25000): Promise<{ path: string; updated_at?: string }[]> {
+      const PAGE_SIZE = 1000;
+      const out: { path: string; updated_at?: string }[] = [];
       try {
-        const { data } = await supabase
-          .from('seo_architecture')
-          .select('country, page_type, slug, updated_at')
-          .eq('published', true)
-          .limit(limit);
-        if (!data || data.length === 0) return [];
-        const base = 'https://streamstickpro.com';
-        return (data as any[]).map((row) => ({
-          path: `/l/${row.country.toLowerCase()}/${row.page_type}/${row.slug}`,
-          updated_at: row.updated_at,
-        }));
-      } catch {
+        let offset = 0;
+        while (offset < limit) {
+          const from = offset;
+          const to = offset + PAGE_SIZE - 1;
+          const { data } = await supabase
+            .from('seo_architecture')
+            .select('country, page_type, slug, updated_at')
+            .eq('published', true)
+            .order('id', { ascending: true })
+            .range(from, to);
+          if (!data || data.length === 0) break;
+          for (const row of data as any[]) {
+            out.push({
+              path: `/l/${(row.country || '').toLowerCase()}/${row.page_type || ''}/${row.slug || ''}`,
+              updated_at: row.updated_at,
+            });
+          }
+          if (data.length < PAGE_SIZE) break;
+          offset += data.length;
+          if (out.length >= limit) break;
+        }
+        return out.slice(0, limit);
+      } catch (err) {
+        console.error('getSeoPagesForSitemap error:', err instanceof Error ? err.message : String(err));
         return [];
       }
     },

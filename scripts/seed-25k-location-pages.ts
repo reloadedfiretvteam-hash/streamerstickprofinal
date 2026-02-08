@@ -455,7 +455,7 @@ function buildRows(locations: LocationRow[]): any[] {
   return rows;
 }
 
-const BATCH = 500;
+const BATCH = 200;
 
 async function main() {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
