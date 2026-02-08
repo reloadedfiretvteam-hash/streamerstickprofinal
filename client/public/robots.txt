@@ -8,6 +8,9 @@ Allow: /
 Allow: /blog
 Allow: /blog/*
 Allow: /shop
+Allow: /resources
+Allow: /l/
+Allow: /l/*
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/

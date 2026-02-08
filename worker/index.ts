@@ -17,7 +17,8 @@ import { createEmailCampaignRoutes } from './routes/email-campaigns';
 import { getStorage } from './helpers';
 
 export interface Env {
-  DATABASE_URL: string;
+  /** Only used in CI by run-supabase-migration.ts; not required by worker at runtime */
+  DATABASE_URL?: string;
   STRIPE_SECRET_KEY: string;
   STRIPE_PUBLISHABLE_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
@@ -188,11 +189,37 @@ app.get('/cron/email-campaigns', async (c) => {
   }
 });
 
+// Phase 4: OG-rich HTML for location pages (crawlers only) — must be before * redirect
+app.get('/l/:country/:pageType/:slug', async (c, next) => {
+  const ua = (c.req.header('User-Agent') || '').toLowerCase();
+  const isCrawler = /bot|crawler|facebookexternalhit|twitterbot|linkedinbot|slurp|whatsapp|telegram|pinterest|discord/i.test(ua);
+  if (!isCrawler) return next();
+  const country = c.req.param('country');
+  const pageType = c.req.param('pageType');
+  const slug = c.req.param('slug');
+  try {
+    const storage = getStorage(c.env);
+    const page = await storage.getSeoPageByPath(country, pageType, slug);
+    if (!page) return next();
+    const title = (page.title || page.h1 || 'IPTV & Jailbroken Fire Stick').replace(/\[LOCATION\]/g, page.location || page.region || slug);
+    const desc = (page.meta_description || page.p1_snippet || '').substring(0, 160);
+    const url = `https://streamstickpro.com/l/${country}/${pageType}/${slug}`;
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(title)} | StreamStickPro</title><meta name="description" content="${escapeHtml(desc)}"><meta property="og:type" content="website"><meta property="og:title" content="${escapeHtml(title)} | StreamStickPro"><meta property="og:description" content="${escapeHtml(desc)}"><meta property="og:url" content="${escapeHtml(url)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${escapeHtml(title)} | StreamStickPro"><meta name="twitter:description" content="${escapeHtml(desc)}"><meta http-equiv="refresh" content="0;url=${escapeHtml(url)}"></head><body><p>Redirecting to <a href="${escapeHtml(url)}">${escapeHtml(title)}</a>...</p></body></html>`;
+    return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  } catch {
+    return next();
+  }
+});
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 // SEO 301 redirects: DB (redirect_map) first, then static
 const SEO_REDIRECTS_STATIC: Record<string, string> = {
   '/guides': '/iptv-services',
   '/guide': '/iptv-services',
-  '/firestick': '/iptv-firestick',
+  '/firestick': '/jailbroken-fire-sticks',  // prompt: firestick → jailbroken fire sticks
   '/jailbreak': '/jailbroken-fire-sticks',
   '/devices': '/firestick-devices',
   '/media-players': '/iptv-media-players',
@@ -256,6 +283,7 @@ app.get('/sitemap.xml', async (c) => {
       { url: '/firestick-devices', priority: '0.9', changefreq: 'weekly' },
       { url: '/best-iptv-firestick', priority: '0.9', changefreq: 'weekly' },
       { url: '/iptv-media-players', priority: '0.9', changefreq: 'weekly' },
+      { url: '/resources', priority: '0.85', changefreq: 'weekly' },
       { url: '/terms', priority: '0.5', changefreq: 'yearly' },
       { url: '/privacy', priority: '0.5', changefreq: 'yearly' },
       { url: '/refund', priority: '0.5', changefreq: 'yearly' },

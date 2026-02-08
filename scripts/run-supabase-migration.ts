@@ -136,6 +136,10 @@ async function runMigration() {
     const seoMigrations = [
       '20260207000001_seo_domination_schema.sql',
       '20260207000002_seed_50_location_pages.sql',
+      '20260207000003_fix_firestick_redirect.sql',
+      '20260207000004_location_content_40_links.sql',
+      '20260207000005_mass_redirects.sql',
+      '20260207000006_seed_300_seo_experts.sql',
     ];
     console.log('\n📦 SEO migrations (seo_architecture, redirect_map, 50 location pages):');
     for (const file of seoMigrations) {

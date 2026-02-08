@@ -158,6 +158,8 @@ export default function Shop() {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
     document.title = "Shop - StreamStickPro | Premium Streaming Devices & Live TV Plans";
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute("content", "Shop StreamStickPro: pre-configured Fire Sticks, IPTV plans, 18,000+ channels. Devices & Live TV subscriptions. Free trial available.");
     loadProducts();
   }, []);
 

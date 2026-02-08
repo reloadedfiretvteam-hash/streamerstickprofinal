@@ -43,7 +43,7 @@ CREATE INDEX IF NOT EXISTS idx_redirect_old ON redirect_map(old_path);
 
 -- Seed essential redirects (no specific cities/prices)
 INSERT INTO redirect_map (old_path, new_path, status_code) VALUES
-  ('/firestick', '/iptv-firestick', 301),
+  ('/firestick', '/jailbroken-fire-sticks', 301),
   ('/iptv-free', '/', 301),
   ('/cheap-iptv', '/shop', 301),
   ('/pricing', '/shop', 301),

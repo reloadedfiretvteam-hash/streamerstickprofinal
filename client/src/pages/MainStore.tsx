@@ -1851,6 +1851,7 @@ export default function MainStore() {
                 <li><Link href="/"><span className="hover:text-orange-400 transition-colors cursor-pointer">Home</span></Link></li>
                 <li><a href="#shop" className="hover:text-orange-400 transition-colors cursor-pointer">Shop All Products</a></li>
                 <li><Link href="/blog"><span className="hover:text-orange-400 transition-colors cursor-pointer">Blog & Guides</span></Link></li>
+                <li><Link href="/resources"><span className="hover:text-orange-400 transition-colors cursor-pointer">Resources & Channel Directory</span></Link></li>
                 <li><a href="#about" className="hover:text-orange-400 transition-colors cursor-pointer">About Us</a></li>
               </ul>
             </div>
@@ -1899,10 +1900,13 @@ export default function MainStore() {
               <p className="text-gray-200">
                 © {new Date().getFullYear()} StreamStickPro. All rights reserved.
               </p>
-              <div className="flex items-center gap-6">
+              <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
                 <span className="text-green-400 font-semibold">🔒 Secure Payment</span>
                 <span className="text-orange-400 font-semibold">24/7 Support</span>
                 <span className="text-blue-400 font-semibold">Money-Back Guarantee</span>
+                <span className="text-gray-300 font-medium">250K+ users served</span>
+                <span className="text-gray-300 font-medium">99.999% uptime</span>
+                <span className="text-gray-300 font-medium">Privacy compliant</span>
               </div>
             </div>
           </div>

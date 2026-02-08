@@ -34,6 +34,7 @@ const FirestickDevices = lazy(() => import("@/pages/FirestickDevices"));
 const BestIptvFirestick = lazy(() => import("@/pages/BestIptvFirestick"));
 const IptvMediaPlayers = lazy(() => import("@/pages/IptvMediaPlayers"));
 const LocationPage = lazy(() => import("@/pages/LocationPage"));
+const Resources = lazy(() => import("@/pages/Resources"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 // Loading fallback component
@@ -96,6 +97,7 @@ function Router() {
         <Route path="/firestick-devices" component={FirestickDevices} />
         <Route path="/best-iptv-firestick" component={BestIptvFirestick} />
         <Route path="/iptv-media-players" component={IptvMediaPlayers} />
+        <Route path="/resources" component={Resources} />
         <Route path="/l/:country/:pageType/:slug" component={LocationPage} />
         <Route component={NotFound} />
       </Switch>

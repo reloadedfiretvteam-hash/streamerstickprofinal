@@ -7,6 +7,12 @@ import { Button } from "@/components/ui/button";
 
 const SITE_URL = "https://streamstickpro.com";
 
+interface ContentBlocks {
+  h2_sections?: { heading: string; body: string }[];
+  numbered_lists?: { title: string; items: string[] }[];
+  tables?: { caption: string; headers: string[]; rows: string[][] }[];
+}
+
 interface SeoPage {
   country: string;
   region?: string;
@@ -20,6 +26,7 @@ interface SeoPage {
   pillar_url?: string;
   internal_links?: { url?: string; anchor?: string }[];
   faq_json?: { question?: string; answer?: string }[];
+  content_blocks?: ContentBlocks;
 }
 
 const COUNTRY_LABEL: Record<string, string> = {
@@ -122,6 +129,11 @@ export default function LocationPage() {
   }));
 
   const internalLinks = Array.isArray(page.internal_links) ? page.internal_links : [];
+  const replaceLoc = (s: string) => (s || "").replace(/\[LOCATION\]/g, locationLabel);
+  const blocks = page.content_blocks || {};
+  const h2Sections = Array.isArray(blocks.h2_sections) ? blocks.h2_sections : [];
+  const numberedLists = Array.isArray(blocks.numbered_lists) ? blocks.numbered_lists : [];
+  const tables = Array.isArray(blocks.tables) ? blocks.tables : [];
 
   return (
     <>
@@ -136,6 +148,60 @@ export default function LocationPage() {
       >
         {page.p1_snippet && (
           <p className="text-xl text-gray-300 mb-6">{page.p1_snippet}</p>
+        )}
+
+        {h2Sections.length > 0 && (
+          <section className="mb-8">
+            {h2Sections.map((sec, i) => (
+              <div key={i} className="mb-6">
+                <h2 className="text-2xl font-bold text-white mb-2">{replaceLoc(sec.heading)}</h2>
+                <p className="text-gray-300">{replaceLoc(sec.body)}</p>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {numberedLists.length > 0 && (
+          <section className="mb-8">
+            {numberedLists.map((list, i) => (
+              <div key={i} className="mb-6">
+                <h2 className="text-2xl font-bold text-white mb-3">{replaceLoc(list.title)}</h2>
+                <ol className="list-decimal list-inside space-y-2 text-gray-300">
+                  {(list.items || []).map((item, j) => (
+                    <li key={j}>{replaceLoc(item)}</li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {tables.length > 0 && (
+          <section className="mb-8 overflow-x-auto">
+            {tables.map((tbl, i) => (
+              <div key={i} className="mb-6">
+                <h2 className="text-2xl font-bold text-white mb-3">{replaceLoc(tbl.caption)}</h2>
+                <table className="w-full border border-white/20 rounded-lg text-gray-300">
+                  <thead>
+                    <tr className="bg-white/5">
+                      {(tbl.headers || []).map((h, j) => (
+                        <th key={j} className="px-4 py-2 text-left font-semibold text-white border-b border-white/20">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(tbl.rows || []).map((row, j) => (
+                      <tr key={j} className="border-b border-white/10">
+                        {row.map((cell, k) => (
+                          <td key={k} className="px-4 py-2">{cell}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </section>
         )}
 
         {internalLinks.length > 0 && (
