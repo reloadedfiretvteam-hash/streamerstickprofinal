@@ -836,6 +836,51 @@ export function createStorage(config: StorageConfig) {
         })
         .eq('id', id);
     },
+
+    // SEO Domination: redirect_map (301 rules from DB)
+    async getRedirectMap(): Promise<{ old_path: string; new_path: string; status_code: number }[]> {
+      try {
+        const { data } = await supabase.from('redirect_map').select('old_path, new_path, status_code');
+        return (data || []).map((r: any) => ({ old_path: r.old_path, new_path: r.new_path, status_code: r.status_code || 301 }));
+      } catch {
+        return [];
+      }
+    },
+
+    // SEO Domination: seo_architecture (location/topic pages for sitemap + API)
+    async getSeoPagesForSitemap(limit: number = 25000): Promise<{ path: string; updated_at?: string }[]> {
+      try {
+        const { data } = await supabase
+          .from('seo_architecture')
+          .select('country, page_type, slug, updated_at')
+          .eq('published', true)
+          .limit(limit);
+        if (!data || data.length === 0) return [];
+        const base = 'https://streamstickpro.com';
+        return (data as any[]).map((row) => ({
+          path: `/l/${row.country.toLowerCase()}/${row.page_type}/${row.slug}`,
+          updated_at: row.updated_at,
+        }));
+      } catch {
+        return [];
+      }
+    },
+
+    async getSeoPageByPath(country: string, pageType: string, slug: string): Promise<any | undefined> {
+      try {
+        const { data } = await supabase
+          .from('seo_architecture')
+          .select('*')
+          .eq('country', country.toUpperCase())
+          .eq('page_type', pageType)
+          .eq('slug', slug)
+          .eq('published', true)
+          .single();
+        return data || undefined;
+      } catch {
+        return undefined;
+      }
+    },
   };
 }
 

@@ -48,7 +48,7 @@ export default function IptvServices() {
           <li><strong>Multi-device</strong> — Plans that allow 2–5 devices are ideal for families.</li>
           <li><strong>Support</strong> — 24/7 support and instant delivery of credentials.</li>
         </ul>
-        <p>StreamStickPro meets these with instant M3U delivery, TiviMate-friendly setup, and a <Link href="/">free trial</Link> so you can test before committing.</p>
+        <p>StreamStickPro meets these with instant M3U delivery, TiviMate-friendly setup, and a <Link href="/">free trial</Link> so you can test before committing. For the best <Link href="/iptv-media-players">IPTV media players</Link> (TiviMate, IPTV Smarters, VLC), see our full guide.</p>
 
         <h2 id="cheap-iptv-subscription">Cheap IPTV Subscription vs Cable</h2>
         <p>A cheap IPTV subscription often starts at $15–25/month. Cable usually runs $100–200+/month. With IPTV you get more channels, on-demand libraries, and the flexibility to use <Link href="/jailbroken-fire-sticks">streaming devices</Link> like pre-configured Fire Sticks. Yearly plans bring the per-month cost down further.</p>

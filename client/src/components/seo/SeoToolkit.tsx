@@ -59,6 +59,10 @@ interface SeoStats {
   keywordsInTop10: number;
   lastAuditScore: number | null;
   criticalIssues: number;
+  /** Live pipeline: from redirect_map + seo_architecture + blog */
+  locationPageCount?: number;
+  blogPageCount?: number;
+  sitemapUrlCount?: number;
 }
 
 interface SeoPage {
@@ -626,6 +630,34 @@ export default function SeoToolkit({ authFetch, showToast }: Props) {
                 <p className="text-xs text-muted-foreground mt-2">{stats?.unresolved404s || 0} unresolved 404s</p>
               </CardContent>
             </Card>
+            {(stats?.sitemapUrlCount != null || stats?.locationPageCount != null) && (
+              <Card className="md:col-span-2 border-green-500/30 bg-green-500/5">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-green-500" /> Live SEO (what’s out there)
+                  </CardTitle>
+                  <CardDescription>From sitemap, redirect_map, and seo_architecture</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-6">
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">{stats?.sitemapUrlCount ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">URLs in sitemap</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">{stats?.locationPageCount ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">Location pages (/l/*)</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">{stats?.blogPageCount ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">Blog posts</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">{stats?.totalRedirects ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">Redirects (301)</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">

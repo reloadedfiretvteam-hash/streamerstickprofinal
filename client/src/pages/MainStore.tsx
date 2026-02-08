@@ -301,7 +301,9 @@ export default function MainStore() {
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
-    document.title = "StreamStickPro - Premium Streaming Devices & Live TV Plans";
+    document.title = "Best IPTV Firestick Service 2026 | 18K+ Channels | StreamStickPro";
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", "Best IPTV service for Fire Stick & Android. 18,000+ live TV channels, 100,000+ movies. TiviMate, IPTV Smarters. Free trial. Shop devices & plans—StreamStickPro.");
     loadProducts();
   }, []);
 
@@ -553,6 +555,7 @@ export default function MainStore() {
             <Link href="/iptv-services"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">IPTV</span></Link>
             <Link href="/iptv-firestick"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Firestick</span></Link>
             <Link href="/firestick-devices"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Devices</span></Link>
+            <Link href="/iptv-media-players"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Media Players</span></Link>
             <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToAbout} data-testid="nav-how-it-works" aria-label="Scroll to How It Works section">How It Works</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToShop} data-testid="nav-shop" aria-label="Scroll to Shop section">Shop</Button>
             <Button 
@@ -763,6 +766,21 @@ export default function MainStore() {
       <div className="py-8 bg-gradient-to-r from-gray-800/50 via-gray-900/50 to-gray-800/50 border-y border-white/10">
         <div className="container mx-auto px-4">
           <TrustStats />
+        </div>
+      </div>
+
+      {/* Niche hub — IPTV, jailbroken Fire Sticks, media players, devices */}
+      <div className="py-6 bg-gray-900/60 border-y border-white/10">
+        <div className="container mx-auto px-4">
+          <p className="text-center text-gray-400 text-sm mb-4">Browse by topic</p>
+          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6">
+            <Link href="/iptv-services"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV Services</span></Link>
+            <Link href="/iptv-firestick"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV for Firestick</span></Link>
+            <Link href="/iptv-media-players"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV Media Players</span></Link>
+            <Link href="/firestick-devices"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Fire Stick Devices</span></Link>
+            <Link href="/jailbroken-fire-sticks"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Jailbroken Fire Sticks</span></Link>
+            <Link href="/best-iptv-firestick"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Best IPTV Firestick</span></Link>
+          </div>
         </div>
       </div>
 
@@ -1810,7 +1828,7 @@ export default function MainStore() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Flame className="w-8 h-8 text-orange-500" />
-                <span className="text-xl font-bold text-white">Inferno TV</span>
+                <span className="text-xl font-bold text-white">StreamStickPro</span>
               </div>
               <p className="text-sm text-gray-200 mb-4">
                 Premium Live TV streaming with 18,000+ channels and 100,000+ movies & series. Pre-configured streaming devices available.
@@ -1830,10 +1848,22 @@ export default function MainStore() {
             <div>
               <h3 className="text-white font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="/" className="hover:text-orange-400 transition-colors cursor-pointer">Home</a></li>
+                <li><Link href="/"><span className="hover:text-orange-400 transition-colors cursor-pointer">Home</span></Link></li>
                 <li><a href="#shop" className="hover:text-orange-400 transition-colors cursor-pointer">Shop All Products</a></li>
-                <li><a href="/blog" className="hover:text-orange-400 transition-colors cursor-pointer">Blog & Guides</a></li>
+                <li><Link href="/blog"><span className="hover:text-orange-400 transition-colors cursor-pointer">Blog & Guides</span></Link></li>
                 <li><a href="#about" className="hover:text-orange-400 transition-colors cursor-pointer">About Us</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-white font-semibold mb-4">Guides</h3>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/iptv-services"><span className="hover:text-orange-400 transition-colors">IPTV Services</span></Link></li>
+                <li><Link href="/iptv-firestick"><span className="hover:text-orange-400 transition-colors">IPTV for Firestick</span></Link></li>
+                <li><Link href="/iptv-media-players"><span className="hover:text-orange-400 transition-colors">IPTV Media Players</span></Link></li>
+                <li><Link href="/firestick-devices"><span className="hover:text-orange-400 transition-colors">Fire Stick Devices</span></Link></li>
+                <li><Link href="/jailbroken-fire-sticks"><span className="hover:text-orange-400 transition-colors">Jailbroken Fire Sticks</span></Link></li>
+                <li><Link href="/best-iptv-firestick"><span className="hover:text-orange-400 transition-colors">Best IPTV Firestick</span></Link></li>
               </ul>
             </div>
 

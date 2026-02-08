@@ -245,11 +245,11 @@ app.get('/sitemap.xml', async (c) => {
     const blogPosts = await storage.getBlogPosts();
     const products = await storage.getRealProducts();
     
+    // Only list canonical URLs; /free-trial 301s to / so omit from sitemap
     const staticPages = [
       { url: '/', priority: '1.0', changefreq: 'daily' },
       { url: '/shop', priority: '0.9', changefreq: 'daily' },
       { url: '/blog', priority: '0.9', changefreq: 'daily' },
-      { url: '/free-trial', priority: '0.9', changefreq: 'weekly' },
       { url: '/iptv-services', priority: '0.9', changefreq: 'weekly' },
       { url: '/iptv-firestick', priority: '0.9', changefreq: 'weekly' },
       { url: '/jailbroken-fire-sticks', priority: '0.9', changefreq: 'weekly' },
@@ -292,16 +292,7 @@ app.get('/sitemap.xml', async (c) => {
       }
     }
 
-    // Add shop page (products are on the shop page)
-    sitemap += `  <url>
-    <loc>${baseUrl}/shop</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-`;
-
-    // SEO location pages from Supabase (seo_architecture)
+    // SEO location pages from Supabase (seo_architecture) — /shop already in staticPages
     const seoPages = await storage.getSeoPagesForSitemap(25000);
     for (const page of seoPages) {
       const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];

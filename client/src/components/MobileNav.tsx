@@ -36,6 +36,7 @@ export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq, onSupportC
     { label: "Home", icon: Home, action: () => { setLocation("/"); } },
     { label: "IPTV Services", icon: Wifi, action: () => { setLocation("/iptv-services"); } },
     { label: "IPTV for Firestick", icon: Tv, action: () => { setLocation("/iptv-firestick"); } },
+    { label: "IPTV Media Players", icon: Tv, action: () => { setLocation("/iptv-media-players"); } },
     { label: "Fire Stick Devices", icon: Tv, action: () => { setLocation("/firestick-devices"); } },
     { label: "Jailbroken Fire Sticks", icon: Tv, action: () => { setLocation("/jailbroken-fire-sticks"); } },
     { label: "Shop", icon: Tv, action: () => navigateToSection("shop") },

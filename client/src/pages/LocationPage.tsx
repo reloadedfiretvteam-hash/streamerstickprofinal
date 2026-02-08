@@ -101,6 +101,7 @@ export default function LocationPage() {
   const countryLabel = COUNTRY_LABEL[page.country.toUpperCase()] || page.country;
   const typeLabel = PAGE_TYPE_LABEL[page.page_type] || page.page_type;
   const locationLabel = page.location || page.region || slug;
+  const displayH1 = (page.h1 || "").replace(/\[LOCATION\]/g, locationLabel);
 
   const breadcrumbs = [
     { label: "Home", href: "/" },

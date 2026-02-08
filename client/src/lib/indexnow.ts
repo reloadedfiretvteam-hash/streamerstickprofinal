@@ -135,6 +135,15 @@ export async function submitProductsToIndexNow(productSlugs: string[]): Promise<
 /**
  * Submit homepage and main pages to IndexNow
  */
+export const PILLAR_PATHS = [
+  '/iptv-services',
+  '/iptv-firestick',
+  '/jailbroken-fire-sticks',
+  '/firestick-devices',
+  '/best-iptv-firestick',
+  '/iptv-media-players',
+] as const;
+
 export async function submitMainPagesToIndexNow(): Promise<IndexNowResponse> {
   const mainPages = [
     '/',
@@ -143,6 +152,7 @@ export async function submitMainPagesToIndexNow(): Promise<IndexNowResponse> {
     '/terms',
     '/privacy',
     '/refund',
+    ...PILLAR_PATHS,
   ];
   return submitToIndexNow(mainPages);
 }

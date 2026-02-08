@@ -71,3 +71,9 @@ jobs:
           curl -sSf -o /dev/null "https://www.bing.com/ping?sitemap=${SITEMAP}" || true
           curl -sSf -o /dev/null "https://www.google.com/ping?sitemap=${SITEMAP}" || true
         continue-on-error: true
+
+      - name: Submit all sitemap URLs to IndexNow (Bing, Yandex, etc.)
+        run: npx tsx scripts/indexnow-from-live-sitemap.ts
+        env:
+          SITE_URL: https://streamstickpro.com
+        continue-on-error: true

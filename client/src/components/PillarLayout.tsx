@@ -41,6 +41,8 @@ export function PillarLayout({ title, description, breadcrumbs, children }: Pill
               <Link href="/iptv-services"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">IPTV</span></Link>
               <Link href="/iptv-firestick"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Firestick</span></Link>
               <Link href="/firestick-devices"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Devices</span></Link>
+              <Link href="/iptv-media-players"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Media Players</span></Link>
+              <Link href="/jailbroken-fire-sticks"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Jailbroken</span></Link>
               <Link href="/blog"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Blog</span></Link>
               <Link href="/shop"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Shop</span></Link>
             </div>
