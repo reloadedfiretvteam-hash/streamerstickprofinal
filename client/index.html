@@ -226,6 +226,21 @@
       }
     }
     </script>
+    <!-- What we're building: WebPage schema for SEO/AEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "StreamStickPro – IPTV + Jailbroken Fire Sticks 2026",
+      "description": "StreamStickPro builds IPTV subscriptions (18,000+ channels, 100,000+ movies), jailbroken and pre-loaded Fire Sticks (Kodi, Stremio, TiviMate), and Google TV streaming for USA, Canada, UK. Location guides, setup tutorials, free trial.",
+      "url": "https://streamstickpro.com/",
+      "mainEntity": {
+        "@type": "Organization",
+        "name": "StreamStickPro",
+        "description": "IPTV subscriptions, jailbroken Fire Sticks, pre-loaded streaming devices, and location-based IPTV and Fire Stick guides for USA, Canada, and UK."
+      }
+    }
+    </script>
     
     <!-- Preconnect to critical origins for faster loading -->
     <link rel="preconnect" href="https://emlqlmfzqsnqokrqvmcm.supabase.co" crossorigin>
@@ -234,12 +249,24 @@
     <link rel="preconnect" href="https://js.stripe.com">
     <link rel="preconnect" href="https://connect.facebook.net">
     
+    <!-- Skip link: hidden until focus (accessibility) -->
+    <style>#skip-link{position:absolute;left:-9999px;z-index:9999;padding:.5rem 1rem;background:#ea580c;color:#fff;border-radius:4px}#skip-link:focus{left:1rem;top:1rem}</style>
     <!-- Optimized Google Fonts - Defer loading with display=swap -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
   </head>
   <body>
-    <div id="root"></div>
+    <a href="#main-content" id="skip-link">Skip to main content</a>
+    <div id="root">
+      <!-- What we're building: visible to crawlers and when JS is slow; replaced by React app -->
+      <main id="main-content" role="main" aria-label="StreamStickPro – What we build">
+        <article>
+          <h1>StreamStickPro – IPTV + Jailbroken Fire Sticks 2026</h1>
+          <p>StreamStickPro builds <strong>IPTV subscriptions</strong> (18,000+ live channels, 100,000+ movies and series), <strong>jailbroken and pre-loaded Fire Sticks</strong> (Kodi, Stremio, TiviMate ready), and <strong>Google TV–compatible streaming</strong> for USA, Canada, and UK. Location guides, setup tutorials, and a free trial are included.</p>
+          <p>Shop <a href="/shop">devices and plans</a>, read <a href="/iptv-services">IPTV guides</a> and <a href="/jailbroken-fire-sticks">jailbroken Fire Stick guides</a>, or start your <a href="/">free trial</a>.</p>
+        </article>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -41,6 +41,23 @@ async function buildProject() {
     },
   });
 
+  console.log("Generating 25K location pages JSON (sitemap + meta fallback)...");
+  const genLocationPages = spawn("npx", ["tsx", "scripts/generate-location-pages-json.ts"], {
+    stdio: "inherit",
+    shell: true,
+    cwd: process.cwd(),
+  });
+  await new Promise<void>((res) => {
+    genLocationPages.on("close", (code) => {
+      if (code === 0) res();
+      else {
+        console.warn("generate-location-pages-json failed (e.g. OOM); continuing. CI will retry with more memory.");
+        res();
+      }
+    });
+    genLocationPages.on("error", () => res());
+  });
+
   console.log("Building Cloudflare Worker...");
   await esbuild({
     entryPoints: ["worker/index.ts"],
@@ -76,6 +93,7 @@ async function buildProject() {
   console.log("Output:");
   console.log("  - dist/_worker.js (Cloudflare Worker)");
   console.log("  - dist/_routes.json (routing config)");
+  console.log("  - dist/location-pages.json (25K URLs + meta for sitemap and /l/ pages)");
   console.log("  - dist/blog/ (prerendered blog posts for SEO)");
 }
 

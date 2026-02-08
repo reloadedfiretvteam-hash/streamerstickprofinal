@@ -100,16 +100,39 @@ app.get('/api/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.0.1' });
 });
 
-// SEO location page API (for /l/:country/:pageType/:slug)
+// SEO location page API (for /l/:country/:pageType/:slug). DB first, then static build fallback so 25K pages work without DB seed.
 app.get('/api/seo-page/:country/:pageType/:slug', async (c) => {
   const country = c.req.param('country');
   const pageType = c.req.param('pageType');
   const slug = c.req.param('slug');
+  const path = `/l/${country.toLowerCase()}/${pageType}/${slug}`;
   const storage = getStorage(c.env);
-  const page = await storage.getSeoPageByPath(country, pageType, slug);
+  let page = await storage.getSeoPageByPath(country, pageType, slug);
   if (!page) {
-    return c.json({ error: 'Not found' }, 404);
+    try {
+      const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
+      if (assetRes.ok) {
+        const list = (await assetRes.json()) as { path: string; t: string; d: string; h: string }[];
+        const staticPage = list.find((p) => p.path === path);
+        if (staticPage) {
+          page = {
+            country: country.toUpperCase(),
+            page_type: pageType,
+            slug,
+            title: staticPage.t,
+            meta_description: staticPage.d,
+            h1: staticPage.h,
+            p1_snippet: staticPage.d,
+            internal_links: [],
+            faq_json: [],
+          };
+        }
+      }
+    } catch {
+      // ignore
+    }
   }
+  if (!page) return c.json({ error: 'Not found' }, 404);
   return c.json(page);
 });
 
@@ -189,7 +212,7 @@ app.get('/cron/email-campaigns', async (c) => {
   }
 });
 
-// Phase 4: OG-rich HTML for location pages (crawlers only) — must be before * redirect
+// Phase 4: OG-rich HTML for location pages (crawlers only) — must be before * redirect. DB first, then static build fallback so 25K pages have meta even without DB seed.
 app.get('/l/:country/:pageType/:slug', async (c, next) => {
   const ua = (c.req.header('User-Agent') || '').toLowerCase();
   const isCrawler = /bot|crawler|facebookexternalhit|twitterbot|linkedinbot|slurp|whatsapp|telegram|pinterest|discord/i.test(ua);
@@ -197,15 +220,87 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
   const country = c.req.param('country');
   const pageType = c.req.param('pageType');
   const slug = c.req.param('slug');
+  const path = `/l/${country.toLowerCase()}/${pageType}/${slug}`;
+  let title = '';
+  let desc = '';
   try {
     const storage = getStorage(c.env);
     const page = await storage.getSeoPageByPath(country, pageType, slug);
-    if (!page) return next();
-    const title = (page.title || page.h1 || 'IPTV & Jailbroken Fire Stick').replace(/\[LOCATION\]/g, page.location || page.region || slug);
-    const desc = (page.meta_description || page.p1_snippet || '').substring(0, 160);
-    const url = `https://streamstickpro.com/l/${country}/${pageType}/${slug}`;
+    if (page) {
+      title = (page.title || page.h1 || 'IPTV & Jailbroken Fire Stick').replace(/\[LOCATION\]/g, page.location || page.region || slug);
+      desc = (page.meta_description || page.p1_snippet || '').substring(0, 160);
+    } else {
+      const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
+      if (assetRes.ok) {
+        const list = (await assetRes.json()) as { path: string; t: string; d: string; h: string }[];
+        const staticPage = list.find((p) => p.path === path);
+        if (staticPage) {
+          title = staticPage.t;
+          desc = staticPage.d;
+        }
+      }
+    }
+    if (!title) return next();
+    const url = `https://streamstickpro.com${path}`;
     const ogImage = 'https://streamstickpro.com/opengraph.jpg';
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(title)} | StreamStickPro</title><meta name="description" content="${escapeHtml(desc)}"><meta property="og:type" content="website"><meta property="og:title" content="${escapeHtml(title)} | StreamStickPro"><meta property="og:description" content="${escapeHtml(desc)}"><meta property="og:url" content="${escapeHtml(url)}"><meta property="og:image" content="${ogImage}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${escapeHtml(title)} | StreamStickPro"><meta name="twitter:description" content="${escapeHtml(desc)}"><meta name="twitter:image" content="${ogImage}"><meta http-equiv="refresh" content="0;url=${escapeHtml(url)}"></head><body><p>Redirecting to <a href="${escapeHtml(url)}">${escapeHtml(title)}</a>...</p></body></html>`;
+    const h1Text = escapeHtml(title);
+    const descSafe = escapeHtml(desc);
+    const fullTitle = `${title} | StreamStickPro`;
+    const fullTitleSafe = escapeHtml(fullTitle);
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${fullTitleSafe}</title>
+  <meta name="description" content="${descSafe}">
+  <link rel="canonical" href="${url}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="${fullTitleSafe}">
+  <meta property="og:description" content="${descSafe}">
+  <meta property="og:url" content="${url}">
+  <meta property="og:image" content="${ogImage}">
+  <meta property="og:site_name" content="StreamStickPro">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${fullTitleSafe}">
+  <meta name="twitter:description" content="${descSafe}">
+  <meta name="twitter:image" content="${ogImage}">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header role="banner">
+    <nav aria-label="Breadcrumb">
+      <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a itemprop="item" href="https://streamstickpro.com/"><span itemprop="name">Home</span></a><meta itemprop="position" content="1"></li>
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a itemprop="item" href="${url}"><span itemprop="name">${h1Text}</span></a><meta itemprop="position" content="2"></li>
+      </ol>
+    </nav>
+  </header>
+  <main id="main" role="main">
+    <article>
+      <h1>${h1Text}</h1>
+      <p class="lead">${descSafe}</p>
+      <section aria-labelledby="what-we-build">
+        <h2 id="what-we-build">What StreamStickPro Builds</h2>
+        <p>StreamStickPro builds <strong>IPTV subscriptions</strong> (18,000+ live channels, 100,000+ movies and series), <strong>jailbroken and pre-loaded Fire Sticks</strong> (Kodi, Stremio, TiviMate ready), and <strong>Google TV–compatible streaming</strong> for USA, Canada, and UK. Location guides, setup tutorials, and a free trial are included.</p>
+      </section>
+      <section aria-labelledby="related">
+        <h2 id="related">Related</h2>
+        <ul>
+          <li><a href="https://streamstickpro.com/iptv-services">IPTV Services</a></li>
+          <li><a href="https://streamstickpro.com/jailbroken-fire-sticks">Jailbroken Fire Sticks</a></li>
+          <li><a href="https://streamstickpro.com/shop">Shop</a></li>
+          <li><a href="https://streamstickpro.com/">Home &amp; Free Trial</a></li>
+        </ul>
+      </section>
+    </article>
+  </main>
+  <footer role="contentinfo"><p>&copy; StreamStickPro. <a href="https://streamstickpro.com/">StreamStickPro</a> – IPTV, Fire Sticks, and streaming guides.</p></footer>
+  <script>window.location.replace(${JSON.stringify(url)});</script>
+  <noscript><p>Continue to <a href="${url}">${h1Text}</a>.</p></noscript>
+</body>
+</html>`;
     return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   } catch {
     return next();
@@ -220,7 +315,9 @@ function escapeHtml(s: string): string {
 const SEO_REDIRECTS_STATIC: Record<string, string> = {
   '/guides': '/iptv-services',
   '/guide': '/iptv-services',
-  '/firestick': '/jailbroken-fire-sticks',  // prompt: firestick → jailbroken fire sticks
+  '/trial': '/',  // Phase 1: trial CTA on homepage
+  '/pricing': '/shop',
+  '/firestick': '/jailbroken-fire-sticks',
   '/jailbreak': '/jailbroken-fire-sticks',
   '/devices': '/firestick-devices',
   '/media-players': '/iptv-media-players',
@@ -247,23 +344,91 @@ app.get('*', async (c, next) => {
   return next();
 });
 
-// Sitemap index (for 50K+ URLs: point to sitemap.xml and future sitemap-*.xml)
-app.get('/sitemap-index.xml', (c) => {
-  const baseUrl = 'https://streamstickpro.com';
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+// Sitemap index (SEO/AEO prompt: sitemap-pages + sitemap-posts; sitemap.xml = full single file)
+const SITEMAP_INDEX_XML = (baseUrl: string, today: string) => `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>${baseUrl}/sitemap.xml</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-  </sitemap>
+  <sitemap><loc>${baseUrl}/sitemap-pages.xml</loc><lastmod>${today}</lastmod></sitemap>
+  <sitemap><loc>${baseUrl}/sitemap-posts.xml</loc><lastmod>${today}</lastmod></sitemap>
+  <sitemap><loc>${baseUrl}/sitemap.xml</loc><lastmod>${today}</lastmod></sitemap>
 </sitemapindex>`;
-  return c.text(xml, 200, {
+app.get('/sitemap-index.xml', (c) => {
+  const today = new Date().toISOString().split('T')[0];
+  return c.text(SITEMAP_INDEX_XML('https://streamstickpro.com', today), 200, {
     'Content-Type': 'application/xml; charset=utf-8',
     'Cache-Control': 'public, max-age=3600',
   });
 });
 
-// Sitemap route - must be before catch-all
+const STATIC_SITEMAP_PAGES = [
+  { url: '/', priority: '1.0', changefreq: 'daily' },
+  { url: '/shop', priority: '0.9', changefreq: 'daily' },
+  { url: '/blog', priority: '0.9', changefreq: 'daily' },
+  { url: '/iptv-services', priority: '0.9', changefreq: 'weekly' },
+  { url: '/iptv-firestick', priority: '0.9', changefreq: 'weekly' },
+  { url: '/jailbroken-fire-sticks', priority: '0.9', changefreq: 'weekly' },
+  { url: '/firestick-devices', priority: '0.9', changefreq: 'weekly' },
+  { url: '/best-iptv-firestick', priority: '0.9', changefreq: 'weekly' },
+  { url: '/iptv-media-players', priority: '0.9', changefreq: 'weekly' },
+  { url: '/resources', priority: '0.85', changefreq: 'weekly' },
+  { url: '/terms', priority: '0.5', changefreq: 'yearly' },
+  { url: '/privacy', priority: '0.5', changefreq: 'yearly' },
+  { url: '/refund', priority: '0.5', changefreq: 'yearly' },
+  { url: '/checkout', priority: '0.7', changefreq: 'weekly' },
+];
+
+// sitemap-pages.xml: static + location pages only (SEO/AEO prompt)
+app.get('/sitemap-pages.xml', async (c) => {
+  const baseUrl = 'https://streamstickpro.com';
+  const today = new Date().toISOString().split('T')[0];
+  let xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+  for (const p of STATIC_SITEMAP_PAGES) {
+    xml += `<url><loc>${baseUrl}${p.url}</loc><lastmod>${today}</lastmod><changefreq>${p.changefreq}</changefreq><priority>${p.priority}</priority></url>`;
+  }
+  try {
+    const storage = getStorage(c.env);
+    const seoPages = await storage.getSeoPagesForSitemap(25000);
+    for (const page of seoPages) {
+      const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : today;
+      xml += `<url><loc>${baseUrl}${page.path}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`;
+    }
+    if (seoPages.length < 2000) {
+      const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
+      if (assetRes.ok) {
+        const list = (await assetRes.json()) as { path: string }[];
+        for (const item of list) {
+          xml += `<url><loc>${baseUrl}${item.path}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`;
+        }
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  xml += '</urlset>';
+  return c.text(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' });
+});
+
+// sitemap-posts.xml: blog only (SEO/AEO prompt)
+app.get('/sitemap-posts.xml', async (c) => {
+  const baseUrl = 'https://streamstickpro.com';
+  const today = new Date().toISOString().split('T')[0];
+  let xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+  try {
+    const storage = getStorage(c.env);
+    const blogPosts = await storage.getBlogPosts();
+    for (const post of blogPosts) {
+      if (post.published) {
+        const lastmod = post.publishedAt ? new Date(post.publishedAt).toISOString().split('T')[0] : today;
+        xml += `<url><loc>${baseUrl}/blog/${post.slug}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`;
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  xml += '</urlset>';
+  return c.text(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' });
+});
+
+// Sitemap route - must be before catch-all (full: static + blog + location)
 app.get('/sitemap.xml', async (c) => {
   try {
     const baseUrl = 'https://streamstickpro.com';
@@ -273,31 +438,12 @@ app.get('/sitemap.xml', async (c) => {
     const blogPosts = await storage.getBlogPosts();
     const products = await storage.getRealProducts();
     
-    // Only list canonical URLs; /free-trial 301s to / so omit from sitemap
-    const staticPages = [
-      { url: '/', priority: '1.0', changefreq: 'daily' },
-      { url: '/shop', priority: '0.9', changefreq: 'daily' },
-      { url: '/blog', priority: '0.9', changefreq: 'daily' },
-      { url: '/iptv-services', priority: '0.9', changefreq: 'weekly' },
-      { url: '/iptv-firestick', priority: '0.9', changefreq: 'weekly' },
-      { url: '/jailbroken-fire-sticks', priority: '0.9', changefreq: 'weekly' },
-      { url: '/firestick-devices', priority: '0.9', changefreq: 'weekly' },
-      { url: '/best-iptv-firestick', priority: '0.9', changefreq: 'weekly' },
-      { url: '/iptv-media-players', priority: '0.9', changefreq: 'weekly' },
-      { url: '/resources', priority: '0.85', changefreq: 'weekly' },
-      { url: '/terms', priority: '0.5', changefreq: 'yearly' },
-      { url: '/privacy', priority: '0.5', changefreq: 'yearly' },
-      { url: '/refund', priority: '0.5', changefreq: 'yearly' },
-      { url: '/checkout', priority: '0.7', changefreq: 'weekly' },
-    ];
-
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 `;
     
-    // Add static pages
-    for (const page of staticPages) {
+    for (const page of STATIC_SITEMAP_PAGES) {
       sitemap += `  <url>
     <loc>${baseUrl}${page.url}</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
@@ -321,7 +467,7 @@ app.get('/sitemap.xml', async (c) => {
       }
     }
 
-    // SEO location pages from Supabase (seo_architecture) — /shop already in staticPages
+    // SEO location pages: Supabase first, then static fallback (25K from build) so Google gets thousands of URLs even if DB seed didn't run
     const seoPages = await storage.getSeoPagesForSitemap(25000);
     for (const page of seoPages) {
       const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
@@ -332,6 +478,26 @@ app.get('/sitemap.xml', async (c) => {
     <priority>0.7</priority>
   </url>
 `;
+    }
+    if (seoPages.length < 2000) {
+      try {
+        const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
+        if (assetRes.ok) {
+          const list = (await assetRes.json()) as { path: string }[];
+          const today = new Date().toISOString().split('T')[0];
+          for (const item of list) {
+            sitemap += `  <url>
+    <loc>${baseUrl}${item.path}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+`;
+          }
+        }
+      } catch {
+        // ignore
+      }
     }
 
     sitemap += `</urlset>`;

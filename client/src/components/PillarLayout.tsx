@@ -53,7 +53,7 @@ export function PillarLayout({ title, description, breadcrumbs, children }: Pill
         </div>
       </nav>
 
-      <main className="container mx-auto px-4 py-6 max-w-4xl">
+      <main id="main-content" className="container mx-auto px-4 py-6 max-w-4xl" role="main">
         <Breadcrumb className="mb-6 text-gray-400">
           <BreadcrumbList>
             {breadcrumbs.map((item, i) => (
