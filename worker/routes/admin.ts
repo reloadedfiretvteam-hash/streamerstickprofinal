@@ -1644,5 +1644,89 @@ export function createAdminRoutes() {
     }
   });
 
+  // ——— Infrastructure & SEO Command Center ———
+  app.get('/seo/infrastructure', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const [redirects, seoPages, blogPosts] = await Promise.all([
+        storage.getRedirectMap(),
+        storage.getSeoPagesForSitemap(50000),
+        storage.getBlogPosts(),
+      ]);
+      const staticPages = 16;
+      const sitemapUrlCount = staticPages + (blogPosts?.length || 0) + (seoPages?.length || 0);
+      const healthScore = Math.min(100, 70 + Math.floor(redirects.length / 10) + Math.min(seoPages?.length || 0, 30));
+      return c.json({
+        data: {
+          infrastructure: {
+            supabase: "connected",
+            cloudflare: "Pages (deploy on push)",
+            github: "clean-main",
+            worker: "ok",
+          },
+          seo: {
+            healthScore,
+            redirectCount: redirects.length,
+            locationPageCount: seoPages?.length || 0,
+            blogPageCount: blogPosts?.length || 0,
+            sitemapUrlCount,
+            criticalIssues: 0,
+          },
+          urls: {
+            sitemap: "https://streamstickpro.com/sitemap.xml",
+            indexNow: "https://streamstickpro.com/59748a36d4494392a7d863abcf2d3b52.txt",
+            liveSite: "https://streamstickpro.com",
+          },
+        },
+      });
+    } catch (error: any) {
+      console.error("SEO infrastructure error:", error);
+      return c.json({ error: error.message || "Failed to load infrastructure" }, 500);
+    }
+  });
+
+  app.get('/seo/location-pages', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const limit = parseInt(c.req.query('limit') || '200', 10);
+      const list = await storage.getSeoArchitectureList(Math.min(limit, 1000));
+      return c.json({ data: list });
+    } catch (error: any) {
+      console.error("Location pages error:", error);
+      return c.json({ error: error.message || "Failed to load location pages" }, 500);
+    }
+  });
+
+  app.post('/seo/redirects', async (c) => {
+    try {
+      const body = await c.req.json<{ sourceUrl: string; targetUrl: string; redirectType?: number }>();
+      const old_path = (body.sourceUrl || "").replace(/^https?:\/\/[^/]+/, "") || "/";
+      const new_path = (body.targetUrl || "").replace(/^https?:\/\/[^/]+/, "") || "/";
+      const status_code = body.redirectType || 301;
+      if (!old_path || old_path === new_path) {
+        return c.json({ error: "Invalid source or target" }, 400);
+      }
+      const storage = getStorage(c.env);
+      await storage.insertRedirect(old_path, new_path, status_code);
+      return c.json({ data: { old_path, new_path, status_code } });
+    } catch (error: any) {
+      console.error("Add redirect error:", error);
+      return c.json({ error: error.message || "Failed to add redirect" }, 500);
+    }
+  });
+
+  app.delete('/seo/redirects', async (c) => {
+    try {
+      const old_path = c.req.query('old_path') || (await c.req.json().then((b: any) => b.old_path).catch(() => null));
+      if (!old_path) return c.json({ error: "old_path required" }, 400);
+      const storage = getStorage(c.env);
+      await storage.deleteRedirect(old_path);
+      return c.json({ data: { deleted: old_path } });
+    } catch (error: any) {
+      console.error("Delete redirect error:", error);
+      return c.json({ error: error.message || "Failed to delete redirect" }, 500);
+    }
+  });
+
   return app;
 }

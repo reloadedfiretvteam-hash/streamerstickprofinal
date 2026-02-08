@@ -7,15 +7,15 @@
  */
 
 import postgres from 'postgres';
-import { readFile } from 'fs/promises';
+import { readFile, readdir } from 'fs/promises';
 import path from 'path';
 
 async function runMigration() {
-  const databaseUrl = process.env.SUPABASE_DATABASE_URL;
-  
+  const databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
+
   if (!databaseUrl) {
-    console.error('❌ SUPABASE_DATABASE_URL environment variable is required');
-    console.error('   Set this in GitHub Secrets with your Supabase connection string');
+    console.error('❌ SUPABASE_DATABASE_URL or DATABASE_URL environment variable is required');
+    console.error('   Set one in GitHub Secrets (Supabase: Project Settings → Database → Connection string URI)');
     console.error('   Format: postgresql://postgres.[project-ref]:[password]@[host]:5432/postgres');
     process.exit(1);
   }
@@ -131,30 +131,27 @@ async function runMigration() {
     console.log(`   abandoned_carts: ${counts[0].carts} rows`);
     console.log(`   orders: ${counts[0].orders} rows`);
 
-    // SEO Domination 2026: run schema + 50 location pages seed from supabase/migrations
+    // SEO Domination 2026: run ALL 20260207* migrations in order (tables, seed, redirects, content_blocks, experts, content_clusters)
     const migrationsDir = path.join(process.cwd(), 'supabase', 'migrations');
-    const seoMigrations = [
-      '20260207000001_seo_domination_schema.sql',
-      '20260207000002_seed_50_location_pages.sql',
-      '20260207000003_fix_firestick_redirect.sql',
-      '20260207000004_location_content_40_links.sql',
-      '20260207000005_mass_redirects.sql',
-      '20260207000006_seed_300_seo_experts.sql',
-    ];
-    console.log('\n📦 SEO migrations (seo_architecture, redirect_map, 50 location pages):');
-    for (const file of seoMigrations) {
+    let migrationFiles: string[] = [];
+    try {
+      const all = await readdir(migrationsDir);
+      migrationFiles = all
+        .filter((f) => f.startsWith('20260207') && f.endsWith('.sql'))
+        .sort();
+    } catch (e) {
+      // no migrations dir or readdir failed
+    }
+    console.log('\n📦 SEO migrations (seo_architecture, redirect_map, content_clusters, seo_experts, 50 pages, 40 links, 300 experts):');
+    for (const file of migrationFiles) {
       const filePath = path.join(migrationsDir, file);
       try {
         const content = await readFile(filePath, 'utf8');
         await sql.unsafe(content);
         console.log(`   ✓ ${file}`);
       } catch (err: any) {
-        if (err.code === 'ENOENT') {
-          console.log(`   (skip ${file} - not found)`);
-        } else {
-          console.error(`   ✗ ${file}:`, err.message);
-          // continue so deploy still succeeds if tables already exist
-        }
+        console.error(`   ✗ ${file}:`, err.message);
+        // continue so deploy still succeeds if tables already exist / duplicate key etc.
       }
     }
 

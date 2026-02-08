@@ -13,12 +13,12 @@ VITE_SECURE_HOSTS = "secure.streamstickpro.com"
 VITE_STORAGE_BUCKET_NAME = "imiges"
 SITE_URL = "https://streamstickpro.com"
 
-# SECRETS - Set these in Cloudflare Pages Dashboard → Settings → Environment Variables
-# Do NOT commit actual values here
-# Required secrets:
+# SECRETS - Set in Cloudflare Pages Dashboard → Settings → Environment Variables (Production)
+# Worker needs these at RUNTIME to talk to Supabase (SEO tables, redirect_map, blog). Same values as GitHub Secrets.
+# Required:
+#   SUPABASE_SERVICE_KEY - Supabase service_role key (Worker reads seo_architecture, redirect_map, etc.)
 #   ADMIN_USERNAME - Admin login username
-#   ADMIN_PASSWORD - Admin login password  
-#   SUPABASE_SERVICE_KEY - Supabase service role key (for server-side operations)
+#   ADMIN_PASSWORD - Admin login password
 #   STRIPE_SECRET_KEY - Stripe API secret key
 #   STRIPE_PUBLISHABLE_KEY - Stripe publishable key
 #   STRIPE_WEBHOOK_SECRET - Stripe webhook signing secret

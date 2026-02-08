@@ -353,6 +353,17 @@ export default function AdminPanel() {
   const [editingBlogPost, setEditingBlogPost] = useState<Partial<BlogPost> | null>(null);
   const [blogSearchTerm, setBlogSearchTerm] = useState("");
   const [blogView, setBlogView] = useState<'list' | 'create' | 'edit'>('list');
+  const [infraData, setInfraData] = useState<{
+    infrastructure?: Record<string, string>;
+    seo?: { healthScore?: number; redirectCount?: number; locationPageCount?: number; blogPageCount?: number; sitemapUrlCount?: number };
+    urls?: { sitemap?: string; liveSite?: string };
+  } | null>(null);
+  const [infraRedirects, setInfraRedirects] = useState<{ id: string; sourceUrl: string; targetUrl: string; redirectType: string }[]>([]);
+  const [infraLocationPages, setInfraLocationPages] = useState<{ path: string; title: string; country: string; page_type: string; slug: string }[]>([]);
+  const [loadingInfra, setLoadingInfra] = useState(false);
+  const [newRedirectSource, setNewRedirectSource] = useState("");
+  const [newRedirectTarget, setNewRedirectTarget] = useState("");
+  const [addingRedirect, setAddingRedirect] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiRequest, setAiRequest] = useState<AIGenerationRequest>({
     topic: '',
@@ -373,6 +384,20 @@ export default function AdminPanel() {
   const [seoAds, setSeoAds] = useState<any[]>([]);
   const [loadingSeoAds, setLoadingSeoAds] = useState(true);
   const [seoAdSearchTerm, setSeoAdSearchTerm] = useState("");
+
+  const [infraData, setInfraData] = useState<{
+    infrastructure?: { supabase: string; cloudflare: string; github: string; worker: string };
+    seo?: { healthScore: number; redirectCount: number; locationPageCount: number; blogPageCount: number; sitemapUrlCount: number; criticalIssues: number };
+    urls?: { sitemap: string; indexNow: string; liveSite: string };
+  } | null>(null);
+  const [infraLoading, setInfraLoading] = useState(false);
+  const [seoRedirects, setSeoRedirects] = useState<Array<{ id: string; sourceUrl: string; targetUrl: string; redirectType: string }>>([]);
+  const [redirectsLoading, setRedirectsLoading] = useState(false);
+  const [locationPagesList, setLocationPagesList] = useState<Array<{ path: string; title: string; country: string; page_type: string; slug: string }>>([]);
+  const [locationPagesLoading, setLocationPagesLoading] = useState(false);
+  const [newRedirectSource, setNewRedirectSource] = useState("");
+  const [newRedirectTarget, setNewRedirectTarget] = useState("");
+  const [addingRedirect, setAddingRedirect] = useState(false);
 
   const [githubStatus, setGithubStatus] = useState<{ connected: boolean; username?: string; avatarUrl?: string; error?: string } | null>(null);
   const [githubRepos, setGithubRepos] = useState<Array<{ id: number; name: string; fullName: string; private: boolean; defaultBranch: string; htmlUrl: string }>>([]);
@@ -484,6 +509,65 @@ export default function AdminPanel() {
     setAuthToken(null);
     setIsAuthenticated(false);
     showToast('Logged out successfully', 'success');
+  };
+
+  const loadInfrastructure = async () => {
+    setLoadingInfra(true);
+    try {
+      const [infraRes, redirectsRes, pagesRes] = await Promise.all([
+        authFetch('/api/admin/seo/infrastructure'),
+        authFetch('/api/admin/seo/redirects'),
+        authFetch('/api/admin/seo/location-pages?limit=500'),
+      ]);
+      const infraJson = await infraRes.json();
+      const redirectsJson = await redirectsRes.json();
+      const pagesJson = await pagesRes.json();
+      if (infraJson.data) setInfraData(infraJson.data);
+      if (redirectsJson.data) setInfraRedirects(redirectsJson.data.map((r: any) => ({ id: r.id, sourceUrl: r.sourceUrl || r.old_path, targetUrl: r.targetUrl || r.new_path, redirectType: String(r.redirectType || r.status_code || 301) })));
+      if (pagesJson.data) setInfraLocationPages(pagesJson.data);
+    } catch (e) {
+      showToast('Failed to load infrastructure data', 'error');
+    } finally {
+      setLoadingInfra(false);
+    }
+  };
+
+  const addRedirect = async () => {
+    if (!newRedirectSource.trim() || !newRedirectTarget.trim()) {
+      showToast('Enter source and target URLs', 'error');
+      return;
+    }
+    setAddingRedirect(true);
+    try {
+      const res = await authFetch('/api/admin/seo/redirects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sourceUrl: newRedirectSource.trim(), targetUrl: newRedirectTarget.trim(), redirectType: 301 }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setNewRedirectSource('');
+      setNewRedirectTarget('');
+      showToast('Redirect added', 'success');
+      loadInfrastructure();
+    } catch (e: any) {
+      showToast(e?.message || 'Failed to add redirect', 'error');
+    } finally {
+      setAddingRedirect(false);
+    }
+  };
+
+  const deleteRedirect = async (oldPath: string) => {
+    if (!confirm('Delete this redirect?')) return;
+    try {
+      const res = await authFetch(`/api/admin/seo/redirects?old_path=${encodeURIComponent(oldPath)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      showToast('Redirect deleted', 'success');
+      loadInfrastructure();
+    } catch (e: any) {
+      showToast(e?.message || 'Failed to delete redirect', 'error');
+    }
   };
 
   useEffect(() => {
@@ -1711,6 +1795,14 @@ export default function AdminPanel() {
             data-testid="nav-seo"
           >
             <Search className="w-4 h-4 mr-3" /> SEO Toolkit
+          </Button>
+          <Button 
+            variant={activeSection === "infrastructure" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => { setActiveSection("infrastructure"); loadInfrastructure(); }}
+            data-testid="nav-infrastructure"
+          >
+            <Globe className="w-4 h-4 mr-3" /> Infrastructure & SEO
           </Button>
           <Button 
             variant={activeSection === "ai-assistant" ? "secondary" : "ghost"} 
@@ -3976,6 +4068,130 @@ export default function AdminPanel() {
                 <p className="text-gray-400">Rank Math Premium-style SEO management</p>
               </div>
               <SeoToolkit authFetch={authFetch} showToast={showToast} />
+            </div>
+          )}
+
+          {activeSection === "infrastructure" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold flex items-center gap-3">
+                    <Globe className="w-8 h-8 text-orange-500" />
+                    Infrastructure & SEO
+                  </h2>
+                  <p className="text-gray-400">Supabase, Cloudflare, GitHub, sitemap, redirects, location pages</p>
+                </div>
+                <Button variant="outline" onClick={loadInfrastructure} disabled={loadingInfra} className="border-gray-600 text-gray-300">
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loadingInfra ? "animate-spin" : ""}`} />
+                  Refresh
+                </Button>
+              </div>
+              {loadingInfra ? (
+                <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-orange-500" /></div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {infraData?.infrastructure && Object.entries(infraData.infrastructure).map(([k, v]) => (
+                      <Card key={k} className="bg-gray-800 border-gray-700">
+                        <CardContent className="p-4">
+                          <p className="text-xs text-gray-500 uppercase tracking-wide">{String(k).charAt(0).toUpperCase() + String(k).slice(1)}</p>
+                          <p className="text-white font-medium mt-1">{v}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {infraData?.seo && (
+                      <Card className="bg-gray-800 border-gray-700">
+                        <CardContent className="p-4">
+                          <p className="text-xs text-gray-500 uppercase tracking-wide">SEO health</p>
+                          <p className="text-white font-medium mt-1">Score {infraData.seo.healthScore ?? 0} · {infraData.seo.locationPageCount ?? 0} location pages</p>
+                          <p className="text-sm text-gray-400 mt-1">{infraData.seo.redirectCount ?? 0} redirects · sitemap {infraData.seo.sitemapUrlCount ?? 0} URLs</p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                  {infraData?.seo && (
+                    <Card className="bg-gray-800 border-orange-500/30">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-orange-400 uppercase tracking-wide font-medium">SEO Domination status</p>
+                        <p className="text-white font-medium mt-1">
+                          {(infraData.seo.locationPageCount ?? 0).toLocaleString()} / 25,000 location pages
+                        </p>
+                        <div className="mt-2 h-2 bg-gray-700 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-orange-500 rounded-full transition-all" 
+                            style={{ width: `${Math.min(100, ((infraData.seo.locationPageCount ?? 0) / 25000) * 100)}%` }} 
+                          />
+                        </div>
+                        <p className="text-sm text-gray-500 mt-2">
+                          To add more: run <code className="bg-gray-700 px-1 rounded text-xs">npx tsx scripts/seed-25k-location-pages.ts</code> with <code className="bg-gray-700 px-1 rounded text-xs">SUPABASE_SERVICE_KEY</code> and <code className="bg-gray-700 px-1 rounded text-xs">VITE_SUPABASE_URL</code> in .env
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                  {infraData?.urls && (
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardContent className="p-4 flex items-center gap-4 flex-wrap">
+                        {(infraData.urls as Record<string, string>).sitemap && (
+                          <a href={(infraData.urls as Record<string, string>).sitemap} target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline flex items-center gap-1">
+                            <ExternalLink className="w-4 h-4" /> Sitemap
+                          </a>
+                        )}
+                        {(infraData.urls as Record<string, string>).indexNow && (
+                          <a href={(infraData.urls as Record<string, string>).indexNow} target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline flex items-center gap-1">
+                            <ExternalLink className="w-4 h-4" /> IndexNow
+                          </a>
+                        )}
+                        {(infraData.urls as Record<string, string>).liveSite && (
+                          <a href={(infraData.urls as Record<string, string>).liveSite} target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline flex items-center gap-1">
+                            <ExternalLink className="w-4 h-4" /> Live site
+                          </a>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-300 mb-3">Redirects</h3>
+                    <div className="flex gap-2 mb-3">
+                      <Input placeholder="Source path (e.g. /old-page)" value={newRedirectSource} onChange={(e) => setNewRedirectSource(e.target.value)} className="bg-gray-700 border-gray-600 text-white max-w-xs" />
+                      <Input placeholder="Target path (e.g. /new-page)" value={newRedirectTarget} onChange={(e) => setNewRedirectTarget(e.target.value)} className="bg-gray-700 border-gray-600 text-white max-w-xs" />
+                      <Button onClick={addRedirect} disabled={addingRedirect}>{addingRedirect ? <Loader2 className="w-4 h-4 animate-spin" /> : "Add"}</Button>
+                    </div>
+                    <div className="border border-gray-700 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader><TableRow className="border-gray-700"><TableHead className="text-gray-400">Source</TableHead><TableHead className="text-gray-400">Target</TableHead><TableHead className="text-gray-400 w-20">Type</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
+                        <TableBody>
+                          {infraRedirects.map((r) => (
+                            <TableRow key={r.id} className="border-gray-700">
+                              <TableCell className="text-gray-300 font-mono text-sm">{r.sourceUrl}</TableCell>
+                              <TableCell className="text-gray-300 font-mono text-sm">{r.targetUrl}</TableCell>
+                              <TableCell className="text-gray-500">{r.redirectType}</TableCell>
+                              <TableCell><Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300" onClick={() => deleteRedirect(r.sourceUrl)}><Trash2 className="w-4 h-4" /></Button></TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-300 mb-3">Location pages (sample)</h3>
+                    <p className="text-sm text-gray-500 mb-2">First 500 from seo_architecture. Path format: /l/usa/iptv/slug (country, pageType, slug). Click View to open on live site.</p>
+                    <div className="border border-gray-700 rounded-lg overflow-hidden max-h-80 overflow-y-auto">
+                      <Table>
+                        <TableHeader><TableRow className="border-gray-700"><TableHead className="text-gray-400">Path</TableHead><TableHead className="text-gray-400">Title</TableHead><TableHead className="text-gray-400 w-24" /></TableRow></TableHeader>
+                        <TableBody>
+                          {infraLocationPages.slice(0, 100).map((p, i) => (
+                            <TableRow key={i} className="border-gray-700">
+                              <TableCell className="text-gray-300 font-mono text-sm">{p.path}</TableCell>
+                              <TableCell className="text-gray-400 text-sm truncate max-w-xs">{p.title}</TableCell>
+                              <TableCell><a href={`https://streamstickpro.com${p.path}`} target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline text-sm flex items-center gap-1"><ExternalLink className="w-3 h-3" /> View</a></TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 

@@ -881,6 +881,38 @@ export function createStorage(config: StorageConfig) {
         return undefined;
       }
     },
+
+    async insertRedirect(old_path: string, new_path: string, status_code: number = 301): Promise<void> {
+      const { error } = await supabase.from('redirect_map').insert({ old_path, new_path, status_code });
+      if (error) throw error;
+    },
+
+    async deleteRedirect(old_path: string): Promise<void> {
+      const { error } = await supabase.from('redirect_map').delete().eq('old_path', old_path);
+      if (error) throw error;
+    },
+
+    async getSeoArchitectureList(limit: number = 500): Promise<{ path: string; title: string; country: string; page_type: string; slug: string }[]> {
+      try {
+        const { data } = await supabase
+          .from('seo_architecture')
+          .select('country, page_type, slug, title')
+          .eq('published', true)
+          .order('country')
+          .order('page_type')
+          .limit(limit);
+        if (!data || data.length === 0) return [];
+        return (data as any[]).map((row) => ({
+          path: `/l/${row.country?.toLowerCase() || ''}/${row.page_type || ''}/${row.slug || ''}`,
+          title: row.title || row.slug || '',
+          country: row.country,
+          page_type: row.page_type,
+          slug: row.slug,
+        }));
+      } catch {
+        return [];
+      }
+    },
   };
 }
 

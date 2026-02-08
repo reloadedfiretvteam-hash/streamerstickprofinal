@@ -1,3 +1,7 @@
+# Deploy to Cloudflare Pages + run Supabase SEO migrations + purge cache + ping sitemaps
+# Required secrets: SUPABASE_DATABASE_URL (or DATABASE_URL), CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID,
+#   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY, STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY,
+#   STRIPE_WEBHOOK_SECRET, RESEND_API_KEY, SESSION_SECRET. Optional: CLOUDFLARE_ZONE_ID (for cache purge).
 name: Deploy to Cloudflare Pages
 
 on:
@@ -25,11 +29,12 @@ jobs:
       
       - name: Install dependencies
         run: npm install --legacy-peer-deps
-      
-      - name: Run Database Migration
+
+      - name: Run Database Migration (Supabase SEO tables)
         run: npx tsx scripts/run-supabase-migration.ts
         env:
-          SUPABASE_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         continue-on-error: true
       
       - name: Build for Cloudflare Workers
@@ -62,6 +67,20 @@ jobs:
           VITE_SECURE_HOSTS: secure.streamstickpro.com
           VITE_STORAGE_BUCKET_NAME: imiges
           SITE_URL: https://streamstickpro.com
+
+      - name: Purge Cloudflare cache (SEO: fresh sitemap & location pages)
+        env:
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -n "$CLOUDFLARE_ZONE_ID" ] && [ -n "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "Purging Cloudflare cache for fresh sitemap and location pages..."
+            curl -sSf -X POST "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              --data '{"purge_everything":true}' || true
+          fi
+        continue-on-error: true
 
       - name: Warm sitemap and notify search engines (Google, Bing, Yandex)
         run: |
