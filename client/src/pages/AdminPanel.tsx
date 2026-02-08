@@ -361,11 +361,11 @@ export default function AdminPanel() {
   const [infraRedirects, setInfraRedirects] = useState<{ id: string; sourceUrl: string; targetUrl: string; redirectType: string }[]>([]);
   const [infraLocationPages, setInfraLocationPages] = useState<{ path: string; title: string; country: string; page_type: string; slug: string }[]>([]);
   const [loadingInfra, setLoadingInfra] = useState(false);
-  // Single set of redirect form state for Infrastructure & SEO section
   const [newRedirectSource, setNewRedirectSource] = useState("");
   const [newRedirectTarget, setNewRedirectTarget] = useState("");
   const [addingRedirect, setAddingRedirect] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
+  // infraData/redirect state above is single set for Infrastructure & SEO (no duplicate)
   const [aiRequest, setAiRequest] = useState<AIGenerationRequest>({
     topic: '',
     keywords: [],
