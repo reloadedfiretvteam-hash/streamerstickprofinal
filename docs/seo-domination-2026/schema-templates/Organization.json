@@ -1,0 +1,15 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "StreamStickPro",
+  "url": "https://streamstickpro.com",
+  "logo": "https://streamstickpro.com/favicon.png",
+  "description": "IPTV and jailbroken Fire Stick provider. [CHANNEL_COUNT] channels, pre-configured devices, Google TV support.",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "customer service",
+    "url": "https://streamstickpro.com",
+    "availableLanguage": "English"
+  },
+  "sameAs": []
+}

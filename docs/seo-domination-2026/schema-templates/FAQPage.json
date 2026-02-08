@@ -1,0 +1,22 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is IPTV?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "IPTV (Internet Protocol Television) delivers live TV and on-demand content over the internet. StreamStickPro provides [CHANNEL_COUNT] channels and works on Fire Stick, Google TV, and Android."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a jailbroken Fire Stick?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A jailbroken Fire Stick is a Fire TV device with sideloading enabled and apps like Kodi or Stremio pre-installed. StreamStickPro offers pre-configured devices ready to stream."
+      }
+    }
+  ]
+}

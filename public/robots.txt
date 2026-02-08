@@ -3,12 +3,22 @@
 # Purpose: Optimize indexing for all major search engines and AI crawlers
 
 # Global Rules - Allow all by default, block specific paths
+# Crawl budget: prioritize pillars + location pages (/l/). No crawl-delay for Google (ignored).
 User-agent: *
 Allow: /
 Allow: /blog
 Allow: /blog/*
 Allow: /shop
 Allow: /products
+Allow: /l/
+Allow: /l/*
+Allow: /iptv-services
+Allow: /iptv-firestick
+Allow: /jailbroken-fire-sticks
+Allow: /firestick-devices
+Allow: /best-iptv-firestick
+Allow: /iptv-media-players
+Allow: /free-trial
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
@@ -26,15 +36,15 @@ Disallow: /*?*session=
 # Crawl Delay (Be nice to our server)
 Crawl-delay: 1
 
-# Google Bot (Premium Treatment)
+# Google Bot (Premium Treatment) - Note: Crawl-delay is ignored by Google
 User-agent: Googlebot
 Allow: /
 Allow: /blog/
 Allow: /shop/
-Allow: /products/
+Allow: /l/
+Allow: /l/*
 Disallow: /admin
 Disallow: /api/
-Crawl-delay: 0.5
 
 # Google Image Bot (Show our products!)
 User-agent: Googlebot-Image
@@ -206,6 +216,7 @@ Allow: /
 Allow: /blog
 Crawl-delay: 2
 
-# Sitemaps (Very Important!)
+# Sitemaps (Google/Bing/Yandex: submit sitemap.xml or sitemap-index.xml)
 Sitemap: https://streamstickpro.com/sitemap.xml
+Sitemap: https://streamstickpro.com/sitemap-index.xml
 

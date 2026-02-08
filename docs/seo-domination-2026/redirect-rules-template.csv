@@ -1,0 +1,13 @@
+old_path,new_path,status_code
+/firestick,/iptv-firestick,301
+/iptv-free,/,301
+/cheap-iptv,/shop,301
+/pricing,/shop,301
+/free-trial,/,301
+/guides,/iptv-services,301
+/guide,/iptv-services,301
+/jailbreak,/jailbroken-fire-sticks,301
+/devices,/firestick-devices,301
+/media-players,/iptv-media-players,301
+/iptv-apps,/iptv-media-players,301
+/iptv-players,/iptv-media-players,301

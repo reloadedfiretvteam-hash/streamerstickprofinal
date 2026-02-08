@@ -1,0 +1,195 @@
+import { useEffect, useState } from "react";
+import { Link, useRoute } from "wouter";
+import { PillarLayout } from "@/components/PillarLayout";
+import { SEOSchema } from "@/components/SEOSchema";
+import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
+
+const SITE_URL = "https://streamstickpro.com";
+
+interface SeoPage {
+  country: string;
+  region?: string;
+  location?: string;
+  slug: string;
+  page_type: string;
+  title: string;
+  meta_description?: string;
+  h1: string;
+  p1_snippet?: string;
+  pillar_url?: string;
+  internal_links?: { url?: string; anchor?: string }[];
+  faq_json?: { question?: string; answer?: string }[];
+}
+
+const COUNTRY_LABEL: Record<string, string> = {
+  USA: "USA",
+  CA: "Canada",
+  UK: "United Kingdom",
+};
+
+const PAGE_TYPE_LABEL: Record<string, string> = {
+  iptv: "IPTV",
+  jailbreak: "Jailbroken Fire Stick",
+  google: "Google TV",
+};
+
+export default function LocationPage() {
+  const [, params] = useRoute("/l/:country/:pageType/:slug");
+  const country = params?.country ?? "";
+  const pageType = params?.pageType ?? "";
+  const slug = params?.slug ?? "";
+
+  const [page, setPage] = useState<SeoPage | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (!country || !pageType || !slug) {
+      setLoading(false);
+      setError(true);
+      return;
+    }
+    setLoading(true);
+    setError(false);
+    fetch(`/api/seo-page/${encodeURIComponent(country)}/${encodeURIComponent(pageType)}/${encodeURIComponent(slug)}`)
+      .then((r) => {
+        if (!r.ok) throw new Error("Not found");
+        return r.json();
+      })
+      .then((data) => {
+        setPage(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setPage(null);
+        setLoading(false);
+        setError(true);
+      });
+  }, [country, pageType, slug]);
+
+  useEffect(() => {
+    if (!page) return;
+    document.title = (page.title || page.h1 || "IPTV & Jailbroken Fire Stick") + " | StreamStickPro";
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta && page.meta_description) meta.setAttribute("content", page.meta_description);
+    return () => {
+      document.title = "StreamStickPro - Get Fully Loaded Streaming in 10 Minutes";
+    };
+  }, [page]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <Spinner className="w-10 h-10 text-orange-500" />
+      </div>
+    );
+  }
+
+  if (error || !page) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-8">
+        <h1 className="text-2xl font-bold mb-4">Page not found</h1>
+        <p className="text-gray-400 mb-6">This location or topic page could not be loaded.</p>
+        <Link href="/">
+          <Button className="bg-orange-500 hover:bg-orange-600">Back to Home</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const countryLabel = COUNTRY_LABEL[page.country.toUpperCase()] || page.country;
+  const typeLabel = PAGE_TYPE_LABEL[page.page_type] || page.page_type;
+  const locationLabel = page.location || page.region || slug;
+
+  const breadcrumbs = [
+    { label: "Home", href: "/" },
+    { label: countryLabel, href: "/" },
+    { label: typeLabel, href: page.pillar_url || (page.page_type === "iptv" ? "/iptv-services" : page.page_type === "jailbreak" ? "/jailbroken-fire-sticks" : "/iptv-media-players") },
+    { label: locationLabel, href: `/l/${country}/${pageType}/${slug}` },
+  ];
+
+  const faq = Array.isArray(page.faq_json)
+    ? page.faq_json
+        .filter((f) => f && (f.question || f.answer))
+        .map((f) => ({ question: f.question || "", answer: f.answer || "" }))
+    : [];
+
+  const schemaBreadcrumbs = breadcrumbs.map((b) => ({
+    name: b.label,
+    url: b.href.startsWith("http") ? b.href : `${SITE_URL}${b.href}`,
+  }));
+
+  const internalLinks = Array.isArray(page.internal_links) ? page.internal_links : [];
+
+  return (
+    <>
+      <SEOSchema
+        faq={faq.length > 0 ? faq : undefined}
+        breadcrumbs={schemaBreadcrumbs.length > 0 ? schemaBreadcrumbs : undefined}
+      />
+      <PillarLayout
+        title={displayH1}
+        description={page.p1_snippet}
+        breadcrumbs={breadcrumbs}
+      >
+        {page.p1_snippet && (
+          <p className="text-xl text-gray-300 mb-6">{page.p1_snippet}</p>
+        )}
+
+        {internalLinks.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-3">Related guides</h2>
+            <ul className="list-disc list-inside space-y-2 text-gray-300">
+              {internalLinks.map((link, i) => (
+                <li key={i}>
+                  <Link href={link.url || "#"} className="text-orange-400 hover:underline">
+                    {link.anchor || link.url}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {faq.length > 0 && (
+          <section className="mt-8">
+            <h2 id="faq" className="text-2xl font-bold text-white mb-4">FAQ</h2>
+            <dl className="space-y-4">
+              {faq.map((item, i) => (
+                <div key={i}>
+                  <dt className="font-semibold text-white">{item.question}</dt>
+                  <dd className="text-gray-300 mt-1 ml-0">{item.answer}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
+
+        <section className="mt-12 p-6 rounded-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-400/30">
+          <h2 className="text-2xl font-bold text-white mb-2">Ready to stream?</h2>
+          <p className="text-gray-300 mb-4">
+            StreamStickPro delivers 18,000+ IPTV channels and jailbroken Fire Sticks with Kodi/Stremio pre-installed. Works on Google TV and Chromecast. Free trial available.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/">
+              <Button className="bg-orange-500 hover:bg-orange-600">View Home & Shop</Button>
+            </Link>
+            <Link href="/shop">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">Shop Plans</Button>
+            </Link>
+            <Link href="/jailbroken-fire-sticks">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">Jailbroken Fire Sticks</Button>
+            </Link>
+            <Link href="/iptv-services">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">IPTV Guide</Button>
+            </Link>
+            <Link href="/iptv-media-players">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">Google TV IPTV</Button>
+            </Link>
+          </div>
+        </section>
+      </PillarLayout>
+    </>
+  );
+}

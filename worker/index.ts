@@ -99,6 +99,19 @@ app.get('/api/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.0.1' });
 });
 
+// SEO location page API (for /l/:country/:pageType/:slug)
+app.get('/api/seo-page/:country/:pageType/:slug', async (c) => {
+  const country = c.req.param('country');
+  const pageType = c.req.param('pageType');
+  const slug = c.req.param('slug');
+  const storage = getStorage(c.env);
+  const page = await storage.getSeoPageByPath(country, pageType, slug);
+  if (!page) {
+    return c.json({ error: 'Not found' }, 404);
+  }
+  return c.json(page);
+});
+
 app.get('/api/debug', async (c) => {
   const supabaseUrl = c.env.VITE_SUPABASE_URL || '';
   const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY || '';
@@ -175,21 +188,51 @@ app.get('/cron/email-campaigns', async (c) => {
   }
 });
 
-// SEO 301 redirects (old URLs → pillar pages)
-const SEO_REDIRECTS: Record<string, string> = {
+// SEO 301 redirects: DB (redirect_map) first, then static
+const SEO_REDIRECTS_STATIC: Record<string, string> = {
   '/guides': '/iptv-services',
   '/guide': '/iptv-services',
   '/firestick': '/iptv-firestick',
   '/jailbreak': '/jailbroken-fire-sticks',
   '/devices': '/firestick-devices',
+  '/media-players': '/iptv-media-players',
+  '/iptv-apps': '/iptv-media-players',
+  '/iptv-players': '/iptv-media-players',
 };
 app.get('*', async (c, next) => {
   const path = new URL(c.req.url).pathname;
-  const target = SEO_REDIRECTS[path];
+  try {
+    const storage = getStorage(c.env);
+    const dbRedirects = await storage.getRedirectMap();
+    for (const r of dbRedirects) {
+      if (r.old_path === path) {
+        return c.redirect('https://streamstickpro.com' + r.new_path, (r.status_code as 301) || 301);
+      }
+    }
+  } catch {
+    /* use static */
+  }
+  const target = SEO_REDIRECTS_STATIC[path];
   if (target) {
-    return c.redirect(target, 301);
+    return c.redirect('https://streamstickpro.com' + target, 301);
   }
   return next();
+});
+
+// Sitemap index (for 50K+ URLs: point to sitemap.xml and future sitemap-*.xml)
+app.get('/sitemap-index.xml', (c) => {
+  const baseUrl = 'https://streamstickpro.com';
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>${baseUrl}/sitemap.xml</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+  </sitemap>
+</sitemapindex>`;
+  return c.text(xml, 200, {
+    'Content-Type': 'application/xml; charset=utf-8',
+    'Cache-Control': 'public, max-age=3600',
+  });
 });
 
 // Sitemap route - must be before catch-all
@@ -212,6 +255,7 @@ app.get('/sitemap.xml', async (c) => {
       { url: '/jailbroken-fire-sticks', priority: '0.9', changefreq: 'weekly' },
       { url: '/firestick-devices', priority: '0.9', changefreq: 'weekly' },
       { url: '/best-iptv-firestick', priority: '0.9', changefreq: 'weekly' },
+      { url: '/iptv-media-players', priority: '0.9', changefreq: 'weekly' },
       { url: '/terms', priority: '0.5', changefreq: 'yearly' },
       { url: '/privacy', priority: '0.5', changefreq: 'yearly' },
       { url: '/refund', priority: '0.5', changefreq: 'yearly' },
@@ -257,6 +301,19 @@ app.get('/sitemap.xml', async (c) => {
   </url>
 `;
 
+    // SEO location pages from Supabase (seo_architecture)
+    const seoPages = await storage.getSeoPagesForSitemap(25000);
+    for (const page of seoPages) {
+      const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+      sitemap += `  <url>
+    <loc>${baseUrl}${page.path}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+`;
+    }
+
     sitemap += `</urlset>`;
 
     return c.text(sitemap, 200, {
@@ -284,11 +341,25 @@ app.get('/sitemap.xml', async (c) => {
   }
 });
 
+// Security headers for all responses
+const SECURITY_HEADERS: Record<string, string> = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+};
+function applySecurityHeaders(res: Response): Response {
+  const next = new Response(res.body, { status: res.status, statusText: res.statusText, headers: new Headers(res.headers) });
+  Object.entries(SECURITY_HEADERS).forEach(([k, v]) => next.headers.set(k, v));
+  return next;
+}
+
 app.get('*', async (c) => {
   try {
-    return await c.env.ASSETS.fetch(c.req.raw);
+    const res = await c.env.ASSETS.fetch(c.req.raw);
+    return applySecurityHeaders(res);
   } catch {
-    return c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
+    const fallback = await c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
+    return applySecurityHeaders(fallback);
   }
 });
 

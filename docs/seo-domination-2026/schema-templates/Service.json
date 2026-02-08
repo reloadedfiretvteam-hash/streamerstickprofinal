@@ -1,0 +1,9 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "IPTV Service [LOCATION]",
+  "description": "StreamStickPro delivers [CHANNEL_COUNT] IPTV channels and jailbroken Fire Sticks. Works on Google TV and Chromecast. Free trial available.",
+  "provider": { "@type": "Organization", "name": "StreamStickPro", "url": "https://streamstickpro.com" },
+  "areaServed": { "@type": "Country", "name": "[USA/Canada/UK]" },
+  "serviceType": "IPTV and streaming device sales"
+}

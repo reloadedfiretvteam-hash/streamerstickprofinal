@@ -1,0 +1,10 @@
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://streamstickpro.com/" },
+    { "@type": "ListItem", "position": 2, "name": "[USA/Canada/UK]", "item": "https://streamstickpro.com/" },
+    { "@type": "ListItem", "position": 3, "name": "[IPTV/Jailbreak/Google TV]", "item": "https://streamstickpro.com/[pillar-path]" },
+    { "@type": "ListItem", "position": 4, "name": "[MAJOR_CITY]", "item": "https://streamstickpro.com/l/[country]/[page_type]/[slug]" }
+  ]
+}

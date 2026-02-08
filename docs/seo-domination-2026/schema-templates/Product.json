@@ -1,0 +1,21 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Pre-Jailbroken Fire Stick 2026",
+  "description": "Fire Stick with Kodi/Stremio pre-installed. Stream [CHANNEL_COUNT] IPTV channels. No specific city; ships to USA, Canada, UK.",
+  "brand": { "@type": "Brand", "name": "StreamStickPro" },
+  "offers": {
+    "@type": "Offer",
+    "url": "https://streamstickpro.com/shop",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "seller": { "@type": "Organization", "name": "StreamStickPro" }
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.95",
+    "reviewCount": "5000",
+    "bestRating": "5",
+    "worstRating": "1"
+  }
+}

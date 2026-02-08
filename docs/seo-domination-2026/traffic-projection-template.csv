@@ -1,0 +1,8 @@
+metric,month_1,month_2,month_3,month_4,notes
+impressions_target,62500000,125000000,187500000,250000000,250M by month 4
+ctr_pct,2,2,2,2,assumed 2% CTR
+clicks,1250000,2500000,3750000,5000000,5M clicks by month 4
+trial_conversion_pct,20,20,20,20,trial signup from clicks
+trials,250000,500000,750000,1000000,1M trials in 120 days
+pages_indexed,5000,15000,25000,25000,ramp to 25K
+avg_position_target,25,15,10,8,improve over time

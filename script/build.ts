@@ -67,23 +67,30 @@ async function buildCloudflare() {
   });
 
   console.log("Creating _routes.json for Cloudflare Pages...");
+  // Worker must handle /* for redirects, sitemap.xml, sitemap-index.xml, API, and SPA fallback
   const routesJson = {
     version: 1,
-    include: ["/api/*"],
+    include: ["/*"],
     exclude: [
-      "/assets/*", 
-      "/*.css", 
-      "/*.js", 
-      "/*.png", 
-      "/*.jpg", 
-      "/*.svg", 
-      "/*.ico", 
+      "/assets/*",
+      "/*.css",
+      "/*.js",
+      "/*.png",
+      "/*.jpg",
+      "/*.jpeg",
+      "/*.webp",
+      "/*.gif",
+      "/*.svg",
+      "/*.ico",
       "/*.woff",
       "/*.woff2",
       "/*.txt",
-      "/googledf2a7b91b7b9494f.html",
       "/BingSiteAuth.xml",
-      "/robots.txt"
+      "/robots.txt",
+      "/manifest.json",
+      "/service-worker.js",
+      "/googledf2a7b91b7b9494f.html",
+      "/googlec8f0b74f53fde501.html"
     ]
   };
   await writeFile("dist/_routes.json", JSON.stringify(routesJson, null, 2));
