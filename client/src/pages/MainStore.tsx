@@ -303,7 +303,7 @@ export default function MainStore() {
     document.documentElement.classList.add("dark");
     document.title = "Best IPTV Firestick Service 2026 | 18K+ Channels | StreamStickPro";
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute("content", "Best IPTV service for Fire Stick & Android. 18,000+ live TV channels, 100,000+ movies. TiviMate, IPTV Smarters. Free trial. Shop devices & plans—StreamStickPro.");
+    if (metaDesc) metaDesc.setAttribute("content", "Best IPTV and live IPTV service for Fire Stick & Android. 18,000+ live TV channels, 100,000+ movies. TiviMate, IPTV Smarters. Free trial. Pre-loaded Fire Sticks & plans—StreamStickPro.");
     loadProducts();
   }, []);
 
@@ -405,6 +405,15 @@ export default function MainStore() {
     }
   };
 
+  // Schema-only description: never output "Real product mapped to..." (internal placeholder from DB/seed)
+  const getSchemaDescription = (product: Product): string => {
+    if (!product.description?.startsWith("Real product mapped to")) return product.description;
+    if (product.category === "iptv") {
+      return `Premium Live TV plan: ${product.name}. 18,000+ live channels, 100,000+ movies and series, sports and PPV. Multi-device options. StreamStickPro.`;
+    }
+    return `Pre-configured ${product.name} with 1 year Live TV included. 18,000+ channels, 100,000+ movies and series. StreamStickPro.`;
+  };
+
   const productListData = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -415,7 +424,7 @@ export default function MainStore() {
       "item": {
         "@type": "Product",
         "name": product.name,
-        "description": product.description,
+        "description": getSchemaDescription(product),
         "image": product.image,
         "offers": {
           "@type": "Offer",
@@ -514,7 +523,7 @@ export default function MainStore() {
         description="Pre-configured Fire Sticks and IPTV subscription plans"
         items={products.slice(0, 6).map(p => ({
           name: p.name,
-          description: p.description,
+          description: getSchemaDescription(p),
           url: `https://streamstickpro.com#${p.id}`,
           image: p.image,
           price: p.price

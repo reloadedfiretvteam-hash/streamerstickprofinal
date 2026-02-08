@@ -18,7 +18,8 @@ export function AnimatedCounter({
   className = "",
   decimals = 0
 }: AnimatedCounterProps) {
-  const [count, setCount] = useState(0);
+  // Start at end so crawlers and first paint see correct numbers (18,000+, 100,000+, 1,000+)
+  const [count, setCount] = useState(end);
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const hasAnimated = useRef(false);
@@ -26,6 +27,7 @@ export function AnimatedCounter({
   useEffect(() => {
     if (isInView && !hasAnimated.current) {
       hasAnimated.current = true;
+      setCount(0);
       const startTime = Date.now();
       const endTime = startTime + duration * 1000;
 

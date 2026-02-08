@@ -10,7 +10,7 @@ export default function IptvServices() {
   useEffect(() => {
     document.title = "Best IPTV Service 2026 | Live TV Streaming Guide | StreamStickPro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Best IPTV service 2026: live TV streaming, cheap IPTV subscription, 18K+ channels. Fire Stick & Android. Free trial—StreamStickPro.");
+    if (meta) meta.setAttribute("content", "Best IPTV service 2026: live IPTV, live TV streaming, cheap IPTV subscription, 18K+ channels. Fire Stick & Android. Free trial—StreamStickPro.");
   }, []);
 
   const breadcrumbs = [
