@@ -356,7 +356,7 @@ export default function AdminPanel() {
   const [infraData, setInfraData] = useState<{
     infrastructure?: Record<string, string>;
     seo?: { healthScore?: number; redirectCount?: number; locationPageCount?: number; blogPageCount?: number; sitemapUrlCount?: number };
-    urls?: { sitemap?: string; liveSite?: string };
+    urls?: { sitemap?: string; indexNow?: string; liveSite?: string };
   } | null>(null);
   const [infraRedirects, setInfraRedirects] = useState<{ id: string; sourceUrl: string; targetUrl: string; redirectType: string }[]>([]);
   const [infraLocationPages, setInfraLocationPages] = useState<{ path: string; title: string; country: string; page_type: string; slug: string }[]>([]);
@@ -384,20 +384,6 @@ export default function AdminPanel() {
   const [seoAds, setSeoAds] = useState<any[]>([]);
   const [loadingSeoAds, setLoadingSeoAds] = useState(true);
   const [seoAdSearchTerm, setSeoAdSearchTerm] = useState("");
-
-  const [infraData, setInfraData] = useState<{
-    infrastructure?: { supabase: string; cloudflare: string; github: string; worker: string };
-    seo?: { healthScore: number; redirectCount: number; locationPageCount: number; blogPageCount: number; sitemapUrlCount: number; criticalIssues: number };
-    urls?: { sitemap: string; indexNow: string; liveSite: string };
-  } | null>(null);
-  const [infraLoading, setInfraLoading] = useState(false);
-  const [seoRedirects, setSeoRedirects] = useState<Array<{ id: string; sourceUrl: string; targetUrl: string; redirectType: string }>>([]);
-  const [redirectsLoading, setRedirectsLoading] = useState(false);
-  const [locationPagesList, setLocationPagesList] = useState<Array<{ path: string; title: string; country: string; page_type: string; slug: string }>>([]);
-  const [locationPagesLoading, setLocationPagesLoading] = useState(false);
-  const [newRedirectSource, setNewRedirectSource] = useState("");
-  const [newRedirectTarget, setNewRedirectTarget] = useState("");
-  const [addingRedirect, setAddingRedirect] = useState(false);
 
   const [githubStatus, setGithubStatus] = useState<{ connected: boolean; username?: string; avatarUrl?: string; error?: string } | null>(null);
   const [githubRepos, setGithubRepos] = useState<Array<{ id: number; name: string; fullName: string; private: boolean; defaultBranch: string; htmlUrl: string }>>([]);

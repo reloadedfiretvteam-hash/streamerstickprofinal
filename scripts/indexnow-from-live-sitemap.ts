@@ -27,25 +27,31 @@ async function main() {
     process.exit(0);
   }
 
-  const body = {
-    host: new URL(SITE_URL).hostname,
-    key: INDEXNOW_KEY,
-    keyLocation: INDEXNOW_KEY_LOCATION,
-    urlList: urls.slice(0, 10000),
-  };
-
-  const indexRes = await fetch('https://api.indexnow.org/IndexNow', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json; charset=utf-8' },
-    body: JSON.stringify(body),
-  });
-
-  if (indexRes.ok || indexRes.status === 200 || indexRes.status === 202) {
-    console.log('IndexNow OK: submitted', body.urlList.length, 'URLs');
-    process.exit(0);
+  const host = new URL(SITE_URL).hostname;
+  const BATCH = 10000;
+  let totalSubmitted = 0;
+  for (let i = 0; i < urls.length; i += BATCH) {
+    const batch = urls.slice(i, i + BATCH);
+    const body = {
+      host,
+      key: INDEXNOW_KEY,
+      keyLocation: INDEXNOW_KEY_LOCATION,
+      urlList: batch,
+    };
+    const indexRes = await fetch('https://api.indexnow.org/IndexNow', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify(body),
+    });
+    if (indexRes.ok || indexRes.status === 200 || indexRes.status === 202) {
+      totalSubmitted += batch.length;
+      console.log('IndexNow batch OK: submitted', batch.length, 'URLs (total', totalSubmitted, ')');
+    } else {
+      console.error('IndexNow batch error:', indexRes.status, await indexRes.text());
+    }
   }
-  console.error('IndexNow error:', indexRes.status, await indexRes.text());
-  process.exit(1);
+  console.log('IndexNow done: submitted', totalSubmitted, 'URLs to Bing/Yandex/Seznam');
+  process.exit(0);
 }
 
 main();

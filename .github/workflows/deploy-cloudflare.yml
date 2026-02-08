@@ -89,17 +89,27 @@ jobs:
           fi
         continue-on-error: true
 
-      - name: Warm sitemap and notify search engines (Google, Bing, Yandex)
+      - name: Wait for deploy to be live
+        run: sleep 15
+
+      - name: Verify sitemap and ping search engines
         run: |
           SITE="https://streamstickpro.com"
           SITEMAP="${SITE}/sitemap.xml"
-          curl -sSf -o /dev/null "${SITEMAP}" || true
-          curl -sSf -o /dev/null "https://www.bing.com/ping?sitemap=${SITEMAP}" || true
-          curl -sSf -o /dev/null "https://www.google.com/ping?sitemap=${SITEMAP}" || true
-          curl -sSf -o /dev/null "https://webmaster.yandex.com/ping?sitemap=${SITEMAP}" || true
+          echo "Fetching sitemap..."
+          SITEMAP_BODY=$(curl -sSf -L "$SITEMAP" || echo "")
+          URL_COUNT=$(echo "$SITEMAP_BODY" | grep -o '<loc>' | wc -l)
+          echo "## Sitemap verification" >> $GITHUB_STEP_SUMMARY
+          echo "**URLs in sitemap:** $URL_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "**Sitemap URL:** $SITEMAP" >> $GITHUB_STEP_SUMMARY
+          echo "URLs in sitemap: $URL_COUNT"
+          echo "Pinging Google, Bing, Yandex..."
+          curl -sSf -o /dev/null "https://www.google.com/ping?sitemap=${SITEMAP}" && echo "Google: submitted" || true
+          curl -sSf -o /dev/null "https://www.bing.com/ping?sitemap=${SITEMAP}" && echo "Bing: submitted" || true
+          curl -sSf -o /dev/null "https://webmaster.yandex.com/ping?sitemap=${SITEMAP}" && echo "Yandex: submitted" || true
         continue-on-error: true
 
-      - name: Submit all sitemap URLs to IndexNow (Bing, Yandex, etc.)
+      - name: Submit URLs to IndexNow (Bing, Yandex, Seznam)
         run: npx tsx scripts/indexnow-from-live-sitemap.ts
         env:
           SITE_URL: https://streamstickpro.com
