@@ -36,6 +36,13 @@ jobs:
           SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         continue-on-error: true
+
+      - name: Seed 25K location pages (thousands of URLs for sitemap)
+        run: npx tsx scripts/seed-25k-location-pages.ts
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        continue-on-error: true
       
       - name: Build for Cloudflare Workers
         run: npx tsx script/build-worker.ts
