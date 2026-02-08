@@ -35,6 +35,12 @@ const BestIptvFirestick = lazy(() => import("@/pages/BestIptvFirestick"));
 const IptvMediaPlayers = lazy(() => import("@/pages/IptvMediaPlayers"));
 const LocationPage = lazy(() => import("@/pages/LocationPage"));
 const Resources = lazy(() => import("@/pages/Resources"));
+const Trial36hr = lazy(() => import("@/pages/Trial36hr"));
+const Pricing = lazy(() => import("@/pages/Pricing"));
+const OnnGoogleTv = lazy(() => import("@/pages/OnnGoogleTv"));
+const IptvSmartersPro = lazy(() => import("@/pages/IptvSmartersPro"));
+const Tivimate = lazy(() => import("@/pages/Tivimate"));
+const VsCompetitor = lazy(() => import("@/pages/VsCompetitor"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 // Loading fallback component
@@ -98,6 +104,12 @@ function Router() {
         <Route path="/best-iptv-firestick" component={BestIptvFirestick} />
         <Route path="/iptv-media-players" component={IptvMediaPlayers} />
         <Route path="/resources" component={Resources} />
+        <Route path="/36hr-trial" component={Trial36hr} />
+        <Route path="/pricing" component={Pricing} />
+        <Route path="/onn-google-tv" component={OnnGoogleTv} />
+        <Route path="/iptv-smarters-pro" component={IptvSmartersPro} />
+        <Route path="/tivimate" component={Tivimate} />
+        <Route path="/vs-:competitor" component={VsCompetitor} />
         <Route path="/l/:country/:pageType/:slug" component={LocationPage} />
         <Route component={NotFound} />
       </Switch>

@@ -315,14 +315,18 @@ function escapeHtml(s: string): string {
 const SEO_REDIRECTS_STATIC: Record<string, string> = {
   '/guides': '/iptv-services',
   '/guide': '/iptv-services',
-  '/trial': '/',  // Phase 1: trial CTA on homepage
-  '/pricing': '/shop',
+  '/trial': '/',
   '/firestick': '/jailbroken-fire-sticks',
   '/jailbreak': '/jailbroken-fire-sticks',
   '/devices': '/firestick-devices',
   '/media-players': '/iptv-media-players',
   '/iptv-apps': '/iptv-media-players',
   '/iptv-players': '/iptv-media-players',
+  '/iptvstronger': '/vs-iptvstronger',
+  '/troypoint': '/vs-troypoint',
+  '/hypotv': '/vs-hypotv',
+  '/tvworldwide': '/vs-tvworldwide',
+  '/iptvproviders': '/vs-iptvproviders',
 };
 app.get('*', async (c, next) => {
   const path = new URL(c.req.url).pathname;
@@ -363,9 +367,14 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/', priority: '1.0', changefreq: 'daily' },
   { url: '/shop', priority: '0.9', changefreq: 'daily' },
   { url: '/blog', priority: '0.9', changefreq: 'daily' },
+  { url: '/36hr-trial', priority: '0.95', changefreq: 'daily' },
+  { url: '/pricing', priority: '0.9', changefreq: 'weekly' },
+  { url: '/jailbroken-fire-sticks', priority: '0.9', changefreq: 'weekly' },
+  { url: '/onn-google-tv', priority: '0.9', changefreq: 'weekly' },
+  { url: '/iptv-smarters-pro', priority: '0.9', changefreq: 'weekly' },
+  { url: '/tivimate', priority: '0.9', changefreq: 'weekly' },
   { url: '/iptv-services', priority: '0.9', changefreq: 'weekly' },
   { url: '/iptv-firestick', priority: '0.9', changefreq: 'weekly' },
-  { url: '/jailbroken-fire-sticks', priority: '0.9', changefreq: 'weekly' },
   { url: '/firestick-devices', priority: '0.9', changefreq: 'weekly' },
   { url: '/best-iptv-firestick', priority: '0.9', changefreq: 'weekly' },
   { url: '/iptv-media-players', priority: '0.9', changefreq: 'weekly' },
@@ -374,6 +383,16 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/privacy', priority: '0.5', changefreq: 'yearly' },
   { url: '/refund', priority: '0.5', changefreq: 'yearly' },
   { url: '/checkout', priority: '0.7', changefreq: 'weekly' },
+  // Tier 1 crush pages
+  { url: '/vs-iptvstronger', priority: '0.85', changefreq: 'weekly' },
+  { url: '/vs-troypoint', priority: '0.85', changefreq: 'weekly' },
+  { url: '/vs-iptvproviders', priority: '0.85', changefreq: 'weekly' },
+  { url: '/vs-hypotv', priority: '0.85', changefreq: 'weekly' },
+  { url: '/vs-tvworldwide', priority: '0.85', changefreq: 'weekly' },
+  { url: '/vs-xtremehd', priority: '0.85', changefreq: 'weekly' },
+  { url: '/vs-iptvgreat', priority: '0.85', changefreq: 'weekly' },
+  { url: '/vs-shoroc', priority: '0.85', changefreq: 'weekly' },
+  { url: '/vs-iptvencoder', priority: '0.85', changefreq: 'weekly' },
 ];
 
 // sitemap-pages.xml: static + location pages only (SEO/AEO prompt)

@@ -625,147 +625,140 @@ export default function MainStore() {
               className="mb-6"
             >
               <span className="inline-block px-6 py-2 bg-gradient-to-r from-orange-500/30 to-red-500/30 backdrop-blur-sm border-2 border-orange-400/50 rounded-full text-sm font-bold text-orange-200 animate-pulse shadow-lg shadow-orange-500/30">
-                ⚡ Instant Setup • 🎯 Plug & Play • 🚀 Ready in Minutes
+                36 HOUR FREE TRIAL – 28K Channels Live Now
+              </span>
+              <span className="ml-3 inline-flex items-center gap-1 rounded-full bg-green-500/20 px-3 py-1 text-green-300 font-bold">
+                <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" aria-hidden="true" />
+                <AnimatedCounter end={2847} suffix=" active" className="text-green-300" />
               </span>
             </motion.div>
 
-            {/* Elite Bold Typography */}
+            {/* Nuclear H1 */}
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-[1.1] tracking-tight"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-6 leading-tight tracking-tight text-white"
             >
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 via-orange-400 to-red-500 bg-[length:200%_100%] animate-gradient bg-clip-text mb-2">
-                Best IPTV Service 2026
-              </span>
-              <span className="block text-white drop-shadow-2xl mb-2">Save $1,000+</span>
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-500 to-blue-400 bg-[length:200%_100%] animate-gradient bg-clip-text mb-2">
-                Per Year vs Cable
-              </span>
-              <span className="block text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-white mt-4 font-bold">18,000+ Live Channels</span>
-              <span className="block text-2xl sm:text-3xl md:text-5xl lg:text-6xl text-blue-200 mt-2 font-bold">100,000+ Movies & Series</span>
+              StreamStickPro IPTV + Jailbroken Fire Sticks + Onn Google TV
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500 mt-2">36hr Trial</span>
             </motion.h1>
 
-            {/* Elite Glassmorphism Answer Block for AEO */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.15 }}
-              className="max-w-5xl mx-auto px-4 mb-6"
-            >
-              <div className="bg-gradient-to-br from-blue-500/20 via-cyan-500/10 to-transparent backdrop-blur-2xl rounded-3xl border-2 border-blue-400/30 shadow-2xl shadow-blue-500/20 p-8 md:p-10">
-                <p className="text-lg sm:text-xl md:text-2xl text-white leading-relaxed font-medium">
-                  <strong className="text-2xl md:text-3xl font-black text-blue-200 block mb-3">What is StreamStickPro?</strong>
-                  <span className="text-gray-50">StreamStickPro is a premium IPTV streaming service that delivers <strong className="text-white font-bold">18,000+ live TV channels</strong> and <strong className="text-white font-bold">100,000+ movies and series</strong> over the internet to any device. Unlike cable TV, StreamStickPro works on Fire Sticks, Smart TVs, phones, and tablets, providing instant access to premium content including all major sports, PPV events, and on-demand entertainment for a fraction of cable costs.</span>
-                </p>
-              </div>
-            </motion.div>
+            {/* Trust above fold */}
             <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="text-base sm:text-lg text-gray-300 mb-6"
+            >
+              247K Users | 99.9% Uptime | McAfee Secure
+            </motion.p>
+
+            {/* 3 Nuclear CTAs */}
+            <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white mb-2 md:mb-4 max-w-3xl mx-auto px-4 font-bold"
+              className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-6 px-4"
             >
-              Cut Cable Forever • Unlimited Streaming • All Premium Content Included
-            </motion.p>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.25 }}
-              className="text-base sm:text-lg md:text-xl text-gray-200 mb-6 md:mb-8 max-w-3xl mx-auto px-4 leading-relaxed"
-            >
-              <span className="font-semibold text-orange-300">✅ Fully Pre-Configured</span> • Devices arrive ready to stream • 
-              <span className="font-semibold text-green-300"> All Sports Channels</span> • UFC, NFL, NBA, MLB included • 
-              <span className="font-semibold text-blue-300"> Zero Hidden Fees</span> • One simple price, everything included
-            </motion.p>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-6 md:mb-8 px-4"
-            >
-              {/* Elite Glassmorphism CTAs */}
-              <motion.button
-                onClick={scrollToShop}
-                className="group px-12 py-6 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 bg-[length:200%_100%] hover:bg-[position:100%_0] rounded-2xl font-black text-2xl transition-all duration-500 transform hover:scale-110 hover:shadow-2xl shadow-orange-500/60 inline-flex items-center justify-center gap-4 text-white border-2 border-orange-300/50"
-                data-testid="button-shop-now"
-                aria-label="Get started now - view shop and plans"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ShoppingCart className="w-7 h-7 group-hover:animate-bounce" aria-hidden="true" />
-                Get Started Now
-                <span className="bg-white/40 backdrop-blur-sm rounded-full px-5 py-2 text-base font-black border border-white/50">Starting at $15/mo</span>
-              </motion.button>
-              <motion.button
-                onClick={scrollToFreeTrial}
-                className="px-12 py-6 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 bg-[length:200%_100%] hover:bg-[position:100%_0] rounded-2xl font-black text-2xl transition-all duration-500 transform hover:scale-110 hover:shadow-2xl shadow-purple-500/60 inline-flex items-center justify-center gap-4 text-white border-2 border-purple-300/50"
-                data-testid="button-free-trial-hero"
-                aria-label="Start your free 36-hour trial - no credit card required"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Gift className="w-7 h-7 group-hover:animate-bounce" aria-hidden="true" />
-                FREE 36-Hour Trial
-                <span className="bg-white/40 backdrop-blur-sm rounded-full px-5 py-2 text-base font-black border border-white/50">No Credit Card</span>
-              </motion.button>
-              <motion.button
-                onClick={openSupport}
-                className="px-12 py-6 bg-gradient-to-br from-white/15 via-white/10 to-white/5 backdrop-blur-2xl hover:from-white/25 hover:via-white/15 hover:to-white/10 border-2 border-white/40 hover:border-white/60 rounded-2xl font-black text-2xl transition-all duration-300 inline-flex items-center justify-center gap-3 text-white shadow-xl shadow-white/10 hover:shadow-2xl hover:shadow-white/20"
-                data-testid="button-contact-hero"
-                aria-label="Questions? Ask us - open contact support"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <MessageCircle className="w-7 h-7" aria-hidden="true" />
-                Questions? Ask Us
-              </motion.button>
+              <Link href="/36hr-trial">
+                <motion.span
+                  className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 rounded-2xl font-black text-xl text-white border-2 border-orange-300/50 shadow-xl shadow-orange-500/40 hover:shadow-2xl transition-all cursor-pointer"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                  role="button"
+                >
+                  <Gift className="w-6 h-6" aria-hidden="true" />
+                  START 36HR TRIAL
+                </motion.span>
+              </Link>
+              <Link href="/jailbroken-fire-sticks">
+                <motion.span
+                  className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl font-black text-xl text-white border-2 border-purple-300/50 shadow-xl shadow-purple-500/40 hover:shadow-2xl transition-all cursor-pointer"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                  role="button"
+                >
+                  <ShoppingCart className="w-6 h-6" aria-hidden="true" />
+                  BUY JAILBROKEN STICK
+                </motion.span>
+              </Link>
+              <Link href="/onn-google-tv">
+                <motion.span
+                  className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gradient-to-br from-white/20 to-white/10 rounded-2xl font-black text-xl text-white border-2 border-white/40 shadow-xl hover:shadow-2xl transition-all cursor-pointer"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                  role="button"
+                >
+                  <Zap className="w-6 h-6" aria-hidden="true" />
+                  ONN GOOGLE TV SETUP
+                </motion.span>
+              </Link>
             </motion.div>
 
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
               className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto text-sm md:text-base"
             >
-              {/* Elite Glassmorphism Cards */}
-              <motion.div 
-                className="bg-gradient-to-br from-orange-500/10 via-red-500/5 to-transparent backdrop-blur-xl rounded-2xl px-6 py-5 border border-orange-400/20 shadow-xl shadow-orange-500/10"
-                whileHover={{ scale: 1.08, borderColor: "rgba(249, 115, 22, 0.6)", boxShadow: "0 20px 40px rgba(249, 115, 22, 0.3)" }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              >
+              <motion.div className="bg-gradient-to-br from-orange-500/10 via-red-500/5 to-transparent backdrop-blur-xl rounded-2xl px-6 py-5 border border-orange-400/20">
                 <div className="text-orange-400 font-extrabold text-2xl md:text-3xl mb-1">
-                  <AnimatedCounter end={18000} suffix="+" className="text-orange-400 font-extrabold text-2xl md:text-3xl" />
+                  <AnimatedCounter end={28000} suffix="+" className="text-orange-400" />
                 </div>
-                <div className="text-blue-100 font-semibold text-sm md:text-base">Live TV Channels</div>
+                <div className="text-blue-100 font-semibold">Live Channels</div>
               </motion.div>
-              <motion.div 
-                className="bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-transparent backdrop-blur-xl rounded-2xl px-6 py-5 border border-purple-400/20 shadow-xl shadow-purple-500/10"
-                whileHover={{ scale: 1.08, borderColor: "rgba(168, 85, 247, 0.6)", boxShadow: "0 20px 40px rgba(168, 85, 247, 0.3)" }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              >
+              <motion.div className="bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-transparent backdrop-blur-xl rounded-2xl px-6 py-5 border border-purple-400/20">
                 <div className="text-purple-400 font-extrabold text-2xl md:text-3xl mb-1">
-                  <AnimatedCounter end={100000} suffix="+" className="text-purple-400 font-extrabold text-2xl md:text-3xl" />
+                  <AnimatedCounter end={100000} suffix="+" className="text-purple-400" />
                 </div>
-                <div className="text-blue-100 font-semibold text-sm md:text-base">Movies & Series</div>
+                <div className="text-blue-100 font-semibold">Movies & Series</div>
               </motion.div>
-              <motion.div 
-                className="bg-gradient-to-br from-green-500/10 via-emerald-500/5 to-transparent backdrop-blur-xl rounded-2xl px-6 py-5 border border-green-400/20 shadow-xl shadow-green-500/10"
-                whileHover={{ scale: 1.08, borderColor: "rgba(34, 197, 94, 0.6)", boxShadow: "0 20px 40px rgba(34, 197, 94, 0.3)" }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              >
-                <div className="text-green-400 font-extrabold text-2xl md:text-3xl mb-1">
-                  <AnimatedCounter end={1000} suffix="+" className="text-green-400 font-extrabold text-2xl md:text-3xl" />
-                </div>
-                <div className="text-blue-100 font-semibold text-sm md:text-base">Dollars Saved vs Cable</div>
+              <motion.div className="bg-gradient-to-br from-green-500/10 via-emerald-500/5 to-transparent backdrop-blur-xl rounded-2xl px-6 py-5 border border-green-400/20">
+                <div className="text-green-400 font-extrabold text-2xl md:text-3xl mb-1">99.9%</div>
+                <div className="text-blue-100 font-semibold">Uptime</div>
               </motion.div>
             </motion.div>
           </div>
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none"></div>
+      </section>
+
+      {/* Section 2: Competitor Domination */}
+      <section className="relative z-10 py-12 md:py-16 bg-gradient-to-b from-gray-900/80 to-gray-900 border-y border-white/10" aria-labelledby="competitor-domination">
+        <div className="container mx-auto px-4">
+          <h2 id="competitor-domination" className="text-2xl md:text-3xl font-bold text-center text-white mb-8">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Competitor Domination</span>
+          </h2>
+          <div className="max-w-3xl mx-auto space-y-4 text-lg text-gray-200">
+            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> Beats IPTVStronger — 36hr vs 24hr trial</p>
+            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> Beats TroyPoint — Onn/Roku native support</p>
+            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> More channels than ANY competitor — 28K+ live</p>
+          </div>
+          <p className="text-center mt-6">
+            <Link href="/vs-iptvstronger"><span className="text-orange-400 hover:text-orange-300 font-semibold">Compare vs IPTVStronger →</span></Link>
+            {" · "}
+            <Link href="/vs-troypoint"><span className="text-orange-400 hover:text-orange-300 font-semibold">Compare vs TroyPoint →</span></Link>
+          </p>
+        </div>
+      </section>
+
+      {/* Section 3: Device Support */}
+      <section className="relative z-10 py-12 md:py-16 bg-gray-900/60 border-b border-white/10" aria-labelledby="device-support">
+        <div className="container mx-auto px-4">
+          <h2 id="device-support" className="text-2xl md:text-3xl font-bold text-center text-white mb-8">
+            Device Support
+          </h2>
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Onn Google TV</span>
+            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Roku TVs</span>
+            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Smart TVs</span>
+            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Fire Stick</span>
+            <Link href="/iptv-smarters-pro"><span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/20 border border-orange-400/40 text-orange-200 font-medium hover:bg-orange-500/30">IPTV Smarters Pro</span></Link>
+            <Link href="/tivimate"><span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/20 border border-orange-400/40 text-orange-200 font-medium hover:bg-orange-500/30">TiviMate</span></Link>
+          </div>
+        </div>
       </section>
 
       {/* Trust Badges */}
