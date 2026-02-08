@@ -1,8 +1,14 @@
 /**
  * Seed 25,000 location pages into seo_architecture (8K IPTV + 10K Jailbreak + 7K Google).
  * Uses USA/CA/UK cities; each location gets 3 rows (iptv, jailbreak, google).
+ *
  * Run: npx tsx scripts/seed-25k-location-pages.ts
  * Requires: VITE_SUPABASE_URL (or SUPABASE_URL) and SUPABASE_SERVICE_KEY
+ *
+ * Get keys: Supabase Dashboard → Project Settings → API (URL + service_role key).
+ * GitHub CI: add those as repo Secrets (VITE_SUPABASE_URL, SUPABASE_SERVICE_KEY) so the deploy workflow can run this.
+ * Local: export VITE_SUPABASE_URL=https://xxx.supabase.co SUPABASE_SERVICE_KEY=your_service_role_key
+ *        then npx tsx scripts/seed-25k-location-pages.ts
  */
 
 import { createClient } from "@supabase/supabase-js";
@@ -428,7 +434,9 @@ const BATCH = 500;
 
 async function main() {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    console.error("❌ Set VITE_SUPABASE_URL (or SUPABASE_URL) and SUPABASE_SERVICE_KEY");
+    console.error("❌ Missing env. Set VITE_SUPABASE_URL (or SUPABASE_URL) and SUPABASE_SERVICE_KEY.");
+    console.error("   From Supabase: Dashboard → Project Settings → API (URL + service_role key).");
+    console.error("   Local: export VITE_SUPABASE_URL=... SUPABASE_SERVICE_KEY=... then run this script.");
     process.exit(1);
   }
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);

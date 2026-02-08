@@ -13,7 +13,8 @@
     "seo:audit": "tsx scripts/seo-audit.ts",
     "seo:submit": "tsx scripts/submit-to-search-engines.ts",
     "seo:indexnow-live": "tsx scripts/indexnow-from-live-sitemap.ts",
-    "seo:create-key": "tsx scripts/create-indexnow-key-file.ts"
+    "seo:create-key": "tsx scripts/create-indexnow-key-file.ts",
+    "seed:25k": "tsx scripts/seed-25k-location-pages.ts"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20251205.0",

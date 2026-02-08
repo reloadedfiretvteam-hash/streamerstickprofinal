@@ -38,11 +38,15 @@ jobs:
         continue-on-error: true
 
       - name: Seed 25K location pages (thousands of URLs for sitemap)
-        run: npx tsx scripts/seed-25k-location-pages.ts
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        continue-on-error: true
+        run: |
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_KEY" ]; then
+            echo "::warning:: 25K seed SKIPPED. Add GitHub Secrets (repo Settings → Secrets → Actions): VITE_SUPABASE_URL, SUPABASE_SERVICE_KEY. Then re-run this workflow or run locally: npx tsx scripts/seed-25k-location-pages.ts"
+            exit 0
+          fi
+          npx tsx scripts/seed-25k-location-pages.ts
       
       - name: Build for Cloudflare Workers
         run: npx tsx script/build-worker.ts
