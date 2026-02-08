@@ -857,12 +857,16 @@ export function createStorage(config: StorageConfig) {
         while (offset < limit) {
           const from = offset;
           const to = offset + PAGE_SIZE - 1;
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from('seo_architecture')
             .select('country, page_type, slug, updated_at')
             .eq('published', true)
             .order('id', { ascending: true })
             .range(from, to);
+          if (error) {
+            console.error('getSeoPagesForSitemap page error:', error.message, 'offset', offset, 'got so far', out.length);
+            break;
+          }
           if (!data || data.length === 0) break;
           for (const row of data as any[]) {
             out.push({
@@ -876,8 +880,8 @@ export function createStorage(config: StorageConfig) {
         }
         return out.slice(0, limit);
       } catch (err) {
-        console.error('getSeoPagesForSitemap error:', err instanceof Error ? err.message : String(err));
-        return [];
+        console.error('getSeoPagesForSitemap error:', err instanceof Error ? err.message : String(err), 'returned', out.length, 'rows');
+        return out;
       }
     },
 

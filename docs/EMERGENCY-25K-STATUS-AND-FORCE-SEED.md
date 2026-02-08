@@ -103,5 +103,6 @@ The seed **does not** create URLs like `/iptv-new-york` or `/jailbroken-fire-sti
 | Workflow runs seed when | ✅ Service key + URL **or** DATABASE_URL set |
 | Location page URL pattern | `/l/{country}/{pageType}/{slug}` (not /iptv-city) |
 | Force run | GitHub Actions → Deploy to Cloudflare Pages → Run workflow |
+| All approaches | See [FIX-25K-URLS-ALL-APPROACHES.md](./FIX-25K-URLS-ALL-APPROACHES.md) for CI, local, SQL Editor, CSV |
 
 **Do not paste this into “Superbase AI Builder.”** This project uses **Supabase + Cloudflare Workers + GitHub Actions**; the seed and sitemap are already implemented. Ensure the right **GitHub Secrets** are set and **re-run the workflow** to force the 25K seed.
