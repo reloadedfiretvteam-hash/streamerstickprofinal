@@ -4,13 +4,19 @@ This doc audits every part of the pipeline, lists **known issues people hit** (f
 
 ---
 
+## ROOT CAUSE (why seed never ran)
+
+**The workflow skipped the seed whenever `SUPABASE_SERVICE_KEY` was empty.** If you only added `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SERVICE_ROLL_KEY`, the step still saw `SUPABASE_SERVICE_KEY` as empty and exited 0 (skip) **before** running the script. The script itself already reads any of the three from `process.env`; the bug was only in the **skip condition**. **Fix:** Skip only when **all three** key secrets are empty, and add a one-line log: `Seed env check: VITE_SUPABASE_URL=1, service_key_any=1` so you can see in the run that env is set.
+
+---
+
 ## 1. GitHub Actions workflow (deploy-cloudflare.yml)
 
 | Line / area | Issue (what goes wrong) | Research / others’ experience | Solution (done or to do) |
 |-------------|-------------------------|--------------------------------|---------------------------|
 | **Trigger: only `clean-main`** | Pushes to `main` never run the workflow; seed never runs. | Repos often use `main` as default; workflow doesn’t run. | **Done:** Trigger added for both `main` and `clean-main`. |
 | **Trigger: no schedule** | After adding/fixing secrets, nothing runs until next push. | Secrets fixed but no re-run; seed still skipped in practice. | **Done:** `schedule: cron: '0 2 * * *'` added so workflow runs daily at 2 AM UTC. |
-| **Secrets: only `SUPABASE_SERVICE_KEY`** | User creates secret as `SUPABASE_SERVICE_ROLE_KEY` (Supabase docs); workflow passes empty key; seed skips. | [GitHub Actions + Supabase](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions): secret name must match exactly. | **Done:** Workflow now passes `SUPABASE_SERVICE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_SERVICE_ROLL_KEY` and copies one into `SUPABASE_SERVICE_KEY` in the seed step. |
+| **Secrets: only `SUPABASE_SERVICE_KEY`** | User creates secret as `SUPABASE_SERVICE_ROLE_KEY` (Supabase docs); workflow passes empty key; seed skips. | [GitHub Actions + Supabase](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions): secret name must match exactly. | **Done:** Workflow now passes all three key names. **ROOT CAUSE FIX:** Skip condition was `if [ -z "$SUPABASE_SERVICE_KEY" ]` so we skipped whenever that one was empty—even when `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SERVICE_ROLL_KEY` were set. The script already reads any of the three from env; we now skip only when **all three** are empty. |
 | **Secrets: typo `SUPABASE_SERVICE_ROLL_KEY`** | User types ROLL instead of ROLE; secret exists but under wrong name; script never sees it. | N/A (typo). | **Done:** Workflow and seed script both accept `SUPABASE_SERVICE_ROLL_KEY`. |
 | **Bash: `[ -z "$VAR" ]` with secrets** | In GHA, unset secrets are empty string; `-z` works. Masked value is still passed to the process. | [Stack Overflow](https://stackoverflow.com/questions/70249519): use `${{ secrets.NAME != '' }}` in `if:`; in bash, `-z "$VAR"` is correct. | **Done:** No change needed; logic is correct. |
 | **Seed step: no failure when 0 inserted** | Seed runs but inserts 0 (wrong key, RLS, etc.); step succeeds; deploy goes ahead with ~292 URLs. | N/A. | **Done:** Seed script now `process.exit(1)` if expected to insert >1000 rows but inserted 0. |

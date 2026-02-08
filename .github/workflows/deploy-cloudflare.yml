@@ -43,6 +43,7 @@ jobs:
 
       - name: Seed 25K location pages (thousands of URLs for sitemap)
         id: seed25k
+        shell: bash
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
@@ -50,26 +51,27 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_SERVICE_ROLL_KEY: ${{ secrets.SUPABASE_SERVICE_ROLL_KEY }}
         run: |
-          # Seed needs Supabase URL + service_role key (not anon). Accept SUPABASE_SERVICE_KEY, SUPABASE_SERVICE_ROLE_KEY, or typo SUPABASE_SERVICE_ROLL_KEY.
-          if [ -z "$SUPABASE_SERVICE_KEY" ]; then export SUPABASE_SERVICE_KEY="$SUPABASE_SERVICE_ROLE_KEY"; fi
-          if [ -z "$SUPABASE_SERVICE_KEY" ]; then export SUPABASE_SERVICE_KEY="$SUPABASE_SERVICE_ROLL_KEY"; fi
-          if [ -z "$VITE_SUPABASE_URL" ]; then
+          set -e
+          # FIX: Skip only if ALL key secrets are empty. Script reads SERVICE_KEY | ROLE_KEY | ROLL_KEY from env.
+          HAS_URL="$([ -n "$VITE_SUPABASE_URL" ] && echo 1 || echo 0)"
+          HAS_KEY="$([ -n "$SUPABASE_SERVICE_KEY" ] || [ -n "$SUPABASE_SERVICE_ROLE_KEY" ] || [ -n "$SUPABASE_SERVICE_ROLL_KEY" ] && echo 1 || echo 0)"
+          echo "Seed env check: VITE_SUPABASE_URL=${HAS_URL} (1=set), service_key_any=${HAS_KEY} (1=at least one set)"
+          if [ "$HAS_URL" = "0" ]; then
             echo "::warning:: 25K seed SKIPPED. Add GitHub Secret VITE_SUPABASE_URL (Supabase project URL)."
             echo "seed_skipped=1" >> $GITHUB_OUTPUT
             echo "seed_message=25K seed SKIPPED (missing VITE_SUPABASE_URL)." >> $GITHUB_OUTPUT
             exit 0
           fi
-          if [ -z "$SUPABASE_SERVICE_KEY" ]; then
-            echo "::warning:: 25K seed SKIPPED. Add GitHub Secret SUPABASE_SERVICE_KEY, SUPABASE_SERVICE_ROLE_KEY, or SUPABASE_SERVICE_ROLL_KEY (Supabase service_role key, not anon key)."
+          if [ "$HAS_KEY" = "0" ]; then
+            echo "::warning:: 25K seed SKIPPED. Add one of: SUPABASE_SERVICE_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_SERVICE_ROLL_KEY (service_role key, not anon)."
             echo "seed_skipped=1" >> $GITHUB_OUTPUT
-            echo "seed_message=25K seed SKIPPED (missing service_role key). Add one of the secrets above (Dashboard → Project Settings → API → service_role)." >> $GITHUB_OUTPUT
+            echo "seed_message=25K seed SKIPPED (missing service_role key)." >> $GITHUB_OUTPUT
             exit 0
           fi
           echo "seed_skipped=0" >> $GITHUB_OUTPUT
-          echo "Running 25K seed (Supabase URL from VITE_SUPABASE_URL)..."
+          echo "Running 25K seed..."
           npx tsx scripts/seed-25k-location-pages.ts
-          echo "seed_message=25K seed finished. Check log above for 'Total inserted' and 'Total rows in seo_architecture'." >> $GITHUB_OUTPUT
-          echo "Seed step finished. See above for 'Total inserted' and 'Total rows in seo_architecture'."
+          echo "seed_message=25K seed finished. See log for Total inserted and Total rows." >> $GITHUB_OUTPUT
 
       - name: Report 25K seed status (SEO URLs)
         if: always()
