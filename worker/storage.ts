@@ -867,16 +867,25 @@ export function createStorage(config: StorageConfig) {
     },
 
     async getSeoPageByPath(country: string, pageType: string, slug: string): Promise<any | undefined> {
-      try {
-        const { data } = await supabase
+      const run = async (s: string) => {
+        const { data, error } = await supabase
           .from('seo_architecture')
           .select('*')
           .eq('country', country.toUpperCase())
           .eq('page_type', pageType)
-          .eq('slug', slug)
+          .eq('slug', s)
           .eq('published', true)
-          .single();
-        return data || undefined;
+          .maybeSingle();
+        return error ? undefined : (data || undefined);
+      };
+      try {
+        const exact = await run(slug);
+        if (exact) return exact;
+        if (!slug.endsWith('-city')) {
+          const withCity = await run(slug + '-city');
+          if (withCity) return withCity;
+        }
+        return undefined;
       } catch {
         return undefined;
       }
