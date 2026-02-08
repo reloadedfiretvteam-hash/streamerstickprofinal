@@ -5,16 +5,41 @@
  * Run: npx tsx scripts/seed-25k-location-pages.ts
  * Requires: VITE_SUPABASE_URL (or SUPABASE_URL) and SUPABASE_SERVICE_KEY
  *
- * Get keys: Supabase Dashboard → Project Settings → API (URL + service_role key).
- * GitHub CI: add those as repo Secrets (VITE_SUPABASE_URL, SUPABASE_SERVICE_KEY) so the deploy workflow can run this.
- * Local: export VITE_SUPABASE_URL=https://xxx.supabase.co SUPABASE_SERVICE_KEY=your_service_role_key
- *        then npx tsx scripts/seed-25k-location-pages.ts
+ * Loads .env.local from project root if present (so you can keep keys there without exporting).
  */
 
 import { createClient } from "@supabase/supabase-js";
+import { readFileSync, existsSync } from "fs";
+import { resolve } from "path";
+
+function loadEnvLocal() {
+  const paths = [resolve(process.cwd(), ".env.local"), resolve(process.cwd(), ".env")];
+  for (const p of paths) {
+    if (!existsSync(p)) continue;
+    try {
+      const content = readFileSync(p, "utf8");
+      for (const line of content.split("\n")) {
+        const trimmed = line.replace(/#.*/, "").trim();
+        const m = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+        if (m) {
+          const val = m[2].trim().replace(/^["'`]|["'`]$/g, "");
+          if (val) process.env[m[1]] = val;
+        }
+      }
+      break;
+    } catch {
+      /* ignore */
+    }
+  }
+}
+loadEnvLocal();
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_SERVICE_KEY =
+  process.env.SUPABASE_SERVICE_KEY ||
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_SERVICE_ROLL_KEY ||
+  process.env.SERVICE_ROLE_KEY;
 
 const INTERNAL_LINKS = [
   { url: "/iptv-services", anchor: "IPTV Services" },
@@ -440,6 +465,19 @@ async function main() {
     process.exit(1);
   }
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+  const redactedUrl = SUPABASE_URL.replace(/^https?:\/\/([^.]+\.)?/, "https://***.");
+  console.log("📍 Supabase project:", redactedUrl);
+
+  const { count: existingCount, error: countError } = await supabase
+    .from("seo_architecture")
+    .select("id", { count: "exact", head: true });
+  if (countError) {
+    console.error("❌ Table seo_architecture missing or not readable:", countError.message);
+    console.error("   Run migrations first (Deploy workflow runs them, or: npx tsx scripts/run-supabase-migration.ts with DATABASE_URL).");
+    process.exit(1);
+  }
+  console.log("   Existing rows in seo_architecture before seed:", existingCount ?? 0);
+
   const locations = buildAllLocations();
   const baseRows = locations.length * 3;
   const allRows = buildRows(locations);
@@ -491,7 +529,20 @@ async function main() {
     skipped += batch.length - count;
     process.stdout.write(`\r  Upserted ${i + batch.length}/${allRows.length} (inserted: ${inserted}, skipped: ${skipped})`);
   }
+  const { count: finalCount, error: finalError } = await supabase
+    .from("seo_architecture")
+    .select("id", { count: "exact", head: true });
+  if (!finalError) {
+    console.log("   Total rows in seo_architecture after seed:", finalCount ?? 0);
+  }
   console.log("\n✅ Done. Total inserted:", inserted, "| Skipped (existing):", skipped);
+
+  // Fail if we expected to add many rows but inserted none (e.g. wrong key or RLS blocking)
+  const expectedMinInsert = Math.min(TARGET_NEW_ROWS, totalRows);
+  if (expectedMinInsert > 1000 && inserted === 0) {
+    console.error("\n❌ Seed inserted 0 rows but expected at least", expectedMinInsert, "- check SUPABASE_SERVICE_KEY (service_role, not anon) and RLS.");
+    process.exit(1);
+  }
 }
 
 main().catch((e) => {
