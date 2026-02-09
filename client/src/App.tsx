@@ -41,6 +41,7 @@ const OnnGoogleTv = lazy(() => import("@/pages/OnnGoogleTv"));
 const IptvSmartersPro = lazy(() => import("@/pages/IptvSmartersPro"));
 const Tivimate = lazy(() => import("@/pages/Tivimate"));
 const VsCompetitor = lazy(() => import("@/pages/VsCompetitor"));
+const UltimateIptvCatalog = lazy(() => import("@/pages/UltimateIptvCatalog"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 // Loading fallback component
@@ -110,6 +111,7 @@ function Router() {
         <Route path="/iptv-smarters-pro" component={IptvSmartersPro} />
         <Route path="/tivimate" component={Tivimate} />
         <Route path="/vs-:competitor" component={VsCompetitor} />
+        <Route path="/ultimate-iptv-catalog-2026" component={UltimateIptvCatalog} />
         <Route path="/l/:country/:pageType/:slug" component={LocationPage} />
         <Route component={NotFound} />
       </Switch>

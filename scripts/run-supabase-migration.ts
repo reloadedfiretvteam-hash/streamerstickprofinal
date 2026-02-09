@@ -137,12 +137,12 @@ async function runMigration() {
     try {
       const all = await readdir(migrationsDir);
       migrationFiles = all
-        .filter((f) => (f.startsWith('20260207') || f.startsWith('20260208')) && f.endsWith('.sql'))
+        .filter((f) => (f.startsWith('20260207') || f.startsWith('20260208') || f.startsWith('20260209')) && f.endsWith('.sql'))
         .sort();
     } catch (e) {
       // no migrations dir or readdir failed
     }
-    console.log('\n📦 SEO migrations (20260207* + 20260208*: seo_architecture, redirect_map, /trial, content_clusters, etc.):');
+    console.log('\n📦 SEO migrations (20260207* + 20260208* + 20260209*: seo_architecture, catalog tables, etc.):');
     for (const file of migrationFiles) {
       const filePath = path.join(migrationsDir, file);
       try {

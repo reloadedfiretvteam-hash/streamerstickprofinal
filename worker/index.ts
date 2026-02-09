@@ -100,6 +100,23 @@ app.get('/api/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.0.1' });
 });
 
+// Catalog API: 93K catalog summary for Schema.org Dataset / AI citation (Nuclear SEO)
+const CATALOG_SUMMARY = {
+  channels: { usa: 847, france: 623, mexico: 456, india: 1247, total: 18000 },
+  movies: 60237,
+  series: 15423,
+  languages: 89,
+  countries: 195,
+  devices: 7,
+  hubUrl: 'https://streamstickpro.com/ultimate-iptv-catalog-2026',
+};
+app.get('/api/catalog-summary', (c) => {
+  return c.json(CATALOG_SUMMARY, 200, {
+    'Cache-Control': 'public, max-age=3600, s-maxage=86400',
+    'Access-Control-Allow-Origin': 'https://streamstickpro.com',
+  });
+});
+
 // SEO location page API (for /l/:country/:pageType/:slug). DB first, then static build fallback so 25K pages work without DB seed.
 app.get('/api/seo-page/:country/:pageType/:slug', async (c) => {
   const country = c.req.param('country');
@@ -393,6 +410,7 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/vs-iptvgreat', priority: '0.85', changefreq: 'weekly' },
   { url: '/vs-shoroc', priority: '0.85', changefreq: 'weekly' },
   { url: '/vs-iptvencoder', priority: '0.85', changefreq: 'weekly' },
+  { url: '/ultimate-iptv-catalog-2026', priority: '0.95', changefreq: 'daily' },
 ];
 
 // sitemap-pages.xml: static + location pages only (SEO/AEO prompt)

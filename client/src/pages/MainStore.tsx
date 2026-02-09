@@ -654,6 +654,12 @@ export default function MainStore() {
               247K Users | 99.9% Uptime | McAfee Secure
             </motion.p>
 
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.18 }} className="mb-4">
+              <Link href="/ultimate-iptv-catalog-2026">
+                <span className="text-orange-300 hover:text-orange-200 font-semibold underline">Explore 93K Catalog →</span>
+              </Link>
+            </motion.p>
+
             {/* 3 Nuclear CTAs */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
