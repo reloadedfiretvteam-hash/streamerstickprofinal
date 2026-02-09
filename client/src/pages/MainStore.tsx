@@ -731,218 +731,6 @@ export default function MainStore() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none"></div>
       </section>
 
-      {/* Section 2: Competitor Domination */}
-      <section className="relative z-10 py-12 md:py-16 bg-gradient-to-b from-gray-900/80 to-gray-900 border-y border-white/10" aria-labelledby="competitor-domination">
-        <div className="container mx-auto px-4">
-          <h2 id="competitor-domination" className="text-2xl md:text-3xl font-bold text-center text-white mb-8">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Competitor Domination</span>
-          </h2>
-          <div className="max-w-3xl mx-auto space-y-4 text-lg text-gray-200">
-            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> Beats IPTVStronger — 36hr vs 24hr trial</p>
-            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> Beats TroyPoint — Onn/Roku native support</p>
-            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> More channels than ANY competitor — 28K+ live</p>
-          </div>
-          <p className="text-center mt-6">
-            <Link href="/vs-iptvstronger"><span className="text-orange-400 hover:text-orange-300 font-semibold">Compare vs IPTVStronger →</span></Link>
-            {" · "}
-            <Link href="/vs-troypoint"><span className="text-orange-400 hover:text-orange-300 font-semibold">Compare vs TroyPoint →</span></Link>
-          </p>
-        </div>
-      </section>
-
-      {/* Section 3: Device Support */}
-      <section className="relative z-10 py-12 md:py-16 bg-gray-900/60 border-b border-white/10" aria-labelledby="device-support">
-        <div className="container mx-auto px-4">
-          <h2 id="device-support" className="text-2xl md:text-3xl font-bold text-center text-white mb-8">
-            Device Support
-          </h2>
-          <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Onn Google TV</span>
-            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Roku TVs</span>
-            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Smart TVs</span>
-            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Fire Stick</span>
-            <Link href="/iptv-smarters-pro"><span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/20 border border-orange-400/40 text-orange-200 font-medium hover:bg-orange-500/30">IPTV Smarters Pro</span></Link>
-            <Link href="/tivimate"><span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/20 border border-orange-400/40 text-orange-200 font-medium hover:bg-orange-500/30">TiviMate</span></Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Badges */}
-      <TrustBadges />
-
-      {/* Trust Stats */}
-      <div className="py-8 bg-gradient-to-r from-gray-800/50 via-gray-900/50 to-gray-800/50 border-y border-white/10">
-        <div className="container mx-auto px-4">
-          <TrustStats />
-        </div>
-      </div>
-
-      {/* Niche hub — IPTV, jailbroken Fire Sticks, media players, devices */}
-      <div className="py-6 bg-gray-900/60 border-y border-white/10">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-gray-400 text-sm mb-4">Browse by topic</p>
-          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6">
-            <Link href="/iptv-services"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV Services</span></Link>
-            <Link href="/iptv-firestick"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV for Firestick</span></Link>
-            <Link href="/iptv-media-players"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV Media Players</span></Link>
-            <Link href="/firestick-devices"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Fire Stick Devices</span></Link>
-            <Link href="/jailbroken-fire-sticks"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Jailbroken Fire Sticks</span></Link>
-            <Link href="/best-iptv-firestick"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Best IPTV Firestick</span></Link>
-          </div>
-        </div>
-      </div>
-
-      {/* IPTV Media Players Section */}
-      <IPTVMediaPlayersSection />
-
-      {/* Channel Logos */}
-      <ChannelLogos />
-
-      {/* Comparison Section - StreamStickPro vs Competitors */}
-      <section className="py-16 bg-gradient-to-b from-gray-900 to-gray-800">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">The Stream Stick Pro Difference</span>
-            </h2>
-            <p className="text-gray-200 text-lg">See why customers choose us over the competition</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* Elite Glassmorphism Comparison - Competitors */}
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="bg-gradient-to-br from-red-950/40 via-red-900/20 to-transparent backdrop-blur-2xl border-2 border-red-500/40 rounded-3xl p-10 shadow-2xl shadow-red-500/20"
-              data-testid="comparison-competitors"
-              whileHover={{ scale: 1.02, borderColor: "rgba(239, 68, 68, 0.6)" }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
-                  <X className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-red-400">Other Fire Stick Websites</h3>
-              </div>
-              <ul className="space-y-4">
-                {[
-                  "Hundreds of apps that fail on a daily basis",
-                  "Broken links and dead streams constantly",
-                  "Apps don't update themselves - manual maintenance required",
-                  "Confusing interfaces that aren't user-friendly",
-                  "Long, complicated tutorials just to get started",
-                  "Poor or no customer support when things break",
-                  "You end up frustrated with a bad product"
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-200">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-
-            {/* Elite Glassmorphism Comparison - StreamStickPro */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-gradient-to-br from-green-950/40 via-emerald-900/20 to-transparent backdrop-blur-2xl border-2 border-green-500/40 rounded-3xl p-10 shadow-2xl shadow-green-500/20 ring-2 ring-green-400/30"
-              data-testid="comparison-streamstickpro"
-              whileHover={{ scale: 1.02, borderColor: "rgba(34, 197, 94, 0.6)", boxShadow: "0 25px 50px rgba(34, 197, 94, 0.3)" }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                  <Check className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-green-400">Stream Stick Pro Experience</h3>
-              </div>
-              <ul className="space-y-4">
-                {[
-                  "ONE app does it all - no confusion, no hassle",
-                  "Daily automatic updates - always fresh content",
-                  "User-friendly interface - even grandma can use it",
-                  "No broken links - premium, stable streams",
-                  "Plug in and watch - ready in 5 minutes",
-                  "Full 24/7 customer support - we're always here",
-                  "You won't be disappointed - this is the future of streaming"
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-200">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" ref={aboutRef} className="py-24 bg-gradient-to-b from-gray-800/80 to-gray-900/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4">
-          <motion.div 
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            animate={isAboutInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="inline-flex items-center gap-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full px-6 py-2 mb-6">
-              <Flame className="w-5 h-5 text-orange-400" />
-              <span className="text-sm font-medium text-orange-300">WHY CHOOSE US</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Break Free From Cable</span>
-            </h2>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Premium streaming at a fraction of the cost. No contracts, no hidden fees.
-            </p>
-          </motion.div>
-
-          <motion.div 
-            className="grid md:grid-cols-3 gap-8"
-            variants={staggerContainer}
-            initial="hidden"
-            animate={isAboutInView ? "visible" : "hidden"}
-          >
-            {/* Elite Glassmorphism Feature Cards */}
-            <motion.div 
-              variants={fadeInUp}
-              className="bg-gradient-to-br from-orange-500/15 via-red-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-10 border-2 border-orange-400/30 shadow-2xl shadow-orange-500/20 hover:border-orange-400/60 transition-all duration-300 hover:scale-105 hover:shadow-orange-500/40"
-              whileHover={{ y: -5 }}
-            >
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-orange-500/50">
-                <Zap className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-black mb-4 text-white">Be Streaming in 10 Minutes</h3>
-              <p className="text-gray-100 text-lg leading-relaxed">Your StreamStick comes with instant login credentials and an easy 10-minute setup video. Start watching Live TV, Movies, Series & Sports today with 24/7 support ready when you need it.</p>
-            </motion.div>
-            <motion.div 
-              variants={fadeInUp}
-              className="bg-gradient-to-br from-blue-500/15 via-cyan-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-10 border-2 border-blue-400/30 shadow-2xl shadow-blue-500/20 hover:border-blue-400/60 transition-all duration-300 hover:scale-105 hover:shadow-blue-500/40"
-              whileHover={{ y: -5 }}
-            >
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/50">
-                <Star className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-black mb-4 text-white">Premium Content</h3>
-              <p className="text-gray-100 text-lg leading-relaxed">Access 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.</p>
-            </motion.div>
-            <motion.div 
-              variants={fadeInUp}
-              className="bg-gradient-to-br from-green-500/15 via-emerald-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-10 border-2 border-green-400/30 shadow-2xl shadow-green-500/20 hover:border-green-400/60 transition-all duration-300 hover:scale-105 hover:shadow-green-500/40"
-              whileHover={{ y: -5 }}
-            >
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-green-500/50">
-                <Check className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-black mb-4 text-white">24/7 Support</h3>
-              <p className="text-gray-100 text-lg leading-relaxed">Our dedicated team is always available to help you with any questions or issues.</p>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Shop Section */}
       <section id="shop" ref={shopRef} className="py-24 bg-gradient-to-b from-gray-900/80 to-gray-800/80 backdrop-blur-sm">
         <div className="container mx-auto px-4">
@@ -1519,6 +1307,220 @@ export default function MainStore() {
 
           {/* Sports Carousel */}
           <SportsCarousel />
+        </div>
+      </section>
+
+
+
+      {/* Section 2: Competitor Domination */}
+      <section className="relative z-10 py-12 md:py-16 bg-gradient-to-b from-gray-900/80 to-gray-900 border-y border-white/10" aria-labelledby="competitor-domination">
+        <div className="container mx-auto px-4">
+          <h2 id="competitor-domination" className="text-2xl md:text-3xl font-bold text-center text-white mb-8">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Competitor Domination</span>
+          </h2>
+          <div className="max-w-3xl mx-auto space-y-4 text-lg text-gray-200">
+            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> Beats IPTVStronger — 36hr vs 24hr trial</p>
+            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> Beats TroyPoint — Onn/Roku native support</p>
+            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> More channels than ANY competitor — 28K+ live</p>
+          </div>
+          <p className="text-center mt-6">
+            <Link href="/vs-iptvstronger"><span className="text-orange-400 hover:text-orange-300 font-semibold">Compare vs IPTVStronger →</span></Link>
+            {" · "}
+            <Link href="/vs-troypoint"><span className="text-orange-400 hover:text-orange-300 font-semibold">Compare vs TroyPoint →</span></Link>
+          </p>
+        </div>
+      </section>
+
+      {/* Section 3: Device Support */}
+      <section className="relative z-10 py-12 md:py-16 bg-gray-900/60 border-b border-white/10" aria-labelledby="device-support">
+        <div className="container mx-auto px-4">
+          <h2 id="device-support" className="text-2xl md:text-3xl font-bold text-center text-white mb-8">
+            Device Support
+          </h2>
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Onn Google TV</span>
+            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Roku TVs</span>
+            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Smart TVs</span>
+            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Fire Stick</span>
+            <Link href="/iptv-smarters-pro"><span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/20 border border-orange-400/40 text-orange-200 font-medium hover:bg-orange-500/30">IPTV Smarters Pro</span></Link>
+            <Link href="/tivimate"><span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/20 border border-orange-400/40 text-orange-200 font-medium hover:bg-orange-500/30">TiviMate</span></Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Badges */}
+      <TrustBadges />
+
+      {/* Trust Stats */}
+      <div className="py-8 bg-gradient-to-r from-gray-800/50 via-gray-900/50 to-gray-800/50 border-y border-white/10">
+        <div className="container mx-auto px-4">
+          <TrustStats />
+        </div>
+      </div>
+
+      {/* Niche hub — IPTV, jailbroken Fire Sticks, media players, devices */}
+      <div className="py-6 bg-gray-900/60 border-y border-white/10">
+        <div className="container mx-auto px-4">
+          <p className="text-center text-gray-400 text-sm mb-4">Browse by topic</p>
+          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6">
+            <Link href="/iptv-services"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV Services</span></Link>
+            <Link href="/iptv-firestick"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV for Firestick</span></Link>
+            <Link href="/iptv-media-players"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV Media Players</span></Link>
+            <Link href="/firestick-devices"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Fire Stick Devices</span></Link>
+            <Link href="/jailbroken-fire-sticks"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Jailbroken Fire Sticks</span></Link>
+            <Link href="/best-iptv-firestick"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Best IPTV Firestick</span></Link>
+          </div>
+        </div>
+      </div>
+
+      {/* IPTV Media Players Section */}
+      <IPTVMediaPlayersSection />
+
+      {/* Channel Logos */}
+      <ChannelLogos />
+
+      {/* Comparison Section - StreamStickPro vs Competitors */}
+      <section className="py-16 bg-gradient-to-b from-gray-900 to-gray-800">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">The Stream Stick Pro Difference</span>
+            </h2>
+            <p className="text-gray-200 text-lg">See why customers choose us over the competition</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* Elite Glassmorphism Comparison - Competitors */}
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="bg-gradient-to-br from-red-950/40 via-red-900/20 to-transparent backdrop-blur-2xl border-2 border-red-500/40 rounded-3xl p-10 shadow-2xl shadow-red-500/20"
+              data-testid="comparison-competitors"
+              whileHover={{ scale: 1.02, borderColor: "rgba(239, 68, 68, 0.6)" }}
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                  <X className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-red-400">Other Fire Stick Websites</h3>
+              </div>
+              <ul className="space-y-4">
+                {[
+                  "Hundreds of apps that fail on a daily basis",
+                  "Broken links and dead streams constantly",
+                  "Apps don't update themselves - manual maintenance required",
+                  "Confusing interfaces that aren't user-friendly",
+                  "Long, complicated tutorials just to get started",
+                  "Poor or no customer support when things break",
+                  "You end up frustrated with a bad product"
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-200">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Elite Glassmorphism Comparison - StreamStickPro */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="bg-gradient-to-br from-green-950/40 via-emerald-900/20 to-transparent backdrop-blur-2xl border-2 border-green-500/40 rounded-3xl p-10 shadow-2xl shadow-green-500/20 ring-2 ring-green-400/30"
+              data-testid="comparison-streamstickpro"
+              whileHover={{ scale: 1.02, borderColor: "rgba(34, 197, 94, 0.6)", boxShadow: "0 25px 50px rgba(34, 197, 94, 0.3)" }}
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                  <Check className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-green-400">Stream Stick Pro Experience</h3>
+              </div>
+              <ul className="space-y-4">
+                {[
+                  "ONE app does it all - no confusion, no hassle",
+                  "Daily automatic updates - always fresh content",
+                  "User-friendly interface - even grandma can use it",
+                  "No broken links - premium, stable streams",
+                  "Plug in and watch - ready in 5 minutes",
+                  "Full 24/7 customer support - we're always here",
+                  "You won't be disappointed - this is the future of streaming"
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-200">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" ref={aboutRef} className="py-24 bg-gradient-to-b from-gray-800/80 to-gray-900/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            animate={isAboutInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="inline-flex items-center gap-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full px-6 py-2 mb-6">
+              <Flame className="w-5 h-5 text-orange-400" />
+              <span className="text-sm font-medium text-orange-300">WHY CHOOSE US</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Break Free From Cable</span>
+            </h2>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+              Premium streaming at a fraction of the cost. No contracts, no hidden fees.
+            </p>
+          </motion.div>
+
+          <motion.div 
+            className="grid md:grid-cols-3 gap-8"
+            variants={staggerContainer}
+            initial="hidden"
+            animate={isAboutInView ? "visible" : "hidden"}
+          >
+            {/* Elite Glassmorphism Feature Cards */}
+            <motion.div 
+              variants={fadeInUp}
+              className="bg-gradient-to-br from-orange-500/15 via-red-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-10 border-2 border-orange-400/30 shadow-2xl shadow-orange-500/20 hover:border-orange-400/60 transition-all duration-300 hover:scale-105 hover:shadow-orange-500/40"
+              whileHover={{ y: -5 }}
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-orange-500/50">
+                <Zap className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-black mb-4 text-white">Be Streaming in 10 Minutes</h3>
+              <p className="text-gray-100 text-lg leading-relaxed">Your StreamStick comes with instant login credentials and an easy 10-minute setup video. Start watching Live TV, Movies, Series & Sports today with 24/7 support ready when you need it.</p>
+            </motion.div>
+            <motion.div 
+              variants={fadeInUp}
+              className="bg-gradient-to-br from-blue-500/15 via-cyan-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-10 border-2 border-blue-400/30 shadow-2xl shadow-blue-500/20 hover:border-blue-400/60 transition-all duration-300 hover:scale-105 hover:shadow-blue-500/40"
+              whileHover={{ y: -5 }}
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/50">
+                <Star className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-black mb-4 text-white">Premium Content</h3>
+              <p className="text-gray-100 text-lg leading-relaxed">Access 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.</p>
+            </motion.div>
+            <motion.div 
+              variants={fadeInUp}
+              className="bg-gradient-to-br from-green-500/15 via-emerald-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-10 border-2 border-green-400/30 shadow-2xl shadow-green-500/20 hover:border-green-400/60 transition-all duration-300 hover:scale-105 hover:shadow-green-500/40"
+              whileHover={{ y: -5 }}
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-green-500/50">
+                <Check className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-black mb-4 text-white">24/7 Support</h3>
+              <p className="text-gray-100 text-lg leading-relaxed">Our dedicated team is always available to help you with any questions or issues.</p>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
