@@ -184,17 +184,21 @@ jobs:
         run: |
           SITE="https://streamstickpro.com"
           SITEMAP="${SITE}/sitemap.xml"
-          echo "Fetching sitemap..."
-          SITEMAP_BODY=$(curl -sSf -L "$SITEMAP" || echo "")
+          SITEMAP_PAGES="${SITE}/sitemap-pages.xml"
+          echo "Fetching sitemaps..."
+          SITEMAP_BODY=$(curl -sSf -L --max-time 60 "$SITEMAP" || echo "")
+          PAGES_BODY=$(curl -sSf -L --max-time 90 "$SITEMAP_PAGES" || echo "")
           URL_COUNT=$(echo "$SITEMAP_BODY" | grep -o '<loc>' | wc -l)
+          PAGES_URL_COUNT=$(echo "$PAGES_BODY" | grep -o '<loc>' | wc -l)
           echo "## Sitemap verification" >> $GITHUB_STEP_SUMMARY
-          echo "**URLs in sitemap:** $URL_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "**sitemap.xml URLs:** $URL_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "**sitemap-pages.xml URLs:** $PAGES_URL_COUNT" >> $GITHUB_STEP_SUMMARY
           echo "**Sitemap URL:** $SITEMAP" >> $GITHUB_STEP_SUMMARY
-          echo "URLs in sitemap: $URL_COUNT"
+          echo "sitemap.xml: $URL_COUNT | sitemap-pages.xml: $PAGES_URL_COUNT"
           echo "Pinging Google, Bing, Yandex..."
-          curl -sSf -o /dev/null "https://www.google.com/ping?sitemap=${SITEMAP}" && echo "Google: submitted" || true
-          curl -sSf -o /dev/null "https://www.bing.com/ping?sitemap=${SITEMAP}" && echo "Bing: submitted" || true
-          curl -sSf -o /dev/null "https://webmaster.yandex.com/ping?sitemap=${SITEMAP}" && echo "Yandex: submitted" || true
+          curl -sSf -o /dev/null "https://www.google.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Google: submitted" || true
+          curl -sSf -o /dev/null "https://www.bing.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Bing: submitted" || true
+          curl -sSf -o /dev/null "https://webmaster.yandex.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Yandex: submitted" || true
         continue-on-error: true
 
       - name: Submit URLs to IndexNow (Bing, Yandex, Seznam)
