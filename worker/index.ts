@@ -27,6 +27,8 @@ export interface Env {
   VITE_SUPABASE_URL: string;
   VITE_SUPABASE_ANON_KEY: string;
   SUPABASE_SERVICE_KEY?: string;
+  SUPABASE_SERVICE_ROLE_KEY?: string;
+  SUPABASE_SERVICE_ROLL_KEY?: string;
   ADMIN_USERNAME?: string;
   ADMIN_PASSWORD?: string;
   JWT_SECRET?: string;
@@ -240,12 +242,16 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
   const path = `/l/${country.toLowerCase()}/${pageType}/${slug}`;
   let title = '';
   let desc = '';
+  let faqJson: { question: string; answer: string }[] = [];
   try {
     const storage = getStorage(c.env);
     const page = await storage.getSeoPageByPath(country, pageType, slug);
     if (page) {
       title = (page.title || page.h1 || 'IPTV & Jailbroken Fire Stick').replace(/\[LOCATION\]/g, page.location || page.region || slug);
-      desc = (page.meta_description || page.p1_snippet || '').substring(0, 160);
+      desc = (page.meta_description || page.p1_snippet || '').substring(0, 155);
+      if (Array.isArray(page.faq_json) && page.faq_json.length > 0) {
+        faqJson = page.faq_json.map((f: any) => ({ question: f.question || f.q || '', answer: f.answer || f.a || '' })).filter((f: any) => f.question && f.answer);
+      }
     } else {
       const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
       if (assetRes.ok) {
@@ -253,9 +259,16 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
         const staticPage = list.find((p) => p.path === path);
         if (staticPage) {
           title = staticPage.t;
-          desc = staticPage.d;
+          desc = (staticPage.d || '').substring(0, 155);
         }
       }
+    }
+    if (faqJson.length === 0) {
+      faqJson = [
+        { question: 'What is the best IPTV service for ' + (slug || 'this area') + '?', answer: 'StreamStickPro offers 18,000+ live channels and 100,000+ movies and series, with a free trial. Works on Fire Stick, ONN Google TV, and Smart TVs.' },
+        { question: 'Can I get a jailbroken Fire Stick with IPTV?', answer: 'Yes. StreamStickPro sells pre-loaded Fire Sticks with IPTV included. Setup in minutes with instant credentials and support.' },
+        { question: 'Does StreamStickPro work on Google TV?', answer: 'Yes. StreamStickPro works on ONN Google TV and other Android TV devices. Native support with IPTV Smarters Pro and TiviMate.' },
+      ];
     }
     if (!title) return next();
     const url = `https://streamstickpro.com${path}`;
@@ -283,6 +296,15 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
   <meta name="twitter:description" content="${descSafe}">
   <meta name="twitter:image" content="${ogImage}">
   <meta name="robots" content="index, follow">
+  ${faqJson.length > 0 ? `<script type="application/ld+json">${JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqJson.map((f: { question: string; answer: string }) => ({
+      '@type': 'Question',
+      name: escapeHtml(f.question),
+      acceptedAnswer: { '@type': 'Answer', text: escapeHtml(f.answer) },
+    })),
+  })}</script>` : ''}
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to content</a>
