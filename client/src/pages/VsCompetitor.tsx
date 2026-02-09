@@ -29,7 +29,7 @@ export default function VsCompetitor() {
         breadcrumbs={breadcrumbs}
       >
         <p className="text-gray-200 mb-8">
-          Comparing StreamStickPro to {name}. See why customers switch: 36hr trial, 28K+ channels, native Onn/Roku support, IPTV Smarters Pro optimized, best price.
+          Comparing StreamStickPro to {name}. See why customers switch: 36hr trial, 18K+ channels, native Onn/Roku support, IPTV Smarters Pro optimized, best price.
         </p>
 
         <div className="overflow-x-auto mb-10">
@@ -43,7 +43,7 @@ export default function VsCompetitor() {
             </thead>
             <tbody className="text-gray-200">
               <tr className="border-t border-white/10"><td className="p-3">Free Trial</td><td className="p-3 text-green-300"><Check className="w-5 h-5 inline" /> 36hr</td><td className="p-3 text-red-300"><X className="w-5 h-5 inline" /> 24hr or less</td></tr>
-              <tr className="border-t border-white/10"><td className="p-3">Channels</td><td className="p-3 text-green-300"><Check className="w-5 h-5 inline" /> 28K+</td><td className="p-3 text-red-300"><X className="w-5 h-5 inline" /> Fewer</td></tr>
+              <tr className="border-t border-white/10"><td className="p-3">Channels</td><td className="p-3 text-green-300"><Check className="w-5 h-5 inline" /> 18K+</td><td className="p-3 text-red-300"><X className="w-5 h-5 inline" /> Fewer</td></tr>
               <tr className="border-t border-white/10"><td className="p-3">Onn Google TV</td><td className="p-3 text-green-300"><Check className="w-5 h-5 inline" /> Native</td><td className="p-3 text-red-300"><X className="w-5 h-5 inline" /> Limited</td></tr>
               <tr className="border-t border-white/10"><td className="p-3">Roku</td><td className="p-3 text-green-300"><Check className="w-5 h-5 inline" /> Native</td><td className="p-3 text-red-300"><X className="w-5 h-5 inline" /> Hacky</td></tr>
               <tr className="border-t border-white/10"><td className="p-3">IPTV Smarters Pro</td><td className="p-3 text-green-300"><Check className="w-5 h-5 inline" /> Optimized</td><td className="p-3 text-red-300"><X className="w-5 h-5 inline" /> Basic</td></tr>

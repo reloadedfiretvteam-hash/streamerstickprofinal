@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { Check } from "lucide-react";
+import { APP_IMAGES, getImageForSlot, fullImageUrl } from "@/data/seo-images";
 
 const breadcrumbs = [
   { label: "Home", href: "/" },
@@ -12,7 +13,15 @@ export default function Tivimate() {
   useEffect(() => {
     document.title = "TiviMate IPTV Setup 2026 | Premium App Guide | StreamStickPro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Use TiviMate with StreamStickPro. Premium IPTV app setup for Fire Stick, Android, Onn. 28K+ channels. 36hr trial. Best IPTV for TiviMate.");
+    if (meta) meta.setAttribute("content", "Use TiviMate with StreamStickPro. Premium IPTV app setup for Fire Stick, Android, Onn. 18K+ channels. 36hr trial. Best IPTV for TiviMate.");
+    const setMeta = (name: string, content: string, isProperty = false) => {
+      const attr = isProperty ? "property" : "name";
+      let tag = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!tag) { tag = document.createElement("meta"); tag.setAttribute(attr, name); document.head.appendChild(tag); }
+      tag.setAttribute("content", content);
+    };
+    setMeta("og:image", fullImageUrl(getImageForSlot(APP_IMAGES, 1).src), true);
+    setMeta("twitter:image", fullImageUrl(getImageForSlot(APP_IMAGES, 1).src));
   }, []);
 
   return (
@@ -20,12 +29,15 @@ export default function Tivimate() {
       <BreadcrumbSchema items={breadcrumbs.map((b) => ({ name: b.label, url: "https://streamstickpro.com" + b.href }))} />
       <PillarLayout
         title="TiviMate – Premium IPTV App Setup"
-        description="StreamStickPro works with TiviMate. Premium setup guide for Fire Stick, Onn, Android. 28K+ channels. Start 36hr trial or shop plans."
+        description="StreamStickPro works with TiviMate. Premium setup guide for Fire Stick, Onn, Android. 18K+ channels. Start 36hr trial or shop plans."
         breadcrumbs={breadcrumbs}
       >
         <p className="text-gray-200 mb-6">
-          <strong className="text-white">TiviMate</strong> is a premium IPTV player with a great EPG and DVR. StreamStickPro is the best IPTV to use with TiviMate: we deliver an optimized stream and full channel list (28K+ live, 100K+ VOD).
+          <strong className="text-white">TiviMate</strong> is a premium IPTV player with a great EPG and DVR. StreamStickPro is the best IPTV to use with TiviMate: we deliver an optimized stream and full channel list (18K+ live, 100K+ VOD).
         </p>
+        <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
+          <img src={getImageForSlot(APP_IMAGES, 1).src} alt={getImageForSlot(APP_IMAGES, 1).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
+        </figure>
         <h2 id="setup">TiviMate + StreamStickPro Setup</h2>
         <ol className="list-decimal list-inside text-gray-200 space-y-2 mb-6">
           <li>Get your credentials: <Link href="/36hr-trial"><span className="text-orange-400 hover:underline">36hr free trial</span></Link> or <Link href="/shop"><span className="text-orange-400 hover:underline">subscription</span></Link>.</li>

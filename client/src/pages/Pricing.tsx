@@ -9,20 +9,20 @@ export default function Pricing() {
   useEffect(() => {
     document.title = "IPTV Pricing 2026 | StreamStickPro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "StreamStickPro IPTV pricing from $15/mo. 28K+ channels. 36hr trial or shop.");
+    if (meta) meta.setAttribute("content", "StreamStickPro IPTV pricing from $15/mo. 18K+ channels. 36hr trial or shop.");
   }, []);
 
   return (
     <>
       <BreadcrumbSchema items={breadcrumbs.map((b) => ({ name: b.label, url: "https://streamstickpro.com" + b.href }))} />
-      <PillarLayout title="IPTV Pricing" description="Subscription tiers. 28K+ channels." breadcrumbs={breadcrumbs}>
-        <p className="text-gray-200 mb-8">Plans from $15/mo. 28K+ channels, 100K+ VOD. Fire Stick, Onn, Smart TV, Smarters Pro, TiviMate.</p>
+      <PillarLayout title="IPTV Pricing" description="Subscription tiers. 18K+ channels." breadcrumbs={breadcrumbs}>
+        <p className="text-gray-200 mb-8">Plans from $15/mo. 18K+ channels, 100K+ VOD. Fire Stick, Onn, Smart TV, Smarters Pro, TiviMate.</p>
         <div className="grid md:grid-cols-3 gap-6 mb-10">
           <div className="rounded-2xl border border-white/20 bg-white/5 p-6">
             <h3 className="text-xl font-bold text-white">Starter</h3>
             <p className="text-3xl font-black text-white mt-2">$15<span className="text-lg text-gray-400">/mo</span></p>
             <ul className="mt-4 space-y-2 text-gray-200 text-sm">
-              <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400 shrink-0" /> 28K+ channels</li>
+              <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400 shrink-0" /> 18K+ channels</li>
             </ul>
             <Link href="/shop"><span className="mt-6 inline-flex items-center justify-center w-full py-3 rounded-xl bg-orange-500 text-white font-semibold"><ShoppingCart className="w-4 h-4 mr-2" /> View Shop</span></Link>
           </div>
@@ -31,7 +31,7 @@ export default function Pricing() {
             <h3 className="text-xl font-bold text-white">Popular</h3>
             <p className="text-3xl font-black text-white mt-2">$25<span className="text-lg text-gray-400">/3 mo</span></p>
             <ul className="mt-4 space-y-2 text-gray-200 text-sm">
-              <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400 shrink-0" /> 28K+ channels</li>
+              <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400 shrink-0" /> 18K+ channels</li>
             </ul>
             <Link href="/shop"><span className="mt-6 inline-flex items-center justify-center w-full py-3 rounded-xl bg-orange-500 text-white font-semibold"><ShoppingCart className="w-4 h-4 mr-2" /> View Shop</span></Link>
           </div>
@@ -39,7 +39,7 @@ export default function Pricing() {
             <h3 className="text-xl font-bold text-white">Best Value</h3>
             <p className="text-3xl font-black text-white mt-2">$65<span className="text-lg text-gray-400">/year</span></p>
             <ul className="mt-4 space-y-2 text-gray-200 text-sm">
-              <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400 shrink-0" /> 28K+ channels</li>
+              <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400 shrink-0" /> 18K+ channels</li>
             </ul>
             <Link href="/shop"><span className="mt-6 inline-flex items-center justify-center w-full py-3 rounded-xl bg-orange-500 text-white font-semibold"><ShoppingCart className="w-4 h-4 mr-2" /> View Shop</span></Link>
           </div>

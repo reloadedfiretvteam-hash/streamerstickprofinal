@@ -301,9 +301,9 @@ export default function MainStore() {
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
-    document.title = "Best IPTV Firestick Service 2026 | 18K+ Channels | StreamStickPro";
+    document.title = "StreamStickPro IPTV + Jailbroken Fire Sticks + Onn Google TV - 36hr Trial";
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute("content", "Best IPTV and live IPTV service for Fire Stick & Android. 18,000+ live TV channels, 100,000+ movies. TiviMate, IPTV Smarters. Free trial. Pre-loaded Fire Sticks & plans—StreamStickPro.");
+    if (metaDesc) metaDesc.setAttribute("content", "36 HOUR FREE TRIAL – 18K+ channels live. IPTV + jailbroken Fire Sticks + Onn Google TV. Beats IPTVStronger, TroyPoint. 247K users, 99.9% uptime. Start trial or buy device—StreamStickPro.");
     loadProducts();
   }, []);
 
@@ -625,7 +625,7 @@ export default function MainStore() {
               className="mb-6"
             >
               <span className="inline-block px-6 py-2 bg-gradient-to-r from-orange-500/30 to-red-500/30 backdrop-blur-sm border-2 border-orange-400/50 rounded-full text-sm font-bold text-orange-200 animate-pulse shadow-lg shadow-orange-500/30">
-                36 HOUR FREE TRIAL – 28K Channels Live Now
+                36 HOUR FREE TRIAL – 18K+ Channels Live Now
               </span>
               <span className="ml-3 inline-flex items-center gap-1 rounded-full bg-green-500/20 px-3 py-1 text-green-300 font-bold">
                 <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" aria-hidden="true" />
@@ -710,7 +710,7 @@ export default function MainStore() {
             >
               <motion.div className="bg-gradient-to-br from-orange-500/10 via-red-500/5 to-transparent backdrop-blur-xl rounded-2xl px-6 py-5 border border-orange-400/20">
                 <div className="text-orange-400 font-extrabold text-2xl md:text-3xl mb-1">
-                  <AnimatedCounter end={28000} suffix="+" className="text-orange-400" />
+                  <AnimatedCounter end={18000} suffix="+" className="text-orange-400" />
                 </div>
                 <div className="text-blue-100 font-semibold">Live Channels</div>
               </motion.div>
@@ -1321,7 +1321,7 @@ export default function MainStore() {
           <div className="max-w-3xl mx-auto space-y-4 text-lg text-gray-200">
             <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> Beats IPTVStronger — 36hr vs 24hr trial</p>
             <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> Beats TroyPoint — Onn/Roku native support</p>
-            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> More channels than ANY competitor — 28K+ live</p>
+            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> More channels than ANY competitor — 18K+ live</p>
           </div>
           <p className="text-center mt-6">
             <Link href="/vs-iptvstronger"><span className="text-orange-400 hover:text-orange-300 font-semibold">Compare vs IPTVStronger →</span></Link>
