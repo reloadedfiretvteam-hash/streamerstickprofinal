@@ -55,8 +55,22 @@ export default function CanonicalTag() {
     }
     ogUrl.content = canonicalUrl;
 
-    // Debug logging disabled in production for cleaner console
-
+    // hreflang for US, Canada, UK – signals to Google/Bing for more impressions in those regions
+    const existingHreflang = document.querySelectorAll('link[rel="alternate"][hreflang]');
+    existingHreflang.forEach((el) => el.remove());
+    const hreflangs = [
+      { lang: 'en-US', href: canonicalUrl },
+      { lang: 'en-CA', href: canonicalUrl },
+      { lang: 'en-GB', href: canonicalUrl },
+      { lang: 'x-default', href: canonicalUrl },
+    ];
+    hreflangs.forEach(({ lang, href }) => {
+      const link = document.createElement('link');
+      link.rel = 'alternate';
+      link.hreflang = lang;
+      link.href = href;
+      document.head.appendChild(link);
+    });
   }, [location]);
 
   return null;

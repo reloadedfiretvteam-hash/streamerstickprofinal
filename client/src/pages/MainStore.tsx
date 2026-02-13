@@ -644,14 +644,22 @@ export default function MainStore() {
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500 mt-2">36hr Trial</span>
             </motion.h1>
 
-            {/* Trust above fold */}
+            {/* Trust above fold + geo for US/UK/CA impressions */}
             <motion.p 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.15 }}
-              className="text-base sm:text-lg text-gray-300 mb-6"
+              className="text-base sm:text-lg text-gray-300 mb-2"
             >
               247K Users | 99.9% Uptime | McAfee Secure
+            </motion.p>
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.16 }}
+              className="text-sm text-gray-400 mb-6"
+            >
+              Serving <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-medium">USA</span></Link>, <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-medium">Canada</span></Link> & <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-medium">UK</span></Link> — IPTV & Fire Sticks nationwide
             </motion.p>
 
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.18 }} className="mb-4">
