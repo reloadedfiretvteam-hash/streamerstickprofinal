@@ -39,6 +39,8 @@ const PAGE_TYPE_LABEL: Record<string, string> = {
   iptv: "IPTV",
   jailbreak: "Jailbroken Fire Stick",
   google: "Google TV",
+  unlocked: "Unlocked Fire Stick",
+  onn: "ONN Google TV",
 };
 
 export default function LocationPage() {
@@ -148,15 +150,19 @@ export default function LocationPage() {
   const breadcrumbs = [
     { label: "Home", href: "/" },
     { label: countryLabel, href: "/" },
-    { label: typeLabel, href: page.pillar_url || (page.page_type === "iptv" ? "/iptv-services" : page.page_type === "jailbreak" ? "/jailbroken-fire-sticks" : "/iptv-media-players") },
+    { label: typeLabel, href: page.pillar_url || (page.page_type === "iptv" ? "/iptv-services" : page.page_type === "jailbreak" || page.page_type === "unlocked" ? "/jailbroken-fire-sticks" : page.page_type === "onn" ? "/onn-google-tv" : "/iptv-media-players") },
     { label: locationLabel, href: `/l/${country}/${pageType}/${slug}` },
   ];
 
-  const faq = Array.isArray(page.faq_json)
-    ? page.faq_json
-        .filter((f) => f && (f.question || f.answer))
-        .map((f) => ({ question: f.question || "", answer: f.answer || "" }))
-    : [];
+  const faq = (() => {
+    const raw = Array.isArray(page.faq_json)
+      ? page.faq_json
+          .map((f) => ({ question: (f?.question ?? "").trim(), answer: (f?.answer ?? "").trim() }))
+          .filter((f) => f.question && f.answer && f.answer.length >= 25)
+      : [];
+    const bad = new Set(["n/a", "na", "location", "[location]", "tbd", "tba"]);
+    return raw.filter((f) => !bad.has(f.answer.toLowerCase()) && !bad.has(f.question.toLowerCase()));
+  })();
 
   const schemaBreadcrumbs = breadcrumbs.map((b) => ({
     name: b.label,

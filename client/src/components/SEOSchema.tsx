@@ -31,15 +31,26 @@ export function SEOSchema({ faq, products, breadcrumbs }: SEOSchemaProps) {
       const existingFaq = document.querySelector('script[data-seo-schema="faq"]');
       if (existingFaq) existingFaq.remove();
 
+      const bad = new Set(['n/a', 'na', 'location', '[location]', 'tbd', 'tba']);
+      const valid = faqMemo.filter(
+        (item) =>
+          item?.question?.trim() &&
+          item?.answer?.trim() &&
+          item.answer.trim().length >= 25 &&
+          !bad.has(item.answer.trim().toLowerCase()) &&
+          !bad.has(item.question.trim().toLowerCase())
+      );
+      if (valid.length === 0) return;
+
       const faqSchema = {
         "@context": "https://schema.org",
         "@type": "FAQPage",
-        "mainEntity": faqMemo.map(item => ({
+        "mainEntity": valid.map(item => ({
           "@type": "Question",
-          "name": item.question,
+          "name": item.question.trim(),
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": item.answer
+            "text": item.answer.trim()
           }
         }))
       };

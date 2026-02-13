@@ -14,9 +14,9 @@ VITE_STORAGE_BUCKET_NAME = "imiges"
 SITE_URL = "https://streamstickpro.com"
 
 # SECRETS - Set in Cloudflare Pages Dashboard → Settings → Environment Variables (Production)
-# Worker needs these at RUNTIME to talk to Supabase (SEO tables, redirect_map, blog). Same values as GitHub Secrets.
+# Worker needs these at RUNTIME to talk to Supabase (SEO, redirect_map, blog, visitor tracking). Same values as GitHub Secrets.
 # Required:
-#   SUPABASE_SERVICE_KEY - Supabase service_role key (Worker reads seo_architecture, redirect_map, etc.)
+#   SUPABASE_SERVICE_KEY (or SUPABASE_SERVICE_ROLE_KEY) - Supabase service_role key (Worker + visitor RPCs: get_live_visitors, upsert_visitor_visit)
 #   ADMIN_USERNAME - Admin login username
 #   ADMIN_PASSWORD - Admin login password
 #   STRIPE_SECRET_KEY - Stripe API secret key
@@ -24,6 +24,8 @@ SITE_URL = "https://streamstickpro.com"
 #   STRIPE_WEBHOOK_SECRET - Stripe webhook signing secret
 #   RESEND_API_KEY - Resend email API key
 #   SESSION_SECRET - Session encryption key
+#
+# Visitor tracking (/api/track-visit, /api/admin/visitors/live) uses VITE_SUPABASE_URL + SUPABASE_SERVICE_KEY above.
 #
 # Optional (for retargeting):
 #   VITE_GOOGLE_ADS_ID - Google Ads conversion tracking ID

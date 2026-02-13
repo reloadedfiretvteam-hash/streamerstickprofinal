@@ -2,6 +2,17 @@
 
 **Use this after you rotate/revoke any keys.** Add these in **GitHub → repo → Settings → Secrets and variables → Actions**. No values go in this doc or in code.
 
+## Deploy branch: clean-main only
+
+- **Only the `clean-main` branch** triggers the deploy workflow. Push to **clean-main** to build, run migrations (including visitor tracking), seed 25K location pages, deploy to Cloudflare Pages, purge cache, and ping sitemaps.
+- Do not add `main` or other branches to the workflow; deployment is **clean-main** only.
+
+## Supabase access key: Cursor / local only (write code only)
+
+- **Your Supabase access key is for you and Cursor only**—use it locally to run migrations, seed, or debug. **Never commit it to the repo or paste it into code.**
+- **Production** uses **GitHub Secrets** (and Cloudflare Pages env) only. The codebase only reads from **environment variables** (`process.env.SUPABASE_SERVICE_KEY`, `secrets.SUPABASE_SERVICE_KEY`, etc.); the actual key is added in GitHub and/or Cloudflare, not in source.
+- Add the same key as **GitHub Secret** `SUPABASE_SERVICE_KEY` (or `SUPABASE_SERVICE_ROLE_KEY`) so the workflow can run migrations and seed. That way Cursor writes code only; deploy uses the key from Secrets.
+
 ## Required for build & deploy
 
 | Secret | Where to get it | Used for |
@@ -24,13 +35,35 @@
 |--------|------------------|----------|
 | `CLOUDFLARE_ZONE_ID` | Cloudflare → your domain (streamstickpro.com) → Overview → Zone ID | Cache purge after deploy (fresh sitemap/location pages) |
 
+## Visitor tracking (Supabase + Cloudflare)
+
+- **Migrations**: The deploy workflow runs all `20260212*` SQL migrations, including **visitor dedup & live stats** (`visitors` ip_hash, `get_live_visitors`, `upsert_visitor_visit`). No extra step needed if `SUPABASE_DATABASE_URL` or `DATABASE_URL` is set.
+- **Worker runtime**: The Cloudflare Worker needs **Supabase** at runtime for `/api/track-visit` and `/api/admin/visitors/live`. Set the same values in **Cloudflare Pages → your project → Settings → Environment variables (Production)**:
+  - `VITE_SUPABASE_URL` (or `SUPABASE_URL`)
+  - `SUPABASE_SERVICE_KEY` or `SUPABASE_SERVICE_ROLE_KEY` (Worker calls Supabase RPCs; anon key is not enough for service RPCs)
+  - Other existing secrets (Stripe, Resend, ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET, etc.) as already documented in wrangler.toml comments.
+- **GitHub Secrets** are used at **build** time; **Cloudflare env** is used at **request** time by the Worker. Ensure both Supabase URL and service key are in Cloudflare so visitor tracking works after deploy.
+
 ## 25K seed behavior
 
 - If **VITE_SUPABASE_URL** + **SUPABASE_SERVICE_KEY** (or ROLE_KEY or ROLL_KEY) are set → workflow runs **Supabase client** 25K seed.
 - Else if **SUPABASE_DATABASE_URL** or **DATABASE_URL** is set → workflow runs **DB script** 25K seed (`seed-25k-via-database-url.ts`).
 - If none of the above → seed step is skipped (sitemap still works via build-time `location-pages.json` if present).
 
-## Deployment
+## Deployment (push to GitHub → deploy)
 
-- **Branch:** Only **clean-main** triggers deploy. Push to `clean-main` to run the workflow.
-- **After adding/rotating secrets:** Push an empty commit or re-run the workflow from Actions tab so the new keys are used.
+- **Branch:** Only **clean-main** triggers deploy. **Push to `clean-main`** to run the workflow (build, deploy to Cloudflare, run migrations including visitor tracking + seed if secrets are set).
+- **To deploy a clean main branch:**
+  1. Commit all changes locally.
+  2. Push to `clean-main`:  
+     `git push origin clean-main`  
+     (If the branch doesn’t exist: `git checkout -b clean-main` then push, or rename/maintain your main branch as `clean-main` and push.)
+  3. GitHub Actions will run: migrations (Supabase SEO + visitor 20260212), 25K seed (if secrets set), build, deploy to Cloudflare Pages, cache purge, sitemap ping.
+- **After adding/rotating secrets:** Push an empty commit to `clean-main` or re-run the workflow from the Actions tab so the new keys are used.
+- **Cloudflare Worker env:** After deploy, ensure **Cloudflare Pages → project → Settings → Environment variables** has Supabase URL + service key (and other secrets) so `/api/track-visit` and admin live visitors work at runtime.
+
+## After deploy: IndexNow, Google, Bing, Yandex, Yahoo
+
+- The workflow **pings** your sitemap to **Google**, **Bing**, and **Yandex**.
+- **Yahoo** uses Bing’s index; pinging Bing covers Yahoo.
+- The workflow then runs **IndexNow** (live sitemap URLs submitted to IndexNow API → **Bing, Yandex, Seznam**). So every deploy pushes your URLs to IndexNow, Google (ping), Bing (ping + IndexNow), Yandex (ping + IndexNow). No extra step needed; just push to **clean-main**.

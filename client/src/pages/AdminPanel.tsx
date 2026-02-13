@@ -307,6 +307,7 @@ export default function AdminPanel() {
   });
   const [loadingStats, setLoadingStats] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [liveByLocation, setLiveByLocation] = useState<Array<{ state: string; city: string; daily_visits: number; yesterday_visits: number; weekly_visits: number; monthly_visits: number; unique_ips: number }>>([]);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -693,6 +694,12 @@ export default function AdminPanel() {
         recentVisitors: mappedRecentVisitors
       });
       setLastUpdate(new Date());
+      // Deduplicated live visitors by state/city (from get_live_visitors RPC)
+      try {
+        const liveRes = await authFetch('/api/admin/visitors/live');
+        const liveJson = await liveRes.json();
+        if (liveJson.data && Array.isArray(liveJson.data)) setLiveByLocation(liveJson.data);
+      } catch (_) { /* ignore */ }
     } catch (error: any) {
       console.error('Error loading visitor statistics:', error);
       // Set empty stats on error but keep component visible
@@ -2332,6 +2339,57 @@ export default function AdminPanel() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Live by location (deduplicated by IP/session, last 24h) */}
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <MapPin className="w-5 h-5 text-orange-500" />
+                    Live Visitors by Location (Deduplicated)
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Unique visitors by state/city in the last 24 hours. Refreshes with stats every 30s.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-gray-700">
+                          <TableHead className="text-gray-400">State</TableHead>
+                          <TableHead className="text-gray-400">City</TableHead>
+                          <TableHead className="text-gray-400">Today</TableHead>
+                          <TableHead className="text-gray-400">Yesterday</TableHead>
+                          <TableHead className="text-gray-400">Weekly</TableHead>
+                          <TableHead className="text-gray-400">Monthly</TableHead>
+                          <TableHead className="text-gray-400">Unique IPs</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {liveByLocation.length > 0 ? (
+                          liveByLocation.map((row, idx) => (
+                            <TableRow key={idx} className="border-gray-700 hover:bg-gray-700/50">
+                              <TableCell className="text-gray-300">{row.state || '—'}</TableCell>
+                              <TableCell className="text-gray-300">{row.city || '—'}</TableCell>
+                              <TableCell className="text-gray-300">{row.daily_visits.toLocaleString()}</TableCell>
+                              <TableCell className="text-gray-400">{row.yesterday_visits.toLocaleString()}</TableCell>
+                              <TableCell className="text-gray-400">{row.weekly_visits.toLocaleString()}</TableCell>
+                              <TableCell className="text-gray-400">{row.monthly_visits.toLocaleString()}</TableCell>
+                              <TableCell className="text-gray-400">{row.unique_ips.toLocaleString()}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={7} className="py-6 text-center text-gray-400">
+                              No location data yet. Visits tracked via /api/track-visit will appear here.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
 
               <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
@@ -4521,6 +4579,52 @@ export default function AdminPanel() {
                     >
                       {broadcastLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
                       Send website reminder to all
+                    </Button>
+                    <p className="text-gray-500 text-xs mt-2">Verify email system: send a test to support@streamstickpro.com</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-gray-600 text-gray-300"
+                      onClick={async () => {
+                        try {
+                          const r = await authFetch('/api/admin/email/send-test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+                          const d = await r.json();
+                          if (d.success) {
+                            showToast(d.message || 'Test email sent to support@streamstickpro.com', 'success');
+                          } else {
+                            showToast(d.error || 'Failed to send test email', 'error');
+                          }
+                        } catch (e) {
+                          showToast('Failed to send test email', 'error');
+                        }
+                      }}
+                    >
+                      <Mail className="w-4 h-4 mr-2" />
+                      Send test email to website
+                    </Button>
+                    <p className="text-gray-500 text-xs mt-3">Past customers (e.g. Sarvane): add them to promotions and send first email now</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-gray-600 text-gray-300"
+                      onClick={async () => {
+                        if (!confirm('Create campaigns for all past customers/orders who don’t have one and send them the first promotion email. Continue?')) return;
+                        try {
+                          const r = await authFetch('/api/admin/email-campaigns/backfill', { method: 'POST' });
+                          const d = await r.json();
+                          if (d.success) {
+                            showToast(d.message || `Created ${d.created} campaigns`, 'success');
+                            if (d.errors?.length) showToast(`Some errors: ${d.errors.slice(0, 2).join('; ')}`, 'error');
+                          } else {
+                            showToast(d.error || d.details || 'Backfill failed', 'error');
+                          }
+                        } catch (e) {
+                          showToast('Backfill request failed', 'error');
+                        }
+                      }}
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      Backfill past customers (send promotions)
                     </Button>
                   </CardContent>
                 </Card>

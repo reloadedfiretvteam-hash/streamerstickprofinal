@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { Check } from "lucide-react";
+import { ONN_IMAGES, getImageForSlot, fullImageUrl } from "@/data/seo-images";
 
 const breadcrumbs = [
   { label: "Home", href: "/" },
@@ -13,6 +14,14 @@ export default function OnnGoogleTv() {
     document.title = "Onn Google TV IPTV Setup 2026 | StreamStickPro";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", "Set up IPTV on Onn Google TV. Native support, no hacky workarounds. StreamStickPro works on Onn 4K and Onn Pro. 36hr trial, then subscribe.");
+    const setMeta = (name: string, content: string, isProperty = false) => {
+      const attr = isProperty ? "property" : "name";
+      let tag = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!tag) { tag = document.createElement("meta"); tag.setAttribute(attr, name); document.head.appendChild(tag); }
+      tag.setAttribute("content", content);
+    };
+    setMeta("og:image", fullImageUrl(getImageForSlot(ONN_IMAGES, 0).src), true);
+    setMeta("twitter:image", fullImageUrl(getImageForSlot(ONN_IMAGES, 0).src));
   }, []);
 
   return (
@@ -26,12 +35,18 @@ export default function OnnGoogleTv() {
         <p className="text-gray-200 mb-6">
           StreamStickPro supports Onn Google TV natively. Use your Onn 4K or Onn 4K Pro with our IPTV service, IPTV Smarters Pro, or TiviMate for the best experience.
         </p>
+        <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
+          <img src={getImageForSlot(ONN_IMAGES, 0).src} alt={getImageForSlot(ONN_IMAGES, 0).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
+        </figure>
         <h2 id="why-onn">Why Onn Google TV?</h2>
         <ul className="list-disc list-inside text-gray-200 space-y-2 mb-6">
           <li>Google TV interface, often cheaper than Fire Stick</li>
           <li>Native app support - we support Onn out of the box</li>
           <li>DVR and storage on Onn Pro for recording</li>
         </ul>
+        <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
+          <img src={getImageForSlot(ONN_IMAGES, 1).src} alt={getImageForSlot(ONN_IMAGES, 1).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
+        </figure>
         <h2 id="setup">Quick Setup</h2>
         <ol className="list-decimal list-inside text-gray-200 space-y-2 mb-6">
           <li>Get your credentials from StreamStickPro (36hr trial or subscription)</li>

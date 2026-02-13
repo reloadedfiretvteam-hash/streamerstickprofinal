@@ -30,7 +30,13 @@ export default function NotFound() {
           <p className="mt-4 text-sm text-gray-400">
             The page you're looking for doesn't exist or has been moved.
           </p>
-
+          <p className="mt-2 text-sm text-gray-500">
+            <a href="/" className="text-orange-400 hover:underline">Home</a>
+            {" · "}
+            <a href="/shop" className="text-orange-400 hover:underline">Shop</a>
+            {" · "}
+            <a href="/blog" className="text-orange-400 hover:underline">Blog</a>
+          </p>
           <Button 
             onClick={() => setLocation("/")}
             className="mt-6 w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"

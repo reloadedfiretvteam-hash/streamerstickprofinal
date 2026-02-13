@@ -219,8 +219,8 @@ export default function Blog() {
           "url": `https://streamstickpro.com/blog/${selectedPost.slug}`
         }) }} />
         
-        <nav className="border-b border-gray-800 sticky top-0 z-10 bg-gray-900/95 backdrop-blur">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4">
+        <nav className="border-b border-gray-800 sticky top-0 z-10 bg-gray-900/95 backdrop-blur" aria-label="Article navigation">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4 flex-wrap">
             <Button
               variant="ghost"
               size="sm"
@@ -232,9 +232,12 @@ export default function Blog() {
               data-testid="button-back-to-blog"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              Back to Blog
             </Button>
-            <div className="flex-1">
+            <a href="/" className="text-sm text-gray-400 hover:text-white">Home</a>
+            <a href="/shop" className="text-sm text-gray-400 hover:text-white">Shop</a>
+            <a href="/?section=free-trial" className="text-sm text-gray-400 hover:text-white">Free Trial</a>
+            <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold truncate" data-testid="text-blog-title">{selectedPost.title}</h1>
             </div>
           </div>
@@ -284,6 +287,17 @@ export default function Blog() {
             }}
             data-testid="text-blog-content"
           />
+
+          {/* Text links back to site - no dead ends, good for SEO and users */}
+          <p className="text-center text-gray-400 text-sm mb-8">
+            <a href="/blog" className="hover:text-white">← Back to Blog</a>
+            {" · "}
+            <a href="/" className="hover:text-white">Home</a>
+            {" · "}
+            <a href="/shop" className="hover:text-white">Shop</a>
+            {" · "}
+            <a href="/?section=free-trial" className="hover:text-white">Free Trial</a>
+          </p>
 
           {/* Call to Action Section - Always show */}
           <div className="border-t border-gray-700 pt-12 mt-12 mb-8">

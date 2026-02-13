@@ -304,6 +304,51 @@ export function createStorage(config: StorageConfig) {
       return !error;
     },
 
+    /** Deduplicated visit by ip_hash (session + IP); uses RPC to append pages_viewed. */
+    async trackVisitByHash(params: {
+      ip_hash: string;
+      state?: string | null;
+      city?: string | null;
+      country?: string | null;
+      user_agent?: string | null;
+      session_id?: string | null;
+      page: string;
+    }): Promise<void> {
+      const { error } = await supabase.rpc('upsert_visitor_visit', {
+        p_ip_hash: params.ip_hash,
+        p_state: params.state ?? null,
+        p_city: params.city ?? null,
+        p_country: params.country ?? null,
+        p_user_agent: params.user_agent ?? null,
+        p_session_id: params.session_id ?? null,
+        p_page: params.page || '/',
+      });
+      if (error) throw error;
+    },
+
+    /** Live visitors aggregated by state/city (for admin dashboard). */
+    async getLiveVisitorsByLocation(): Promise<Array<{
+      state: string;
+      city: string;
+      daily_visits: number;
+      yesterday_visits: number;
+      weekly_visits: number;
+      monthly_visits: number;
+      unique_ips: number;
+    }>> {
+      const { data, error } = await supabase.rpc('get_live_visitors');
+      if (error) throw error;
+      return (data || []).map((row: any) => ({
+        state: row.state ?? '',
+        city: row.city ?? '',
+        daily_visits: Number(row.daily_visits ?? 0),
+        yesterday_visits: Number(row.yesterday_visits ?? 0),
+        weekly_visits: Number(row.weekly_visits ?? 0),
+        monthly_visits: Number(row.monthly_visits ?? 0),
+        unique_ips: Number(row.unique_ips ?? 0),
+      }));
+    },
+
     async trackVisitor(visitor: InsertVisitor): Promise<Visitor> {
       const dbVisitor = {
         session_id: visitor.sessionId,

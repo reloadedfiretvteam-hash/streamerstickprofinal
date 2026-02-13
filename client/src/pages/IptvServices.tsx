@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { SEOSchema } from "@/components/SEOSchema";
+import { IPTV_IMAGES, getImageForSlot, fullImageUrl } from "@/data/seo-images";
 
 const TITLE = "Ultimate IPTV Guide 2026: Best IPTV Service & Live TV Streaming";
 const DESC = "Complete guide to the best IPTV service for 2026. Compare live TV streaming, cheap IPTV subscriptions, and cord-cutting. 18,000+ channels, Fire Stick & Android.";
@@ -11,6 +12,14 @@ export default function IptvServices() {
     document.title = "Best IPTV Service 2026 | Live TV Streaming Guide | StreamStickPro";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", "Best IPTV service 2026: live IPTV, live TV streaming, cheap IPTV subscription, 18K+ channels. Fire Stick & Android. Free trial—StreamStickPro.");
+    const setMeta = (name: string, content: string, isProperty = false) => {
+      const attr = isProperty ? "property" : "name";
+      let tag = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!tag) { tag = document.createElement("meta"); tag.setAttribute(attr, name); document.head.appendChild(tag); }
+      tag.setAttribute("content", content);
+    };
+    setMeta("og:image", fullImageUrl(getImageForSlot(IPTV_IMAGES, 0).src), true);
+    setMeta("twitter:image", fullImageUrl(getImageForSlot(IPTV_IMAGES, 0).src));
   }, []);
 
   const breadcrumbs = [
@@ -37,6 +46,9 @@ export default function IptvServices() {
       >
         <h2 id="what-is-iptv">What Is IPTV and How Does Live TV Streaming Work?</h2>
         <p>IPTV (Internet Protocol Television) is a way to watch live TV and on-demand content over the internet. Instead of cable or satellite, your TV signal comes through your broadband connection. That means you can watch on <Link href="/iptv-firestick">Fire Stick</Link>, Android boxes, Smart TVs, phones, and tablets—anywhere you have internet.</p>
+        <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
+          <img src={getImageForSlot(IPTV_IMAGES, 0).src} alt={getImageForSlot(IPTV_IMAGES, 0).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
+        </figure>
         <p>Live TV streaming via IPTV typically uses an app (like TiviMate or IPTV Smarters) and a subscription that gives you access to channel lists (M3U or Xtream Codes). You get thousands of channels, sports, PPV, and VOD for much less than cable.</p>
 
         <h2 id="best-iptv-service-2026">Best IPTV Service 2026: What to Look For</h2>
@@ -48,6 +60,9 @@ export default function IptvServices() {
           <li><strong>Multi-device</strong> — Plans that allow 2–5 devices are ideal for families.</li>
           <li><strong>Support</strong> — 24/7 support and instant delivery of credentials.</li>
         </ul>
+        <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
+          <img src={getImageForSlot(IPTV_IMAGES, 1).src} alt={getImageForSlot(IPTV_IMAGES, 1).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
+        </figure>
         <p>StreamStickPro meets these with instant M3U delivery, TiviMate-friendly setup, and a <Link href="/">free trial</Link> so you can test before committing. For the best <Link href="/iptv-media-players">IPTV media players</Link> (TiviMate, IPTV Smarters, VLC), see our full guide.</p>
 
         <h2 id="cheap-iptv-subscription">Cheap IPTV Subscription vs Cable</h2>

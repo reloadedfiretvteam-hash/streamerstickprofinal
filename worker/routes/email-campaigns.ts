@@ -45,7 +45,7 @@ export function createEmailCampaignRoutes() {
       const now = new Date();
       const firstEmailDate = new Date(now.getTime() + (2 + Math.random()) * 24 * 60 * 60 * 1000); // 2-3 days
 
-      // Create campaign
+      // Create campaign (first email sent immediately below; next scheduled 3–4 days)
       const { data: campaign, error } = await supabase
         .from('email_campaigns')
         .insert({
@@ -65,11 +65,44 @@ export function createEmailCampaignRoutes() {
 
       if (error) throw error;
 
+      // Send first (welcome) email immediately using stored template so everyone gets an email right away
+      let firstEmailSent = false;
+      try {
+        const emailResult = await sendCampaignEmail(campaign, c.env, supabase);
+        if (emailResult.success) {
+          firstEmailSent = true;
+          const now = new Date();
+          const nextWeekly = new Date(now.getTime() + (3 + Math.random()) * 24 * 60 * 60 * 1000);
+          await supabase
+            .from('email_campaigns')
+            .update({
+              first_email_sent_at: now.toISOString(),
+              last_email_sent_at: now.toISOString(),
+              emails_sent_count: 1,
+              week_emails_sent: 1,
+              next_email_scheduled_at: nextWeekly.toISOString(),
+            })
+            .eq('id', campaign.id);
+          await supabase.from('email_sends').insert({
+            campaign_id: campaign.id,
+            customer_email: campaign.customer_email,
+            email_type: 'weekly_reminder',
+            subject: emailResult.subject,
+            provider: emailResult.provider,
+            provider_id: emailResult.providerId,
+            status: 'sent',
+          });
+        }
+      } catch (sendErr: any) {
+        console.warn('[EMAIL_CAMPAIGN] Immediate first email failed:', sendErr?.message);
+      }
+
       return c.json({ 
         success: true, 
         campaign,
         message: 'Email campaign created successfully',
-        firstEmailScheduled: firstEmailDate.toISOString()
+        firstEmailSentImmediately: firstEmailSent,
+        nextEmailScheduled: firstEmailDate.toISOString()
       });
     } catch (error: any) {
       console.error('Error creating email campaign:', error);

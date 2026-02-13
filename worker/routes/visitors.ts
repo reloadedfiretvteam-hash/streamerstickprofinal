@@ -143,6 +143,18 @@ export function createVisitorRoutes() {
     }
   });
 
+  // Live visitors by state/city (deduplicated); requires admin auth when under /api/admin/visitors
+  app.get('/live', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const rows = await storage.getLiveVisitorsByLocation();
+      return c.json({ data: rows });
+    } catch (err: any) {
+      console.error('[visitors/live]', err?.message || err);
+      return c.json({ error: 'Failed to fetch live visitors', details: err?.message }, 500);
+    }
+  });
+
   app.get('/stats', async (c) => {
     try {
       if (!c.env.VITE_SUPABASE_URL) {

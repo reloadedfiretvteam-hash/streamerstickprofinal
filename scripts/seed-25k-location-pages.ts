@@ -1,11 +1,11 @@
 /**
- * Seed 25,000 location pages into seo_architecture (8K IPTV + 10K Jailbreak + 7K Google).
- * Uses USA/CA/UK cities; each location gets 3 rows (iptv, jailbreak, google).
+ * Seed 40K+ location pages into seo_architecture (IPTV, jailbreak, google, unlocked, onn).
+ * Each location gets 5 rows. Multiple meta templates per type for unique descriptions.
  *
  * Run: npx tsx scripts/seed-25k-location-pages.ts
- * Requires: VITE_SUPABASE_URL (or SUPABASE_URL) and SUPABASE_SERVICE_KEY
+ * Requires: VITE_SUPABASE_URL (or SUPABASE_URL) and SUPABASE_SERVICE_KEY (or access key)
  *
- * Loads .env.local from project root if present (so you can keep keys there without exporting).
+ * Loads .env.local from project root if present.
  */
 
 import { createClient } from "@supabase/supabase-js";
@@ -352,10 +352,11 @@ function buildUKLocations(max: number): LocationRow[] {
   return out;
 }
 
-// Target 24,950 new rows so 50 existing + 24,950 = 25,000 total. 24,950 / 3 = 8316 locations + 2 rows.
-const TARGET_NEW_ROWS = 24_950;
-const TARGET_LOCATIONS = Math.floor(TARGET_NEW_ROWS / 3); // 8316
-const EXTRA_ROWS = TARGET_NEW_ROWS - TARGET_LOCATIONS * 3; // 2
+// 5 page types per location: iptv, jailbreak, google, unlocked, onn → ~41.5K rows
+const ROW_TYPES = 5;
+const TARGET_LOCATIONS = 8_316;
+const TARGET_NEW_ROWS = TARGET_LOCATIONS * ROW_TYPES; // 41,580
+const EXTRA_ROWS = 2;
 
 function buildAllLocations(): LocationRow[] {
   const usa = buildUSALocations();
@@ -384,6 +385,44 @@ function contentBlocksWithLocation(location: string): typeof CONTENT_BLOCKS {
   };
 }
 
+/** Pick one of N options by slug for meta variety (no duplicate descriptions). */
+function pickMetaIndex(slug: string, n: number): number {
+  let h = 0;
+  for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) >>> 0;
+  return h % n;
+}
+
+const META_IPTV = [
+  (loc: string) => `StreamStickPro: 18,000+ IPTV channels + jailbroken Fire Sticks for ${loc}. Google TV ready. Free trial.`,
+  (loc: string) => `Best IPTV in ${loc}. 28K channels, jailbroken Fire Sticks, ONN Google TV. Free trial—StreamStickPro.`,
+  (loc: string) => `IPTV service for ${loc}: 18K+ live channels, 100K+ VOD. Fire Stick & ONN. StreamStickPro free trial.`,
+  (loc: string) => `Live IPTV and unlocked streaming devices in ${loc}. StreamStickPro. 36hr trial, no card required.`,
+];
+const META_JAILBREAK = [
+  (loc: string) => `Pre-jailbroken Fire Stick for ${loc}. Kodi/Stremio pre-installed. StreamStickPro. Free trial IPTV.`,
+  (loc: string) => `Jailbroken Fire Stick ${loc}: pre-loaded, 18K+ channels. StreamStickPro ships ready to stream.`,
+  (loc: string) => `Fully loaded Fire Stick for ${loc}. No sideloading—StreamStickPro. IPTV included. Free trial.`,
+  (loc: string) => `Unlocked Fire Stick ${loc}. Pre-configured IPTV, Kodi. StreamStickPro. 36hr trial.`,
+];
+const META_GOOGLE = [
+  (loc: string) => `IPTV on Google TV for ${loc}. StreamStickPro 18,000+ channels. Chromecast compatible. Free trial.`,
+  (loc: string) => `Google TV IPTV ${loc}. ONN 4K, Fire Stick. StreamStickPro 28K channels. Free trial.`,
+  (loc: string) => `Best IPTV for Google TV in ${loc}. StreamStickPro works on ONN, Android TV. 36hr trial.`,
+  (loc: string) => `StreamStickPro IPTV on Google TV—${loc}. 18K+ channels, TiviMate. Free trial.`,
+];
+const META_UNLOCKED = [
+  (loc: string) => `Unlocked Fire Stick & streaming devices for ${loc}. StreamStickPro. Pre-loaded IPTV, 18K+ channels. Free trial.`,
+  (loc: string) => `Unlocked streaming device ${loc}: Fire Stick, ONN. No restrictions—StreamStickPro. 36hr trial.`,
+  (loc: string) => `Get an unlocked Fire Stick in ${loc}. StreamStickPro pre-configures IPTV. 28K channels. Free trial.`,
+  (loc: string) => `Unlocked Fire Stick ${loc}. StreamStickPro—jailbroken devices, IPTV, 100K+ movies. Start free trial.`,
+];
+const META_ONN = [
+  (loc: string) => `Jailbroken ONN Google TV & IPTV for ${loc}. StreamStickPro. 18K+ channels. 36hr free trial.`,
+  (loc: string) => `ONN 4K Google TV IPTV ${loc}. StreamStickPro native support. Unlocked device, 28K channels. Free trial.`,
+  (loc: string) => `Best IPTV for ONN Google TV in ${loc}. StreamStickPro. Unlocked ONN device, 18K+ channels.`,
+  (loc: string) => `ONN Google TV unlocked ${loc}. StreamStickPro IPTV, TiviMate. 36hr trial. Ships to USA, CA, UK.`,
+];
+
 function buildRows(locations: LocationRow[]): any[] {
   const rows: any[] = [];
   const faq = [
@@ -397,6 +436,7 @@ function buildRows(locations: LocationRow[]): any[] {
     const pillarJailbreak = "/jailbroken-fire-sticks";
     const pillarGoogle = "/iptv-media-players";
     const p1 = "StreamStickPro delivers 18,000+ IPTV channels + jailbroken Fire Sticks with Kodi/Stremio pre-installed. Works Google TV/Chromecast. Free trial available.";
+    const idx = pickMetaIndex(loc.slug, 4);
     // IPTV
     rows.push({
       page_type: "iptv",
@@ -406,7 +446,7 @@ function buildRows(locations: LocationRow[]): any[] {
       slug: loc.slug,
       target_keyword: `IPTV ${loc.location}`,
       title: `${loc.location} IPTV + Jailbroken Fire Stick Guide 2026 | StreamStickPro`,
-      meta_description: `StreamStickPro: 18,000+ IPTV channels + jailbroken Fire Sticks for ${loc.location}. Google TV ready. Free trial.`,
+      meta_description: META_IPTV[idx](loc.location).substring(0, 160),
       h1: `[LOCATION] IPTV + Jailbroken Fire Stick Guide 2026`,
       p1_snippet: p1,
       pillar_url: pillarIptv,
@@ -424,7 +464,7 @@ function buildRows(locations: LocationRow[]): any[] {
       slug: loc.slug,
       target_keyword: `jailbroken Fire Stick ${loc.location}`,
       title: `${loc.location} Jailbroken Fire Stick 2026 | StreamStickPro`,
-      meta_description: `Pre-jailbroken Fire Stick for ${loc.location}. Kodi/Stremio pre-installed. StreamStickPro. Free trial IPTV.`,
+      meta_description: META_JAILBREAK[idx](loc.location).substring(0, 160),
       h1: `[LOCATION] Jailbroken Fire Stick Guide 2026`,
       p1_snippet: p1,
       pillar_url: pillarJailbreak,
@@ -442,8 +482,44 @@ function buildRows(locations: LocationRow[]): any[] {
       slug: loc.slug,
       target_keyword: `Google TV IPTV ${loc.location}`,
       title: `${loc.location} Google TV IPTV 2026 | StreamStickPro`,
-      meta_description: `IPTV on Google TV for ${loc.location}. StreamStickPro 18,000+ channels. Chromecast compatible. Free trial.`,
+      meta_description: META_GOOGLE[idx](loc.location).substring(0, 160),
       h1: `[LOCATION] Google TV IPTV Guide 2026`,
+      p1_snippet: p1,
+      pillar_url: pillarGoogle,
+      internal_links: INTERNAL_LINKS,
+      content_blocks: contentBlocks,
+      faq_json: faq,
+      published: true,
+    });
+    // Unlocked (unlocked Fire Stick / unlocked streaming device)
+    rows.push({
+      page_type: "unlocked",
+      country: loc.country,
+      region: loc.region,
+      location: loc.location,
+      slug: loc.slug,
+      target_keyword: `unlocked Fire Stick ${loc.location}`,
+      title: `${loc.location} Unlocked Fire Stick & Streaming Device 2026 | StreamStickPro`,
+      meta_description: META_UNLOCKED[idx](loc.location).substring(0, 160),
+      h1: `[LOCATION] Unlocked Fire Stick & Streaming Device Guide 2026`,
+      p1_snippet: p1,
+      pillar_url: pillarJailbreak,
+      internal_links: INTERNAL_LINKS,
+      content_blocks: contentBlocks,
+      faq_json: faq,
+      published: true,
+    });
+    // ONN (jailbroken ONN / ONN Google TV)
+    rows.push({
+      page_type: "onn",
+      country: loc.country,
+      region: loc.region,
+      location: loc.location,
+      slug: loc.slug,
+      target_keyword: `ONN Google TV IPTV ${loc.location}`,
+      title: `${loc.location} ONN Google TV & Jailbroken ONN Device 2026 | StreamStickPro`,
+      meta_description: META_ONN[idx](loc.location).substring(0, 160),
+      h1: `[LOCATION] ONN Google TV & IPTV Guide 2026`,
       p1_snippet: p1,
       pillar_url: pillarGoogle,
       internal_links: INTERNAL_LINKS,
@@ -468,11 +544,11 @@ export function getSeedRows(): any[] {
   ];
   const p1 = "StreamStickPro delivers 18,000+ IPTV channels + jailbroken Fire Sticks with Kodi/Stremio pre-installed. Works Google TV/Chromecast. Free trial available.";
   const contentBlocks = contentBlocksWithLocation("your area");
+  const pageTypes = ["iptv", "jailbreak", "google", "unlocked", "onn"] as const;
   for (let e = 0; e < EXTRA_ROWS; e++) {
     const slug = `streamstickpro-coverage-${e + 1}`;
-    const pageTypes = ["iptv", "jailbreak", "google"] as const;
     allRows.push({
-      page_type: pageTypes[e],
+      page_type: pageTypes[e % pageTypes.length],
       country: "USA",
       region: "National",
       location: "National",

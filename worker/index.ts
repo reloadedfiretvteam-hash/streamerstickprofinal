@@ -58,6 +58,32 @@ app.route('/api/admin', createAdminRoutes());
 app.route('/api/stripe', createWebhookRoutes());
 app.route('/api/track', createVisitorRoutes());
 app.route('/api/admin/visitors', createVisitorRoutes());
+
+// Deduplicated visit tracking (ip_hash + session); public, no auth
+app.post('/api/track-visit', async (c) => {
+  try {
+    const body = await c.req.json().catch(() => ({}));
+    const ip_hash = body.ip_hash;
+    const page = typeof body.page === 'string' ? body.page : '/';
+    if (!ip_hash || typeof ip_hash !== 'string') {
+      return c.json({ error: 'ip_hash required' }, 400);
+    }
+    const storage = getStorage(c.env);
+    await storage.trackVisitByHash({
+      ip_hash,
+      state: body.state ?? null,
+      city: body.city ?? null,
+      country: body.country ?? null,
+      user_agent: body.user_agent ?? c.req.header('user-agent') ?? null,
+      session_id: body.session_id ?? null,
+      page,
+    });
+    return c.json({ ok: true });
+  } catch (err: any) {
+    console.error('[track-visit]', err?.message || err);
+    return c.json({ error: 'Failed to track visit', details: err?.message }, 500);
+  }
+});
 app.route('/api/customer', createCustomerRoutes());
 app.route('/api/free-trial', createTrialRoutes());
 app.route('/api/blog', createBlogRoutes());
@@ -268,8 +294,11 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
         { question: 'What is the best IPTV service for ' + (slug || 'this area') + '?', answer: 'StreamStickPro offers 18,000+ live channels and 100,000+ movies and series, with a free trial. Works on Fire Stick, ONN Google TV, and Smart TVs.' },
         { question: 'Can I get a jailbroken Fire Stick with IPTV?', answer: 'Yes. StreamStickPro sells pre-loaded Fire Sticks with IPTV included. Setup in minutes with instant credentials and support.' },
         { question: 'Does StreamStickPro work on Google TV?', answer: 'Yes. StreamStickPro works on ONN Google TV and other Android TV devices. Native support with IPTV Smarters Pro and TiviMate.' },
+        { question: 'Is there a free trial?', answer: 'Yes. StreamStickPro offers a 36-hour free trial. Start from the homepage to get instant access to 28,000+ channels.' },
+        { question: 'What devices are supported?', answer: 'StreamStickPro works on Amazon Fire Stick, ONN Google TV, Android TV, Smart TVs, and set-top boxes. Use IPTV Smarters Pro or TiviMate for the best experience.' },
       ];
     }
+    faqJson = sanitizeFaq(faqJson);
     if (!title) return next();
     const url = `https://streamstickpro.com${path}`;
     const ogImage = 'https://streamstickpro.com/opengraph.jpg';
@@ -327,10 +356,14 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
       <section aria-labelledby="related">
         <h2 id="related">Related</h2>
         <ul>
-          <li><a href="https://streamstickpro.com/iptv-services">IPTV Services</a></li>
+          <li><a href="https://streamstickpro.com/">Home &amp; 36hr Free Trial</a></li>
+          <li><a href="https://streamstickpro.com/36hr-trial">Start 36-Hour Free Trial</a></li>
           <li><a href="https://streamstickpro.com/jailbroken-fire-sticks">Jailbroken Fire Sticks</a></li>
+          <li><a href="https://streamstickpro.com/iptv-services">IPTV Services</a></li>
+          <li><a href="https://streamstickpro.com/onn-google-tv">ONN Google TV Setup</a></li>
+          <li><a href="https://streamstickpro.com/pricing">Pricing</a></li>
           <li><a href="https://streamstickpro.com/shop">Shop</a></li>
-          <li><a href="https://streamstickpro.com/">Home &amp; Free Trial</a></li>
+          <li><a href="https://streamstickpro.com/ultimate-iptv-catalog-2026">Explore 93K IPTV Catalog</a></li>
         </ul>
       </section>
     </article>
@@ -348,6 +381,20 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/** Sanitize FAQ for GSC: no empty/N/A/Location/short answers so Google does not show errors. */
+function sanitizeFaq(items: { question: string; answer: string }[]): { question: string; answer: string }[] {
+  const bad = new Set(['', 'n/a', 'na', 'location', '[location]', 'tbd', 'tba', '—', '–', '-']);
+  return items.filter((f) => {
+    const q = (f.question || '').trim();
+    const a = (f.answer || '').trim();
+    if (!q || !a) return false;
+    if (a.length < 25) return false;
+    if (bad.has(a.toLowerCase()) || bad.has(q.toLowerCase())) return false;
+    if (/^\[LOCATION\]$/i.test(a) || /^location$/i.test(a)) return false;
+    return true;
+  });
 }
 
 // SEO 301 redirects: DB (redirect_map) first, then static
@@ -433,6 +480,7 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/vs-shoroc', priority: '0.85', changefreq: 'weekly' },
   { url: '/vs-iptvencoder', priority: '0.85', changefreq: 'weekly' },
   { url: '/ultimate-iptv-catalog-2026', priority: '0.95', changefreq: 'daily' },
+  { url: '/tools/catalog', priority: '0.85', changefreq: 'weekly' },
 ];
 
 // sitemap-pages.xml: static + location pages only (SEO/AEO prompt)
@@ -445,7 +493,7 @@ app.get('/sitemap-pages.xml', async (c) => {
   }
   try {
     const storage = getStorage(c.env);
-    const seoPages = await storage.getSeoPagesForSitemap(25000);
+    const seoPages = await storage.getSeoPagesForSitemap(50000);
     for (const page of seoPages) {
       const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : today;
       xml += `<url><loc>${baseUrl}${page.path}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`;
@@ -527,7 +575,7 @@ app.get('/sitemap.xml', async (c) => {
     }
 
     // SEO location pages: Supabase first, then static fallback (25K from build) so Google gets thousands of URLs even if DB seed didn't run
-    const seoPages = await storage.getSeoPagesForSitemap(25000);
+    const seoPages = await storage.getSeoPagesForSitemap(50000);
     for (const page of seoPages) {
       const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
       sitemap += `  <url>

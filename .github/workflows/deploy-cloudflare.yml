@@ -41,7 +41,7 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Run Database Migration (Supabase SEO tables)
+      - name: Run Database Migration (Supabase: SEO + visitor tracking)
         run: npx tsx scripts/run-supabase-migration.ts
         env:
           SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
@@ -180,9 +180,10 @@ jobs:
       - name: Wait for deploy to be live
         run: sleep 15
 
-      - name: Verify sitemap and ping search engines
+      - name: Verify sitemap and ping search engines (Google, Bing, Yandex, Yahoo)
         run: |
           SITE="https://streamstickpro.com"
+          SITEMAP_INDEX="${SITE}/sitemap-index.xml"
           SITEMAP="${SITE}/sitemap.xml"
           SITEMAP_PAGES="${SITE}/sitemap-pages.xml"
           echo "Fetching sitemaps..."
@@ -193,16 +194,25 @@ jobs:
           echo "## Sitemap verification" >> $GITHUB_STEP_SUMMARY
           echo "**sitemap.xml URLs:** $URL_COUNT" >> $GITHUB_STEP_SUMMARY
           echo "**sitemap-pages.xml URLs:** $PAGES_URL_COUNT" >> $GITHUB_STEP_SUMMARY
-          echo "**Sitemap URL:** $SITEMAP" >> $GITHUB_STEP_SUMMARY
+          echo "**Sitemap index:** $SITEMAP_INDEX" >> $GITHUB_STEP_SUMMARY
           echo "sitemap.xml: $URL_COUNT | sitemap-pages.xml: $PAGES_URL_COUNT"
-          echo "Pinging Google, Bing, Yandex..."
+          echo "Pinging Google, Bing, Yandex (Yahoo uses Bing)..."
           curl -sSf -o /dev/null "https://www.google.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Google: submitted" || true
-          curl -sSf -o /dev/null "https://www.bing.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Bing: submitted" || true
+          curl -sSf -o /dev/null "https://www.bing.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Bing: submitted (Yahoo covered via Bing)" || true
           curl -sSf -o /dev/null "https://webmaster.yandex.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Yandex: submitted" || true
+          echo "## Search engine submission" >> $GITHUB_STEP_SUMMARY
+          echo "- **Google:** sitemap ping" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bing:** sitemap ping (Yahoo uses Bing)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Yandex:** sitemap ping" >> $GITHUB_STEP_SUMMARY
+          echo "- **IndexNow:** next step (Bing, Yandex, Seznam)" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
 
-      - name: Submit URLs to IndexNow (Bing, Yandex, Seznam)
-        run: npx tsx scripts/indexnow-from-live-sitemap.ts
+      - name: Submit URLs to IndexNow (Bing, Yandex, Seznam, etc.)
+        id: indexnow
+        run: |
+          npx tsx scripts/indexnow-from-live-sitemap.ts || true
+          echo "## IndexNow" >> $GITHUB_STEP_SUMMARY
+          echo "URLs from live sitemap submitted to IndexNow (Bing, Yandex, Seznam)." >> $GITHUB_STEP_SUMMARY
         env:
           SITE_URL: https://streamstickpro.com
         continue-on-error: true

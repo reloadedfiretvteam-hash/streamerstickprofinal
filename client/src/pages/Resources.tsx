@@ -57,12 +57,61 @@ export default function Resources() {
       </section>
 
       <section className="mb-10">
-        <h2 className="text-2xl font-bold text-white mb-3">2,000+ Free IPTV & Streaming Resources</h2>
+        <h2 className="text-2xl font-bold text-white mb-3">IPTV Catalog API &amp; Data for Webmasters</h2>
+        <p className="text-gray-300 mb-4">
+          Use our 93K+ catalog stats on your site. Free API, link to us—backlink-friendly. Perfect for streaming guides and tech blogs.
+        </p>
+        <Link href="/tools/catalog">
+          <span className="text-orange-400 hover:underline font-medium">Tools: Catalog API &amp; Link to Us →</span>
+        </Link>
+      </section>
+
+      <section className="mb-10">
+        <h2 id="explore-by-location" className="text-2xl font-bold text-white mb-3">Explore by location</h2>
+        <p className="text-gray-300 mb-4">
+          IPTV, jailbroken Fire Sticks, unlocked devices, and ONN Google TV by city and region. 40,000+ location guides with unique meta and internal links.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-sm">
+          {[
+            { loc: "Houston", country: "usa", type: "iptv" },
+            { loc: "New York", country: "usa", type: "iptv" },
+            { loc: "Los Angeles", country: "usa", type: "jailbreak" },
+            { loc: "Chicago", country: "usa", type: "google" },
+            { loc: "Phoenix", country: "usa", type: "unlocked" },
+            { loc: "Philadelphia", country: "usa", type: "onn" },
+            { loc: "San Antonio", country: "usa", type: "iptv" },
+            { loc: "San Diego", country: "usa", type: "jailbreak" },
+            { loc: "Dallas", country: "usa", type: "google" },
+            { loc: "Toronto", country: "ca", type: "iptv" },
+            { loc: "Vancouver", country: "ca", type: "jailbreak" },
+            { loc: "Montreal", country: "ca", type: "google" },
+            { loc: "London", country: "uk", type: "iptv" },
+            { loc: "Birmingham", country: "uk", type: "jailbreak" },
+            { loc: "Houston", country: "usa", type: "unlocked" },
+            { loc: "Miami", country: "usa", type: "onn" },
+          ].map(({ loc, country, type }) => {
+            const slug = loc.toLowerCase().replace(/\s+/g, "-");
+            return (
+              <Link key={`${country}-${type}-${slug}`} href={`/l/${country}/${type}/${slug}`}>
+                <span className="text-orange-400 hover:text-orange-300 hover:underline">{loc} – {type}</span>
+              </Link>
+            );
+          })}
+        </div>
+        <p className="text-gray-500 text-sm mt-3">
+          <Link href="/ultimate-iptv-catalog-2026"><span className="text-orange-400 hover:underline">Explore 93K catalog</span></Link>
+          {" · "}
+          <Link href="/l/usa/iptv/houston"><span className="text-orange-400 hover:underline">Sample: Houston IPTV</span></Link>
+        </p>
+      </section>
+
+      <section className="mb-10">
+        <h2 className="text-2xl font-bold text-white mb-3">2,000+ Free IPTV &amp; Streaming Resources</h2>
         <p className="text-gray-300 mb-4">
           Free trials, setup tutorials, cord-cutting guides, and device comparisons. StreamStickPro blog and pillar guides cover Fire Stick, Google TV, and IPTV from A to Z.
         </p>
         <Link href="/blog">
-          <span className="text-orange-400 hover:underline font-medium">Blog & Guides →</span>
+          <span className="text-orange-400 hover:underline font-medium">Blog &amp; Guides →</span>
         </Link>
       </section>
 

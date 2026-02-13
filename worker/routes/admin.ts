@@ -788,6 +788,103 @@ export function createAdminRoutes() {
     }
   });
 
+  // Backfill email campaigns for past customers/orders so they get promotions (e.g. Sarvane)
+  app.post('/email-campaigns/backfill', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+
+      const customers = await storage.getAllCustomers();
+      const orders = await storage.getAllOrders();
+      const emailToName: Record<string, string> = {};
+      const emails = new Set<string>();
+      customers.forEach((cust: { email?: string; fullName?: string }) => {
+        if (cust.email && cust.email.includes('@')) {
+          const e = cust.email.trim().toLowerCase();
+          emails.add(e);
+          if (cust.fullName) emailToName[e] = cust.fullName;
+        }
+      });
+      orders.forEach((o: { customerEmail?: string; customerName?: string }) => {
+        if (o.customerEmail && o.customerEmail.includes('@')) {
+          const e = o.customerEmail.trim().toLowerCase();
+          emails.add(e);
+          if (o.customerName && !emailToName[e]) emailToName[e] = o.customerName;
+        }
+      });
+
+      const { data: existing } = await supabase.from('email_campaigns').select('customer_email').eq('status', 'active');
+      const hasCampaign = new Set((existing || []).map((r: { customer_email: string }) => r.customer_email?.toLowerCase()).filter(Boolean));
+
+      const toBackfill = Array.from(emails).filter((e) => !hasCampaign.has(e));
+      if (toBackfill.length === 0) {
+        return c.json({ success: true, message: 'All customers already have campaigns', created: 0, total: emails.size });
+      }
+
+      const baseUrl = new URL(c.req.url).origin;
+      let created = 0;
+      const errors: string[] = [];
+      for (const email of toBackfill) {
+        try {
+          const res = await fetch(`${baseUrl}/api/email-campaigns/create`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              customerEmail: email,
+              customerName: emailToName[email] || null,
+              campaignType: 'purchase',
+            }),
+          });
+          const data = await res.json();
+          if (data.success) created++;
+          else if (data.message !== 'Campaign already exists') errors.push(`${email}: ${data.error || data.message}`);
+        } catch (err: any) {
+          errors.push(`${email}: ${err.message}`);
+        }
+        await new Promise((r) => setTimeout(r, 300));
+      }
+
+      return c.json({
+        success: true,
+        message: `Backfill complete. Created ${created} campaigns; ${toBackfill.length - created} skipped or failed.`,
+        created,
+        totalPastCustomers: toBackfill.length,
+        errors: errors.slice(0, 20),
+      });
+    } catch (error: any) {
+      console.error('Backfill error:', error);
+      return c.json({ error: 'Failed to backfill', details: error.message }, 500);
+    }
+  });
+
+  // Send a single test email to your website email (or body.to) to verify Resend
+  app.post('/email/send-test', async (c) => {
+    try {
+      const body = await c.req.json().catch(() => ({}));
+      const to = (body.to && String(body.to).includes('@')) ? String(body.to).trim() : 'support@streamstickpro.com';
+      const result = await sendEmail({
+        to,
+        subject: 'StreamStickPro – Test email (system check)',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #ea580c;">StreamStickPro test email</h1>
+            <p>This is a system test. Visitor tracking and email are working.</p>
+            <p>Sent at: ${new Date().toISOString()}</p>
+            <p>— StreamStickPro</p>
+          </div>
+        `,
+      }, c.env);
+      if (result.success) {
+        return c.json({ success: true, message: `Test email sent to ${to}`, provider: result.provider });
+      }
+      return c.json({ success: false, error: result.error }, 500);
+    } catch (error: any) {
+      console.error('Send test email error:', error);
+      return c.json({ error: 'Failed to send test email', details: error.message }, 500);
+    }
+  });
+
   app.get('/page-edits', async (c) => {
     try {
       const storage = getStorage(c.env);

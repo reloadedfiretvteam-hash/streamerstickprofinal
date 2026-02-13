@@ -131,18 +131,18 @@ async function runMigration() {
     console.log(`   abandoned_carts: ${counts[0].carts} rows`);
     console.log(`   orders: ${counts[0].orders} rows`);
 
-    // SEO Domination 2026: run ALL 20260207* migrations in order (tables, seed, redirects, content_blocks, experts, content_clusters)
+    // SEO + Visitor tracking: run 20260207*, 20260208*, 20260209*, 20260212* migrations in order
     const migrationsDir = path.join(process.cwd(), 'supabase', 'migrations');
     let migrationFiles: string[] = [];
     try {
       const all = await readdir(migrationsDir);
       migrationFiles = all
-        .filter((f) => (f.startsWith('20260207') || f.startsWith('20260208') || f.startsWith('20260209')) && f.endsWith('.sql'))
+        .filter((f) => (f.startsWith('20260207') || f.startsWith('20260208') || f.startsWith('20260209') || f.startsWith('20260212')) && f.endsWith('.sql'))
         .sort();
     } catch (e) {
       // no migrations dir or readdir failed
     }
-    console.log('\n📦 SEO migrations (20260207* + 20260208* + 20260209*: seo_architecture, catalog tables, etc.):');
+    console.log('\n📦 SEO + visitor migrations (20260207*–20260209*, 20260212*):');
     for (const file of migrationFiles) {
       const filePath = path.join(migrationsDir, file);
       try {
