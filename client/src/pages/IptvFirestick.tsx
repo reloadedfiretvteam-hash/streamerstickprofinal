@@ -10,9 +10,9 @@ const breadcrumbs = [
 
 export default function IptvFirestick() {
   useEffect(() => {
-    document.title = "Best IPTV for Firestick 2026 | Setup & Apps | StreamStickPro";
+    document.title = "IPTV Fire Stick 2026 | 10K+ Channels, No Buffer | StreamStick Pro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Best IPTV for Fire Stick 2026: TiviMate, IPTV Smarters, setup guide. Free trial. Pre-loaded Fire Sticks & plans—StreamStickPro.");
+    if (meta) meta.setAttribute("content", "Best IPTV for Fire Stick: 18K+ live channels, TiviMate & Smarters setup. Install in 2 mins. Free trial. Pre-loaded sticks—StreamStick Pro.");
   }, []);
 
   const faq = [

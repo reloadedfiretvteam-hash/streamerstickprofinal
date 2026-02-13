@@ -11,7 +11,7 @@ const breadcrumbs = [
 
 export default function IptvSmartersPro() {
   useEffect(() => {
-    document.title = "IPTV Smarters Pro Setup and Guide 2026 | StreamStickPro";
+    document.title = "IPTV Smarters Pro Setup 2026 | 5 Min Guide | StreamStick Pro";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", "Use IPTV Smarters Pro with StreamStickPro. Optimized M3U, easy setup on Fire Stick, Onn, Smart TV. 36hr trial. Best IPTV for Smarters Pro.");
     const setMeta = (name: string, content: string, isProperty = false) => {

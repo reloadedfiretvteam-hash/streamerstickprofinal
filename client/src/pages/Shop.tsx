@@ -157,9 +157,9 @@ export default function Shop() {
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
-    document.title = "Shop - StreamStickPro | Premium Streaming Devices & Live TV Plans";
+    document.title = "IPTV Subscription Plans 2026 | Fire Stick & Devices | StreamStick Pro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Shop StreamStickPro: pre-configured Fire Sticks, IPTV plans, 18,000+ channels. Devices & Live TV subscriptions. Free trial available.");
+    if (meta) meta.setAttribute("content", "Shop IPTV plans from $15/mo and pre-loaded Fire Sticks. 18K+ channels, 4K, 99.9% uptime. Start free trial or buy now—StreamStick Pro.");
     loadProducts();
   }, []);
 

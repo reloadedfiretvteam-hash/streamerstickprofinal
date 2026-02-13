@@ -9,9 +9,9 @@ const DESC = "Complete guide to the best IPTV service for 2026. Compare live TV 
 
 export default function IptvServices() {
   useEffect(() => {
-    document.title = "Best IPTV Service 2026 | Live TV Streaming Guide | StreamStickPro";
+    document.title = "IPTV Subscription Plans 2026 | Cheapest & Best | StreamStick Pro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Best IPTV service 2026: live IPTV, live TV streaming, cheap IPTV subscription, 18K+ channels. Fire Stick & Android. Free trial—StreamStickPro.");
+    if (meta) meta.setAttribute("content", "IPTV plans from $15/mo: 18K+ live channels, 4K sports, PPV, 99.9% uptime. Fire Stick & Android. Cancel anytime. 36hr free trial—StreamStick Pro.");
     const setMeta = (name: string, content: string, isProperty = false) => {
       const attr = isProperty ? "property" : "name";
       let tag = document.querySelector(`meta[${attr}="${name}"]`);

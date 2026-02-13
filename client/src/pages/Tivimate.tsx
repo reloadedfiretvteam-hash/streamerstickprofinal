@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
+import { HowToSchema } from "@/components/SEOSchema";
 import { Check } from "lucide-react";
 import { APP_IMAGES, getImageForSlot, fullImageUrl } from "@/data/seo-images";
 
@@ -11,9 +12,9 @@ const breadcrumbs = [
 
 export default function Tivimate() {
   useEffect(() => {
-    document.title = "TiviMate IPTV Setup 2026 | Premium App Guide | StreamStickPro";
+    document.title = "TiviMate IPTV Setup 2026 | 5 Min Guide | StreamStick Pro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Use TiviMate with StreamStickPro. Premium IPTV app setup for Fire Stick, Android, Onn. 18K+ channels. 36hr trial. Best IPTV for TiviMate.");
+    if (meta) meta.setAttribute("content", "TiviMate IPTV setup 2026: use StreamStickPro with TiviMate on Fire Stick, Android, Onn. 18K+ channels, 36hr trial. 5-min guide—best IPTV for TiviMate.");
     const setMeta = (name: string, content: string, isProperty = false) => {
       const attr = isProperty ? "property" : "name";
       let tag = document.querySelector(`meta[${attr}="${name}"]`);
@@ -24,9 +25,22 @@ export default function Tivimate() {
     setMeta("twitter:image", fullImageUrl(getImageForSlot(APP_IMAGES, 1).src));
   }, []);
 
+  const howToSteps = [
+    { name: "Get credentials", text: "Sign up for the 36hr free trial or a subscription at StreamStickPro to get your M3U or Xtream Codes." },
+    { name: "Install TiviMate", text: "Install TiviMate on your Fire Stick, Onn Google TV, or Android TV device." },
+    { name: "Add playlist", text: "Add your M3U playlist or enter Xtream Codes in TiviMate settings." },
+    { name: "Enjoy", text: "Use the premium EPG and DVR features with 18K+ live channels and 100K+ VOD." },
+  ];
+
   return (
     <>
       <BreadcrumbSchema items={breadcrumbs.map((b) => ({ name: b.label, url: "https://streamstickpro.com" + b.href }))} />
+      <HowToSchema
+        name="TiviMate IPTV Setup 2026"
+        description="How to set up TiviMate with StreamStickPro: get credentials, install TiviMate, add playlist, enjoy 18K+ channels."
+        steps={howToSteps}
+        totalTime="PT5M"
+      />
       <PillarLayout
         title="TiviMate – Premium IPTV App Setup"
         description="StreamStickPro works with TiviMate. Premium setup guide for Fire Stick, Onn, Android. 18K+ channels. Start 36hr trial or shop plans."

@@ -8,7 +8,7 @@ const DESC = "Compare the best IPTV media players and apps for Fire Stick and An
 
 export default function IptvMediaPlayers() {
   useEffect(() => {
-    document.title = "Best IPTV Media Players & Apps 2026 | TiviMate, Smarters | StreamStickPro";
+    document.title = "IPTV Media Players 2026 | TiviMate & Smarters Guide | StreamStick Pro";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", "Best IPTV media players: TiviMate, IPTV Smarters, Perfect Player, VLC. Works on Fire Stick, Android, Smart TV. EPG, M3U, recording. StreamStickPro.");
   }, []);
