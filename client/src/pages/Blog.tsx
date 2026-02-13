@@ -122,32 +122,33 @@ export default function Blog() {
     // This ensures consistency across all pages
     
     const baseUrl = 'https://streamstickpro.com';
-    const defaultDescription = 'Guides, tips, and everything you need to know about cord cutting and streaming';
-    const defaultTitle = 'Posts | StreamStickPro - Cord Cutting Guides & Tips';
+    const defaultDescription = 'IPTV guides: what you get with 18K+ channels, Fire Stick setup, ONN Google TV, free trial. StreamStick Pro blog—streaming tips and niche guides.';
+    const defaultTitle = 'IPTV & Fire Stick Blog 2026 | Guides & Tips | StreamStick Pro';
     
     if (params.slug && posts.length > 0) {
       const postFromSlug = posts.find(p => p.slug === params.slug);
       if (postFromSlug) {
         setSelectedPost(postFromSlug);
-        document.title = `${postFromSlug.title} | StreamStickPro Posts`;
-        
-        setMetaTag('description', postFromSlug.excerpt);
+        const postTitle = postFromSlug.title.length > 45 ? postFromSlug.title.slice(0, 42) + '...' : postFromSlug.title;
+        const docTitle = `${postTitle} | StreamStick Pro`;
+        document.title = docTitle.length > 60 ? docTitle.slice(0, 57) + '...' : docTitle;
+        const desc = (postFromSlug.excerpt || '').trim();
+        const metaDesc = desc.length > 160 ? desc.slice(0, 157) + '...' : desc;
+        setMetaTag('description', metaDesc || 'IPTV and Fire Stick guide. StreamStick Pro—18K+ channels, free trial.');
         setMetaTag('robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
-        // Canonical tag handled by CanonicalTag component
-        setMetaTag('og:title', postFromSlug.title, true);
-        setMetaTag('og:description', postFromSlug.excerpt, true);
+        const ogTitle = (postFromSlug.title.length > 60 ? postFromSlug.title.slice(0, 57) + '...' : postFromSlug.title);
+        setMetaTag('og:title', ogTitle, true);
+        setMetaTag('og:description', metaDesc || 'IPTV and Fire Stick guide. StreamStick Pro.', true);
         setMetaTag('og:url', `${baseUrl}/blog/${postFromSlug.slug}`, true);
         setMetaTag('og:type', 'article', true);
-        setMetaTag('og:site_name', 'StreamStickPro', true);
-        if (postFromSlug.featuredImage || postFromSlug.image) {
-          const imageUrl = postFromSlug.featuredImage || postFromSlug.image || '';
-          setMetaTag('og:image', imageUrl, true);
-          setMetaTag('og:image:alt', postFromSlug.title, true);
-          setMetaTag('twitter:image', imageUrl);
-        }
+        setMetaTag('og:site_name', 'StreamStick Pro', true);
+        const imageUrl = postFromSlug.image && postFromSlug.image.startsWith('http') ? postFromSlug.image : `${baseUrl}/opengraph.jpg`;
+        setMetaTag('og:image', imageUrl, true);
+        setMetaTag('og:image:alt', postFromSlug.title, true);
+        setMetaTag('twitter:image', imageUrl);
         setMetaTag('twitter:card', 'summary_large_image');
-        setMetaTag('twitter:title', postFromSlug.title);
-        setMetaTag('twitter:description', postFromSlug.excerpt);
+        setMetaTag('twitter:title', ogTitle);
+        setMetaTag('twitter:description', metaDesc || 'IPTV and Fire Stick guide. StreamStick Pro.');
         setMetaTag('article:published_time', postFromSlug.date, true);
       } else {
         setSelectedPost(null);
@@ -195,32 +196,31 @@ export default function Blog() {
           "@context": "https://schema.org",
           "@type": "BlogPosting",
           "headline": selectedPost.title,
-          "description": selectedPost.excerpt,
+          "description": (selectedPost.excerpt || '').slice(0, 160),
           "datePublished": selectedPost.date,
           "dateModified": selectedPost.date,
-          "author": { 
-            "@type": "Organization", 
-            "name": "StreamStickPro",
-            "url": "https://streamstickpro.com"
-          },
+          "author": { "@type": "Organization", "name": "StreamStick Pro", "url": "https://streamstickpro.com" },
           "publisher": {
             "@type": "Organization",
-            "name": "StreamStickPro",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://streamstickpro.com/logo.png"
-            }
+            "name": "StreamStick Pro",
+            "logo": { "@type": "ImageObject", "url": "https://streamstickpro.com/favicon.png" }
           },
-          "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": `https://streamstickpro.com/blog/${selectedPost.slug}`
-          },
+          "image": selectedPost.image && selectedPost.image.startsWith('http') ? selectedPost.image : "https://streamstickpro.com/opengraph.jpg",
+          "mainEntityOfPage": { "@type": "WebPage", "@id": `https://streamstickpro.com/blog/${selectedPost.slug}` },
           "articleBody": selectedPost.content,
           "url": `https://streamstickpro.com/blog/${selectedPost.slug}`
         }) }} />
         
         <nav className="border-b border-gray-800 sticky top-0 z-10 bg-gray-900/95 backdrop-blur" aria-label="Article navigation">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4 flex-wrap">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-3 flex-wrap">
+            <a
+              href="/"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-semibold text-sm transition-colors"
+              data-testid="button-skip-to-home"
+            >
+              <Flame className="w-4 h-4" />
+              Go to Homepage
+            </a>
             <Button
               variant="ghost"
               size="sm"
@@ -234,9 +234,8 @@ export default function Blog() {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Blog
             </Button>
-            <a href="/" className="text-sm text-gray-400 hover:text-white">Home</a>
             <a href="/shop" className="text-sm text-gray-400 hover:text-white">Shop</a>
-            <a href="/?section=free-trial" className="text-sm text-gray-400 hover:text-white">Free Trial</a>
+            <a href="/36hr-trial" className="text-sm text-gray-400 hover:text-white">Free Trial</a>
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold truncate" data-testid="text-blog-title">{selectedPost.title}</h1>
             </div>
@@ -288,16 +287,15 @@ export default function Blog() {
             data-testid="text-blog-content"
           />
 
-          {/* Text links back to site - no dead ends, good for SEO and users */}
-          <p className="text-center text-gray-400 text-sm mb-8">
-            <a href="/blog" className="hover:text-white">← Back to Blog</a>
-            {" · "}
-            <a href="/" className="hover:text-white">Home</a>
-            {" · "}
-            <a href="/shop" className="hover:text-white">Shop</a>
-            {" · "}
-            <a href="/?section=free-trial" className="hover:text-white">Free Trial</a>
-          </p>
+          {/* Skip to homepage + internal links – high visibility for users and SEO */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
+            <a href="/" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-semibold text-sm">
+              <Flame className="w-4 h-4" /> Go to Homepage
+            </a>
+            <a href="/blog" className="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:text-white hover:border-gray-500 text-sm">← Back to Blog</a>
+            <a href="/shop" className="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:text-white hover:border-gray-500 text-sm">Shop</a>
+            <a href="/36hr-trial" className="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:text-white hover:border-gray-500 text-sm">Free Trial</a>
+          </div>
 
           {/* Call to Action Section - Always show */}
           <div className="border-t border-gray-700 pt-12 mt-12 mb-8">
@@ -321,20 +319,19 @@ export default function Blog() {
                     size="lg" 
                     variant="outline"
                     className="border-green-500 text-green-400 hover:bg-green-500/10"
-                    onClick={() => setLocation("/?section=free-trial")}
+                    onClick={() => setLocation("/36hr-trial")}
                     data-testid="button-cta-trial"
                   >
                     <Zap className="w-5 h-5 mr-2" />
                     Start Free Trial
                   </Button>
                   <Button 
-                    size="lg" 
-                    variant="outline"
-                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                    size="lg"
+                    className="bg-orange-600 hover:bg-orange-500"
                     onClick={() => setLocation("/")}
                     data-testid="button-cta-home"
                   >
-                    <Tv className="w-5 h-5 mr-2" />
+                    <Flame className="w-5 h-5 mr-2" />
                     Go to Homepage
                   </Button>
                 </div>
@@ -435,17 +432,27 @@ export default function Blog() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Blog",
-        "name": "StreamStickPro Posts",
-        "description": "Guides, tips, and news about streaming devices and Live TV",
+        "name": "IPTV & Fire Stick Blog | StreamStick Pro",
+        "description": "What you get with IPTV: 18K+ channels, Fire Stick setup, ONN Google TV, free trial. Niche guides and streaming tips from StreamStick Pro.",
         "url": "https://streamstickpro.com/blog",
         "blogPost": posts.map(post => ({
           "@type": "BlogPosting",
           "headline": post.title,
-          "description": post.excerpt,
+          "description": (post.excerpt || '').slice(0, 160),
           "datePublished": post.date,
-          "author": { "@type": "Organization", "name": "StreamStickPro" }
+          "author": { "@type": "Organization", "name": "StreamStick Pro" }
         }))
       }) }} />
+
+      <nav className="sticky top-0 z-20 bg-gray-900/95 backdrop-blur border-b border-gray-800">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+          <a href="/" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-semibold text-sm">
+            <Flame className="w-4 h-4" /> Go to Homepage
+          </a>
+          <a href="/shop" className="text-sm text-gray-300 hover:text-white">Shop</a>
+          <a href="/36hr-trial" className="text-sm text-gray-300 hover:text-white">Free Trial</a>
+        </div>
+      </nav>
 
       <div className="relative h-64 sm:h-72 md:h-80 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-orange-600 to-red-700" />
@@ -459,7 +466,7 @@ export default function Blog() {
             animate={{ opacity: 1, y: 0 }}
             data-testid="heading-blog-title"
           >
-            StreamStickPro Posts
+            IPTV & Fire Stick Blog
           </motion.h1>
           <motion.p 
             className="text-lg text-gray-100 text-center max-w-2xl"
@@ -468,7 +475,7 @@ export default function Blog() {
             transition={{ delay: 0.2 }}
             data-testid="text-blog-subtitle"
           >
-            Guides, tips, and everything you need to know about cord cutting and streaming
+            What you get with IPTV: 18K+ channels, Fire Stick & ONN setup, free trial. Niche guides from StreamStick Pro.
           </motion.p>
         </div>
       </div>
@@ -631,7 +638,7 @@ export default function Blog() {
                 size="lg" 
                 variant="outline"
                 className="border-green-500 text-green-400 hover:bg-green-500/10"
-                onClick={() => setLocation("/?section=free-trial")}
+                onClick={() => setLocation("/36hr-trial")}
                 data-testid="button-blog-cta-trial"
               >
                 <Zap className="w-5 h-5 mr-2" />
@@ -639,12 +646,11 @@ export default function Blog() {
               </Button>
               <Button 
                 size="lg" 
-                variant="outline"
-                className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                className="bg-orange-600 hover:bg-orange-500"
                 onClick={() => setLocation("/")}
                 data-testid="button-blog-cta-home"
               >
-                <Tv className="w-5 h-5 mr-2" />
+                <Flame className="w-5 h-5 mr-2" />
                 Go to Homepage
               </Button>
             </div>
