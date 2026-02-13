@@ -52,4 +52,6 @@ No extra manual pings needed after deploy.
 
 ---
 
+**See also:** `docs/SEO-MASTER-AUDIT-AND-NICHE-FLOOD.md` (niche matrix, meta at scale, AEO, redirects, backlinks), `docs/ARCHITECTURE-AND-SECRETS.md` (where to set GitHub/Cloudflare/Supabase secrets—no keys in repo).
+
 **Summary:** Push to `clean-main` → workflow runs migrations, build, deploy, sitemap pings, and IndexNow. Then ensure Bing Webmaster (and GSC) have the sitemap submitted and ownership verified.

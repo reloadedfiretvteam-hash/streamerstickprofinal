@@ -397,22 +397,76 @@ function sanitizeFaq(items: { question: string; answer: string }[]): { question:
   });
 }
 
-// SEO 301 redirects: DB (redirect_map) first, then static
+// SEO 301 redirects: DB (redirect_map) first, then static. Flood niche: IPTV, jailbreak, Canada/US/UK, devices, media players.
 const SEO_REDIRECTS_STATIC: Record<string, string> = {
+  // Guides & trial
   '/guides': '/iptv-services',
   '/guide': '/iptv-services',
   '/trial': '/',
+  '/free-trial': '/36hr-trial',
+  // Fire Stick & jailbreak
   '/firestick': '/jailbroken-fire-sticks',
+  '/fire-stick': '/jailbroken-fire-sticks',
+  '/firestick-iptv': '/iptv-firestick',
+  '/fire-stick-iptv': '/iptv-firestick',
   '/jailbreak': '/jailbroken-fire-sticks',
+  '/jailbroken-firestick': '/jailbroken-fire-sticks',
+  '/jailbroken-fire-stick': '/jailbroken-fire-sticks',
+  '/unlocked-fire-stick': '/jailbroken-fire-sticks',
+  '/preloaded-fire-stick': '/jailbroken-fire-sticks',
+  '/kodi-fire-stick': '/jailbroken-fire-sticks',
+  // Devices & players
   '/devices': '/firestick-devices',
   '/media-players': '/iptv-media-players',
   '/iptv-apps': '/iptv-media-players',
   '/iptv-players': '/iptv-media-players',
+  '/iptv-smarters': '/iptv-smarters-pro',
+  '/smarters-pro': '/iptv-smarters-pro',
+  '/perfect-player': '/iptv-media-players',
+  '/perfect-player-iptv': '/iptv-media-players',
+  '/vlc-iptv': '/iptv-media-players',
+  '/kodi-iptv': '/iptv-media-players',
+  '/stremio': '/iptv-media-players',
+  '/stremio-iptv': '/iptv-media-players',
+  // Regions (pillar; location pages cover cities)
+  '/iptv-canada': '/iptv-services',
+  '/iptv-usa': '/iptv-services',
+  '/iptv-us': '/iptv-services',
+  '/iptv-uk': '/iptv-services',
+  '/iptv-united-kingdom': '/iptv-services',
+  '/best-iptv-canada': '/iptv-services',
+  '/best-iptv-usa': '/iptv-services',
+  '/best-iptv-uk': '/iptv-services',
+  '/iptv-service': '/iptv-services',
+  '/iptv-subscription': '/shop',
+  '/iptv-plans': '/pricing',
+  '/iptv-pricing': '/pricing',
+  // ONN & Google TV
+  '/onn': '/onn-google-tv',
+  '/onn-tv': '/onn-google-tv',
+  '/onn-google-tv-iptv': '/onn-google-tv',
+  '/google-tv-iptv': '/onn-google-tv',
+  '/android-tv-iptv': '/iptv-media-players',
+  // Competitors
   '/iptvstronger': '/vs-iptvstronger',
   '/troypoint': '/vs-troypoint',
   '/hypotv': '/vs-hypotv',
   '/tvworldwide': '/vs-tvworldwide',
   '/iptvproviders': '/vs-iptvproviders',
+  '/xtremehd': '/vs-xtremehd',
+  '/iptvgreat': '/vs-iptvgreat',
+  '/shoroc': '/vs-shoroc',
+  '/iptvencoder': '/vs-iptvencoder',
+  // Best / comparison
+  '/best-iptv': '/best-iptv-firestick',
+  '/best-iptv-firestick-2026': '/best-iptv-firestick',
+  '/best-iptv-service': '/iptv-services',
+  '/resources': '/resources',
+  '/catalog': '/ultimate-iptv-catalog-2026',
+  '/tools': '/tools/catalog',
+  '/iptv': '/iptv-services',
+  '/live-tv': '/iptv-services',
+  '/streaming': '/iptv-services',
 };
 app.get('*', async (c, next) => {
   const path = new URL(c.req.url).pathname;

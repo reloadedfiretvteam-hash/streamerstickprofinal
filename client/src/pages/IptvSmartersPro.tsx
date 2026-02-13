@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
+import { HowToSchema } from "@/components/SEOSchema";
 import { Check } from "lucide-react";
 import { APP_IMAGES, getImageForSlot, fullImageUrl } from "@/data/seo-images";
 
@@ -13,7 +14,7 @@ export default function IptvSmartersPro() {
   useEffect(() => {
     document.title = "IPTV Smarters Pro Setup 2026 | 5 Min Guide | StreamStick Pro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Use IPTV Smarters Pro with StreamStickPro. Optimized M3U, easy setup on Fire Stick, Onn, Smart TV. 36hr trial. Best IPTV for Smarters Pro.");
+    if (meta) meta.setAttribute("content", "IPTV Smarters Pro setup 2026: use StreamStickPro M3U on Fire Stick, Onn, Smart TV. 5-min guide. 36hr trial—best IPTV for Smarters Pro.");
     const setMeta = (name: string, content: string, isProperty = false) => {
       const attr = isProperty ? "property" : "name";
       let tag = document.querySelector(`meta[${attr}="${name}"]`);
@@ -24,9 +25,22 @@ export default function IptvSmartersPro() {
     setMeta("twitter:image", fullImageUrl(getImageForSlot(APP_IMAGES, 0).src));
   }, []);
 
+  const howToSteps = [
+    { name: "Sign up", text: "Get a 36hr free trial or subscription from StreamStickPro to receive your M3U URL or Xtream Codes." },
+    { name: "Install app", text: "Install IPTV Smarters Pro on your Fire Stick, ONN Google TV, or Smart TV from the app store or sideload." },
+    { name: "Add credentials", text: "Add your M3U URL or Xtream login in IPTV Smarters Pro settings." },
+    { name: "Stream", text: "Enjoy 18K+ live channels and 100K+ VOD with full Smarters Pro support." },
+  ];
+
   return (
     <>
       <BreadcrumbSchema items={breadcrumbs.map((b) => ({ name: b.label, url: "https://streamstickpro.com" + b.href }))} />
+      <HowToSchema
+        name="IPTV Smarters Pro Setup 2026"
+        description="How to set up IPTV Smarters Pro with StreamStickPro: get M3U, install app, add credentials, stream 18K+ channels."
+        steps={howToSteps}
+        totalTime="PT5M"
+      />
       <PillarLayout
         title="IPTV Smarters Pro - Setup and Best IPTV"
         description="StreamStickPro is optimized for IPTV Smarters Pro. Get your M3U from our 36hr trial or subscription. Fire Stick, Onn, Smart TV supported."
