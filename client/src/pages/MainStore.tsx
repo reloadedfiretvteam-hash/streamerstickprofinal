@@ -531,7 +531,7 @@ export default function MainStore() {
       />
       
       {/* Navigation - Elite Glassmorphism Design */}
-      <nav className="sticky top-0 z-50 w-full border-b border-white/20 bg-gradient-to-r from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-2xl shadow-2xl shadow-black/50">
+      <nav className="sticky top-0 z-50 w-full border-b border-white/20 bg-gradient-to-r from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-2xl shadow-2xl shadow-black/50" aria-label="Main navigation">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <MobileNav scrollToShop={scrollToShop} scrollToAbout={scrollToAbout} scrollToFaq={scrollToFaq} onSupportClick={openSupport} />
@@ -565,6 +565,7 @@ export default function MainStore() {
             <Link href="/iptv-firestick"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Firestick</span></Link>
             <Link href="/firestick-devices"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Devices</span></Link>
             <Link href="/iptv-media-players"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Media Players</span></Link>
+            <Link href="/tutorials"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Tutorials</span></Link>
             <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToAbout} data-testid="nav-how-it-works" aria-label="Scroll to How It Works section">How It Works</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToShop} data-testid="nav-shop" aria-label="Scroll to Shop section">Shop</Button>
             <Button 
@@ -1383,6 +1384,26 @@ export default function MainStore() {
 
       {/* IPTV Media Players Section */}
       <IPTVMediaPlayersSection />
+
+      {/* Tutorials: Adding IPTV Media Players to Your Devices */}
+      <section id="tutorials" className="py-16 bg-gradient-to-b from-gray-800/80 to-gray-900/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold mb-3 text-white">
+              Adding IPTV Media Players to Your Devices
+            </h2>
+            <p className="text-gray-300 text-lg max-w-2xl mx-auto mb-8">
+              Step-by-step video tutorials: install IPTV media player on Fire Stick and ONN Google TV.
+            </p>
+            <Link href="/tutorials">
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-4 text-lg gap-2">
+                <Play className="w-5 h-5" aria-hidden="true" />
+                Watch Tutorials
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Channel Logos */}
       <ChannelLogos />

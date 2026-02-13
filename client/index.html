@@ -13,6 +13,8 @@
     <meta name="author" content="StreamStickPro" />
     <meta name="copyright" content="StreamStickPro 2026" />
     <meta name="theme-color" content="#1a1a1a" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <link rel="canonical" href="https://streamstickpro.com/" />
     <!-- Phase 14: hreflang en-US, en-CA, en-GB -->
     <link rel="alternate" hreflang="en-US" href="https://streamstickpro.com/" />
@@ -261,8 +263,7 @@
     }
     </script>
     
-    <!-- Preconnect to critical origins for faster loading -->
-    <link rel="preconnect" href="https://emlqlmfzqsnqokrqvmcm.supabase.co" crossorigin>
+    <!-- Preconnect to critical origins for faster loading (Supabase already above) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://js.stripe.com">
@@ -323,8 +324,8 @@
       });
     })();
     </script>
-    <!-- Skip link: hidden until focus (accessibility) -->
-    <style>#skip-link{position:absolute;left:-9999px;z-index:9999;padding:.5rem 1rem;background:#ea580c;color:#fff;border-radius:4px}#skip-link:focus{left:1rem;top:1rem}</style>
+    <!-- Skip link: elite a11y – hidden until focus, strong focus-visible, main has scroll-margin for sticky nav -->
+    <style>#skip-link{position:absolute;left:-9999px;z-index:9999;padding:.6rem 1.2rem;background:#ea580c;color:#fff;border-radius:6px;font-weight:600;text-decoration:none}#skip-link:focus{left:1rem;top:1rem;outline:3px solid #f97316;outline-offset:2px}#skip-link:focus:not(:focus-visible){outline:none}#skip-link:focus-visible{left:1rem;top:1rem;outline:3px solid #f97316;outline-offset:2px}#main-content{scroll-margin-top:5rem}</style>
     <!-- Optimized Google Fonts - Defer loading with display=swap -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
@@ -333,7 +334,7 @@
     <a href="#main-content" id="skip-link">Skip to main content</a>
     <div id="root">
       <!-- What we're building: visible to crawlers and when JS is slow; replaced by React app -->
-      <main id="main-content" role="main" aria-label="StreamStickPro – What we build">
+      <main id="main-content" role="main" aria-label="Primary content – StreamStickPro IPTV and Fire Stick">
         <article>
           <h1>StreamStickPro IPTV + Jailbroken Fire Sticks + Onn Google TV - 36hr Trial</h1>
           <p><strong>36 HOUR FREE TRIAL – 18K+ Channels Live Now.</strong> StreamStickPro builds <strong>IPTV</strong>, <strong>jailbroken Fire Sticks</strong>, and <strong>Onn Google TV</strong> streaming. Beats IPTVStronger (36hr vs 24hr trial), TroyPoint (Onn/Roku native). 247K users, 99.9% uptime, McAfee Secure.</p>

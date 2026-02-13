@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Menu, X, Flame, ShoppingCart, ChevronRight, Tv, Wifi, BookOpen, HelpCircle, Home, Mail } from "lucide-react";
+import { Menu, X, Flame, ShoppingCart, ChevronRight, Tv, Wifi, BookOpen, HelpCircle, Home, Mail, Play } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,7 @@ export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq, onSupportC
     { label: "IPTV Services", icon: Wifi, action: () => { setLocation("/iptv-services"); } },
     { label: "IPTV for Firestick", icon: Tv, action: () => { setLocation("/iptv-firestick"); } },
     { label: "IPTV Media Players", icon: Tv, action: () => { setLocation("/iptv-media-players"); } },
+    { label: "Tutorials", icon: Play, action: () => { setLocation("/tutorials"); } },
     { label: "Fire Stick Devices", icon: Tv, action: () => { setLocation("/firestick-devices"); } },
     { label: "Jailbroken Fire Sticks", icon: Tv, action: () => { setLocation("/jailbroken-fire-sticks"); } },
     { label: "Shop", icon: Tv, action: () => navigateToSection("shop") },

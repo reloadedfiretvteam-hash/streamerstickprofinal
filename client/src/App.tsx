@@ -43,13 +43,14 @@ const Tivimate = lazy(() => import("@/pages/Tivimate"));
 const VsCompetitor = lazy(() => import("@/pages/VsCompetitor"));
 const UltimateIptvCatalog = lazy(() => import("@/pages/UltimateIptvCatalog"));
 const ToolsCatalog = lazy(() => import("@/pages/ToolsCatalog"));
+const Tutorials = lazy(() => import("@/pages/Tutorials"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 // Loading fallback component
 const LoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-900">
+  <div className="min-h-screen flex items-center justify-center bg-gray-900" role="status" aria-live="polite" aria-busy="true">
     <div className="text-center">
-      <Spinner className="w-8 h-8 text-orange-500 mx-auto mb-4" />
+      <Spinner className="w-8 h-8 text-orange-500 mx-auto mb-4" aria-hidden="true" />
       <p className="text-gray-400">Loading...</p>
     </div>
   </div>
@@ -114,6 +115,7 @@ function Router() {
         <Route path="/vs-:competitor" component={VsCompetitor} />
         <Route path="/ultimate-iptv-catalog-2026" component={UltimateIptvCatalog} />
         <Route path="/tools/catalog" component={ToolsCatalog} />
+        <Route path="/tutorials" component={Tutorials} />
         <Route path="/l/:country/:pageType/:slug" component={LocationPage} />
         <Route component={NotFound} />
       </Switch>

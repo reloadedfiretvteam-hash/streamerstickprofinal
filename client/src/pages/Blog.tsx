@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { SEOSchema } from "@/components/SEOSchema";
+import { SEOSchema, BlogPostSchema } from "@/components/SEOSchema";
 
 interface BlogPost {
   id: string;
@@ -85,7 +85,7 @@ export default function Blog() {
             content: post.content,
             category: post.category || "Guides",
             readTime: `${Math.ceil((post.content || "").split(" ").length / 200)} min read`,
-            date: post.createdAt ? new Date(post.createdAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+            date: (post.publishedAt || post.createdAt) ? new Date(post.publishedAt || post.createdAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
             featured: post.featured || false,
             image: post.imageUrl || post.image_url || "https://streamstickpro.com/opengraph.jpg",
             linkedProductIds: post.linkedProductIds || null
@@ -339,6 +339,14 @@ export default function Blog() {
             </div>
           </div>
 
+          {/* Article schema for SEO (single post view) */}
+          <BlogPostSchema
+            title={selectedPost.title}
+            description={selectedPost.excerpt || selectedPost.content?.slice(0, 160) || "StreamStickPro blog guide."}
+            datePublished={selectedPost.date}
+            dateModified={selectedPost.date}
+            image={selectedPost.image}
+          />
           {/* Product Schema for Product-Linked Posts */}
           {selectedPost.linkedProductIds && selectedPost.linkedProductIds.length > 0 && (
             <SEOSchema 
@@ -348,7 +356,7 @@ export default function Blog() {
                   name: p.name,
                   description: p.description || selectedPost.excerpt,
                   price: p.price,
-                  image: p.image,
+                  image: p.imageUrl ?? undefined,
                   availability: 'InStock' as const,
                   brand: 'StreamStickPro',
                   sku: p.id

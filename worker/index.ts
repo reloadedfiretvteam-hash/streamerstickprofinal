@@ -419,6 +419,8 @@ const SEO_REDIRECTS_STATIC: Record<string, string> = {
   // Devices & players
   '/devices': '/firestick-devices',
   '/media-players': '/iptv-media-players',
+  '/tutorial': '/tutorials',
+  '/tutorials/iptv-media-players': '/tutorials',
   '/iptv-apps': '/iptv-media-players',
   '/iptv-players': '/iptv-media-players',
   '/iptv-smarters': '/iptv-smarters-pro',
@@ -519,6 +521,7 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/firestick-devices', priority: '0.9', changefreq: 'weekly' },
   { url: '/best-iptv-firestick', priority: '0.9', changefreq: 'weekly' },
   { url: '/iptv-media-players', priority: '0.9', changefreq: 'weekly' },
+  { url: '/tutorials', priority: '0.9', changefreq: 'weekly' },
   { url: '/resources', priority: '0.85', changefreq: 'weekly' },
   { url: '/terms', priority: '0.5', changefreq: 'yearly' },
   { url: '/privacy', priority: '0.5', changefreq: 'yearly' },

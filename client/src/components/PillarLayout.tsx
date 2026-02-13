@@ -30,7 +30,7 @@ export function PillarLayout({ title, description, breadcrumbs, children }: Pill
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <nav className="sticky top-0 z-50 w-full border-b border-white/20 bg-gray-900/95 backdrop-blur-xl">
+      <nav className="sticky top-0 z-50 w-full border-b border-white/20 bg-gray-900/95 backdrop-blur-xl" aria-label="Main navigation">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2 font-bold text-lg text-white hover:opacity-90">
@@ -42,6 +42,7 @@ export function PillarLayout({ title, description, breadcrumbs, children }: Pill
               <Link href="/iptv-firestick"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Firestick</span></Link>
               <Link href="/firestick-devices"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Devices</span></Link>
               <Link href="/iptv-media-players"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Media Players</span></Link>
+              <Link href="/tutorials"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Tutorials</span></Link>
               <Link href="/jailbroken-fire-sticks"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Jailbroken</span></Link>
               <Link href="/blog"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Blog</span></Link>
               <Link href="/shop"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Shop</span></Link>
