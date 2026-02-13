@@ -13,7 +13,7 @@ export default function JailbrokenFireSticks() {
   useEffect(() => {
     document.title = "IPTV Fire Stick 2026 | Pre-Loaded & Jailbroken Devices | StreamStick Pro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Jailbroken Fire Sticks & pre-loaded devices: 18K+ channels, ready in 10 mins. Fire Stick HD, 4K, 4K Max. Shop now—StreamStick Pro.");
+    if (meta) meta.setAttribute("content", "Jailbroken Fire Sticks and pre-loaded devices: 18K+ channels, ready in 10 mins. Fire Stick HD, 4K, 4K Max. Shop now. StreamStick Pro.");
     const setMeta = (name: string, content: string, isProperty = false) => {
       const attr = isProperty ? "property" : "name";
       let tag = document.querySelector(`meta[${attr}="${name}"]`);

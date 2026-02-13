@@ -303,7 +303,7 @@ export default function MainStore() {
     document.documentElement.classList.add("dark");
     document.title = "IPTV Fire Stick 2026 | 18K+ Channels, No Buffer | StreamStick Pro";
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute("content", "36 HOUR FREE TRIAL – 18K+ channels live. IPTV + jailbroken Fire Sticks + Onn Google TV. Beats IPTVStronger, TroyPoint. 247K users, 99.9% uptime. Start trial or buy device—StreamStickPro.");
+    if (metaDesc) metaDesc.setAttribute("content", "36hr free trial: 18K+ live channels, IPTV and jailbroken Fire Sticks, Onn Google TV. Beats IPTVStronger and TroyPoint. 99.9% uptime. Start trial or buy device—StreamStick Pro.");
     loadProducts();
   }, []);
 

@@ -17,7 +17,7 @@ export default function Resources() {
   useEffect(() => {
     document.title = "IPTV Resources 2026 | Channel Directory & Setup Guides | StreamStick Pro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Complete 18,000+ IPTV channel directory, Jailbroken Fire Stick setup encyclopedia, IPTV app comparison matrix, and free streaming resources. StreamStickPro.");
+    if (meta) meta.setAttribute("content", "Complete 18,000+ IPTV channel directory, jailbroken Fire Stick setup guides, IPTV app comparison, and free streaming resources. StreamStick Pro.");
   }, []);
 
   return (

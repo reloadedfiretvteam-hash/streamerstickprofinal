@@ -159,7 +159,7 @@ export default function Shop() {
     document.documentElement.classList.add("dark");
     document.title = "IPTV Subscription Plans 2026 | Fire Stick & Devices | StreamStick Pro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Shop IPTV plans from $15/mo and pre-loaded Fire Sticks. 18K+ channels, 4K, 99.9% uptime. Start free trial or buy now—StreamStick Pro.");
+    if (meta) meta.setAttribute("content", "Shop IPTV plans from $15/mo and pre-loaded Fire Sticks. 18K+ channels, 4K, 99.9% uptime. Start free trial or buy now. StreamStick Pro.");
     loadProducts();
   }, []);
 

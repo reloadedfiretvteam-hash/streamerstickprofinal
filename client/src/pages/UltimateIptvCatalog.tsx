@@ -30,9 +30,10 @@ const faq = [
 
 export default function UltimateIptvCatalog() {
   useEffect(() => {
-    document.title = "18K Live TV + 60K Movies ONN & Fire Stick | Ultimate IPTV Catalog 2026 | StreamStickPro";
+    document.title = "Ultimate IPTV Catalog 2026 | 18K Channels, 60K Movies | StreamStick Pro";
+    const desc = `Ultimate IPTV catalog 2026: ${CATALOG_DATA.channels.total.toLocaleString()} live channels, ${CATALOG_DATA.movies.toLocaleString()} movies, ${CATALOG_DATA.series.toLocaleString()} series. ONN & Fire Stick. $14.99/mo. StreamStick Pro.`;
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", `Ultimate IPTV catalog 2026: ${CATALOG_DATA.channels.total.toLocaleString()} live channels, ${CATALOG_DATA.movies.toLocaleString()} movies, ${CATALOG_DATA.series.toLocaleString()} series. ONN & Fire Stick. $14.99/mo 99.9% uptime. StreamStickPro.`);
+    if (meta) meta.setAttribute("content", desc.length > 160 ? desc.slice(0, 157) + "..." : desc);
   }, []);
 
   const roiHours = Math.round((CATALOG_DATA.movies + CATALOG_DATA.series * 10) * 1.5 / 1000);

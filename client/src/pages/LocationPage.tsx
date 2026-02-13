@@ -79,7 +79,8 @@ export default function LocationPage() {
 
   useEffect(() => {
     if (!page) return;
-    const title = (page.title || page.h1 || "IPTV & Jailbroken Fire Stick") + " | StreamStickPro";
+    const rawTitle = (page.title || page.h1 || "IPTV & Jailbroken Fire Stick") + " | StreamStick Pro";
+    const title = rawTitle.length > 60 ? rawTitle.slice(0, 57) + "..." : rawTitle;
     const desc = (page.meta_description || page.p1_snippet || "").substring(0, 160);
     const canonicalUrl = `${SITE_URL}/l/${country}/${pageType}/${slug}`;
     const ogImage = `${SITE_URL}/opengraph.jpg`;

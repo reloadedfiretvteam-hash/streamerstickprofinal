@@ -10,9 +10,11 @@ export default function VsCompetitor() {
   const name = competitorDisplayName(slug);
 
   useEffect(() => {
-    document.title = `StreamStickPro vs ${name} 2026 - Why We WIN | StreamStickPro`;
+    const title = `StreamStickPro vs ${name} 2026 | Why We Win | StreamStick Pro`;
+    document.title = title.length > 60 ? title.slice(0, 57) + "..." : title;
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", `${name} alternative. StreamStickPro 36hr trial beats ${name}. Compare trial, channels, Onn TV, Roku, Smarters Pro, price. We win.`);
+    const desc = `${name} alternative. StreamStick Pro 36hr trial beats ${name}. Compare trial, channels, Onn TV, Smarters Pro, price. We win.`;
+    if (meta) meta.setAttribute("content", desc.length > 160 ? desc.slice(0, 157) + "..." : desc);
   }, [name]);
 
   const breadcrumbs = [

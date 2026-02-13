@@ -13,7 +13,7 @@ export default function OnnGoogleTv() {
   useEffect(() => {
     document.title = "IPTV ONN Google TV 2026 | Setup in 5 Min | StreamStick Pro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Set up IPTV on Onn Google TV. Native support, no hacky workarounds. StreamStickPro works on Onn 4K and Onn Pro. 36hr trial, then subscribe.");
+    if (meta) meta.setAttribute("content", "Set up IPTV on Onn Google TV. Native support for Onn 4K and Onn Pro. 36hr trial, then subscribe. StreamStick Pro.");
     const setMeta = (name: string, content: string, isProperty = false) => {
       const attr = isProperty ? "property" : "name";
       let tag = document.querySelector(`meta[${attr}="${name}"]`);

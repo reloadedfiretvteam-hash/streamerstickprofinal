@@ -12,7 +12,7 @@ export default function FirestickDevices() {
   useEffect(() => {
     document.title = "Fire Stick & Streaming Devices 2026 | IPTV Ready | StreamStick Pro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Best streaming devices 2026: Fire Stick HD, 4K, 4K Max, ONN 4K. Pre-configured with IPTV. Compare and shop—StreamStickPro.");
+    if (meta) meta.setAttribute("content", "Best streaming devices 2026: Fire Stick HD, 4K, 4K Max, ONN 4K. Pre-configured with IPTV. Compare and shop. StreamStick Pro.");
   }, []);
 
   const faq = [

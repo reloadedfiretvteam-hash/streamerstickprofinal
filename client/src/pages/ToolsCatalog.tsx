@@ -18,7 +18,7 @@ export default function ToolsCatalog() {
   useEffect(() => {
     document.title = "IPTV Catalog API & Channel Data for Webmasters | StreamStickPro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Use StreamStickPro 93K+ IPTV catalog data on your site. Free API, channel counts, embed. Link to us—backlink-friendly resource for IPTV and streaming.");
+    if (meta) meta.setAttribute("content", "Use StreamStick Pro 93K+ IPTV catalog data on your site. Free API, channel counts, embed. Backlink-friendly resource for IPTV and streaming.");
   }, []);
 
   return (

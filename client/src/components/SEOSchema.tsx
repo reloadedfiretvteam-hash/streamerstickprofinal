@@ -31,28 +31,35 @@ export function SEOSchema({ faq, products, breadcrumbs }: SEOSchemaProps) {
       const existingFaq = document.querySelector('script[data-seo-schema="faq"]');
       if (existingFaq) existingFaq.remove();
 
-      const bad = new Set(['n/a', 'na', 'location', '[location]', 'tbd', 'tba']);
+      const bad = new Set(['n/a', 'na', 'location', '[location]', 'tbd', 'tba', 'none', 'n/a.', '—', '–', '-', 'no answer', 'no', 'yes']);
       const valid = faqMemo.filter(
-        (item) =>
-          item?.question?.trim() &&
-          item?.answer?.trim() &&
-          item.answer.trim().length >= 25 &&
-          !bad.has(item.answer.trim().toLowerCase()) &&
-          !bad.has(item.question.trim().toLowerCase())
+        (item) => {
+          const q = (item?.question ?? '').trim();
+          const a = (item?.answer ?? '').trim();
+          if (!q || !a) return false;
+          if (a.length < 25) return false;
+          if (bad.has(a.toLowerCase()) || bad.has(q.toLowerCase())) return false;
+          if (/^\[LOCATION\]$/i.test(a) || /^location$/i.test(a)) return false;
+          return true;
+        }
       );
       if (valid.length === 0) return;
 
       const faqSchema = {
         "@context": "https://schema.org",
         "@type": "FAQPage",
-        "mainEntity": valid.map(item => ({
-          "@type": "Question",
-          "name": item.question.trim(),
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": item.answer.trim()
-          }
-        }))
+        "mainEntity": valid.map(item => {
+          const q = item.question.trim();
+          const a = item.answer.trim();
+          return {
+            "@type": "Question",
+            "name": q,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": a
+            }
+          };
+        })
       };
       const faqScript = document.createElement('script');
       faqScript.type = 'application/ld+json';
@@ -316,15 +323,20 @@ export function QASchema({
     const existingScript = document.querySelector('script[data-seo-schema="qa"]');
     if (existingScript) existingScript.remove();
 
+    const valid = questionsMemo.filter(
+      (q) => (q?.question ?? '').trim().length > 0 && (q?.answer ?? '').trim().length >= 25
+    );
+    if (valid.length === 0) return;
+
     const qaSchema = {
       "@context": "https://schema.org",
       "@type": "QAPage",
-      "mainEntity": questionsMemo.map(q => ({
+      "mainEntity": valid.map(q => ({
         "@type": "Question",
-        "name": q.question,
+        "name": (q.question || '').trim(),
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": q.answer,
+          "text": (q.answer || '').trim(),
           ...(q.author && { "author": { "@type": "Person", "name": q.author } }),
           ...(q.dateCreated && { "dateCreated": q.dateCreated })
         }

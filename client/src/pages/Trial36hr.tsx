@@ -13,7 +13,7 @@ export default function Trial36hr() {
   useEffect(() => {
     document.title = "IPTV Free Trial 2026 | 36hr Instant Access | StreamStick Pro";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Start your 36-hour free IPTV trial. No credit card. Instant M3U. 18K+ channels. Beats IPTVStronger 24hr trial. StreamStickPro.");
+    if (meta) meta.setAttribute("content", "Start your 36-hour free IPTV trial. No credit card. Instant M3U. 18K+ channels. Beats IPTVStronger 24hr trial. StreamStick Pro.");
   }, []);
 
   return (
