@@ -134,6 +134,7 @@ export default function CustomerLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
+      <h1 className="sr-only">Customer Login – StreamStickPro Account</h1>
       <Card className="w-full max-w-md bg-gray-800/50 border-gray-700">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl text-white">Customer Portal</CardTitle>

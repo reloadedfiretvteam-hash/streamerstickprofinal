@@ -126,6 +126,7 @@ export default function LocationPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <h1 className="sr-only">IPTV and Fire Stick Location Guide – StreamStick Pro</h1>
         <Spinner className="w-10 h-10 text-orange-500" />
       </div>
     );

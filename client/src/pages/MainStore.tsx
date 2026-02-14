@@ -23,7 +23,7 @@ import { ChannelLogos } from "@/components/ChannelLogos";
 import { IPTVMediaPlayersSection } from "@/components/IPTVMediaPlayersSection";
 import { SavingsCalculator } from "@/components/SavingsCalculator";
 import { StickyMobileCTA, ScrollToTopButton } from "@/components/StickyMobileCTA";
-import { SEOSchema, QASchema, ServiceSchema, ItemListSchema } from "@/components/SEOSchema";
+import { SEOSchema, ServiceSchema, ItemListSchema } from "@/components/SEOSchema";
 import { ProductQuickView, QuickViewButton } from "@/components/ProductQuickView";
 import { MobileNav } from "@/components/MobileNav";
 import { ComparisonTable } from "@/components/ComparisonTable";
@@ -392,18 +392,7 @@ export default function MainStore() {
   const firestickProducts = products.filter(p => p.category === 'firestick');
   const iptvProducts = products.filter(p => p.category === 'iptv');
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "StreamStickPro",
-    "url": "https://streamstickpro.com/",
-    "description": "Premium pre-configured streaming devices with Live TV plans - 18,000+ channels, 100,000+ movies & series, comprehensive sports coverage",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://streamstickpro.com/?search={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
-  };
+  // WebSite + Organization schema: only in index.html to avoid duplicate structured data (GSC).
 
   // Schema-only description: never output "Real product mapped to..." (internal placeholder from DB/seed)
   const getSchemaDescription = (product: Product): string => {
@@ -442,20 +431,6 @@ export default function MainStore() {
     }))
   };
 
-  const organizationData = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "StreamStickPro",
-    "url": "https://streamstickpro.com/",
-    "logo": "https://streamstickpro.com/logo.png",
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "contactType": "customer service",
-      "availableLanguage": "English"
-    },
-    "sameAs": []
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white pb-32 md:pb-20 relative">
       {/* Parallax Hero Background - Optimized with lazy loading and performance hints */}
@@ -476,38 +451,8 @@ export default function MainStore() {
 
       {/* Content Layer */}
       <div className="relative z-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productListData) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData) }} />
-      
-      {/* Q&A Schema for Answer Engine Optimization (AEO) */}
-      <QASchema questions={[
-        {
-          question: "What is IPTV and how does it work?",
-          answer: "IPTV (Internet Protocol Television) is a streaming service that delivers live TV channels and on-demand content over the internet. Unlike traditional cable, IPTV works on any internet-connected device including Fire Sticks, Smart TVs, phones, and tablets. You receive login credentials that allow you to access 18,000+ live channels, 100,000+ movies and series instantly.",
-          dateCreated: new Date().toISOString()
-        },
-        {
-          question: "How do I set up IPTV on Fire Stick?",
-          answer: "Setting up IPTV on Fire Stick is simple. Purchase a pre-configured Fire Stick from StreamStickPro and it arrives ready to stream. You'll receive instant login credentials and setup video tutorials. Just plug in your Fire Stick, connect to WiFi, and follow the 10-minute tutorial to start streaming 18,000+ channels immediately.",
-          dateCreated: new Date().toISOString()
-        },
-        {
-          question: "What channels are included with IPTV service?",
-          answer: "Our IPTV service includes 18,000+ live TV channels worldwide covering all major categories: sports (NFL, NBA, MLB, UFC, boxing PPV), movies, news, entertainment, kids channels, international channels, and premium networks. Plus access to 100,000+ movies and TV series on-demand with regular updates.",
-          dateCreated: new Date().toISOString()
-        },
-        {
-          question: "Do I need a credit card for the free trial?",
-          answer: "No credit card required for our 36-hour free trial. Simply sign up with your email address to get instant access to all 18,000+ live channels and the complete content library. Experience the service risk-free before making any purchase commitment.",
-          dateCreated: new Date().toISOString()
-        },
-        {
-          question: "How much does IPTV cost compared to cable?",
-          answer: "IPTV is significantly cheaper than cable TV. Our plans start at just $15/month compared to cable which typically costs $100-200/month. With IPTV you get more channels, on-demand content, multi-device streaming, and save $1,000+ per year while accessing more entertainment options.",
-          dateCreated: new Date().toISOString()
-        }
-      ]} />
+      {/* WebSite, Organization, FAQPage: index.html only. ItemList + ServiceSchema here for product/shop signal. */}
 
       {/* Service Schema for IPTV Service Offerings */}
       <ServiceSchema 

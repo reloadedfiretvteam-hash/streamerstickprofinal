@@ -181,12 +181,13 @@ jobs:
         run: sleep 15
 
       - name: Verify sitemap and ping search engines (Google, Bing, Yandex, Yahoo)
+        id: sitemap_verify
         run: |
           SITE="https://streamstickpro.com"
           SITEMAP_INDEX="${SITE}/sitemap-index.xml"
           SITEMAP="${SITE}/sitemap.xml"
           SITEMAP_PAGES="${SITE}/sitemap-pages.xml"
-          echo "Fetching sitemaps..."
+          echo "Fetching sitemaps (live after deploy)..."
           SITEMAP_BODY=$(curl -sSf -L --max-time 60 "$SITEMAP" || echo "")
           PAGES_BODY=$(curl -sSf -L --max-time 90 "$SITEMAP_PAGES" || echo "")
           URL_COUNT=$(echo "$SITEMAP_BODY" | grep -o '<loc>' | wc -l)
@@ -196,6 +197,10 @@ jobs:
           echo "**sitemap-pages.xml URLs:** $PAGES_URL_COUNT" >> $GITHUB_STEP_SUMMARY
           echo "**Sitemap index:** $SITEMAP_INDEX" >> $GITHUB_STEP_SUMMARY
           echo "sitemap.xml: $URL_COUNT | sitemap-pages.xml: $PAGES_URL_COUNT"
+          if [ "$URL_COUNT" -lt "10" ]; then
+            echo "::warning:: sitemap.xml has very few URLs ($URL_COUNT). Check Cloudflare Pages env (Supabase) and build (location-pages.json)."
+            echo "⚠️ **Low URL count** – indexing may be limited. Set Worker env in Cloudflare and ensure 25K seed or location-pages.json." >> $GITHUB_STEP_SUMMARY
+          fi
           echo "Pinging Google, Bing, Yandex (Yahoo uses Bing)..."
           curl -sSf -o /dev/null "https://www.google.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Google: submitted" || true
           curl -sSf -o /dev/null "https://www.bing.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Bing: submitted (Yahoo covered via Bing)" || true
@@ -215,4 +220,5 @@ jobs:
           echo "URLs from live sitemap submitted to IndexNow (Bing, Yandex, Seznam)." >> $GITHUB_STEP_SUMMARY
         env:
           SITE_URL: https://streamstickpro.com
+          INDEXNOW_KEY: 752d1cf8edc045568943005a03892968
         continue-on-error: true

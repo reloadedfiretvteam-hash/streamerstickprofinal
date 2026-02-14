@@ -280,7 +280,7 @@ export default function Blog() {
                 .replace(/^(.+)$/gm, match => !match.startsWith("<") ? match : match)
                 .replace(/\*\*(.+?)\*\*/g, "<strong style='font-weight: 700; font-size: 1.1em;'>$1</strong>")
                 .replace(/^- (.+)$/gm, "<li style='margin-left: 1.5rem; margin-bottom: 0.5rem; font-size: 1em;'>$1</li>")
-                .replace(/^# (.+)$/gm, "<h1 style='font-size: clamp(28px, 6vw, 36px); font-weight: 800; margin-top: 2rem; margin-bottom: 1rem; line-height: 1.3; color: white;'>$1</h1>")
+                .replace(/^# (.+)$/gm, "<h2 style='font-size: clamp(28px, 6vw, 36px); font-weight: 800; margin-top: 2rem; margin-bottom: 1rem; line-height: 1.3; color: white;'>$1</h2>")
                 .replace(/^## (.+)$/gm, "<h2 style='font-size: clamp(24px, 5vw, 30px); font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; line-height: 1.4; color: white;'>$1</h2>")
                 .replace(/^### (.+)$/gm, "<h3 style='font-size: clamp(20px, 4vw, 24px); font-weight: 700; margin-top: 1.25rem; margin-bottom: 0.5rem; line-height: 1.4; color: white;'>$1</h3>")
             }}

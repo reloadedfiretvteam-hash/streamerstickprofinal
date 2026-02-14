@@ -82,7 +82,7 @@ async function buildProject() {
   const routesJson = {
     version: 1,
     include: ["/*"],
-    exclude: ["/assets/*", "/robots.txt", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif", "/*.webp", "/*.svg", "/*.ico", "/*.woff", "/*.woff2", "/*.ttf", "/BingSiteAuth.xml", "/googledf2a7b91b7b9494f.html", "/59748a36d4494392a7d863abcf2d3b52.txt", "/696320d78e6e55d1584eca38a9d864b5.txt"]
+    exclude: ["/assets/*", "/robots.txt", "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif", "/*.webp", "/*.svg", "/*.ico", "/*.woff", "/*.woff2", "/*.ttf", "/BingSiteAuth.xml", "/googledf2a7b91b7b9494f.html", "/752d1cf8edc045568943005a03892968.txt", "/59748a36d4494392a7d863abcf2d3b52.txt", "/696320d78e6e55d1584eca38a9d864b5.txt"]
   };
   await writeFile("dist/_routes.json", JSON.stringify(routesJson, null, 2));
 

@@ -1,18 +1,16 @@
 # StreamStickPro - robots.txt
-# Allow all crawlers; sitemap for discovery
+# Allow Googlebot/Bingbot; no Crawl-delay (Google ignores it, Crawl-delay can slow Bing indexing)
 
 User-agent: *
 Allow: /
-
+Disallow: /api/
 Disallow: /admin
 Disallow: /admin/
-Disallow: /api/
 Disallow: /shadow-services
 Disallow: /checkout
 Disallow: /success
 Disallow: /cancel
 
-Sitemap: https://streamstickpro.com/sitemap.xml
+# Both sitemaps so crawlers discover all URLs (index + full)
 Sitemap: https://streamstickpro.com/sitemap-index.xml
-
-Host: https://streamstickpro.com
+Sitemap: https://streamstickpro.com/sitemap.xml

@@ -435,7 +435,7 @@ export function createAdminRoutes() {
       
       // Enhance with additional analytics
       // Use service key explicitly to bypass RLS
-      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY;
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
       
@@ -595,7 +595,7 @@ export function createAdminRoutes() {
     try {
       const storage = getStorage(c.env);
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       
       // Get all paid orders
       const allOrders = await storage.getAllOrders();
@@ -705,7 +705,7 @@ export function createAdminRoutes() {
     try {
       const storage = getStorage(c.env);
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
 
       const emails = new Set<string>();
 
@@ -768,7 +768,7 @@ export function createAdminRoutes() {
     try {
       const storage = getStorage(c.env);
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       const emails = new Set<string>();
       const customers = await storage.getAllCustomers();
       customers.forEach((cust: { email?: string }) => {
@@ -793,7 +793,7 @@ export function createAdminRoutes() {
     try {
       const storage = getStorage(c.env);
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
 
       const customers = await storage.getAllCustomers();
       const orders = await storage.getAllOrders();
@@ -1235,7 +1235,7 @@ export function createAdminRoutes() {
       // For admin, we need all posts (published and unpublished)
       // Use service key to bypass RLS and get all posts
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       const { data, error } = await supabase.from('blog_posts')
         .select('*')
         .order('created_at', { ascending: false });
@@ -1267,7 +1267,7 @@ export function createAdminRoutes() {
   app.post('/blog/posts', async (c) => {
     try {
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       const body = await c.req.json();
       
       // Generate slug from title if not provided
@@ -1312,7 +1312,7 @@ export function createAdminRoutes() {
   app.put('/blog/posts/:id', async (c) => {
     try {
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       const body = await c.req.json();
       const id = c.req.param('id');
       
@@ -1364,7 +1364,7 @@ export function createAdminRoutes() {
   app.delete('/blog/posts/:id', async (c) => {
     try {
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       const id = c.req.param('id');
       
       const { error } = await supabase.from('blog_posts').delete().eq('id', id);
@@ -1531,7 +1531,7 @@ export function createAdminRoutes() {
   app.get('/seo-ads', async (c) => {
     try {
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       const { data, error } = await supabase.from('seo_ads')
         .select('*')
         .order('created_at', { ascending: false });
@@ -1561,7 +1561,7 @@ export function createAdminRoutes() {
   app.post('/seo-ads', async (c) => {
     try {
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       const body = await c.req.json();
       
       const slug = body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -1600,7 +1600,7 @@ export function createAdminRoutes() {
   app.put('/seo-ads/:id', async (c) => {
     try {
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       const body = await c.req.json();
       const id = c.req.param('id');
       
@@ -1643,7 +1643,7 @@ export function createAdminRoutes() {
   app.delete('/seo-ads/:id', async (c) => {
     try {
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       const id = c.req.param('id');
       
       const { error } = await supabase.from('seo_ads').delete().eq('id', id);

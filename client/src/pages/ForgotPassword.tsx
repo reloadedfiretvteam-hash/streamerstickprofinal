@@ -59,6 +59,7 @@ export default function ForgotPassword() {
   if (isEmailSent) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
+        <h1 className="sr-only">Check Your Email – Password Reset</h1>
         <Card className="w-full max-w-md bg-gray-800/50 border-gray-700">
           <CardHeader className="text-center">
             <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
@@ -97,6 +98,7 @@ export default function ForgotPassword() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
+      <h1 className="sr-only">Forgot Password – StreamStickPro</h1>
       <Card className="w-full max-w-md bg-gray-800/50 border-gray-700">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl text-white">Forgot Password?</CardTitle>

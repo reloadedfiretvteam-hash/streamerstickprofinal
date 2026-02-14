@@ -2,24 +2,47 @@
 /**
  * Fetch LIVE sitemap from production and submit all URLs to IndexNow.
  * Run AFTER deploy so Bing/Yandex/Seznam get every URL immediately.
+ * Fetches sitemap-index.xml and all child sitemaps (sitemap-pages.xml, sitemap-posts.xml, sitemap.xml).
  * Usage: npx tsx scripts/indexnow-from-live-sitemap.ts
  *        SITE_URL=https://streamstickpro.com npx tsx scripts/indexnow-from-live-sitemap.ts
  */
 const SITE_URL = process.env.SITE_URL || 'https://streamstickpro.com';
-const SITEMAP_URL = `${SITE_URL}/sitemap.xml`;
-const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '59748a36d4494392a7d863abcf2d3b52';
+const SITEMAP_INDEX_URL = `${SITE_URL}/sitemap-index.xml`;
+const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '752d1cf8edc045568943005a03892968';
 const INDEXNOW_KEY_LOCATION = `${SITE_URL}/${INDEXNOW_KEY}.txt`;
 
-async function main() {
-  console.log('Fetching live sitemap:', SITEMAP_URL);
-  const res = await fetch(SITEMAP_URL);
-  if (!res.ok) {
-    console.error('Failed to fetch sitemap:', res.status);
-    process.exit(1);
-  }
-  const xml = await res.text();
+function extractUrls(xml: string): string[] {
   const locs = xml.match(/<loc>([^<]+)<\/loc>/g) || [];
-  const urls = locs.map((m) => m.replace(/<\/?loc>/g, '').trim()).filter(Boolean);
+  return locs.map((m) => m.replace(/<\/?loc>/g, '').trim()).filter(Boolean);
+}
+
+async function main() {
+  const allUrls = new Set<string>();
+
+  // Fetch sitemap-index.xml to get all sitemap URLs
+  console.log('Fetching sitemap index:', SITEMAP_INDEX_URL);
+  const indexRes = await fetch(SITEMAP_INDEX_URL);
+  if (!indexRes.ok) {
+    console.warn('sitemap-index.xml failed, falling back to sitemap.xml:', indexRes.status);
+    const fallback = await fetch(`${SITE_URL}/sitemap.xml`);
+    if (!fallback.ok) {
+      console.error('Failed to fetch sitemap:', fallback.status);
+      process.exit(1);
+    }
+    extractUrls(await fallback.text()).forEach((u) => allUrls.add(u));
+  } else {
+    const indexXml = await indexRes.text();
+    const sitemapUrls = extractUrls(indexXml);
+    for (const sitemapUrl of sitemapUrls) {
+      console.log('Fetching sitemap:', sitemapUrl);
+      const res = await fetch(sitemapUrl);
+      if (res.ok) {
+        extractUrls(await res.text()).forEach((u) => allUrls.add(u));
+      }
+    }
+  }
+
+  const urls = Array.from(allUrls);
   console.log('URLs found:', urls.length);
 
   if (urls.length === 0) {

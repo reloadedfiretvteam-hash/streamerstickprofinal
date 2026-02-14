@@ -3,8 +3,8 @@
  * Documentation: https://www.indexnow.org/documentation
  */
 
-const INDEXNOW_KEY = '59748a36d4494392a7d863abcf2d3b52';
-const INDEXNOW_KEY_LOCATION = 'https://streamstickpro.com/59748a36d4494392a7d863abcf2d3b52.txt';
+const INDEXNOW_KEY = '752d1cf8edc045568943005a03892968';
+const INDEXNOW_KEY_LOCATION = 'https://streamstickpro.com/752d1cf8edc045568943005a03892968.txt';
 const SITE_URL = 'https://streamstickpro.com';
 const INDEXNOW_API_URL = 'https://api.indexnow.org/IndexNow';
 

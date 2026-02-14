@@ -593,103 +593,93 @@ app.get('/sitemap-posts.xml', async (c) => {
   return c.text(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' });
 });
 
-// Sitemap route - must be before catch-all (full: static + blog + location)
+// Sitemap route - must be before catch-all (full: static + blog + location). Resilient: never 500; Supabase failure returns static + location-pages.json.
 app.get('/sitemap.xml', async (c) => {
+  const baseUrl = 'https://streamstickpro.com';
+  const today = new Date().toISOString().split('T')[0];
+  let blogPosts: any[] = [];
+  let seoPages: { path: string; updated_at?: string }[] = [];
+
   try {
-    const baseUrl = 'https://streamstickpro.com';
     const storage = getStorage(c.env);
-    
-    // Get blog posts and products
-    const blogPosts = await storage.getBlogPosts();
-    const products = await storage.getRealProducts();
-    
-    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+    try {
+      blogPosts = await storage.getBlogPosts();
+    } catch (e) {
+      console.error('sitemap getBlogPosts:', (e as Error)?.message);
+    }
+    try {
+      seoPages = await storage.getSeoPagesForSitemap(50000);
+    } catch (e) {
+      console.error('sitemap getSeoPagesForSitemap:', (e as Error)?.message);
+    }
+  } catch {
+    // getStorage failed (e.g. missing env); continue with empty blog + seo
+  }
+
+  let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 `;
-    
-    for (const page of STATIC_SITEMAP_PAGES) {
-      sitemap += `  <url>
+
+  for (const page of STATIC_SITEMAP_PAGES) {
+    sitemap += `  <url>
     <loc>${baseUrl}${page.url}</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <lastmod>${today}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>
 `;
-    }
+  }
 
-    // Add blog posts
-    for (const post of blogPosts) {
-      if (post.published) {
-        const lastmod = post.publishedAt ? new Date(post.publishedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-        sitemap += `  <url>
+  for (const post of blogPosts) {
+    if (post.published) {
+      const lastmod = post.publishedAt ? new Date(post.publishedAt).toISOString().split('T')[0] : today;
+      sitemap += `  <url>
     <loc>${baseUrl}/blog/${post.slug}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 `;
-      }
     }
+  }
 
-    // SEO location pages: Supabase first, then static fallback (25K from build) so Google gets thousands of URLs even if DB seed didn't run
-    const seoPages = await storage.getSeoPagesForSitemap(50000);
-    for (const page of seoPages) {
-      const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-      sitemap += `  <url>
+  for (const page of seoPages) {
+    const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : today;
+    sitemap += `  <url>
     <loc>${baseUrl}${page.path}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 `;
-    }
-    if (seoPages.length < 2000) {
-      try {
-        const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
-        if (assetRes.ok) {
-          const list = (await assetRes.json()) as { path: string }[];
-          const today = new Date().toISOString().split('T')[0];
-          for (const item of list) {
-            sitemap += `  <url>
+  }
+  if (seoPages.length < 2000) {
+    try {
+      const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
+      if (assetRes.ok) {
+        const list = (await assetRes.json()) as { path: string }[];
+        for (const item of list) {
+          sitemap += `  <url>
     <loc>${baseUrl}${item.path}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 `;
-          }
         }
-      } catch {
-        // ignore
-      }
-    }
-
-    sitemap += `</urlset>`;
-
-    return c.text(sitemap, 200, {
-      'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600',
-    });
-  } catch (error: any) {
-    console.error('Error generating sitemap:', error);
-    // Fallback to static file if dynamic generation fails
-    try {
-      const response = await c.env.ASSETS.fetch(new Request(new URL('/sitemap.xml', c.req.url)));
-      if (response.ok) {
-        return new Response(response.body, {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/xml; charset=utf-8',
-            'Cache-Control': 'public, max-age=3600',
-          },
-        });
       }
     } catch {
-      // If static file also fails, return error
+      // ignore
     }
-    return c.text('Error generating sitemap', 500);
   }
+
+  sitemap += `</urlset>`;
+
+  return c.text(sitemap, 200, {
+    'Content-Type': 'application/xml; charset=utf-8',
+    'Cache-Control': 'public, max-age=3600',
+  });
 });
 
 // Security headers for all responses

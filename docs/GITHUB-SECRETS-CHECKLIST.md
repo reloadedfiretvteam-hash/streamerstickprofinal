@@ -38,10 +38,12 @@
 ## Visitor tracking (Supabase + Cloudflare)
 
 - **Migrations**: The deploy workflow runs all `20260212*` SQL migrations, including **visitor dedup & live stats** (`visitors` ip_hash, `get_live_visitors`, `upsert_visitor_visit`). No extra step needed if `SUPABASE_DATABASE_URL` or `DATABASE_URL` is set.
-- **Worker runtime**: The Cloudflare Worker needs **Supabase** at runtime for `/api/track-visit` and `/api/admin/visitors/live`. Set the same values in **Cloudflare Pages → your project → Settings → Environment variables (Production)**:
-  - `VITE_SUPABASE_URL` (or `SUPABASE_URL`)
-  - `SUPABASE_SERVICE_KEY` or `SUPABASE_SERVICE_ROLE_KEY` (Worker calls Supabase RPCs; anon key is not enough for service RPCs)
-  - Other existing secrets (Stripe, Resend, ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET, etc.) as already documented in wrangler.toml comments.
+- **Worker runtime**: Set **every** variable the Worker reads in **Cloudflare Pages → your project → Settings → Environment variables (Production)**. Full list (SEO + Supabase + GitHub + deploy):
+  - **Supabase:** `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_KEY` (or `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SERVICE_ROLL_KEY`) — required for sitemaps, redirects, /l/ pages, track-visit, admin, blog, orders.
+  - **Stripe:** `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`
+  - **Auth/email:** `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `SESSION_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL` (vars in wrangler.toml; override in Cloudflare if needed)
+  - **Optional:** `JWT_SECRET`, `GITHUB_TOKEN`, `OPENAI_API_KEY`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `NODE_ENV`
+  - Without Supabase URL + service key, sitemaps and location pages still work (static + location-pages.json fallback), but blog/redirects from DB and track-visit will fail.
 - **GitHub Secrets** are used at **build** time; **Cloudflare env** is used at **request** time by the Worker. Ensure both Supabase URL and service key are in Cloudflare so visitor tracking works after deploy.
 
 ## 25K seed behavior

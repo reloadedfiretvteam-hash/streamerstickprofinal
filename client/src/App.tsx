@@ -44,6 +44,7 @@ const VsCompetitor = lazy(() => import("@/pages/VsCompetitor"));
 const UltimateIptvCatalog = lazy(() => import("@/pages/UltimateIptvCatalog"));
 const ToolsCatalog = lazy(() => import("@/pages/ToolsCatalog"));
 const Tutorials = lazy(() => import("@/pages/Tutorials"));
+const SeoAds = lazy(() => import("@/pages/SeoAds"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 // Loading fallback component
@@ -116,6 +117,8 @@ function Router() {
         <Route path="/ultimate-iptv-catalog-2026" component={UltimateIptvCatalog} />
         <Route path="/tools/catalog" component={ToolsCatalog} />
         <Route path="/tutorials" component={Tutorials} />
+        <Route path="/seo-ads" component={SeoAds} />
+        <Route path="/seo-ads/:slug" component={SeoAds} />
         <Route path="/l/:country/:pageType/:slug" component={LocationPage} />
         <Route component={NotFound} />
       </Switch>

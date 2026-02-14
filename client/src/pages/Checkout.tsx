@@ -278,6 +278,8 @@ export default function Checkout() {
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to Store
         </Button>
 
+        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-foreground">Checkout – Complete Your Order</h1>
+
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3 space-y-6">
             <Card className="border-white/10 bg-card/50 backdrop-blur">

@@ -115,6 +115,7 @@ export default function ResetPassword() {
   if (isVerifying) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
+        <h1 className="sr-only">Reset Password – Verifying Link</h1>
         <Card className="w-full max-w-md bg-gray-800/50 border-gray-700">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center gap-4">
@@ -130,6 +131,7 @@ export default function ResetPassword() {
   if (!token || !isValidToken) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
+        <h1 className="sr-only">Reset Password – Invalid or Expired Link</h1>
         <Card className="w-full max-w-md bg-gray-800/50 border-gray-700">
           <CardHeader className="text-center">
             <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -155,6 +157,7 @@ export default function ResetPassword() {
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
+        <h1 className="sr-only">Password Reset Successfully – StreamStickPro</h1>
         <Card className="w-full max-w-md bg-gray-800/50 border-gray-700">
           <CardHeader className="text-center">
             <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
@@ -179,6 +182,7 @@ export default function ResetPassword() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
+      <h1 className="sr-only">Create New Password – StreamStickPro</h1>
       <Card className="w-full max-w-md bg-gray-800/50 border-gray-700">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl text-white">Create New Password</CardTitle>
