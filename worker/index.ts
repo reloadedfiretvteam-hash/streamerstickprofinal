@@ -145,40 +145,45 @@ app.get('/api/catalog-summary', (c) => {
   });
 });
 
-// SEO location page API (for /l/:country/:pageType/:slug). DB first, then static build fallback so 25K pages work without DB seed.
+// SEO location page API (for /l/:country/:pageType/:slug). DB first, then static build fallback. Never 500 for "not found"; 404 only.
 app.get('/api/seo-page/:country/:pageType/:slug', async (c) => {
-  const country = c.req.param('country');
-  const pageType = c.req.param('pageType');
-  const slug = c.req.param('slug');
-  const path = `/l/${country.toLowerCase()}/${pageType}/${slug}`;
-  const storage = getStorage(c.env);
-  let page = await storage.getSeoPageByPath(country, pageType, slug);
-  if (!page) {
-    try {
-      const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
-      if (assetRes.ok) {
-        const list = (await assetRes.json()) as { path: string; t: string; d: string; h: string }[];
-        const staticPage = list.find((p) => p.path === path);
-        if (staticPage) {
-          page = {
-            country: country.toUpperCase(),
-            page_type: pageType,
-            slug,
-            title: staticPage.t,
-            meta_description: staticPage.d,
-            h1: staticPage.h,
-            p1_snippet: staticPage.d,
-            internal_links: [],
-            faq_json: [],
-          };
+  try {
+    const country = c.req.param('country');
+    const pageType = c.req.param('pageType');
+    const slug = c.req.param('slug');
+    const path = `/l/${country.toLowerCase()}/${pageType}/${slug}`;
+    const storage = getStorage(c.env);
+    let page = await storage.getSeoPageByPath(country, pageType, slug);
+    if (!page) {
+      try {
+        const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
+        if (assetRes.ok) {
+          const list = (await assetRes.json()) as { path: string; t: string; d: string; h: string }[];
+          const staticPage = list.find((p) => p.path === path);
+          if (staticPage) {
+            page = {
+              country: country.toUpperCase(),
+              page_type: pageType,
+              slug,
+              title: staticPage.t,
+              meta_description: staticPage.d,
+              h1: staticPage.h,
+              p1_snippet: staticPage.d,
+              internal_links: [],
+              faq_json: [],
+            };
+          }
         }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
     }
+    if (!page) return c.json({ error: 'Not found' }, 404);
+    return c.json(page);
+  } catch (err) {
+    console.error('[api/seo-page]', err instanceof Error ? err.message : String(err));
+    return c.json({ error: 'Service temporarily unavailable' }, 500);
   }
-  if (!page) return c.json({ error: 'Not found' }, 404);
-  return c.json(page);
 });
 
 app.get('/api/debug', async (c) => {
@@ -274,7 +279,7 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
     const page = await storage.getSeoPageByPath(country, pageType, slug);
     if (page) {
       title = (page.title || page.h1 || 'IPTV & Jailbroken Fire Stick').replace(/\[LOCATION\]/g, page.location || page.region || slug);
-      desc = (page.meta_description || page.p1_snippet || '').substring(0, 155);
+      desc = (page.meta_description || page.p1_snippet || '').trim().substring(0, 160) || 'IPTV and Fire Stick guides for your area. StreamStickPro—18K+ channels, free trial. USA, Canada, UK.';
       if (Array.isArray(page.faq_json) && page.faq_json.length > 0) {
         faqJson = page.faq_json.map((f: any) => ({ question: f.question || f.q || '', answer: f.answer || f.a || '' })).filter((f: any) => f.question && f.answer);
       }
@@ -285,7 +290,7 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
         const staticPage = list.find((p) => p.path === path);
         if (staticPage) {
           title = staticPage.t;
-          desc = (staticPage.d || '').substring(0, 155);
+          desc = (staticPage.d || '').trim().substring(0, 160) || 'IPTV and Fire Stick guides for your area. StreamStickPro—18K+ channels, free trial. USA, Canada, UK.';
         }
       }
     }
@@ -299,11 +304,15 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
       ];
     }
     faqJson = sanitizeFaq(faqJson);
-    if (!title) return next();
+    if (!title) {
+      // Return real 404 for crawlers so GSC doesn't report "soft 404" (was: return next() → SPA 200 + "not found")
+      const notFoundHtml = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Page Not Found | StreamStickPro</title><meta name="robots" content="noindex, nofollow"><link rel="canonical" href="https://streamstickpro.com/"></head><body><h1>Page Not Found</h1><p>This location or topic page was not found.</p><p><a href="https://streamstickpro.com/">StreamStickPro Home</a></p></body></html>`;
+      return new Response(notFoundHtml, { status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    }
     const url = `https://streamstickpro.com${path}`;
     const ogImage = 'https://streamstickpro.com/opengraph.jpg';
     const h1Text = escapeHtml(title);
-    const descSafe = escapeHtml(desc.substring(0, 160));
+    const descSafe = escapeHtml(desc.substring(0, 160) || 'IPTV and Fire Stick guides. StreamStickPro—18K+ channels, free trial.');
     const fullTitleRaw = `${title} | StreamStick Pro`;
     const fullTitle = fullTitleRaw.length > 60 ? fullTitleRaw.slice(0, 57) + "..." : fullTitleRaw;
     const fullTitleSafe = escapeHtml(fullTitle);

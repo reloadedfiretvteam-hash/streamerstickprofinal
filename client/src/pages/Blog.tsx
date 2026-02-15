@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { SEOSchema, BlogPostSchema } from "@/components/SEOSchema";
+import { truncateMetaDescription, truncateTitle } from "@/lib/seo";
 
 interface BlogPost {
   id: string;
@@ -124,21 +125,18 @@ export default function Blog() {
     const baseUrl = 'https://streamstickpro.com';
     const defaultDescription = 'IPTV guides: what you get with 18K+ channels, Fire Stick setup, ONN Google TV, free trial. StreamStick Pro blog—streaming tips and niche guides.';
     const defaultTitle = 'IPTV & Fire Stick Blog 2026 | Guides & Tips | StreamStick Pro';
-    
+
     if (params.slug && posts.length > 0) {
       const postFromSlug = posts.find(p => p.slug === params.slug);
       if (postFromSlug) {
         setSelectedPost(postFromSlug);
-        const postTitle = postFromSlug.title.length > 45 ? postFromSlug.title.slice(0, 42) + '...' : postFromSlug.title;
-        const docTitle = `${postTitle} | StreamStick Pro`;
-        document.title = docTitle.length > 60 ? docTitle.slice(0, 57) + '...' : docTitle;
-        const desc = (postFromSlug.excerpt || '').trim();
-        const metaDesc = desc.length > 160 ? desc.slice(0, 157) + '...' : desc;
-        setMetaTag('description', metaDesc || 'IPTV and Fire Stick guide. StreamStick Pro—18K+ channels, free trial.');
+        document.title = truncateTitle(postFromSlug.title);
+        const metaDesc = truncateMetaDescription(postFromSlug.excerpt);
+        setMetaTag('description', metaDesc);
         setMetaTag('robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
-        const ogTitle = (postFromSlug.title.length > 60 ? postFromSlug.title.slice(0, 57) + '...' : postFromSlug.title);
+        const ogTitle = truncateTitle(postFromSlug.title, '');
         setMetaTag('og:title', ogTitle, true);
-        setMetaTag('og:description', metaDesc || 'IPTV and Fire Stick guide. StreamStick Pro.', true);
+        setMetaTag('og:description', metaDesc, true);
         setMetaTag('og:url', `${baseUrl}/blog/${postFromSlug.slug}`, true);
         setMetaTag('og:type', 'article', true);
         setMetaTag('og:site_name', 'StreamStick Pro', true);
@@ -148,7 +146,7 @@ export default function Blog() {
         setMetaTag('twitter:image', imageUrl);
         setMetaTag('twitter:card', 'summary_large_image');
         setMetaTag('twitter:title', ogTitle);
-        setMetaTag('twitter:description', metaDesc || 'IPTV and Fire Stick guide. StreamStick Pro.');
+        setMetaTag('twitter:description', metaDesc);
         setMetaTag('article:published_time', postFromSlug.date, true);
       } else {
         setSelectedPost(null);

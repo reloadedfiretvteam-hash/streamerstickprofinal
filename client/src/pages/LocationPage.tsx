@@ -4,6 +4,7 @@ import { PillarLayout } from "@/components/PillarLayout";
 import { SEOSchema } from "@/components/SEOSchema";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
+import { truncateMetaDescription, truncateTitle } from "@/lib/seo";
 
 const SITE_URL = "https://streamstickpro.com";
 
@@ -79,9 +80,8 @@ export default function LocationPage() {
 
   useEffect(() => {
     if (!page) return;
-    const rawTitle = (page.title || page.h1 || "IPTV & Jailbroken Fire Stick") + " | StreamStick Pro";
-    const title = rawTitle.length > 60 ? rawTitle.slice(0, 57) + "..." : rawTitle;
-    const desc = (page.meta_description || page.p1_snippet || "").substring(0, 160);
+    const title = truncateTitle(page.title || page.h1 || "IPTV & Jailbroken Fire Stick");
+    const desc = truncateMetaDescription(page.meta_description || page.p1_snippet);
     const canonicalUrl = `${SITE_URL}/l/${country}/${pageType}/${slug}`;
     const ogImage = `${SITE_URL}/opengraph.jpg`;
 
