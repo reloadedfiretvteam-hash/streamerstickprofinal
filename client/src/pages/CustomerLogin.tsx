@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, User, Lock, Mail, UserPlus } from "lucide-react";
+import { setPageMeta } from "@/lib/seo";
 
 export default function CustomerLogin() {
   const [, navigate] = useLocation();
@@ -24,11 +25,13 @@ export default function CustomerLogin() {
   });
 
   useEffect(() => {
-    document.title = "Customer Login | StreamStickPro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Log in to your StreamStickPro account to view orders and IPTV credentials.");
+    setPageMeta({
+      title: "Customer Login | StreamStickPro",
+      description: "Log in to your StreamStickPro account to view orders and IPTV credentials.",
+      path: "/customer-login",
+      noindex: true,
+    });
     const robots = document.querySelector('meta[name="robots"]');
-    if (robots) robots.setAttribute("content", "noindex, nofollow");
     return () => {
       if (robots) robots.setAttribute("content", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
     };

@@ -2,39 +2,19 @@ import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { setPageMeta } from "@/lib/seo";
 
 export default function PrivacyPolicy() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    const title = "Privacy Policy | StreamStickPro";
-    const description = "Learn how StreamStickPro collects, uses, and protects your personal information. Our privacy policy covers data collection, payment security, and your rights.";
-    const url = "https://streamstickpro.com/privacy";
-    
-    document.title = title;
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
-    
-    const setMetaTag = (name: string, content: string, isProperty = false) => {
-      const attr = isProperty ? 'property' : 'name';
-      let tag = document.querySelector(`meta[${attr}="${name}"]`);
-      if (!tag) {
-        tag = document.createElement('meta');
-        tag.setAttribute(attr, name);
-        document.head.appendChild(tag);
-      }
-      tag.setAttribute('content', content);
-    };
-    
-    // Canonical tag handled by centralized CanonicalTag component
-    
-    setMetaTag('description', description);
-    setMetaTag('og:title', title, true);
-    setMetaTag('og:description', description, true);
-    setMetaTag('og:url', url, true);
-    setMetaTag('og:type', 'website', true);
-    setMetaTag('twitter:title', title);
-    setMetaTag('twitter:description', description);
+    setPageMeta({
+      title: "Privacy Policy | StreamStickPro",
+      description: "Learn how StreamStickPro collects, uses, and protects your personal information. Our privacy policy covers data collection, payment security, and your rights.",
+      path: "/privacy",
+    });
   }, []);
 
   return (

@@ -2,15 +2,18 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { SEOSchema } from "@/components/SEOSchema";
+import { setPageMeta } from "@/lib/seo";
 
 const TITLE = "Best IPTV Media Players 2026: TiviMate, IPTV Smarters, VLC & More";
 const DESC = "Compare the best IPTV media players and apps for Fire Stick and Android. TiviMate, IPTV Smarters Pro, Perfect Player, VLC. EPG, recording, M3U support.";
 
 export default function IptvMediaPlayers() {
   useEffect(() => {
-    document.title = "IPTV Media Players 2026 | TiviMate & Smarters Guide | StreamStick Pro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Best IPTV media players: TiviMate, IPTV Smarters, Perfect Player, VLC. Fire Stick, Android, Smart TV. EPG, M3U, recording. StreamStick Pro.");
+    setPageMeta({
+      title: "IPTV Media Players 2026 | TiviMate & Smarters Guide | StreamStick Pro",
+      description: "Best IPTV media players: TiviMate, IPTV Smarters, Perfect Player, VLC. Fire Stick, Android, Smart TV. EPG, M3U, recording. StreamStick Pro.",
+      path: "/iptv-media-players",
+    });
   }, []);
 
   const breadcrumbs = [

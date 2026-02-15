@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
+import { setPageMeta } from "@/lib/seo";
 import { Check } from "lucide-react";
 import { ONN_IMAGES, getImageForSlot, fullImageUrl } from "@/data/seo-images";
 
@@ -11,17 +12,21 @@ const breadcrumbs = [
 
 export default function OnnGoogleTv() {
   useEffect(() => {
-    document.title = "IPTV ONN Google TV 2026 | Setup in 5 Min | StreamStick Pro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Set up IPTV on Onn Google TV. Native support for Onn 4K and Onn Pro. 36hr trial, then subscribe. StreamStick Pro.");
+    const ogImg = fullImageUrl(getImageForSlot(ONN_IMAGES, 0).src);
+    setPageMeta({
+      title: "IPTV ONN Google TV 2026 | Setup in 5 Min | StreamStick Pro",
+      description: "Set up IPTV on Onn Google TV. Native support for Onn 4K and Onn Pro. 36hr trial, then subscribe. StreamStick Pro.",
+      path: "/onn-google-tv",
+      ogImage: ogImg,
+    });
     const setMeta = (name: string, content: string, isProperty = false) => {
       const attr = isProperty ? "property" : "name";
       let tag = document.querySelector(`meta[${attr}="${name}"]`);
       if (!tag) { tag = document.createElement("meta"); tag.setAttribute(attr, name); document.head.appendChild(tag); }
       tag.setAttribute("content", content);
     };
-    setMeta("og:image", fullImageUrl(getImageForSlot(ONN_IMAGES, 0).src), true);
-    setMeta("twitter:image", fullImageUrl(getImageForSlot(ONN_IMAGES, 0).src));
+    setMeta("og:image", ogImg, true);
+    setMeta("twitter:image", ogImg);
   }, []);
 
   return (

@@ -4,6 +4,7 @@ import { CheckCircle, ArrowRight, Download, Youtube, Mail, Clock, Zap, Loader2 }
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { trackConversion } from "@/components/RetargetingPixels";
+import { setPageMeta } from "@/lib/seo";
 
 interface OrderDetails {
   order: {
@@ -22,11 +23,13 @@ export default function Success() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = "Order Confirmed | StreamStickPro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Your order is confirmed. StreamStickPro—Fire Sticks and IPTV with 18,000+ channels. Check your email for next steps.");
+    setPageMeta({
+      title: "Order Confirmed | StreamStickPro",
+      description: "Your order is confirmed. StreamStickPro—Fire Sticks and IPTV with 18,000+ channels. Check your email for next steps.",
+      path: "/success",
+      noindex: true,
+    });
     const robots = document.querySelector('meta[name="robots"]');
-    if (robots) robots.setAttribute("content", "noindex, nofollow");
     return () => {
       if (robots) robots.setAttribute("content", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
     };

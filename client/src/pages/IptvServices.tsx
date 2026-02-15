@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { SEOSchema } from "@/components/SEOSchema";
+import { setPageMeta } from "@/lib/seo";
 import { IPTV_IMAGES, getImageForSlot, fullImageUrl } from "@/data/seo-images";
 
 const TITLE = "Ultimate IPTV Guide 2026: Best IPTV Service & Live TV Streaming";
@@ -9,17 +10,21 @@ const DESC = "Complete guide to the best IPTV service for 2026. Compare live TV 
 
 export default function IptvServices() {
   useEffect(() => {
-    document.title = "IPTV Subscription Plans 2026 | Cheapest & Best | StreamStick Pro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "IPTV plans from $15/mo: 18K+ live channels, 4K sports, PPV, 99.9% uptime. Fire Stick and Android. Cancel anytime. 36hr free trial. StreamStick Pro.");
+    const ogImg = fullImageUrl(getImageForSlot(IPTV_IMAGES, 0).src);
+    setPageMeta({
+      title: "IPTV Subscription Plans 2026 | Cheapest & Best | StreamStick Pro",
+      description: "IPTV plans from $15/mo: 18K+ live channels, 4K sports, PPV, 99.9% uptime. Fire Stick and Android. Cancel anytime. 36hr free trial. StreamStick Pro.",
+      path: "/iptv-services",
+      ogImage: ogImg,
+    });
     const setMeta = (name: string, content: string, isProperty = false) => {
       const attr = isProperty ? "property" : "name";
       let tag = document.querySelector(`meta[${attr}="${name}"]`);
       if (!tag) { tag = document.createElement("meta"); tag.setAttribute(attr, name); document.head.appendChild(tag); }
       tag.setAttribute("content", content);
     };
-    setMeta("og:image", fullImageUrl(getImageForSlot(IPTV_IMAGES, 0).src), true);
-    setMeta("twitter:image", fullImageUrl(getImageForSlot(IPTV_IMAGES, 0).src));
+    setMeta("og:image", ogImg, true);
+    setMeta("twitter:image", ogImg);
   }, []);
 
   const breadcrumbs = [

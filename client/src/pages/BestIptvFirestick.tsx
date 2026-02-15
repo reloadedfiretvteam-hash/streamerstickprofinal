@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { SEOSchema } from "@/components/SEOSchema";
+import { setPageMeta } from "@/lib/seo";
 
 const breadcrumbs = [
   { label: "Home", href: "/" },
@@ -10,9 +11,11 @@ const breadcrumbs = [
 
 export default function BestIptvFirestick() {
   useEffect(() => {
-    document.title = "Best IPTV Firestick 2026 | 18K+ Channels, No Buffer | StreamStick Pro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Best IPTV Firestick 2026: compare services and devices. 18K+ channels, TiviMate, pre-loaded Fire Sticks. Free trial. StreamStick Pro.");
+    setPageMeta({
+      title: "Best IPTV Firestick 2026 | 18K+ Channels, No Buffer | StreamStick Pro",
+      description: "Best IPTV Firestick 2026: compare services and devices. 18K+ channels, TiviMate, pre-loaded Fire Sticks. Free trial. StreamStick Pro.",
+      path: "/best-iptv-firestick",
+    });
   }, []);
 
   const faq = [

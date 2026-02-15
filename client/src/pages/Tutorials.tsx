@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { PillarLayout } from "@/components/PillarLayout";
 import { Button } from "@/components/ui/button";
 import { Play, Home } from "lucide-react";
+import { setPageMeta } from "@/lib/seo";
 
 const TITLE = "Adding IPTV Media Players to Your Devices";
 const DESC = "Step-by-step video tutorials: install IPTV media player on Fire Stick and ONN Google TV. Quick setup guides from StreamStickPro.";
@@ -22,9 +23,11 @@ const VIDEOS = [
 
 export default function Tutorials() {
   useEffect(() => {
-    document.title = `${TITLE} | Video Tutorials | StreamStick Pro`;
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", DESC);
+    setPageMeta({
+      title: `${TITLE} | Video Tutorials | StreamStick Pro`,
+      description: DESC,
+      path: "/tutorials",
+    });
   }, []);
 
   const breadcrumbs = [

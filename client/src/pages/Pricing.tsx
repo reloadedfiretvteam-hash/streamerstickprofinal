@@ -1,15 +1,18 @@
 import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
+import { setPageMeta } from "@/lib/seo";
 import { Check, ShoppingCart } from "lucide-react";
 
 const breadcrumbs = [{ label: "Home", href: "/" }, { label: "Pricing", href: "/pricing" }];
 
 export default function Pricing() {
   useEffect(() => {
-    document.title = "IPTV Subscription Plans 2026 | Cheapest & Best | StreamStick Pro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "IPTV plans from $15/mo: 18K+ live channels, 4K sports, PPV, 99.9% uptime. Cancel anytime. 36hr free trial. StreamStick Pro.");
+    setPageMeta({
+      title: "IPTV Subscription Plans 2026 | Cheapest & Best | StreamStick Pro",
+      description: "IPTV plans from $15/mo: 18K+ live channels, 4K sports, PPV, 99.9% uptime. Cancel anytime. 36hr free trial. StreamStick Pro.",
+      path: "/pricing",
+    });
   }, []);
 
   return (

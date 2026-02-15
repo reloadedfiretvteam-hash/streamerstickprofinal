@@ -1,10 +1,11 @@
 /**
  * SEO meta helpers – enforce Google/Bing best practice lengths to fix GSC errors.
- * Title: 50–60 chars. Meta description: 140–160 chars.
+ * Canonical source: @/lib/seo (setPageMeta, truncateMetaDescription, truncateTitle).
+ * Title: 50–60 chars. Meta description: 50–160 chars (Google allows 50–160).
  */
 const TITLE_MIN = 50;
 const TITLE_MAX = 60;
-const DESC_MIN = 140;
+const DESC_MIN = 50;
 const DESC_MAX = 160;
 
 export function truncateTitle(title: string, max = TITLE_MAX): string {

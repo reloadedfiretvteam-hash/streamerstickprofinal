@@ -2,39 +2,19 @@ import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { setPageMeta } from "@/lib/seo";
 
 export default function TermsOfService() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    const title = "Terms of Service | StreamStickPro";
-    const description = "Read the Terms of Service for StreamStickPro. Understand our policies on orders, digital delivery, service availability, and user responsibilities.";
-    const url = "https://streamstickpro.com/terms";
-    
-    document.title = title;
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
-    
-    const setMetaTag = (name: string, content: string, isProperty = false) => {
-      const attr = isProperty ? 'property' : 'name';
-      let tag = document.querySelector(`meta[${attr}="${name}"]`);
-      if (!tag) {
-        tag = document.createElement('meta');
-        tag.setAttribute(attr, name);
-        document.head.appendChild(tag);
-      }
-      tag.setAttribute('content', content);
-    };
-    
-    // Canonical tag handled by centralized CanonicalTag component
-    
-    setMetaTag('description', description);
-    setMetaTag('og:title', title, true);
-    setMetaTag('og:description', description, true);
-    setMetaTag('og:url', url, true);
-    setMetaTag('og:type', 'website', true);
-    setMetaTag('twitter:title', title);
-    setMetaTag('twitter:description', description);
+    setPageMeta({
+      title: "Terms of Service | StreamStickPro",
+      description: "Read the Terms of Service for StreamStickPro. Understand our policies on orders, digital delivery, service availability, and user responsibilities.",
+      path: "/terms",
+    });
   }, []);
 
   return (

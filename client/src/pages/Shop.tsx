@@ -12,6 +12,7 @@ import { DemoVideo } from "@/components/DemoVideo";
 import { FreeTrial } from "@/components/FreeTrial";
 import { ProductQuickView, QuickViewButton } from "@/components/ProductQuickView";
 import { ComparisonTable } from "@/components/ComparisonTable";
+import { setPageMeta } from "@/lib/seo";
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
 const firestickHdImg = `${SUPABASE_BASE}/OIP_(11)99_1764978938773.jpg`;
@@ -157,9 +158,11 @@ export default function Shop() {
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
-    document.title = "IPTV Subscription Plans 2026 | Fire Stick & Devices | StreamStick Pro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Shop IPTV plans from $15/mo and pre-loaded Fire Sticks. 18K+ channels, 4K, 99.9% uptime. Start free trial or buy now. StreamStick Pro.");
+    setPageMeta({
+      title: "IPTV Subscription Plans 2026 | Fire Stick & Devices | StreamStick Pro",
+      description: "Shop IPTV plans from $15/mo and pre-loaded Fire Sticks. 18K+ channels, 4K, 99.9% uptime. Start free trial or buy now. StreamStick Pro.",
+      path: "/shop",
+    });
     loadProducts();
   }, []);
 

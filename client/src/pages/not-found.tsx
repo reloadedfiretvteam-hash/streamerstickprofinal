@@ -3,18 +3,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Home } from "lucide-react";
 import { useLocation } from "wouter";
+import { setPageMeta } from "@/lib/seo";
 
 export default function NotFound() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    document.title = "Page Not Found | StreamStickPro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Page not found. StreamStickPro—IPTV, Fire Sticks, 18,000+ channels. Return to home or shop.");
-    const robots = document.querySelector('meta[name="robots"]');
-    if (robots) robots.setAttribute("content", "noindex, nofollow");
-    // Remove canonical on 404 so GSC doesn't see "canonical points to non-existent URL"
+    setPageMeta({
+      title: "Page Not Found | StreamStickPro",
+      description: "Page not found. StreamStickPro—IPTV, Fire Sticks, 18,000+ channels. Return to home or shop.",
+      noindex: true,
+    });
     document.querySelectorAll('link[rel="canonical"]').forEach((el) => el.remove());
+    const robots = document.querySelector('meta[name="robots"]');
     return () => {
       if (robots) robots.setAttribute("content", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
     };

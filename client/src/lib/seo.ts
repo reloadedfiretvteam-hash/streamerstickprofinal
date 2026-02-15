@@ -1,7 +1,9 @@
 /**
- * SEO helpers: meta description length (50–160 chars for Google), title length (50–60).
- * Use everywhere we set document title or meta description to avoid GSC "too long" / "too short" warnings.
+ * SEO package: single source of truth for title (50–60 chars), meta description (50–160 chars),
+ * canonical/og/twitter. Use setPageMeta() on every page so GSC has no "too long" / "too short" / missing-tag issues.
  */
+
+export const SITE_URL = 'https://streamstickpro.com';
 
 const META_DESC_MAX = 160;
 const META_DESC_MIN = 50;
@@ -27,11 +29,58 @@ export function truncateMetaDescription(
 }
 
 /**
- * Truncate page title to ~60 chars (Google typically shows ~50–60).
+ * Truncate page title to ~60 chars (Google typically shows ~50–60). Pass suffix '' for title-only (e.g. og:title).
  */
 export function truncateTitle(title: string | null | undefined, suffix = ' | StreamStick Pro'): string {
   const t = (title || 'StreamStickPro').trim();
-  const full = t + suffix;
+  const full = suffix ? t + suffix : t;
   if (full.length <= TITLE_MAX) return full;
   return full.slice(0, TITLE_MAX - 3).trim() + '...';
+}
+
+function setMeta(name: string, content: string, isProperty = false): void {
+  if (typeof document === 'undefined' || !content) return;
+  const attr = isProperty ? 'property' : 'name';
+  let el = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement;
+  if (!el) {
+    el = document.createElement('meta');
+    el.setAttribute(attr, name);
+    document.head.appendChild(el);
+  }
+  el.content = content;
+}
+
+/**
+ * Set document title + meta description + og + twitter in one call. All lengths enforced (title ≤60, description 50–160).
+ * Call this in useEffect on every page. Canonical/og:url are set by CanonicalTag when path matches; pass path here for og:url override.
+ */
+export function setPageMeta(options: {
+  title: string;
+  description: string;
+  path?: string;
+  noindex?: boolean;
+  ogImage?: string;
+  type?: 'website' | 'article';
+}): void {
+  if (typeof document === 'undefined') return;
+  const { title, description, path, noindex, ogImage, type = 'website' } = options;
+  const fullTitle = title.includes('|') ? truncateTitle(title, '') : truncateTitle(title, ' | StreamStick Pro');
+  const safeDesc = truncateMetaDescription(description);
+  document.title = fullTitle;
+  setMeta('description', safeDesc);
+  const url = path ? `${SITE_URL}${path.startsWith('/') ? path : '/' + path}` : SITE_URL + (window.location.pathname || '/');
+  setMeta('og:title', fullTitle, true);
+  setMeta('og:description', safeDesc, true);
+  setMeta('og:url', url, true);
+  setMeta('og:type', type, true);
+  setMeta('og:image', ogImage || `${SITE_URL}/opengraph.jpg`, true);
+  setMeta('twitter:card', 'summary_large_image');
+  setMeta('twitter:title', fullTitle);
+  setMeta('twitter:description', safeDesc);
+  setMeta('twitter:image', ogImage || `${SITE_URL}/opengraph.jpg`);
+  let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement;
+  if (noindex) {
+    if (!robots) { robots = document.createElement('meta'); robots.setAttribute('name', 'robots'); document.head.appendChild(robots); }
+    robots.content = 'noindex, nofollow';
+  }
 }

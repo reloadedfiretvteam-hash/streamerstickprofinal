@@ -5,6 +5,7 @@
 import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout } from "@/components/PillarLayout";
+import { setPageMeta } from "@/lib/seo";
 
 const SITE_URL = "https://streamstickpro.com";
 
@@ -15,9 +16,11 @@ const breadcrumbs = [
 
 export default function Resources() {
   useEffect(() => {
-    document.title = "IPTV Resources 2026 | Channel Directory & Setup Guides | StreamStick Pro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Complete 18,000+ IPTV channel directory, jailbroken Fire Stick setup guides, IPTV app comparison, and free streaming resources. StreamStick Pro.");
+    setPageMeta({
+      title: "IPTV Resources 2026 | Channel Directory & Setup Guides | StreamStick Pro",
+      description: "Complete 18,000+ IPTV channel directory, jailbroken Fire Stick setup guides, IPTV app comparison, and free streaming resources. StreamStick Pro.",
+      path: "/resources",
+    });
   }, []);
 
   return (

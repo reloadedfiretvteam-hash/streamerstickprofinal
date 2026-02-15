@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, ArrowLeft, CreditCard, Lock, ShieldCheck, Zap, CheckCircle, Loader2, RefreshCw, UserPlus, Globe, MessageSquare, Phone } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { setPageMeta } from "@/lib/seo";
 
 const productIdMap: Record<string, string> = {
   "fs-hd": "firestick-hd",
@@ -64,11 +65,13 @@ export default function Checkout() {
   });
 
   useEffect(() => {
-    document.title = "Checkout | StreamStickPro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Secure checkout for Fire Sticks and IPTV plans. StreamStickPro—18,000+ channels, 100,000+ movies. Free trial available.");
+    setPageMeta({
+      title: "Checkout | StreamStickPro",
+      description: "Secure checkout for Fire Sticks and IPTV plans. StreamStickPro—18,000+ channels, 100,000+ movies. Free trial available.",
+      path: "/checkout",
+      noindex: true,
+    });
     const robots = document.querySelector('meta[name="robots"]');
-    if (robots) robots.setAttribute("content", "noindex, nofollow");
     return () => {
       if (robots) robots.setAttribute("content", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
     };

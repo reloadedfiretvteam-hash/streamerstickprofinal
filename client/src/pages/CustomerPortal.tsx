@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { setPageMeta } from "@/lib/seo";
 import {
   Loader2,
   User,
@@ -93,11 +94,13 @@ export default function CustomerPortal() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    document.title = "My Account | StreamStickPro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Manage your StreamStickPro account, orders, and IPTV credentials.");
+    setPageMeta({
+      title: "My Account | StreamStickPro",
+      description: "Manage your StreamStickPro account, orders, and IPTV credentials.",
+      path: "/customer-portal",
+      noindex: true,
+    });
     const robots = document.querySelector('meta[name="robots"]');
-    if (robots) robots.setAttribute("content", "noindex, nofollow");
     return () => {
       if (robots) robots.setAttribute("content", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
     };

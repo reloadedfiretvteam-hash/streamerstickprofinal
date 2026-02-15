@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { SEOSchema } from "@/components/SEOSchema";
+import { setPageMeta } from "@/lib/seo";
 
 const breadcrumbs = [
   { label: "Home", href: "/" },
@@ -10,9 +11,11 @@ const breadcrumbs = [
 
 export default function IptvFirestick() {
   useEffect(() => {
-    document.title = "IPTV Fire Stick 2026 | 18K+ Channels, No Buffer | StreamStick Pro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Best IPTV for Fire Stick: 18K+ live channels, TiviMate and Smarters setup in 2 mins. Free trial and pre-loaded sticks. StreamStick Pro—start today.");
+    setPageMeta({
+      title: "IPTV Fire Stick 2026 | 18K+ Channels, No Buffer | StreamStick Pro",
+      description: "Best IPTV for Fire Stick: 18K+ live channels, TiviMate and Smarters setup in 2 mins. Free trial and pre-loaded sticks. StreamStick Pro—start today.",
+      path: "/iptv-firestick",
+    });
   }, []);
 
   const faq = [

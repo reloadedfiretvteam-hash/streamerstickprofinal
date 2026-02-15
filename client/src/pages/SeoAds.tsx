@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { setPageMeta, truncateMetaDescription } from "@/lib/seo";
 
 interface SeoAd {
   id: string;
@@ -113,37 +114,21 @@ export default function SeoAds() {
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
-    
-    const setMetaTag = (name: string, content: string, isProperty = false) => {
-      const attr = isProperty ? 'property' : 'name';
-      let tag = document.querySelector(`meta[${attr}="${name}"]`);
-      if (!tag) {
-        tag = document.createElement('meta');
-        tag.setAttribute(attr, name);
-        document.head.appendChild(tag);
-      }
-      tag.setAttribute('content', content);
-    };
 
-    // Canonical tags are now handled by centralized CanonicalTag component
-    
-    const baseUrl = 'https://streamstickpro.com';
-    
     if (selectedAd) {
-      document.title = selectedAd.metaTitle || `${selectedAd.title} | StreamStickPro`;
-      setMetaTag('description', selectedAd.metaDescription || selectedAd.excerpt);
-      // Canonical tag handled by CanonicalTag component
-      setMetaTag('og:title', selectedAd.title, true);
-      setMetaTag('og:description', selectedAd.excerpt, true);
-      setMetaTag('og:url', `${baseUrl}/seo-ads/${selectedAd.slug}`, true);
-      setMetaTag('og:type', 'article', true);
-      if (selectedAd.featuredImage) {
-        setMetaTag('og:image', selectedAd.featuredImage, true);
-      }
+      setPageMeta({
+        title: selectedAd.metaTitle || `${selectedAd.title} | StreamStickPro`,
+        description: truncateMetaDescription(selectedAd.metaDescription || selectedAd.excerpt),
+        path: `/seo-ads/${selectedAd.slug}`,
+        ogImage: selectedAd.featuredImage || undefined,
+        type: 'article',
+      });
     } else {
-      document.title = 'SEO Guides & Comparisons | StreamStickPro';
-      setMetaTag('description', 'Compare streaming devices, apps, and services. Find the best solutions for cord cutting and live TV streaming.');
-      // Canonical tag handled by CanonicalTag component
+      setPageMeta({
+        title: "SEO Guides & Comparisons | StreamStickPro",
+        description: "Compare streaming devices, apps, and services. Find the best solutions for cord cutting and live TV streaming.",
+        path: "/seo-ads",
+      });
     }
   }, [selectedAd]);
 

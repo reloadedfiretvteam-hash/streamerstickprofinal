@@ -3,6 +3,7 @@ import { Link, useRoute } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { Check, X, Gift } from "lucide-react";
 import { competitorDisplayName } from "@/data/crushCompetitors";
+import { setPageMeta } from "@/lib/seo";
 
 export default function VsCompetitor() {
   const [, params] = useRoute("/vs-:competitor");
@@ -10,12 +11,12 @@ export default function VsCompetitor() {
   const name = competitorDisplayName(slug);
 
   useEffect(() => {
-    const title = `StreamStickPro vs ${name} 2026 | Why We Win | StreamStick Pro`;
-    document.title = title.length > 60 ? title.slice(0, 57) + "..." : title;
-    const meta = document.querySelector('meta[name="description"]');
-    const desc = `${name} alternative. StreamStick Pro 36hr trial beats ${name}. Compare trial, channels, Onn TV, Smarters Pro, price. We win.`;
-    if (meta) meta.setAttribute("content", desc.length > 160 ? desc.slice(0, 157) + "..." : desc);
-  }, [name]);
+    setPageMeta({
+      title: `StreamStickPro vs ${name} 2026 | Why We Win | StreamStick Pro`,
+      description: `${name} alternative. StreamStick Pro 36hr trial beats ${name}. Compare trial, channels, Onn TV, Smarters Pro, price. We win.`,
+      path: `/vs-${slug}`,
+    });
+  }, [name, slug]);
 
   const breadcrumbs = [
     { label: "Home", href: "/" },

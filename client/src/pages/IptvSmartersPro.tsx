@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { HowToSchema } from "@/components/SEOSchema";
 import { Check } from "lucide-react";
+import { setPageMeta } from "@/lib/seo";
 import { APP_IMAGES, getImageForSlot, fullImageUrl } from "@/data/seo-images";
 
 const breadcrumbs = [
@@ -12,17 +13,21 @@ const breadcrumbs = [
 
 export default function IptvSmartersPro() {
   useEffect(() => {
-    document.title = "IPTV Smarters Pro Setup 2026 | 5 Min Guide | StreamStick Pro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "IPTV Smarters Pro setup 2026: use StreamStickPro M3U on Fire Stick, Onn, Smart TV. 5-min guide. 36hr trial—best IPTV for Smarters Pro.");
+    const ogImg = fullImageUrl(getImageForSlot(APP_IMAGES, 0).src);
+    setPageMeta({
+      title: "IPTV Smarters Pro Setup 2026 | 5 Min Guide | StreamStick Pro",
+      description: "IPTV Smarters Pro setup 2026: use StreamStickPro M3U on Fire Stick, Onn, Smart TV. 5-min guide. 36hr trial—best IPTV for Smarters Pro.",
+      path: "/iptv-smarters-pro",
+      ogImage: ogImg,
+    });
     const setMeta = (name: string, content: string, isProperty = false) => {
       const attr = isProperty ? "property" : "name";
       let tag = document.querySelector(`meta[${attr}="${name}"]`);
       if (!tag) { tag = document.createElement("meta"); tag.setAttribute(attr, name); document.head.appendChild(tag); }
       tag.setAttribute("content", content);
     };
-    setMeta("og:image", fullImageUrl(getImageForSlot(APP_IMAGES, 0).src), true);
-    setMeta("twitter:image", fullImageUrl(getImageForSlot(APP_IMAGES, 0).src));
+    setMeta("og:image", ogImg, true);
+    setMeta("twitter:image", ogImg);
   }, []);
 
   const howToSteps = [

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { SEOSchema } from "@/components/SEOSchema";
+import { setPageMeta } from "@/lib/seo";
 import { JAILBREAK_IMAGES, getImageForSlot, fullImageUrl } from "@/data/seo-images";
 
 const breadcrumbs = [
@@ -11,17 +12,21 @@ const breadcrumbs = [
 
 export default function JailbrokenFireSticks() {
   useEffect(() => {
-    document.title = "IPTV Fire Stick 2026 | Pre-Loaded & Jailbroken Devices | StreamStick Pro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Jailbroken Fire Sticks and pre-loaded devices: 18K+ channels, ready in 10 mins. Fire Stick HD, 4K, 4K Max. Shop now. StreamStick Pro.");
+    const ogImg = fullImageUrl(getImageForSlot(JAILBREAK_IMAGES, 0).src);
+    setPageMeta({
+      title: "IPTV Fire Stick 2026 | Pre-Loaded & Jailbroken Devices | StreamStick Pro",
+      description: "Jailbroken Fire Sticks and pre-loaded devices: 18K+ channels, ready in 10 mins. Fire Stick HD, 4K, 4K Max. Shop now. StreamStick Pro.",
+      path: "/jailbroken-fire-sticks",
+      ogImage: ogImg,
+    });
     const setMeta = (name: string, content: string, isProperty = false) => {
       const attr = isProperty ? "property" : "name";
       let tag = document.querySelector(`meta[${attr}="${name}"]`);
       if (!tag) { tag = document.createElement("meta"); tag.setAttribute(attr, name); document.head.appendChild(tag); }
       tag.setAttribute("content", content);
     };
-    setMeta("og:image", fullImageUrl(getImageForSlot(JAILBREAK_IMAGES, 0).src), true);
-    setMeta("twitter:image", fullImageUrl(getImageForSlot(JAILBREAK_IMAGES, 0).src));
+    setMeta("og:image", ogImg, true);
+    setMeta("twitter:image", ogImg);
   }, []);
 
   const faq = [

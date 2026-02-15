@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Lock, CheckCircle, XCircle } from "lucide-react";
+import { setPageMeta } from "@/lib/seo";
 
 export default function ResetPassword() {
   const [, navigate] = useLocation();
@@ -26,11 +27,12 @@ export default function ResetPassword() {
   const token = new URLSearchParams(search).get("token");
 
   useEffect(() => {
-    document.title = "Reset Password | StreamStickPro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Set a new password for your StreamStickPro account.");
+    setPageMeta({
+      title: "Reset Password | StreamStickPro",
+      description: "Set a new password for your StreamStickPro account.",
+      noindex: true,
+    });
     const robots = document.querySelector('meta[name="robots"]');
-    if (robots) robots.setAttribute("content", "noindex, nofollow");
     return () => {
       if (robots) robots.setAttribute("content", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
     };

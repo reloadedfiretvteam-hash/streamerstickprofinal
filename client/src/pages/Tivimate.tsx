@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { HowToSchema } from "@/components/SEOSchema";
 import { Check } from "lucide-react";
+import { setPageMeta } from "@/lib/seo";
 import { APP_IMAGES, getImageForSlot, fullImageUrl } from "@/data/seo-images";
 
 const breadcrumbs = [
@@ -12,17 +13,21 @@ const breadcrumbs = [
 
 export default function Tivimate() {
   useEffect(() => {
-    document.title = "TiviMate IPTV Setup 2026 | 5 Min Guide | StreamStick Pro";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "TiviMate IPTV setup 2026: use StreamStickPro with TiviMate on Fire Stick, Android, Onn. 18K+ channels, 36hr trial. 5-min guide—best IPTV for TiviMate.");
+    const ogImg = fullImageUrl(getImageForSlot(APP_IMAGES, 1).src);
+    setPageMeta({
+      title: "TiviMate IPTV Setup 2026 | 5 Min Guide | StreamStick Pro",
+      description: "TiviMate IPTV setup 2026: use StreamStickPro with TiviMate on Fire Stick, Android, Onn. 18K+ channels, 36hr trial. 5-min guide—best IPTV for TiviMate.",
+      path: "/tivimate",
+      ogImage: ogImg,
+    });
     const setMeta = (name: string, content: string, isProperty = false) => {
       const attr = isProperty ? "property" : "name";
       let tag = document.querySelector(`meta[${attr}="${name}"]`);
       if (!tag) { tag = document.createElement("meta"); tag.setAttribute(attr, name); document.head.appendChild(tag); }
       tag.setAttribute("content", content);
     };
-    setMeta("og:image", fullImageUrl(getImageForSlot(APP_IMAGES, 1).src), true);
-    setMeta("twitter:image", fullImageUrl(getImageForSlot(APP_IMAGES, 1).src));
+    setMeta("og:image", ogImg, true);
+    setMeta("twitter:image", ogImg);
   }, []);
 
   const howToSteps = [

@@ -121,6 +121,7 @@ export function SEOSchema({ faq, products, breadcrumbs }: SEOSchemaProps) {
       const existingBreadcrumbs = document.querySelector('script[data-seo-schema="breadcrumbs"]');
       if (existingBreadcrumbs) existingBreadcrumbs.remove();
 
+      const base = 'https://streamstickpro.com';
       const breadcrumbSchema = {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
@@ -128,7 +129,7 @@ export function SEOSchema({ faq, products, breadcrumbs }: SEOSchemaProps) {
           "@type": "ListItem",
           "position": index + 1,
           "name": item.name,
-          "item": item.url
+          "item": item.url.startsWith('http') ? item.url : `${base}${item.url.startsWith('/') ? item.url : '/' + item.url}`
         }))
       };
       const breadcrumbScript = document.createElement('script');
