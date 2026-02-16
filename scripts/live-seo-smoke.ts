@@ -3,6 +3,8 @@
  * - HTTP status is 200
  * - canonical tag exists and matches the URL (no contradictions)
  * - title and meta description exist and are reasonable lengths
+ * - robots meta is consistent (noindex only on known noindex routes)
+ * - JSON-LD is present on content-heavy pages (blog + location)
  *
  * Usage:
  *   npx tsx scripts/live-seo-smoke.ts
@@ -11,10 +13,16 @@
 const SITE_URL = (process.env.SITE_URL || 'https://streamstickpro.com').replace(/\/$/, '');
 const SAMPLE = Math.max(10, Math.min(1000, Number(process.env.SAMPLE || '200')));
 const TIMEOUT_MS = Math.max(5000, Math.min(30000, Number(process.env.TIMEOUT_MS || '15000')));
-const UA = process.env.USER_AGENT || 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
+const CONCURRENCY = Math.max(1, Math.min(25, Number(process.env.CONCURRENCY || '10')));
+const UA_PROFILE = (process.env.UA_PROFILE || '').toLowerCase(); // googlebot | browser | (custom via USER_AGENT)
+const UA =
+  process.env.USER_AGENT ||
+  (UA_PROFILE === 'browser'
+    ? 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0 Safari/537.36'
+    : 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
 
 type Issue = {
-  type: 'http' | 'canonical' | 'meta' | 'title';
+  type: 'http' | 'canonical' | 'meta' | 'title' | 'robots' | 'schema';
   url: string;
   status?: number | 'ERR';
   detail: string;
@@ -52,6 +60,14 @@ function extractMetaDescription(html: string): string | null {
   return extractTag(html, /<meta\s+name="description"\s+content="([^"]*)"/i);
 }
 
+function extractRobots(html: string): string | null {
+  return extractTag(html, /<meta\s+name="robots"\s+content="([^"]*)"/i);
+}
+
+function countJsonLd(html: string): number {
+  return Array.from(html.matchAll(/<script\s+type="application\/ld\+json"/gi)).length;
+}
+
 async function fetchText(url: string): Promise<{ status: number; text: string }> {
   const ac = new AbortController();
   const t = setTimeout(() => ac.abort(), TIMEOUT_MS);
@@ -66,6 +82,20 @@ async function fetchText(url: string): Promise<{ status: number; text: string }>
   } finally {
     clearTimeout(t);
   }
+}
+
+async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, idx: number) => Promise<R>): Promise<R[]> {
+  const out: R[] = new Array(items.length) as any;
+  let next = 0;
+  const workers = new Array(Math.min(limit, items.length)).fill(0).map(async () => {
+    while (true) {
+      const i = next++;
+      if (i >= items.length) break;
+      out[i] = await fn(items[i], i);
+    }
+  });
+  await Promise.all(workers);
+  return out;
 }
 
 async function getSitemapUrls(): Promise<string[]> {
@@ -108,8 +138,24 @@ function mdTable(issues: Issue[], limit = 25): string {
   ].join('\n');
 }
 
+function expectedNoindex(pathname: string): boolean {
+  const p = pathname.toLowerCase();
+  return (
+    p.startsWith('/checkout') ||
+    p.startsWith('/success') ||
+    p.startsWith('/cancel') ||
+    p.startsWith('/customer-portal') ||
+    p.startsWith('/customer-login') ||
+    p.startsWith('/forgot-password') ||
+    p.startsWith('/reset-password') ||
+    p.startsWith('/admin')
+  );
+}
+
 async function main() {
-  console.log(`[live-seo-smoke] site=${SITE_URL} sample=${SAMPLE} timeout_ms=${TIMEOUT_MS}`);
+  console.log(
+    `[live-seo-smoke] site=${SITE_URL} sample=${SAMPLE} concurrency=${CONCURRENCY} timeout_ms=${TIMEOUT_MS} ua_profile=${UA_PROFILE || 'default'}`
+  );
   const urls = await getSitemapUrls();
   console.log(`[live-seo-smoke] sitemap urls=${urls.length}`);
 
@@ -117,12 +163,13 @@ async function main() {
   const issues: Issue[] = [];
   let ok = 0;
 
-  for (const url of sample) {
+  await mapLimit(sample, CONCURRENCY, async (url) => {
     try {
       const { status, text } = await fetchText(url);
+      const pathname = new URL(url).pathname;
       if (status !== 200) {
         issues.push({ type: 'http', url, status, detail: 'Non-200 response' });
-        continue;
+        return;
       }
 
       const canonical = extractCanonical(text);
@@ -131,7 +178,9 @@ async function main() {
       } else {
         const normCanon = stripTrailingSlash(canonical);
         const normUrl = stripTrailingSlash(url);
-        if (normCanon !== normUrl) {
+        if (!normCanon.startsWith(SITE_URL)) {
+          issues.push({ type: 'canonical', url, status, detail: `Canonical host mismatch → ${normCanon}` });
+        } else if (normCanon !== normUrl) {
           issues.push({ type: 'canonical', url, status, detail: `Canonical mismatch → ${normCanon}` });
         }
       }
@@ -150,14 +199,41 @@ async function main() {
         issues.push({ type: 'meta', url, status, detail: `Long meta description (${desc.length})` });
       }
 
+      const robots = (extractRobots(text) || '').toLowerCase();
+      const isNoindexExpected = expectedNoindex(pathname);
+      const hasNoindex = robots.includes('noindex');
+      if (hasNoindex && !isNoindexExpected) {
+        issues.push({ type: 'robots', url, status, detail: `Unexpected noindex robots="${robots || '(missing)'}"` });
+      }
+      if (!hasNoindex && isNoindexExpected) {
+        issues.push({ type: 'robots', url, status, detail: `Expected noindex for ${pathname} but robots="${robots || '(missing)'}"` });
+      }
+
+      const ldCount = countJsonLd(text);
+      const shouldHaveLd = pathname.startsWith('/blog/') || pathname.startsWith('/l/');
+      if (shouldHaveLd && ldCount === 0) {
+        issues.push({ type: 'schema', url, status, detail: 'Expected JSON-LD (<script type="application/ld+json">) but found none' });
+      }
+
       ok++;
     } catch (e: any) {
-      issues.push({ type: 'http', url, status: 'ERR', detail: e?.name === 'AbortError' ? 'Timeout' : (e?.message || String(e)) });
+      issues.push({
+        type: 'http',
+        url,
+        status: 'ERR',
+        detail: e?.name === 'AbortError' ? 'Timeout' : (e?.message || String(e)),
+      });
     }
-  }
+  });
 
-  const errorCount = issues.filter((i) => i.type === 'http' || (i.type === 'canonical' && i.detail.startsWith('Missing'))).length;
-  console.log(`[live-seo-smoke] ok=${ok}/${sample.length} issues=${issues.length} error_like=${errorCount}`);
+  const errorLike = issues.filter((i) => {
+    if (i.type === 'http') return true;
+    if (i.type === 'canonical') return true;
+    if (i.type === 'robots' && (i.detail.startsWith('Unexpected') || i.detail.startsWith('Expected'))) return true;
+    if (i.type === 'schema') return true;
+    return false;
+  }).length;
+  console.log(`[live-seo-smoke] ok=${ok}/${sample.length} issues=${issues.length} error_like=${errorLike}`);
 
   if (issues.length) {
     console.log('\n[live-seo-smoke] Top issues:\n');
@@ -166,7 +242,7 @@ async function main() {
   }
 
   // Exit non-zero only when we see real breakage (timeouts/500s/missing canonicals).
-  if (errorCount > 0) process.exitCode = 1;
+  if (errorLike > 0) process.exitCode = 1;
 }
 
 main().catch((err) => {

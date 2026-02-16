@@ -47,6 +47,16 @@ interface Product {
 
 const categories = ["All", "Guides", "Savings", "How-To", "Sports", "Reviews", "Support", "Streaming"];
 
+function extractTocHeadings(content: string): string[] {
+  const c = content || "";
+  // Prefer Markdown headings if present
+  const md = Array.from(c.matchAll(/^##\s+(.+)$/gm)).map((m) => (m[1] || "").trim()).filter(Boolean);
+  if (md.length) return md.slice(0, 12);
+  // Fallback: grab existing HTML <h2> tags
+  const html = Array.from(c.matchAll(/<h2[^>]*>([^<]+)<\/h2>/gi)).map((m) => (m[1] || "").trim()).filter(Boolean);
+  return html.slice(0, 12);
+}
+
 export default function Blog() {
   const [, setLocation] = useLocation();
   const params = useParams<{ slug?: string }>();
@@ -188,6 +198,8 @@ export default function Blog() {
   const featuredPosts = posts.filter(p => p.featured);
 
   if (selectedPost) {
+    const quickAnswer = (selectedPost.excerpt || selectedPost.content || '').toString().replace(/<[^>]+>/g, '').trim().slice(0, 180);
+    const toc = extractTocHeadings(selectedPost.content || "");
     return (
       <div className="min-h-screen bg-gray-900 text-white">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
@@ -252,6 +264,52 @@ export default function Blog() {
             </span>
             <Badge variant="secondary" data-testid="badge-category">{selectedPost.category}</Badge>
           </div>
+
+          {/* Quick Answer (AEO / snippet-friendly) */}
+          {quickAnswer && (
+            <div className="mb-8 p-6 rounded-xl border border-orange-500/30 bg-gradient-to-r from-orange-600/15 to-red-600/10">
+              <div className="flex items-start gap-3">
+                <Zap className="w-5 h-5 text-orange-400 mt-0.5" />
+                <div className="flex-1">
+                  <div className="text-sm text-orange-300 font-semibold mb-1">Quick answer (30 seconds)</div>
+                  <p className="text-gray-200">{quickAnswer}{quickAnswer.length >= 170 ? "…" : ""}</p>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <a href="/36hr-trial" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold text-sm">
+                      <Zap className="w-4 h-4" /> Start Free Trial
+                    </a>
+                    <a href="/shop" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-semibold text-sm">
+                      <Flame className="w-4 h-4" /> Shop Plans
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Table of contents (keeps users on page longer) */}
+          {toc.length > 2 && (
+            <div className="mb-8 p-5 rounded-xl border border-white/10 bg-gray-800/40">
+              <h2 className="text-lg font-bold mb-3">On this page</h2>
+              <ul className="text-sm text-gray-300 space-y-2">
+                {toc.slice(0, 10).map((h, idx) => (
+                  <li key={idx}>
+                    <button
+                      type="button"
+                      className="text-orange-400 hover:underline text-left"
+                      onClick={() => {
+                        const container = document.querySelector('[data-testid="text-blog-content"]');
+                        const els = container ? Array.from(container.querySelectorAll('h2')) : [];
+                        const el = els[idx] as HTMLElement | undefined;
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                    >
+                      {h}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Featured Image */}
           {selectedPost.image && (

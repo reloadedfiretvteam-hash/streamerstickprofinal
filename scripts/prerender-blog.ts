@@ -18,6 +18,102 @@ interface BlogPost {
   metaDescription?: string;
 }
 
+function escapeHtml(s: string): string {
+  return (s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function slugifyAnchor(s: string): string {
+  return (s || '')
+    .toLowerCase()
+    .replace(/&amp;|&/g, 'and')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .slice(0, 60);
+}
+
+function renderMarkdownLite(raw: string): { html: string; toc: { id: string; text: string }[] } {
+  const lines = (raw || '').replace(/\r\n/g, '\n').split('\n');
+  const out: string[] = [];
+  const toc: { id: string; text: string }[] = [];
+  let i = 0;
+
+  const flushParagraph = (buf: string[]) => {
+    const text = buf.join(' ').trim();
+    if (!text) return;
+    const p = escapeHtml(text)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" class="text-orange-400 hover:underline">$1</a>');
+    out.push(`<p>${p}</p>`);
+  };
+
+  while (i < lines.length) {
+    const line = lines[i].trimEnd();
+    const t = line.trim();
+    if (!t) {
+      i++;
+      continue;
+    }
+
+    // Headings
+    const h3 = t.match(/^###\s+(.+)/);
+    const h2 = t.match(/^##\s+(.+)/);
+    const h1 = t.match(/^#\s+(.+)/);
+    const heading = (h2 || h3 || h1)?.[1];
+    if (heading) {
+      const id = slugifyAnchor(heading);
+      const safe = escapeHtml(heading);
+      const level = h3 ? 3 : 2; // avoid multiple H1 inside article
+      if (level === 2) toc.push({ id, text: heading });
+      out.push(`<h${level} id="${id}" class="scroll-mt-24">${safe}</h${level}>`);
+      i++;
+      continue;
+    }
+
+    // Bullet list
+    if (/^- /.test(t)) {
+      const items: string[] = [];
+      while (i < lines.length && /^- /.test(lines[i].trim())) {
+        items.push(lines[i].trim().replace(/^- /, ''));
+        i++;
+      }
+      const lis = items
+        .map((x) => `<li>${escapeHtml(x).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</li>`)
+        .join('');
+      out.push(`<ul>${lis}</ul>`);
+      continue;
+    }
+
+    // Numbered list
+    if (/^\d+\.\s+/.test(t)) {
+      const items: string[] = [];
+      while (i < lines.length && /^\d+\.\s+/.test(lines[i].trim())) {
+        items.push(lines[i].trim().replace(/^\d+\.\s+/, ''));
+        i++;
+      }
+      const lis = items
+        .map((x) => `<li>${escapeHtml(x).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</li>`)
+        .join('');
+      out.push(`<ol>${lis}</ol>`);
+      continue;
+    }
+
+    // Paragraph (collect until blank line)
+    const buf: string[] = [];
+    while (i < lines.length && lines[i].trim()) {
+      buf.push(lines[i].trim());
+      i++;
+    }
+    flushParagraph(buf);
+  }
+
+  return { html: out.join('\n'), toc };
+}
+
 async function fetchBlogPosts(): Promise<BlogPost[]> {
   // Hardcoded Supabase config for build-time prerendering (anon key is public)
   const supabaseUrl = "https://emlqlmfzqsnqokrqvmcm.supabase.co";
@@ -60,10 +156,12 @@ async function fetchBlogPosts(): Promise<BlogPost[]> {
 
 function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): string {
   const title = post.title || "Blog Post";
-  const description = post.metaDescription || post.excerpt || `Read about ${title} on StreamStickPro`;
+  const descriptionRaw = post.metaDescription || post.excerpt || `Read about ${title} on StreamStickPro`;
+  const description = escapeHtml(descriptionRaw).slice(0, 160);
   const keywords = post.keywords?.join(", ") || "fire stick, iptv, streaming, cord cutting";
   const date = post.createdAt || new Date().toISOString();
   const readTime = Math.ceil((post.content || "").split(" ").length / 200);
+  const updated = new Date(date).toISOString();
   
   // Mid-article product advertisement (proper HTML - not inside <p>)
   const midArticleAd = `<div class="my-8 p-6 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl border border-blue-500/30">
@@ -79,23 +177,37 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
       </div>
     </div>`;
   
-  // Convert content to paragraphs
-  const contentParagraphs = (post.content || "").split(/\n\n+/).filter(p => p.trim());
-  
-  // Build clean HTML with ad inserted after 2nd paragraph
-  const htmlParagraphs: string[] = [];
-  for (let i = 0; i < contentParagraphs.length; i++) {
-    const p = contentParagraphs[i]
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/^- (.+)$/gm, "<li>$1</li>");
-    htmlParagraphs.push(`<p>${p}</p>`);
-    
-    // Insert ad after 2nd paragraph
-    if (i === 1 && contentParagraphs.length > 3) {
-      htmlParagraphs.push(midArticleAd);
-    }
-  }
-  const cleanContent = htmlParagraphs.join("\n");
+  const rendered = renderMarkdownLite(post.content || "");
+  // Insert ad after first chunk (keeps HTML valid)
+  const parts = rendered.html.split('\n');
+  const cleanContent = parts.length > 6 ? [...parts.slice(0, 6), midArticleAd, ...parts.slice(6)].join('\n') : rendered.html;
+
+  const tocHtml =
+    rendered.toc.length > 2
+      ? `<div class="my-8 p-5 rounded-xl border border-white/10 bg-gray-800/40">
+          <h2 class="text-lg font-bold mb-3">On this page</h2>
+          <ul class="text-sm text-gray-300 space-y-2">
+            ${rendered.toc
+              .slice(0, 10)
+              .map((h) => `<li><a class="text-orange-400 hover:underline" href="#${escapeHtml(h.id)}">${escapeHtml(h.text)}</a></li>`)
+              .join('')}
+          </ul>
+        </div>`
+      : '';
+
+  const quickAnswer = `<div class="my-8 p-6 rounded-xl border border-orange-500/30 bg-gradient-to-r from-orange-600/15 to-red-600/10">
+      <div class="flex items-start gap-3">
+        <div class="text-2xl">⚡</div>
+        <div class="flex-1">
+          <div class="text-sm text-orange-300 font-semibold mb-1">Quick answer (30 seconds)</div>
+          <p class="text-gray-200">${description}</p>
+          <div class="mt-4 flex flex-wrap gap-3">
+            <a href="/36hr-trial" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg">Start Free Trial →</a>
+            <a href="/shop" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-5 rounded-lg">Shop Plans →</a>
+          </div>
+        </div>
+      </div>
+    </div>`;
 
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
@@ -104,10 +216,21 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
     "description": description,
     "datePublished": date,
     "dateModified": date,
-    "author": { "@type": "Organization", "name": "StreamStickPro" },
+    "author": { "@type": "Organization", "name": "StreamStickPro", "url": SITE_URL },
     "publisher": { "@type": "Organization", "name": "StreamStickPro", "logo": { "@type": "ImageObject", "url": `${SITE_URL}/favicon.png` } },
     "mainEntityOfPage": { "@type": "WebPage", "@id": `${SITE_URL}/blog/${post.slug}` },
-    "keywords": keywords
+    "keywords": keywords,
+    "inLanguage": "en-US"
+  });
+
+  const breadcrumbLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": `${SITE_URL}/` },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": `${SITE_URL}/blog` },
+      { "@type": "ListItem", "position": 3, "name": title, "item": `${SITE_URL}/blog/${post.slug}` }
+    ]
   });
 
   return `<!DOCTYPE html>
@@ -139,6 +262,7 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="stylesheet" href="${cssPath}">
   <script type="application/ld+json">${jsonLd}</script>
+  <script type="application/ld+json">${breadcrumbLd}</script>
 </head>
 <body class="bg-gray-900 text-white">
   <div id="root">
@@ -163,6 +287,16 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
           <span>${readTime} min read</span>
           <span class="bg-orange-600/20 text-orange-400 px-2 py-1 rounded text-sm">${post.category || "Guides"}</span>
         </div>
+        <div class="p-4 rounded-xl border border-white/10 bg-gray-800/30 mb-8">
+          <div class="text-sm text-gray-300">
+            <strong>By StreamStickPro Editorial Team</strong> • Updated <time datetime="${updated}">${new Date(updated).toLocaleDateString()}</time>
+          </div>
+          <div class="text-xs text-gray-400 mt-2">
+            Want help choosing a plan? <a class="text-orange-400 hover:underline" href="/36hr-trial">Start a free trial</a> or <a class="text-orange-400 hover:underline" href="/shop">shop plans</a>.
+          </div>
+        </div>
+        ${quickAnswer}
+        ${tocHtml}
         <div class="prose prose-invert max-w-none">
           ${cleanContent}
         </div>
@@ -215,6 +349,17 @@ function generateBlogIndexHTML(posts: BlogPost[], cssPath: string, jsPath: strin
     </a>
   `).join("\n");
 
+  const lastUpdated = posts[0]?.createdAt ? new Date(posts[0].createdAt).toISOString() : new Date().toISOString();
+
+  const blogLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "StreamStickPro Blog",
+    "description": "Guides on IPTV, Fire Stick setup, ONN Google TV, and cord cutting.",
+    "url": `${SITE_URL}/blog`,
+    "publisher": { "@type": "Organization", "name": "StreamStickPro", "url": SITE_URL }
+  });
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -238,6 +383,7 @@ function generateBlogIndexHTML(posts: BlogPost[], cssPath: string, jsPath: strin
   
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="stylesheet" href="${cssPath}">
+  <script type="application/ld+json">${blogLd}</script>
 </head>
 <body class="bg-gray-900 text-white">
   <div id="root">
@@ -256,6 +402,24 @@ function generateBlogIndexHTML(posts: BlogPost[], cssPath: string, jsPath: strin
     <main class="max-w-6xl mx-auto px-4 py-12">
       <h1 class="text-4xl font-bold mb-2">StreamStickPro Blog</h1>
       <p class="text-gray-400 mb-8">Expert guides on cord cutting, Fire Sticks, and IPTV streaming</p>
+
+      <div class="mb-10 p-6 rounded-xl border border-white/10 bg-gray-800/30">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <div class="text-sm text-gray-300">
+              <strong>By StreamStickPro Editorial Team</strong> • Updated <time datetime="${lastUpdated}">${new Date(lastUpdated).toLocaleDateString()}</time>
+            </div>
+            <div class="text-gray-400 text-sm mt-2 max-w-2xl">
+              If you’re new: start with <a class="text-orange-400 hover:underline" href="/36hr-trial">the free trial</a>, then read the guides below to pick the best setup.
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <a href="/36hr-trial" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg">Start Free Trial →</a>
+            <a href="/shop" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-5 rounded-lg">Shop Plans →</a>
+            <a href="/iptv-services" class="border border-orange-500/40 text-orange-300 hover:text-white hover:border-orange-400 font-semibold py-2 px-5 rounded-lg">IPTV Services</a>
+          </div>
+        </div>
+      </div>
       
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         ${postCards}
