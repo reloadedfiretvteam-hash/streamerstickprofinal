@@ -921,6 +921,126 @@ app.get('/sitemap.xml', async (c) => {
   });
 });
 
+// ── SSR meta for blog posts (crawlers get correct title/desc, not SPA shell) ──
+app.get('/blog/:slug', async (c, next) => {
+  const ua = (c.req.header('User-Agent') || '').toLowerCase();
+  const isCrawler = /bot|crawler|facebookexternalhit|twitterbot|linkedinbot|slurp|whatsapp|telegram|pinterest|discord|googlebot/i.test(ua);
+  if (!isCrawler) return next();
+  const slug = c.req.param('slug');
+  if (!slug) return next();
+  try {
+    const storage = getStorage(c.env);
+    const post = await storage.getBlogPostBySlug(slug);
+    if (!post) return next();
+    const url = `https://streamstickpro.com/blog/${slug}`;
+    const titleRaw = (post.title || 'Blog | StreamStickPro').toString();
+    const fullTitle = titleRaw.length > 60 ? titleRaw.slice(0, 57) + '...' : titleRaw;
+    const fullTitleSafe = escapeHtml(fullTitle);
+    const descRaw = (post.excerpt || post.metaDescription || post.title || '').toString().slice(0, 160);
+    const descSafe = escapeHtml(descRaw || 'IPTV guides, Fire Stick tutorials, and streaming tips from StreamStickPro.');
+    const ogImage = post.coverImage || 'https://streamstickpro.com/opengraph.jpg';
+    const publishedAt = post.publishedAt ? new Date(post.publishedAt).toISOString() : '';
+    const updatedAt = post.updatedAt ? new Date(post.updatedAt).toISOString() : publishedAt;
+
+    const jsonLd = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: titleRaw.slice(0, 110),
+      description: descRaw,
+      url,
+      image: ogImage,
+      datePublished: publishedAt || undefined,
+      dateModified: updatedAt || undefined,
+      author: { '@type': 'Organization', name: 'StreamStickPro', url: 'https://streamstickpro.com' },
+      publisher: { '@type': 'Organization', name: 'StreamStickPro', url: 'https://streamstickpro.com' },
+    });
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${fullTitleSafe}</title>
+  <meta name="description" content="${descSafe}">
+  <link rel="canonical" href="${url}">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="${fullTitleSafe}">
+  <meta property="og:description" content="${descSafe}">
+  <meta property="og:url" content="${url}">
+  <meta property="og:image" content="${escapeHtml(ogImage)}">
+  <meta property="og:site_name" content="StreamStickPro">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${fullTitleSafe}">
+  <meta name="twitter:description" content="${descSafe}">
+  <meta name="twitter:image" content="${escapeHtml(ogImage)}">
+  ${publishedAt ? `<meta property="article:published_time" content="${publishedAt}">` : ''}
+  ${updatedAt ? `<meta property="article:modified_time" content="${updatedAt}">` : ''}
+  <script type="application/ld+json">${jsonLd}</script>
+</head>
+<body>
+  <header role="banner">
+    <nav aria-label="Breadcrumb">
+      <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a itemprop="item" href="https://streamstickpro.com/"><span itemprop="name">Home</span></a><meta itemprop="position" content="1"></li>
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a itemprop="item" href="https://streamstickpro.com/blog"><span itemprop="name">Blog</span></a><meta itemprop="position" content="2"></li>
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a itemprop="item" href="${url}"><span itemprop="name">${fullTitleSafe}</span></a><meta itemprop="position" content="3"></li>
+      </ol>
+    </nav>
+  </header>
+  <main id="main" role="main">
+    <article>
+      <h1>${fullTitleSafe}</h1>
+      <p class="lead">${descSafe}</p>
+    </article>
+    <nav aria-label="Related">
+      <ul>
+        <li><a href="https://streamstickpro.com/">Home &amp; Free Trial</a></li>
+        <li><a href="https://streamstickpro.com/blog">All Blog Posts</a></li>
+        <li><a href="https://streamstickpro.com/shop">Shop</a></li>
+        <li><a href="https://streamstickpro.com/iptv-services">IPTV Services</a></li>
+        <li><a href="https://streamstickpro.com/jailbroken-fire-sticks">Jailbroken Fire Sticks</a></li>
+        <li><a href="https://streamstickpro.com/onn-google-tv">ONN Google TV</a></li>
+      </ul>
+    </nav>
+  </main>
+  <footer role="contentinfo"><p>&copy; StreamStickPro. <a href="https://streamstickpro.com/">StreamStickPro</a> – IPTV, Fire Sticks, streaming guides.</p></footer>
+  <script>window.location.replace(${JSON.stringify(url)});</script>
+  <noscript><p>Continue to <a href="${url}">${fullTitleSafe}</a>.</p></noscript>
+</body>
+</html>`;
+    return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  } catch {
+    return next();
+  }
+});
+
+// ── SSR meta for competitor "vs" pages ──
+const VS_META: Record<string, { title: string; desc: string }> = {
+  'iptvstronger': { title: 'StreamStickPro vs IPTVStronger 2026 | Honest Comparison', desc: 'Compare StreamStickPro vs IPTVStronger: channels, pricing, reliability, devices. See why StreamStickPro leads with 18K+ channels and free trial.' },
+  'troypoint': { title: 'StreamStickPro vs TroyPoint 2026 | IPTV Comparison', desc: 'StreamStickPro vs TroyPoint comparison: features, pricing, setup. StreamStickPro offers 18K+ channels, pre-loaded Fire Sticks, 24/7 support.' },
+  'hypotv': { title: 'StreamStickPro vs HypoTV 2026 | Which IPTV Is Better?', desc: 'Compare StreamStickPro vs HypoTV: channel count, reliability, price. StreamStickPro: 18K+ channels, 4K, free trial.' },
+  'tvworldwide': { title: 'StreamStickPro vs TV Worldwide 2026 | IPTV Showdown', desc: 'StreamStickPro vs TV Worldwide: features, price, device support compared. 18K+ channels with StreamStickPro.' },
+  'iptvproviders': { title: 'StreamStickPro vs IPTV Providers 2026 | Best IPTV Service', desc: 'StreamStickPro vs IPTV Providers: head-to-head comparison. Channels, VOD, price, reliability. StreamStickPro wins with 18K+ channels.' },
+  'xtremehd': { title: 'StreamStickPro vs XtremeHD 2026 | IPTV Comparison', desc: 'Compare StreamStickPro vs XtremeHD IPTV: channels, quality, price. StreamStickPro offers 18K+ channels and free trial.' },
+  'iptvgreat': { title: 'StreamStickPro vs IPTV Great 2026 | Best IPTV', desc: 'StreamStickPro vs IPTV Great: full comparison of features, channels, pricing. StreamStickPro leads with 18K+ channels.' },
+  'shoroc': { title: 'StreamStickPro vs Shoroc 2026 | IPTV Comparison', desc: 'Compare StreamStickPro vs Shoroc IPTV service. Channels, reliability, price. StreamStickPro: 18K+ channels, free trial.' },
+  'iptvencoder': { title: 'StreamStickPro vs IPTV Encoder 2026 | Comparison', desc: 'StreamStickPro vs IPTV Encoder: features, channels, pricing compared. StreamStickPro offers 18K+ channels and 24/7 support.' },
+};
+app.get('/vs-:competitor', async (c, next) => {
+  const ua = (c.req.header('User-Agent') || '').toLowerCase();
+  const isCrawler = /bot|crawler|facebookexternalhit|twitterbot|linkedinbot|slurp|whatsapp|telegram|pinterest|discord|googlebot/i.test(ua);
+  if (!isCrawler) return next();
+  const comp = c.req.param('competitor');
+  const meta = VS_META[comp];
+  if (!meta) return next();
+  const url = `https://streamstickpro.com/vs-${comp}`;
+  const titleSafe = escapeHtml(meta.title);
+  const descSafe = escapeHtml(meta.desc);
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${titleSafe}</title><meta name="description" content="${descSafe}"><link rel="canonical" href="${url}"><meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"><meta property="og:title" content="${titleSafe}"><meta property="og:description" content="${descSafe}"><meta property="og:url" content="${url}"><meta property="og:type" content="website"><meta property="og:site_name" content="StreamStickPro"></head><body><main><h1>${titleSafe}</h1><p>${descSafe}</p><nav><ul><li><a href="https://streamstickpro.com/">Home &amp; Free Trial</a></li><li><a href="https://streamstickpro.com/shop">Shop</a></li><li><a href="https://streamstickpro.com/iptv-services">IPTV Services</a></li></ul></nav></main><script>window.location.replace(${JSON.stringify(url)});</script></body></html>`;
+  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+});
+
 // ── IndexNow key file (plain text, not SPA HTML) ──
 app.get('/3b1a52f5f41a4138b1f21c3265180f44.txt', (c) => {
   return c.text('3b1a52f5f41a4138b1f21c3265180f44', 200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=86400' });
