@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import { Resend } from 'resend';
 import type { Env } from '../index';
+import { sendEmail } from '../email-providers';
 
 const IPTV_PORTAL_URL = 'http://ky-tv.cc';
 const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
@@ -35,8 +35,8 @@ export function createTrialRoutes() {
         return c.json({ error: "Please enter your existing username" }, 400);
       }
 
-      const resend = new Resend(c.env.RESEND_API_KEY);
       const fromEmail = c.env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
+      const from = fromEmail.includes('<') ? fromEmail : `StreamStickPro <${fromEmail}>`;
 
       const letters = 'abcdefghkmnpqrstuvwxyz';
       const upperLetters = 'ABCDEFGHJKMNPQRSTUVWXYZ';
@@ -70,12 +70,9 @@ export function createTrialRoutes() {
         password: isExistingUser ? '(using existing password)' : password.substring(0, 10),
       };
 
-      // Customer email
-      await resend.emails.send({
-        from: fromEmail,
-        to: email,
-        subject: 'Your FREE 36-Hour IPTV Trial Credentials - StreamStickPro',
-        html: `
+      // Customer email (REQUIRED). Use unified sender (Resend → MailChannels fallback).
+      const customerSubject = 'Your FREE 36-Hour IPTV Trial Credentials - StreamStickPro';
+      const customerHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #9333ea;">🎉 Your Free Trial is Ready!</h1>
             
@@ -123,15 +120,28 @@ export function createTrialRoutes() {
             
             <p>Happy Streaming! 🎬<br>StreamStickPro Team</p>
           </div>
-        `,
-      });
+        `;
 
-      // Owner notification email with all details
-      await resend.emails.send({
-        from: fromEmail,
-        to: OWNER_EMAIL,
-        subject: `🆕 New Free Trial Signup - ${name}`,
-        html: `
+      const customerResult = await sendEmail({
+        from,
+        to: email,
+        subject: customerSubject,
+        html: customerHtml,
+      }, c.env);
+
+      if (!customerResult.success) {
+        console.error('[free-trial] customer email failed:', customerResult.error);
+        return c.json({
+          error: 'Failed to send trial email. Please try again in a few minutes.',
+          details: customerResult.error,
+          provider: customerResult.provider,
+        }, 500);
+      }
+
+      // Owner notification (NON-FATAL). If this fails, customer still gets credentials.
+      try {
+        const ownerSubject = `🆕 New Free Trial Signup - ${name}`;
+        const ownerHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #9333ea;">New Free Trial Request</h1>
             
@@ -171,10 +181,22 @@ export function createTrialRoutes() {
             
             <p>This customer may convert to a paying customer. Consider following up after their trial expires!</p>
           </div>
-        `,
-      });
+        `;
 
-      console.log(`Free trial credentials sent to ${email}, owner notified`);
+        const ownerResult = await sendEmail({
+          from,
+          to: OWNER_EMAIL,
+          subject: ownerSubject,
+          html: ownerHtml,
+        }, c.env);
+        if (!ownerResult.success) {
+          console.warn('[free-trial] owner email failed (non-fatal):', ownerResult.error);
+        }
+      } catch (e: any) {
+        console.warn('[free-trial] owner email threw (non-fatal):', e?.message || e);
+      }
+
+      console.log(`Free trial credentials sent to ${email} (provider=${customerResult.provider})`);
 
       // Create email campaign for free trial customer
       try {
@@ -197,10 +219,10 @@ export function createTrialRoutes() {
         // Don't fail the request if campaign creation fails
       }
 
-      return c.json({ success: true, message: "Trial credentials sent" });
+      return c.json({ success: true, message: "Trial credentials sent", provider: customerResult.provider });
     } catch (error: any) {
-      console.error("Error processing free trial:", error);
-      return c.json({ error: "Failed to process trial request. Please try again." }, 500);
+      console.error("Error processing free trial:", error?.message || error);
+      return c.json({ error: "Failed to process trial request. Please try again.", details: error?.message }, 500);
     }
   });
 
