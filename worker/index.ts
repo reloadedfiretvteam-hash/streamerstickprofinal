@@ -250,6 +250,27 @@ app.get('/api/seo-page/:country/:pageType/:slug', async (c) => {
   }
 });
 
+// Related internal links for location pages (fast: served from cached location-pages index)
+app.get('/api/seo-related/:country/:pageType/:slug', async (c) => {
+  const country = c.req.param('country');
+  const pageType = c.req.param('pageType');
+  const slug = c.req.param('slug');
+  const path = `/l/${country.toLowerCase()}/${pageType}/${slug}`;
+  try {
+    const idx = await getLocationPagesIndex(c);
+    if (!idx) return c.json({ related: [] }, 200, { 'Cache-Control': 'public, max-age=3600, s-maxage=86400' });
+    const k = regionKey(country, pageType, slug);
+    const rel = (idx.byRegionKey.get(k) || []).filter((p) => p !== path).slice(0, 12);
+    const related = rel.map((p) => {
+      const entry = idx.byPath.get(p);
+      return { url: p, title: entry?.h || entry?.t || p };
+    });
+    return c.json({ related }, 200, { 'Cache-Control': 'public, max-age=3600, s-maxage=86400' });
+  } catch {
+    return c.json({ related: [] }, 200, { 'Cache-Control': 'public, max-age=300' });
+  }
+});
+
 app.get('/api/debug', async (c) => {
   const supabaseUrl = c.env.VITE_SUPABASE_URL || '';
   const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY || '';

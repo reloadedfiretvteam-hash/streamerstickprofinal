@@ -53,6 +53,7 @@ export default function LocationPage() {
   const [page, setPage] = useState<SeoPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [autoRelated, setAutoRelated] = useState<{ url: string; title?: string }[]>([]);
 
   useEffect(() => {
     if (!country || !pageType || !slug) {
@@ -76,6 +77,17 @@ export default function LocationPage() {
         setLoading(false);
         setError(true);
       });
+  }, [country, pageType, slug]);
+
+  useEffect(() => {
+    if (!country || !pageType || !slug) return;
+    fetch(`/api/seo-related/${encodeURIComponent(country)}/${encodeURIComponent(pageType)}/${encodeURIComponent(slug)}`)
+      .then((r) => (r.ok ? r.json() : { related: [] }))
+      .then((data) => {
+        const rel = Array.isArray(data?.related) ? data.related : [];
+        setAutoRelated(rel.filter((x: any) => x && typeof x.url === "string").slice(0, 12));
+      })
+      .catch(() => setAutoRelated([]));
   }, [country, pageType, slug]);
 
   useEffect(() => {
@@ -172,6 +184,27 @@ export default function LocationPage() {
   }));
 
   const internalLinks = Array.isArray(page.internal_links) ? page.internal_links : [];
+  const relatedLinks = (() => {
+    const out: { url: string; anchor: string }[] = [];
+    const seen = new Set<string>();
+    for (const l of internalLinks) {
+      const url = (l?.url || "").trim();
+      if (!url) continue;
+      const norm = url.startsWith("http") ? url.replace(SITE_URL, "") : url;
+      if (seen.has(norm)) continue;
+      seen.add(norm);
+      out.push({ url: norm, anchor: (l?.anchor || norm).toString() });
+    }
+    for (const r of autoRelated) {
+      const url = (r?.url || "").trim();
+      if (!url) continue;
+      const norm = url.startsWith("http") ? url.replace(SITE_URL, "") : url;
+      if (seen.has(norm)) continue;
+      seen.add(norm);
+      out.push({ url: norm, anchor: (r?.title || norm).toString() });
+    }
+    return out.slice(0, 12);
+  })();
   const replaceLoc = (s: string) => (s || "").replace(/\[LOCATION\]/g, locationLabel);
   const blocks = page.content_blocks || {};
   const h2Sections = Array.isArray(blocks.h2_sections) ? blocks.h2_sections : [];
@@ -247,11 +280,11 @@ export default function LocationPage() {
           </section>
         )}
 
-        {internalLinks.length > 0 && (
+        {relatedLinks.length > 0 && (
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-3">Related guides</h2>
             <ul className="list-disc list-inside space-y-2 text-gray-300">
-              {internalLinks.map((link, i) => (
+              {relatedLinks.map((link, i) => (
                 <li key={i}>
                   <Link href={link.url || "#"} className="text-orange-400 hover:underline">
                     {link.anchor || link.url}
