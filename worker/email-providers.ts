@@ -11,6 +11,7 @@ export interface EmailOptions {
 export interface EmailResult {
   success: boolean;
   provider: string;
+  providerId?: string;
   error?: string;
 }
 
@@ -145,7 +146,7 @@ async function sendViaResend(options: EmailOptions, env: Env): Promise<EmailResu
 
     const resend = new Resend(env.RESEND_API_KEY);
     
-    await resend.emails.send({
+    const resp: any = await resend.emails.send({
       from: options.from || env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com',
       to: options.to,
       subject: options.subject,
@@ -155,6 +156,7 @@ async function sendViaResend(options: EmailOptions, env: Env): Promise<EmailResu
     return {
       success: true,
       provider: 'resend',
+      providerId: resp?.data?.id || resp?.id,
     };
   } catch (error: any) {
     return {

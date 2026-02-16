@@ -876,12 +876,31 @@ export function createAdminRoutes() {
         `,
       }, c.env);
       if (result.success) {
-        return c.json({ success: true, message: `Test email sent to ${to}`, provider: result.provider });
+        return c.json({ success: true, message: `Test email sent to ${to}`, provider: result.provider, providerId: result.providerId });
       }
       return c.json({ success: false, error: result.error }, 500);
     } catch (error: any) {
       console.error('Send test email error:', error);
       return c.json({ error: 'Failed to send test email', details: error.message }, 500);
+    }
+  });
+
+  // Retrieve Resend delivery status for an email id (admin only).
+  app.get('/email/resend/:id', async (c) => {
+    try {
+      const id = c.req.param('id');
+      if (!id) return c.json({ error: 'id required' }, 400);
+      if (!c.env.RESEND_API_KEY) return c.json({ error: 'RESEND_API_KEY not configured' }, 500);
+      const r = await fetch(`https://api.resend.com/emails/${encodeURIComponent(id)}`, {
+        headers: {
+          'Authorization': `Bearer ${c.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const text = await r.text();
+      return c.text(text, r.status, { 'Content-Type': 'application/json; charset=utf-8' });
+    } catch (error: any) {
+      return c.json({ error: 'Failed to retrieve Resend email', details: error.message }, 500);
     }
   });
 

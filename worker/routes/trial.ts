@@ -135,6 +135,7 @@ export function createTrialRoutes() {
           error: 'Failed to send trial email. Please try again in a few minutes.',
           details: customerResult.error,
           provider: customerResult.provider,
+          providerId: customerResult.providerId,
         }, 500);
       }
 
@@ -196,7 +197,7 @@ export function createTrialRoutes() {
         console.warn('[free-trial] owner email threw (non-fatal):', e?.message || e);
       }
 
-      console.log(`Free trial credentials sent to ${email} (provider=${customerResult.provider})`);
+      console.log(`Free trial credentials sent to ${email} (provider=${customerResult.provider}, id=${customerResult.providerId || 'n/a'})`);
 
       // Create email campaign for free trial customer
       try {
@@ -219,7 +220,7 @@ export function createTrialRoutes() {
         // Don't fail the request if campaign creation fails
       }
 
-      return c.json({ success: true, message: "Trial credentials sent", provider: customerResult.provider });
+      return c.json({ success: true, message: "Trial credentials sent", provider: customerResult.provider, providerId: customerResult.providerId });
     } catch (error: any) {
       console.error("Error processing free trial:", error?.message || error);
       return c.json({ error: "Failed to process trial request. Please try again.", details: error?.message }, 500);
