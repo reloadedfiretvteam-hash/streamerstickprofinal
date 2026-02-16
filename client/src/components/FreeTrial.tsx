@@ -12,6 +12,7 @@ const iptvImg = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/publ
 
 export function FreeTrial() {
   const [email, setEmail] = useState("");
+  const [submittedEmail, setSubmittedEmail] = useState("");
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [countryOptions, setCountryOptions] = useState({
@@ -23,6 +24,8 @@ export function FreeTrial() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [emailProvider, setEmailProvider] = useState<string>("");
+  const [emailProviderId, setEmailProviderId] = useState<string>("");
 
   const handleCountryOptionChange = (option: keyof typeof countryOptions, checked: boolean) => {
     setCountryOptions(prev => {
@@ -55,6 +58,8 @@ export function FreeTrial() {
 
     setLoading(true);
     setError("");
+    setEmailProvider("");
+    setEmailProviderId("");
 
     try {
       const response = await apiCall("/api/free-trial", {
@@ -69,6 +74,10 @@ export function FreeTrial() {
       });
 
       if (response.ok) {
+        const data = await response.json().catch(() => ({} as any));
+        setSubmittedEmail(email);
+        setEmailProvider(String(data?.provider || ""));
+        setEmailProviderId(String(data?.providerId || ""));
         setSuccess(true);
         setEmail("");
         setName("");
@@ -97,8 +106,14 @@ export function FreeTrial() {
         </div>
         <p className="text-2xl font-bold text-green-400 mb-2">Trial Activated!</p>
         <p className="text-gray-300 mb-4">
-          Check your email for your 36-hour trial credentials. Your login details have been sent to <span className="text-green-400 font-semibold">{email || "your email"}</span>.
+          Check your email for your 36-hour trial credentials. Your login details have been sent to <span className="text-green-400 font-semibold">{submittedEmail || "your email"}</span>.
         </p>
+        {(emailProvider || emailProviderId) && (
+          <p className="text-xs text-gray-400 mb-3">
+            Email status reference{emailProvider ? ` (${emailProvider})` : ""}:{" "}
+            <span className="font-mono text-gray-200 break-all">{emailProviderId || "n/a"}</span>
+          </p>
+        )}
         <p className="text-sm text-gray-300">
           Didn't receive it? Check your spam folder or contact us at reloadedfiretvteam@gmail.com
         </p>

@@ -313,30 +313,24 @@ ${blogUrls}
 }
 
 function generateRobotsTxt(): string {
-  return `User-agent: *
+  // IMPORTANT: This file is what production serves (/_routes.json excludes /robots.txt from the Worker).
+  // It must point to the LIVE sitemap index (which includes /l/* location pages) and must not list noindex pages.
+  return `# StreamStickPro - robots.txt
+# Allow Googlebot/Bingbot; no Crawl-delay (Google ignores it; it can slow Bing).
+
+User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin
+Disallow: /admin/
 Disallow: /shadow-services
-Disallow: /checkout?*
+Disallow: /checkout
+Disallow: /success
+Disallow: /cancel
 
+# Sitemaps (index + full)
+Sitemap: ${SITE_URL}/sitemap-index.xml
 Sitemap: ${SITE_URL}/sitemap.xml
-
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 1
-
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 2
-
-User-agent: Yandexbot
-Allow: /
-Crawl-delay: 2
-
-User-agent: DuckDuckBot
-Allow: /
-Crawl-delay: 1
 `;
 }
 

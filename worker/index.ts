@@ -535,7 +535,7 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/terms', priority: '0.5', changefreq: 'yearly' },
   { url: '/privacy', priority: '0.5', changefreq: 'yearly' },
   { url: '/refund', priority: '0.5', changefreq: 'yearly' },
-  { url: '/checkout', priority: '0.7', changefreq: 'weekly' },
+  // Do not include checkout in sitemap (noindex + disallowed in robots)
   // Tier 1 crush pages
   { url: '/vs-iptvstronger', priority: '0.85', changefreq: 'weekly' },
   { url: '/vs-troypoint', priority: '0.85', changefreq: 'weekly' },
