@@ -2,6 +2,33 @@ import { Hono } from 'hono';
 import { getStorage } from '../helpers';
 import type { Env } from '../index';
 
+function parseCookies(cookieHeader: string | null): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!cookieHeader) return out;
+  const parts = cookieHeader.split(';');
+  for (const p of parts) {
+    const [k, ...rest] = p.trim().split('=');
+    if (!k) continue;
+    out[k] = decodeURIComponent(rest.join('=') || '');
+  }
+  return out;
+}
+
+function setCookieHeader(name: string, value: string, maxAgeSeconds: number): string {
+  return `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax; Secure; HttpOnly`;
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  const bytes = new Uint8Array(digest);
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function isBotUA(ua: string): boolean {
+  return /bot|crawler|spider|slurp|facebookexternalhit|twitterbot|linkedinbot|pinterest|discord|whatsapp|telegram/i.test(ua || '');
+}
+
 export function createVisitorRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
@@ -103,31 +130,40 @@ export function createVisitorRoutes() {
         return c.json({ error: "Session ID and page URL are required" }, 400);
       }
 
-      const ipAddress = c.req.header('cf-connecting-ip') || 
-                        c.req.header('x-forwarded-for')?.split(',')[0] || 
-                        'unknown';
-
       const cfData = (c.req.raw as any).cf || {};
-      
-      const visitor = await storage.trackVisitor({
-        sessionId,
-        pageUrl,
+      const ua = (userAgent || c.req.header('user-agent') || '').toString();
+
+      // Stable visitor cookie (unique visitor). If missing, create it.
+      const cookies = parseCookies(c.req.header('cookie'));
+      let vid = cookies['vid'];
+      let setCookie: string | null = null;
+      if (!vid) {
+        vid = crypto.randomUUID();
+        setCookie = setCookieHeader('vid', vid, 60 * 60 * 24 * 30);
+      }
+
+      const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0] || 'unknown';
+      const salt = (c.env as any).VISITOR_HASH_SALT || c.env.JWT_SECRET || 'streamstickpro';
+      const ip_hash = await sha256Hex(`vid:${vid}|salt:${salt}`) || await sha256Hex(`ip:${ip}|ua:${ua}|salt:${salt}`);
+
+      const url = new URL(pageUrl, 'https://streamstickpro.com');
+      const page = url.pathname || '/';
+
+      await storage.trackVisitByHash({
+        ip_hash,
+        state: cfData.region ?? null,
+        city: cfData.city ?? null,
+        country: cfData.country ?? null,
+        user_agent: ua || null,
+        session_id: sessionId || null,
+        page,
+        page_url: pageUrl || null,
         referrer: referrer || null,
-        userAgent: userAgent || c.req.header('user-agent') || null,
-        ipAddress,
-        country: cfData.country || null,
-        countryCode: cfData.country || null,
-        region: cfData.region || null,
-        regionCode: cfData.regionCode || null,
-        city: cfData.city || null,
-        latitude: cfData.latitude?.toString() || null,
-        longitude: cfData.longitude?.toString() || null,
-        timezone: cfData.timezone || null,
-        isp: cfData.asOrganization || null,
-        isProxy: false,
+        is_bot: isBotUA(ua),
       });
 
-      return c.json({ success: true, visitorId: visitor.id });
+      if (setCookie) c.header('Set-Cookie', setCookie);
+      return c.json({ success: true });
     } catch (error: any) {
       console.error("Error tracking visitor:", error);
       return c.json({ 
@@ -160,81 +196,30 @@ export function createVisitorRoutes() {
       if (!c.env.VITE_SUPABASE_URL) {
         return c.json({ error: 'Supabase URL not configured' }, 500);
       }
-      
+
       const storage = getStorage(c.env);
-      let stats;
-      try {
-        stats = await storage.getVisitorStats();
-      } catch (statsError: any) {
-        console.error('[VISITOR_STATS] Error getting stats:', statsError?.message || statsError);
-        // Return empty stats instead of failing completely
-        stats = {
-          totalVisitors: 0,
-          todayVisitors: 0,
-          yesterdayVisitors: 0,
-          weekVisitors: 0,
-          monthVisitors: 0,
-          onlineNow: 0,
-          recentVisitors: []
-        };
-      }
-      
-      // Enhance with additional analytics
-      // Use service key explicitly to bypass RLS
-      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY;
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
-      
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
-      
-      // Get detailed visitor data - service key should bypass RLS
-      const { data: allVisitors, error: visitorsError } = await supabase
-        .from('visitors')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5000);
-      
-      if (visitorsError) {
-        console.error('[VISITOR_STATS] Error fetching visitors:', visitorsError?.message || visitorsError);
-      }
-      
-      // Calculate geo stats
-      const countryStats: Record<string, number> = {};
-      (allVisitors || []).forEach((v: any) => {
-        if (v.country) {
-          countryStats[v.country] = (countryStats[v.country] || 0) + 1;
-        }
+      const stats = await storage.getVisitorStats();
+
+      return c.json({
+        data: {
+          totalVisitors: stats.totalVisitors,
+          todayVisitors: stats.todayVisitors,
+          yesterdayVisitors: stats.yesterdayVisitors,
+          weekVisitors: stats.weekVisitors,
+          monthVisitors: stats.monthVisitors,
+          onlineNow: stats.onlineNow,
+          deviceBreakdown: stats.deviceBreakdown,
+          topCountries: stats.topCountries,
+          countryBreakdown: stats.topCountries,
+          liveVisitors: stats.recentVisitors,
+        },
       });
-      
-      const topCountries = Object.entries(countryStats)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10)
-        .map(([name, count]) => ({ name, count }));
-      
-      // Ensure all stats are included
-      const finalStats = {
-        ...stats,
-        yesterdayVisitors: stats.yesterdayVisitors || 0, // Ensure it exists
-        monthVisitors: stats.monthVisitors || 0, // Ensure it exists
-        topCountries,
-        countryBreakdown: topCountries, // alias for compatibility
-        deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0, bot: 0 }, // Default if not calculated
-        liveVisitors: stats.recentVisitors || [], // Map recentVisitors to liveVisitors
-      };
-      
-      return c.json({ data: finalStats });
     } catch (error: any) {
       console.error('[VISITOR_STATS] Unexpected error:', error?.message || error);
-      
-      // Always return JSON, even on error
-      return c.json({ 
-        error: "Failed to fetch visitor stats", 
+      return c.json({
+        error: 'Failed to fetch visitor stats',
         details: error.message || 'Unknown error',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }, 500);
     }
   });

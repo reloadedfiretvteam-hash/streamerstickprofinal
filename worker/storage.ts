@@ -313,7 +313,11 @@ export function createStorage(config: StorageConfig) {
       user_agent?: string | null;
       session_id?: string | null;
       page: string;
+      page_url?: string | null;
+      referrer?: string | null;
+      is_bot?: boolean | null;
     }): Promise<void> {
+      // Try 10-param RPC (migration v2), then 7-param (v1), then direct upsert as last resort
       const { error } = await supabase.rpc('upsert_visitor_visit', {
         p_ip_hash: params.ip_hash,
         p_state: params.state ?? null,
@@ -322,8 +326,49 @@ export function createStorage(config: StorageConfig) {
         p_user_agent: params.user_agent ?? null,
         p_session_id: params.session_id ?? null,
         p_page: params.page || '/',
+        p_page_url: params.page_url ?? null,
+        p_referrer: params.referrer ?? null,
+        p_is_bot: params.is_bot ?? false,
       });
-      if (error) throw error;
+      if (!error) return;
+
+      // RPC signature mismatch — try 7-param version
+      if (error.message?.includes('does not exist') || error.code === '42883') {
+        const { error: err7 } = await supabase.rpc('upsert_visitor_visit', {
+          p_ip_hash: params.ip_hash,
+          p_state: params.state ?? null,
+          p_city: params.city ?? null,
+          p_country: params.country ?? null,
+          p_user_agent: params.user_agent ?? null,
+          p_session_id: params.session_id ?? null,
+          p_page: params.page || '/',
+        });
+        if (!err7) return;
+
+        // Neither RPC exists — direct upsert into visitors table
+        if (err7.message?.includes('does not exist') || err7.code === '42883') {
+          const { error: directErr } = await supabase.from('visitors').upsert({
+            ip_hash: params.ip_hash,
+            state: params.state ?? null,
+            region: params.state ?? null,
+            city: params.city ?? null,
+            country: params.country ?? null,
+            user_agent: params.user_agent ?? null,
+            session_id: params.session_id ?? null,
+            page_url: params.page_url ?? null,
+            referrer: params.referrer ?? null,
+            is_bot: params.is_bot ?? false,
+            last_visit: new Date().toISOString(),
+          }, { onConflict: 'ip_hash' });
+          if (directErr) {
+            console.error('[trackVisitByHash] direct upsert fallback failed:', directErr.message);
+            throw directErr;
+          }
+          return;
+        }
+        throw err7;
+      }
+      throw error;
     },
 
     /** Live visitors aggregated by state/city (for admin dashboard). */
@@ -413,116 +458,135 @@ export function createStorage(config: StorageConfig) {
       weekVisitors: number;
       monthVisitors: number;
       onlineNow: number;
-      recentVisitors: Visitor[];
+      recentVisitors: any[];
+      deviceBreakdown: { desktop: number; mobile: number; tablet: number; bot: number };
+      topCountries: Array<{ name: string; count: number }>;
     }> {
+      const empty = {
+        totalVisitors: 0, todayVisitors: 0, yesterdayVisitors: 0,
+        weekVisitors: 0, monthVisitors: 0, onlineNow: 0,
+        recentVisitors: [] as any[], deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0, bot: 0 },
+        topCountries: [] as Array<{ name: string; count: number }>,
+      };
       try {
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
         const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-        const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000); // 30 days ago, not first of month
+        const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
         const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
 
-        // Use COUNT queries for accurate totals - much more efficient than loading all data
         const todayISO = today.toISOString();
         const yesterdayISO = yesterday.toISOString();
         const weekAgoISO = weekAgo.toISOString();
         const monthAgoISO = monthAgo.toISOString();
         const fiveMinutesAgoISO = fiveMinutesAgo.toISOString();
 
-        // Get total count
-        const { count: totalVisitors, error: totalError } = await supabase
-          .from('visitors')
-          .select('*', { count: 'exact', head: true });
-        
-        if (totalError) {
-          console.error('[VISITOR_STATS] Error counting total visitors:', totalError);
-        }
+        // Determine which columns exist by checking if ip_hash/last_visit are available
+        // Try optimal query first (dedup + bot filter + last_visit); fall back to created_at
+        const hasDedup = true; // assume ip_hash column; if missing, fallback catches it
 
-        // Get today's count
-        const { count: todayVisitors, error: todayError } = await supabase
-          .from('visitors')
-          .select('*', { count: 'exact', head: true })
-          .gte('created_at', todayISO);
-        
-        if (todayError) {
-          console.error('[VISITOR_STATS] Error counting today visitors:', todayError);
-        }
+        const dateCol = 'last_visit'; // preferred; fallback to created_at below
 
-        // Get yesterday's count
-        const { count: yesterdayVisitors, error: yesterdayError } = await supabase
-          .from('visitors')
-          .select('*', { count: 'exact', head: true })
-          .gte('created_at', yesterdayISO)
-          .lt('created_at', todayISO);
-        
-        if (yesterdayError) {
-          console.error('[VISITOR_STATS] Error counting yesterday visitors:', yesterdayError);
-        }
-
-        // Get week's count
-        const { count: weekVisitors, error: weekError } = await supabase
-          .from('visitors')
-          .select('*', { count: 'exact', head: true })
-          .gte('created_at', weekAgoISO);
-        
-        if (weekError) {
-          console.error('[VISITOR_STATS] Error counting week visitors:', weekError);
-        }
-
-        // Get month's count (30 days)
-        const { count: monthVisitors, error: monthError } = await supabase
-          .from('visitors')
-          .select('*', { count: 'exact', head: true })
-          .gte('created_at', monthAgoISO);
-        
-        if (monthError) {
-          console.error('[VISITOR_STATS] Error counting month visitors:', monthError);
-        }
-
-        // Get online now count (last 5 minutes)
-        const { count: onlineNow, error: onlineError } = await supabase
-          .from('visitors')
-          .select('*', { count: 'exact', head: true })
-          .gte('created_at', fiveMinutesAgoISO);
-        
-        if (onlineError) {
-          console.error('[VISITOR_STATS] Error counting online visitors:', onlineError);
-        }
-
-        // Get recent visitors for display (only fetch what we need)
-        const { data: recentData, error: recentError } = await supabase
-          .from('visitors')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(50);
-        
-        const recentVisitors = recentError 
-          ? [] 
-          : (recentData || []).map((d: any) => this.mapVisitorFromDb(d));
-
-        const stats = {
-          totalVisitors: totalVisitors || 0,
-          todayVisitors: todayVisitors || 0,
-          yesterdayVisitors: yesterdayVisitors || 0,
-          weekVisitors: weekVisitors || 0,
-          monthVisitors: monthVisitors || 0,
-          onlineNow: onlineNow || 0,
-          recentVisitors,
+        const countQ = (extra?: (q: any) => any) => {
+          let q = supabase.from('visitors').select('*', { count: 'exact', head: true });
+          if (hasDedup) q = q.not('ip_hash', 'is', null);
+          // Exclude bots (safe even if column missing — PostgREST returns 0 matches instead of error)
+          q = q.or('is_bot.is.null,is_bot.eq.false');
+          if (extra) q = extra(q);
+          return q;
         };
 
-        return stats;
+        let [totalRes, todayRes, yesterdayRes, weekRes, monthRes, onlineRes] = await Promise.all([
+          countQ(),
+          countQ(q => q.gte(dateCol, todayISO)),
+          countQ(q => q.gte(dateCol, yesterdayISO).lt(dateCol, todayISO)),
+          countQ(q => q.gte(dateCol, weekAgoISO)),
+          countQ(q => q.gte(dateCol, monthAgoISO)),
+          countQ(q => q.gte(dateCol, fiveMinutesAgoISO)),
+        ]);
+
+        // If last_visit column doesn't exist, retry with created_at
+        if (totalRes.error?.message?.includes('column') || todayRes.error?.message?.includes('column')) {
+          console.warn('[VISITOR_STATS] last_visit/is_bot column missing, falling back to created_at');
+          const simpleQ = (extra?: (q: any) => any) => {
+            let q = supabase.from('visitors').select('*', { count: 'exact', head: true });
+            if (extra) q = extra(q);
+            return q;
+          };
+          [totalRes, todayRes, yesterdayRes, weekRes, monthRes, onlineRes] = await Promise.all([
+            simpleQ(),
+            simpleQ(q => q.gte('created_at', todayISO)),
+            simpleQ(q => q.gte('created_at', yesterdayISO).lt('created_at', todayISO)),
+            simpleQ(q => q.gte('created_at', weekAgoISO)),
+            simpleQ(q => q.gte('created_at', monthAgoISO)),
+            simpleQ(q => q.gte('created_at', fiveMinutesAgoISO)),
+          ]);
+        }
+
+        // Recent visitors for display
+        let recentData: any[] | null = null;
+        const recQ = await supabase.from('visitors').select('*')
+          .not('ip_hash', 'is', null)
+          .or('is_bot.is.null,is_bot.eq.false')
+          .order('last_visit', { ascending: false })
+          .limit(50);
+        if (recQ.error) {
+          // fallback: order by created_at, no bot/dedup filter
+          const fallback = await supabase.from('visitors').select('*')
+            .order('created_at', { ascending: false }).limit(50);
+          recentData = fallback.data;
+        } else {
+          recentData = recQ.data;
+        }
+
+        const recentVisitors = (recentData || []).map((d: any) => this.mapVisitorFromDb(d));
+
+        // Device + country from recent 500 rows
+        let sampleRows: any[] | null = null;
+        const sampQ = await supabase.from('visitors').select('user_agent,country')
+          .not('ip_hash', 'is', null)
+          .or('is_bot.is.null,is_bot.eq.false')
+          .order('last_visit', { ascending: false })
+          .limit(500);
+        sampleRows = sampQ.error ? [] : (sampQ.data || []);
+        if (sampQ.error) {
+          const fb = await supabase.from('visitors').select('user_agent,country')
+            .order('created_at', { ascending: false }).limit(500);
+          sampleRows = fb.data || [];
+        }
+
+        const device = { desktop: 0, mobile: 0, tablet: 0, bot: 0 };
+        const countryMap: Record<string, number> = {};
+        for (const row of sampleRows) {
+          const ua = (row.user_agent || '').toLowerCase();
+          if (/bot|crawl|spider|slurp/i.test(ua)) { device.bot++; }
+          else if (/ipad|tablet|kindle|playbook|silk/i.test(ua)) { device.tablet++; }
+          else if (/mobile|android|iphone|ipod|blackberry|opera mini|iemobile/i.test(ua)) { device.mobile++; }
+          else { device.desktop++; }
+          const c = row.country || 'Unknown';
+          countryMap[c] = (countryMap[c] || 0) + 1;
+        }
+
+        const topCountries = Object.entries(countryMap)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10)
+          .map(([name, count]) => ({ name, count }));
+
+        return {
+          totalVisitors: totalRes.count || 0,
+          todayVisitors: todayRes.count || 0,
+          yesterdayVisitors: yesterdayRes.count || 0,
+          weekVisitors: weekRes.count || 0,
+          monthVisitors: monthRes.count || 0,
+          onlineNow: onlineRes.count || 0,
+          recentVisitors,
+          deviceBreakdown: device,
+          topCountries,
+        };
       } catch (error: any) {
         console.error('[VISITOR_STATS] Unexpected error:', error);
-        return {
-          totalVisitors: 0,
-          todayVisitors: 0,
-          yesterdayVisitors: 0,
-          weekVisitors: 0,
-          monthVisitors: 0,
-          onlineNow: 0,
-          recentVisitors: [],
-        };
+        return empty;
       }
     },
 
@@ -649,12 +713,12 @@ export function createStorage(config: StorageConfig) {
       };
     },
 
-    mapVisitorFromDb(data: any): Visitor {
+    mapVisitorFromDb(data: any): Visitor & Record<string, any> {
       return {
         id: data.id,
         sessionId: data.session_id,
-        pageUrl: data.page_url,
-        referrer: data.referrer,
+        pageUrl: data.last_page_url || data.page_url,
+        referrer: data.last_referrer || data.referrer,
         userAgent: data.user_agent,
         ipAddress: data.ip_address,
         country: data.country,
@@ -662,11 +726,16 @@ export function createStorage(config: StorageConfig) {
         region: data.region,
         regionCode: data.region_code,
         city: data.city,
+        state: data.state,
         latitude: data.latitude,
         longitude: data.longitude,
         timezone: data.timezone,
         isp: data.isp,
         isProxy: data.is_proxy,
+        isBot: data.is_bot ?? false,
+        pagesViewed: data.pages_viewed ?? [],
+        lastVisit: data.last_visit ? new Date(data.last_visit) : null,
+        firstVisit: data.first_visit ? new Date(data.first_visit) : null,
         createdAt: data.created_at ? new Date(data.created_at) : null,
       };
     },
