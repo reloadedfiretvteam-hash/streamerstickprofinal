@@ -332,8 +332,13 @@ export function createStorage(config: StorageConfig) {
       });
       if (!error) return;
 
+      const isRpcMissing = (e: any) =>
+        e?.code === '42883' ||
+        e?.message?.includes('does not exist') ||
+        e?.message?.includes('Could not find');
+
       // RPC signature mismatch — try 7-param version
-      if (error.message?.includes('does not exist') || error.code === '42883') {
+      if (isRpcMissing(error)) {
         const { error: err7 } = await supabase.rpc('upsert_visitor_visit', {
           p_ip_hash: params.ip_hash,
           p_state: params.state ?? null,
@@ -346,7 +351,7 @@ export function createStorage(config: StorageConfig) {
         if (!err7) return;
 
         // Neither RPC exists — direct upsert into visitors table
-        if (err7.message?.includes('does not exist') || err7.code === '42883') {
+        if (isRpcMissing(err7)) {
           const { error: directErr } = await supabase.from('visitors').upsert({
             ip_hash: params.ip_hash,
             state: params.state ?? null,
@@ -368,6 +373,7 @@ export function createStorage(config: StorageConfig) {
         }
         throw err7;
       }
+      // Unknown RPC error — propagate
       throw error;
     },
 
