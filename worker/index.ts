@@ -32,6 +32,8 @@ export interface Env {
   ADMIN_USERNAME?: string;
   ADMIN_PASSWORD?: string;
   JWT_SECRET?: string;
+  /** Optional salt for hashing visitor IDs (recommended) */
+  VISITOR_HASH_SALT?: string;
   GITHUB_TOKEN?: string;
   OPENAI_API_KEY?: string;
   CLOUDFLARE_API_TOKEN?: string;
@@ -59,6 +61,33 @@ type LocationPagesIndex = {
 let LOCATION_CACHE: LocationPagesIndex | null = null;
 let LOCATION_CACHE_PROMISE: Promise<LocationPagesIndex | null> | null = null;
 const LOCATION_CACHE_TTL_MS = 10 * 60 * 1000;
+
+function parseCookies(cookieHeader: string | null): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!cookieHeader) return out;
+  const parts = cookieHeader.split(';');
+  for (const p of parts) {
+    const [k, ...rest] = p.trim().split('=');
+    if (!k) continue;
+    out[k] = decodeURIComponent(rest.join('=') || '');
+  }
+  return out;
+}
+
+function setCookieHeader(name: string, value: string, maxAgeSeconds: number): string {
+  return `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax; Secure; HttpOnly`;
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  const bytes = new Uint8Array(digest);
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function isBotUA(ua: string): boolean {
+  return /bot|crawler|spider|slurp|facebookexternalhit|twitterbot|linkedinbot|pinterest|discord|whatsapp|telegram/i.test(ua || '');
+}
 
 const CA_REGIONS = new Set(['ab', 'bc', 'mb', 'nb', 'nl', 'ns', 'nt', 'nu', 'on', 'pe', 'qc', 'sk', 'yt']);
 const US_REGIONS = new Set([
@@ -156,21 +185,43 @@ app.route('/api/admin/visitors', createVisitorRoutes());
 app.post('/api/track-visit', async (c) => {
   try {
     const body = await c.req.json().catch(() => ({}));
-    const ip_hash = body.ip_hash;
     const page = typeof body.page === 'string' ? body.page : '/';
-    if (!ip_hash || typeof ip_hash !== 'string') {
-      return c.json({ error: 'ip_hash required' }, 400);
+    const page_url = typeof body.page_url === 'string' ? body.page_url : null;
+    const referrer = typeof body.referrer === 'string' ? body.referrer : null;
+    const session_id = typeof body.session_id === 'string' ? body.session_id : null;
+    const ua = (typeof body.user_agent === 'string' ? body.user_agent : c.req.header('user-agent')) || '';
+
+    // Stable visitor cookie (unique visitor). If missing, create it.
+    const cookies = parseCookies(c.req.header('cookie'));
+    let vid = cookies['vid'];
+    let setCookie: string | null = null;
+    if (!vid) {
+      vid = crypto.randomUUID();
+      setCookie = setCookieHeader('vid', vid, 60 * 60 * 24 * 30);
     }
+
+    const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0] || 'unknown';
+    const salt = c.env.VISITOR_HASH_SALT || c.env.JWT_SECRET || 'streamstickpro';
+    const ip_hash =
+      typeof body.ip_hash === 'string' && body.ip_hash
+        ? body.ip_hash
+        : await sha256Hex(`vid:${vid}|salt:${salt}`) || await sha256Hex(`ip:${ip}|ua:${ua}|salt:${salt}`);
+
+    const cfData = (c.req.raw as any).cf || {};
     const storage = getStorage(c.env);
     await storage.trackVisitByHash({
       ip_hash,
-      state: body.state ?? null,
-      city: body.city ?? null,
-      country: body.country ?? null,
-      user_agent: body.user_agent ?? c.req.header('user-agent') ?? null,
-      session_id: body.session_id ?? null,
+      state: body.state ?? cfData.region ?? null,
+      city: body.city ?? cfData.city ?? null,
+      country: body.country ?? cfData.country ?? null,
+      user_agent: ua || null,
+      session_id,
       page,
+      page_url,
+      referrer,
+      is_bot: isBotUA(ua),
     });
+    if (setCookie) c.header('Set-Cookie', setCookie);
     return c.json({ ok: true });
   } catch (err: any) {
     console.error('[track-visit]', err?.message || err);
