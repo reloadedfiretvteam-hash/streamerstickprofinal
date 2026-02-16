@@ -350,9 +350,10 @@ export function createStorage(config: StorageConfig) {
         });
         if (!err7) return;
 
-        // Neither RPC exists — direct upsert into visitors table
+        // Neither RPC exists — direct insert using only original table columns
         if (isRpcMissing(err7)) {
-          const { error: directErr } = await supabase.from('visitors').upsert({
+          // Try with dedup columns first (migration applied)
+          const { error: upsertErr } = await supabase.from('visitors').upsert({
             ip_hash: params.ip_hash,
             state: params.state ?? null,
             region: params.state ?? null,
@@ -365,11 +366,29 @@ export function createStorage(config: StorageConfig) {
             is_bot: params.is_bot ?? false,
             last_visit: new Date().toISOString(),
           }, { onConflict: 'ip_hash' });
-          if (directErr) {
-            console.error('[trackVisitByHash] direct upsert fallback failed:', directErr.message);
-            throw directErr;
+          if (!upsertErr) return;
+
+          // ip_hash column missing — fallback to basic INSERT (original schema)
+          if (upsertErr.message?.includes('ip_hash') || upsertErr.message?.includes('column') || upsertErr.message?.includes('Could not find')) {
+            console.warn('[trackVisitByHash] ip_hash column missing, using basic insert');
+            const { error: insertErr } = await supabase.from('visitors').insert({
+              session_id: params.session_id ?? params.ip_hash,
+              page_url: params.page_url ?? null,
+              referrer: params.referrer ?? null,
+              user_agent: params.user_agent ?? null,
+              country: params.country ?? null,
+              city: params.city ?? null,
+              region: params.state ?? null,
+            });
+            if (insertErr) {
+              console.error('[trackVisitByHash] basic insert fallback failed:', insertErr.message);
+              throw insertErr;
+            }
+            return;
           }
-          return;
+
+          console.error('[trackVisitByHash] direct upsert fallback failed:', upsertErr.message);
+          throw upsertErr;
         }
         throw err7;
       }
