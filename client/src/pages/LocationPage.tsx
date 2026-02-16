@@ -44,6 +44,23 @@ const PAGE_TYPE_LABEL: Record<string, string> = {
   onn: "ONN Google TV",
 };
 
+function prettyLocationFromSlug(slug: string, country: string): string {
+  const s = (slug || "").trim();
+  if (!s) return "";
+  const parts = s.split("-").filter(Boolean);
+  if (parts.length < 2) {
+    return s.replace(/-/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+  }
+  const last = parts[parts.length - 1].toUpperCase();
+  const name = parts.slice(0, -1).join(" ").replace(/\b\w/g, (m) => m.toUpperCase());
+  const c = (country || "").toLowerCase();
+  if (c === "uk") {
+    // e.g. ripon-england → Ripon, England
+    return `${name}, ${last.charAt(0) + last.slice(1).toLowerCase()}`;
+  }
+  return `${name}, ${last}`;
+}
+
 export default function LocationPage() {
   const [, params] = useRoute("/l/:country/:pageType/:slug");
   const country = params?.country ?? "";
@@ -158,7 +175,7 @@ export default function LocationPage() {
 
   const countryLabel = COUNTRY_LABEL[page.country.toUpperCase()] || page.country;
   const typeLabel = PAGE_TYPE_LABEL[page.page_type] || page.page_type;
-  const locationLabel = page.location || page.region || slug;
+  const locationLabel = page.location || page.region || prettyLocationFromSlug(slug, country);
   const displayH1 = (page.h1 || "").replace(/\[LOCATION\]/g, locationLabel);
 
   const breadcrumbs = [

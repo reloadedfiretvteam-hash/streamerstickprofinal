@@ -40,6 +40,7 @@ export function MobileNav({ scrollToShop, scrollToAbout, scrollToFaq, onSupportC
     { label: "Tutorials", icon: Play, action: () => { setLocation("/tutorials"); } },
     { label: "Fire Stick Devices", icon: Tv, action: () => { setLocation("/firestick-devices"); } },
     { label: "Jailbroken Fire Sticks", icon: Tv, action: () => { setLocation("/jailbroken-fire-sticks"); } },
+    { label: "Locations", icon: ChevronRight, action: () => { setLocation("/locations"); } },
     { label: "Shop", icon: Tv, action: () => navigateToSection("shop") },
     { label: "How It Works", icon: ChevronRight, action: () => navigateToSection("about") },
     { label: "Blog", icon: BookOpen, action: () => setLocation("/blog") },

@@ -34,6 +34,7 @@ const FirestickDevices = lazy(() => import("@/pages/FirestickDevices"));
 const BestIptvFirestick = lazy(() => import("@/pages/BestIptvFirestick"));
 const IptvMediaPlayers = lazy(() => import("@/pages/IptvMediaPlayers"));
 const LocationPage = lazy(() => import("@/pages/LocationPage"));
+const LocationsHub = lazy(() => import("@/pages/LocationsHub"));
 const Resources = lazy(() => import("@/pages/Resources"));
 const Trial36hr = lazy(() => import("@/pages/Trial36hr"));
 const Pricing = lazy(() => import("@/pages/Pricing"));
@@ -120,6 +121,7 @@ function Router() {
         <Route path="/seo-ads" component={SeoAds} />
         <Route path="/seo-ads/:slug" component={SeoAds} />
         <Route path="/l/:country/:pageType/:slug" component={LocationPage} />
+        <Route path="/locations" component={LocationsHub} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

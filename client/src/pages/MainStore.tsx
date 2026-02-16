@@ -514,6 +514,7 @@ export default function MainStore() {
             <Link href="/firestick-devices"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Devices</span></Link>
             <Link href="/iptv-media-players"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Media Players</span></Link>
             <Link href="/tutorials"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Tutorials</span></Link>
+            <Link href="/locations"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Locations</span></Link>
             <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToAbout} data-testid="nav-how-it-works" aria-label="Scroll to How It Works section">How It Works</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToShop} data-testid="nav-shop" aria-label="Scroll to Shop section">Shop</Button>
             <Button 
@@ -600,7 +601,7 @@ export default function MainStore() {
               transition={{ duration: 0.5, delay: 0.15 }}
               className="text-base sm:text-lg text-gray-300 mb-2"
             >
-              247K Users | 99.9% Uptime | McAfee Secure
+              Secure checkout | Fast setup | Support when you need it
             </motion.p>
             <motion.p 
               initial={{ opacity: 0, y: 10 }}

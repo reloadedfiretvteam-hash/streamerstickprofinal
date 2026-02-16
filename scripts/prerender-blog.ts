@@ -115,9 +115,12 @@ function renderMarkdownLite(raw: string): { html: string; toc: { id: string; tex
 }
 
 async function fetchBlogPosts(): Promise<BlogPost[]> {
-  // Hardcoded Supabase config for build-time prerendering (anon key is public)
-  const supabaseUrl = "https://emlqlmfzqsnqokrqvmcm.supabase.co";
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg";
+  // Build-time Supabase config for prerendering.
+  // Prefer env vars; fall back to the public anon key (safe, but env looks cleaner in repo).
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || "https://emlqlmfzqsnqokrqvmcm.supabase.co";
+  const supabaseKey =
+    process.env.VITE_SUPABASE_ANON_KEY ||
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg";
   
   console.log(`   Using Supabase URL: ${supabaseUrl.substring(0, 40)}...`);
 
@@ -166,7 +169,6 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
   // Mid-article product advertisement (proper HTML - not inside <p>)
   const midArticleAd = `<div class="my-8 p-6 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl border border-blue-500/30">
       <div class="flex flex-col md:flex-row items-center gap-4">
-        <div class="text-4xl">🔥</div>
         <div class="flex-1 text-center md:text-left">
           <h4 class="text-lg font-bold text-orange-400">Limited Time Offer!</h4>
           <p class="text-gray-300 text-sm">Fire Sticks with 1 Year Live TV - Starting at just $130</p>
@@ -268,9 +270,7 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
   <div id="root">
     <header class="bg-gray-900 border-b border-white/10 px-4 py-4">
       <div class="max-w-6xl mx-auto flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2 text-xl font-bold text-orange-500">
-          🔥 StreamStickPro
-        </a>
+        <a href="/" class="flex items-center gap-2 text-xl font-bold text-orange-500">StreamStickPro</a>
         <nav class="flex gap-4">
           <a href="/?section=shop" class="text-gray-300 hover:text-white">Shop</a>
           <a href="/blog" class="text-gray-300 hover:text-white">Blog</a>
@@ -315,7 +315,7 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
           <h3 class="text-xl font-bold mb-2">Ready to Cut the Cord?</h3>
           <p class="text-gray-300 mb-4">Get streaming in 10 minutes with our pre-configured Fire Sticks and IPTV subscriptions.</p>
           <a href="/?section=shop" class="inline-block bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg">
-            🔥 Shop Now
+            Shop Now
           </a>
         </div>
       </article>
@@ -323,7 +323,7 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
     
     <footer class="bg-gray-900 border-t border-white/10 py-8 mt-12">
       <div class="max-w-6xl mx-auto px-4 text-center text-gray-400">
-        <p>&copy; 2025 StreamStickPro. All rights reserved.</p>
+        <p>&copy; ${new Date().getFullYear()} StreamStickPro. All rights reserved.</p>
         <div class="mt-4 flex flex-wrap justify-center gap-4">
           <a href="/" class="hover:text-orange-400">Home</a>
           <a href="/shop" class="hover:text-orange-400">Shop</a>
@@ -389,9 +389,7 @@ function generateBlogIndexHTML(posts: BlogPost[], cssPath: string, jsPath: strin
   <div id="root">
     <header class="bg-gray-900 border-b border-white/10 px-4 py-4">
       <div class="max-w-6xl mx-auto flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2 text-xl font-bold text-orange-500">
-          🔥 StreamStickPro
-        </a>
+        <a href="/" class="flex items-center gap-2 text-xl font-bold text-orange-500">StreamStickPro</a>
         <nav class="flex gap-4">
           <a href="/?section=shop" class="text-gray-300 hover:text-white">Shop</a>
           <a href="/blog" class="text-orange-500">Blog</a>
@@ -432,7 +430,7 @@ function generateBlogIndexHTML(posts: BlogPost[], cssPath: string, jsPath: strin
     
     <footer class="bg-gray-900 border-t border-white/10 py-8 mt-12">
       <div class="max-w-6xl mx-auto px-4 text-center text-gray-400">
-        <p>&copy; 2025 StreamStickPro. All rights reserved.</p>
+        <p>&copy; ${new Date().getFullYear()} StreamStickPro. All rights reserved.</p>
       </div>
     </footer>
   </div>
@@ -447,7 +445,8 @@ function generateSitemap(posts: BlogPost[]): string {
   const staticPages = [
     { url: "/", priority: "1.0", changefreq: "weekly" },
     { url: "/blog", priority: "0.9", changefreq: "daily" },
-    { url: "/checkout", priority: "0.8", changefreq: "monthly" },
+    // Do not include checkout in sitemap (noindex + disallowed)
+    { url: "/locations", priority: "0.85", changefreq: "daily" },
   ];
   
   const staticUrls = staticPages.map(page => `

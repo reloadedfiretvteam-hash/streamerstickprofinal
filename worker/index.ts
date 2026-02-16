@@ -50,24 +50,39 @@ type LocationPagesIndex = {
   loadedAt: number;
   list: LocationStaticPage[];
   byPath: Map<string, LocationStaticPage>;
-  byRegionKey: Map<string, string[]>; // key: country|pageType|region -> list of paths
+  byRegionKey: Map<string, string[]>; // key: country|pageType|region -> sample list of paths
+  regionCount: Map<string, number>; // key: country|pageType|region -> total count
+  countryCount: Map<string, number>; // key: country -> total count
+  countryTypeCount: Map<string, number>; // key: country|pageType -> total count
 };
 
 let LOCATION_CACHE: LocationPagesIndex | null = null;
 let LOCATION_CACHE_PROMISE: Promise<LocationPagesIndex | null> | null = null;
 const LOCATION_CACHE_TTL_MS = 10 * 60 * 1000;
 
-function regionFromSlug(slug: string): string {
+const CA_REGIONS = new Set(['ab', 'bc', 'mb', 'nb', 'nl', 'ns', 'nt', 'nu', 'on', 'pe', 'qc', 'sk', 'yt']);
+const US_REGIONS = new Set([
+  'al','ak','az','ar','ca','co','ct','de','fl','ga','hi','id','il','in','ia','ks','ky','la','me','md','ma','mi','mn','ms','mo','mt',
+  'ne','nv','nh','nj','nm','ny','nc','nd','oh','ok','or','pa','ri','sc','sd','tn','tx','ut','vt','va','wa','wv','wi','wy','dc',
+]);
+const UK_REGIONS = new Set(['england', 'scotland', 'wales', 'ni']);
+
+function regionFromSlug(country: string, slug: string): string {
   const s = (slug || '').toLowerCase();
   const parts = s.split('-').filter(Boolean);
   if (parts.length < 2) return '';
   const last = parts[parts.length - 1];
-  // CA: ab/bc/... ; US: al/tx/... ; UK: england/scotland/wales/ni
-  return last.length <= 20 ? last : '';
+  if (last.length > 20) return '';
+  const c = (country || '').toLowerCase();
+  if (c === 'ca') return CA_REGIONS.has(last) ? last : '';
+  if (c === 'usa' || c === 'us') return US_REGIONS.has(last) ? last : '';
+  if (c === 'uk') return UK_REGIONS.has(last) ? last : '';
+  // fallback: accept last token as region if it looks reasonable
+  return last;
 }
 
 function regionKey(country: string, pageType: string, slug: string): string {
-  return `${(country || '').toLowerCase()}|${(pageType || '').toLowerCase()}|${regionFromSlug(slug)}`;
+  return `${(country || '').toLowerCase()}|${(pageType || '').toLowerCase()}|${regionFromSlug(country, slug)}`;
 }
 
 async function getLocationPagesIndex(c: any): Promise<LocationPagesIndex | null> {
@@ -82,6 +97,9 @@ async function getLocationPagesIndex(c: any): Promise<LocationPagesIndex | null>
       const list = (await assetRes.json()) as LocationStaticPage[];
       const byPath = new Map<string, LocationStaticPage>();
       const byRegionKey = new Map<string, string[]>();
+      const regionCount = new Map<string, number>();
+      const countryCount = new Map<string, number>();
+      const countryTypeCount = new Map<string, number>();
       for (const p of list) {
         if (!p?.path) continue;
         byPath.set(p.path, p);
@@ -91,12 +109,20 @@ async function getLocationPagesIndex(c: any): Promise<LocationPagesIndex | null>
         const pageType = seg[2] || '';
         const slug = seg[3] || '';
         const k = regionKey(country, pageType, slug);
-        if (k.endsWith('|')) continue;
-        const arr = byRegionKey.get(k) || [];
-        if (arr.length < 400) arr.push(p.path); // cap to avoid unbounded memory per region
-        byRegionKey.set(k, arr);
+
+        const cKey = (country || '').toLowerCase();
+        countryCount.set(cKey, (countryCount.get(cKey) || 0) + 1);
+        const ctKey = `${cKey}|${(pageType || '').toLowerCase()}`;
+        countryTypeCount.set(ctKey, (countryTypeCount.get(ctKey) || 0) + 1);
+
+        if (!k.endsWith('|')) {
+          regionCount.set(k, (regionCount.get(k) || 0) + 1);
+          const arr = byRegionKey.get(k) || [];
+          if (arr.length < 80) arr.push(p.path); // sample cap (enough for related links + hubs)
+          byRegionKey.set(k, arr);
+        }
       }
-      const idx: LocationPagesIndex = { loadedAt: now, list, byPath, byRegionKey };
+      const idx: LocationPagesIndex = { loadedAt: now, list, byPath, byRegionKey, regionCount, countryCount, countryTypeCount };
       LOCATION_CACHE = idx;
       return idx;
     } catch {
@@ -272,6 +298,10 @@ app.get('/api/seo-related/:country/:pageType/:slug', async (c) => {
 });
 
 app.get('/api/debug', async (c) => {
+  // This endpoint is useful during development but should not be exposed in production.
+  if ((c.env.NODE_ENV || '').toLowerCase() === 'production') {
+    return c.json({ error: 'Not found' }, 404);
+  }
   const supabaseUrl = c.env.VITE_SUPABASE_URL || '';
   const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY || '';
   
@@ -325,6 +355,56 @@ app.get('/api/debug', async (c) => {
     },
     nodeEnv: c.env.NODE_ENV || 'not set',
   });
+});
+
+// Locations hub data for internal linking at scale (kept small + cacheable)
+app.get('/api/locations/hub', async (c) => {
+  const country = (c.req.query('country') || '').toLowerCase();
+  const pageType = (c.req.query('pageType') || '').toLowerCase();
+  const region = (c.req.query('region') || '').toLowerCase();
+  const idx = await getLocationPagesIndex(c);
+  if (!idx) return c.json({ countries: [], pageTypes: [], regions: [], cities: [] }, 200, { 'Cache-Control': 'public, max-age=300' });
+
+  const cacheHeaders = { 'Cache-Control': 'public, max-age=3600, s-maxage=86400' };
+
+  if (!country) {
+    const countries = Array.from(idx.countryCount.entries())
+      .map(([code, count]) => ({ code, count }))
+      .sort((a, b) => b.count - a.count);
+    return c.json({ countries }, 200, cacheHeaders);
+  }
+
+  if (country && !pageType) {
+    const pageTypes = Array.from(idx.countryTypeCount.entries())
+      .filter(([k]) => k.startsWith(country + '|'))
+      .map(([k, count]) => ({ pageType: k.split('|')[1], count }))
+      .sort((a, b) => b.count - a.count);
+    return c.json({ country, pageTypes }, 200, cacheHeaders);
+  }
+
+  if (country && pageType && !region) {
+    const regions = Array.from(idx.regionCount.entries())
+      .filter(([k]) => k.startsWith(`${country}|${pageType}|`))
+      .map(([k, count]) => {
+        const parts = k.split('|');
+        const r = parts[2] || '';
+        const sample = (idx.byRegionKey.get(k) || []).slice(0, 5).map((p) => {
+          const entry = idx.byPath.get(p);
+          return { url: p, title: entry?.h || entry?.t || p };
+        });
+        return { region: r, count, sample };
+      })
+      .sort((a, b) => b.count - a.count);
+    return c.json({ country, pageType, regions }, 200, cacheHeaders);
+  }
+
+  const key = `${country}|${pageType}|${region}`;
+  const paths = (idx.byRegionKey.get(key) || []).slice(0, 60);
+  const cities = paths.map((p) => {
+    const entry = idx.byPath.get(p);
+    return { url: p, title: entry?.h || entry?.t || p };
+  });
+  return c.json({ country, pageType, region, cities }, 200, cacheHeaders);
 });
 
 // Cron trigger handler for email campaigns (called every 6 hours)
@@ -623,6 +703,7 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/', priority: '1.0', changefreq: 'daily' },
   { url: '/shop', priority: '0.9', changefreq: 'daily' },
   { url: '/blog', priority: '0.9', changefreq: 'daily' },
+  { url: '/locations', priority: '0.85', changefreq: 'daily' },
   { url: '/36hr-trial', priority: '0.95', changefreq: 'daily' },
   { url: '/pricing', priority: '0.9', changefreq: 'weekly' },
   { url: '/jailbroken-fire-sticks', priority: '0.9', changefreq: 'weekly' },
