@@ -61,9 +61,11 @@ export function setPageMeta(options: {
   noindex?: boolean;
   ogImage?: string;
   type?: 'website' | 'article';
+  publishedTime?: string;
+  modifiedTime?: string;
 }): void {
   if (typeof document === 'undefined') return;
-  const { title, description, path, noindex, ogImage, type = 'website' } = options;
+  const { title, description, path, noindex, ogImage, type = 'website', publishedTime, modifiedTime } = options;
   const fullTitle = title.includes('|') ? truncateTitle(title, '') : truncateTitle(title, ' | StreamStick Pro');
   const safeDesc = truncateMetaDescription(description);
   document.title = fullTitle;
@@ -73,14 +75,24 @@ export function setPageMeta(options: {
   setMeta('og:description', safeDesc, true);
   setMeta('og:url', url, true);
   setMeta('og:type', type, true);
+  setMeta('og:site_name', 'StreamStickPro', true);
   setMeta('og:image', ogImage || `${SITE_URL}/opengraph.jpg`, true);
   setMeta('twitter:card', 'summary_large_image');
   setMeta('twitter:title', fullTitle);
   setMeta('twitter:description', safeDesc);
   setMeta('twitter:image', ogImage || `${SITE_URL}/opengraph.jpg`);
+  if (publishedTime) setMeta('article:published_time', publishedTime, true);
+  if (modifiedTime) setMeta('article:modified_time', modifiedTime, true);
   let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement;
   if (noindex) {
     if (!robots) { robots = document.createElement('meta'); robots.setAttribute('name', 'robots'); document.head.appendChild(robots); }
     robots.content = 'noindex, nofollow';
+  } else if (!robots) {
+    robots = document.createElement('meta');
+    robots.setAttribute('name', 'robots');
+    robots.content = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+    document.head.appendChild(robots);
+  } else if (!robots.content || robots.content === 'noindex, nofollow') {
+    robots.content = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
   }
 }

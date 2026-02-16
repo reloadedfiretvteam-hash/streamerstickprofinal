@@ -169,16 +169,19 @@ export function BlogPostSchema({
 
     const articleSchema = {
       "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": title,
+      "@type": "BlogPosting",
+      "@id": window.location.href + '#article',
+      "headline": title.slice(0, 110),
       "description": description,
       "image": image || "https://streamstickpro.com/opengraph.jpg",
       "author": {
         "@type": "Organization",
+        "@id": "https://streamstickpro.com/#organization",
         "name": author
       },
       "publisher": {
         "@type": "Organization",
+        "@id": "https://streamstickpro.com/#organization",
         "name": "StreamStickPro",
         "logo": {
           "@type": "ImageObject",
@@ -187,10 +190,17 @@ export function BlogPostSchema({
       },
       "datePublished": datePublished,
       "dateModified": dateModified || datePublished,
+      "isPartOf": { "@id": "https://streamstickpro.com/#website" },
       "mainEntityOfPage": {
         "@type": "WebPage",
         "@id": window.location.href
-      }
+      },
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": ["h1", ".lead", "article p:first-of-type"]
+      },
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true
     };
 
     const script = document.createElement('script');
