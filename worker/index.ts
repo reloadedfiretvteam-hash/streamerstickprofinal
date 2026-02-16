@@ -921,6 +921,58 @@ app.get('/sitemap.xml', async (c) => {
   });
 });
 
+// ── IndexNow key file (plain text, not SPA HTML) ──
+app.get('/3b1a52f5f41a4138b1f21c3265180f44.txt', (c) => {
+  return c.text('3b1a52f5f41a4138b1f21c3265180f44', 200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=86400' });
+});
+
+// ── IndexNow bulk URL submission ──
+app.post('/api/indexnow/ping', async (c) => {
+  try {
+    const body = await c.req.json().catch(() => ({}));
+    const urls: string[] = Array.isArray(body.urls) ? body.urls.slice(0, 10000) : [];
+    if (!urls.length) return c.json({ error: 'urls array required' }, 400);
+    const key = '3b1a52f5f41a4138b1f21c3265180f44';
+    const payload = { host: 'streamstickpro.com', key, keyLocation: `https://streamstickpro.com/${key}.txt`, urlList: urls };
+    const resp = await fetch('https://api.indexnow.org/indexnow', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify(payload),
+    });
+    return c.json({ submitted: urls.length, status: resp.status, ok: resp.status >= 200 && resp.status < 300 });
+  } catch (err: any) {
+    return c.json({ error: err.message }, 500);
+  }
+});
+
+// ── Per-page SEO meta for SPA pages (critical: Googlebot sees unique meta per page) ──
+const PAGE_META: Record<string, { title: string; description: string; noindex?: boolean }> = {
+  '/': { title: 'IPTV Fire Stick 2026 | 18K+ Channels, No Buffer | StreamStick Pro', description: 'Best IPTV for Fire Stick 2026: 18,000+ live channels, VOD movies, 24/7 support. Free 36-hour trial. Jailbroken Fire Sticks and ONN Google TV included.' },
+  '/shop': { title: 'Shop IPTV Subscriptions & Fire Sticks | StreamStick Pro', description: 'Buy IPTV subscriptions, jailbroken Fire Sticks, and ONN Google TV devices. 18,000+ channels, instant setup, 24/7 support. Shop StreamStickPro now.' },
+  '/blog': { title: 'IPTV & Streaming Blog | Guides, News, Tips | StreamStick Pro', description: 'Expert IPTV guides, Fire Stick tutorials, streaming tips, and cord-cutting news. Updated weekly by StreamStickPro.' },
+  '/locations': { title: 'IPTV Service by City & Region | USA, Canada, UK | StreamStick Pro', description: 'Find IPTV service in your city. StreamStickPro covers 40,000+ locations across USA, Canada, and UK. Local guides, setup help, free trial.' },
+  '/iptv-services': { title: 'Best IPTV Service 2026 | 18K+ Channels | StreamStick Pro', description: 'StreamStickPro IPTV: 18,000+ live channels, 100,000+ VOD, EPG guide, catch-up TV. Works on Fire Stick, Google TV, Smart TVs. Free 36-hour trial.' },
+  '/jailbroken-fire-sticks': { title: 'Jailbroken Fire Sticks 2026 | Pre-Loaded, Ready to Stream | StreamStick Pro', description: 'Buy jailbroken Fire Sticks pre-loaded with IPTV, Kodi, Stremio, TiviMate. 18K+ channels, plug and play. Ships fast to USA, Canada, UK.' },
+  '/onn-google-tv': { title: 'ONN Google TV IPTV Setup 2026 | StreamStick Pro', description: 'Set up IPTV on ONN Google TV in minutes. 18,000+ channels, TiviMate & Smarters Pro compatible. Step-by-step guide by StreamStickPro.' },
+  '/36hr-trial': { title: 'Free 36-Hour IPTV Trial | 18K+ Channels | StreamStick Pro', description: 'Try StreamStickPro free for 36 hours. 18,000+ live channels, VOD, EPG guide. No credit card required. Instant access.' },
+  '/pricing': { title: 'IPTV Pricing & Plans 2026 | StreamStick Pro', description: 'StreamStickPro IPTV pricing: affordable monthly and yearly plans. 18,000+ channels, 4K quality, multi-device support. Compare plans.' },
+  '/iptv-firestick': { title: 'IPTV for Fire Stick 2026 | Setup Guide | StreamStick Pro', description: 'How to set up IPTV on Amazon Fire Stick. Step-by-step guide for IPTV Smarters Pro, TiviMate, and more. 18K+ channels with StreamStickPro.' },
+  '/best-iptv-firestick': { title: 'Best IPTV for Fire Stick 2026 | Top Picks | StreamStick Pro', description: 'Best IPTV services for Amazon Fire Stick in 2026. Compare features, channels, prices. StreamStickPro rated #1 with 18K+ channels.' },
+  '/firestick-devices': { title: 'Fire Stick Devices for IPTV 2026 | StreamStick Pro', description: 'Best Fire Stick devices for IPTV streaming in 2026. Fire Stick 4K Max, Lite, and pre-loaded jailbroken options compared.' },
+  '/iptv-media-players': { title: 'Best IPTV Media Players 2026 | Apps & Devices | StreamStick Pro', description: 'Top IPTV media players and apps: TiviMate, IPTV Smarters Pro, Kodi, Perfect Player, VLC. Setup guides and comparisons.' },
+  '/iptv-smarters-pro': { title: 'IPTV Smarters Pro Setup Guide 2026 | StreamStick Pro', description: 'Complete IPTV Smarters Pro setup guide. Install on Fire Stick, Android, iOS. Add StreamStickPro credentials and start streaming 18K+ channels.' },
+  '/tivimate': { title: 'TiviMate IPTV Player Setup 2026 | StreamStick Pro', description: 'TiviMate setup guide for IPTV. Install on Fire Stick and Android TV. EPG, catch-up, multi-view. Best settings for StreamStickPro.' },
+  '/tutorials': { title: 'IPTV & Fire Stick Tutorials | StreamStick Pro', description: 'Step-by-step IPTV tutorials: Fire Stick setup, app installation, troubleshooting, VPN guides. StreamStickPro video and text guides.' },
+  '/resources': { title: 'IPTV Resources & Tools | StreamStick Pro', description: 'IPTV resources, tools, speed tests, VPN guides, and troubleshooting. Everything you need for the best streaming experience.' },
+  '/ultimate-iptv-catalog-2026': { title: 'Ultimate IPTV Channel Catalog 2026 | 93K+ Channels | StreamStick Pro', description: 'Explore the ultimate IPTV channel catalog: 93,000+ channels from 150+ countries. Search by country, genre, language. StreamStickPro.' },
+  '/tools/catalog': { title: 'IPTV Tools & Utilities | StreamStick Pro', description: 'Free IPTV tools: speed test, M3U validator, EPG checker, channel finder. StreamStickPro utilities for optimal streaming.' },
+  '/terms': { title: 'Terms of Service | StreamStick Pro', description: 'StreamStickPro terms of service. Read our policies on IPTV subscriptions, Fire Stick purchases, refunds, and account usage.' },
+  '/privacy': { title: 'Privacy Policy | StreamStick Pro', description: 'StreamStickPro privacy policy. How we collect, use, and protect your personal information. GDPR and CCPA compliant.' },
+  '/refund': { title: 'Refund Policy | StreamStick Pro', description: 'StreamStickPro refund policy. 7-day money-back guarantee on IPTV subscriptions. How to request a refund.' },
+  '/checkout': { title: 'Checkout | StreamStick Pro', description: 'Complete your StreamStickPro purchase.', noindex: true },
+  '/success': { title: 'Order Confirmed | StreamStick Pro', description: 'Your StreamStickPro order has been confirmed.', noindex: true },
+};
+
 // Security headers for all responses
 const SECURITY_HEADERS: Record<string, string> = {
   'X-Content-Type-Options': 'nosniff',
@@ -933,13 +985,50 @@ function applySecurityHeaders(res: Response): Response {
   return next;
 }
 
+/** Inject per-page meta tags into the SPA shell so Googlebot sees unique title/canonical/description per URL. */
+function injectMeta(html: string, pathname: string): string {
+  const base = 'https://streamstickpro.com';
+  const meta = PAGE_META[pathname];
+  if (!meta) {
+    // Unknown page — at minimum fix the canonical to point to THIS page, not homepage
+    const canon = `${base}${pathname}`;
+    return html
+      .replace(/<link[^>]*rel=["']canonical["'][^>]*>/i, `<link rel="canonical" href="${canon}">`)
+      .replace(/<meta[^>]*property=["']og:url["'][^>]*>/i, `<meta property="og:url" content="${canon}">`);
+  }
+  const canon = `${base}${pathname}`;
+  const titleSafe = escapeHtml(meta.title);
+  const descSafe = escapeHtml(meta.description);
+  const robotsContent = meta.noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+
+  let out = html;
+  out = out.replace(/<title>[^<]*<\/title>/i, `<title>${titleSafe}</title>`);
+  out = out.replace(/<link[^>]*rel=["']canonical["'][^>]*>/i, `<link rel="canonical" href="${canon}">`);
+  out = out.replace(/<meta[^>]*name=["']description["'][^>]*>/i, `<meta name="description" content="${descSafe}">`);
+  out = out.replace(/<meta[^>]*name=["']robots["'][^>]*>/i, `<meta name="robots" content="${robotsContent}">`);
+  out = out.replace(/<meta[^>]*property=["']og:title["'][^>]*>/i, `<meta property="og:title" content="${titleSafe}">`);
+  out = out.replace(/<meta[^>]*property=["']og:description["'][^>]*>/i, `<meta property="og:description" content="${descSafe}">`);
+  out = out.replace(/<meta[^>]*property=["']og:url["'][^>]*>/i, `<meta property="og:url" content="${canon}">`);
+  return out;
+}
+
 app.get('*', async (c) => {
+  const pathname = new URL(c.req.url).pathname;
+
   try {
     const res = await c.env.ASSETS.fetch(c.req.raw);
-    return applySecurityHeaders(res);
+    // If ASSETS served a real file (not index.html fallback), return it directly
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('text/html')) return applySecurityHeaders(res);
+    // For HTML responses, inject correct meta tags
+    const html = await res.text();
+    const fixed = injectMeta(html, pathname);
+    return applySecurityHeaders(new Response(fixed, { status: res.status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }));
   } catch {
     const fallback = await c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
-    return applySecurityHeaders(fallback);
+    const html = await fallback.text();
+    const fixed = injectMeta(html, pathname);
+    return applySecurityHeaders(new Response(fixed, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }));
   }
 });
 
