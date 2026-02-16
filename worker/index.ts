@@ -42,6 +42,73 @@ export interface Env {
 
 const app = new Hono<{ Bindings: Env }>();
 
+// --- Location pages static fallback cache (critical for crawl/index stability) ---
+// Without caching, repeatedly fetching + parsing location-pages.json can exceed Worker CPU/memory limits
+// and cause 503 "Worker exceeded resource limits" for Googlebot across /l/*.
+type LocationStaticPage = { path: string; t: string; d: string; h: string };
+type LocationPagesIndex = {
+  loadedAt: number;
+  list: LocationStaticPage[];
+  byPath: Map<string, LocationStaticPage>;
+  byRegionKey: Map<string, string[]>; // key: country|pageType|region -> list of paths
+};
+
+let LOCATION_CACHE: LocationPagesIndex | null = null;
+let LOCATION_CACHE_PROMISE: Promise<LocationPagesIndex | null> | null = null;
+const LOCATION_CACHE_TTL_MS = 10 * 60 * 1000;
+
+function regionFromSlug(slug: string): string {
+  const s = (slug || '').toLowerCase();
+  const parts = s.split('-').filter(Boolean);
+  if (parts.length < 2) return '';
+  const last = parts[parts.length - 1];
+  // CA: ab/bc/... ; US: al/tx/... ; UK: england/scotland/wales/ni
+  return last.length <= 20 ? last : '';
+}
+
+function regionKey(country: string, pageType: string, slug: string): string {
+  return `${(country || '').toLowerCase()}|${(pageType || '').toLowerCase()}|${regionFromSlug(slug)}`;
+}
+
+async function getLocationPagesIndex(c: any): Promise<LocationPagesIndex | null> {
+  const now = Date.now();
+  if (LOCATION_CACHE && now - LOCATION_CACHE.loadedAt < LOCATION_CACHE_TTL_MS) return LOCATION_CACHE;
+  if (LOCATION_CACHE_PROMISE) return LOCATION_CACHE_PROMISE;
+
+  LOCATION_CACHE_PROMISE = (async () => {
+    try {
+      const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
+      if (!assetRes.ok) return null;
+      const list = (await assetRes.json()) as LocationStaticPage[];
+      const byPath = new Map<string, LocationStaticPage>();
+      const byRegionKey = new Map<string, string[]>();
+      for (const p of list) {
+        if (!p?.path) continue;
+        byPath.set(p.path, p);
+        // /l/{country}/{pageType}/{slug}
+        const seg = p.path.split('/').filter(Boolean);
+        const country = seg[1] || '';
+        const pageType = seg[2] || '';
+        const slug = seg[3] || '';
+        const k = regionKey(country, pageType, slug);
+        if (k.endsWith('|')) continue;
+        const arr = byRegionKey.get(k) || [];
+        if (arr.length < 400) arr.push(p.path); // cap to avoid unbounded memory per region
+        byRegionKey.set(k, arr);
+      }
+      const idx: LocationPagesIndex = { loadedAt: now, list, byPath, byRegionKey };
+      LOCATION_CACHE = idx;
+      return idx;
+    } catch {
+      return null;
+    } finally {
+      LOCATION_CACHE_PROMISE = null;
+    }
+  })();
+
+  return LOCATION_CACHE_PROMISE;
+}
+
 app.use('*', cors({
   origin: ['https://streamstickpro.com', 'https://www.streamstickpro.com', 'https://secure.streamstickpro.com'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -156,23 +223,20 @@ app.get('/api/seo-page/:country/:pageType/:slug', async (c) => {
     let page = await storage.getSeoPageByPath(country, pageType, slug);
     if (!page) {
       try {
-        const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
-        if (assetRes.ok) {
-          const list = (await assetRes.json()) as { path: string; t: string; d: string; h: string }[];
-          const staticPage = list.find((p) => p.path === path);
-          if (staticPage) {
-            page = {
-              country: country.toUpperCase(),
-              page_type: pageType,
-              slug,
-              title: staticPage.t,
-              meta_description: staticPage.d,
-              h1: staticPage.h,
-              p1_snippet: staticPage.d,
-              internal_links: [],
-              faq_json: [],
-            };
-          }
+        const idx = await getLocationPagesIndex(c);
+        const staticPage = idx?.byPath.get(path);
+        if (staticPage) {
+          page = {
+            country: country.toUpperCase(),
+            page_type: pageType,
+            slug,
+            title: staticPage.t,
+            meta_description: staticPage.d,
+            h1: staticPage.h,
+            p1_snippet: staticPage.d,
+            internal_links: [],
+            faq_json: [],
+          };
         }
       } catch {
         // ignore
@@ -284,14 +348,11 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
         faqJson = page.faq_json.map((f: any) => ({ question: f.question || f.q || '', answer: f.answer || f.a || '' })).filter((f: any) => f.question && f.answer);
       }
     } else {
-      const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
-      if (assetRes.ok) {
-        const list = (await assetRes.json()) as { path: string; t: string; d: string; h: string }[];
-        const staticPage = list.find((p) => p.path === path);
-        if (staticPage) {
-          title = staticPage.t;
-          desc = (staticPage.d || '').trim().substring(0, 160) || 'IPTV and Fire Stick guides for your area. StreamStickPro—18K+ channels, free trial. USA, Canada, UK.';
-        }
+      const idx = await getLocationPagesIndex(c);
+      const staticPage = idx?.byPath.get(path);
+      if (staticPage) {
+        title = staticPage.t;
+        desc = (staticPage.d || '').trim().substring(0, 160) || 'IPTV and Fire Stick guides for your area. StreamStickPro—18K+ channels, free trial. USA, Canada, UK.';
       }
     }
     if (faqJson.length === 0) {
@@ -316,6 +377,27 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
     const fullTitleRaw = `${title} | StreamStick Pro`;
     const fullTitle = fullTitleRaw.length > 60 ? fullTitleRaw.slice(0, 57) + "..." : fullTitleRaw;
     const fullTitleSafe = escapeHtml(fullTitle);
+
+    // Dynamic internal linking (same region) for crawl depth + topical authority.
+    let dynamicRelated = '';
+    try {
+      const idx = await getLocationPagesIndex(c);
+      const k = regionKey(country, pageType, slug);
+      const rel = (idx?.byRegionKey.get(k) || []).filter((p) => p !== path).slice(0, 8);
+      if (rel.length) {
+        const items = rel
+          .map((p) => {
+            const entry = idx?.byPath.get(p);
+            const label = escapeHtml((entry?.h || entry?.t || p).toString()).slice(0, 80);
+            return `<li><a href=\"https://streamstickpro.com${p}\">${label}</a></li>`;
+          })
+          .join('');
+        dynamicRelated = `<h3>More guides in your area</h3><ul>${items}</ul>`;
+      }
+    } catch {
+      /* ignore */
+    }
+
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -375,6 +457,7 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
           <li><a href="https://streamstickpro.com/shop">Shop</a></li>
           <li><a href="https://streamstickpro.com/ultimate-iptv-catalog-2026">Explore 93K IPTV Catalog</a></li>
         </ul>
+        ${dynamicRelated}
       </section>
     </article>
   </main>
@@ -566,12 +649,9 @@ app.get('/sitemap-pages.xml', async (c) => {
       xml += `<url><loc>${baseUrl}${page.path}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`;
     }
     if (seoPages.length < 2000) {
-      const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
-      if (assetRes.ok) {
-        const list = (await assetRes.json()) as { path: string }[];
-        for (const item of list) {
-          xml += `<url><loc>${baseUrl}${item.path}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`;
-        }
+      const idx = await getLocationPagesIndex(c);
+      for (const item of idx?.list || []) {
+        xml += `<url><loc>${baseUrl}${item.path}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`;
       }
     }
   } catch {
@@ -665,18 +745,15 @@ app.get('/sitemap.xml', async (c) => {
   }
   if (seoPages.length < 2000) {
     try {
-      const assetRes = await c.env.ASSETS.fetch(new Request(new URL('/location-pages.json', c.req.url)));
-      if (assetRes.ok) {
-        const list = (await assetRes.json()) as { path: string }[];
-        for (const item of list) {
-          sitemap += `  <url>
+      const idx = await getLocationPagesIndex(c);
+      for (const item of idx?.list || []) {
+        sitemap += `  <url>
     <loc>${baseUrl}${item.path}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 `;
-        }
       }
     } catch {
       // ignore

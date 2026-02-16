@@ -212,6 +212,18 @@ jobs:
           echo "- **IndexNow:** next step (Bing, Yandex, Seznam)" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
 
+      - name: Live SEO smoke test (sample sitemap URLs)
+        id: seo_smoke
+        run: |
+          npx tsx scripts/live-seo-smoke.ts || true
+          echo "## Live SEO smoke test" >> $GITHUB_STEP_SUMMARY
+          echo "Sampled sitemap URLs on production (status/canonical/meta length)." >> $GITHUB_STEP_SUMMARY
+        env:
+          SITE_URL: https://streamstickpro.com
+          SAMPLE: "200"
+          TIMEOUT_MS: "15000"
+        continue-on-error: true
+
       - name: Submit URLs to IndexNow (Bing, Yandex, Seznam, etc.)
         id: indexnow
         run: |
