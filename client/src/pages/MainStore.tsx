@@ -1552,7 +1552,7 @@ export default function MainStore() {
               </motion.div>
             </a>
 
-            <a href="/blog/best-live-tv-sports-streaming-2025" className="block" data-testid="blog-card-3">
+            <a href="/blog/best-live-tv-sports-streaming-2026" className="block" data-testid="blog-card-3">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1562,7 +1562,7 @@ export default function MainStore() {
                 <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4">
                   <Star className="w-6 h-6 text-blue-500" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Best Live TV Sports Streaming 2025</h3>
+                <h3 className="text-lg font-bold text-white mb-2">Best Live TV Sports Streaming 2026</h3>
                 <p className="text-gray-200 text-sm mb-4">Discover comprehensive sports coverage including NFL, NBA, UFC, and more.</p>
                 <span className="text-orange-400 text-sm font-semibold flex items-center gap-1">
                   Read More <ChevronRight className="w-4 h-4" />

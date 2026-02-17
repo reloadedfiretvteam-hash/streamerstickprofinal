@@ -735,6 +735,16 @@ app.get('*', async (c, next) => {
   return next();
 });
 
+// ── Block crawlers on secure domain (shadow store should NEVER appear in search engines) ──
+const SECURE_HOSTS = new Set(['secure.streamstickpro.com']);
+app.get('/robots.txt', (c) => {
+  const hostname = new URL(c.req.url).hostname;
+  if (SECURE_HOSTS.has(hostname)) {
+    return c.text('User-agent: *\nDisallow: /\n', 200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=86400' });
+  }
+  return c.env.ASSETS.fetch(c.req.raw);
+});
+
 // ── RSS/Atom Feed (content freshness signal + aggregator traffic) ──
 app.get('/feed.xml', async (c) => {
   const baseUrl = 'https://streamstickpro.com';
@@ -1019,6 +1029,7 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/terms': { title: 'Terms of Service | StreamStick Pro', description: 'StreamStickPro terms of service. Read our policies on IPTV subscriptions, Fire Stick purchases, refunds, and account usage.' },
   '/privacy': { title: 'Privacy Policy | StreamStick Pro', description: 'StreamStickPro privacy policy. How we collect, use, and protect your personal information. GDPR and CCPA compliant.' },
   '/refund': { title: 'Refund Policy | StreamStick Pro', description: 'StreamStickPro refund policy. 7-day money-back guarantee on IPTV subscriptions. How to request a refund.' },
+  '/shadow-services': { title: 'StreamStick Pro', description: 'StreamStickPro secure store.', noindex: true },
   '/checkout': { title: 'Checkout | StreamStick Pro', description: 'Complete your StreamStickPro purchase.', noindex: true },
   '/success': { title: 'Order Confirmed | StreamStick Pro', description: 'Your StreamStickPro order has been confirmed.', noindex: true },
   '/customer-login': { title: 'Customer Login | StreamStick Pro', description: 'Log in to your StreamStickPro account.', noindex: true },
@@ -1036,12 +1047,13 @@ const SECURITY_HEADERS: Record<string, string> = {
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self), interest-cohort=()',
   'Content-Security-Policy': "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://connect.facebook.net https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' https: data: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https: wss:; frame-src https://js.stripe.com https://www.facebook.com; object-src 'none'; base-uri 'self'; form-action 'self' https://js.stripe.com;",
 };
-function applySecurityHeaders(res: Response, pathname?: string): Response {
+function applySecurityHeaders(res: Response, pathname?: string, hostname?: string): Response {
   const next = new Response(res.body, { status: res.status, statusText: res.statusText, headers: new Headers(res.headers) });
   Object.entries(SECURITY_HEADERS).forEach(([k, v]) => next.headers.set(k, v));
   // X-Robots-Tag: redundant signal that reinforces meta robots at HTTP level
-  const noindexPaths = new Set(['/checkout', '/success', '/admin', '/customer-login', '/my-account', '/forgot-password', '/reset-password']);
-  if (pathname && noindexPaths.has(pathname)) {
+  const noindexPaths = new Set(['/checkout', '/success', '/admin', '/customer-login', '/my-account', '/forgot-password', '/reset-password', '/shadow-services']);
+  const isSecureDomain = hostname && (hostname === 'secure.streamstickpro.com' || hostname.endsWith('.secure.streamstickpro.com'));
+  if (isSecureDomain || (pathname && noindexPaths.has(pathname))) {
     next.headers.set('X-Robots-Tag', 'noindex, nofollow');
   } else {
     next.headers.set('X-Robots-Tag', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
@@ -1154,21 +1166,23 @@ function injectMeta(html: string, pathname: string, meta: { title: string; descr
 }
 
 app.get('*', async (c) => {
-  const pathname = new URL(c.req.url).pathname;
+  const url = new URL(c.req.url);
+  const pathname = url.pathname;
+  const hostname = url.hostname;
   const meta = await resolvePageMeta(pathname, c.env);
 
   try {
     const res = await c.env.ASSETS.fetch(c.req.raw);
     const ct = res.headers.get('content-type') || '';
-    if (!ct.includes('text/html')) return applySecurityHeaders(res, pathname);
+    if (!ct.includes('text/html')) return applySecurityHeaders(res, pathname, hostname);
     const html = await res.text();
     const fixed = injectMeta(html, pathname, meta);
-    return applySecurityHeaders(new Response(fixed, { status: res.status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname);
+    return applySecurityHeaders(new Response(fixed, { status: res.status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   } catch {
     const fallback = await c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
     const html = await fallback.text();
     const fixed = injectMeta(html, pathname, meta);
-    return applySecurityHeaders(new Response(fixed, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname);
+    return applySecurityHeaders(new Response(fixed, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   }
 });
 

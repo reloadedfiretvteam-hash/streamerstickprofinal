@@ -37,7 +37,7 @@ export default function PrivacyPolicy() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="prose prose-invert max-w-none" data-testid="content-privacy">
-          <p className="text-gray-400 mb-8">Last updated: December 2025</p>
+          <p className="text-gray-400 mb-8">Last updated: February 2026</p>
 
           <h2 className="text-xl font-bold text-white mt-8 mb-4">1. Information We Collect</h2>
           <p className="text-gray-300 mb-4">

@@ -37,25 +37,25 @@ function generateParagraph(topic: string, kw: string): string {
 function generateContent(title: string, intro: string, sections: string[], keywordsStr: string): string {
   const kw = keywordsStr.split(",").map((s) => s.trim()).filter(Boolean);
   const sectionContent = sections.map((s) => `## ${s}\n\n${generateParagraph(s, kw[0] || "streaming")}\n`).join("\n\n");
-  return `# ${title}\n\n${intro}\n\n${sectionContent}\n\n## Why Choose StreamStickPro?\n\nWe offer **pre-configured Fire Sticks** and **premium IPTV** with 10-minute setup, 24/7 support, 20,000+ channels, and money-back guarantee. [Shop Fire Sticks](/shop) | [Get IPTV](/shop)\n\n---\n*Last updated: February 2025*`;
+  return `# ${title}\n\n${intro}\n\n${sectionContent}\n\n## Why Choose StreamStickPro?\n\nWe offer **pre-configured Fire Sticks** and **premium IPTV** with 10-minute setup, 24/7 support, 20,000+ channels, and money-back guarantee. [Shop Fire Sticks](/shop) | [Get IPTV](/shop)\n\n---\n*Last updated: February 2026*`;
 }
 
 const TOPIC_TEMPLATES: Array<{ title: string; slug: string; category: string; keywords: string; sections: string[] }> = [
-  { title: "Best IPTV in {{region}} 2025", slug: "best-iptv-{{region-slug}}-2025", category: "IPTV Services", keywords: "iptv {{region}}, streaming {{region}}", sections: ["What is IPTV?", "Choosing a Provider", "Free Trials", "Subscription Options"] },
+  { title: "Best IPTV in {{region}} 2026", slug: "best-iptv-{{region-slug}}-2026", category: "IPTV Services", keywords: "iptv {{region}}, streaming {{region}}", sections: ["What is IPTV?", "Choosing a Provider", "Free Trials", "Subscription Options"] },
   { title: "Jailbroken Fire Stick {{region}}: Guide", slug: "jailbroken-fire-stick-{{region-slug}}-guide", category: "Fire Stick Guides", keywords: "jailbroken fire stick {{region}}, fire stick {{region}}", sections: ["What is a Jailbroken Fire Stick?", "Setup and Apps", "Support"] },
   { title: "Pre-Configured Fire Stick {{region}}", slug: "pre-configured-fire-stick-{{region-slug}}", category: "Fire Stick Guides", keywords: "pre-configured fire stick {{region}}, fire stick {{region}}", sections: ["Why Pre-Configured?", "What's Included", "Setup"] },
   { title: "ONN Google TV IPTV {{region}}", slug: "onn-google-tv-iptv-{{region-slug}}", category: "ONN Devices", keywords: "onn iptv {{region}}, onn google tv {{region}}", sections: ["ONN Overview", "IPTV on ONN", "Troubleshooting"] },
   { title: "Best IPTV Channels {{region}}", slug: "best-iptv-channels-{{region-slug}}", category: "IPTV Services", keywords: "iptv channels {{region}}, streaming {{region}}", sections: ["Channel Lineups", "How to Get Access"] },
   { title: "IPTV Free Trial {{region}}", slug: "iptv-free-trial-{{region-slug}}", category: "IPTV Services", keywords: "iptv free trial {{region}}, iptv trial {{region}}", sections: ["How Free Trials Work", "Subscription Options"] },
-  { title: "IPTV Subscription Options {{region}} 2025", slug: "iptv-subscription-options-{{region-slug}}-2025", category: "IPTV Services", keywords: "iptv subscription {{region}}, iptv plans {{region}}", sections: ["Monthly vs Yearly", "Best Value"] },
+  { title: "IPTV Subscription Options {{region}} 2026", slug: "iptv-subscription-options-{{region-slug}}-2026", category: "IPTV Services", keywords: "iptv subscription {{region}}, iptv plans {{region}}", sections: ["Monthly vs Yearly", "Best Value"] },
   { title: "1-Year IPTV + Fire Stick {{region}}", slug: "1-year-iptv-fire-stick-{{region-slug}}", category: "IPTV Services", keywords: "iptv fire stick deal {{region}}, streaming bundle {{region}}", sections: ["Bundle Benefits", "Setup"] },
   { title: "Tutorial: IPTV on Fire Stick {{region}}", slug: "tutorial-iptv-fire-stick-{{region-slug}}", category: "Guides", keywords: "iptv fire stick setup {{region}}", sections: ["Step-by-Step", "App Recommendations"] },
   { title: "Streaming Device Guide {{region}}", slug: "streaming-device-guide-{{region-slug}}", category: "Guides", keywords: "streaming device {{region}}, fire stick {{region}}", sections: ["Fire Stick vs ONN", "Where to Buy"] },
   { title: "Fire Stick Setup {{region}}", slug: "fire-stick-setup-{{region-slug}}", category: "Fire Stick Guides", keywords: "fire stick setup {{region}}", sections: ["Connect and Register", "Install Apps"] },
   { title: "ONN Device Setup {{region}}", slug: "onn-device-setup-{{region-slug}}", category: "ONN Devices", keywords: "onn setup {{region}}, onn iptv", sections: ["ONN Overview", "IPTV Setup"] },
-  { title: "Cord-Cutting Guide {{region}} 2025", slug: "cord-cutting-guide-{{region-slug}}-2025", category: "Guides", keywords: "cord cutting {{region}}, streaming {{region}}", sections: ["Why Cord-Cut", "Streaming Options"] },
+  { title: "Cord-Cutting Guide {{region}} 2026", slug: "cord-cutting-guide-{{region-slug}}-2026", category: "Guides", keywords: "cord cutting {{region}}, streaming {{region}}", sections: ["Why Cord-Cut", "Streaming Options"] },
   { title: "IPTV for Beginners {{region}}", slug: "iptv-for-beginners-{{region-slug}}", category: "IPTV Services", keywords: "iptv beginners {{region}}, what is iptv", sections: ["What is IPTV?", "Getting Started"] },
-  { title: "Best Streaming Device {{region}} 2025", slug: "best-streaming-device-{{region-slug}}-2025", category: "Guides", keywords: "best streaming device {{region}}", sections: ["Fire Stick", "ONN", "Comparison"] },
+  { title: "Best Streaming Device {{region}} 2026", slug: "best-streaming-device-{{region-slug}}-2026", category: "Guides", keywords: "best streaming device {{region}}", sections: ["Fire Stick", "ONN", "Comparison"] },
   { title: "IPTV + Fire Stick Bundle {{region}}", slug: "iptv-fire-stick-bundle-{{region-slug}}", category: "IPTV Services", keywords: "iptv fire stick bundle {{region}}", sections: ["Bundle Contents", "Activation"] },
   { title: "Free Trial IPTV {{region}} No Card", slug: "free-trial-iptv-{{region-slug}}-no-credit-card", category: "IPTV Services", keywords: "iptv free trial {{region}}", sections: ["How It Works", "Subscribing"] },
   { title: "Year Subscription + Fire Stick {{region}}", slug: "year-subscription-fire-stick-{{region-slug}}", category: "IPTV Services", keywords: "year subscription fire stick {{region}}", sections: ["What's Included", "Setup"] },
@@ -76,7 +76,7 @@ function buildPosts(): SeedPost[] {
       const title = t.title.replace(/\{\{region\}\}/g, region.name);
       const slug = t.slug.replace(/\{\{region-slug\}\}/g, region.slug);
       const keywords = t.keywords.replace(/\{\{region\}\}/g, region.name);
-      const intro = `Guide to **${keywords.split(",")[0].trim()}** in ${region.name}. Everything you need for streaming and IPTV in ${region.name} in 2025.`;
+      const intro = `Guide to **${keywords.split(",")[0].trim()}** in ${region.name}. Everything you need for streaming and IPTV in ${region.name} in 2026.`;
       const sections = t.sections.map((s) => s.replace(/\{\{region\}\}/g, region.name));
       const content = generateContent(title, intro, sections, keywords);
       posts.push({

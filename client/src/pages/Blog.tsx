@@ -203,16 +203,25 @@ export default function Blog() {
     return (
       <div className="min-h-screen bg-gray-900 text-white">
         {/* BlogPostSchema component below provides the complete BlogPosting JSON-LD (with @id, speakable, isPartOf, inLanguage) */}
+
+        {/* Prominent skip-to-homepage banner — high visibility for visitors who want to go straight to the site */}
+        <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white text-center py-2.5 px-4">
+          <a href="/" className="inline-flex items-center gap-2 font-semibold hover:underline text-sm sm:text-base">
+            <Flame className="w-4 h-4" />
+            Skip to StreamStickPro Homepage — Shop Fire Sticks, IPTV & Free Trial
+            <ChevronRight className="w-4 h-4" />
+          </a>
+        </div>
         
         <nav className="border-b border-gray-800 sticky top-0 z-10 bg-gray-900/95 backdrop-blur" aria-label="Article navigation">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-3 flex-wrap">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-3 flex-wrap">
             <a
               href="/"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-semibold text-sm transition-colors"
               data-testid="button-skip-to-home"
             >
               <Flame className="w-4 h-4" />
-              Go to Homepage
+              Homepage
             </a>
             <Button
               variant="ghost"
@@ -225,12 +234,12 @@ export default function Blog() {
               data-testid="button-back-to-blog"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Blog
+              All Articles
             </Button>
-            <a href="/shop" className="text-sm text-gray-400 hover:text-white">Shop</a>
-            <a href="/36hr-trial" className="text-sm text-gray-400 hover:text-white">Free Trial</a>
+            <a href="/shop" className="text-sm text-gray-400 hover:text-white font-medium">Shop</a>
+            <a href="/36hr-trial" className="text-sm text-green-400 hover:text-green-300 font-medium">Free Trial</a>
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold truncate" data-testid="text-blog-title">{selectedPost.title}</h1>
+              <h1 className="text-lg sm:text-2xl font-bold truncate" data-testid="text-blog-title">{selectedPost.title}</h1>
             </div>
           </div>
         </nav>
@@ -306,22 +315,24 @@ export default function Blog() {
             </div>
           )}
 
-          <div 
+          <article 
             className="max-w-none mb-12 text-gray-100"
             style={{
               fontSize: 'clamp(18px, 4vw, 20px)',
-              lineHeight: '1.8',
-              fontWeight: '400'
+              lineHeight: '1.9',
+              fontWeight: '400',
+              letterSpacing: '0.01em'
             }}
             dangerouslySetInnerHTML={{ 
               __html: selectedPost.content
-                .replace(/\n\n/g, "</p><p>")
+                .replace(/\n\n/g, "</p><p style='margin-bottom: 1.25rem;'>")
                 .replace(/^(.+)$/gm, match => !match.startsWith("<") ? match : match)
-                .replace(/\*\*(.+?)\*\*/g, "<strong style='font-weight: 700; font-size: 1.1em;'>$1</strong>")
-                .replace(/^- (.+)$/gm, "<li style='margin-left: 1.5rem; margin-bottom: 0.5rem; font-size: 1em;'>$1</li>")
-                .replace(/^# (.+)$/gm, "<h2 style='font-size: clamp(28px, 6vw, 36px); font-weight: 800; margin-top: 2rem; margin-bottom: 1rem; line-height: 1.3; color: white;'>$1</h2>")
-                .replace(/^## (.+)$/gm, "<h2 style='font-size: clamp(24px, 5vw, 30px); font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; line-height: 1.4; color: white;'>$1</h2>")
-                .replace(/^### (.+)$/gm, "<h3 style='font-size: clamp(20px, 4vw, 24px); font-weight: 700; margin-top: 1.25rem; margin-bottom: 0.5rem; line-height: 1.4; color: white;'>$1</h3>")
+                .replace(/\*\*(.+?)\*\*/g, "<strong style='font-weight: 700; font-size: 1.05em; color: #f5f5f5;'>$1</strong>")
+                .replace(/^- (.+)$/gm, "<li style='margin-left: 1.5rem; margin-bottom: 0.6rem; font-size: 1em; padding-left: 0.5rem;'>$1</li>")
+                .replace(/^# (.+)$/gm, "<h2 style='font-size: clamp(28px, 6vw, 36px); font-weight: 800; margin-top: 2.5rem; margin-bottom: 1rem; line-height: 1.3; color: white; border-bottom: 2px solid rgba(249,115,22,0.3); padding-bottom: 0.5rem;'>$1</h2>")
+                .replace(/^## (.+)$/gm, "<h2 style='font-size: clamp(24px, 5vw, 30px); font-weight: 700; margin-top: 2rem; margin-bottom: 0.75rem; line-height: 1.4; color: white; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.4rem;'>$1</h2>")
+                .replace(/^### (.+)$/gm, "<h3 style='font-size: clamp(20px, 4vw, 24px); font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; line-height: 1.4; color: #e5e5e5;'>$1</h3>")
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "<a href='$2' style='color: #f97316; text-decoration: underline; text-underline-offset: 3px;'>$1</a>")
             }}
             data-testid="text-blog-content"
           />
@@ -476,6 +487,14 @@ export default function Blog() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white pb-12">
+      {/* Prominent skip-to-homepage banner */}
+      <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white text-center py-2.5 px-4">
+        <a href="/" className="inline-flex items-center gap-2 font-semibold hover:underline text-sm sm:text-base">
+          <Flame className="w-4 h-4" />
+          Visit StreamStickPro — Shop Fire Sticks, IPTV Subscriptions & Start Free Trial
+          <ChevronRight className="w-4 h-4" />
+        </a>
+      </div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Blog",

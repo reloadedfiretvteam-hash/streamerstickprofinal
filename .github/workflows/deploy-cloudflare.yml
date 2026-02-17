@@ -48,6 +48,26 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         continue-on-error: true
 
+      - name: Migrate blog posts 2025 → 2026 (one-time year fix)
+        run: npx tsx scripts/migrate-2025-to-2026.ts
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SERVICE_ROLL_KEY: ${{ secrets.SUPABASE_SERVICE_ROLL_KEY }}
+        continue-on-error: true
+
+      - name: Seed 400 new standalone SEO blog posts (jailbroken sticks, IPTV, cord-cutting, sports, cities)
+        run: npx tsx scripts/seed-400-new-blogs.ts
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SERVICE_ROLL_KEY: ${{ secrets.SUPABASE_SERVICE_ROLL_KEY }}
+        continue-on-error: true
+
       - name: Verify secrets for 25K seed (no values logged)
         run: |
           echo "Supabase URL set: $([ -n \"$VITE_SUPABASE_URL\" ] && echo yes || echo no)"

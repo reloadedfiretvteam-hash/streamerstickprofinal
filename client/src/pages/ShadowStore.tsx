@@ -419,7 +419,7 @@ export default function ShadowStore() {
             className="max-w-3xl mx-auto text-center space-y-8"
           >
             <Badge variant="outline" className="px-4 py-1 text-primary border-primary/20 bg-primary/5">
-              Award-Winning Web Design Agency 2025
+              Award-Winning Web Design Agency 2026
             </Badge>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">
               Digital Experiences <br/>
@@ -821,7 +821,7 @@ export default function ShadowStore() {
             </div>
           </div>
           <div className="border-t pt-8 text-center text-sm">
-            <p>© 2025 WebFlow Design Agency. All rights reserved.</p>
+            <p>© 2026 WebFlow Design Agency. All rights reserved.</p>
           </div>
         </div>
       </footer>

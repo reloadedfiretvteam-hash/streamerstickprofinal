@@ -265,7 +265,7 @@ export function HowToSchema({
   return null;
 }
 
-// Video Schema for 2025-2026 SEO (Answer Engine Optimization)
+// Video Schema for 2026 SEO (Answer Engine Optimization)
 export function VideoSchema({
   name,
   description,
@@ -322,7 +322,7 @@ export function VideoSchema({
   return null;
 }
 
-// Q&A Schema for Answer Engine Optimization (2025-2026)
+// Q&A Schema for Answer Engine Optimization (2026)
 export function QASchema({
   questions
 }: {
@@ -421,7 +421,7 @@ export function ServiceSchema({
   return null;
 }
 
-// ItemList Schema for Product Listings (2025-2026)
+// ItemList Schema for Product Listings (2026)
 export function ItemListSchema({
   name,
   description,
