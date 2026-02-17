@@ -2,13 +2,20 @@ import { useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { apiCall } from "@/lib/api";
 
-function getSessionId(): string {
-  let sessionId = sessionStorage.getItem('visitor_session_id');
-  if (!sessionId) {
-    sessionId = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-    sessionStorage.setItem('visitor_session_id', sessionId);
+function getVisitSessionId(): string {
+  // 30-minute rolling session id (better analytics; does NOT define "unique visitor")
+  const KEY_ID = 'visit_session_id';
+  const KEY_TS = 'visit_session_last_ts';
+  const now = Date.now();
+  const last = Number(localStorage.getItem(KEY_TS) || '0');
+  let id = localStorage.getItem(KEY_ID);
+  const idleMs = now - last;
+  if (!id || !last || idleMs > 30 * 60 * 1000) {
+    id = `${now}-${Math.random().toString(36).slice(2, 12)}`;
+    localStorage.setItem(KEY_ID, id);
   }
-  return sessionId;
+  localStorage.setItem(KEY_TS, String(now));
+  return id;
 }
 
 export function useTracking() {
@@ -26,19 +33,22 @@ export function useTracking() {
 
     const trackPageView = async () => {
       try {
-        const sessionId = getSessionId();
         const referrer = document.referrer || null;
         const userAgent = navigator.userAgent;
         const fullUrl = window.location.href;
+        const pagePath = window.location.pathname || '/';
+        const session_id = getVisitSessionId();
 
-        const response = await apiCall('/api/track', {
+        // Use deduplicated visitor tracking endpoint (server sets a stable visitor cookie)
+        const response = await apiCall('/api/track-visit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            sessionId,
-            pageUrl: fullUrl,
+            session_id,
+            page: pagePath,
+            page_url: fullUrl,
             referrer,
-            userAgent,
+            user_agent: userAgent,
           }),
         });
 
@@ -67,7 +77,7 @@ export function useTracking() {
         console.error('❌ Failed to track page view:', {
           error: error.message,
           url: window.location.href,
-          sessionId: getSessionId()
+          sessionId: getVisitSessionId()
         });
       }
     };

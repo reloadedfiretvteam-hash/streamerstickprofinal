@@ -3632,7 +3632,7 @@ export default function AdminPanel() {
                           <Input
                             value={aiRequest.topic}
                             onChange={(e) => setAiRequest({ ...aiRequest, topic: e.target.value })}
-                            placeholder="e.g., Best Streaming Apps for Fire Stick in 2025"
+                            placeholder="e.g., Best Streaming Apps for Fire Stick in 2026"
                             className="bg-gray-700 border-gray-600 text-white"
                             data-testid="input-ai-topic"
                           />

@@ -192,7 +192,7 @@ app.post('/api/track-visit', async (c) => {
     const ua = (typeof body.user_agent === 'string' ? body.user_agent : c.req.header('user-agent')) || '';
 
     // Stable visitor cookie (unique visitor). If missing, create it.
-    const cookies = parseCookies(c.req.header('cookie'));
+    const cookies = parseCookies(c.req.header('cookie') ?? null);
     let vid = cookies['vid'];
     let setCookie: string | null = null;
     if (!vid) {
@@ -800,7 +800,6 @@ const SITEMAP_INDEX_XML = (baseUrl: string, today: string) => `<?xml version="1.
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap><loc>${baseUrl}/sitemap-pages.xml</loc><lastmod>${today}</lastmod></sitemap>
   <sitemap><loc>${baseUrl}/sitemap-posts.xml</loc><lastmod>${today}</lastmod></sitemap>
-  <sitemap><loc>${baseUrl}/sitemap.xml</loc><lastmod>${today}</lastmod></sitemap>
 </sitemapindex>`;
 app.get('/sitemap-index.xml', (c) => {
   const today = new Date().toISOString().split('T')[0];

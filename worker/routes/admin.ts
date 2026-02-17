@@ -428,7 +428,9 @@ export function createAdminRoutes() {
     }
   });
 
-  app.get('/visitors/stats', async (c) => {
+  // Legacy visitor stats route (kept for backwards compatibility).
+  // Primary stats endpoint is now: /api/admin/visitors/stats (from worker/routes/visitors.ts)
+  app.get('/visitors/stats-legacy', async (c) => {
     try {
       const storage = getStorage(c.env);
       const stats = await storage.getVisitorStats();
@@ -1841,6 +1843,49 @@ export function createAdminRoutes() {
     } catch (error: any) {
       console.error("Delete redirect error:", error);
       return c.json({ error: error.message || "Failed to delete redirect" }, 500);
+    }
+  });
+
+  // ── One-time migration: update all "2025" references to "2026" in blog posts ──
+  app.post('/migrate-2025-to-2026', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
+
+      // Fetch all blog posts that contain "2025" in title, slug, content, or excerpt
+      const { data: posts, error: fetchErr } = await supabase.from('blog_posts')
+        .select('id, title, slug, content, excerpt, meta_description')
+        .or('title.ilike.%2025%,slug.ilike.%2025%,content.ilike.%2025%,excerpt.ilike.%2025%,meta_description.ilike.%2025%');
+
+      if (fetchErr) return c.json({ error: fetchErr.message }, 500);
+      if (!posts || posts.length === 0) return c.json({ message: 'No blog posts with 2025 found', updated: 0 });
+
+      let updated = 0;
+      let errors: string[] = [];
+
+      for (const post of posts) {
+        const updates: Record<string, string> = {};
+        if (post.title && post.title.includes('2025')) updates.title = post.title.replace(/2025/g, '2026');
+        if (post.slug && post.slug.includes('2025')) updates.slug = post.slug.replace(/2025/g, '2026');
+        if (post.content && post.content.includes('2025')) updates.content = post.content.replace(/2025/g, '2026');
+        if (post.excerpt && post.excerpt.includes('2025')) updates.excerpt = post.excerpt.replace(/2025/g, '2026');
+        if (post.meta_description && post.meta_description.includes('2025')) updates.meta_description = post.meta_description.replace(/2025/g, '2026');
+
+        if (Object.keys(updates).length > 0) {
+          const { error: updateErr } = await supabase.from('blog_posts').update(updates).eq('id', post.id);
+          if (updateErr) {
+            errors.push(`${post.id}: ${updateErr.message}`);
+          } else {
+            updated++;
+          }
+        }
+      }
+
+      return c.json({ message: `Migration complete`, found: posts.length, updated, errors: errors.length > 0 ? errors.slice(0, 10) : undefined });
+    } catch (error: any) {
+      console.error('Migration 2025->2026 error:', error);
+      return c.json({ error: error.message || 'Migration failed' }, 500);
     }
   });
 

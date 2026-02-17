@@ -1,13 +1,10 @@
 import { useState, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
 import { apiCall } from "@/lib/api";
-import { motion } from "framer-motion";
 import { 
   Flame, 
-  ArrowLeft, 
   Calendar, 
   Clock, 
-  Tag, 
   ChevronRight,
   Search,
   Tv,
@@ -16,16 +13,12 @@ import {
   Star,
   User,
   BookOpen,
-  Share2,
   ExternalLink,
-  Wifi,
   Monitor,
   Play
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { SEOSchema, BlogPostSchema } from "@/components/SEOSchema";
 import { truncateMetaDescription, truncateTitle } from "@/lib/seo";
 
