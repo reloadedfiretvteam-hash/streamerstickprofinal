@@ -708,7 +708,7 @@ const SEO_REDIRECTS_STATIC: Record<string, string> = {
   '/best-iptv': '/best-iptv-firestick',
   '/best-iptv-firestick-2026': '/best-iptv-firestick',
   '/best-iptv-service': '/iptv-services',
-  '/resources': '/resources',
+  // '/resources': removed — was self-redirect loop (301 → /resources → 301 → infinite)
   '/catalog': '/ultimate-iptv-catalog-2026',
   '/tools': '/tools/catalog',
   '/iptv': '/iptv-services',
@@ -1040,7 +1040,8 @@ function applySecurityHeaders(res: Response, pathname?: string): Response {
   const next = new Response(res.body, { status: res.status, statusText: res.statusText, headers: new Headers(res.headers) });
   Object.entries(SECURITY_HEADERS).forEach(([k, v]) => next.headers.set(k, v));
   // X-Robots-Tag: redundant signal that reinforces meta robots at HTTP level
-  if (pathname === '/checkout' || pathname === '/success' || pathname === '/admin') {
+  const noindexPaths = new Set(['/checkout', '/success', '/admin', '/customer-login', '/my-account', '/forgot-password', '/reset-password']);
+  if (pathname && noindexPaths.has(pathname)) {
     next.headers.set('X-Robots-Tag', 'noindex, nofollow');
   } else {
     next.headers.set('X-Robots-Tag', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
@@ -1127,15 +1128,10 @@ function injectMeta(html: string, pathname: string, meta: { title: string; descr
   const base = 'https://streamstickpro.com';
   const canon = `${base}${pathname === '/' ? '/' : pathname.replace(/\/+$/, '')}`;
 
-  // RSS + OpenSearch discovery links (injected once, before </head>)
-  const discoveryLinks = `<link rel="alternate" type="application/rss+xml" title="StreamStickPro Blog" href="${base}/feed.xml"><link rel="search" type="application/opensearchdescription+xml" title="StreamStickPro" href="${base}/opensearch.xml">`;
-
   if (!meta) {
-    let out = html
+    return html
       .replace(/<link[^>]*rel=["']canonical["'][^>]*>/i, `<link rel="canonical" href="${canon}">`)
       .replace(/<meta[^>]*property=["']og:url["'][^>]*>/i, `<meta property="og:url" content="${canon}">`);
-    out = out.replace('</head>', `${discoveryLinks}</head>`);
-    return out;
   }
   const titleSafe = escapeHtml(meta.title);
   const descSafe = escapeHtml(meta.description);
@@ -1152,8 +1148,8 @@ function injectMeta(html: string, pathname: string, meta: { title: string; descr
   out = out.replace(/<meta[^>]*property=["']og:title["'][^>]*>/i, `<meta property="og:title" content="${titleSafe}">`);
   out = out.replace(/<meta[^>]*property=["']og:description["'][^>]*>/i, `<meta property="og:description" content="${descSafe}">`);
   out = out.replace(/<meta[^>]*property=["']og:url["'][^>]*>/i, `<meta property="og:url" content="${canon}">`);
-  // Inject discovery links + breadcrumb LD before </head>
-  out = out.replace('</head>', `${discoveryLinks}${breadcrumbLD}</head>`);
+  // Inject breadcrumb LD before </head> (RSS/OpenSearch links already in static index.html)
+  if (breadcrumbLD) out = out.replace('</head>', `${breadcrumbLD}</head>`);
   return out;
 }
 

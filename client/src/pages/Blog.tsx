@@ -202,24 +202,7 @@ export default function Blog() {
     const toc = extractTocHeadings(selectedPost.content || "");
     return (
       <div className="min-h-screen bg-gray-900 text-white">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BlogPosting",
-          "headline": selectedPost.title,
-          "description": (selectedPost.excerpt || '').slice(0, 160),
-          "datePublished": selectedPost.date,
-          "dateModified": selectedPost.date,
-          "author": { "@type": "Organization", "name": "StreamStick Pro", "url": "https://streamstickpro.com" },
-          "publisher": {
-            "@type": "Organization",
-            "name": "StreamStick Pro",
-            "logo": { "@type": "ImageObject", "url": "https://streamstickpro.com/favicon.png" }
-          },
-          "image": selectedPost.image && selectedPost.image.startsWith('http') ? selectedPost.image : "https://streamstickpro.com/opengraph.jpg",
-          "mainEntityOfPage": { "@type": "WebPage", "@id": `https://streamstickpro.com/blog/${selectedPost.slug}` },
-          "articleBody": selectedPost.content,
-          "url": `https://streamstickpro.com/blog/${selectedPost.slug}`
-        }) }} />
+        {/* BlogPostSchema component below provides the complete BlogPosting JSON-LD (with @id, speakable, isPartOf, inLanguage) */}
         
         <nav className="border-b border-gray-800 sticky top-0 z-10 bg-gray-900/95 backdrop-blur" aria-label="Article navigation">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-3 flex-wrap">
