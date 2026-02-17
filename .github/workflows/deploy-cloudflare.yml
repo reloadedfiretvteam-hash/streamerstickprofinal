@@ -221,9 +221,13 @@ jobs:
             echo "::warning:: sitemap.xml has very few URLs ($URL_COUNT). Check Cloudflare Pages env (Supabase) and build (location-pages.json)."
             echo "⚠️ **Low URL count** – indexing may be limited. Set Worker env in Cloudflare and ensure 25K seed or location-pages.json." >> $GITHUB_STEP_SUMMARY
           fi
-          echo "Pinging Google, Bing, Yandex (Yahoo uses Bing)..."
-          curl -sSf -o /dev/null "https://www.google.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Google: submitted" || true
-          curl -sSf -o /dev/null "https://www.bing.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Bing: submitted (Yahoo covered via Bing)" || true
+          echo "Pinging Google, Bing, Yandex with all sitemaps..."
+          curl -sSf -o /dev/null "https://www.google.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Google: sitemap-index submitted" || true
+          curl -sSf -o /dev/null "https://www.google.com/ping?sitemap=${SITE}/sitemap-posts.xml" && echo "Google: sitemap-posts submitted" || true
+          curl -sSf -o /dev/null "https://www.google.com/ping?sitemap=${SITE}/sitemap-pages.xml" && echo "Google: sitemap-pages submitted" || true
+          curl -sSf -o /dev/null "https://www.google.com/ping?sitemap=${SITE}/sitemap.xml" && echo "Google: sitemap.xml submitted" || true
+          curl -sSf -o /dev/null "https://www.bing.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Bing: submitted (Yahoo covered)" || true
+          curl -sSf -o /dev/null "https://www.bing.com/ping?sitemap=${SITE}/sitemap-posts.xml" && echo "Bing: posts submitted" || true
           curl -sSf -o /dev/null "https://webmaster.yandex.com/ping?sitemap=${SITE}/sitemap-index.xml" && echo "Yandex: submitted" || true
           echo "## Search engine submission" >> $GITHUB_STEP_SUMMARY
           echo "- **Google:** sitemap ping" >> $GITHUB_STEP_SUMMARY
@@ -256,5 +260,5 @@ jobs:
           echo "URLs from live sitemap submitted to IndexNow (Bing, Yandex, Seznam)." >> $GITHUB_STEP_SUMMARY
         env:
           SITE_URL: https://streamstickpro.com
-          INDEXNOW_KEY: 752d1cf8edc045568943005a03892968
+          INDEXNOW_KEY: 3b1a52f5f41a4138b1f21c3265180f44
         continue-on-error: true

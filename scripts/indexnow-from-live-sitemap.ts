@@ -8,7 +8,7 @@
  */
 const SITE_URL = process.env.SITE_URL || 'https://streamstickpro.com';
 const SITEMAP_INDEX_URL = `${SITE_URL}/sitemap-index.xml`;
-const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '752d1cf8edc045568943005a03892968';
+const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '3b1a52f5f41a4138b1f21c3265180f44';
 const INDEXNOW_KEY_LOCATION = `${SITE_URL}/${INDEXNOW_KEY}.txt`;
 
 function extractUrls(xml: string): string[] {

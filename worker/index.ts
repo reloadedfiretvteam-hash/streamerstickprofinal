@@ -981,9 +981,12 @@ app.get('/sitemap.xml', async (c) => {
   });
 });
 
-// ── IndexNow key file (plain text, not SPA HTML) ──
+// ── IndexNow key files (plain text, not SPA HTML) — serve both keys so submissions always validate ──
 app.get('/3b1a52f5f41a4138b1f21c3265180f44.txt', (c) => {
   return c.text('3b1a52f5f41a4138b1f21c3265180f44', 200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=86400' });
+});
+app.get('/752d1cf8edc045568943005a03892968.txt', (c) => {
+  return c.text('752d1cf8edc045568943005a03892968', 200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=86400' });
 });
 
 // ── IndexNow bulk URL submission ──
