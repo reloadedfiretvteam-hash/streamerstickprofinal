@@ -3,6 +3,8 @@
 
 User-agent: *
 Allow: /
+Allow: /feed.xml
+Allow: /opensearch.xml
 Disallow: /api/
 Disallow: /admin
 Disallow: /admin/
@@ -10,6 +12,16 @@ Disallow: /shadow-services
 Disallow: /checkout
 Disallow: /success
 Disallow: /cancel
+Disallow: /customer-login
+Disallow: /my-account
+Disallow: /forgot-password
+Disallow: /reset-password
+
+# Clean URL parameters (prevents duplicate content from query strings)
+Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&ref&fbclid&gclid /
+
+# Canonical host
+Host: https://streamstickpro.com
 
 # Both sitemaps so crawlers discover all URLs (index + full)
 Sitemap: https://streamstickpro.com/sitemap-index.xml

@@ -618,7 +618,7 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
   <noscript><p>Continue to <a href="${url}">${h1Text}</a>.</p></noscript>
 </body>
 </html>`;
-    return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    return applySecurityHeaders(new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }), path);
   } catch {
     return next();
   }
@@ -733,6 +733,56 @@ app.get('*', async (c, next) => {
     return c.redirect('https://streamstickpro.com' + target, 301);
   }
   return next();
+});
+
+// ── RSS/Atom Feed (content freshness signal + aggregator traffic) ──
+app.get('/feed.xml', async (c) => {
+  const baseUrl = 'https://streamstickpro.com';
+  const now = new Date().toUTCString();
+  let items = '';
+  try {
+    const storage = getStorage(c.env);
+    const blogPosts = await storage.getBlogPosts();
+    for (const post of blogPosts) {
+      if (!post.published) continue;
+      const pubDate = post.publishedAt ? new Date(post.publishedAt).toUTCString() : now;
+      const title = escapeHtml((post.title || 'Blog Post').toString());
+      const desc = escapeHtml(((post.excerpt || post.metaDescription || post.title || '').toString()).slice(0, 300));
+      const link = `${baseUrl}/blog/${post.slug}`;
+      items += `    <item>\n      <title>${title}</title>\n      <link>${link}</link>\n      <guid isPermaLink="true">${link}</guid>\n      <pubDate>${pubDate}</pubDate>\n      <description>${desc}</description>\n      <category>${escapeHtml((post.category || 'Guides').toString())}</category>\n    </item>\n`;
+    }
+  } catch { /* DB unavailable — empty feed is valid */ }
+  const rss = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>StreamStickPro – IPTV &amp; Fire Stick Blog</title>
+    <link>${baseUrl}/blog</link>
+    <description>IPTV guides, Fire Stick tutorials, streaming tips, and cord-cutting news from StreamStickPro.</description>
+    <language>en-us</language>
+    <lastBuildDate>${now}</lastBuildDate>
+    <atom:link href="${baseUrl}/feed.xml" rel="self" type="application/rss+xml"/>
+    <image>
+      <url>${baseUrl}/favicon.png</url>
+      <title>StreamStickPro</title>
+      <link>${baseUrl}</link>
+    </image>
+${items}  </channel>
+</rss>`;
+  return c.text(rss, 200, { 'Content-Type': 'application/rss+xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600, s-maxage=7200' });
+});
+app.get('/rss.xml', (c) => c.redirect('https://streamstickpro.com/feed.xml', 301));
+
+// ── OpenSearch XML (browser search integration) ──
+app.get('/opensearch.xml', (c) => {
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>StreamStickPro</ShortName>
+  <Description>Search StreamStickPro: IPTV guides, Fire Stick tutorials, streaming tips</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <Url type="text/html" template="https://streamstickpro.com/blog?search={searchTerms}"/>
+  <Image width="16" height="16" type="image/png">https://streamstickpro.com/favicon.png</Image>
+</OpenSearchDescription>`;
+  return c.text(xml, 200, { 'Content-Type': 'application/opensearchdescription+xml; charset=utf-8', 'Cache-Control': 'public, max-age=86400' });
 });
 
 // Sitemap index (SEO/AEO prompt: sitemap-pages + sitemap-posts; sitemap.xml = full single file)
@@ -971,17 +1021,39 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/refund': { title: 'Refund Policy | StreamStick Pro', description: 'StreamStickPro refund policy. 7-day money-back guarantee on IPTV subscriptions. How to request a refund.' },
   '/checkout': { title: 'Checkout | StreamStick Pro', description: 'Complete your StreamStickPro purchase.', noindex: true },
   '/success': { title: 'Order Confirmed | StreamStick Pro', description: 'Your StreamStickPro order has been confirmed.', noindex: true },
+  '/customer-login': { title: 'Customer Login | StreamStick Pro', description: 'Log in to your StreamStickPro account.', noindex: true },
+  '/my-account': { title: 'My Account | StreamStick Pro', description: 'Manage your StreamStickPro account.', noindex: true },
+  '/forgot-password': { title: 'Forgot Password | StreamStick Pro', description: 'Reset your StreamStickPro password.', noindex: true },
+  '/reset-password': { title: 'Reset Password | StreamStick Pro', description: 'Reset your StreamStickPro password.', noindex: true },
 };
 
-// Security headers for all responses
+// Security + SEO headers for all responses (Google/Bing trust signals)
 const SECURITY_HEADERS: Record<string, string> = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self), interest-cohort=()',
+  'Content-Security-Policy': "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://connect.facebook.net https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' https: data: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https: wss:; frame-src https://js.stripe.com https://www.facebook.com; object-src 'none'; base-uri 'self'; form-action 'self' https://js.stripe.com;",
 };
-function applySecurityHeaders(res: Response): Response {
+function applySecurityHeaders(res: Response, pathname?: string): Response {
   const next = new Response(res.body, { status: res.status, statusText: res.statusText, headers: new Headers(res.headers) });
   Object.entries(SECURITY_HEADERS).forEach(([k, v]) => next.headers.set(k, v));
+  // X-Robots-Tag: redundant signal that reinforces meta robots at HTTP level
+  if (pathname === '/checkout' || pathname === '/success' || pathname === '/admin') {
+    next.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  } else {
+    next.headers.set('X-Robots-Tag', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+  }
+  // Link: canonical HTTP header (complements HTML <link rel="canonical">)
+  if (pathname) {
+    const canon = `https://streamstickpro.com${pathname === '/' ? '/' : pathname.replace(/\/+$/, '')}`;
+    next.headers.set('Link', `<${canon}>; rel="canonical"`);
+  }
+  // Cache-Control for HTML (short TTL, stale-while-revalidate for speed)
+  if (!next.headers.has('cache-control') && (next.headers.get('content-type') || '').includes('text/html')) {
+    next.headers.set('Cache-Control', 'public, max-age=300, s-maxage=600, stale-while-revalidate=3600');
+  }
   return next;
 }
 
@@ -1021,19 +1093,56 @@ async function resolvePageMeta(pathname: string, env: Env): Promise<{ title: str
   return null;
 }
 
+/** Build BreadcrumbList JSON-LD for any page (gives crawlers navigation context). */
+function buildBreadcrumbLD(pathname: string, pageTitle: string): string {
+  const base = 'https://streamstickpro.com';
+  const crumbs: { name: string; url: string }[] = [{ name: 'Home', url: base + '/' }];
+  if (pathname !== '/') {
+    // Add intermediate crumb for known sections
+    if (pathname.startsWith('/blog')) {
+      if (pathname !== '/blog') crumbs.push({ name: 'Blog', url: base + '/blog' });
+    } else if (pathname.startsWith('/vs-')) {
+      crumbs.push({ name: 'Comparisons', url: base + '/iptv-services' });
+    } else if (pathname.startsWith('/l/')) {
+      crumbs.push({ name: 'Locations', url: base + '/locations' });
+    }
+    crumbs.push({ name: pageTitle.replace(/ \| StreamStick Pro$/i, '').slice(0, 60), url: base + pathname });
+  }
+  if (crumbs.length < 2) return '';
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': crumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      'position': i + 1,
+      'name': c.name,
+      'item': c.url,
+    })),
+  };
+  return `<script type="application/ld+json">${JSON.stringify(ld)}</script>`;
+}
+
 /** Inject per-page meta tags into the SPA shell so Googlebot sees unique title/canonical/description per URL. */
 function injectMeta(html: string, pathname: string, meta: { title: string; description: string; noindex?: boolean } | null): string {
   const base = 'https://streamstickpro.com';
-  const canon = `${base}${pathname}`;
+  const canon = `${base}${pathname === '/' ? '/' : pathname.replace(/\/+$/, '')}`;
+
+  // RSS + OpenSearch discovery links (injected once, before </head>)
+  const discoveryLinks = `<link rel="alternate" type="application/rss+xml" title="StreamStickPro Blog" href="${base}/feed.xml"><link rel="search" type="application/opensearchdescription+xml" title="StreamStickPro" href="${base}/opensearch.xml">`;
+
   if (!meta) {
-    // Unknown page — at minimum fix the canonical to point to THIS page, not homepage
-    return html
+    let out = html
       .replace(/<link[^>]*rel=["']canonical["'][^>]*>/i, `<link rel="canonical" href="${canon}">`)
       .replace(/<meta[^>]*property=["']og:url["'][^>]*>/i, `<meta property="og:url" content="${canon}">`);
+    out = out.replace('</head>', `${discoveryLinks}</head>`);
+    return out;
   }
   const titleSafe = escapeHtml(meta.title);
   const descSafe = escapeHtml(meta.description);
   const robotsContent = meta.noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+
+  // BreadcrumbList JSON-LD for crawlers (only on indexable pages)
+  const breadcrumbLD = meta.noindex ? '' : buildBreadcrumbLD(pathname, meta.title);
 
   let out = html;
   out = out.replace(/<title>[^<]*<\/title>/i, `<title>${titleSafe}</title>`);
@@ -1043,6 +1152,8 @@ function injectMeta(html: string, pathname: string, meta: { title: string; descr
   out = out.replace(/<meta[^>]*property=["']og:title["'][^>]*>/i, `<meta property="og:title" content="${titleSafe}">`);
   out = out.replace(/<meta[^>]*property=["']og:description["'][^>]*>/i, `<meta property="og:description" content="${descSafe}">`);
   out = out.replace(/<meta[^>]*property=["']og:url["'][^>]*>/i, `<meta property="og:url" content="${canon}">`);
+  // Inject discovery links + breadcrumb LD before </head>
+  out = out.replace('</head>', `${discoveryLinks}${breadcrumbLD}</head>`);
   return out;
 }
 
@@ -1053,15 +1164,15 @@ app.get('*', async (c) => {
   try {
     const res = await c.env.ASSETS.fetch(c.req.raw);
     const ct = res.headers.get('content-type') || '';
-    if (!ct.includes('text/html')) return applySecurityHeaders(res);
+    if (!ct.includes('text/html')) return applySecurityHeaders(res, pathname);
     const html = await res.text();
     const fixed = injectMeta(html, pathname, meta);
-    return applySecurityHeaders(new Response(fixed, { status: res.status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }));
+    return applySecurityHeaders(new Response(fixed, { status: res.status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname);
   } catch {
     const fallback = await c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
     const html = await fallback.text();
     const fixed = injectMeta(html, pathname, meta);
-    return applySecurityHeaders(new Response(fixed, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }));
+    return applySecurityHeaders(new Response(fixed, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname);
   }
 });
 
