@@ -113,12 +113,39 @@ export function createTrialRoutes() {
             <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
               <strong>⏰ Remember:</strong> Your trial expires in 36 hours. Upgrade anytime to keep streaming!
             </div>
+
+            <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7;">
+              <h3 style="margin-top: 0; color: #0369a1;">📋 Subscriptions & Free Trial Info</h3>
+              <p>Your free trial gives you full access to <strong>18,000+ live channels</strong>, VOD, and sports — the same experience as our paid subscribers.</p>
+              <p>Ready to upgrade? We have flexible subscription plans with no contracts:</p>
+              <ul style="padding-left: 20px;">
+                <li><strong>Monthly Plan</strong> — Pay month-to-month, cancel anytime</li>
+                <li><strong>Quarterly Plan</strong> — Save more with 3-month billing</li>
+                <li><strong>Yearly Plan + Free Fire Stick</strong> — Best value, biggest savings</li>
+              </ul>
+              <p><a href="https://streamstickpro.com/shop" style="color: #0284c7; font-weight: bold;">View All Subscription Plans →</a></p>
+            </div>
+
+            <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
+              <h3 style="margin-top: 0; color: #15803d;">🕐 Business Hours & Contact</h3>
+              <p><strong>Business Hours:</strong> 5:00 AM – 11:00 PM Eastern (US) Standard Time</p>
+              <p><strong>Email:</strong> <a href="mailto:reloadedfiretvteam@gmail.com" style="color: #15803d;">reloadedfiretvteam@gmail.com</a></p>
+              <p><strong>Website:</strong> <a href="https://streamstickpro.com" style="color: #15803d;">streamstickpro.com</a></p>
+              <p style="font-size: 14px; color: #4b5563;">We respond to all emails within business hours. Feel free to reach out with any questions about your trial, setup, or subscriptions!</p>
+            </div>
+
+            <div style="background: #fdf4ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #a855f7;">
+              <h3 style="margin-top: 0; color: #7c3aed;">🎁 Refer a Friend & Earn Credits!</h3>
+              <p>Love StreamStickPro? Bring a friend or family member to sign up and <strong>earn credits toward your subscription!</strong></p>
+              <p>Simply tell them to mention your email when they sign up. We'll apply credits to your account automatically.</p>
+              <p><a href="https://streamstickpro.com" style="color: #7c3aed; font-weight: bold;">Share StreamStickPro →</a></p>
+            </div>
             
-            <p>Love the service? <a href="https://streamstickpro.com" style="color: #9333ea; font-weight: bold;">Visit our shop</a> to get full access!</p>
+            <p>Love the service? <a href="https://streamstickpro.com/shop" style="color: #9333ea; font-weight: bold;">Visit our shop</a> to get full access!</p>
             
-            <p>Questions? Reply to this email or contact us at reloadedfiretvteam@gmail.com</p>
+            <p>Questions? Reply to this email or contact us at <a href="mailto:reloadedfiretvteam@gmail.com" style="color: #9333ea;">reloadedfiretvteam@gmail.com</a></p>
             
-            <p>Happy Streaming! 🎬<br>StreamStickPro Team</p>
+            <p>Happy Streaming! 🎬<br><strong>StreamStickPro Team</strong><br><span style="font-size: 13px; color: #6b7280;">Business Hours: 5 AM – 11 PM EST</span></p>
           </div>
         `;
 

@@ -41,9 +41,9 @@ export function createEmailCampaignRoutes() {
         });
       }
 
-      // Calculate first email time (send first email in 2-3 days)
+      // Schedule first weekly reminder 7 days from now
       const now = new Date();
-      const firstEmailDate = new Date(now.getTime() + (2 + Math.random()) * 24 * 60 * 60 * 1000); // 2-3 days
+      const firstEmailDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
       // Create campaign (first email sent immediately below; next scheduled 3–4 days)
       const { data: campaign, error } = await supabase
@@ -72,7 +72,7 @@ export function createEmailCampaignRoutes() {
         if (emailResult.success) {
           firstEmailSent = true;
           const now = new Date();
-          const nextWeekly = new Date(now.getTime() + (3 + Math.random()) * 24 * 60 * 60 * 1000);
+          const nextWeekly = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
           await supabase
             .from('email_campaigns')
             .update({
@@ -164,15 +164,14 @@ export function createEmailCampaignRoutes() {
             if (campaign.phase === 'weekly') {
               updateData.week_emails_sent = campaign.week_emails_sent + 1;
               
-              // After 2 emails in first week, move to monthly phase
-              if (updateData.week_emails_sent >= 2) {
+              // After 4 weekly emails, move to monthly phase
+              if (updateData.week_emails_sent >= 4) {
                 updateData.phase = 'monthly';
-                // Schedule first monthly email for 30 days from now
                 const monthlyDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
                 updateData.next_email_scheduled_at = monthlyDate.toISOString();
               } else {
-                // Schedule next weekly email (3-4 days from now)
-                const nextWeekly = new Date(now.getTime() + (3 + Math.random()) * 24 * 60 * 60 * 1000);
+                // Schedule next weekly email (7 days from now)
+                const nextWeekly = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
                 updateData.next_email_scheduled_at = nextWeekly.toISOString();
               }
             } else {
@@ -308,39 +307,70 @@ function generateWeeklyReminderEmail(name: string, websiteUrl: string, campaignT
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
         <h1 style="color: white; margin: 0;">🎬 StreamStickPro</h1>
+        <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 14px;">Your Ultimate Streaming Solution</p>
       </div>
       
       <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">
         <h2 style="color: #333; margin-top: 0;">Hi ${name}!</h2>
         
-        <p>We wanted to remind you about <strong>StreamStickPro</strong> - your ultimate streaming solution!</p>
-        
         ${isTrial 
-          ? `<p>Since you tried our free trial, we thought you'd like to know about our full service options:</p>`
-          : `<p>As a valued customer, here's what makes StreamStickPro special:</p>`
+          ? `<p><strong>Thank you for testing out StreamStickPro!</strong> We hope you enjoyed the experience. Feel free to reach out if you have any questions — we're always happy to help.</p>
+             <p>Since you tried our free trial, we wanted to check in and let you know about our full subscription options:</p>`
+          : `<p><strong>Thank you for being a StreamStickPro customer!</strong> We appreciate your support and wanted to check in with you.</p>
+             <p>As a valued customer, here's what makes StreamStickPro special:</p>`
         }
         
         <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
           <h3 style="margin-top: 0; color: #667eea;">✨ Why Choose StreamStickPro?</h3>
           <ul style="padding-left: 20px;">
-            <li><strong>20,000+ Live Channels</strong> - Sports, Movies, TV Shows, and more!</li>
-            <li><strong>Instant Setup</strong> - Get fully loaded in just 10 minutes</li>
-            <li><strong>24/7 Support</strong> - We're here to help whenever you need us</li>
-            <li><strong>Best Prices</strong> - Save thousands compared to cable TV</li>
-            <li><strong>Regular Updates</strong> - Always fresh content, automatically updated</li>
+            <li><strong>20,000+ Live Channels</strong> — Sports, Movies, TV Shows, PPV, and more!</li>
+            <li><strong>Instant Setup</strong> — Get fully loaded in just 10 minutes</li>
+            <li><strong>Dedicated Support</strong> — We're here during business hours to help</li>
+            <li><strong>Best Prices</strong> — Save thousands compared to cable TV</li>
+            <li><strong>Regular Updates</strong> — Always fresh content, automatically updated</li>
           </ul>
+        </div>
+
+        <div style="background: #fdf4ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #a855f7;">
+          <h3 style="margin-top: 0; color: #7c3aed;">🎁 Bring a Friend — Earn Credits!</h3>
+          <p>Know someone who would love StreamStickPro? <strong>Bring a friend or family member to sign up and earn credits toward your subscription!</strong></p>
+          <p>Just tell them to mention your name or email when they sign up. We'll apply credits to your account automatically.</p>
+          <p style="text-align: center;">
+            <a href="${websiteUrl}" style="color: #7c3aed; font-weight: bold; font-size: 16px;">Share StreamStickPro & Earn →</a>
+          </p>
+        </div>
+
+        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
+          <h3 style="margin-top: 0; color: #667eea;">📋 Subscription Plans</h3>
+          <ul style="padding-left: 20px;">
+            <li><strong>Monthly Plan</strong> — Pay month-to-month, cancel anytime</li>
+            <li><strong>Quarterly Plan</strong> — Save more with 3-month billing</li>
+            <li><strong>Yearly Plan + Free Fire Stick</strong> — Best value, biggest savings</li>
+          </ul>
+          <p style="text-align: center;">
+            <a href="${websiteUrl}/shop" style="color: #667eea; font-weight: bold;">View All Plans →</a>
+          </p>
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${websiteUrl}" 
+          <a href="${websiteUrl}/shop" 
              style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
             Visit StreamStickPro Now →
           </a>
         </div>
+
+        <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
+          <h3 style="margin-top: 0; color: #15803d;">🕐 Business Hours & Contact</h3>
+          <p><strong>Hours:</strong> 5:00 AM – 11:00 PM Eastern (US) Standard Time</p>
+          <p><strong>Email:</strong> <a href="mailto:reloadedfiretvteam@gmail.com" style="color: #15803d;">reloadedfiretvteam@gmail.com</a></p>
+          <p><strong>Website:</strong> <a href="${websiteUrl}" style="color: #15803d;">streamstickpro.com</a></p>
+          <p style="font-size: 14px; color: #4b5563;">Feel free to reach out with any questions about your account, subscriptions, or setup. We're happy to help!</p>
+        </div>
         
         <p style="color: #666; font-size: 14px; margin-top: 30px;">
-          Questions? Just reply to this email - we're here to help!<br>
-          <strong>StreamStickPro Team</strong>
+          Thank you for choosing StreamStickPro!<br>
+          <strong>StreamStickPro Team</strong><br>
+          <span style="font-size: 13px; color: #9ca3af;">Business Hours: 5 AM – 11 PM EST</span>
         </p>
       </div>
       
@@ -366,33 +396,57 @@ function generateMonthlyReminderEmail(name: string, websiteUrl: string, campaign
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
         <h1 style="color: white; margin: 0;">📺 StreamStickPro Monthly Update</h1>
+        <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 14px;">Your Ultimate Streaming Solution</p>
       </div>
       
       <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">
         <h2 style="color: #333; margin-top: 0;">Hi ${name}!</h2>
         
         <p>Just a friendly monthly reminder that <strong>StreamStickPro</strong> is here whenever you need the best streaming experience!</p>
+
+        ${isTrial 
+          ? `<p>Thank you for testing out StreamStickPro! We hope you loved the trial. If you haven't subscribed yet, now is a great time — we have plans to fit every budget.</p>`
+          : `<p>Thank you for being a loyal StreamStickPro customer! We truly appreciate your support.</p>`
+        }
         
         <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
           <h3 style="margin-top: 0; color: #667eea;">🎯 What's New This Month?</h3>
           <ul style="padding-left: 20px;">
             <li>New channels added to our lineup</li>
             <li>Improved streaming quality and reliability</li>
-            <li>Enhanced customer support features</li>
+            <li>Enhanced customer support during business hours</li>
             <li>Special offers for returning customers</li>
           </ul>
         </div>
+
+        <div style="background: #fdf4ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #a855f7;">
+          <h3 style="margin-top: 0; color: #7c3aed;">🎁 Bring a Friend — Earn Credits!</h3>
+          <p><strong>Refer a friend or family member to sign up and earn credits toward your subscription!</strong></p>
+          <p>Just have them mention your name or email at signup. Credits are applied automatically to your account.</p>
+          <p style="text-align: center;">
+            <a href="${websiteUrl}" style="color: #7c3aed; font-weight: bold; font-size: 16px;">Share StreamStickPro & Earn →</a>
+          </p>
+        </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${websiteUrl}" 
+          <a href="${websiteUrl}/shop" 
              style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; font-size: 16px;">
             Check Out StreamStickPro →
           </a>
         </div>
+
+        <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
+          <h3 style="margin-top: 0; color: #15803d;">🕐 Business Hours & Contact</h3>
+          <p><strong>Hours:</strong> 5:00 AM – 11:00 PM Eastern (US) Standard Time</p>
+          <p><strong>Email:</strong> <a href="mailto:reloadedfiretvteam@gmail.com" style="color: #15803d;">reloadedfiretvteam@gmail.com</a></p>
+          <p><strong>Website:</strong> <a href="${websiteUrl}" style="color: #15803d;">streamstickpro.com</a></p>
+          <p style="font-size: 14px; color: #4b5563;">Feel free to reach out anytime during business hours. We're happy to help with setup, subscriptions, or anything else!</p>
+        </div>
         
         <p style="color: #666; font-size: 14px; margin-top: 30px;">
-          Remember: StreamStickPro offers the best value in streaming - save thousands compared to cable!<br><br>
-          <strong>StreamStickPro Team</strong>
+          StreamStickPro — the best value in streaming. Save thousands compared to cable!<br><br>
+          <strong>StreamStickPro Team</strong><br>
+          <span style="font-size: 13px; color: #9ca3af;">Business Hours: 5 AM – 11 PM EST</span>
         </p>
       </div>
       
