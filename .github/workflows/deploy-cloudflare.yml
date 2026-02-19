@@ -200,6 +200,31 @@ jobs:
       - name: Wait for deploy to be live
         run: sleep 15
 
+      - name: Backfill email campaigns for past customers (marketing emails)
+        run: |
+          echo "Enrolling past customers in weekly marketing email campaigns..."
+          # Login to get admin token
+          TOKEN=$(curl -sSf -X POST "https://streamstickpro.com/api/auth/login" \
+            -H "Content-Type: application/json" \
+            -d '{"username":"admin","password":"admin123"}' | jq -r '.token // empty')
+          if [ -n "$TOKEN" ]; then
+            RESULT=$(curl -sSf -X POST "https://streamstickpro.com/api/admin/email-campaigns/backfill" \
+              -H "Authorization: Bearer $TOKEN" \
+              -H "Content-Type: application/json" --max-time 120 || echo '{"error":"timeout"}')
+            echo "$RESULT"
+            echo "## Email Campaign Backfill" >> $GITHUB_STEP_SUMMARY
+            echo "$RESULT" | jq -r '"Created: \(.created // 0) | Total: \(.totalPastCustomers // 0)"' >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
+          else
+            echo "::warning:: Could not get admin token for email backfill"
+          fi
+        continue-on-error: true
+
+      - name: Trigger email campaign processing (cron)
+        run: |
+          echo "Processing scheduled marketing emails..."
+          curl -sSf "https://streamstickpro.com/cron/email-campaigns" --max-time 60 || true
+        continue-on-error: true
+
       - name: Verify sitemap and ping search engines (Google, Bing, Yandex, Yahoo)
         id: sitemap_verify
         run: |
