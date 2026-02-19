@@ -88,6 +88,10 @@ export function createTrialRoutes() {
               </div>
             </div>
             
+            <div style="background: #fff7ed; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ea580c;">
+              <strong>⏳ Activation Time:</strong> Please allow <strong>1–3 hours</strong> for your subscription to be fully active. During business hours (5 AM – 11 PM EST), activation is usually completed within <strong>15 minutes</strong>.
+            </div>
+
             <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
               <p style="margin: 0 0 10px 0;"><strong>Service Portal URL:</strong></p>
               <p style="margin: 0;"><a href="${IPTV_PORTAL_URL}" style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 18px;" target="_blank">${IPTV_PORTAL_URL}</a></p>
