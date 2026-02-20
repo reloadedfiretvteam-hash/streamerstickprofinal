@@ -281,8 +281,20 @@ function clearStoredToken(): void {
 }
 
 export default function AdminPanel() {
-  const [activeSection, setActiveSection] = useState("dashboard");
+  const [activeSection, setActiveSection] = useState(() => {
+    const hash = window.location.hash.replace('#', '');
+    return hash || "dashboard";
+  });
   const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    const onHash = () => {
+      const h = window.location.hash.replace('#', '');
+      if (h) setActiveSection(h);
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);

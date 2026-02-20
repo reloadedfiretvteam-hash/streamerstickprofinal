@@ -14,6 +14,7 @@ import { createBlogRoutes } from './routes/blog';
 import { createSeoAdRoutes } from './routes/seo-ads';
 import { createAIAssistantRoutes } from './routes/ai-assistant';
 import { createEmailCampaignRoutes } from './routes/email-campaigns';
+import { createMarketingRoutes } from './routes/marketing';
 import { getStorage } from './helpers';
 
 export interface Env {
@@ -180,6 +181,7 @@ app.route('/api/admin', createAdminRoutes());
 app.route('/api/stripe', createWebhookRoutes());
 app.route('/api/track', createVisitorRoutes());
 app.route('/api/admin/visitors', createVisitorRoutes());
+app.route('/api/admin/marketing', createMarketingRoutes());
 
 // Deduplicated visit tracking (ip_hash + session); public, no auth
 app.post('/api/track-visit', async (c) => {
@@ -234,6 +236,20 @@ app.route('/api/blog', createBlogRoutes());
 app.route('/api/seo-ads', createSeoAdRoutes());
 app.route('/api/ai-assistant', createAIAssistantRoutes());
 app.route('/api/email-campaigns', createEmailCampaignRoutes());
+
+app.get('/unsubscribe', async (c) => {
+  try {
+    const email = c.req.query('email');
+    if (!email) return c.html('<html><body><h1>Missing email parameter</h1></body></html>', 400);
+    const { createClient } = await import('@supabase/supabase-js');
+    const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+    const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
+    await supabase.from('contacts').update({ is_subscribed: false }).eq('email', email);
+    return c.html('<!DOCTYPE html><html><head><title>Unsubscribed</title><style>body{font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#1a1a2e;color:#fff;margin:0}div{text-align:center;padding:40px;background:#16213e;border-radius:16px;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,0.3)}</style></head><body><div><h1>Unsubscribed</h1><p>You have been successfully unsubscribed from StreamStickPro emails.</p><p><a href="https://streamstickpro.com" style="color:#667eea">Return to StreamStickPro</a></p></div></body></html>');
+  } catch (e: any) {
+    return c.html('<html><body><h1>Error processing unsubscribe</h1></body></html>', 500);
+  }
+});
 
 app.post('/api/track-cart', async (c) => {
   try {
