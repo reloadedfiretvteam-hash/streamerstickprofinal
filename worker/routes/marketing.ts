@@ -1,12 +1,14 @@
 import { Hono } from 'hono';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '../email-providers';
-import { getStorageConfig } from '../helpers';
 import type { Env } from '../index';
 
+function env_key(env: Env): string {
+  return env.SUPABASE_SERVICE_KEY || env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLL_KEY || env.VITE_SUPABASE_ANON_KEY || '';
+}
+
 function getSupabase(env: Env) {
-  const cfg = getStorageConfig(env);
-  return createClient(cfg.supabaseUrl, cfg.supabaseKey);
+  return createClient(env.VITE_SUPABASE_URL, env_key(env));
 }
 
 function buildUnsubFooter(email: string): string {
@@ -16,6 +18,20 @@ function buildUnsubFooter(email: string): string {
 
 export function createMarketingRoutes() {
   const app = new Hono<{ Bindings: Env }>();
+
+  app.get('/debug', async (c) => {
+    const key = env_key(c.env);
+    return c.json({
+      version: 'v3',
+      hasServiceKey: !!c.env.SUPABASE_SERVICE_KEY,
+      hasServiceRoleKey: !!c.env.SUPABASE_SERVICE_ROLE_KEY,
+      hasServiceRollKey: !!c.env.SUPABASE_SERVICE_ROLL_KEY,
+      hasAnonKey: !!c.env.VITE_SUPABASE_ANON_KEY,
+      supabaseUrl: c.env.VITE_SUPABASE_URL || 'NOT_SET',
+      keyPrefix: key ? key.substring(0, 10) + '...' : 'NONE',
+      keyLength: key ? key.length : 0,
+    });
+  });
 
   app.get('/contacts', async (c) => {
     const supabase = getSupabase(c.env);
