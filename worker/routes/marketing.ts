@@ -19,42 +19,6 @@ function buildUnsubFooter(email: string): string {
 export function createMarketingRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
-  app.get('/debug', async (c) => {
-    const key = env_key(c.env);
-    const resendKey = c.env.RESEND_API_KEY || '';
-    return c.json({
-      version: 'v5',
-      hasServiceKey: !!c.env.SUPABASE_SERVICE_KEY,
-      supabaseUrl: c.env.VITE_SUPABASE_URL || 'NOT_SET',
-      keyPrefix: key ? key.substring(0, 10) + '...' : 'NONE',
-      keyLength: key ? key.length : 0,
-      hasResendKey: !!c.env.RESEND_API_KEY,
-      resendKeyPrefix: resendKey ? resendKey.substring(0, 6) + '...' : 'NONE',
-      resendKeyLength: resendKey.length,
-      resendFromEmail: c.env.RESEND_FROM_EMAIL || 'NOT_SET',
-    });
-  });
-
-  app.post('/test-email-direct', async (c) => {
-    try {
-      const body = await c.req.json();
-      const testEmail = body.email || 'reloadedfiretvteam@gmail.com';
-      if (!c.env.RESEND_API_KEY) return c.json({ error: 'RESEND_API_KEY not set' }, 500);
-      const { Resend } = await import('resend');
-      const resend = new Resend(c.env.RESEND_API_KEY);
-      const fromEmail = c.env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
-      const resp = await resend.emails.send({
-        from: fromEmail,
-        to: testEmail,
-        subject: '[StreamStickPro] Email System Test',
-        html: '<h1>Email System Working</h1><p>This is a test email from StreamStickPro admin panel email marketing system.</p>',
-      });
-      return c.json({ success: true, response: resp });
-    } catch (e: any) {
-      return c.json({ success: false, error: e.message, stack: e.stack?.substring(0, 500) }, 500);
-    }
-  });
-
   app.get('/contacts', async (c) => {
     const supabase = getSupabase(c.env);
     const { data, error } = await supabase.from('contacts').select('*').order('created_at', { ascending: false });
