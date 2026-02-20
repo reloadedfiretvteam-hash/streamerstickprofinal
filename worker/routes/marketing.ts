@@ -22,7 +22,7 @@ export function createMarketingRoutes() {
   app.get('/debug', async (c) => {
     const key = env_key(c.env);
     return c.json({
-      version: 'v3',
+      version: 'v4',
       hasServiceKey: !!c.env.SUPABASE_SERVICE_KEY,
       hasServiceRoleKey: !!c.env.SUPABASE_SERVICE_ROLE_KEY,
       hasServiceRollKey: !!c.env.SUPABASE_SERVICE_ROLL_KEY,
