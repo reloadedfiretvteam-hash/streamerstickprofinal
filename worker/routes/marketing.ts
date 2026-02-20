@@ -1,11 +1,12 @@
-﻿import { Hono } from 'hono';
+import { Hono } from 'hono';
+import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '../email-providers';
+import { getStorageConfig } from '../helpers';
 import type { Env } from '../index';
 
-async function getSupabase(env: Env) {
-  const mod = await import('@supabase/supabase-js');
-  const serviceKey = env.SUPABASE_SERVICE_KEY || env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLL_KEY || env.VITE_SUPABASE_ANON_KEY;
-  return mod.createClient(env.VITE_SUPABASE_URL, serviceKey);
+function getSupabase(env: Env) {
+  const cfg = getStorageConfig(env);
+  return createClient(cfg.supabaseUrl, cfg.supabaseKey);
 }
 
 function buildUnsubFooter(email: string): string {
@@ -17,7 +18,7 @@ export function createMarketingRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
   app.get('/contacts', async (c) => {
-    const supabase = await getSupabase(c.env);
+    const supabase = getSupabase(c.env);
     const { data, error } = await supabase.from('contacts').select('*').order('created_at', { ascending: false });
     if (error) return c.json({ error: error.message }, 500);
     return c.json(data || []);
@@ -26,7 +27,7 @@ export function createMarketingRoutes() {
   app.get('/contacts/count', async (c) => {
     const source = c.req.query('source');
     const subscribed = c.req.query('subscribed');
-    const supabase = await getSupabase(c.env);
+    const supabase = getSupabase(c.env);
     let query = supabase.from('contacts').select('id', { count: 'exact', head: true });
     if (source) query = query.eq('source', source);
     if (subscribed) query = query.eq('is_subscribed', subscribed === 'true');
@@ -36,28 +37,28 @@ export function createMarketingRoutes() {
   });
 
   app.patch('/contacts/:id/unsubscribe', async (c) => {
-    const supabase = await getSupabase(c.env);
+    const supabase = getSupabase(c.env);
     const { error } = await supabase.from('contacts').update({ is_subscribed: false }).eq('id', c.req.param('id'));
     if (error) return c.json({ error: error.message }, 500);
     return c.json({ success: true });
   });
 
   app.patch('/contacts/:id/resubscribe', async (c) => {
-    const supabase = await getSupabase(c.env);
+    const supabase = getSupabase(c.env);
     const { error } = await supabase.from('contacts').update({ is_subscribed: true }).eq('id', c.req.param('id'));
     if (error) return c.json({ error: error.message }, 500);
     return c.json({ success: true });
   });
 
   app.get('/campaigns', async (c) => {
-    const supabase = await getSupabase(c.env);
+    const supabase = getSupabase(c.env);
     const { data, error } = await supabase.from('email_campaigns').select('*').order('created_at', { ascending: false });
     if (error) return c.json({ error: error.message }, 500);
     return c.json(data || []);
   });
 
   app.get('/campaigns/:id', async (c) => {
-    const supabase = await getSupabase(c.env);
+    const supabase = getSupabase(c.env);
     const { data, error } = await supabase.from('email_campaigns').select('*, email_sends(*)').eq('id', c.req.param('id')).single();
     if (error) return c.json({ error: error.message }, 500);
     return c.json(data);
@@ -65,7 +66,7 @@ export function createMarketingRoutes() {
 
   app.post('/campaigns', async (c) => {
     const body = await c.req.json();
-    const supabase = await getSupabase(c.env);
+    const supabase = getSupabase(c.env);
     const { data, error } = await supabase.from('email_campaigns').insert({
       name: body.name,
       subject: body.subject,
@@ -80,7 +81,7 @@ export function createMarketingRoutes() {
 
   app.put('/campaigns/:id', async (c) => {
     const body = await c.req.json();
-    const supabase = await getSupabase(c.env);
+    const supabase = getSupabase(c.env);
     const u: Record<string, any> = {};
     if (body.name !== undefined) u.name = body.name;
     if (body.subject !== undefined) u.subject = body.subject;
@@ -94,14 +95,14 @@ export function createMarketingRoutes() {
   });
 
   app.delete('/campaigns/:id', async (c) => {
-    const supabase = await getSupabase(c.env);
+    const supabase = getSupabase(c.env);
     const { error } = await supabase.from('email_campaigns').delete().eq('id', c.req.param('id'));
     if (error) return c.json({ error: error.message }, 500);
     return c.json({ success: true });
   });
 
   app.post('/campaigns/:id/preview-count', async (c) => {
-    const supabase = await getSupabase(c.env);
+    const supabase = getSupabase(c.env);
     const { data: cmp } = await supabase.from('email_campaigns').select('segment').eq('id', c.req.param('id')).single();
     let q = supabase.from('contacts').select('id', { count: 'exact', head: true }).eq('is_subscribed', true);
     if (cmp?.segment?.source) q = q.eq('source', cmp.segment.source);
@@ -113,7 +114,7 @@ export function createMarketingRoutes() {
   app.post('/campaigns/:id/test-send', async (c) => {
     const body = await c.req.json();
     if (!body.email) return c.json({ error: 'Test email required' }, 400);
-    const supabase = await getSupabase(c.env);
+    const supabase = getSupabase(c.env);
     const { data: cmp, error } = await supabase.from('email_campaigns').select('*').eq('id', c.req.param('id')).single();
     if (error || !cmp) return c.json({ error: 'Campaign not found' }, 404);
     const footer = buildUnsubFooter(body.email);
@@ -125,7 +126,7 @@ export function createMarketingRoutes() {
 
   app.post('/campaigns/:id/send', async (c) => {
     const id = c.req.param('id');
-    const supabase = await getSupabase(c.env);
+    const supabase = getSupabase(c.env);
     const { data: cmp, error: cErr } = await supabase.from('email_campaigns').select('*').eq('id', id).single();
     if (cErr || !cmp) return c.json({ error: 'Campaign not found' }, 404);
     if (cmp.status === 'sent') return c.json({ error: 'Already sent' }, 400);
@@ -152,7 +153,7 @@ export function createMarketingRoutes() {
   app.post('/send-to-selected', async (c) => {
     const body = await c.req.json();
     if (!body.contactIds?.length || !body.subject || !body.bodyHtml) return c.json({ error: 'contactIds, subject, bodyHtml required' }, 400);
-    const supabase = await getSupabase(c.env);
+    const supabase = getSupabase(c.env);
     const { data: contacts } = await supabase.from('contacts').select('*').in('id', body.contactIds);
     let sent = 0, failed = 0;
     for (const ct of (contacts || [])) {
