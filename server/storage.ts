@@ -20,6 +20,12 @@ import {
   type InsertPasswordResetToken,
   type AbandonedCart,
   type InsertAbandonedCart,
+  type Contact,
+  type InsertContact,
+  type EmailCampaign,
+  type InsertEmailCampaign,
+  type EmailSend,
+  type InsertEmailSend,
   users,
   orders,
   realProducts,
@@ -29,6 +35,9 @@ import {
   blogPosts,
   passwordResetTokens,
   abandonedCarts,
+  contacts,
+  emailCampaigns,
+  emailSends,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -96,6 +105,28 @@ export interface IStorage {
   markPasswordResetTokenUsed(id: string): Promise<void>;
   deleteExpiredPasswordResetTokens(): Promise<void>;
   
+  // Email Marketing - Contacts
+  upsertContact(email: string, source: 'free_trial' | 'subscription' | 'firestick', firstName?: string, lastName?: string): Promise<Contact>;
+  getContact(id: string): Promise<Contact | undefined>;
+  getContactByEmail(email: string): Promise<Contact | undefined>;
+  getAllContacts(filters?: { source?: string; search?: string; subscribedOnly?: boolean }): Promise<Contact[]>;
+  getContactCount(segment?: { source?: string }): Promise<number>;
+  updateContactSubscription(id: string, isSubscribed: boolean): Promise<Contact | undefined>;
+
+  // Email Marketing - Campaigns
+  createEmailCampaign(campaign: InsertEmailCampaign): Promise<EmailCampaign>;
+  getEmailCampaign(id: string): Promise<EmailCampaign | undefined>;
+  getAllEmailCampaigns(): Promise<EmailCampaign[]>;
+  updateEmailCampaign(id: string, updates: Partial<InsertEmailCampaign>): Promise<EmailCampaign | undefined>;
+  deleteEmailCampaign(id: string): Promise<boolean>;
+
+  // Email Marketing - Sends
+  createEmailSend(send: InsertEmailSend): Promise<EmailSend>;
+  createEmailSendsBatch(sends: InsertEmailSend[]): Promise<EmailSend[]>;
+  updateEmailSend(id: string, updates: Partial<InsertEmailSend>): Promise<EmailSend | undefined>;
+  getEmailSendsByCampaign(campaignId: string): Promise<EmailSend[]>;
+  getCampaignSendStats(campaignId: string): Promise<{ queued: number; sent: number; failed: number }>;
+
   createAbandonedCart(cart: InsertAbandonedCart): Promise<AbandonedCart>;
   getAbandonedCart(id: string): Promise<AbandonedCart | undefined>;
   getAbandonedCartByEmail(email: string): Promise<AbandonedCart | undefined>;
@@ -587,6 +618,153 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date()
       })
       .where(eq(abandonedCarts.id, id));
+  }
+
+  // ===== EMAIL MARKETING - CONTACTS =====
+
+  private static SOURCE_PRIORITY: Record<string, number> = { free_trial: 1, firestick: 2, subscription: 3 };
+
+  async upsertContact(
+    email: string,
+    source: 'free_trial' | 'subscription' | 'firestick',
+    firstName?: string,
+    lastName?: string
+  ): Promise<Contact> {
+    const existing = await this.getContactByEmail(email);
+    if (existing) {
+      const currentPriority = DatabaseStorage.SOURCE_PRIORITY[existing.source] || 0;
+      const newPriority = DatabaseStorage.SOURCE_PRIORITY[source] || 0;
+      const updates: Partial<InsertContact> = { lastActivityAt: new Date() };
+      if (newPriority > currentPriority) updates.source = source;
+      if (firstName && !existing.firstName) updates.firstName = firstName;
+      if (lastName && !existing.lastName) updates.lastName = lastName;
+
+      const [updated] = await db.update(contacts)
+        .set(updates)
+        .where(eq(contacts.id, existing.id))
+        .returning();
+      return updated;
+    }
+
+    const [contact] = await db.insert(contacts)
+      .values({ email, source, firstName: firstName || null, lastName: lastName || null, lastActivityAt: new Date() })
+      .returning();
+    return contact;
+  }
+
+  async getContact(id: string): Promise<Contact | undefined> {
+    const [contact] = await db.select().from(contacts).where(eq(contacts.id, id));
+    return contact;
+  }
+
+  async getContactByEmail(email: string): Promise<Contact | undefined> {
+    const [contact] = await db.select().from(contacts).where(eq(contacts.email, email));
+    return contact;
+  }
+
+  async getAllContacts(filters?: { source?: string; search?: string; subscribedOnly?: boolean }): Promise<Contact[]> {
+    const conditions = [];
+    if (filters?.source && filters.source !== 'all') {
+      conditions.push(eq(contacts.source, filters.source));
+    }
+    if (filters?.search) {
+      const term = `%${filters.search}%`;
+      conditions.push(or(ilike(contacts.email, term), ilike(contacts.firstName, term), ilike(contacts.lastName, term))!);
+    }
+    if (filters?.subscribedOnly) {
+      conditions.push(eq(contacts.isSubscribed, true));
+    }
+    const query = conditions.length > 0
+      ? db.select().from(contacts).where(and(...conditions)).orderBy(desc(contacts.createdAt))
+      : db.select().from(contacts).orderBy(desc(contacts.createdAt));
+    return query;
+  }
+
+  async getContactCount(segment?: { source?: string }): Promise<number> {
+    const conditions = [eq(contacts.isSubscribed, true)];
+    if (segment?.source && segment.source !== 'all') {
+      conditions.push(eq(contacts.source, segment.source));
+    }
+    const [result] = await db.select({ count: count() }).from(contacts).where(and(...conditions));
+    return result?.count || 0;
+  }
+
+  async updateContactSubscription(id: string, isSubscribed: boolean): Promise<Contact | undefined> {
+    const [contact] = await db.update(contacts)
+      .set({ isSubscribed })
+      .where(eq(contacts.id, id))
+      .returning();
+    return contact;
+  }
+
+  // ===== EMAIL MARKETING - CAMPAIGNS =====
+
+  async createEmailCampaign(campaign: InsertEmailCampaign): Promise<EmailCampaign> {
+    const [newCampaign] = await db.insert(emailCampaigns).values(campaign).returning();
+    return newCampaign;
+  }
+
+  async getEmailCampaign(id: string): Promise<EmailCampaign | undefined> {
+    const [campaign] = await db.select().from(emailCampaigns).where(eq(emailCampaigns.id, id));
+    return campaign;
+  }
+
+  async getAllEmailCampaigns(): Promise<EmailCampaign[]> {
+    return db.select().from(emailCampaigns).orderBy(desc(emailCampaigns.createdAt));
+  }
+
+  async updateEmailCampaign(id: string, updates: Partial<InsertEmailCampaign>): Promise<EmailCampaign | undefined> {
+    const [campaign] = await db.update(emailCampaigns)
+      .set(updates)
+      .where(eq(emailCampaigns.id, id))
+      .returning();
+    return campaign;
+  }
+
+  async deleteEmailCampaign(id: string): Promise<boolean> {
+    const result = await db.delete(emailCampaigns).where(eq(emailCampaigns.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // ===== EMAIL MARKETING - SENDS =====
+
+  async createEmailSend(send: InsertEmailSend): Promise<EmailSend> {
+    const [newSend] = await db.insert(emailSends).values(send).returning();
+    return newSend;
+  }
+
+  async createEmailSendsBatch(sends: InsertEmailSend[]): Promise<EmailSend[]> {
+    if (sends.length === 0) return [];
+    return db.insert(emailSends).values(sends).returning();
+  }
+
+  async updateEmailSend(id: string, updates: Partial<InsertEmailSend>): Promise<EmailSend | undefined> {
+    const [send] = await db.update(emailSends)
+      .set(updates)
+      .where(eq(emailSends.id, id))
+      .returning();
+    return send;
+  }
+
+  async getEmailSendsByCampaign(campaignId: string): Promise<EmailSend[]> {
+    return db.select().from(emailSends)
+      .where(eq(emailSends.campaignId, campaignId))
+      .orderBy(desc(emailSends.sentAt));
+  }
+
+  async getCampaignSendStats(campaignId: string): Promise<{ queued: number; sent: number; failed: number }> {
+    const sends = await db.select({ status: emailSends.status, count: count() })
+      .from(emailSends)
+      .where(eq(emailSends.campaignId, campaignId))
+      .groupBy(emailSends.status);
+
+    const stats = { queued: 0, sent: 0, failed: 0 };
+    for (const row of sends) {
+      if (row.status === 'queued') stats.queued = row.count;
+      if (row.status === 'sent') stats.sent = row.count;
+      if (row.status === 'failed') stats.failed = row.count;
+    }
+    return stats;
   }
 }
 

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, uniqueIndex, index, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, uniqueIndex, index, serial, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -818,3 +818,92 @@ export type CreateSeoRedirect = z.infer<typeof createSeoRedirectSchema>;
 export type UpdateSeoPage = z.infer<typeof updateSeoPageSchema>;
 export type CreateSeoKeyword = z.infer<typeof createSeoKeywordSchema>;
 export type RunSeoAudit = z.infer<typeof runSeoAuditSchema>;
+
+// ============================================
+// EMAIL MARKETING TABLES
+// ============================================
+
+export const contacts = pgTable("contacts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  source: text("source").notNull(), // free_trial, subscription, firestick
+  createdAt: timestamp("created_at").defaultNow(),
+  lastActivityAt: timestamp("last_activity_at"),
+  isSubscribed: boolean("is_subscribed").default(true),
+}, (table) => [
+  uniqueIndex("contacts_email_idx").on(table.email),
+  index("contacts_source_idx").on(table.source),
+  index("contacts_subscribed_idx").on(table.isSubscribed),
+  index("contacts_created_at_idx").on(table.createdAt),
+]);
+
+export const insertContactSchema = createInsertSchema(contacts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertContact = z.infer<typeof insertContactSchema>;
+export type Contact = typeof contacts.$inferSelect;
+
+export const emailCampaigns = pgTable("email_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  subject: text("subject").notNull(),
+  bodyHtml: text("body_html").notNull(),
+  bodyText: text("body_text"),
+  segment: jsonb("segment"), // e.g. { "source": "free_trial" }
+  status: text("status").default("draft"), // draft, sending, sent
+  createdBy: varchar("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  sentAt: timestamp("sent_at"),
+}, (table) => [
+  index("email_campaigns_status_idx").on(table.status),
+  index("email_campaigns_created_at_idx").on(table.createdAt),
+]);
+
+export const insertEmailCampaignSchema = createInsertSchema(emailCampaigns).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertEmailCampaign = z.infer<typeof insertEmailCampaignSchema>;
+export type EmailCampaign = typeof emailCampaigns.$inferSelect;
+
+export const emailSends = pgTable("email_sends", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: varchar("campaign_id").notNull(),
+  contactId: varchar("contact_id").notNull(),
+  status: text("status").default("queued"), // queued, sent, failed
+  providerMessageId: text("provider_message_id"),
+  errorMessage: text("error_message"),
+  sentAt: timestamp("sent_at"),
+}, (table) => [
+  index("email_sends_campaign_idx").on(table.campaignId),
+  index("email_sends_contact_idx").on(table.contactId),
+  index("email_sends_status_idx").on(table.status),
+]);
+
+export const insertEmailSendSchema = createInsertSchema(emailSends).omit({
+  id: true,
+});
+
+export type InsertEmailSend = z.infer<typeof insertEmailSendSchema>;
+export type EmailSend = typeof emailSends.$inferSelect;
+
+// Zod schemas for API validation
+export const createCampaignSchema = z.object({
+  name: z.string().min(1, "Campaign name is required"),
+  subject: z.string().min(1, "Subject is required"),
+  bodyHtml: z.string().min(1, "Email body HTML is required"),
+  bodyText: z.string().optional(),
+  segment: z.object({
+    source: z.enum(["all", "free_trial", "subscription", "firestick"]).optional(),
+  }).optional(),
+});
+
+export const updateCampaignSchema = createCampaignSchema.partial();
+
+export type CreateCampaignRequest = z.infer<typeof createCampaignSchema>;
+export type UpdateCampaignRequest = z.infer<typeof updateCampaignSchema>;
