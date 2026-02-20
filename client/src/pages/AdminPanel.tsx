@@ -1784,7 +1784,7 @@ export default function AdminPanel() {
           <p className="text-xs text-gray-400 mt-1">StreamStickPro Management</p>
         </div>
         
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <Button 
             variant={activeSection === "dashboard" ? "secondary" : "ghost"} 
             className="w-full justify-start"
