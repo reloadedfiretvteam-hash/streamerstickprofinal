@@ -110,6 +110,8 @@ function Router() {
         <Route path="/iptv-media-players" component={IptvMediaPlayers} />
         <Route path="/resources" component={Resources} />
         <Route path="/36hr-trial" component={Trial36hr} />
+        <Route path="/trial" component={Trial36hr} />
+        <Route path="/firestick" component={JailbrokenFireSticks} />
         <Route path="/pricing" component={Pricing} />
         <Route path="/onn-google-tv" component={OnnGoogleTv} />
         <Route path="/iptv-smarters-pro" component={IptvSmartersPro} />
