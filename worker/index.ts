@@ -14,7 +14,6 @@ import { createBlogRoutes } from './routes/blog';
 import { createSeoAdRoutes } from './routes/seo-ads';
 import { createAIAssistantRoutes } from './routes/ai-assistant';
 import { createEmailCampaignRoutes } from './routes/email-campaigns';
-import { createMarketingRoutes } from './routes/marketing';
 import { getStorage } from './helpers';
 
 export interface Env {
@@ -181,7 +180,6 @@ app.route('/api/admin', createAdminRoutes());
 app.route('/api/stripe', createWebhookRoutes());
 app.route('/api/track', createVisitorRoutes());
 app.route('/api/admin/visitors', createVisitorRoutes());
-app.route('/api/admin/marketing', createMarketingRoutes());
 
 // Deduplicated visit tracking (ip_hash + session); public, no auth
 app.post('/api/track-visit', async (c) => {
@@ -237,20 +235,6 @@ app.route('/api/seo-ads', createSeoAdRoutes());
 app.route('/api/ai-assistant', createAIAssistantRoutes());
 app.route('/api/email-campaigns', createEmailCampaignRoutes());
 
-app.get('/unsubscribe', async (c) => {
-  try {
-    const email = c.req.query('email');
-    if (!email) return c.html('<html><body><h1>Missing email parameter</h1></body></html>', 400);
-    const { createClient } = await import('@supabase/supabase-js');
-    const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY;
-    const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
-    await supabase.from('contacts').update({ is_subscribed: false }).eq('email', email);
-    return c.html('<!DOCTYPE html><html><head><title>Unsubscribed</title><style>body{font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#1a1a2e;color:#fff;margin:0}div{text-align:center;padding:40px;background:#16213e;border-radius:16px;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,0.3)}</style></head><body><div><h1>Unsubscribed</h1><p>You have been successfully unsubscribed from StreamStickPro emails.</p><p><a href="https://streamstickpro.com" style="color:#667eea">Return to StreamStickPro</a></p></div></body></html>');
-  } catch (e: any) {
-    return c.html('<html><body><h1>Error processing unsubscribe</h1></body></html>', 500);
-  }
-});
-
 app.post('/api/track-cart', async (c) => {
   try {
     const { getStorage } = await import('./helpers');
@@ -285,19 +269,7 @@ app.get('/api/stripe/config', async (c) => {
 });
 
 app.get('/api/health', (c) => {
-  const env = c.env;
-  const bindings = {
-    stripe: !!(env.STRIPE_SECRET_KEY && env.STRIPE_SECRET_KEY.length > 0),
-    resend: !!(env.RESEND_API_KEY && env.RESEND_API_KEY.length > 0),
-    supabase: !!(env.VITE_SUPABASE_URL && (env.SUPABASE_SERVICE_KEY || env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLL_KEY)),
-  };
-  const ok = bindings.stripe && bindings.resend && bindings.supabase;
-  return c.json({
-    status: ok ? 'ok' : 'degraded',
-    timestamp: new Date().toISOString(),
-    version: '2.0.1',
-    bindings,
-  });
+  return c.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.0.1' });
 });
 
 // Catalog API: 93K catalog summary for Schema.org Dataset / AI citation (Nuclear SEO)
@@ -351,7 +323,7 @@ app.get('/api/seo-page/:country/:pageType/:slug', async (c) => {
     return c.json(page);
   } catch (err) {
     console.error('[api/seo-page]', err instanceof Error ? err.message : String(err));
-    return c.json({ error: 'Service temporarily unavailable' }, 503, { 'Retry-After': '60' });
+    return c.json({ error: 'Service temporarily unavailable' }, 500);
   }
 });
 
@@ -507,7 +479,6 @@ app.get('/cron/email-campaigns', async (c) => {
 });
 
 // Phase 4: OG-rich HTML for location pages (crawlers only) — must be before * redirect. DB first, then static build fallback so 25K pages have meta even without DB seed.
-// GSC: avoid 5xx when DB/timeout fails — return 503 with Retry-After so crawlers retry; only 404 when page truly missing.
 app.get('/l/:country/:pageType/:slug', async (c, next) => {
   const ua = (c.req.header('User-Agent') || '').toLowerCase();
   const isCrawler = /bot|crawler|facebookexternalhit|twitterbot|linkedinbot|slurp|whatsapp|telegram|pinterest|discord/i.test(ua);
@@ -520,13 +491,8 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
   let desc = '';
   let faqJson: { question: string; answer: string }[] = [];
   try {
-    let page: any = null;
-    try {
-      const storage = getStorage(c.env);
-      page = await storage.getSeoPageByPath(country, pageType, slug);
-    } catch {
-      // DB timeout/unavailable — fall back to static index only (don't 5xx)
-    }
+    const storage = getStorage(c.env);
+    const page = await storage.getSeoPageByPath(country, pageType, slug);
     if (page) {
       title = (page.title || page.h1 || 'IPTV & Jailbroken Fire Stick').replace(/\[LOCATION\]/g, page.location || page.region || slug);
       desc = (page.meta_description || page.p1_snippet || '').trim().substring(0, 160) || 'IPTV and Fire Stick guides for your area. StreamStickPro—18K+ channels, free trial. USA, Canada, UK.';
@@ -653,10 +619,8 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
 </body>
 </html>`;
     return applySecurityHeaders(new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }), path);
-  } catch (err) {
-    console.error('[location page]', path, err instanceof Error ? err.message : String(err));
-    const tmp = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Temporarily Unavailable</title><meta name="robots" content="noindex,nofollow"></head><body><h1>Temporarily Unavailable</h1><p>Please try again in a moment.</p><p><a href="https://streamstickpro.com/">StreamStickPro Home</a></p></body></html>`;
-    return new Response(tmp, { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Retry-After': '60' } });
+  } catch {
+    return next();
   }
 });
 

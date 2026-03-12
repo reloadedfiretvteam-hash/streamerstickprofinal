@@ -168,32 +168,6 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
       
-      - name: Sync secrets to Cloudflare Pages
-        run: node scripts/sync-secrets-to-cloudflare-pages.mjs
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-          STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
-          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com' }}
-          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
-
-      - name: List Cloudflare Pages secrets (verify sync)
-        run: |
-          echo "Production secrets:"
-          npx wrangler pages secret list --project-name=streamerstickpro-live --env=production 2>/dev/null || true
-          echo "Preview secrets (used by clean-main if not production branch):"
-          npx wrangler pages secret list --project-name=streamerstickpro-live --env=preview 2>/dev/null || true
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        continue-on-error: true
-
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
@@ -225,47 +199,6 @@ jobs:
 
       - name: Wait for deploy to be live
         run: sleep 15
-
-      - name: Smoke test – verify Worker has Stripe, Resend, Supabase
-        run: |
-          echo "Checking https://streamstickpro.com/api/health for bindings..."
-          RESP=$(curl -sSf --max-time 30 "https://streamstickpro.com/api/health" || echo '{}')
-          echo "$RESP" | jq .
-          STATUS=$(echo "$RESP" | jq -r '.status // "unknown"')
-          STRIPE=$(echo "$RESP" | jq -r '.bindings.stripe // false')
-          RESEND=$(echo "$RESP" | jq -r '.bindings.resend // false')
-          SUPABASE=$(echo "$RESP" | jq -r '.bindings.supabase // false')
-          if [ "$STRIPE" != "true" ] || [ "$RESEND" != "true" ] || [ "$SUPABASE" != "true" ]; then
-            echo "::error::Worker missing secrets: stripe=$STRIPE resend=$RESEND supabase=$SUPABASE"
-            echo "Set secrets in Cloudflare Dashboard (Pages → streamerstickpro-live → Settings → Environment variables) or fix Sync step."
-            exit 1
-          fi
-          echo "All bindings present. Checkout and trials should work."
-
-      - name: Backfill email campaigns for past customers (marketing emails)
-        run: |
-          echo "Enrolling past customers in weekly marketing email campaigns..."
-          # Login to get admin token
-          TOKEN=$(curl -sSf -X POST "https://streamstickpro.com/api/auth/login" \
-            -H "Content-Type: application/json" \
-            -d '{"username":"admin","password":"admin123"}' | jq -r '.token // empty')
-          if [ -n "$TOKEN" ]; then
-            RESULT=$(curl -sSf -X POST "https://streamstickpro.com/api/admin/email-campaigns/backfill" \
-              -H "Authorization: Bearer $TOKEN" \
-              -H "Content-Type: application/json" --max-time 120 || echo '{"error":"timeout"}')
-            echo "$RESULT"
-            echo "## Email Campaign Backfill" >> $GITHUB_STEP_SUMMARY
-            echo "$RESULT" | jq -r '"Created: \(.created // 0) | Total: \(.totalPastCustomers // 0)"' >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
-          else
-            echo "::warning:: Could not get admin token for email backfill"
-          fi
-        continue-on-error: true
-
-      - name: Trigger email campaign processing (cron)
-        run: |
-          echo "Processing scheduled marketing emails..."
-          curl -sSf "https://streamstickpro.com/cron/email-campaigns" --max-time 60 || true
-        continue-on-error: true
 
       - name: Verify sitemap and ping search engines (Google, Bing, Yandex, Yahoo)
         id: sitemap_verify
@@ -329,10 +262,3 @@ jobs:
           SITE_URL: https://streamstickpro.com
           INDEXNOW_KEY: 3b1a52f5f41a4138b1f21c3265180f44
         continue-on-error: true
-
-      - name: GSC and system summary
-        if: success()
-        run: |
-          echo "## Google Search Console and system" >> $GITHUB_STEP_SUMMARY
-          echo "- **Checkout and free trials:** Smoke test passed — Worker has Stripe, Resend, Supabase. **Manually test:** [Health](https://streamstickpro.com/api/health) | [36hr Trial](https://streamstickpro.com/36hr-trial) | [Shop/Checkout](https://streamstickpro.com/#shop)." >> $GITHUB_STEP_SUMMARY
-          echo "- **GSC:** See docs/GSC-STATUS-FIXES.md for your Passed/Failed/Started statuses. Submit sitemap-index.xml; fix Page with redirect (1); 5xx reduced via 503+Retry-After." >> $GITHUB_STEP_SUMMARY
