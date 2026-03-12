@@ -3,35 +3,17 @@ pages_build_output_dir = "./dist"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-# PUBLIC variables (safe to commit)
-[vars]
-NODE_ENV = "production"
-RESEND_FROM_EMAIL = "noreply@streamstickpro.com"
-VITE_SUPABASE_URL = "https://emlqlmfzqsnqokrqvmcm.supabase.co"
-VITE_SUPABASE_ANON_KEY = "sb_publishable_BkyZ4tI3yVw04QBkAmZjXw_fhy0Y7LzJ-4tTvLSlElxowyyuQGDQRBQsiCOD1YquEtRgISm"
-VITE_SECURE_HOSTS = "secure.streamstickpro.com"
-VITE_STORAGE_BUCKET_NAME = "imiges"
-SITE_URL = "https://streamstickpro.com"
-
-# SECRETS - Set in Cloudflare Pages Dashboard → Settings → Environment Variables (Production)
-# Worker needs these at RUNTIME to talk to Supabase (SEO, redirect_map, blog, visitor tracking). Same values as GitHub Secrets.
-# Required:
-#   SUPABASE_SERVICE_KEY (or SUPABASE_SERVICE_ROLE_KEY) - Supabase service_role key (Worker + visitor RPCs: get_live_visitors, upsert_visitor_visit)
-#   ADMIN_USERNAME - Admin login username
-#   ADMIN_PASSWORD - Admin login password
-#   STRIPE_SECRET_KEY - Stripe API secret key
-#   STRIPE_PUBLISHABLE_KEY - Stripe publishable key
-#   STRIPE_WEBHOOK_SECRET - Stripe webhook signing secret
-#   RESEND_API_KEY - Resend email API key
-#   SESSION_SECRET - Session encryption key
+# ALL environment variables (public + secrets) are managed in the Cloudflare Dashboard:
+#   Workers & Pages → streamerstickpro-live → Settings → Environment variables
 #
-# Visitor tracking (/api/track-visit, /api/admin/visitors/live) uses VITE_SUPABASE_URL + SUPABASE_SERVICE_KEY above.
+# DO NOT add a [vars] section here. Cloudflare Pages treats wrangler.toml as the
+# "source of truth" and any [vars] defined here REPLACE (not merge with) Dashboard
+# variables — including encrypted secrets like STRIPE_SECRET_KEY. This was the root
+# cause of checkout/trial breaking on every deploy.
 #
-# Optional (for retargeting):
-#   VITE_GOOGLE_ADS_ID - Google Ads conversion tracking ID
-#   VITE_FACEBOOK_PIXEL_ID - Facebook Pixel ID
-
-# NOTE: Cron triggers for Cloudflare Pages must be configured in the Dashboard:
-#   Workers & Pages → Your Project → Settings → Triggers → Add Cron Trigger
-#   Schedule: 0 */6 * * * (every 6 hours)
-#   This will call /cron/email-campaigns endpoint automatically
+# Required Dashboard variables (Production + Preview):
+#   NODE_ENV, RESEND_FROM_EMAIL, SITE_URL,
+#   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_SECURE_HOSTS, VITE_STORAGE_BUCKET_NAME,
+#   SUPABASE_SERVICE_KEY, ADMIN_USERNAME, ADMIN_PASSWORD,
+#   STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET,
+#   RESEND_API_KEY, SESSION_SECRET, JWT_SECRET, UNSUBSCRIBE_JWT_SECRET

@@ -323,7 +323,7 @@ app.get('/api/seo-page/:country/:pageType/:slug', async (c) => {
     return c.json(page);
   } catch (err) {
     console.error('[api/seo-page]', err instanceof Error ? err.message : String(err));
-    return c.json({ error: 'Service temporarily unavailable' }, 500);
+    return c.json({ error: 'Service temporarily unavailable' }, 503, { 'Retry-After': '60' });
   }
 });
 
@@ -568,6 +568,10 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
   <meta name="twitter:title" content="${fullTitleSafe}">
   <meta name="twitter:description" content="${descSafe}">
   <meta name="twitter:image" content="${ogImage}">
+  <meta name="twitter:image:alt" content="${h1Text} – StreamStickPro IPTV">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="${h1Text} – StreamStickPro IPTV">
   <meta name="robots" content="index, follow">
   ${faqJson.length > 0 ? `<script type="application/ld+json">${JSON.stringify({
     '@context': 'https://schema.org',
@@ -716,7 +720,8 @@ const SEO_REDIRECTS_STATIC: Record<string, string> = {
   '/streaming': '/iptv-services',
 };
 app.get('*', async (c, next) => {
-  const path = new URL(c.req.url).pathname;
+  const reqUrl = new URL(c.req.url);
+  const path = reqUrl.pathname;
   try {
     const storage = getStorage(c.env);
     const dbRedirects = await storage.getRedirectMap();
@@ -731,6 +736,10 @@ app.get('*', async (c, next) => {
   const target = SEO_REDIRECTS_STATIC[path];
   if (target) {
     return c.redirect('https://streamstickpro.com' + target, 301);
+  }
+  if (path !== '/' && path.endsWith('/')) {
+    const clean = path.replace(/\/+$/, '');
+    return c.redirect('https://streamstickpro.com' + clean + reqUrl.search, 301);
   }
   return next();
 });
@@ -1009,28 +1018,28 @@ app.post('/api/indexnow/ping', async (c) => {
 
 // ── Per-page SEO meta for SPA pages (critical: Googlebot sees unique meta per page) ──
 const PAGE_META: Record<string, { title: string; description: string; noindex?: boolean }> = {
-  '/': { title: 'IPTV Fire Stick 2026 | 18K+ Channels, No Buffer | StreamStick Pro', description: 'Best IPTV for Fire Stick 2026: 18,000+ live channels, VOD movies, 24/7 support. Free 36-hour trial. Jailbroken Fire Sticks and ONN Google TV included.' },
+  '/': { title: 'IPTV Fire Stick 2026 | 18K+ Live Channels | StreamStick Pro', description: 'Best IPTV for Fire Stick 2026: 18,000+ live channels, VOD movies, 24/7 support. Free 36-hour trial. Jailbroken Fire Sticks and ONN Google TV included.' },
   '/shop': { title: 'Shop IPTV Subscriptions & Fire Sticks | StreamStick Pro', description: 'Buy IPTV subscriptions, jailbroken Fire Sticks, and ONN Google TV devices. 18,000+ channels, instant setup, 24/7 support. Shop StreamStickPro now.' },
-  '/blog': { title: 'IPTV & Streaming Blog | Guides, News, Tips | StreamStick Pro', description: 'Expert IPTV guides, Fire Stick tutorials, streaming tips, and cord-cutting news. Updated weekly by StreamStickPro.' },
-  '/locations': { title: 'IPTV Service by City & Region | USA, Canada, UK | StreamStick Pro', description: 'Find IPTV service in your city. StreamStickPro covers 40,000+ locations across USA, Canada, and UK. Local guides, setup help, free trial.' },
+  '/blog': { title: 'IPTV & Streaming Blog | Guides, News, Tips | StreamStick Pro', description: 'Expert IPTV guides, Fire Stick tutorials, streaming tips, and cord-cutting news. Updated weekly by the StreamStickPro editorial team.' },
+  '/locations': { title: 'IPTV by City & Region | USA, Canada, UK | StreamStick Pro', description: 'Find IPTV service in your city. StreamStickPro covers 40,000+ locations across USA, Canada, and UK. Local guides, setup help, free trial.' },
   '/iptv-services': { title: 'Best IPTV Service 2026 | 18K+ Channels | StreamStick Pro', description: 'StreamStickPro IPTV: 18,000+ live channels, 100,000+ VOD, EPG guide, catch-up TV. Works on Fire Stick, Google TV, Smart TVs. Free 36-hour trial.' },
-  '/jailbroken-fire-sticks': { title: 'Jailbroken Fire Sticks 2026 | Pre-Loaded, Ready to Stream | StreamStick Pro', description: 'Buy jailbroken Fire Sticks pre-loaded with IPTV, Kodi, Stremio, TiviMate. 18K+ channels, plug and play. Ships fast to USA, Canada, UK.' },
-  '/onn-google-tv': { title: 'ONN Google TV IPTV Setup 2026 | StreamStick Pro', description: 'Set up IPTV on ONN Google TV in minutes. 18,000+ channels, TiviMate & Smarters Pro compatible. Step-by-step guide by StreamStickPro.' },
-  '/36hr-trial': { title: 'Free 36-Hour IPTV Trial | 18K+ Channels | StreamStick Pro', description: 'Try StreamStickPro free for 36 hours. 18,000+ live channels, VOD, EPG guide. No credit card required. Instant access.' },
-  '/pricing': { title: 'IPTV Pricing & Plans 2026 | StreamStick Pro', description: 'StreamStickPro IPTV pricing: affordable monthly and yearly plans. 18,000+ channels, 4K quality, multi-device support. Compare plans.' },
+  '/jailbroken-fire-sticks': { title: 'Jailbroken Fire Sticks 2026 | Pre-Loaded | StreamStick Pro', description: 'Buy jailbroken Fire Sticks pre-loaded with IPTV, Kodi, Stremio, TiviMate. 18K+ channels, plug and play. Ships fast to USA, Canada, UK.' },
+  '/onn-google-tv': { title: 'ONN Google TV IPTV Setup Guide 2026 | StreamStick Pro', description: 'Set up IPTV on ONN Google TV in minutes. 18,000+ channels, TiviMate & Smarters Pro compatible. Step-by-step guide by StreamStickPro.' },
+  '/36hr-trial': { title: 'Free 36-Hour IPTV Trial | 18K+ Channels | StreamStick Pro', description: 'Try StreamStickPro free for 36 hours. 18,000+ live channels, VOD, EPG guide. No credit card required. Instant activation on all devices.' },
+  '/pricing': { title: 'IPTV Pricing & Subscription Plans 2026 | StreamStick Pro', description: 'StreamStickPro IPTV pricing: affordable monthly and yearly plans. 18,000+ channels, 4K quality, multi-device support. Compare plans now.' },
   '/iptv-firestick': { title: 'IPTV for Fire Stick 2026 | Setup Guide | StreamStick Pro', description: 'How to set up IPTV on Amazon Fire Stick. Step-by-step guide for IPTV Smarters Pro, TiviMate, and more. 18K+ channels with StreamStickPro.' },
-  '/best-iptv-firestick': { title: 'Best IPTV for Fire Stick 2026 | Top Picks | StreamStick Pro', description: 'Best IPTV services for Amazon Fire Stick in 2026. Compare features, channels, prices. StreamStickPro rated #1 with 18K+ channels.' },
-  '/firestick-devices': { title: 'Fire Stick Devices for IPTV 2026 | StreamStick Pro', description: 'Best Fire Stick devices for IPTV streaming in 2026. Fire Stick 4K Max, Lite, and pre-loaded jailbroken options compared.' },
-  '/iptv-media-players': { title: 'Best IPTV Media Players 2026 | Apps & Devices | StreamStick Pro', description: 'Top IPTV media players and apps: TiviMate, IPTV Smarters Pro, Kodi, Perfect Player, VLC. Setup guides and comparisons.' },
+  '/best-iptv-firestick': { title: 'Best IPTV for Fire Stick 2026 | Top Picks | StreamStick Pro', description: 'Best IPTV services for Amazon Fire Stick in 2026. Compare features, channels, prices. StreamStickPro rated #1 with 18K+ channels and free trial.' },
+  '/firestick-devices': { title: 'Fire Stick Devices for IPTV 2026 | StreamStick Pro', description: 'Best Fire Stick devices for IPTV streaming in 2026. Fire Stick 4K Max, Lite, and pre-loaded jailbroken options compared by experts.' },
+  '/iptv-media-players': { title: 'Best IPTV Media Players 2026 | Devices | StreamStick Pro', description: 'Top IPTV media players and apps: TiviMate, IPTV Smarters Pro, Kodi, Perfect Player, VLC. Expert setup guides and side-by-side comparisons.' },
   '/iptv-smarters-pro': { title: 'IPTV Smarters Pro Setup Guide 2026 | StreamStick Pro', description: 'Complete IPTV Smarters Pro setup guide. Install on Fire Stick, Android, iOS. Add StreamStickPro credentials and start streaming 18K+ channels.' },
-  '/tivimate': { title: 'TiviMate IPTV Player Setup 2026 | StreamStick Pro', description: 'TiviMate setup guide for IPTV. Install on Fire Stick and Android TV. EPG, catch-up, multi-view. Best settings for StreamStickPro.' },
-  '/tutorials': { title: 'IPTV & Fire Stick Tutorials | StreamStick Pro', description: 'Step-by-step IPTV tutorials: Fire Stick setup, app installation, troubleshooting, VPN guides. StreamStickPro video and text guides.' },
-  '/resources': { title: 'IPTV Resources & Tools | StreamStick Pro', description: 'IPTV resources, tools, speed tests, VPN guides, and troubleshooting. Everything you need for the best streaming experience.' },
-  '/ultimate-iptv-catalog-2026': { title: 'Ultimate IPTV Channel Catalog 2026 | 93K+ Channels | StreamStick Pro', description: 'Explore the ultimate IPTV channel catalog: 93,000+ channels from 150+ countries. Search by country, genre, language. StreamStickPro.' },
-  '/tools/catalog': { title: 'IPTV Tools & Utilities | StreamStick Pro', description: 'Free IPTV tools: speed test, M3U validator, EPG checker, channel finder. StreamStickPro utilities for optimal streaming.' },
-  '/terms': { title: 'Terms of Service | StreamStick Pro', description: 'StreamStickPro terms of service. Read our policies on IPTV subscriptions, Fire Stick purchases, refunds, and account usage.' },
-  '/privacy': { title: 'Privacy Policy | StreamStick Pro', description: 'StreamStickPro privacy policy. How we collect, use, and protect your personal information. GDPR and CCPA compliant.' },
-  '/refund': { title: 'Refund Policy | StreamStick Pro', description: 'StreamStickPro refund policy. 7-day money-back guarantee on IPTV subscriptions. How to request a refund.' },
+  '/tivimate': { title: 'TiviMate IPTV Player Setup Guide 2026 | StreamStick Pro', description: 'TiviMate setup guide for IPTV. Install on Fire Stick and Android TV. EPG, catch-up, multi-view. Best settings for StreamStickPro streaming.' },
+  '/tutorials': { title: 'IPTV & Fire Stick Setup Tutorials 2026 | StreamStick Pro', description: 'Step-by-step IPTV tutorials: Fire Stick setup, app installation, troubleshooting, VPN guides. StreamStickPro video and text guides.' },
+  '/resources': { title: 'IPTV Streaming Resources & Tools 2026 | StreamStick Pro', description: 'IPTV resources, tools, speed tests, VPN guides, and troubleshooting. Everything you need for the best StreamStickPro streaming experience.' },
+  '/ultimate-iptv-catalog-2026': { title: 'IPTV Channel Catalog 2026 | 93K+ Channels | StreamStick Pro', description: 'Explore the ultimate IPTV channel catalog: 93,000+ channels from 150+ countries. Search by country, genre, language. StreamStickPro.' },
+  '/tools/catalog': { title: 'Free IPTV Tools & Streaming Utilities | StreamStick Pro', description: 'Free IPTV tools: speed test, M3U playlist validator, EPG checker, channel finder. StreamStickPro utilities for the best streaming setup.' },
+  '/terms': { title: 'Terms of Service | IPTV & Streaming | StreamStick Pro', description: 'StreamStickPro terms of service. Read our policies on IPTV subscriptions, Fire Stick purchases, refunds, and account usage.' },
+  '/privacy': { title: 'Privacy Policy | Data Protection | StreamStick Pro', description: 'StreamStickPro privacy policy. How we collect, use, and protect your personal information. GDPR and CCPA compliant. Read our full policy.' },
+  '/refund': { title: 'Refund Policy | Money-Back Guarantee | StreamStick Pro', description: 'StreamStickPro refund policy. 7-day money-back guarantee on IPTV subscriptions. Learn how to request a refund and what purchases are covered.' },
   '/shadow-services': { title: 'StreamStick Pro', description: 'StreamStickPro secure store.', noindex: true },
   '/checkout': { title: 'Checkout | StreamStick Pro', description: 'Complete your StreamStickPro purchase.', noindex: true },
   '/success': { title: 'Order Confirmed | StreamStick Pro', description: 'Your StreamStickPro order has been confirmed.', noindex: true },
@@ -1038,6 +1047,7 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/my-account': { title: 'My Account | StreamStick Pro', description: 'Manage your StreamStickPro account.', noindex: true },
   '/forgot-password': { title: 'Forgot Password | StreamStick Pro', description: 'Reset your StreamStickPro password.', noindex: true },
   '/reset-password': { title: 'Reset Password | StreamStick Pro', description: 'Reset your StreamStickPro password.', noindex: true },
+  '/cancel': { title: 'Checkout Cancelled | StreamStick Pro', description: 'Checkout was cancelled. Return to shop or home.', noindex: true },
 };
 
 // Security + SEO headers for all responses (Google/Bing trust signals)
@@ -1053,7 +1063,7 @@ function applySecurityHeaders(res: Response, pathname?: string, hostname?: strin
   const next = new Response(res.body, { status: res.status, statusText: res.statusText, headers: new Headers(res.headers) });
   Object.entries(SECURITY_HEADERS).forEach(([k, v]) => next.headers.set(k, v));
   // X-Robots-Tag: redundant signal that reinforces meta robots at HTTP level
-  const noindexPaths = new Set(['/checkout', '/success', '/admin', '/customer-login', '/my-account', '/forgot-password', '/reset-password', '/shadow-services']);
+  const noindexPaths = new Set(['/checkout', '/success', '/cancel', '/admin', '/customer-login', '/my-account', '/forgot-password', '/reset-password', '/shadow-services']);
   const isSecureDomain = hostname && (hostname === 'secure.streamstickpro.com' || hostname.endsWith('.secure.streamstickpro.com'));
   if (isSecureDomain || (pathname && noindexPaths.has(pathname))) {
     next.headers.set('X-Robots-Tag', 'noindex, nofollow');
@@ -1076,13 +1086,13 @@ function applySecurityHeaders(res: Response, pathname?: string, hostname?: strin
 const VS_META: Record<string, { title: string; description: string }> = {
   '/vs-iptvstronger': { title: 'StreamStickPro vs IPTVStronger 2026 | Honest Comparison', description: 'Compare StreamStickPro vs IPTVStronger: channels, pricing, reliability, devices. See why StreamStickPro leads with 18K+ channels and free trial.' },
   '/vs-troypoint': { title: 'StreamStickPro vs TroyPoint 2026 | IPTV Comparison', description: 'StreamStickPro vs TroyPoint comparison: features, pricing, setup. StreamStickPro offers 18K+ channels, pre-loaded Fire Sticks, 24/7 support.' },
-  '/vs-hypotv': { title: 'StreamStickPro vs HypoTV 2026 | Which IPTV Is Better?', description: 'Compare StreamStickPro vs HypoTV: channel count, reliability, price. StreamStickPro: 18K+ channels, 4K, free trial.' },
-  '/vs-tvworldwide': { title: 'StreamStickPro vs TV Worldwide 2026 | IPTV Showdown', description: 'StreamStickPro vs TV Worldwide: features, price, device support compared. 18K+ channels with StreamStickPro.' },
+  '/vs-hypotv': { title: 'StreamStickPro vs HypoTV 2026 | Which IPTV Is Better?', description: 'Compare StreamStickPro vs HypoTV: channel count, reliability, price, device support. StreamStickPro: 18K+ channels, 4K quality, free trial.' },
+  '/vs-tvworldwide': { title: 'StreamStickPro vs TV Worldwide 2026 | IPTV Showdown', description: 'StreamStickPro vs TV Worldwide: features, pricing, device support, channel count compared. 18K+ channels and free trial with StreamStickPro.' },
   '/vs-iptvproviders': { title: 'StreamStickPro vs IPTV Providers 2026 | Best IPTV Service', description: 'StreamStickPro vs IPTV Providers: head-to-head comparison. Channels, VOD, price, reliability. StreamStickPro wins with 18K+ channels.' },
-  '/vs-xtremehd': { title: 'StreamStickPro vs XtremeHD 2026 | IPTV Comparison', description: 'Compare StreamStickPro vs XtremeHD IPTV: channels, quality, price. StreamStickPro offers 18K+ channels and free trial.' },
-  '/vs-iptvgreat': { title: 'StreamStickPro vs IPTV Great 2026 | Best IPTV', description: 'StreamStickPro vs IPTV Great: full comparison of features, channels, pricing. StreamStickPro leads with 18K+ channels.' },
-  '/vs-shoroc': { title: 'StreamStickPro vs Shoroc 2026 | IPTV Comparison', description: 'Compare StreamStickPro vs Shoroc IPTV service. Channels, reliability, price. StreamStickPro: 18K+ channels, free trial.' },
-  '/vs-iptvencoder': { title: 'StreamStickPro vs IPTV Encoder 2026 | Comparison', description: 'StreamStickPro vs IPTV Encoder: features, channels, pricing compared. StreamStickPro offers 18K+ channels and 24/7 support.' },
+  '/vs-xtremehd': { title: 'StreamStickPro vs XtremeHD 2026 | IPTV Full Comparison', description: 'Compare StreamStickPro vs XtremeHD IPTV: channels, streaming quality, pricing, support. StreamStickPro offers 18K+ channels and free 36-hour trial.' },
+  '/vs-iptvgreat': { title: 'StreamStickPro vs IPTV Great 2026 | Full Comparison', description: 'StreamStickPro vs IPTV Great: full comparison of features, channels, pricing, customer support. StreamStickPro leads with 18K+ channels.' },
+  '/vs-shoroc': { title: 'StreamStickPro vs Shoroc 2026 | IPTV Service Comparison', description: 'Compare StreamStickPro vs Shoroc IPTV service. Channels, reliability, pricing, devices. StreamStickPro: 18K+ channels, free trial included.' },
+  '/vs-iptvencoder': { title: 'StreamStickPro vs IPTV Encoder 2026 | Full Comparison', description: 'StreamStickPro vs IPTV Encoder: features, channels, pricing, support compared. StreamStickPro offers 18K+ channels and 24/7 customer support.' },
 };
 
 /** Resolve per-page meta: static map, vs pages, or fetch blog post from DB. */
@@ -1162,7 +1172,8 @@ function injectMeta(html: string, pathname: string, meta: { title: string; descr
   out = out.replace(/<meta[^>]*property=["']og:title["'][^>]*>/i, `<meta property="og:title" content="${titleSafe}">`);
   out = out.replace(/<meta[^>]*property=["']og:description["'][^>]*>/i, `<meta property="og:description" content="${descSafe}">`);
   out = out.replace(/<meta[^>]*property=["']og:url["'][^>]*>/i, `<meta property="og:url" content="${canon}">`);
-  // Inject breadcrumb LD before </head> (RSS/OpenSearch links already in static index.html)
+  out = out.replace(/<meta[^>]*name=["']twitter:title["'][^>]*>/i, `<meta name="twitter:title" content="${titleSafe}">`);
+  out = out.replace(/<meta[^>]*name=["']twitter:description["'][^>]*>/i, `<meta name="twitter:description" content="${descSafe}">`);
   if (breadcrumbLD) out = out.replace('</head>', `${breadcrumbLD}</head>`);
   return out;
 }
