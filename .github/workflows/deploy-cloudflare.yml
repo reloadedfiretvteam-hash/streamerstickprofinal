@@ -215,6 +215,22 @@ jobs:
       - name: Wait for deploy to be live
         run: sleep 15
 
+      - name: Smoke test – verify Worker has Stripe, Resend, Supabase
+        run: |
+          echo "Checking https://streamstickpro.com/api/health for bindings..."
+          RESP=$(curl -sSf --max-time 30 "https://streamstickpro.com/api/health" || echo '{}')
+          echo "$RESP" | jq .
+          STATUS=$(echo "$RESP" | jq -r '.status // "unknown"')
+          STRIPE=$(echo "$RESP" | jq -r '.bindings.stripe // false')
+          RESEND=$(echo "$RESP" | jq -r '.bindings.resend // false')
+          SUPABASE=$(echo "$RESP" | jq -r '.bindings.supabase // false')
+          if [ "$STRIPE" != "true" ] || [ "$RESEND" != "true" ] || [ "$SUPABASE" != "true" ]; then
+            echo "::error::Worker missing secrets: stripe=$STRIPE resend=$RESEND supabase=$SUPABASE"
+            echo "Set secrets in Cloudflare Dashboard (Pages → streamerstickpro-live → Settings → Environment variables) or fix Sync step."
+            exit 1
+          fi
+          echo "All bindings present. Checkout and trials should work."
+
       - name: Backfill email campaigns for past customers (marketing emails)
         run: |
           echo "Enrolling past customers in weekly marketing email campaigns..."

@@ -38,7 +38,7 @@ async function putSecret(name, value) {
   return new Promise((resolve, reject) => {
     const child = spawn(
       'npx',
-      ['wrangler', 'pages', 'secret', 'put', name, '--project-name', PROJECT],
+      ['wrangler', 'pages', 'secret', 'put', name, '--project-name', PROJECT, '--env', 'production'],
       {
         env: {
           ...process.env,
