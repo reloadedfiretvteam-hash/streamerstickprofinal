@@ -102,51 +102,6 @@ async function runMigration() {
     await sql`CREATE INDEX IF NOT EXISTS orders_customer_id_idx ON orders (customer_id)`;
     console.log('✓ orders table columns');
 
-    // Create email_campaigns table for weekly/monthly marketing emails
-    await sql`
-      CREATE TABLE IF NOT EXISTS email_campaigns (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        customer_email TEXT NOT NULL,
-        customer_name TEXT,
-        campaign_type TEXT NOT NULL,
-        order_id UUID,
-        trial_id TEXT,
-        status TEXT NOT NULL DEFAULT 'active',
-        first_email_sent_at TIMESTAMPTZ,
-        last_email_sent_at TIMESTAMPTZ,
-        next_email_scheduled_at TIMESTAMPTZ,
-        emails_sent_count INTEGER DEFAULT 0,
-        phase TEXT NOT NULL DEFAULT 'weekly',
-        week_emails_sent INTEGER DEFAULT 0,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW()
-      )
-    `;
-    await sql`CREATE INDEX IF NOT EXISTS idx_email_campaigns_email ON email_campaigns(customer_email)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_email_campaigns_status ON email_campaigns(status)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_email_campaigns_next_scheduled ON email_campaigns(next_email_scheduled_at)`;
-    console.log('✓ email_campaigns table');
-
-    // Create email_sends table for tracking sent emails
-    await sql`
-      CREATE TABLE IF NOT EXISTS email_sends (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        campaign_id UUID,
-        customer_email TEXT NOT NULL,
-        email_type TEXT NOT NULL,
-        subject TEXT NOT NULL,
-        sent_at TIMESTAMPTZ DEFAULT NOW(),
-        provider TEXT,
-        provider_id TEXT,
-        status TEXT DEFAULT 'sent',
-        error_message TEXT,
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      )
-    `;
-    await sql`CREATE INDEX IF NOT EXISTS idx_email_sends_campaign ON email_sends(campaign_id)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_email_sends_email ON email_sends(customer_email)`;
-    console.log('✓ email_sends table');
-
     // Enable RLS with permissive policies
     const tables = ['customers', 'password_reset_tokens', 'abandoned_carts'];
     for (const table of tables) {

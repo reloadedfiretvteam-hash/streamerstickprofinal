@@ -312,14 +312,6 @@ export async function registerRoutes(
         countryPreference: countryPreference || null,
       });
 
-      // Upsert to contacts for email marketing
-      try {
-        const contactSource = hasPhysicalProduct ? 'firestick' as const : 'subscription' as const;
-        await storage.upsertContact(customerEmail, contactSource, customerName || undefined);
-      } catch (contactErr) {
-        console.error('Failed to upsert contact at checkout:', contactErr);
-      }
-
       res.json({ 
         sessionId: session.id,
         url: session.url,
@@ -994,13 +986,6 @@ export async function registerRoutes(
       });
 
       console.log(`Free trial credentials sent to ${email}, owner notified`);
-
-      // Upsert to contacts for email marketing
-      try {
-        await storage.upsertContact(email, 'free_trial', name);
-      } catch (contactErr) {
-        console.error('Failed to upsert contact for free trial:', contactErr);
-      }
 
       res.json({ success: true, message: "Trial credentials sent" });
     } catch (error: any) {
@@ -2846,10 +2831,6 @@ Host: https://streamstickpro.com
   // Register Analytics Routes
   const { registerAnalyticsRoutes } = await import('./routes-analytics');
   registerAnalyticsRoutes(app);
-
-  // Register Email Marketing Routes
-  const { registerMarketingRoutes } = await import('./routes-marketing');
-  registerMarketingRoutes(app, adminAuthMiddleware);
 
   return httpServer;
 }
