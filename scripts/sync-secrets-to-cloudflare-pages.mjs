@@ -59,6 +59,11 @@ async function putSecret(name, value) {
 async function main() {
   requireEnv('CLOUDFLARE_ACCOUNT_ID');
   requireEnv('CLOUDFLARE_API_TOKEN');
+  // Fail fast if checkout/trial will break without these
+  requireEnv('STRIPE_SECRET_KEY');
+  requireEnv('RESEND_API_KEY');
+  requireEnv('VITE_SUPABASE_URL');
+  requireEnv('SUPABASE_SERVICE_KEY');
 
   for (const name of SECRET_NAMES) {
     const value = process.env[name];
