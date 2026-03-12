@@ -19,22 +19,7 @@ html {
     min-height: 48px;
     min-width: 48px;
   }
-  /* Prominent CTAs (Elite SEO / conversion): larger tap targets for main actions */
-  .cta-hero, .cta-primary {
-    min-height: 56px;
-    padding: 0.875rem 1.5rem;
-    font-weight: 600;
-    font-size: 1rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .cta-hero, .cta-primary {
-    min-height: 72px;
-    padding: 1rem 2rem;
-    font-weight: 600;
-    font-size: 1.125rem;
-  }
+  
 }
 
 @theme inline {
@@ -143,10 +128,4 @@ html {
 /* Smooth Scrolling */
 html {
   scroll-behavior: smooth;
-}
-
-/* SEO / a11y: strong focus-visible for keyboard users */
-button:focus-visible, a:focus-visible, [tabindex="0"]:focus-visible {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
 }
