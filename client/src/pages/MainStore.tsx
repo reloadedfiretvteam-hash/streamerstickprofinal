@@ -627,7 +627,7 @@ export default function MainStore() {
             >
               <Link href="/36hr-trial">
                 <motion.span
-                  className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 rounded-2xl font-black text-xl text-white border-2 border-orange-300/50 shadow-xl shadow-orange-500/40 hover:shadow-2xl transition-all cursor-pointer"
+                  className="cta-hero inline-flex items-center justify-center gap-2 px-10 py-5 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 rounded-2xl font-black text-xl text-white border-2 border-orange-300/50 shadow-xl shadow-orange-500/40 hover:shadow-2xl transition-all cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
                   role="button"
@@ -638,7 +638,7 @@ export default function MainStore() {
               </Link>
               <Link href="/jailbroken-fire-sticks">
                 <motion.span
-                  className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl font-black text-xl text-white border-2 border-purple-300/50 shadow-xl shadow-purple-500/40 hover:shadow-2xl transition-all cursor-pointer"
+                  className="cta-hero inline-flex items-center justify-center gap-2 px-10 py-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl font-black text-xl text-white border-2 border-purple-300/50 shadow-xl shadow-purple-500/40 hover:shadow-2xl transition-all cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
                   role="button"
@@ -856,7 +856,7 @@ export default function MainStore() {
                             category: 'iptv',
                             badge: plan.badge,
                           } as Product)}
-                          className="w-full py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/30"
+                          className="cta-primary w-full py-3 rounded-xl font-bold text-sm transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/30"
                           data-testid={`button-add-iptv-${plan.duration}`}
                           aria-label={`Add ${plan.durationLabel} Live TV plan for ${deviceCount} device${deviceCount > 1 ? 's' : ''} to cart`}
                         >
