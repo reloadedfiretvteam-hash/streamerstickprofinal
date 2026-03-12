@@ -351,7 +351,7 @@ app.get('/api/seo-page/:country/:pageType/:slug', async (c) => {
     return c.json(page);
   } catch (err) {
     console.error('[api/seo-page]', err instanceof Error ? err.message : String(err));
-    return c.json({ error: 'Service temporarily unavailable' }, 500);
+    return c.json({ error: 'Service temporarily unavailable' }, 503, { 'Retry-After': '60' });
   }
 });
 
@@ -507,6 +507,7 @@ app.get('/cron/email-campaigns', async (c) => {
 });
 
 // Phase 4: OG-rich HTML for location pages (crawlers only) — must be before * redirect. DB first, then static build fallback so 25K pages have meta even without DB seed.
+// GSC: avoid 5xx when DB/timeout fails — return 503 with Retry-After so crawlers retry; only 404 when page truly missing.
 app.get('/l/:country/:pageType/:slug', async (c, next) => {
   const ua = (c.req.header('User-Agent') || '').toLowerCase();
   const isCrawler = /bot|crawler|facebookexternalhit|twitterbot|linkedinbot|slurp|whatsapp|telegram|pinterest|discord/i.test(ua);
@@ -519,8 +520,13 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
   let desc = '';
   let faqJson: { question: string; answer: string }[] = [];
   try {
-    const storage = getStorage(c.env);
-    const page = await storage.getSeoPageByPath(country, pageType, slug);
+    let page: any = null;
+    try {
+      const storage = getStorage(c.env);
+      page = await storage.getSeoPageByPath(country, pageType, slug);
+    } catch {
+      // DB timeout/unavailable — fall back to static index only (don't 5xx)
+    }
     if (page) {
       title = (page.title || page.h1 || 'IPTV & Jailbroken Fire Stick').replace(/\[LOCATION\]/g, page.location || page.region || slug);
       desc = (page.meta_description || page.p1_snippet || '').trim().substring(0, 160) || 'IPTV and Fire Stick guides for your area. StreamStickPro—18K+ channels, free trial. USA, Canada, UK.';
@@ -647,8 +653,10 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
 </body>
 </html>`;
     return applySecurityHeaders(new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }), path);
-  } catch {
-    return next();
+  } catch (err) {
+    console.error('[location page]', path, err instanceof Error ? err.message : String(err));
+    const tmp = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Temporarily Unavailable</title><meta name="robots" content="noindex,nofollow"></head><body><h1>Temporarily Unavailable</h1><p>Please try again in a moment.</p><p><a href="https://streamstickpro.com/">StreamStickPro Home</a></p></body></html>`;
+    return new Response(tmp, { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Retry-After': '60' } });
   }
 });
 

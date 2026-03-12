@@ -183,6 +183,17 @@ jobs:
           RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com' }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
 
+      - name: List Cloudflare Pages secrets (verify sync)
+        run: |
+          echo "Production secrets:"
+          npx wrangler pages secret list --project-name=streamerstickpro-live --env=production 2>/dev/null || true
+          echo "Preview secrets (used by clean-main if not production branch):"
+          npx wrangler pages secret list --project-name=streamerstickpro-live --env=preview 2>/dev/null || true
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        continue-on-error: true
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
@@ -318,3 +329,10 @@ jobs:
           SITE_URL: https://streamstickpro.com
           INDEXNOW_KEY: 3b1a52f5f41a4138b1f21c3265180f44
         continue-on-error: true
+
+      - name: GSC and system summary
+        if: success()
+        run: |
+          echo "## Google Search Console and system" >> $GITHUB_STEP_SUMMARY
+          echo "- **Checkout and free trials:** Smoke test passed — Worker has Stripe, Resend, Supabase. **Manually test:** [Health](https://streamstickpro.com/api/health) | [36hr Trial](https://streamstickpro.com/36hr-trial) | [Shop/Checkout](https://streamstickpro.com/#shop)." >> $GITHUB_STEP_SUMMARY
+          echo "- **GSC:** See docs/GSC-STATUS-FIXES.md for your Passed/Failed/Started statuses. Submit sitemap-index.xml; fix Page with redirect (1); 5xx reduced via 503+Retry-After." >> $GITHUB_STEP_SUMMARY
