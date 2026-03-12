@@ -323,7 +323,7 @@ app.get('/api/seo-page/:country/:pageType/:slug', async (c) => {
     return c.json(page);
   } catch (err) {
     console.error('[api/seo-page]', err instanceof Error ? err.message : String(err));
-    return c.json({ error: 'Service temporarily unavailable' }, 500);
+    return c.json({ error: 'Service temporarily unavailable' }, 503, { 'Retry-After': '60' });
   }
 });
 
@@ -563,11 +563,15 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
   <meta property="og:description" content="${descSafe}">
   <meta property="og:url" content="${url}">
   <meta property="og:image" content="${ogImage}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="${escapeHtml('StreamStickPro – IPTV and Fire Stick streaming, 18K+ channels, 36hr free trial')}">
   <meta property="og:site_name" content="StreamStickPro">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${fullTitleSafe}">
   <meta name="twitter:description" content="${descSafe}">
   <meta name="twitter:image" content="${ogImage}">
+  <meta name="twitter:image:alt" content="${escapeHtml('StreamStickPro – IPTV and Fire Stick streaming, 18K+ channels, 36hr free trial')}">
   <meta name="robots" content="index, follow">
   ${faqJson.length > 0 ? `<script type="application/ld+json">${JSON.stringify({
     '@context': 'https://schema.org',
@@ -619,8 +623,10 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
 </body>
 </html>`;
     return applySecurityHeaders(new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }), path);
-  } catch {
-    return next();
+  } catch (err) {
+    console.error('[l/]', err instanceof Error ? err.message : String(err));
+    const serviceUnavailableHtml = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Service Temporarily Unavailable | StreamStickPro</title><meta name="robots" content="noindex, nofollow"></head><body><h1>Service Temporarily Unavailable</h1><p>Please try again shortly.</p><p><a href="https://streamstickpro.com/">StreamStickPro Home</a></p></body></html>`;
+    return new Response(serviceUnavailableHtml, { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Retry-After': '60' } });
   }
 });
 
@@ -1038,6 +1044,7 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/my-account': { title: 'My Account | StreamStick Pro', description: 'Manage your StreamStickPro account.', noindex: true },
   '/forgot-password': { title: 'Forgot Password | StreamStick Pro', description: 'Reset your StreamStickPro password.', noindex: true },
   '/reset-password': { title: 'Reset Password | StreamStick Pro', description: 'Reset your StreamStickPro password.', noindex: true },
+  '/cancel': { title: 'Checkout Cancelled | StreamStick Pro', description: 'Checkout was cancelled. Return to shop or home.', noindex: true },
 };
 
 // Security + SEO headers for all responses (Google/Bing trust signals)
@@ -1053,7 +1060,7 @@ function applySecurityHeaders(res: Response, pathname?: string, hostname?: strin
   const next = new Response(res.body, { status: res.status, statusText: res.statusText, headers: new Headers(res.headers) });
   Object.entries(SECURITY_HEADERS).forEach(([k, v]) => next.headers.set(k, v));
   // X-Robots-Tag: redundant signal that reinforces meta robots at HTTP level
-  const noindexPaths = new Set(['/checkout', '/success', '/admin', '/customer-login', '/my-account', '/forgot-password', '/reset-password', '/shadow-services']);
+  const noindexPaths = new Set(['/checkout', '/success', '/cancel', '/admin', '/customer-login', '/my-account', '/forgot-password', '/reset-password', '/shadow-services']);
   const isSecureDomain = hostname && (hostname === 'secure.streamstickpro.com' || hostname.endsWith('.secure.streamstickpro.com'));
   if (isSecureDomain || (pathname && noindexPaths.has(pathname))) {
     next.headers.set('X-Robots-Tag', 'noindex, nofollow');
@@ -1111,17 +1118,18 @@ async function resolvePageMeta(pathname: string, env: Env): Promise<{ title: str
 /** Build BreadcrumbList JSON-LD for any page (gives crawlers navigation context). */
 function buildBreadcrumbLD(pathname: string, pageTitle: string): string {
   const base = 'https://streamstickpro.com';
+  const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/+$/, '') || '/';
   const crumbs: { name: string; url: string }[] = [{ name: 'Home', url: base + '/' }];
-  if (pathname !== '/') {
+  if (normalizedPath !== '/') {
     // Add intermediate crumb for known sections
-    if (pathname.startsWith('/blog')) {
-      if (pathname !== '/blog') crumbs.push({ name: 'Blog', url: base + '/blog' });
-    } else if (pathname.startsWith('/vs-')) {
+    if (normalizedPath.startsWith('/blog')) {
+      if (normalizedPath !== '/blog') crumbs.push({ name: 'Blog', url: base + '/blog' });
+    } else if (normalizedPath.startsWith('/vs-')) {
       crumbs.push({ name: 'Comparisons', url: base + '/iptv-services' });
-    } else if (pathname.startsWith('/l/')) {
+    } else if (normalizedPath.startsWith('/l/')) {
       crumbs.push({ name: 'Locations', url: base + '/locations' });
     }
-    crumbs.push({ name: pageTitle.replace(/ \| StreamStick Pro$/i, '').slice(0, 60), url: base + pathname });
+    crumbs.push({ name: pageTitle.replace(/ \| StreamStick Pro$/i, '').slice(0, 60), url: base + normalizedPath });
   }
   if (crumbs.length < 2) return '';
   const ld = {
@@ -1169,8 +1177,13 @@ function injectMeta(html: string, pathname: string, meta: { title: string; descr
 
 app.get('*', async (c) => {
   const url = new URL(c.req.url);
-  const pathname = url.pathname;
+  let pathname = url.pathname;
   const hostname = url.hostname;
+  // 301 redirect trailing slash to non-trailing (except /) to avoid "Duplicate, Google chose different canonical"
+  if (pathname.length > 1 && pathname.endsWith('/')) {
+    const target = pathname.replace(/\/+$/, '') || '/';
+    return c.redirect('https://streamstickpro.com' + target, 301);
+  }
   const meta = await resolvePageMeta(pathname, c.env);
 
   try {

@@ -134,10 +134,14 @@ export default function LocationPage() {
     setMeta("og:url", canonicalUrl, true);
     setMeta("og:type", "website", true);
     setMeta("og:image", ogImage, true);
+    setMeta("og:image:width", "1200", true);
+    setMeta("og:image:height", "630", true);
+    setMeta("og:image:alt", "StreamStickPro – IPTV and Fire Stick streaming, 18K+ channels, 36hr free trial", true);
     setMeta("twitter:card", "summary_large_image");
     setMeta("twitter:title", title);
     setMeta("twitter:description", desc);
     setMeta("twitter:image", ogImage);
+    setMeta("twitter:image:alt", "StreamStickPro – IPTV and Fire Stick streaming, 18K+ channels, 36hr free trial");
 
     let linkCanonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
     if (!linkCanonical) {

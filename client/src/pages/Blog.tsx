@@ -179,8 +179,11 @@ export default function Blog() {
         setMetaTag('og:site_name', 'StreamStick Pro', true);
         const imageUrl = postFromSlug.image && postFromSlug.image.startsWith('http') ? postFromSlug.image : `${baseUrl}/opengraph.jpg`;
         setMetaTag('og:image', imageUrl, true);
+        setMetaTag('og:image:width', '1200', true);
+        setMetaTag('og:image:height', '630', true);
         setMetaTag('og:image:alt', postFromSlug.title, true);
         setMetaTag('twitter:image', imageUrl);
+        setMetaTag('twitter:image:alt', postFromSlug.title);
         setMetaTag('twitter:card', 'summary_large_image');
         setMetaTag('twitter:title', ogTitle);
         setMetaTag('twitter:description', metaDesc);

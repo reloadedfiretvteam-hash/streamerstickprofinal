@@ -11,10 +11,11 @@
 | **BASELINE_WORKING_DEPLOYMENT** | Commit **635a725** |
 | **Commit message** | Add activation time notice (1-3 hrs, usually 15 min during business hours) to trial email |
 | **Date** | 2026-02-18 |
-| **Live deploy URL (reference)** | 4a86d30c.streamerstickpro-live.pages.dev |
+| **Live deploy URL (reference)** | **https://4a86d30c.streamerstickpro-live.pages.dev** (aliases: streamstickpro.com, secure.streamstickpro.com) |
+| **Deployed** | 11:13 PM Feb 18, 2026 · 58s · Success |
 | **Status** | Stripe checkout ✓ | Free trial ✓ | Preserved and untouched in Worker |
 
-This version must remain the reference for all payment and trial logic.
+This version must remain the reference for all payment and trial logic. If a newer deploy breaks checkout/trial, roll back in Cloudflare to this deployment (4a86d30c).
 
 ---
 
