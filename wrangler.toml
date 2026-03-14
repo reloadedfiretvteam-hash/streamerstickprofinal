@@ -1,19 +1,11 @@
 name = "streamerstickpro-live"
-pages_build_output_dir = "./dist"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
+# pages_build_output_dir is INTENTIONALLY omitted.
+# Per Cloudflare docs: without this key, wrangler.toml is "local development only"
+# and Dashboard environment variables + secrets are NOT overridden.
+# The GitHub Actions workflow specifies "dist" directly in the wrangler command.
+#
 # ALL environment variables (public + secrets) are managed in the Cloudflare Dashboard:
 #   Workers & Pages → streamerstickpro-live → Settings → Environment variables
-#
-# DO NOT add a [vars] section here. Cloudflare Pages treats wrangler.toml as the
-# "source of truth" and any [vars] defined here REPLACE (not merge with) Dashboard
-# variables — including encrypted secrets like STRIPE_SECRET_KEY. This was the root
-# cause of checkout/trial breaking on every deploy.
-#
-# Required Dashboard variables (Production + Preview):
-#   NODE_ENV, RESEND_FROM_EMAIL, SITE_URL,
-#   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_SECURE_HOSTS, VITE_STORAGE_BUCKET_NAME,
-#   SUPABASE_SERVICE_KEY, ADMIN_USERNAME, ADMIN_PASSWORD,
-#   STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET,
-#   RESEND_API_KEY, SESSION_SECRET, JWT_SECRET, UNSUBSCRIBE_JWT_SECRET
