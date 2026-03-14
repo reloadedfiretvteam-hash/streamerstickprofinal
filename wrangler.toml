@@ -1,0 +1,8 @@
+name = "streamerstickpro-live"
+pages_build_output_dir = "./dist"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# NO [vars] section — all environment variables (including secrets) come from
+# the Cloudflare Dashboard: Workers & Pages > streamerstickpro-live > Settings > Environment variables.
+# Adding [vars] here would REPLACE Dashboard secrets (Stripe, Resend, etc.) and break checkout/trial.

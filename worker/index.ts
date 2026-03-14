@@ -508,12 +508,14 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
       }
     }
     if (faqJson.length === 0) {
+      const loc = slug.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
+      const ct = country.toUpperCase();
       faqJson = [
-        { question: 'What is the best IPTV service for ' + (slug || 'this area') + '?', answer: 'StreamStickPro offers 18,000+ live channels and 100,000+ movies and series, with a free trial. Works on Fire Stick, ONN Google TV, and Smart TVs.' },
-        { question: 'Can I get a jailbroken Fire Stick with IPTV?', answer: 'Yes. StreamStickPro sells pre-loaded Fire Sticks with IPTV included. Setup in minutes with instant credentials and support.' },
-        { question: 'Does StreamStickPro work on Google TV?', answer: 'Yes. StreamStickPro works on ONN Google TV and other Android TV devices. Native support with IPTV Smarters Pro and TiviMate.' },
-        { question: 'Is there a free trial?', answer: 'Yes. StreamStickPro offers a 36-hour free trial. Start from the homepage to get instant access to 28,000+ channels.' },
-        { question: 'What devices are supported?', answer: 'StreamStickPro works on Amazon Fire Stick, ONN Google TV, Android TV, Smart TVs, and set-top boxes. Use IPTV Smarters Pro or TiviMate for the best experience.' },
+        { question: `What is the best IPTV service in ${loc}, ${ct}?`, answer: `StreamStickPro is the top-rated IPTV service for ${loc} with 18,000+ live channels, 100,000+ movies and series, buffer-free HD streaming, and a free 36-hour trial. Works on Fire Stick, ONN Google TV, and Smart TVs.` },
+        { question: `Can I get a jailbroken Fire Stick shipped to ${loc}?`, answer: `Yes. StreamStickPro ships pre-loaded jailbroken Fire Sticks to ${loc} and across ${ct}. Comes with IPTV, Kodi, Stremio, and TiviMate installed. Plug in and start streaming 18K+ channels in minutes.` },
+        { question: `How do I set up IPTV on Google TV in ${loc}?`, answer: `Download IPTV Smarters Pro or TiviMate from the Google Play Store on your ONN Google TV. Enter your StreamStickPro credentials and you will have instant access to 18,000+ channels in ${loc}. Setup takes under 5 minutes.` },
+        { question: `Does StreamStickPro offer a free trial for ${loc} customers?`, answer: `Yes. StreamStickPro offers a 36-hour free IPTV trial for customers in ${loc}, ${ct}. No credit card required. Get instant login credentials and test 18,000+ live channels, VOD, and EPG guide.` },
+        { question: `What devices work with StreamStickPro IPTV in ${loc}?`, answer: `StreamStickPro works on Amazon Fire Stick, Fire TV Cube, ONN Google TV, Chromecast, Android TV, Samsung and LG Smart TVs, and MAG boxes in ${loc}. Use IPTV Smarters Pro or TiviMate for the best experience.` },
       ];
     }
     faqJson = sanitizeFaq(faqJson);
@@ -597,9 +599,9 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
     <article>
       <h1>${h1Text}</h1>
       <p class="lead">${descSafe}</p>
-      <section aria-labelledby="what-we-build">
-        <h2 id="what-we-build">What StreamStickPro Builds</h2>
-        <p>StreamStickPro builds <strong>IPTV subscriptions</strong> (18,000+ live channels, 100,000+ movies and series), <strong>jailbroken and pre-loaded Fire Sticks</strong> (Kodi, Stremio, TiviMate ready), and <strong>Google TV–compatible streaming</strong> for USA, Canada, and UK. Location guides, setup tutorials, and a free trial are included.</p>
+      <section aria-labelledby="what-we-offer">
+        <h2 id="what-we-offer">IPTV Streaming in ${h1Text}</h2>
+        <p>StreamStickPro delivers <strong>18,000+ live channels</strong> and <strong>100,000+ movies and series</strong> to viewers in this area. Our service includes pre-loaded <strong>jailbroken Fire Sticks</strong> with Kodi, Stremio, and TiviMate, plus <strong>ONN Google TV</strong> support. Get a <strong>free 36-hour trial</strong>, instant login credentials, and 24/7 customer support. Available for delivery and digital activation across ${escapeHtml(country.toUpperCase())}.</p>
       </section>
       <section aria-labelledby="related">
         <h2 id="related">Related</h2>
@@ -624,6 +626,13 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
 </html>`;
     return applySecurityHeaders(new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }), path);
   } catch {
+    const ua = (c.req.header('User-Agent') || '').toLowerCase();
+    if (/bot|crawler|spider|slurp|facebookexternalhit|twitterbot/i.test(ua)) {
+      return new Response('<!DOCTYPE html><html><head><meta name="robots" content="noindex"><title>Temporarily Unavailable</title></head><body><h1>Service Temporarily Unavailable</h1><p>Please retry shortly.</p></body></html>', {
+        status: 503,
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Retry-After': '120' },
+      });
+    }
     return next();
   }
 });
@@ -1184,6 +1193,9 @@ app.get('*', async (c) => {
   const hostname = url.hostname;
   const meta = await resolvePageMeta(pathname, c.env);
 
+  // Known SPA routes that should always return 200 (even without a static asset)
+  const isKnownRoute = !!meta || pathname.startsWith('/l/') || pathname.startsWith('/blog/');
+
   try {
     const res = await c.env.ASSETS.fetch(c.req.raw);
     const ct = res.headers.get('content-type') || '';
@@ -1194,8 +1206,10 @@ app.get('*', async (c) => {
   } catch {
     const fallback = await c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
     const html = await fallback.text();
-    const fixed = injectMeta(html, pathname, meta);
-    return applySecurityHeaders(new Response(fixed, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
+    // Unknown routes get 404 so Google doesn't report "soft 404" for non-existent pages
+    const status = isKnownRoute ? 200 : 404;
+    const fixed = isKnownRoute ? injectMeta(html, pathname, meta) : injectMeta(html, pathname, { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
+    return applySecurityHeaders(new Response(fixed, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   }
 });
 

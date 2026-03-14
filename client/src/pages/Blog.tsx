@@ -196,8 +196,11 @@ export default function Blog() {
         setMetaTag('og:description', defaultDescription, true);
         setMetaTag('og:url', `${baseUrl}/blog`, true);
         setMetaTag('og:type', 'website', true);
+        setMetaTag('og:image', `${baseUrl}/opengraph.jpg`, true);
         setMetaTag('twitter:title', defaultTitle);
         setMetaTag('twitter:description', defaultDescription);
+        setMetaTag('twitter:image', `${baseUrl}/opengraph.jpg`);
+        setMetaTag('twitter:card', 'summary_large_image');
       }
     } else {
       setSelectedPost(null);
@@ -207,8 +210,11 @@ export default function Blog() {
       setMetaTag('og:description', defaultDescription, true);
       setMetaTag('og:url', `${baseUrl}/blog`, true);
       setMetaTag('og:type', 'website', true);
+      setMetaTag('og:image', `${baseUrl}/opengraph.jpg`, true);
       setMetaTag('twitter:title', defaultTitle);
       setMetaTag('twitter:description', defaultDescription);
+      setMetaTag('twitter:image', `${baseUrl}/opengraph.jpg`);
+      setMetaTag('twitter:card', 'summary_large_image');
     }
     
     return () => {
