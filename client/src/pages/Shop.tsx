@@ -160,7 +160,7 @@ export default function Shop() {
     document.documentElement.classList.add("dark");
     setPageMeta({
       title: "IPTV Subscription Plans 2026 | Fire Stick & Devices | StreamStick Pro",
-      description: "Shop IPTV plans from $15/mo and pre-loaded Fire Sticks. 18K+ channels, 4K, 99.9% uptime. Start free trial or buy now. StreamStick Pro.",
+      description: "Shop IPTV plans from $15/mo and Fire Stick device options. 18K+ channels, 4K, and 99.9% uptime. Start a free trial or buy now with StreamStick Pro.",
       path: "/shop",
     });
     loadProducts();
@@ -274,7 +274,7 @@ export default function Shop() {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Premium Products</span>
             </h1>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Browse our complete collection of pre-configured streaming devices and Live TV plans
+              Browse our complete collection of streaming device options and Live TV plans
             </p>
           </motion.div>
 
@@ -443,14 +443,14 @@ export default function Shop() {
             <ComparisonTable />
           </div>
 
-          {/* Pre-Loaded Fire Stick Devices - DISPLAYED SECOND */}
+          {/* Fire Stick device options - DISPLAYED SECOND */}
           <div className="mb-16">
             <h3 className="text-3xl md:text-4xl font-bold mb-4 text-center flex items-center justify-center gap-3">
               <Flame className="w-8 h-8 text-orange-500" />
-              Pre-Loaded Fire Stick Devices
+              Fire Stick Device Options
             </h3>
             <p className="text-center text-gray-300 mb-8 max-w-2xl mx-auto">
-              Each device comes pre-configured with 1 Year of Live TV service included. Just plug in and start streaming!
+              Each device includes 1 year of Live TV service and quick setup guidance so you can get started fast.
             </p>
             <div className="grid md:grid-cols-3 gap-8">
               {firestickProducts.map((product, index) => {

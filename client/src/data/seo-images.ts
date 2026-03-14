@@ -18,7 +18,7 @@ type ImageDef = { src: string; alt: string };
 
 /** Single images (for one-off use) */
 export const SEO_IMAGES: Record<string, ImageDef> = {
-  jailbrokenChain: { src: `${BASE}/jailbroken-fire-stick-chain.png`, alt: "Jailbroken Amazon Fire TV Stick with remote – StreamStickPro pre-loaded devices for IPTV" },
+  jailbrokenChain: { src: `${BASE}/jailbroken-fire-stick-chain.png`, alt: "Jailbroken Amazon Fire TV Stick with remote – StreamStickPro IPTV setup and streaming guidance" },
   firestickApk: { src: `${BASE}/firestick-apk-setup.png`, alt: "Amazon Fire Stick with APK setup for IPTV and jailbroken streaming – StreamStickPro" },
   firestickOriginal: { src: `${BASE}/fire-tv-stick-original-budget.png`, alt: "Jailbroken Fire TV Stick Original budget-friendly with Kodi and streaming apps – StreamStickPro" },
   firestick4k: { src: `${BASE}/fire-tv-stick-4k-jailbroken.png`, alt: "Jailbroken Fire TV Stick 4K with Kodi, Cyberflix, Netflix – StreamStickPro" },
@@ -40,7 +40,7 @@ export const JAILBREAK_IMAGES: ImageDef[] = [
   SEO_IMAGES.firestickOriginal,
   SEO_IMAGES.firestickApk,
   SEO_IMAGES.firestick4k,
-  { src: `${SUPABASE}/OIP_(11)99_1764978938773.jpg`, alt: "Fire Stick HD pre-configured for IPTV – StreamStickPro" },
+  { src: `${SUPABASE}/OIP_(11)99_1764978938773.jpg`, alt: "Fire Stick HD for IPTV – StreamStickPro" },
   { src: `${SUPABASE}/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg`, alt: "Fire Stick 4K streaming device – StreamStickPro" },
   { src: `${SUPABASE}/71E1te69hZL._AC_SL1500__1764978938773.jpg`, alt: "Fire Stick 4K Max – StreamStickPro" },
 ];

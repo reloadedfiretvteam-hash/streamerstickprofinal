@@ -303,8 +303,8 @@ export default function MainStore() {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
     setPageMeta({
-      title: "IPTV Fire Stick 2026 | 18K+ Channels, No Buffer | StreamStick Pro",
-      description: "36hr free trial: 18K+ live channels, IPTV and jailbroken Fire Sticks, Onn Google TV. Beats IPTVStronger and TroyPoint. 99.9% uptime. Start trial or buy device—StreamStick Pro.",
+      title: "Best IPTV for Fire Stick 2026 | 36hr Trial | StreamStick Pro",
+      description: "Mobile-first IPTV and Fire Stick experience with 18K+ live channels and 100K+ VOD. Start a 36-hour free trial or choose a ready-to-use device in minutes.",
       path: "/",
     });
     loadProducts();
@@ -403,7 +403,7 @@ export default function MainStore() {
     if (product.category === "iptv") {
       return `Premium Live TV plan: ${product.name}. 18,000+ live channels, 100,000+ movies and series, sports and PPV. Multi-device options. StreamStickPro.`;
     }
-    return `Pre-configured ${product.name} with 1 year Live TV included. 18,000+ channels, 100,000+ movies and series. StreamStickPro.`;
+    return `${product.name} with 1 year Live TV included, plus setup guidance and support. 18,000+ channels, 100,000+ movies and series. StreamStickPro.`;
   };
 
   const productListData = {
@@ -468,11 +468,11 @@ export default function MainStore() {
       {/* ItemList Schema for Product Listings */}
       <ItemListSchema 
         name="StreamStickPro Products"
-        description="Pre-configured Fire Sticks and IPTV subscription plans"
+        description="Fire Stick device options and IPTV subscription plans"
         items={products.slice(0, 6).map(p => ({
           name: p.name,
           description: getSchemaDescription(p),
-          url: `https://streamstickpro.com#${p.id}`,
+          url: `https://streamstickpro.com/#${p.id}`,
           image: p.image,
           price: p.price
         }))}
@@ -480,7 +480,7 @@ export default function MainStore() {
       
       {/* Navigation - Elite Glassmorphism Design */}
       <nav className="sticky top-0 z-50 w-full border-b border-white/20 bg-gradient-to-r from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-2xl shadow-2xl shadow-black/50" aria-label="Main navigation">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="container mx-auto px-4 h-16 md:h-[72px] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <MobileNav scrollToShop={scrollToShop} scrollToAbout={scrollToAbout} scrollToFaq={scrollToFaq} onSupportClick={openSupport} />
             <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
@@ -562,12 +562,12 @@ export default function MainStore() {
       <main id="main-content" role="main">
       {/* Hero Section */}
       {/* Elite Hero Section - Enhanced Visuals */}
-      <section ref={heroRef} className="relative text-white overflow-hidden min-h-[700px] md:min-h-[800px] flex items-center z-10">
+      <section ref={heroRef} className="relative text-white overflow-hidden min-h-[620px] md:min-h-[780px] flex items-center z-10">
 
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-20"></div>
 
-        <div className="container mx-auto px-4 py-16 md:py-20 relative z-10">
-          <div className="max-w-5xl mx-auto text-center">
+        <div className="container mx-auto px-4 py-12 md:py-20 relative z-10">
+          <div className="max-w-6xl mx-auto text-center">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -588,10 +588,10 @@ export default function MainStore() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-6 leading-tight tracking-tight text-white"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-5 leading-[1.1] tracking-tight text-white"
             >
-              StreamStickPro IPTV + Jailbroken Fire Sticks + Onn Google TV
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500 mt-2">36hr Trial</span>
+              IPTV for Fire Stick, ONN Google TV, and Smart TVs
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-red-500 mt-2">Start Your 36-Hour Free Trial</span>
             </motion.h1>
 
             {/* Trust above fold + geo for US/UK/CA impressions */}
@@ -599,17 +599,17 @@ export default function MainStore() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.15 }}
-              className="text-base sm:text-lg text-gray-300 mb-2"
+              className="text-base sm:text-lg md:text-xl text-gray-200 mb-2"
             >
-              Secure checkout | Fast setup | Support when you need it
+              Fast setup, secure checkout, and real human support 24/7.
             </motion.p>
             <motion.p 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.16 }}
-              className="text-sm text-gray-400 mb-6"
+              className="text-sm sm:text-base text-gray-300 mb-6 max-w-3xl mx-auto"
             >
-              Serving <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-medium">USA</span></Link>, <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-medium">Canada</span></Link> & <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-medium">UK</span></Link> — IPTV & Fire Sticks nationwide
+              Get 18,000+ live channels, 100,000+ movies and series, and premium sports with instant activation in <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">USA</span></Link>, <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">Canada</span></Link>, and <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">UK</span></Link>.
             </motion.p>
 
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.18 }} className="mb-4">
@@ -623,11 +623,11 @@ export default function MainStore() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-6 px-4"
+              className="flex flex-col lg:flex-row justify-center gap-3 sm:gap-4 mb-6 px-2 sm:px-4 max-w-4xl mx-auto"
             >
               <Link href="/36hr-trial">
                 <motion.span
-                  className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 rounded-2xl font-black text-xl text-white border-2 border-orange-300/50 shadow-xl shadow-orange-500/40 hover:shadow-2xl transition-all cursor-pointer"
+                  className="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-5 sm:py-6 min-h-[72px] bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 rounded-2xl font-black text-lg sm:text-xl text-white border-2 border-orange-300/50 shadow-xl shadow-orange-500/40 hover:shadow-2xl transition-all cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
                   role="button"
@@ -638,7 +638,7 @@ export default function MainStore() {
               </Link>
               <Link href="/jailbroken-fire-sticks">
                 <motion.span
-                  className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl font-black text-xl text-white border-2 border-purple-300/50 shadow-xl shadow-purple-500/40 hover:shadow-2xl transition-all cursor-pointer"
+                  className="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-5 sm:py-6 min-h-[72px] bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl font-black text-lg sm:text-xl text-white border-2 border-purple-300/50 shadow-xl shadow-purple-500/40 hover:shadow-2xl transition-all cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
                   role="button"
@@ -649,7 +649,7 @@ export default function MainStore() {
               </Link>
               <Link href="/onn-google-tv">
                 <motion.span
-                  className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gradient-to-br from-white/20 to-white/10 rounded-2xl font-black text-xl text-white border-2 border-white/40 shadow-xl hover:shadow-2xl transition-all cursor-pointer"
+                  className="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-5 sm:py-6 min-h-[72px] bg-gradient-to-br from-white/20 to-white/10 rounded-2xl font-black text-lg sm:text-xl text-white border-2 border-white/40 shadow-xl hover:shadow-2xl transition-all cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
                   role="button"
@@ -703,10 +703,10 @@ export default function MainStore() {
               <span className="text-sm font-medium text-orange-300">SHOP ALL PRODUCTS</span>
             </div>
             <h2 className="text-4xl md:text-6xl font-bold mb-6">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Pre-Configured Fire Sticks & IPTV Plans</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Fire Stick Device Options & IPTV Plans</span>
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Trusted by 2,700+ customers. Recommended on Reddit (r/firetvstick, r/IPTV). Pre-loaded devices with 18,000+ channels, 100,000+ movies, and instant setup. No downloader codes needed - everything ready to stream!
+              Trusted by 2,700+ customers. Recommended on Reddit (r/firetvstick, r/IPTV). 18,000+ channels, 100,000+ movies and series, and instant setup guidance. No downloader codes needed.
             </p>
           </motion.div>
 
@@ -1605,7 +1605,7 @@ export default function MainStore() {
               { 
                 step: "1", 
                 title: "Choose Your Device", 
-                description: "Select from Fire Stick HD, 4K, or 4K Max. All devices come pre-configured and ready to use.",
+                description: "Select from Fire Stick HD, 4K, or 4K Max. All device options include clear setup guidance.",
                 icon: "📱",
                 image: "firestick-device-selection.jpg"
               },
@@ -1619,7 +1619,7 @@ export default function MainStore() {
               { 
                 step: "3", 
                 title: "We Ship & Setup", 
-                description: "Your device arrives ready to use. All apps pre-installed, credentials included, zero configuration needed.",
+                description: "Your device arrives with credentials and clear setup guidance so you can get started quickly.",
                 icon: "🚀",
                 image: "device-setup-ready.jpg"
               },
@@ -1682,7 +1682,7 @@ export default function MainStore() {
             {[
               {
                 title: "No Tech Skills Required",
-                description: "Everything pre-configured. No tutorials, no confusion. Plug and play.",
+                description: "Clear setup guidance with no guesswork. Start quickly with step-by-step support.",
                 visual: "💻",
                 image: "no-tech-skills.jpg",
                 color: "from-green-500/15 to-emerald-500/5",
@@ -1819,7 +1819,7 @@ export default function MainStore() {
                 <span className="text-xl font-bold text-white">StreamStickPro</span>
               </div>
               <p className="text-sm text-gray-200 mb-4">
-                Premium Live TV streaming with 18,000+ channels and 100,000+ movies & series. Pre-configured streaming devices available.
+                Premium Live TV streaming with 18,000+ channels and 100,000+ movies & series. Fire Stick and streaming device options available.
               </p>
               <div className="flex gap-3">
                 <a href="mailto:reloadedfiretvteam@gmail.com" className="w-10 h-10 bg-gray-800 hover:bg-orange-600 rounded-lg flex items-center justify-center transition-colors" data-testid="link-email" aria-label="Email us">

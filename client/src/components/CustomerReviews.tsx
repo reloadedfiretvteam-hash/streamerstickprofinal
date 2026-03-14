@@ -50,7 +50,7 @@ const reviews: Review[] = [
     date: "Sep 2024",
     rating: 5,
     product: "3 Month Live TV Plan",
-    review: "Started with 3 months to test it out and just renewed for a full year. Picture quality is great, rarely any buffering. I emailed support once on a Sunday and didn't hear back until Monday morning, but they were helpful when they responded. Overall very satisfied.",
+    review: "Started with 3 months to test it out and just renewed for a full year. Picture quality is great and the experience has been very stable. I emailed support once on a Sunday and didn't hear back until Monday morning, but they were helpful when they responded. Overall very satisfied.",
     verified: true
   },
   {

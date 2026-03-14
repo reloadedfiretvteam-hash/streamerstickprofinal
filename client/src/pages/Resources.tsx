@@ -18,7 +18,7 @@ export default function Resources() {
   useEffect(() => {
     setPageMeta({
       title: "IPTV Resources 2026 | Channel Directory & Setup Guides | StreamStick Pro",
-      description: "Complete 18,000+ IPTV channel directory, jailbroken Fire Stick setup guides, IPTV app comparison, and free streaming resources. StreamStick Pro.",
+      description: "Complete 18,000+ IPTV channel directory, Fire Stick setup guides, IPTV app comparison, and free streaming resources. StreamStick Pro.",
       path: "/resources",
     });
   }, []);
@@ -40,9 +40,9 @@ export default function Resources() {
       </section>
 
       <section className="mb-10">
-        <h2 className="text-2xl font-bold text-white mb-3">Jailbroken Fire Stick 2026 Setup Encyclopedia</h2>
+        <h2 className="text-2xl font-bold text-white mb-3">Fire Stick 2026 Setup Encyclopedia</h2>
         <p className="text-gray-300 mb-4">
-          Step-by-step setup for pre-loaded Fire Sticks: Kodi, Stremio, and live TV in 10 minutes. StreamStickPro ships devices ready to stream 18,000+ channels and 100,000+ movies.
+          Step-by-step setup for Fire Stick: Kodi, Stremio, and live TV in about 10 minutes. StreamStickPro provides clear setup guidance for 18,000+ channels and 100,000+ movies.
         </p>
         <Link href="/jailbroken-fire-sticks">
           <span className="text-orange-400 hover:underline font-medium">Jailbroken Fire Sticks Guide →</span>
@@ -72,7 +72,7 @@ export default function Resources() {
       <section className="mb-10">
         <h2 id="explore-by-location" className="text-2xl font-bold text-white mb-3">Explore by location</h2>
         <p className="text-gray-300 mb-4">
-          IPTV, jailbroken Fire Sticks, unlocked devices, and ONN Google TV by city and region. 40,000+ location guides with unique meta and internal links.
+          IPTV, Fire Stick options, and ONN Google TV by city and region. 40,000+ location guides with unique meta and internal links.
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-sm">
           {[

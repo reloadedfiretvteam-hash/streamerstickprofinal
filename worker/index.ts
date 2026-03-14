@@ -511,8 +511,8 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
       const loc = slug.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
       const ct = country.toUpperCase();
       faqJson = [
-        { question: `What is the best IPTV service in ${loc}, ${ct}?`, answer: `StreamStickPro is the top-rated IPTV service for ${loc} with 18,000+ live channels, 100,000+ movies and series, buffer-free HD streaming, and a free 36-hour trial. Works on Fire Stick, ONN Google TV, and Smart TVs.` },
-        { question: `Can I get a jailbroken Fire Stick shipped to ${loc}?`, answer: `Yes. StreamStickPro ships pre-loaded jailbroken Fire Sticks to ${loc} and across ${ct}. Comes with IPTV, Kodi, Stremio, and TiviMate installed. Plug in and start streaming 18K+ channels in minutes.` },
+        { question: `What is the best IPTV service in ${loc}, ${ct}?`, answer: `StreamStickPro is a top-rated IPTV service for ${loc} with 18,000+ live channels, 100,000+ movies and series, and a free 36-hour trial. Works on Fire Stick, ONN Google TV, and Smart TVs.` },
+        { question: `Can I get Fire Stick support in ${loc}?`, answer: `Yes. StreamStickPro supports Fire Stick users in ${loc} and across ${ct} with IPTV access, clear setup steps, and 24/7 support.` },
         { question: `How do I set up IPTV on Google TV in ${loc}?`, answer: `Download IPTV Smarters Pro or TiviMate from the Google Play Store on your ONN Google TV. Enter your StreamStickPro credentials and you will have instant access to 18,000+ channels in ${loc}. Setup takes under 5 minutes.` },
         { question: `Does StreamStickPro offer a free trial for ${loc} customers?`, answer: `Yes. StreamStickPro offers a 36-hour free IPTV trial for customers in ${loc}, ${ct}. No credit card required. Get instant login credentials and test 18,000+ live channels, VOD, and EPG guide.` },
         { question: `What devices work with StreamStickPro IPTV in ${loc}?`, answer: `StreamStickPro works on Amazon Fire Stick, Fire TV Cube, ONN Google TV, Chromecast, Android TV, Samsung and LG Smart TVs, and MAG boxes in ${loc}. Use IPTV Smarters Pro or TiviMate for the best experience.` },
@@ -601,7 +601,7 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
       <p class="lead">${descSafe}</p>
       <section aria-labelledby="what-we-offer">
         <h2 id="what-we-offer">IPTV Streaming in ${h1Text}</h2>
-        <p>StreamStickPro delivers <strong>18,000+ live channels</strong> and <strong>100,000+ movies and series</strong> to viewers in this area. Our service includes pre-loaded <strong>jailbroken Fire Sticks</strong> with Kodi, Stremio, and TiviMate, plus <strong>ONN Google TV</strong> support. Get a <strong>free 36-hour trial</strong>, instant login credentials, and 24/7 customer support. Available for delivery and digital activation across ${escapeHtml(country.toUpperCase())}.</p>
+        <p>StreamStickPro delivers <strong>18,000+ live channels</strong> and <strong>100,000+ movies and series</strong> to viewers in this area. Our service supports <strong>Fire Stick</strong>, <strong>ONN Google TV</strong>, and Smart TVs. Get a <strong>free 36-hour trial</strong>, instant login credentials, and 24/7 customer support across ${escapeHtml(country.toUpperCase())}.</p>
       </section>
       <section aria-labelledby="related">
         <h2 id="related">Related</h2>
@@ -1032,13 +1032,13 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/blog': { title: 'IPTV & Streaming Blog | Guides, News, Tips | StreamStick Pro', description: 'Expert IPTV guides, Fire Stick tutorials, streaming tips, and cord-cutting news. Updated weekly by the StreamStickPro editorial team.' },
   '/locations': { title: 'IPTV by City & Region | USA, Canada, UK | StreamStick Pro', description: 'Find IPTV service in your city. StreamStickPro covers 40,000+ locations across USA, Canada, and UK. Local guides, setup help, free trial.' },
   '/iptv-services': { title: 'Best IPTV Service 2026 | 18K+ Channels | StreamStick Pro', description: 'StreamStickPro IPTV: 18,000+ live channels, 100,000+ VOD, EPG guide, catch-up TV. Works on Fire Stick, Google TV, Smart TVs. Free 36-hour trial.' },
-  '/jailbroken-fire-sticks': { title: 'Jailbroken Fire Sticks 2026 | Pre-Loaded | StreamStick Pro', description: 'Buy jailbroken Fire Sticks pre-loaded with IPTV, Kodi, Stremio, TiviMate. 18K+ channels, plug and play. Ships fast to USA, Canada, UK.' },
+  '/jailbroken-fire-sticks': { title: 'Jailbroken Fire Stick Guide 2026 | StreamStick Pro', description: 'Explore jailbroken Fire Stick options, IPTV setup, and streaming guidance. 18K+ channels and support for USA, Canada, and UK.' },
   '/onn-google-tv': { title: 'ONN Google TV IPTV Setup Guide 2026 | StreamStick Pro', description: 'Set up IPTV on ONN Google TV in minutes. 18,000+ channels, TiviMate & Smarters Pro compatible. Step-by-step guide by StreamStickPro.' },
   '/36hr-trial': { title: 'Free 36-Hour IPTV Trial | 18K+ Channels | StreamStick Pro', description: 'Try StreamStickPro free for 36 hours. 18,000+ live channels, VOD, EPG guide. No credit card required. Instant activation on all devices.' },
   '/pricing': { title: 'IPTV Pricing & Subscription Plans 2026 | StreamStick Pro', description: 'StreamStickPro IPTV pricing: affordable monthly and yearly plans. 18,000+ channels, 4K quality, multi-device support. Compare plans now.' },
   '/iptv-firestick': { title: 'IPTV for Fire Stick 2026 | Setup Guide | StreamStick Pro', description: 'How to set up IPTV on Amazon Fire Stick. Step-by-step guide for IPTV Smarters Pro, TiviMate, and more. 18K+ channels with StreamStickPro.' },
   '/best-iptv-firestick': { title: 'Best IPTV for Fire Stick 2026 | Top Picks | StreamStick Pro', description: 'Best IPTV services for Amazon Fire Stick in 2026. Compare features, channels, prices. StreamStickPro rated #1 with 18K+ channels and free trial.' },
-  '/firestick-devices': { title: 'Fire Stick Devices for IPTV 2026 | StreamStick Pro', description: 'Best Fire Stick devices for IPTV streaming in 2026. Fire Stick 4K Max, Lite, and pre-loaded jailbroken options compared by experts.' },
+  '/firestick-devices': { title: 'Fire Stick Devices for IPTV 2026 | StreamStick Pro', description: 'Best Fire Stick devices for IPTV streaming in 2026. Fire Stick 4K Max, Lite, and ONN Google TV options compared by experts.' },
   '/iptv-media-players': { title: 'Best IPTV Media Players 2026 | Devices | StreamStick Pro', description: 'Top IPTV media players and apps: TiviMate, IPTV Smarters Pro, Kodi, Perfect Player, VLC. Expert setup guides and side-by-side comparisons.' },
   '/iptv-smarters-pro': { title: 'IPTV Smarters Pro Setup Guide 2026 | StreamStick Pro', description: 'Complete IPTV Smarters Pro setup guide. Install on Fire Stick, Android, iOS. Add StreamStickPro credentials and start streaming 18K+ channels.' },
   '/tivimate': { title: 'TiviMate IPTV Player Setup Guide 2026 | StreamStick Pro', description: 'TiviMate setup guide for IPTV. Install on Fire Stick and Android TV. EPG, catch-up, multi-view. Best settings for StreamStickPro streaming.' },
@@ -1094,7 +1094,7 @@ function applySecurityHeaders(res: Response, pathname?: string, hostname?: strin
 // VS-competitor meta for crawler SSR
 const VS_META: Record<string, { title: string; description: string }> = {
   '/vs-iptvstronger': { title: 'StreamStickPro vs IPTVStronger 2026 | Honest Comparison', description: 'Compare StreamStickPro vs IPTVStronger: channels, pricing, reliability, devices. See why StreamStickPro leads with 18K+ channels and free trial.' },
-  '/vs-troypoint': { title: 'StreamStickPro vs TroyPoint 2026 | IPTV Comparison', description: 'StreamStickPro vs TroyPoint comparison: features, pricing, setup. StreamStickPro offers 18K+ channels, pre-loaded Fire Sticks, 24/7 support.' },
+  '/vs-troypoint': { title: 'StreamStickPro vs TroyPoint 2026 | IPTV Comparison', description: 'StreamStickPro vs TroyPoint comparison: features, pricing, and setup. StreamStickPro offers 18K+ channels and 24/7 support.' },
   '/vs-hypotv': { title: 'StreamStickPro vs HypoTV 2026 | Which IPTV Is Better?', description: 'Compare StreamStickPro vs HypoTV: channel count, reliability, price, device support. StreamStickPro: 18K+ channels, 4K quality, free trial.' },
   '/vs-tvworldwide': { title: 'StreamStickPro vs TV Worldwide 2026 | IPTV Showdown', description: 'StreamStickPro vs TV Worldwide: features, pricing, device support, channel count compared. 18K+ channels and free trial with StreamStickPro.' },
   '/vs-iptvproviders': { title: 'StreamStickPro vs IPTV Providers 2026 | Best IPTV Service', description: 'StreamStickPro vs IPTV Providers: head-to-head comparison. Channels, VOD, price, reliability. StreamStickPro wins with 18K+ channels.' },
