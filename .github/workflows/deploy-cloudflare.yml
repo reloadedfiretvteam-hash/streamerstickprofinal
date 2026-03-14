@@ -44,3 +44,17 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy dist --project-name=streamerstickpro-live --branch=clean-main
+        continue-on-error: true
+
+      - name: Sync secrets to Cloudflare Pages
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "${{ secrets.STRIPE_SECRET_KEY }}" | npx wrangler pages secret put STRIPE_SECRET_KEY --project-name=streamerstickpro-live
+          echo "${{ secrets.STRIPE_PUBLISHABLE_KEY }}" | npx wrangler pages secret put STRIPE_PUBLISHABLE_KEY --project-name=streamerstickpro-live
+          echo "${{ secrets.STRIPE_WEBHOOK_SECRET }}" | npx wrangler pages secret put STRIPE_WEBHOOK_SECRET --project-name=streamerstickpro-live
+          echo "${{ secrets.SUPABASE_SERVICE_KEY }}" | npx wrangler pages secret put SUPABASE_SERVICE_KEY --project-name=streamerstickpro-live
+          echo "${{ secrets.RESEND_API_KEY }}" | npx wrangler pages secret put RESEND_API_KEY --project-name=streamerstickpro-live
+          echo "${{ secrets.SESSION_SECRET }}" | npx wrangler pages secret put SESSION_SECRET --project-name=streamerstickpro-live
