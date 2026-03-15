@@ -1531,47 +1531,71 @@ export default function AdminPanel() {
 
     setSaving(true);
 
+    const normalizedId = editingProduct.id && editingProduct.id.trim().length > 0
+      ? editingProduct.id.trim()
+      : editingProduct.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 48) || `product-${Date.now()}`;
+
     const productData = {
-      ...editingProduct,
+      id: normalizedId,
+      name: editingProduct.name,
+      description: editingProduct.description,
+      price: editingProduct.price,
+      imageUrl: editingProduct.main_image || null,
+      category: editingProduct.category === 'devices' ? 'firestick' : 'subscription',
+      shadowName: editingProduct.cloaked_name || undefined,
       updated_at: new Date().toISOString()
     };
 
-    if (editingProduct.id) {
-      const { error } = await supabase
-        .from('real_products')
-        .update(productData)
-        .eq('id', editingProduct.id);
-
-      if (!error) {
+    if (editingProduct.id && editingProduct.id.trim().length > 0) {
+      try {
+        const response = await authFetch(`/api/admin/products/${editingProduct.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData),
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          showToast(result?.error || 'Error updating product', 'error');
+          return;
+        }
         const synced = await syncToShadowProduct(editingProduct);
         if (synced) {
-          showToast('Product updated successfully! Shadow product synced.', 'success');
+          showToast('Product updated successfully! Price and checkout are now synced.', 'success');
         } else {
           showToast('Product updated but shadow sync failed. Please try again.', 'error');
         }
         loadProducts();
         setEditingProduct(null);
-      } else {
-        showToast('Error updating product: ' + error.message, 'error');
+      } catch (error: any) {
+        showToast('Error updating product: ' + (error?.message || 'Unknown error'), 'error');
       }
     } else {
-      const { data: newProduct, error } = await supabase
-        .from('real_products')
-        .insert([productData])
-        .select()
-        .single();
-
-      if (!error && newProduct) {
-        const synced = await syncToShadowProduct({ ...editingProduct, id: newProduct.id });
+      try {
+        const response = await authFetch('/api/admin/products/create-with-stripe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData),
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          showToast(result?.error || 'Error creating product', 'error');
+          return;
+        }
+        const newId = result?.data?.id || normalizedId;
+        const synced = await syncToShadowProduct({ ...editingProduct, id: newId });
         if (synced) {
-          showToast('Product created successfully! Shadow product synced.', 'success');
+          showToast('Product created successfully! Price and checkout are now synced.', 'success');
         } else {
           showToast('Product created but shadow sync failed. Please try again.', 'error');
         }
         loadProducts();
         setEditingProduct(null);
-      } else if (error) {
-        showToast('Error creating product: ' + error.message, 'error');
+      } catch (error: any) {
+        showToast('Error creating product: ' + (error?.message || 'Unknown error'), 'error');
       }
     }
 

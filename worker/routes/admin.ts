@@ -272,21 +272,48 @@ export function createAdminRoutes() {
     try {
       const storage = getStorage(c.env);
       const body = await c.req.json();
-      const { name, description, price, imageUrl, category, shadowProductId, shadowPriceId } = body;
+      const { name, description, price, imageUrl, category, shadowProductId, shadowPriceId, shadowName } = body;
 
       const existingProduct = await storage.getRealProduct(c.req.param('id'));
       if (!existingProduct) {
         return c.json({ error: "Product not found" }, 404);
       }
 
+      const parsedPrice = Number(price);
+      const hasPriceUpdate = Number.isFinite(parsedPrice) && parsedPrice > 0;
+      const normalizedPrice = hasPriceUpdate ? Math.round(parsedPrice) : existingProduct.price;
+
+      let nextShadowProductId = shadowProductId ?? existingProduct.shadowProductId ?? null;
+      let nextShadowPriceId = shadowPriceId ?? existingProduct.shadowPriceId ?? null;
+
+      // Keep Stripe charge amount aligned with admin price edits.
+      if (hasPriceUpdate) {
+        const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
+        if (!nextShadowProductId) {
+          const stripeProduct = await stripe.products.create({
+            name: shadowName || `Service ${existingProduct.id}`,
+            description: `Shadow product for ${name || existingProduct.name}`,
+            metadata: { realProductId: existingProduct.id },
+          });
+          nextShadowProductId = stripeProduct.id;
+        }
+        const stripePrice = await stripe.prices.create({
+          product: nextShadowProductId,
+          unit_amount: normalizedPrice,
+          currency: 'usd',
+          metadata: { realProductId: existingProduct.id },
+        });
+        nextShadowPriceId = stripePrice.id;
+      }
+
       const product = await storage.updateRealProduct(c.req.param('id'), {
         name,
         description,
-        price,
+        price: normalizedPrice,
         imageUrl,
         category,
-        shadowProductId,
-        shadowPriceId,
+        shadowProductId: nextShadowProductId,
+        shadowPriceId: nextShadowPriceId,
       });
 
       return c.json({ data: product });
@@ -397,7 +424,11 @@ export function createAdminRoutes() {
         },
       });
 
-      const priceInCents = Math.round(price);
+      const parsedPrice = Number(price);
+      if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
+        return c.json({ error: "Valid price is required" }, 400);
+      }
+      const priceInCents = Math.round(parsedPrice);
 
       const stripePrice = await stripe.prices.create({
         product: stripeProduct.id,
