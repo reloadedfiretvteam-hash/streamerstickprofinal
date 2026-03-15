@@ -175,6 +175,58 @@ app.route('/api/auth', createAuthRoutes());
 app.route('/api/products', createProductRoutes());
 app.route('/api/checkout', createCheckoutRoutes());
 app.route('/api/orders', createOrderRoutes());
+
+// Public email-open tracking pixel (1x1 gif), used by admin marketing campaigns.
+app.get('/api/marketing/open.gif', async (c) => {
+  const transparentGif = Uint8Array.from([
+    71, 73, 70, 56, 57, 97, 1, 0, 1, 0, 128, 0, 0, 0, 0, 0,
+    255, 255, 255, 33, 249, 4, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0,
+    1, 0, 1, 0, 0, 2, 2, 68, 1, 0, 59,
+  ]);
+
+  try {
+    const campaignId = c.req.query('campaign');
+    const contactId = c.req.query('contact');
+    if (campaignId && contactId) {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        c.env.VITE_SUPABASE_URL,
+        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
+      );
+      const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0] || 'unknown';
+      const ua = c.req.header('user-agent') || '';
+      const salt = c.env.VISITOR_HASH_SALT || c.env.JWT_SECRET || 'streamstickpro';
+      const ipHash = await sha256Hex(`ip:${ip}|ua:${ua}|salt:${salt}`);
+
+      await supabase
+        .from('email_events')
+        .upsert(
+          {
+            campaign_id: campaignId,
+            contact_id: contactId,
+            event_type: 'open',
+            user_agent: ua || null,
+            ip_hash: ipHash,
+          },
+          { onConflict: 'campaign_id,contact_id,event_type', ignoreDuplicates: true }
+        );
+    }
+  } catch (error: any) {
+    console.error('[marketing-open-tracking]', error?.message || error);
+  }
+
+  return new Response(transparentGif, {
+    status: 200,
+    headers: {
+      'Content-Type': 'image/gif',
+      'Content-Length': String(transparentGif.byteLength),
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      Pragma: 'no-cache',
+      Expires: '0',
+    },
+  });
+});
+
 app.use('/api/admin/*', authMiddleware);
 app.route('/api/admin', createAdminRoutes());
 app.route('/api/stripe', createWebhookRoutes());
@@ -755,12 +807,15 @@ app.get('*', async (c, next) => {
 
 // ── Block crawlers on secure domain (shadow store should NEVER appear in search engines) ──
 const SECURE_HOSTS = new Set(['secure.streamstickpro.com']);
-app.get('/robots.txt', (c) => {
+app.get('/robots.txt', async (c) => {
   const hostname = new URL(c.req.url).hostname;
   if (SECURE_HOSTS.has(hostname)) {
     return c.text('User-agent: *\nDisallow: /\n', 200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=86400' });
   }
-  return c.env.ASSETS.fetch(c.req.raw);
+  const res = await c.env.ASSETS.fetch(c.req.raw);
+  const headers = new Headers(res.headers);
+  headers.set('Cache-Control', 'public, max-age=21600, s-maxage=21600');
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
 });
 
 // ── RSS/Atom Feed (content freshness signal + aggregator traffic) ──
@@ -823,7 +878,7 @@ app.get('/sitemap-index.xml', (c) => {
   const today = new Date().toISOString().split('T')[0];
   return c.text(SITEMAP_INDEX_XML('https://streamstickpro.com', today), 200, {
     'Content-Type': 'application/xml; charset=utf-8',
-    'Cache-Control': 'public, max-age=3600',
+    'Cache-Control': 'public, max-age=21600, s-maxage=21600',
   });
 });
 
@@ -888,7 +943,7 @@ app.get('/sitemap-pages.xml', async (c) => {
     /* ignore */
   }
   xml += '</urlset>';
-  return c.text(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' });
+  return c.text(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=21600, s-maxage=21600' });
 });
 
 // sitemap-posts.xml: blog only (SEO/AEO prompt)
@@ -909,7 +964,7 @@ app.get('/sitemap-posts.xml', async (c) => {
     /* ignore */
   }
   xml += '</urlset>';
-  return c.text(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' });
+  return c.text(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=21600, s-maxage=21600' });
 });
 
 // Sitemap route - must be before catch-all (full: static + blog + location). Resilient: never 500; Supabase failure returns static + location-pages.json.
@@ -994,7 +1049,7 @@ app.get('/sitemap.xml', async (c) => {
 
   return c.text(sitemap, 200, {
     'Content-Type': 'application/xml; charset=utf-8',
-    'Cache-Control': 'public, max-age=3600',
+    'Cache-Control': 'public, max-age=21600, s-maxage=21600',
   });
 });
 
@@ -1029,13 +1084,13 @@ app.post('/api/indexnow/ping', async (c) => {
 const PAGE_META: Record<string, { title: string; description: string; noindex?: boolean }> = {
   '/': { title: 'IPTV Fire Stick 2026 | 18K+ Live Channels | StreamStick Pro', description: 'Best IPTV for Fire Stick 2026: 18,000+ live channels, VOD movies, 24/7 support. Free 36-hour trial. Jailbroken Fire Sticks and ONN Google TV included.' },
   '/shop': { title: 'Shop IPTV Subscriptions & Fire Sticks | StreamStick Pro', description: 'Buy IPTV subscriptions, jailbroken Fire Sticks, and ONN Google TV devices. 18,000+ channels, instant setup, 24/7 support. Shop StreamStickPro now.' },
+  '/pricing': { title: 'IPTV Pricing & Subscription Plans 2026 | StreamStick Pro', description: 'IPTV pricing with multi-device options and Fire Stick bundles. 18,000+ channels, 100,000+ VOD, instant activation, 24/7 support. Compare plans now.' },
   '/blog': { title: 'IPTV & Streaming Blog | Guides, News, Tips | StreamStick Pro', description: 'Expert IPTV guides, Fire Stick tutorials, streaming tips, and cord-cutting news. Updated weekly by the StreamStickPro editorial team.' },
   '/locations': { title: 'IPTV by City & Region | USA, Canada, UK | StreamStick Pro', description: 'Find IPTV service in your city. StreamStickPro covers 40,000+ locations across USA, Canada, and UK. Local guides, setup help, free trial.' },
   '/iptv-services': { title: 'Best IPTV Service 2026 | 18K+ Channels | StreamStick Pro', description: 'StreamStickPro IPTV: 18,000+ live channels, 100,000+ VOD, EPG guide, catch-up TV. Works on Fire Stick, Google TV, Smart TVs. Free 36-hour trial.' },
   '/jailbroken-fire-sticks': { title: 'Jailbroken Fire Stick Guide 2026 | StreamStick Pro', description: 'Explore jailbroken Fire Stick options, IPTV setup, and streaming guidance. 18K+ channels and support for USA, Canada, and UK.' },
   '/onn-google-tv': { title: 'ONN Google TV IPTV Setup Guide 2026 | StreamStick Pro', description: 'Set up IPTV on ONN Google TV in minutes. 18,000+ channels, TiviMate & Smarters Pro compatible. Step-by-step guide by StreamStickPro.' },
   '/36hr-trial': { title: 'Free 36-Hour IPTV Trial | 18K+ Channels | StreamStick Pro', description: 'Try StreamStickPro free for 36 hours. 18,000+ live channels, VOD, EPG guide. No credit card required. Instant activation on all devices.' },
-  '/pricing': { title: 'IPTV Pricing & Subscription Plans 2026 | StreamStick Pro', description: 'StreamStickPro IPTV pricing: affordable monthly and yearly plans. 18,000+ channels, 4K quality, multi-device support. Compare plans now.' },
   '/iptv-firestick': { title: 'IPTV for Fire Stick 2026 | Setup Guide | StreamStick Pro', description: 'How to set up IPTV on Amazon Fire Stick. Step-by-step guide for IPTV Smarters Pro, TiviMate, and more. 18K+ channels with StreamStickPro.' },
   '/best-iptv-firestick': { title: 'Best IPTV for Fire Stick 2026 | Top Picks | StreamStick Pro', description: 'Best IPTV services for Amazon Fire Stick in 2026. Compare features, channels, prices. StreamStickPro rated #1 with 18K+ channels and free trial.' },
   '/firestick-devices': { title: 'Fire Stick Devices for IPTV 2026 | StreamStick Pro', description: 'Best Fire Stick devices for IPTV streaming in 2026. Fire Stick 4K Max, Lite, and ONN Google TV options compared by experts.' },

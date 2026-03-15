@@ -28,6 +28,7 @@ import {
   AlertCircle,
   Flame,
   RefreshCw,
+  RefreshCcw,
   Upload,
   Loader2,
   Palette,
@@ -49,8 +50,10 @@ import {
   GitBranch,
   CloudUpload,
   CheckCheck,
+  CheckSquare,
   Zap,
   Mail,
+  Send,
   RotateCcw,
   ArrowUpRight,
   Timer,
@@ -400,6 +403,18 @@ export default function AdminPanel() {
   const [broadcastLoading, setBroadcastLoading] = useState(false);
   const [broadcastResult, setBroadcastResult] = useState<{ sent: number; failed: number; total: number; message: string; errors?: string[] } | null>(null);
 
+  const [marketingContacts, setMarketingContacts] = useState<Array<{email: string, name: string, type: string, date: string, source: string}>>([]);
+  const [marketingLoading, setMarketingLoading] = useState(false);
+  const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
+  const [campaignName, setCampaignName] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
+  const [sendingMarketing, setSendingMarketing] = useState(false);
+  const [marketingResult, setMarketingResult] = useState<{sent: number, failed: number, total: number, message?: string, campaignId?: string} | null>(null);
+  const [contactSearch, setContactSearch] = useState('');
+  const [marketingCampaigns, setMarketingCampaigns] = useState<Array<{id: string; name: string; subject: string; status: string; createdAt: string; sentAt?: string; sent: number; failed: number; opened: number; queued: number; total: number;}>>([]);
+  const [marketingCampaignsLoading, setMarketingCampaignsLoading] = useState(false);
+
   const [envStatus, setEnvStatus] = useState<{
     hasStripeKey?: boolean;
     hasWebhookSecret?: boolean;
@@ -604,6 +619,18 @@ export default function AdminPanel() {
 
     return () => clearInterval(interval);
   }, [isAuthenticated]);
+
+  // Lazy-load marketing contacts when opening Email Marketing
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (activeSection !== "email-marketing") return;
+    if (marketingContacts.length === 0 && !marketingLoading) {
+      loadMarketingContacts();
+    }
+    if (marketingCampaigns.length === 0 && !marketingCampaignsLoading) {
+      loadMarketingCampaigns();
+    }
+  }, [activeSection, isAuthenticated, marketingContacts.length, marketingLoading, marketingCampaigns.length, marketingCampaignsLoading]);
 
   const loadOrderStats = async () => {
     try {
@@ -1078,6 +1105,80 @@ export default function AdminPanel() {
     }
   };
 
+  const loadMarketingContacts = async () => {
+    setMarketingLoading(true);
+    try {
+      const response = await authFetch('/api/admin/marketing/contacts');
+      const result = await response.json();
+      if (result.data) {
+        setMarketingContacts(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading marketing contacts:', error);
+      showToast('Failed to load contacts', 'error');
+    } finally {
+      setMarketingLoading(false);
+    }
+  };
+
+  const loadMarketingCampaigns = async () => {
+    setMarketingCampaignsLoading(true);
+    try {
+      const response = await authFetch('/api/admin/marketing/campaigns');
+      const result = await response.json();
+      if (result.data) {
+        setMarketingCampaigns(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading marketing campaigns:', error);
+      showToast('Failed to load campaign history', 'error');
+    } finally {
+      setMarketingCampaignsLoading(false);
+    }
+  };
+
+  const sendMarketingCampaign = async (testOnly = false) => {
+    if (!testOnly && selectedEmails.size === 0) {
+      showToast('Please select at least one recipient', 'error');
+      return;
+    }
+    if (!emailSubject.trim() || !emailBody.trim()) {
+      showToast('Please enter a subject and body', 'error');
+      return;
+    }
+    setSendingMarketing(true);
+    setMarketingResult(null);
+    try {
+      const htmlBody = `<div style="font-family: Arial, sans-serif; line-height: 1.6;">${emailBody
+        .split('\n')
+        .map((line) => `<p>${line.replace(/</g, '&lt;').replace(/>/g, '&gt;') || '&nbsp;'}</p>`)
+        .join('')}</div>`;
+
+      const response = await authFetch('/api/admin/marketing/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipients: testOnly ? ['support@streamstickpro.com'] : Array.from(selectedEmails),
+          subject: emailSubject,
+          htmlBody,
+          campaignName: campaignName.trim() || undefined,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result?.error || 'Failed to send campaign');
+      }
+      setMarketingResult(result);
+      showToast(result.message || `Campaign sent: ${result.sent} delivered`, 'success');
+      loadMarketingCampaigns();
+    } catch (error) {
+      console.error('Error sending campaign:', error);
+      showToast('Failed to send campaign', 'error');
+    } finally {
+      setSendingMarketing(false);
+    }
+  };
+
   const selectCustomer = async (customer: Customer) => {
     setSelectedCustomer(customer);
     await loadCustomerOrders(customer.id);
@@ -1270,6 +1371,16 @@ export default function AdminPanel() {
     c.email.toLowerCase().includes(customerSearch.toLowerCase()) ||
     (c.fullName && c.fullName.toLowerCase().includes(customerSearch.toLowerCase()))
   );
+
+  const filteredMarketingContacts = marketingContacts.filter((c) => {
+    const q = contactSearch.toLowerCase();
+    return (
+      c.email.toLowerCase().includes(q) ||
+      (c.name && c.name.toLowerCase().includes(q)) ||
+      (c.type && c.type.toLowerCase().includes(q)) ||
+      (c.source && c.source.toLowerCase().includes(q))
+    );
+  });
 
   const updateFulfillmentOrder = async (orderId: string, updates: { fulfillmentStatus?: string; amazonOrderId?: string }) => {
     setUpdatingFulfillment(orderId);
@@ -1744,6 +1855,14 @@ export default function AdminPanel() {
                 {customers.length}
               </Badge>
             )}
+          </Button>
+          <Button
+            variant={activeSection === "email-marketing" ? "secondary" : "ghost"}
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => setActiveSection("email-marketing")}
+            data-testid="nav-email-marketing"
+          >
+            <Mail className="w-4 h-4 mr-3" /> Email Marketing
           </Button>
           <Button 
             variant={activeSection === "blog" ? "secondary" : "ghost"} 
@@ -3395,6 +3514,262 @@ export default function AdminPanel() {
                   )}
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeSection === "email-marketing" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold flex items-center gap-3">
+                    <Mail className="w-8 h-8 text-orange-500" />
+                    Email Marketing (Selective)
+                  </h2>
+                  <p className="text-gray-400">Pick recipients, compose, and send via Resend.</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-600 text-gray-200"
+                    onClick={async () => {
+                      await Promise.all([loadMarketingContacts(), loadMarketingCampaigns()]);
+                    }}
+                    disabled={marketingLoading || marketingCampaignsLoading}
+                  >
+                    {marketingLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCcw className="w-4 h-4 mr-2" />}
+                    Reload contacts
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-600 text-gray-200"
+                    onClick={() => setSelectedEmails(new Set(filteredMarketingContacts.map((c) => c.email)))}
+                    disabled={filteredMarketingContacts.length === 0}
+                  >
+                    <CheckSquare className="w-4 h-4 mr-2" />
+                    Select all ({filteredMarketingContacts.length})
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-300"
+                    onClick={() => setSelectedEmails(new Set())}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <Card className="bg-gray-800 border-gray-700 xl:col-span-2">
+                  <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <CardTitle className="text-white">Recipients</CardTitle>
+                      <CardDescription className="text-gray-400">
+                        {marketingContacts.length} contacts • {selectedEmails.size} selected
+                      </CardDescription>
+                    </div>
+                    <div className="relative w-full sm:w-80">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        placeholder="Search email, name, type, source..."
+                        value={contactSearch}
+                        onChange={(e) => setContactSearch(e.target.value)}
+                        className="pl-10 bg-gray-700 border-gray-600 text-white"
+                      />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    {marketingLoading ? (
+                      <div className="p-8 text-center text-gray-400">
+                        <Loader2 className="w-8 h-8 mx-auto mb-3 animate-spin" />
+                        Loading contacts...
+                      </div>
+                    ) : filteredMarketingContacts.length === 0 ? (
+                      <div className="p-8 text-center text-gray-400">
+                        <Users className="w-12 h-12 mx-auto mb-3 opacity-60" />
+                        <p className="text-lg">No contacts found</p>
+                        <p className="text-sm text-gray-500">Reload or adjust your search.</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full text-sm text-left">
+                          <thead className="bg-gray-900 text-gray-300 uppercase text-xs">
+                            <tr>
+                              <th className="px-4 py-3 w-10"></th>
+                              <th className="px-4 py-3">Email</th>
+                              <th className="px-4 py-3">Name</th>
+                              <th className="px-4 py-3">Type</th>
+                              <th className="px-4 py-3">Source</th>
+                              <th className="px-4 py-3">Date</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-800">
+                            {filteredMarketingContacts.map((contact) => {
+                              const selected = selectedEmails.has(contact.email);
+                              return (
+                                <tr key={contact.email} className={selected ? "bg-orange-500/5" : ""}>
+                                  <td className="px-4 py-3">
+                                    <input
+                                      type="checkbox"
+                                      aria-label={`Select ${contact.email}`}
+                                      checked={selected}
+                                      onChange={() => {
+                                        setSelectedEmails((prev) => {
+                                          const next = new Set(prev);
+                                          if (next.has(contact.email)) next.delete(contact.email);
+                                          else next.add(contact.email);
+                                          return next;
+                                        });
+                                      }}
+                                      className="h-4 w-4"
+                                    />
+                                  </td>
+                                  <td className="px-4 py-3 text-white font-medium">{contact.email}</td>
+                                  <td className="px-4 py-3 text-gray-200">{contact.name || '—'}</td>
+                                  <td className="px-4 py-3">
+                                    <span className="px-2 py-1 rounded-full text-xs bg-gray-700 text-gray-200 border border-gray-600">
+                                      {contact.type || 'contact'}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3 text-gray-300 text-xs uppercase">{contact.source || 'n/a'}</td>
+                                  <td className="px-4 py-3 text-gray-400 text-xs">
+                                    {contact.date ? new Date(contact.date).toLocaleDateString() : '—'}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-white">Compose</CardTitle>
+                    <CardDescription className="text-gray-400">
+                      Send to selected ({selectedEmails.size}) or run a test to the site inbox.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">Campaign name</label>
+                      <Input
+                        value={campaignName}
+                        onChange={(e) => setCampaignName(e.target.value)}
+                        placeholder="e.g., April trial follow-up"
+                        className="bg-gray-700 border-gray-600 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">Subject</label>
+                      <Input
+                        value={emailSubject}
+                        onChange={(e) => setEmailSubject(e.target.value)}
+                        placeholder="e.g., StreamStickPro: New channels & sports updates"
+                        className="bg-gray-700 border-gray-600 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">Message</label>
+                      <textarea
+                        value={emailBody}
+                        onChange={(e) => setEmailBody(e.target.value)}
+                        rows={8}
+                        placeholder="Write your campaign message... (HTML-safe; new lines become paragraphs)"
+                        className="w-full rounded-lg bg-gray-700 border border-gray-600 text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">New lines will become paragraphs. Basic HTML is escaped for safety.</p>
+                    </div>
+                    {marketingResult && (
+                      <div className="rounded-lg border border-gray-700 bg-gray-900/60 p-3 text-sm text-gray-200">
+                        <p className="font-semibold">{marketingResult.message || 'Sent'}</p>
+                        <p className="text-gray-400">Sent: {marketingResult.sent} • Failed: {marketingResult.failed} • Total: {marketingResult.total}</p>
+                        {marketingResult.campaignId && (
+                          <p className="text-gray-500 text-xs mt-1">Campaign ID: {marketingResult.campaignId}</p>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button
+                        variant="outline"
+                        className="border-gray-600 text-gray-200 w-full sm:w-auto"
+                        disabled={sendingMarketing}
+                        onClick={() => sendMarketingCampaign(true)}
+                      >
+                        {sendingMarketing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
+                        Send test to support@streamstickpro.com
+                      </Button>
+                      <Button
+                        className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white"
+                        disabled={sendingMarketing || selectedEmails.size === 0}
+                        onClick={() => sendMarketingCampaign(false)}
+                      >
+                        {sendingMarketing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                        Send to selected
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Recent Campaign History</CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Review sent campaigns, totals, failures, and timestamps.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {marketingCampaignsLoading ? (
+                    <div className="p-6 text-center text-gray-400">
+                      <Loader2 className="w-6 h-6 mx-auto mb-2 animate-spin" />
+                      Loading campaign history...
+                    </div>
+                  ) : marketingCampaigns.length === 0 ? (
+                    <div className="p-6 text-center text-gray-400">
+                      No campaigns sent yet.
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {marketingCampaigns.map((campaign) => (
+                        <div key={campaign.id} className="rounded-xl border border-gray-700 bg-gray-900/50 p-4">
+                          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                            <div>
+                              <p className="text-white font-semibold">{campaign.name || campaign.subject}</p>
+                              <p className="text-gray-300 text-sm">{campaign.subject}</p>
+                              <p className="text-gray-500 text-xs mt-1">
+                                Created {campaign.createdAt ? new Date(campaign.createdAt).toLocaleString() : 'unknown'}
+                                {campaign.sentAt ? ` • Sent ${new Date(campaign.sentAt).toLocaleString()}` : ''}
+                              </p>
+                            </div>
+                            <div className="flex flex-wrap gap-2 text-xs">
+                              <span className="px-2 py-1 rounded-full bg-green-500/15 text-green-300 border border-green-500/30">
+                                Sent {campaign.sent}
+                              </span>
+                              <span className="px-2 py-1 rounded-full bg-red-500/15 text-red-300 border border-red-500/30">
+                                Failed {campaign.failed}
+                              </span>
+                              <span className="px-2 py-1 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30">
+                                Opened {campaign.opened || 0}
+                              </span>
+                              <span className="px-2 py-1 rounded-full bg-gray-700 text-gray-200 border border-gray-600">
+                                Total {campaign.total}
+                              </span>
+                              <span className="px-2 py-1 rounded-full bg-orange-500/15 text-orange-300 border border-orange-500/30 uppercase">
+                                {campaign.status}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           )}
 

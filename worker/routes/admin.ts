@@ -906,6 +906,397 @@ export function createAdminRoutes() {
     }
   });
 
+  // ——— Email Marketing Tool ———
+  app.get('/marketing/contacts', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+
+      const contactMap = new Map<string, { email: string; name: string; type: string; date: string; source: string; isSubscribed?: boolean }>();
+      const typePriority = (type: string) => {
+        if (type === 'purchase') return 3;
+        if (type === 'trial') return 2;
+        if (type === 'contact') return 1;
+        return 0;
+      };
+      const mergeContact = (incoming: { email: string; name: string; type: string; date: string; source: string; isSubscribed?: boolean }) => {
+        const existing = contactMap.get(incoming.email);
+        if (!existing) {
+          contactMap.set(incoming.email, incoming);
+          return;
+        }
+
+        const incomingPriority = typePriority(incoming.type);
+        const existingPriority = typePriority(existing.type);
+        const incomingDate = incoming.date ? new Date(incoming.date).getTime() : 0;
+        const existingDate = existing.date ? new Date(existing.date).getTime() : 0;
+        const shouldReplace = incomingPriority > existingPriority || (incomingPriority === existingPriority && incomingDate > existingDate);
+
+        if (shouldReplace) {
+          contactMap.set(incoming.email, {
+            ...existing,
+            ...incoming,
+            isSubscribed: incoming.isSubscribed ?? existing.isSubscribed,
+            name: incoming.name || existing.name,
+          });
+          return;
+        }
+
+        if (!existing.name && incoming.name) {
+          existing.name = incoming.name;
+        }
+        if (existing.isSubscribed === undefined && incoming.isSubscribed !== undefined) {
+          existing.isSubscribed = incoming.isSubscribed;
+        }
+      };
+
+      // 1. Contacts table (if it exists)
+      try {
+        const { data: contactRows } = await supabase.from('contacts').select('*');
+        (contactRows || []).forEach((row: any) => {
+          const email = (row.email || '').trim().toLowerCase();
+          if (!email || !email.includes('@')) return;
+          const fullName = [row.first_name, row.last_name].filter(Boolean).join(' ').trim();
+          const source = row.source || 'contacts';
+          const type =
+            source === 'free_trial'
+              ? 'trial'
+              : source === 'subscription' || source === 'firestick'
+                ? 'purchase'
+                : 'contact';
+          mergeContact({
+            email,
+            name: fullName || row.name || row.full_name || '',
+            type,
+            date: row.created_at || row.updated_at || '',
+            source,
+            isSubscribed: row.is_subscribed !== false,
+          });
+        });
+      } catch {
+        // contacts table may not exist — ignore
+      }
+
+      // 2. Customers from storage
+      const customers = await storage.getAllCustomers();
+      customers.forEach((cust: any) => {
+        const email = (cust.email || '').trim().toLowerCase();
+        if (!email || !email.includes('@')) return;
+        mergeContact({
+          email,
+          name: cust.fullName || cust.username || '',
+          type: 'purchase',
+          date: cust.createdAt || '',
+          source: 'customers',
+        });
+      });
+
+      // 3. Orders from storage (captures free-trial users too)
+      const orders = await storage.getAllOrders();
+      orders.forEach((o: any) => {
+        const email = (o.customerEmail || '').trim().toLowerCase();
+        if (!email || !email.includes('@')) return;
+        const isTrial = o.paymentMethod === 'free-trial' || o.amount === 0;
+        mergeContact({
+          email,
+          name: o.customerName || '',
+          type: isTrial ? 'trial' : 'purchase',
+          date: o.createdAt || '',
+          source: 'orders',
+        });
+      });
+
+      // 4. email_campaigns table (picks up any stragglers)
+      try {
+        const { data: campaigns } = await supabase.from('email_campaigns').select('customer_email, customer_name, created_at');
+        (campaigns || []).forEach((row: any) => {
+          const email = (row.customer_email || '').trim().toLowerCase();
+          if (!email || !email.includes('@')) return;
+          mergeContact({
+            email,
+            name: row.customer_name || '',
+            type: 'campaign',
+            date: row.created_at || '',
+            source: 'email_campaigns',
+          });
+        });
+      } catch {
+        // table may not exist
+      }
+
+      const contacts = Array.from(contactMap.values()).sort((a, b) => {
+        if (!a.date && !b.date) return 0;
+        if (!a.date) return 1;
+        if (!b.date) return -1;
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
+
+      return c.json({ data: contacts, total: contacts.length });
+    } catch (error: any) {
+      console.error('Marketing contacts error:', error);
+      return c.json({ error: 'Failed to fetch marketing contacts', details: error.message }, 500);
+    }
+  });
+
+  app.post('/marketing/send', async (c) => {
+    try {
+      const body = await c.req.json();
+      const { recipients, subject, htmlBody, campaignName } = body;
+
+      if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+        return c.json({ error: 'recipients (array of emails) is required' }, 400);
+      }
+      if (!subject || typeof subject !== 'string' || !subject.trim()) {
+        return c.json({ error: 'subject is required' }, 400);
+      }
+      if (!htmlBody || typeof htmlBody !== 'string' || !htmlBody.trim()) {
+        return c.json({ error: 'htmlBody is required' }, 400);
+      }
+
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        c.env.VITE_SUPABASE_URL,
+        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
+      );
+
+      const normalizedRecipients = Array.from(
+        new Set(
+          recipients
+            .map((r: any) => String(r || '').trim().toLowerCase())
+            .filter((r: string) => r.includes('@'))
+        )
+      );
+
+      const bodyText = String(htmlBody)
+        .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+        .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      // Upsert recipients into contacts so campaigns and sends can be tracked historically.
+      const { data: existingContacts } = await supabase
+        .from('contacts')
+        .select('id,email,first_name,last_name,source,is_subscribed')
+        .in('email', normalizedRecipients);
+
+      const existingByEmail = new Map((existingContacts || []).map((row: any) => [String(row.email).toLowerCase(), row]));
+      const missing = normalizedRecipients.filter((email) => !existingByEmail.has(email));
+
+      if (missing.length > 0) {
+        await supabase.from('contacts').upsert(
+          missing.map((email) => ({
+            email,
+            first_name: null,
+            last_name: null,
+            source: 'subscription',
+            is_subscribed: true,
+            last_activity_at: new Date().toISOString(),
+          })),
+          { onConflict: 'email' }
+        );
+      }
+
+      const { data: contactRows, error: contactsError } = await supabase
+        .from('contacts')
+        .select('id,email,first_name,last_name,source,is_subscribed')
+        .in('email', normalizedRecipients);
+
+      if (contactsError) {
+        return c.json({ error: 'Failed to load contacts for campaign', details: contactsError.message }, 500);
+      }
+
+      const { data: campaignRows, error: campaignError } = await supabase
+        .from('email_campaigns')
+        .insert({
+          name: (campaignName && String(campaignName).trim()) || subject.trim().slice(0, 120),
+          subject: subject.trim(),
+          body_html: htmlBody,
+          body_text: bodyText,
+          segment: { recipients: normalizedRecipients, count: normalizedRecipients.length },
+          status: 'sending',
+        })
+        .select('id')
+        .limit(1);
+
+      if (campaignError || !campaignRows?.[0]?.id) {
+        return c.json({ error: 'Failed to create campaign record', details: campaignError?.message || 'No campaign id returned' }, 500);
+      }
+
+      const campaignId = campaignRows[0].id;
+      let sent = 0;
+      let failed = 0;
+      const errors: string[] = [];
+      const sendRows: any[] = [];
+
+      for (const contact of contactRows || []) {
+        const to = String(contact.email).toLowerCase();
+        if (contact.is_subscribed === false) {
+          failed++;
+          errors.push(`${to}: unsubscribed`);
+          sendRows.push({
+            campaign_id: campaignId,
+            contact_id: contact.id,
+            status: 'failed',
+            error_message: 'Recipient is unsubscribed',
+            sent_at: new Date().toISOString(),
+          });
+          continue;
+        }
+        try {
+          const origin = new URL(c.req.url).origin;
+          const trackingPixelUrl = `${origin}/api/marketing/open.gif?campaign=${encodeURIComponent(String(campaignId))}&contact=${encodeURIComponent(String(contact.id))}`;
+          const trackedHtmlBody = /<\/body>/i.test(htmlBody)
+            ? htmlBody.replace(/<\/body>/i, `<img src="${trackingPixelUrl}" alt="" width="1" height="1" style="display:none;max-height:1px;max-width:1px;opacity:0;" /></body>`)
+            : `${htmlBody}<img src="${trackingPixelUrl}" alt="" width="1" height="1" style="display:none;max-height:1px;max-width:1px;opacity:0;" />`;
+
+          const result = await sendEmail({ to, subject, html: trackedHtmlBody }, c.env);
+          if (result.success) {
+            sent++;
+            sendRows.push({
+              campaign_id: campaignId,
+              contact_id: contact.id,
+              status: 'sent',
+              provider_message_id: result.providerId || null,
+              sent_at: new Date().toISOString(),
+            });
+          } else {
+            failed++;
+            errors.push(`${to}: ${result.error || 'unknown error'}`);
+            sendRows.push({
+              campaign_id: campaignId,
+              contact_id: contact.id,
+              status: 'failed',
+              error_message: result.error || 'unknown error',
+              sent_at: new Date().toISOString(),
+            });
+          }
+        } catch (err: any) {
+          failed++;
+          errors.push(`${to}: ${err.message || 'send threw'}`);
+          sendRows.push({
+            campaign_id: campaignId,
+            contact_id: contact.id,
+            status: 'failed',
+            error_message: err.message || 'send threw',
+            sent_at: new Date().toISOString(),
+          });
+        }
+        await new Promise(r => setTimeout(r, 250));
+      }
+
+      if (sendRows.length > 0) {
+        await supabase.from('email_sends').insert(sendRows);
+      }
+
+      await supabase
+        .from('email_campaigns')
+        .update({ status: 'sent', sent_at: new Date().toISOString() })
+        .eq('id', campaignId);
+
+      return c.json({
+        success: true,
+        sent,
+        failed,
+        total: normalizedRecipients.length,
+        campaignId,
+        errors: errors.slice(0, 50),
+      });
+    } catch (error: any) {
+      console.error('Marketing send error:', error);
+      return c.json({ error: 'Failed to send marketing emails', details: error.message }, 500);
+    }
+  });
+
+  app.get('/marketing/campaigns', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        c.env.VITE_SUPABASE_URL,
+        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
+      );
+
+      const { data: campaigns, error } = await supabase
+        .from('email_campaigns')
+        .select('id,name,subject,status,created_at,sent_at')
+        .order('created_at', { ascending: false })
+        .limit(25);
+
+      if (error) {
+        return c.json({ error: 'Failed to load campaigns', details: error.message }, 500);
+      }
+
+      const campaignIds = (campaigns || []).map((c: any) => c.id).filter(Boolean);
+      let sendsByCampaign = new Map<string, any[]>();
+      let openCountsByCampaign = new Map<string, number>();
+
+      if (campaignIds.length > 0) {
+        const { data: sendsRows } = await supabase
+          .from('email_sends')
+          .select('campaign_id,status,provider_message_id,error_message,sent_at')
+          .in('campaign_id', campaignIds)
+          .order('sent_at', { ascending: false });
+
+        sendsByCampaign = (sendsRows || []).reduce((acc: Map<string, any[]>, row: any) => {
+          const key = String(row.campaign_id || '');
+          if (!acc.has(key)) acc.set(key, []);
+          acc.get(key)!.push(row);
+          return acc;
+        }, new Map<string, any[]>());
+
+        try {
+          const { data: eventRows } = await supabase
+            .from('email_events')
+            .select('campaign_id,contact_id,event_type')
+            .in('campaign_id', campaignIds)
+            .eq('event_type', 'open');
+
+          const uniqueByCampaign = new Map<string, Set<string>>();
+          for (const row of eventRows || []) {
+            const campaignKey = String(row.campaign_id || '');
+            const contactKey = String(row.contact_id || '');
+            if (!campaignKey || !contactKey) continue;
+            if (!uniqueByCampaign.has(campaignKey)) uniqueByCampaign.set(campaignKey, new Set<string>());
+            uniqueByCampaign.get(campaignKey)!.add(contactKey);
+          }
+          for (const [campaignKey, contactSet] of uniqueByCampaign.entries()) {
+            openCountsByCampaign.set(campaignKey, contactSet.size);
+          }
+        } catch {
+          // email_events might not exist until migration is applied
+        }
+      }
+
+      const summarized = (campaigns || []).map((campaign: any) => {
+        const sends = sendsByCampaign.get(String(campaign.id)) || [];
+        const sent = sends.filter((s: any) => s.status === 'sent').length;
+        const failed = sends.filter((s: any) => s.status === 'failed').length;
+        const queued = sends.filter((s: any) => s.status === 'queued').length;
+
+        return {
+          id: campaign.id,
+          name: campaign.name,
+          subject: campaign.subject,
+          status: campaign.status,
+          createdAt: campaign.created_at,
+          sentAt: campaign.sent_at,
+          sent,
+          failed,
+          queued,
+          opened: openCountsByCampaign.get(String(campaign.id)) || 0,
+          total: sends.length,
+          recentSends: sends.slice(0, 10),
+        };
+      });
+
+      return c.json({ data: summarized, total: summarized.length });
+    } catch (error: any) {
+      console.error('Marketing campaigns error:', error);
+      return c.json({ error: 'Failed to fetch campaigns', details: error.message }, 500);
+    }
+  });
+
   app.get('/page-edits', async (c) => {
     try {
       const storage = getStorage(c.env);
