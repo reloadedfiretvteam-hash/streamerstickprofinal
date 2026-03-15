@@ -799,10 +799,13 @@ export function createStorage(config: StorageConfig) {
     },
 
     async getBlogPostBySlug(slug: string): Promise<any | undefined> {
+      // Use maybeSingle with published filter to avoid 406/500 when legacy duplicate rows exist.
       const { data } = await supabase.from('blog_posts')
         .select('*')
         .eq('slug', slug)
-        .single();
+        .eq('is_published', true)
+        .limit(1)
+        .maybeSingle();
       return data ? this.mapBlogPostFromDb(data) : undefined;
     },
 
