@@ -342,6 +342,22 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
           <p><strong>Setup Video:</strong> <a href="${SETUP_VIDEO_URL}" style="color: #15803d;">${SETUP_VIDEO_URL}</a></p>
         </div>
   `;
+  const shippingAddress = [
+    order.shippingStreet,
+    [order.shippingCity, order.shippingState].filter(Boolean).join(', '),
+    [order.shippingZip, order.shippingCountry].filter(Boolean).join(' '),
+  ]
+    .filter((part) => !!part && part.trim().length > 0)
+    .join('<br>');
+  const hasShippingInfo = !!(
+    order.shippingName ||
+    order.shippingStreet ||
+    order.shippingCity ||
+    order.shippingState ||
+    order.shippingZip ||
+    order.shippingCountry ||
+    order.shippingPhone
+  );
   
   const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -363,6 +379,14 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
           <p><strong>Order ID:</strong> ${order.id}</p>
           <p><strong>Order Date:</strong> ${orderDate}</p>
           <p><strong>Customer Type:</strong> <span style="background: ${isRenewal ? '#d1fae5' : '#fef3c7'}; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${orderTypeLabel}</span></p>
+        </div>
+
+        <div style="background: ${hasShippingInfo ? '#ecfeff' : '#fff7ed'}; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${hasShippingInfo ? '#06b6d4' : '#f97316'};">
+          <h2 style="margin-top: 0; color: ${hasShippingInfo ? '#155e75' : '#9a3412'};">📦 Shipping Details</h2>
+          <p><strong>Recipient:</strong> ${order.shippingName || order.customerName || 'Not provided'}</p>
+          <p><strong>Shipping Phone:</strong> ${order.shippingPhone || order.customerPhone || 'Not provided'}</p>
+          <p><strong>Address:</strong><br>${shippingAddress || 'Not captured yet'}</p>
+          ${!hasShippingInfo ? '<p style="color: #b45309; font-weight: bold; margin-top: 10px;">⚠️ Shipping address missing. Check Stripe Checkout session before fulfillment.</p>' : ''}
         </div>
         
         ${order.customerMessage ? `
