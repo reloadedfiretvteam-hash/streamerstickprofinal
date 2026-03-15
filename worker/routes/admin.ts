@@ -912,11 +912,26 @@ export function createAdminRoutes() {
   });
 
   // ——— Email Marketing Tool ———
+  app.get('/marketing/health', async (c) => {
+    const supabaseUrl = c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK;
+    const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+    return c.json({
+      ok: !!supabaseUrl && !!supabaseKey,
+      hasSupabaseUrl: !!supabaseUrl,
+      hasSupabaseKey: !!supabaseKey,
+    });
+  });
+
   app.get('/marketing/contacts', async (c) => {
     try {
       const storage = getStorage(c.env);
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabaseUrl = c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK;
+      const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+      if (!supabaseUrl || !supabaseKey) {
+        return c.json({ error: 'Marketing unavailable: missing Supabase configuration', details: 'Set VITE_SUPABASE_URL and SUPABASE_SERVICE_KEY' }, 503);
+      }
+      const supabase = createClient(supabaseUrl, supabaseKey);
 
       const contactMap = new Map<string, { email: string; name: string; username?: string; type: string; date: string; source: string; isSubscribed?: boolean }>();
       const typePriority = (type: string) => {
@@ -1068,10 +1083,12 @@ export function createAdminRoutes() {
       }
 
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(
-        c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
-        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
-      );
+      const supabaseUrl = c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK;
+      const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+      if (!supabaseUrl || !supabaseKey) {
+        return c.json({ error: 'Marketing unavailable: missing Supabase configuration', details: 'Set VITE_SUPABASE_URL and SUPABASE_SERVICE_KEY' }, 503);
+      }
+      const supabase = createClient(supabaseUrl, supabaseKey);
 
       const normalizedRecipients = Array.from(
         new Set(
@@ -1233,10 +1250,12 @@ export function createAdminRoutes() {
   app.get('/marketing/campaigns', async (c) => {
     try {
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(
-        c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
-        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
-      );
+      const supabaseUrl = c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK;
+      const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+      if (!supabaseUrl || !supabaseKey) {
+        return c.json({ error: 'Marketing unavailable: missing Supabase configuration', details: 'Set VITE_SUPABASE_URL and SUPABASE_SERVICE_KEY' }, 503);
+      }
+      const supabase = createClient(supabaseUrl, supabaseKey);
 
       const { data: campaigns, error } = await supabase
         .from('email_campaigns')
@@ -1338,10 +1357,12 @@ export function createAdminRoutes() {
       }
 
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(
-        c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
-        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
-      );
+      const supabaseUrl = c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK;
+      const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+      if (!supabaseUrl || !supabaseKey) {
+        return c.json({ error: 'Marketing unavailable: missing Supabase configuration', details: 'Set VITE_SUPABASE_URL and SUPABASE_SERVICE_KEY' }, 503);
+      }
+      const supabase = createClient(supabaseUrl, supabaseKey);
 
       const { data: sendRows, error: sendsError } = await supabase
         .from('email_sends')
@@ -1356,6 +1377,8 @@ export function createAdminRoutes() {
       const contactIds = Array.from(new Set((sendRows || []).map((row: any) => row.contact_id).filter(Boolean)));
       const openSet = new Set<string>();
       const clickSet = new Set<string>();
+      const openedAtByContact = new Map<string, string>();
+      const clickedAtByContact = new Map<string, string>();
 
       if (contactIds.length > 0) {
         try {
@@ -1369,8 +1392,22 @@ export function createAdminRoutes() {
           for (const event of events || []) {
             const key = String(event.contact_id || '');
             if (!key) continue;
-            if (event.event_type === 'open') openSet.add(key);
-            if (event.event_type === 'click') clickSet.add(key);
+            if (event.event_type === 'open') {
+              openSet.add(key);
+              const at = String(event.created_at || '');
+              const prev = openedAtByContact.get(key);
+              if (!prev || (at && new Date(at).getTime() > new Date(prev).getTime())) {
+                openedAtByContact.set(key, at);
+              }
+            }
+            if (event.event_type === 'click') {
+              clickSet.add(key);
+              const at = String(event.created_at || '');
+              const prev = clickedAtByContact.get(key);
+              if (!prev || (at && new Date(at).getTime() > new Date(prev).getTime())) {
+                clickedAtByContact.set(key, at);
+              }
+            }
           }
         } catch {
           // no-op if email_events not available yet
@@ -1390,6 +1427,8 @@ export function createAdminRoutes() {
           sentAt: row.sent_at || '',
           opened: openSet.has(cid),
           clicked: clickSet.has(cid),
+          openedAt: openedAtByContact.get(cid) || '',
+          clickedAt: clickedAtByContact.get(cid) || '',
         };
       });
 

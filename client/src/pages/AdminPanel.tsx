@@ -414,9 +414,10 @@ export default function AdminPanel() {
   const [contactSearch, setContactSearch] = useState('');
   const [marketingCampaigns, setMarketingCampaigns] = useState<Array<{id: string; name: string; subject: string; status: string; createdAt: string; sentAt?: string; sent: number; failed: number; opened: number; clicked: number; queued: number; total: number;}>>([]);
   const [marketingCampaignsLoading, setMarketingCampaignsLoading] = useState(false);
-  const [campaignRecipients, setCampaignRecipients] = useState<Record<string, Array<{contactId: string; email: string; name: string; sendStatus: string; errorMessage?: string; sentAt?: string; opened: boolean; clicked: boolean}>>>({});
+  const [campaignRecipients, setCampaignRecipients] = useState<Record<string, Array<{contactId: string; email: string; name: string; sendStatus: string; errorMessage?: string; sentAt?: string; opened: boolean; clicked: boolean; openedAt?: string; clickedAt?: string}>>>({});
   const [campaignRecipientsLoading, setCampaignRecipientsLoading] = useState<Record<string, boolean>>({});
   const [expandedCampaignId, setExpandedCampaignId] = useState<string | null>(null);
+  const [marketingHealth, setMarketingHealth] = useState<{ok: boolean; hasSupabaseUrl?: boolean; hasSupabaseKey?: boolean; error?: string} | null>(null);
 
   const [envStatus, setEnvStatus] = useState<{
     hasStripeKey?: boolean;
@@ -1121,6 +1122,17 @@ export default function AdminPanel() {
       showToast('Failed to load contacts', 'error');
     } finally {
       setMarketingLoading(false);
+    }
+  };
+
+  const loadMarketingHealth = async () => {
+    try {
+      const response = await authFetch('/api/admin/marketing/health');
+      const result = await response.json();
+      setMarketingHealth(result);
+    } catch (error) {
+      console.error('Error loading marketing health:', error);
+      setMarketingHealth({ ok: false, error: 'Health check failed' });
     }
   };
 
@@ -3821,7 +3833,9 @@ export default function AdminPanel() {
                                         <th className="px-3 py-2">Name</th>
                                         <th className="px-3 py-2">Send</th>
                                         <th className="px-3 py-2">Opened</th>
+                                        <th className="px-3 py-2">Opened at</th>
                                         <th className="px-3 py-2">Clicked</th>
+                                        <th className="px-3 py-2">Clicked at</th>
                                         <th className="px-3 py-2">Sent at</th>
                                       </tr>
                                     </thead>
@@ -3840,7 +3854,13 @@ export default function AdminPanel() {
                                             </span>
                                           </td>
                                           <td className="px-3 py-2 text-blue-300">{row.opened ? 'Yes' : 'No'}</td>
+                                          <td className="px-3 py-2 text-gray-400">
+                                            {row.openedAt ? new Date(row.openedAt).toLocaleString() : '—'}
+                                          </td>
                                           <td className="px-3 py-2 text-indigo-300">{row.clicked ? 'Yes' : 'No'}</td>
+                                          <td className="px-3 py-2 text-gray-400">
+                                            {row.clickedAt ? new Date(row.clickedAt).toLocaleString() : '—'}
+                                          </td>
                                           <td className="px-3 py-2 text-gray-400">
                                             {row.sentAt ? new Date(row.sentAt).toLocaleString() : '—'}
                                           </td>
