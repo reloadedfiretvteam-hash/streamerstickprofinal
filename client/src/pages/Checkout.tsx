@@ -7,9 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, ArrowLeft, CreditCard, Lock, ShieldCheck, Zap, CheckCircle, Loader2, RefreshCw, UserPlus, Globe, MessageSquare, Phone } from "lucide-react";
+import { Trash2, ArrowLeft, CreditCard, Lock, ShieldCheck, Zap, CheckCircle, Loader2, Globe, MessageSquare, Phone } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { setPageMeta } from "@/lib/seo";
 
@@ -44,8 +43,6 @@ export default function Checkout() {
   const { items, total, removeItem, updateQuantity, clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [accountType, setAccountType] = useState<"new" | "renewal">("new");
-  const [existingUsername, setExistingUsername] = useState("");
   const [countryOptions, setCountryOptions] = useState({
     usaOnly: false,
     usaCanadaUk: false,
@@ -167,11 +164,6 @@ export default function Checkout() {
       }
     }
 
-    if (accountType === "renewal" && hasIPTVProduct && !existingUsername.trim()) {
-      setError("Please enter your existing username");
-      return;
-    }
-
     setIsProcessing(true);
     setError(null);
 
@@ -186,11 +178,6 @@ export default function Checkout() {
         customerEmail: formData.email,
         customerName: `${formData.firstName} ${formData.lastName}`.trim(),
       };
-
-      if (accountType === "renewal" && hasIPTVProduct && existingUsername.trim()) {
-        checkoutPayload.isRenewal = true;
-        checkoutPayload.existingUsername = existingUsername.trim();
-      }
 
       if (showCountryOptions) {
         checkoutPayload.countryPreference = buildCountryPreference();
@@ -345,72 +332,22 @@ export default function Checkout() {
               <Card className="border-white/10 bg-card/50 backdrop-blur">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-xl flex items-center gap-2">
-                    <RefreshCw className="w-5 h-5 text-primary" />
-                    Account Type
+                    <MessageSquare className="w-5 h-5 text-primary" />
+                    Returning Customer Note
                   </CardTitle>
-                  <CardDescription>Are you a new customer or renewing an existing subscription?</CardDescription>
+                  <CardDescription>
+                    If you are a returning customer, please message us your username. Thank you.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <RadioGroup 
-                    value={accountType} 
-                    onValueChange={(value) => setAccountType(value as "new" | "renewal")}
-                    className="space-y-3"
-                  >
-                    <div 
-                      className={`flex items-center space-x-3 p-4 rounded-lg border transition-all cursor-pointer ${
-                        accountType === "new" 
-                          ? "border-primary bg-primary/10" 
-                          : "border-white/10 hover:border-white/20"
-                      }`}
-                      onClick={() => setAccountType("new")}
-                      data-testid="radio-new-account"
-                    >
-                      <RadioGroupItem value="new" id="new" />
-                      <div className="flex items-center gap-3 flex-1">
-                        <UserPlus className="w-5 h-5 text-green-400" />
-                        <div>
-                          <Label htmlFor="new" className="font-semibold cursor-pointer">New Account</Label>
-                          <p className="text-sm text-muted-foreground">I'm a new customer - generate new login credentials for me</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div 
-                      className={`flex items-center space-x-3 p-4 rounded-lg border transition-all cursor-pointer ${
-                        accountType === "renewal" 
-                          ? "border-primary bg-primary/10" 
-                          : "border-white/10 hover:border-white/20"
-                      }`}
-                      onClick={() => setAccountType("renewal")}
-                      data-testid="radio-renewal"
-                    >
-                      <RadioGroupItem value="renewal" id="renewal" />
-                      <div className="flex items-center gap-3 flex-1">
-                        <RefreshCw className="w-5 h-5 text-blue-400" />
-                        <div>
-                          <Label htmlFor="renewal" className="font-semibold cursor-pointer">Renew Existing Account</Label>
-                          <p className="text-sm text-muted-foreground">I already have an account - extend my subscription</p>
-                        </div>
-                      </div>
-                    </div>
-                  </RadioGroup>
-
-                  {accountType === "renewal" && (
-                    <div className="space-y-2 pt-2">
-                      <Label htmlFor="existingUsername">Your Existing Username *</Label>
-                      <Input 
-                        id="existingUsername"
-                        placeholder="Enter your current Live TV username" 
-                        value={existingUsername}
-                        onChange={(e) => setExistingUsername(e.target.value)}
-                        className="bg-background/50 border-white/20 h-12"
-                        data-testid="input-existing-username"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Enter the username you currently use to access Live TV. Your subscription will be extended.
-                      </p>
-                    </div>
-                  )}
+                  <Textarea
+                    id="returning-user-message"
+                    placeholder="If you are a returning customer, please message us your username. Thank you."
+                    value={formData.message}
+                    onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                    className="bg-background/50 border-white/20 min-h-[90px] resize-none"
+                    data-testid="input-returning-customer-message"
+                  />
                 </CardContent>
               </Card>
             )}
@@ -509,9 +446,7 @@ export default function Checkout() {
               <CardHeader className="pb-4">
                 <CardTitle className="text-xl">Contact Information</CardTitle>
                 <CardDescription>
-                  {accountType === "new" && hasIPTVProduct 
-                    ? "We'll send your new login credentials here" 
-                    : "We'll send your order confirmation here"}
+                  We'll send your order confirmation here
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -639,21 +574,23 @@ export default function Checkout() {
                     </div>
                   </>
                 )}
-                <div className="space-y-2">
-                  <Label htmlFor="message" className="flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4" />
-                    Message (Optional)
-                  </Label>
-                  <Textarea 
-                    id="message"
-                    name="message"
-                    placeholder="Any special requests, questions, or notes for your order..." 
-                    value={formData.message}
-                    onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
-                    className="bg-background/50 border-white/20 min-h-[100px] resize-none"
-                    data-testid="input-message"
-                  />
-                </div>
+                {!hasIPTVProduct && (
+                  <div className="space-y-2">
+                    <Label htmlFor="message" className="flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4" />
+                      Message (Optional)
+                    </Label>
+                    <Textarea 
+                      id="message"
+                      name="message"
+                      placeholder="Any special requests, questions, or notes for your order..." 
+                      value={formData.message}
+                      onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                      className="bg-background/50 border-white/20 min-h-[100px] resize-none"
+                      data-testid="input-message"
+                    />
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
