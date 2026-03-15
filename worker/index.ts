@@ -1024,9 +1024,13 @@ app.get('/sitemap-posts.xml', async (c) => {
   try {
     const storage = getStorage(c.env);
     const blogPosts = await storage.getBlogPosts();
+    const seen = new Set<string>();
     for (const post of blogPosts) {
       const slug = String(post?.slug || '').toLowerCase();
-      if (post.published && slug && !EXCLUDED_BLOG_SLUGS.has(slug)) {
+      if (!post.published || !slug || EXCLUDED_BLOG_SLUGS.has(slug) || seen.has(slug)) continue;
+      const livePost = await storage.getBlogPostBySlug(slug);
+      if (livePost?.slug) {
+        seen.add(slug);
         const lastmod = post.publishedAt ? new Date(post.publishedAt).toISOString().split('T')[0] : today;
         xml += `<url><loc>${baseUrl}/blog/${post.slug}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`;
       }
@@ -1076,18 +1080,27 @@ app.get('/sitemap.xml', async (c) => {
 `;
   }
 
-  for (const post of blogPosts) {
-    const slug = String(post?.slug || '').toLowerCase();
-    if (post.published && slug && !EXCLUDED_BLOG_SLUGS.has(slug)) {
-      const lastmod = post.publishedAt ? new Date(post.publishedAt).toISOString().split('T')[0] : today;
-      sitemap += `  <url>
+  try {
+    const storage = getStorage(c.env);
+    const seen = new Set<string>();
+    for (const post of blogPosts) {
+      const slug = String(post?.slug || '').toLowerCase();
+      if (!post.published || !slug || EXCLUDED_BLOG_SLUGS.has(slug) || seen.has(slug)) continue;
+      const livePost = await storage.getBlogPostBySlug(slug);
+      if (livePost?.slug) {
+        seen.add(slug);
+        const lastmod = post.publishedAt ? new Date(post.publishedAt).toISOString().split('T')[0] : today;
+        sitemap += `  <url>
     <loc>${baseUrl}/blog/${post.slug}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 `;
+      }
     }
+  } catch {
+    /* ignore */
   }
 
   for (const page of seoPages) {
