@@ -6,6 +6,18 @@ import type { Env } from '../index';
 export function createEmailCampaignRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
+  app.use('*', async (c, next) => {
+    const legacyEnabled = ((c.env as any).LEGACY_EMAIL_CAMPAIGNS_ENABLED || '').toLowerCase() === '1';
+    if (!legacyEnabled) {
+      return c.json({
+        success: true,
+        skipped: true,
+        message: 'Legacy email campaign routes are disabled',
+      });
+    }
+    return next();
+  });
+
   // Create campaign when customer purchases or takes free trial
   app.post('/create', async (c) => {
     try {

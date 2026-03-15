@@ -9,7 +9,11 @@ async function main() {
     process.exit(1);
   }
   
-  const projectName = 'streamerstickprofinal';
+  const projectName = process.env.CLOUDFLARE_PROJECT_NAME;
+  if (!projectName) {
+    console.error('Missing CLOUDFLARE_PROJECT_NAME');
+    process.exit(1);
+  }
   
   console.log(`Setting environment variables for project: ${projectName}\n`);
   
@@ -50,13 +54,12 @@ async function main() {
     RESEND_FROM_EMAIL: 'noreply@streamstickpro.com',
     
     // Supabase
-    VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL || 'https://emlqlmfzqsnqokrqvmcm.supabase.co',
+    VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL,
     VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY,
     
     // Other
     VITE_SECURE_HOSTS: process.env.VITE_SECURE_HOSTS || 'secure.streamstickpro.com',
     SESSION_SECRET: process.env.SESSION_SECRET,
-    GITHUB_TOKEN: process.env.GITHUB_PERSONAL_ACCESS_TOKEN,
   };
   
   // Try to get Resend API key from connector
@@ -89,6 +92,14 @@ async function main() {
     console.log('\n⚠️ Could not fetch Resend key from connector:', err.message);
   }
   
+  // Refuse to continue if required vars are missing
+  const requiredVars = ['DATABASE_URL', 'STRIPE_SECRET_KEY', 'STRIPE_PUBLISHABLE_KEY', 'VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'SESSION_SECRET'];
+  const missingRequired = requiredVars.filter((k) => !envVars[k]);
+  if (missingRequired.length > 0) {
+    console.error(`Missing required env values: ${missingRequired.join(', ')}`);
+    process.exit(1);
+  }
+
   // Filter out undefined/null values
   const definedVars = Object.entries(envVars).filter(([k, v]) => v !== null && v !== undefined);
   
@@ -97,8 +108,8 @@ async function main() {
   // Build the deployment_configs structure for the PATCH request
   const existingConfig = projectData.result.deployment_configs || {};
   
-  const productionEnvVars = {};
-  const previewEnvVars = {};
+  const productionEnvVars = { ...(existingConfig.production?.env_vars || {}) };
+  const previewEnvVars = { ...(existingConfig.preview?.env_vars || {}) };
   
   for (const [key, value] of definedVars) {
     productionEnvVars[key] = { value };
