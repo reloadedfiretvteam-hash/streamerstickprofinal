@@ -833,6 +833,10 @@ const SEO_REDIRECTS_STATIC: Record<string, string> = {
 app.get('*', async (c, next) => {
   const reqUrl = new URL(c.req.url);
   const path = reqUrl.pathname;
+  const host = reqUrl.hostname;
+  if (host === 'www.streamstickpro.com') {
+    return c.redirect(`https://streamstickpro.com${path}${reqUrl.search}`, 301);
+  }
   try {
     const storage = getStorage(c.env);
     const dbRedirects = await storage.getRedirectMap();
@@ -1298,16 +1302,36 @@ app.get('*', async (c) => {
   const hostname = url.hostname;
   const meta = await resolvePageMeta(pathname, c.env);
 
-  // Known SPA routes that should always return 200 (even without a static asset)
-  const isKnownRoute = !!meta || pathname.startsWith('/l/') || pathname.startsWith('/blog/');
+  // Known SPA routes that should always return 200 (even without a static asset).
+  // Blog slugs are only considered known if metadata resolves (post exists).
+  const staticKnownRoutes = new Set([
+    '/', '/shop', '/shadow-services', '/admin', '/checkout', '/success', '/blog',
+    '/customer-login', '/my-account', '/forgot-password', '/reset-password',
+    '/terms', '/privacy', '/refund', '/iptv-services', '/iptv-firestick',
+    '/jailbroken-fire-sticks', '/firestick-devices', '/best-iptv-firestick',
+    '/iptv-media-players', '/resources', '/36hr-trial', '/pricing',
+    '/onn-google-tv', '/iptv-smarters-pro', '/tivimate', '/ultimate-iptv-catalog-2026',
+    '/tools/catalog', '/tutorials', '/seo-ads', '/locations', '/trial', '/firestick',
+  ]);
+  const isBlogSlug = /^\/blog\/[a-z0-9][a-z0-9\-]*[a-z0-9]$/i.test(pathname);
+  const isKnownRoute =
+    staticKnownRoutes.has(pathname) ||
+    pathname.startsWith('/l/') ||
+    /^\/vs-[a-z0-9\-]+$/i.test(pathname) ||
+    /^\/seo-ads\/[a-z0-9\-]+$/i.test(pathname) ||
+    (isBlogSlug ? !!meta : false) ||
+    !!meta;
 
   try {
     const res = await c.env.ASSETS.fetch(c.req.raw);
     const ct = res.headers.get('content-type') || '';
     if (!ct.includes('text/html')) return applySecurityHeaders(res, pathname, hostname);
     const html = await res.text();
-    const fixed = injectMeta(html, pathname, meta);
-    return applySecurityHeaders(new Response(fixed, { status: res.status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
+    const status = isKnownRoute ? 200 : 404;
+    const fixed = isKnownRoute
+      ? injectMeta(html, pathname, meta)
+      : injectMeta(html, pathname, { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
+    return applySecurityHeaders(new Response(fixed, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   } catch {
     const fallback = await c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
     const html = await fallback.text();
