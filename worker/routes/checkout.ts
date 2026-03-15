@@ -172,11 +172,13 @@ export function createCheckoutRoutes() {
       }
 
       // Verify payment was successful
+      let stripeSession: Stripe.Checkout.Session | null = null;
       if (order.status !== 'paid') {
         // Try to verify with Stripe if we have a session
         if (sessionId) {
           const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
           const session = await stripe.checkout.sessions.retrieve(sessionId);
+          stripeSession = session;
           if (session.payment_status !== 'paid') {
             return c.json({ error: "Payment not completed" }, 400);
           }
@@ -187,6 +189,35 @@ export function createCheckoutRoutes() {
           }
         } else {
           return c.json({ error: "Payment not completed" }, 400);
+        }
+      }
+
+      // Always hydrate shipping details from Stripe session before owner/customer emails.
+      // This prevents missing fulfillment address when webhook processing is delayed.
+      if (sessionId) {
+        try {
+          if (!stripeSession) {
+            const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
+            stripeSession = await stripe.checkout.sessions.retrieve(sessionId);
+          }
+          const shipping = stripeSession.shipping_details;
+          if (shipping) {
+            const line1 = shipping.address?.line1 || '';
+            const line2 = shipping.address?.line2 || '';
+            const shippingStreet = line2 ? `${line1}, ${line2}` : line1 || null;
+            await storage.updateOrder(order.id, {
+              shippingName: shipping.name || null,
+              shippingPhone: stripeSession.customer_details?.phone || null,
+              shippingStreet,
+              shippingCity: shipping.address?.city || null,
+              shippingState: shipping.address?.state || null,
+              shippingZip: shipping.address?.postal_code || null,
+              shippingCountry: shipping.address?.country || null,
+            });
+            order = (await storage.getOrder(order.id)) || order;
+          }
+        } catch (error: any) {
+          console.warn(`[CHECKOUT] Could not hydrate shipping details from Stripe session ${sessionId}: ${error?.message || error}`);
         }
       }
 
