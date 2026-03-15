@@ -32,15 +32,13 @@ export function createWebhookRoutes() {
 
       if (!signature) {
         console.error('[WEBHOOK] Missing stripe-signature header');
-        // Still return 200 to acknowledge receipt - Stripe needs 200-299 range
-        return c.json({ received: true, error: 'Missing signature' }, 200);
+        return c.json({ error: 'Missing signature' }, 400);
       }
 
       const webhookSecret = c.env.STRIPE_WEBHOOK_SECRET;
       if (!webhookSecret) {
         console.error('[WEBHOOK] STRIPE_WEBHOOK_SECRET not configured');
-        // Still return 200 to acknowledge receipt - configuration issue logged
-        return c.json({ received: true, error: 'Webhook not configured' }, 200);
+        return c.json({ error: 'Webhook not configured' }, 500);
       }
 
       let event: Stripe.Event;
@@ -51,8 +49,7 @@ export function createWebhookRoutes() {
         console.log(`[WEBHOOK] Verified event: ${event.type} (${event.id})`);
       } catch (error: any) {
         console.error(`[WEBHOOK] Signature verification failed: ${error.message}`);
-        // Still return 200 to prevent retries - invalid signature logged but acknowledged
-        return c.json({ received: true, error: 'Invalid signature' }, 200);
+        return c.json({ error: 'Invalid signature' }, 400);
       }
 
       const storage = getStorage(c.env);
@@ -96,14 +93,15 @@ export function createWebhookRoutes() {
         processingResult = { success: false, error: error.message };
       }
 
-      // Always return 200 OK to prevent Stripe retries (event was received)
-      // Stripe requires HTTP 200-299 status codes to consider webhook delivered
+      if (!processingResult.success) {
+        return c.json({ error: processingResult.error || 'Webhook processing failed' }, 500);
+      }
+
       return c.json({ received: true }, 200);
     } catch (error: any) {
-      // Final safety net - catch any unexpected errors and still return 200
       console.error(`[WEBHOOK] Unexpected error in webhook handler: ${error.message}`);
       console.error(`[WEBHOOK] Stack trace: ${error.stack}`);
-      return c.json({ received: true, error: 'Unexpected error' }, 200);
+      return c.json({ error: 'Unexpected error' }, 500);
     }
   };
 
