@@ -44,7 +44,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy dist --project-name=streamerstickpro-live --branch=clean-main
-        continue-on-error: true
 
       - name: Sync secrets to Cloudflare Pages
         env:
