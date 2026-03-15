@@ -227,6 +227,55 @@ app.get('/api/marketing/open.gif', async (c) => {
   });
 });
 
+// Public click tracking redirect for marketing links
+app.get('/api/marketing/click', async (c) => {
+  try {
+    const campaignId = c.req.query('campaign');
+    const contactId = c.req.query('contact');
+    const targetUrl = c.req.query('url');
+
+    if (!targetUrl) {
+      return c.redirect('https://streamstickpro.com', 302);
+    }
+
+    // Basic safety: only allow absolute http/https redirects
+    const parsed = new URL(targetUrl);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return c.redirect('https://streamstickpro.com', 302);
+    }
+
+    if (campaignId && contactId) {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        c.env.VITE_SUPABASE_URL,
+        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
+      );
+      const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0] || 'unknown';
+      const ua = c.req.header('user-agent') || '';
+      const salt = c.env.VISITOR_HASH_SALT || c.env.JWT_SECRET || 'streamstickpro';
+      const ipHash = await sha256Hex(`ip:${ip}|ua:${ua}|salt:${salt}`);
+
+      await supabase
+        .from('email_events')
+        .upsert(
+          {
+            campaign_id: campaignId,
+            contact_id: contactId,
+            event_type: 'click',
+            user_agent: ua || null,
+            ip_hash: ipHash,
+          },
+          { onConflict: 'campaign_id,contact_id,event_type', ignoreDuplicates: true }
+        );
+    }
+
+    return c.redirect(targetUrl, 302);
+  } catch (error: any) {
+    console.error('[marketing-click-tracking]', error?.message || error);
+    return c.redirect('https://streamstickpro.com', 302);
+  }
+});
+
 app.use('/api/admin/*', authMiddleware);
 app.route('/api/admin', createAdminRoutes());
 app.route('/api/stripe', createWebhookRoutes());

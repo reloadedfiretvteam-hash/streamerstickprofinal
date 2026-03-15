@@ -403,7 +403,7 @@ export default function AdminPanel() {
   const [broadcastLoading, setBroadcastLoading] = useState(false);
   const [broadcastResult, setBroadcastResult] = useState<{ sent: number; failed: number; total: number; message: string; errors?: string[] } | null>(null);
 
-  const [marketingContacts, setMarketingContacts] = useState<Array<{email: string, name: string, type: string, date: string, source: string}>>([]);
+  const [marketingContacts, setMarketingContacts] = useState<Array<{email: string, name: string, username?: string, type: string, date: string, source: string}>>([]);
   const [marketingLoading, setMarketingLoading] = useState(false);
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [campaignName, setCampaignName] = useState('');
@@ -412,8 +412,11 @@ export default function AdminPanel() {
   const [sendingMarketing, setSendingMarketing] = useState(false);
   const [marketingResult, setMarketingResult] = useState<{sent: number, failed: number, total: number, message?: string, campaignId?: string} | null>(null);
   const [contactSearch, setContactSearch] = useState('');
-  const [marketingCampaigns, setMarketingCampaigns] = useState<Array<{id: string; name: string; subject: string; status: string; createdAt: string; sentAt?: string; sent: number; failed: number; opened: number; queued: number; total: number;}>>([]);
+  const [marketingCampaigns, setMarketingCampaigns] = useState<Array<{id: string; name: string; subject: string; status: string; createdAt: string; sentAt?: string; sent: number; failed: number; opened: number; clicked: number; queued: number; total: number;}>>([]);
   const [marketingCampaignsLoading, setMarketingCampaignsLoading] = useState(false);
+  const [campaignRecipients, setCampaignRecipients] = useState<Record<string, Array<{contactId: string; email: string; name: string; sendStatus: string; errorMessage?: string; sentAt?: string; opened: boolean; clicked: boolean}>>>({});
+  const [campaignRecipientsLoading, setCampaignRecipientsLoading] = useState<Record<string, boolean>>({});
+  const [expandedCampaignId, setExpandedCampaignId] = useState<string | null>(null);
 
   const [envStatus, setEnvStatus] = useState<{
     hasStripeKey?: boolean;
@@ -1134,6 +1137,22 @@ export default function AdminPanel() {
       showToast('Failed to load campaign history', 'error');
     } finally {
       setMarketingCampaignsLoading(false);
+    }
+  };
+
+  const loadCampaignRecipients = async (campaignId: string) => {
+    setCampaignRecipientsLoading((prev) => ({ ...prev, [campaignId]: true }));
+    try {
+      const response = await authFetch(`/api/admin/marketing/campaigns/${campaignId}/recipients`);
+      const result = await response.json();
+      if (result.data) {
+        setCampaignRecipients((prev) => ({ ...prev, [campaignId]: result.data }));
+      }
+    } catch (error) {
+      console.error('Error loading campaign recipients:', error);
+      showToast('Failed to load campaign recipients', 'error');
+    } finally {
+      setCampaignRecipientsLoading((prev) => ({ ...prev, [campaignId]: false }));
     }
   };
 
@@ -3599,6 +3618,7 @@ export default function AdminPanel() {
                             <tr>
                               <th className="px-4 py-3 w-10"></th>
                               <th className="px-4 py-3">Email</th>
+                              <th className="px-4 py-3">Username</th>
                               <th className="px-4 py-3">Name</th>
                               <th className="px-4 py-3">Type</th>
                               <th className="px-4 py-3">Source</th>
@@ -3627,6 +3647,7 @@ export default function AdminPanel() {
                                     />
                                   </td>
                                   <td className="px-4 py-3 text-white font-medium">{contact.email}</td>
+                                  <td className="px-4 py-3 text-gray-300">{contact.username || '—'}</td>
                                   <td className="px-4 py-3 text-gray-200">{contact.name || '—'}</td>
                                   <td className="px-4 py-3">
                                     <span className="px-2 py-1 rounded-full text-xs bg-gray-700 text-gray-200 border border-gray-600">
@@ -3756,14 +3777,81 @@ export default function AdminPanel() {
                               <span className="px-2 py-1 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30">
                                 Opened {campaign.opened || 0}
                               </span>
+                              <span className="px-2 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                                Clicked {campaign.clicked || 0}
+                              </span>
                               <span className="px-2 py-1 rounded-full bg-gray-700 text-gray-200 border border-gray-600">
                                 Total {campaign.total}
                               </span>
                               <span className="px-2 py-1 rounded-full bg-orange-500/15 text-orange-300 border border-orange-500/30 uppercase">
                                 {campaign.status}
                               </span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 px-2 border-gray-600 text-gray-200"
+                                onClick={async () => {
+                                  const nextExpanded = expandedCampaignId === campaign.id ? null : campaign.id;
+                                  setExpandedCampaignId(nextExpanded);
+                                  if (nextExpanded && !campaignRecipients[campaign.id]) {
+                                    await loadCampaignRecipients(campaign.id);
+                                  }
+                                }}
+                              >
+                                <Eye className="w-3 h-3 mr-1" />
+                                {expandedCampaignId === campaign.id ? 'Hide recipients' : 'View recipients'}
+                              </Button>
                             </div>
                           </div>
+                          {expandedCampaignId === campaign.id && (
+                            <div className="mt-4 border-t border-gray-700 pt-4">
+                              {campaignRecipientsLoading[campaign.id] ? (
+                                <div className="text-center text-gray-400 py-4">
+                                  <Loader2 className="w-5 h-5 mx-auto mb-2 animate-spin" />
+                                  Loading recipients...
+                                </div>
+                              ) : (campaignRecipients[campaign.id] || []).length === 0 ? (
+                                <div className="text-center text-gray-400 py-4">No recipients found for this campaign.</div>
+                              ) : (
+                                <div className="overflow-x-auto">
+                                  <table className="min-w-full text-xs text-left">
+                                    <thead className="bg-gray-900 text-gray-300 uppercase">
+                                      <tr>
+                                        <th className="px-3 py-2">Email</th>
+                                        <th className="px-3 py-2">Name</th>
+                                        <th className="px-3 py-2">Send</th>
+                                        <th className="px-3 py-2">Opened</th>
+                                        <th className="px-3 py-2">Clicked</th>
+                                        <th className="px-3 py-2">Sent at</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-800">
+                                      {(campaignRecipients[campaign.id] || []).map((row) => (
+                                        <tr key={`${campaign.id}-${row.contactId}`}>
+                                          <td className="px-3 py-2 text-gray-100">{row.email}</td>
+                                          <td className="px-3 py-2 text-gray-300">{row.name || '—'}</td>
+                                          <td className="px-3 py-2">
+                                            <span className={`px-2 py-1 rounded-full border ${
+                                              row.sendStatus === 'sent'
+                                                ? 'bg-green-500/15 text-green-300 border-green-500/30'
+                                                : 'bg-red-500/15 text-red-300 border-red-500/30'
+                                            }`}>
+                                              {row.sendStatus}
+                                            </span>
+                                          </td>
+                                          <td className="px-3 py-2 text-blue-300">{row.opened ? 'Yes' : 'No'}</td>
+                                          <td className="px-3 py-2 text-indigo-300">{row.clicked ? 'Yes' : 'No'}</td>
+                                          <td className="px-3 py-2 text-gray-400">
+                                            {row.sentAt ? new Date(row.sentAt).toLocaleString() : '—'}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

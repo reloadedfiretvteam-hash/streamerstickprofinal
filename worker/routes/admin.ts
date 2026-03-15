@@ -913,14 +913,14 @@ export function createAdminRoutes() {
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
 
-      const contactMap = new Map<string, { email: string; name: string; type: string; date: string; source: string; isSubscribed?: boolean }>();
+      const contactMap = new Map<string, { email: string; name: string; username?: string; type: string; date: string; source: string; isSubscribed?: boolean }>();
       const typePriority = (type: string) => {
         if (type === 'purchase') return 3;
         if (type === 'trial') return 2;
         if (type === 'contact') return 1;
         return 0;
       };
-      const mergeContact = (incoming: { email: string; name: string; type: string; date: string; source: string; isSubscribed?: boolean }) => {
+      const mergeContact = (incoming: { email: string; name: string; username?: string; type: string; date: string; source: string; isSubscribed?: boolean }) => {
         const existing = contactMap.get(incoming.email);
         if (!existing) {
           contactMap.set(incoming.email, incoming);
@@ -939,12 +939,16 @@ export function createAdminRoutes() {
             ...incoming,
             isSubscribed: incoming.isSubscribed ?? existing.isSubscribed,
             name: incoming.name || existing.name,
+            username: incoming.username || existing.username,
           });
           return;
         }
 
         if (!existing.name && incoming.name) {
           existing.name = incoming.name;
+        }
+        if (!existing.username && incoming.username) {
+          existing.username = incoming.username;
         }
         if (existing.isSubscribed === undefined && incoming.isSubscribed !== undefined) {
           existing.isSubscribed = incoming.isSubscribed;
@@ -968,6 +972,7 @@ export function createAdminRoutes() {
           mergeContact({
             email,
             name: fullName || row.name || row.full_name || '',
+            username: row.username || '',
             type,
             date: row.created_at || row.updated_at || '',
             source,
@@ -986,6 +991,7 @@ export function createAdminRoutes() {
         mergeContact({
           email,
           name: cust.fullName || cust.username || '',
+          username: cust.username || '',
           type: 'purchase',
           date: cust.createdAt || '',
           source: 'customers',
@@ -1001,6 +1007,7 @@ export function createAdminRoutes() {
         mergeContact({
           email,
           name: o.customerName || '',
+            username: o.username || '',
           type: isTrial ? 'trial' : 'purchase',
           date: o.createdAt || '',
           source: 'orders',
@@ -1016,6 +1023,7 @@ export function createAdminRoutes() {
           mergeContact({
             email,
             name: row.customer_name || '',
+            username: '',
             type: 'campaign',
             date: row.created_at || '',
             source: 'email_campaigns',
@@ -1147,9 +1155,17 @@ export function createAdminRoutes() {
         try {
           const origin = new URL(c.req.url).origin;
           const trackingPixelUrl = `${origin}/api/marketing/open.gif?campaign=${encodeURIComponent(String(campaignId))}&contact=${encodeURIComponent(String(contact.id))}`;
-          const trackedHtmlBody = /<\/body>/i.test(htmlBody)
-            ? htmlBody.replace(/<\/body>/i, `<img src="${trackingPixelUrl}" alt="" width="1" height="1" style="display:none;max-height:1px;max-width:1px;opacity:0;" /></body>`)
-            : `${htmlBody}<img src="${trackingPixelUrl}" alt="" width="1" height="1" style="display:none;max-height:1px;max-width:1px;opacity:0;" />`;
+          const clickWrappedHtmlBody = htmlBody.replace(
+            /href=(["'])(https?:\/\/[^"']+)\1/gi,
+            (_match, quote, url) => {
+              const clickUrl = `${origin}/api/marketing/click?campaign=${encodeURIComponent(String(campaignId))}&contact=${encodeURIComponent(String(contact.id))}&url=${encodeURIComponent(String(url))}`;
+              return `href=${quote}${clickUrl}${quote}`;
+            }
+          );
+
+          const trackedHtmlBody = /<\/body>/i.test(clickWrappedHtmlBody)
+            ? clickWrappedHtmlBody.replace(/<\/body>/i, `<img src="${trackingPixelUrl}" alt="" width="1" height="1" style="display:none;max-height:1px;max-width:1px;opacity:0;" /></body>`)
+            : `${clickWrappedHtmlBody}<img src="${trackingPixelUrl}" alt="" width="1" height="1" style="display:none;max-height:1px;max-width:1px;opacity:0;" />`;
 
           const result = await sendEmail({ to, subject, html: trackedHtmlBody }, c.env);
           if (result.success) {
@@ -1230,6 +1246,7 @@ export function createAdminRoutes() {
       const campaignIds = (campaigns || []).map((c: any) => c.id).filter(Boolean);
       let sendsByCampaign = new Map<string, any[]>();
       let openCountsByCampaign = new Map<string, number>();
+      let clickCountsByCampaign = new Map<string, number>();
 
       if (campaignIds.length > 0) {
         const { data: sendsRows } = await supabase
@@ -1250,18 +1267,28 @@ export function createAdminRoutes() {
             .from('email_events')
             .select('campaign_id,contact_id,event_type')
             .in('campaign_id', campaignIds)
-            .eq('event_type', 'open');
+            .in('event_type', ['open', 'click']);
 
-          const uniqueByCampaign = new Map<string, Set<string>>();
+          const uniqueOpenByCampaign = new Map<string, Set<string>>();
+          const uniqueClickByCampaign = new Map<string, Set<string>>();
           for (const row of eventRows || []) {
             const campaignKey = String(row.campaign_id || '');
             const contactKey = String(row.contact_id || '');
             if (!campaignKey || !contactKey) continue;
-            if (!uniqueByCampaign.has(campaignKey)) uniqueByCampaign.set(campaignKey, new Set<string>());
-            uniqueByCampaign.get(campaignKey)!.add(contactKey);
+            if (row.event_type === 'open') {
+              if (!uniqueOpenByCampaign.has(campaignKey)) uniqueOpenByCampaign.set(campaignKey, new Set<string>());
+              uniqueOpenByCampaign.get(campaignKey)!.add(contactKey);
+            }
+            if (row.event_type === 'click') {
+              if (!uniqueClickByCampaign.has(campaignKey)) uniqueClickByCampaign.set(campaignKey, new Set<string>());
+              uniqueClickByCampaign.get(campaignKey)!.add(contactKey);
+            }
           }
-          for (const [campaignKey, contactSet] of uniqueByCampaign.entries()) {
+          for (const [campaignKey, contactSet] of uniqueOpenByCampaign.entries()) {
             openCountsByCampaign.set(campaignKey, contactSet.size);
+          }
+          for (const [campaignKey, contactSet] of uniqueClickByCampaign.entries()) {
+            clickCountsByCampaign.set(campaignKey, contactSet.size);
           }
         } catch {
           // email_events might not exist until migration is applied
@@ -1285,6 +1312,7 @@ export function createAdminRoutes() {
           failed,
           queued,
           opened: openCountsByCampaign.get(String(campaign.id)) || 0,
+          clicked: clickCountsByCampaign.get(String(campaign.id)) || 0,
           total: sends.length,
           recentSends: sends.slice(0, 10),
         };
@@ -1294,6 +1322,76 @@ export function createAdminRoutes() {
     } catch (error: any) {
       console.error('Marketing campaigns error:', error);
       return c.json({ error: 'Failed to fetch campaigns', details: error.message }, 500);
+    }
+  });
+
+  app.get('/marketing/campaigns/:id/recipients', async (c) => {
+    try {
+      const campaignId = c.req.param('id');
+      if (!campaignId) {
+        return c.json({ error: 'campaign id is required' }, 400);
+      }
+
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        c.env.VITE_SUPABASE_URL,
+        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
+      );
+
+      const { data: sendRows, error: sendsError } = await supabase
+        .from('email_sends')
+        .select('contact_id,status,error_message,sent_at,contacts(email,first_name,last_name)')
+        .eq('campaign_id', campaignId)
+        .order('sent_at', { ascending: false });
+
+      if (sendsError) {
+        return c.json({ error: 'Failed to load campaign recipients', details: sendsError.message }, 500);
+      }
+
+      const contactIds = Array.from(new Set((sendRows || []).map((row: any) => row.contact_id).filter(Boolean)));
+      const openSet = new Set<string>();
+      const clickSet = new Set<string>();
+
+      if (contactIds.length > 0) {
+        try {
+          const { data: events } = await supabase
+            .from('email_events')
+            .select('contact_id,event_type,created_at')
+            .eq('campaign_id', campaignId)
+            .in('contact_id', contactIds)
+            .in('event_type', ['open', 'click']);
+
+          for (const event of events || []) {
+            const key = String(event.contact_id || '');
+            if (!key) continue;
+            if (event.event_type === 'open') openSet.add(key);
+            if (event.event_type === 'click') clickSet.add(key);
+          }
+        } catch {
+          // no-op if email_events not available yet
+        }
+      }
+
+      const recipients = (sendRows || []).map((row: any) => {
+        const cRow = row.contacts || {};
+        const fullName = [cRow.first_name, cRow.last_name].filter(Boolean).join(' ').trim();
+        const cid = String(row.contact_id || '');
+        return {
+          contactId: cid,
+          email: cRow.email || '',
+          name: fullName || '',
+          sendStatus: row.status || 'queued',
+          errorMessage: row.error_message || '',
+          sentAt: row.sent_at || '',
+          opened: openSet.has(cid),
+          clicked: clickSet.has(cid),
+        };
+      });
+
+      return c.json({ data: recipients, total: recipients.length });
+    } catch (error: any) {
+      console.error('Marketing campaign recipients error:', error);
+      return c.json({ error: 'Failed to fetch campaign recipients', details: error.message }, 500);
     }
   });
 
