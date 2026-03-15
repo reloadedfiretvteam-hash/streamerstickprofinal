@@ -851,7 +851,10 @@ app.get('*', async (c, next) => {
   if (target) {
     return c.redirect('https://streamstickpro.com' + target, 301);
   }
-  if (path !== '/' && path.endsWith('/')) {
+  // Avoid redirect ping-pong on blog slugs where upstream may enforce trailing slash.
+  // Example loop: /blog/slug -> 308 /blog/slug/ -> 301 /blog/slug (this rule).
+  const isBlogSlugWithTrailingSlash = /^\/blog\/[a-z0-9][a-z0-9\-]*\/$/i.test(path);
+  if (path !== '/' && path.endsWith('/') && !isBlogSlugWithTrailingSlash) {
     const clean = path.replace(/\/+$/, '');
     return c.redirect('https://streamstickpro.com' + clean + reqUrl.search, 301);
   }
