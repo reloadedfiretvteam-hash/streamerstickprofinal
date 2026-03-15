@@ -833,6 +833,11 @@ app.get('*', async (c, next) => {
   const reqUrl = new URL(c.req.url);
   const path = reqUrl.pathname;
   const host = reqUrl.hostname;
+  const normalizePath = (p: string) => {
+    if (!p) return '/';
+    const n = p.replace(/\/+$/, '');
+    return n || '/';
+  };
   if (host === 'www.streamstickpro.com') {
     return c.redirect(`https://streamstickpro.com${path}${reqUrl.search}`, 301);
   }
@@ -841,6 +846,8 @@ app.get('*', async (c, next) => {
     const dbRedirects = await storage.getRedirectMap();
     for (const r of dbRedirects) {
       if (r.old_path === path) {
+        // Guard against self/loop redirects such as /blog/slug <-> /blog/slug/
+        if (normalizePath(r.new_path || '') === normalizePath(path)) continue;
         return c.redirect('https://streamstickpro.com' + r.new_path, (r.status_code as 301) || 301);
       }
     }
@@ -849,6 +856,7 @@ app.get('*', async (c, next) => {
   }
   const target = SEO_REDIRECTS_STATIC[path];
   if (target) {
+    if (normalizePath(target) === normalizePath(path)) return next();
     return c.redirect('https://streamstickpro.com' + target, 301);
   }
   // Avoid redirect ping-pong on blog slugs where upstream may enforce trailing slash.
