@@ -61,6 +61,7 @@ type LocationPagesIndex = {
 let LOCATION_CACHE: LocationPagesIndex | null = null;
 let LOCATION_CACHE_PROMISE: Promise<LocationPagesIndex | null> | null = null;
 const LOCATION_CACHE_TTL_MS = 10 * 60 * 1000;
+const SUPABASE_URL_FALLBACK = 'https://emlqlmfzqsnqokrqvmcm.supabase.co';
 
 function parseCookies(cookieHeader: string | null): Record<string, string> {
   const out: Record<string, string> = {};
@@ -190,7 +191,7 @@ app.get('/api/marketing/open.gif', async (c) => {
     if (campaignId && contactId) {
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(
-        c.env.VITE_SUPABASE_URL,
+        c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
         c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
       );
       const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0] || 'unknown';
@@ -247,7 +248,7 @@ app.get('/api/marketing/click', async (c) => {
     if (campaignId && contactId) {
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(
-        c.env.VITE_SUPABASE_URL,
+        c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
         c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
       );
       const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0] || 'unknown';

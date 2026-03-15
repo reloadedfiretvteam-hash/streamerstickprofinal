@@ -34,6 +34,8 @@ const WEBSITE_REMINDER_HTML = (name: string) => `
 </body>
 </html>`;
 
+const SUPABASE_URL_FALLBACK = 'https://emlqlmfzqsnqokrqvmcm.supabase.co';
+
 export function createAdminRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
@@ -597,7 +599,10 @@ export function createAdminRoutes() {
     try {
       const storage = getStorage(c.env);
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(
+        c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
+        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
+      );
       
       // Get all paid orders
       const allOrders = await storage.getAllOrders();
@@ -1064,7 +1069,7 @@ export function createAdminRoutes() {
 
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(
-        c.env.VITE_SUPABASE_URL,
+        c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
         c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
       );
 
@@ -1229,7 +1234,7 @@ export function createAdminRoutes() {
     try {
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(
-        c.env.VITE_SUPABASE_URL,
+        c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
         c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
       );
 
@@ -1334,7 +1339,7 @@ export function createAdminRoutes() {
 
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(
-        c.env.VITE_SUPABASE_URL,
+        c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
         c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
       );
 
