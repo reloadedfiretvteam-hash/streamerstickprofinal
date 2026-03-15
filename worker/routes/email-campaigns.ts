@@ -105,6 +105,14 @@ export function createEmailCampaignRoutes() {
         nextEmailScheduled: firstEmailDate.toISOString()
       });
     } catch (error: any) {
+      if (isCampaignSchemaMismatch(error)) {
+        console.warn('[EMAIL_CAMPAIGN] Schema mismatch detected; skipping legacy campaign flow.');
+        return c.json({
+          success: true,
+          skipped: true,
+          message: 'Legacy campaign flow skipped due to schema mismatch',
+        });
+      }
       console.error('Error creating email campaign:', error);
       return c.json({ 
         error: 'Failed to create email campaign',
@@ -220,6 +228,14 @@ export function createEmailCampaignRoutes() {
         message: `Processed ${results.processed} campaigns: ${results.sent} sent, ${results.failed} failed`
       });
     } catch (error: any) {
+      if (isCampaignSchemaMismatch(error)) {
+        return c.json({
+          success: true,
+          skipped: true,
+          message: 'Legacy campaign scheduler skipped due to schema mismatch',
+          processed: 0,
+        });
+      }
       console.error('Error processing scheduled emails:', error);
       return c.json({ 
         error: 'Failed to process scheduled emails',
@@ -246,11 +262,27 @@ export function createEmailCampaignRoutes() {
 
       return c.json({ data: campaigns || [] });
     } catch (error: any) {
+      if (isCampaignSchemaMismatch(error)) {
+        return c.json({ data: [], skipped: true, message: 'Legacy campaign status unavailable due to schema mismatch' });
+      }
       return c.json({ error: error.message }, 500);
     }
   });
 
   return app;
+}
+
+function isCampaignSchemaMismatch(error: any): boolean {
+  const msg = String(error?.message || '').toLowerCase();
+  return (
+    msg.includes('column') && (
+      msg.includes('customer_email') ||
+      msg.includes('campaign_type') ||
+      msg.includes('next_email_scheduled_at') ||
+      msg.includes('email_type') ||
+      msg.includes('contact_id')
+    )
+  );
 }
 
 async function sendCampaignEmail(campaign: any, env: Env, supabase: any): Promise<{

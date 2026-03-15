@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Set up Cloudflare environment variables for payment webhook
 
-const SUPABASE_URL = 'https://emlqlmfzqsnqokrqvmcm.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg';
-const STRIPE_SECRET_KEY = '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';
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || '';
 
 async function setupCloudflare() {
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
@@ -13,6 +13,10 @@ async function setupCloudflare() {
   if (!accountId || !apiToken) {
     console.error('❌ Missing Cloudflare credentials');
     console.error('Set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN');
+    process.exit(1);
+  }
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !STRIPE_SECRET_KEY) {
+    console.error('❌ Missing required env vars: STRIPE_SECRET_KEY, VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY');
     process.exit(1);
   }
   

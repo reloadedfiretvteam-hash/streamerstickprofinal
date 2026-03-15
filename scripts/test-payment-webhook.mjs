@@ -3,10 +3,14 @@
 
 import Stripe from 'stripe';
 
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || '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';
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || '';
 const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://streamstickpro.com/api/stripe/webhook';
 
 async function testWebhook() {
+  if (!STRIPE_SECRET_KEY) {
+    console.error('❌ STRIPE_SECRET_KEY is required');
+    process.exit(1);
+  }
   console.log('🧪 Testing Payment Webhook\n');
   console.log('=' .repeat(50) + '\n');
   

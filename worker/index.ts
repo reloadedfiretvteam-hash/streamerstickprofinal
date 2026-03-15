@@ -722,7 +722,6 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
     </article>
   </main>
   <footer role="contentinfo"><p>&copy; StreamStickPro. <a href="https://streamstickpro.com/">StreamStickPro</a> – IPTV, Fire Sticks, and streaming guides.</p></footer>
-  <script>window.location.replace(${JSON.stringify(url)});</script>
   <noscript><p>Continue to <a href="${url}">${h1Text}</a>.</p></noscript>
 </body>
 </html>`;
