@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useLocation, Link } from "wouter";
 import { apiCall } from "@/lib/api";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
-import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, Play, X, Gift, ChevronRight, Heart } from "lucide-react";
+import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, Play, X, Gift, ChevronRight, Heart, ShieldCheck } from "lucide-react";
 import { useCart, useWishlist } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -303,8 +303,8 @@ export default function MainStore() {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
     setPageMeta({
-      title: "Best IPTV for Fire Stick 2026 | 36hr Trial | StreamStick Pro",
-      description: "Mobile-first IPTV and Fire Stick experience with 18K+ live channels and 100K+ VOD. Start a 36-hour free trial or choose a ready-to-use device in minutes.",
+      title: "IPTV Fire Stick 2026 | 18K+ Channels | StreamStickPro 36hr Trial",
+      description: "IPTV for Fire Stick and ONN Google TV with 18K+ live channels. Start a 36-hour trial, buy devices, and activate in minutes.",
       path: "/",
     });
     loadProducts();
@@ -590,8 +590,8 @@ export default function MainStore() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-5 leading-[1.1] tracking-tight text-white"
             >
-              IPTV for Fire Stick, ONN Google TV, and Smart TVs
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-red-500 mt-2">Start Your 36-Hour Free Trial</span>
+              IPTV Fire Stick 2026
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-red-500 mt-2">18K+ Live Channels | 36-Hour Trial</span>
             </motion.h1>
 
             {/* Trust above fold + geo for US/UK/CA impressions */}
@@ -599,9 +599,9 @@ export default function MainStore() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.15 }}
-              className="text-base sm:text-lg md:text-xl text-gray-200 mb-2"
+              className="text-base sm:text-lg md:text-xl text-gray-100 mb-2"
             >
-              Fast setup, secure checkout, and real human support 24/7.
+              Premium IPTV for Fire Stick, ONN Google TV, and Smart TVs with secure checkout and 24/7 human support.
             </motion.p>
             <motion.p 
               initial={{ opacity: 0, y: 10 }}
@@ -609,7 +609,7 @@ export default function MainStore() {
               transition={{ duration: 0.5, delay: 0.16 }}
               className="text-sm sm:text-base text-gray-300 mb-6 max-w-3xl mx-auto"
             >
-              Get 18,000+ live channels, 100,000+ movies and series, and premium sports with instant activation in <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">USA</span></Link>, <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">Canada</span></Link>, and <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">UK</span></Link>.
+              18,000+ live channels, 100,000+ movies & series, premium sports, and instant activation in <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">USA</span></Link>, <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">Canada</span></Link>, and <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">UK</span></Link>.
             </motion.p>
 
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.18 }} className="mb-4">
@@ -644,7 +644,7 @@ export default function MainStore() {
                   role="button"
                 >
                   <ShoppingCart className="w-6 h-6" aria-hidden="true" />
-                  BUY JAILBROKEN STICK
+                  BUY FIRE STICK NOW
                 </motion.span>
               </Link>
               <Link href="/onn-google-tv">
@@ -658,6 +658,31 @@ export default function MainStore() {
                   ONN GOOGLE TV SETUP
                 </motion.span>
               </Link>
+            </motion.div>
+
+            {/* Payment methods above the fold */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.28 }}
+              className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-6 text-xs sm:text-sm text-gray-100"
+            >
+              {[
+                "Visa",
+                "Mastercard",
+                "Amex",
+                "Discover",
+                "Apple Pay",
+                "Google Pay",
+                "Link by Stripe",
+              ].map((label) => (
+                <span
+                  key={label}
+                  className="px-3 py-1 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm font-semibold"
+                >
+                  {label}
+                </span>
+              ))}
             </motion.div>
 
             <motion.div 
@@ -687,6 +712,60 @@ export default function MainStore() {
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none"></div>
+      </section>
+
+      {/* Elite Conversion Strip */}
+      <section className="py-12 md:py-16 bg-gradient-to-b from-gray-900 to-gray-950 border-y border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <p className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/15 border border-orange-400/30 text-orange-200 text-xs sm:text-sm font-semibold">
+              Built for fast decisions on mobile and desktop
+            </p>
+            <h2 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+              Pick your path in under 30 seconds
+            </h2>
+            <p className="mt-3 text-gray-300 max-w-3xl mx-auto text-sm sm:text-base">
+              Start with a trial, buy a ready-to-use device, or compare options before checkout. Every step is designed for clarity and easy access.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4 md:gap-6">
+            <div className="rounded-2xl border border-orange-400/25 bg-gradient-to-br from-orange-500/15 to-orange-500/5 p-5 md:p-6">
+              <p className="text-orange-300 text-xs font-semibold tracking-wide">STEP 1</p>
+              <h3 className="text-white text-xl font-bold mt-2">Start 36-Hour Trial</h3>
+              <p className="text-gray-300 text-sm mt-2">See channel quality, speed, and setup flow before you buy.</p>
+              <Link href="/36hr-trial">
+                <span className="mt-5 inline-flex items-center justify-center gap-2 w-full min-h-[72px] rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black transition-colors cursor-pointer">
+                  Start Trial <ChevronRight className="w-5 h-5" />
+                </span>
+              </Link>
+            </div>
+
+            <div className="rounded-2xl border border-blue-400/25 bg-gradient-to-br from-blue-500/15 to-blue-500/5 p-5 md:p-6">
+              <p className="text-blue-300 text-xs font-semibold tracking-wide">STEP 2</p>
+              <h3 className="text-white text-xl font-bold mt-2">Choose Device or Plan</h3>
+              <p className="text-gray-300 text-sm mt-2">Fire Stick and ONN options, plus multi-device IPTV plans.</p>
+              <button
+                onClick={scrollToShop}
+                className="mt-5 inline-flex items-center justify-center gap-2 w-full min-h-[72px] rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-black transition-colors"
+                data-testid="button-jump-to-shop"
+              >
+                View Options <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="rounded-2xl border border-emerald-400/25 bg-gradient-to-br from-emerald-500/15 to-emerald-500/5 p-5 md:p-6">
+              <p className="text-emerald-300 text-xs font-semibold tracking-wide">STEP 3</p>
+              <h3 className="text-white text-xl font-bold mt-2">Checkout Securely</h3>
+              <p className="text-gray-300 text-sm mt-2">Stripe checkout with card and wallet support in one flow.</p>
+              <Link href="/checkout">
+                <span className="mt-5 inline-flex items-center justify-center gap-2 w-full min-h-[72px] rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black transition-colors cursor-pointer">
+                  Go to Checkout <ChevronRight className="w-5 h-5" />
+                </span>
+              </Link>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Shop Section */}
@@ -1735,6 +1814,56 @@ export default function MainStore() {
         </div>
       </section>
 
+      {/* Trust & Indexing Signals */}
+      <section className="py-14 bg-gradient-to-b from-gray-900 to-gray-950 border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <h3 className="text-3xl font-bold text-white mb-3">Secure, indexed, ready to buy</h3>
+              <p className="text-gray-300 text-base md:text-lg">
+                We keep search engines happy and customers protected: clean redirects, fast pages, XML sitemaps, robots.txt, and Stripe-secured checkout with 24/7 support.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2 text-sm text-gray-200">
+                {[
+                  "Stripe secure checkout",
+                  "Robots + XML sitemaps",
+                  "Canonical + 301s",
+                  "99.9% uptime",
+                  "24/7 support",
+                ].map((item) => (
+                  <span key={item} className="px-3 py-1 rounded-full border border-white/10 bg-white/5">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <ShieldCheck className="w-8 h-8 text-green-400" />
+                <div>
+                  <p className="text-white font-semibold">Payments & Wallets</p>
+                  <p className="text-gray-400 text-sm">Visa, Mastercard, Amex, Discover, Apple Pay, Google Pay, Link</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Zap className="w-8 h-8 text-orange-400" />
+                <div>
+                  <p className="text-white font-semibold">Fast crawl & serve</p>
+                  <p className="text-gray-400 text-sm">Optimized metadata, canonical headers, and prebuilt sitemaps.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Mail className="w-8 h-8 text-blue-400" />
+                <div>
+                  <p className="text-white font-semibold">Always reachable</p>
+                  <p className="text-gray-400 text-sm">24/7 human support at reloadedfiretvteam@gmail.com.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section id="faq" className="py-20 bg-gray-800/50">
         <div className="container mx-auto px-4 max-w-3xl">
@@ -1858,16 +1987,28 @@ export default function MainStore() {
 
             <div>
               <h3 className="text-white font-semibold mb-4">Payment Methods</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-green-400" />
-                  <span>Cash App: $starevan11</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-orange-400" />
-                  <span>Bitcoin: Accepted</span>
-                </li>
-              </ul>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "Visa",
+                  "Mastercard",
+                  "Amex",
+                  "Discover",
+                  "Apple Pay",
+                  "Google Pay",
+                  "Link by Stripe",
+                ].map((method) => (
+                  <span
+                    key={method}
+                    className="px-3 py-1 rounded-full border border-white/15 bg-white/5 text-xs font-semibold text-gray-100"
+                  >
+                    {method}
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 mt-3 flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-orange-400" />
+                Secure checkout powered by Stripe.
+              </p>
             </div>
 
             <div>

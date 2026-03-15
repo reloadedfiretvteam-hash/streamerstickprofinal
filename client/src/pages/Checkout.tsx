@@ -681,10 +681,22 @@ export default function Checkout() {
                     </div>
                   </div>
                   
-                  <div className="flex justify-center items-center gap-3 pt-2">
-                    <CreditCard className="w-8 h-8 text-muted-foreground" />
-                    <div className="text-xs text-muted-foreground">
-                      Powered by Stripe
+                  <div className="pt-2 space-y-3">
+                    <div className="flex justify-center items-center gap-3">
+                      <CreditCard className="w-8 h-8 text-muted-foreground" />
+                      <div className="text-xs text-muted-foreground">
+                        Powered by Stripe
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {["Visa", "Mastercard", "Amex", "Discover", "Apple Pay", "Google Pay", "Link"].map((method) => (
+                        <span
+                          key={method}
+                          className="px-2.5 py-1 rounded-full border border-white/15 bg-white/5 text-[11px] font-semibold text-muted-foreground"
+                        >
+                          {method}
+                        </span>
+                      ))}
                     </div>
                   </div>
                 </div>
