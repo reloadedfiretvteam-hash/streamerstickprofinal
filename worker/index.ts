@@ -982,6 +982,12 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/tools/catalog', priority: '0.85', changefreq: 'weekly' },
 ];
 
+const EXCLUDED_BLOG_SLUGS = new Set([
+  'how-to-manage-multiple-streaming-subscriptions',
+  'how-to-sideload-apps-on-onn-streaming-box',
+  'watch-cricket-live-ipl-test-world-cup',
+]);
+
 // sitemap-pages.xml: static + location pages only (SEO/AEO prompt)
 app.get('/sitemap-pages.xml', async (c) => {
   const baseUrl = 'https://streamstickpro.com';
@@ -1019,7 +1025,8 @@ app.get('/sitemap-posts.xml', async (c) => {
     const storage = getStorage(c.env);
     const blogPosts = await storage.getBlogPosts();
     for (const post of blogPosts) {
-      if (post.published) {
+      const slug = String(post?.slug || '').toLowerCase();
+      if (post.published && slug && !EXCLUDED_BLOG_SLUGS.has(slug)) {
         const lastmod = post.publishedAt ? new Date(post.publishedAt).toISOString().split('T')[0] : today;
         xml += `<url><loc>${baseUrl}/blog/${post.slug}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`;
       }
@@ -1070,7 +1077,8 @@ app.get('/sitemap.xml', async (c) => {
   }
 
   for (const post of blogPosts) {
-    if (post.published) {
+    const slug = String(post?.slug || '').toLowerCase();
+    if (post.published && slug && !EXCLUDED_BLOG_SLUGS.has(slug)) {
       const lastmod = post.publishedAt ? new Date(post.publishedAt).toISOString().split('T')[0] : today;
       sitemap += `  <url>
     <loc>${baseUrl}/blog/${post.slug}</loc>
