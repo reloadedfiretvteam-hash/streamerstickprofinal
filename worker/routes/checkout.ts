@@ -64,29 +64,21 @@ export function createCheckoutRoutes() {
       const realProductNames = productsWithQuantity.map(p => p.product.name).join(', ');
       const shadowProductIds = productsWithQuantity.map(p => p.product.shadowProductId || '').join(',');
 
-      // Determine shipping requirements:
-      // - Shipping REQUIRED for Firestick and ONN devices
-      // - Shipping OPTIONAL for premium TV subscriptions (IPTV)
-      const hasPhysicalProduct = productsWithQuantity.some(({ product }) => {
-        const name = (product.name || '').toLowerCase();
-        const id = (product.id || '').toLowerCase();
-        // Only require shipping for actual physical devices (Firestick, ONN)
-        // NOT for IPTV subscriptions
-        return (name.includes('fire') && (name.includes('stick') || name.includes('device'))) ||
-               (name.includes('stick') && name.includes('device')) ||
-               name.includes('onn') || 
-               name.includes('android-onn') ||
-               id.includes('firestick') || 
-               id.includes('android-onn') ||
-               id.includes('onn-');
-      });
-
       const sessionConfig: any = {
         line_items: lineItems,
         mode: 'payment',
         success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${baseUrl}/cancel`,
         customer_email: customerEmail,
+        // Enable cards + Link (Apple Pay / Google Pay ride on card payment requests)
+        payment_method_types: ['card', 'link'],
+        // Always collect shipping address so fulfillment has a delivery destination.
+        shipping_address_collection: {
+          allowed_countries: ['US', 'CA'],
+        },
+        phone_number_collection: {
+          enabled: true,
+        },
         metadata: {
           realProductIds,
           realProductNames,
@@ -96,15 +88,6 @@ export function createCheckoutRoutes() {
           existingCustomerId: existingCustomer?.id || '',
         },
       };
-
-      if (hasPhysicalProduct) {
-        sessionConfig.shipping_address_collection = {
-          allowed_countries: ['US', 'CA'],
-        };
-        sessionConfig.phone_number_collection = {
-          enabled: true,
-        };
-      }
 
       console.log("Checkout: Calling stripe.checkout.sessions.create with lineItems:", JSON.stringify(lineItems));
       const session = await stripe.checkout.sessions.create(sessionConfig);
