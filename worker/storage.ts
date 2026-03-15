@@ -799,14 +799,14 @@ export function createStorage(config: StorageConfig) {
     },
 
     async getBlogPostBySlug(slug: string): Promise<any | undefined> {
-      // Use maybeSingle with published filter to avoid 406/500 when legacy duplicate rows exist.
+      // Be tolerant of legacy duplicate slugs: fetch latest published row and use first result.
       const { data } = await supabase.from('blog_posts')
         .select('*')
         .eq('slug', slug)
         .eq('is_published', true)
-        .limit(1)
-        .maybeSingle();
-      return data ? this.mapBlogPostFromDb(data) : undefined;
+        .order('published_at', { ascending: false })
+        .limit(1);
+      return data?.[0] ? this.mapBlogPostFromDb(data[0]) : undefined;
     },
 
     async searchBlogPosts(query: string): Promise<any[]> {
