@@ -1,222 +1,29 @@
-# StreamStickPro - Advanced Robots.txt
-# Updated: 2025-01-15
-# Purpose: Optimize indexing for all major search engines and AI crawlers
+# StreamStickPro - robots.txt
+# Allow Googlebot/Bingbot; no Crawl-delay (Google ignores it, Crawl-delay can slow Bing indexing)
 
-# Global Rules - Allow all by default, block specific paths
-# Crawl budget: prioritize pillars + location pages (/l/). No crawl-delay for Google (ignored).
 User-agent: *
 Allow: /
-Allow: /blog
-Allow: /blog/*
-Allow: /shop
-Allow: /products
-Allow: /l/
-Allow: /l/*
-Allow: /iptv-services
-Allow: /iptv-firestick
-Allow: /jailbroken-fire-sticks
-Allow: /firestick-devices
-Allow: /best-iptv-firestick
-Allow: /iptv-media-players
-Allow: /free-trial
+Allow: /feed.xml
+Allow: /opensearch.xml
+Disallow: /api/
 Disallow: /admin
 Disallow: /admin/
-Disallow: /api/
 Disallow: /shadow-services
 Disallow: /checkout
 Disallow: /success
 Disallow: /cancel
-Disallow: /track-order?
-Disallow: /*.json$
-Disallow: /*?*sort=
-Disallow: /*?*filter=
-Disallow: /*?*payment=
-Disallow: /*?*session=
+Disallow: /customer-login
+Disallow: /my-account
+Disallow: /forgot-password
+Disallow: /reset-password
 
-# Crawl Delay (Be nice to our server)
-Crawl-delay: 1
+# Clean URL parameters (prevents duplicate content from query strings)
+Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&ref&fbclid&gclid /
 
-# Google Bot (Premium Treatment) - Note: Crawl-delay is ignored by Google
-User-agent: Googlebot
-Allow: /
-Allow: /blog/
-Allow: /shop/
-Allow: /l/
-Allow: /l/*
-Disallow: /admin
-Disallow: /api/
+# Canonical host
+Host: https://streamstickpro.com
 
-# Google Image Bot (Show our products!)
-User-agent: Googlebot-Image
-Allow: /
-Allow: /*.jpg
-Allow: /*.jpeg
-Allow: /*.png
-Allow: /*.webp
-Allow: /*.gif
-
-# Google Mobile Bot
-User-agent: Googlebot-Mobile
-Allow: /
-Disallow: /admin
-Crawl-delay: 0.5
-
-# Bing Bot (Welcome!)
-User-agent: Bingbot
-Allow: /
-Allow: /blog/
-Allow: /shop/
-Disallow: /admin
-Disallow: /api/
-Crawl-delay: 1
-
-# Yahoo Bot
-User-agent: Slurp
-Allow: /
-Disallow: /admin
-Disallow: /api/
-
-# DuckDuckGo Bot
-User-agent: DuckDuckBot
-Allow: /
-Disallow: /admin
-Disallow: /api/
-
-# Yandex Bot
-User-agent: YandexBot
-Allow: /
-Disallow: /admin
-Disallow: /api/
-Crawl-delay: 2
-
-# Baidu Bot (Chinese Search)
-User-agent: Baiduspider
-Allow: /
-Disallow: /admin
-Disallow: /api/
-Crawl-delay: 2
-
-# Facebook Bot (For sharing)
-User-agent: facebookexternalhit
-Allow: /
-Allow: /blog/
-Allow: /shop/
-
-# Twitter Bot (For card previews)
-User-agent: Twitterbot
-Allow: /
-Allow: /blog/
-Allow: /shop/
-
-# LinkedIn Bot
-User-agent: LinkedInBot
-Allow: /
-Allow: /blog/
-
-# Pinterest Bot
-User-agent: Pinterest
-Allow: /
-Allow: /*.jpg
-Allow: /*.png
-Allow: /*.webp
-
-# WhatsApp Bot (For link previews)
-User-agent: WhatsApp
-Allow: /
-Allow: /blog/
-Allow: /shop/
-
-# Telegram Bot (For link previews)
-User-agent: TelegramBot
-Allow: /
-Allow: /blog/
-
-# Bad Bots (Block these)
-User-agent: AhrefsBot
-Disallow: /
-
-User-agent: SemrushBot
-Disallow: /
-
-User-agent: MJ12bot
-Disallow: /
-
-User-agent: DotBot
-Disallow: /
-
-User-agent: BLEXBot
-Disallow: /
-
-User-agent: SEMrushBot
-Disallow: /
-
-# AI Search Engine Crawlers (Allow for AI-powered search)
-User-agent: GPTBot
-Allow: /
-Allow: /blog
-Allow: /blog/*
-Disallow: /admin
-Disallow: /api/
-Crawl-delay: 1
-
-User-agent: ChatGPT-User
-Allow: /
-Allow: /blog
-Allow: /blog/*
-Disallow: /admin
-Disallow: /api/
-Crawl-delay: 1
-
-User-agent: Claude-Web
-Allow: /
-Allow: /blog
-Allow: /blog/*
-Disallow: /admin
-Disallow: /api/
-Crawl-delay: 1
-
-User-agent: Anthropic-AI
-Allow: /
-Allow: /blog
-Allow: /blog/*
-Disallow: /admin
-Disallow: /api/
-Crawl-delay: 1
-
-User-agent: PerplexityBot
-Allow: /
-Allow: /blog
-Allow: /blog/*
-Disallow: /admin
-Disallow: /api/
-Crawl-delay: 1
-
-User-agent: Bytespider
-Allow: /
-Allow: /blog
-Disallow: /admin
-Disallow: /api/
-Crawl-delay: 1
-
-User-agent: CCBot
-Allow: /
-Allow: /blog
-Disallow: /admin
-Disallow: /api/
-Crawl-delay: 1
-
-# Additional Search Engines
-User-agent: Applebot
-Allow: /
-Allow: /blog
-Crawl-delay: 1
-
-User-agent: ia_archiver
-Allow: /
-Allow: /blog
-Crawl-delay: 2
-
-# Sitemaps (Google/Bing/Yandex: submit sitemap.xml or sitemap-index.xml)
-Sitemap: https://streamstickpro.com/sitemap.xml
+# Sitemaps (GSC: submit both; index contains sitemap-pages + sitemap-posts)
 Sitemap: https://streamstickpro.com/sitemap-index.xml
+Sitemap: https://streamstickpro.com/sitemap.xml
 

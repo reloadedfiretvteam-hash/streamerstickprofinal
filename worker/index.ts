@@ -1316,7 +1316,7 @@ app.get('*', async (c) => {
   const isBlogSlug = /^\/blog\/[a-z0-9][a-z0-9\-]*[a-z0-9]$/i.test(pathname);
   const isKnownRoute =
     staticKnownRoutes.has(pathname) ||
-    pathname.startsWith('/l/') ||
+    /^\/l\/[^/]+\/[^/]+\/[^/]+$/i.test(pathname) ||
     /^\/vs-[a-z0-9\-]+$/i.test(pathname) ||
     /^\/seo-ads\/[a-z0-9\-]+$/i.test(pathname) ||
     (isBlogSlug ? !!meta : false) ||
