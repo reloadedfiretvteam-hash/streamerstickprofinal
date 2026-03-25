@@ -1208,6 +1208,32 @@ const SECURITY_HEADERS: Record<string, string> = {
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self), interest-cohort=()',
   'Content-Security-Policy': "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://connect.facebook.net https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' https: data: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https: wss:; frame-src https://js.stripe.com https://www.facebook.com; object-src 'none'; base-uri 'self'; form-action 'self' https://js.stripe.com;",
 };
+
+const SEO_LIMITS = {
+  titleMax: 60,
+  descriptionMax: 160,
+};
+
+function trimToWordBoundary(input: string, max: number): string {
+  const value = String(input || '').replace(/\s+/g, ' ').trim();
+  if (value.length <= max) return value;
+  const sliced = value.slice(0, max - 1);
+  const boundary = sliced.lastIndexOf(' ');
+  const head = boundary > 30 ? sliced.slice(0, boundary) : sliced;
+  return `${head}...`;
+}
+
+function normalizeMeta(meta: { title: string; description: string; noindex?: boolean }) {
+  return {
+    title: trimToWordBoundary(meta.title || 'StreamStick Pro', SEO_LIMITS.titleMax),
+    description: trimToWordBoundary(
+      meta.description || 'Premium IPTV and device setup with StreamStick Pro.',
+      SEO_LIMITS.descriptionMax
+    ),
+    noindex: Boolean(meta.noindex),
+  };
+}
+
 function applySecurityHeaders(res: Response, pathname?: string, hostname?: string): Response {
   const next = new Response(res.body, { status: res.status, statusText: res.statusText, headers: new Headers(res.headers) });
   Object.entries(SECURITY_HEADERS).forEach(([k, v]) => next.headers.set(k, v));
@@ -1247,9 +1273,9 @@ const VS_META: Record<string, { title: string; description: string }> = {
 /** Resolve per-page meta: static map, vs pages, or fetch blog post from DB. */
 async function resolvePageMeta(pathname: string, env: Env): Promise<{ title: string; description: string; noindex?: boolean } | null> {
   // 1. Static page map
-  if (PAGE_META[pathname]) return PAGE_META[pathname];
+  if (PAGE_META[pathname]) return normalizeMeta(PAGE_META[pathname]);
   // 2. VS competitor pages
-  if (VS_META[pathname]) return VS_META[pathname];
+  if (VS_META[pathname]) return normalizeMeta(VS_META[pathname]);
   // 3. Blog post: /blog/<slug>
   const blogMatch = pathname.match(/^\/blog\/([a-z0-9][a-z0-9\-]*[a-z0-9])$/);
   if (blogMatch) {
@@ -1260,7 +1286,7 @@ async function resolvePageMeta(pathname: string, env: Env): Promise<{ title: str
         const titleRaw = (post.title || 'Blog | StreamStickPro').toString();
         const fullTitle = titleRaw.length > 60 ? titleRaw.slice(0, 57) + '...' : titleRaw;
         const descRaw = (post.excerpt || post.metaDescription || post.title || '').toString().slice(0, 160) || 'IPTV guides, Fire Stick tutorials, and streaming tips from StreamStickPro.';
-        return { title: fullTitle, description: descRaw };
+        return normalizeMeta({ title: fullTitle, description: descRaw });
       }
     } catch { /* DB unavailable — fall through */ }
   }
@@ -1306,12 +1332,13 @@ function injectMeta(html: string, pathname: string, meta: { title: string; descr
       .replace(/<link[^>]*rel=["']canonical["'][^>]*>/i, `<link rel="canonical" href="${canon}">`)
       .replace(/<meta[^>]*property=["']og:url["'][^>]*>/i, `<meta property="og:url" content="${canon}">`);
   }
-  const titleSafe = escapeHtml(meta.title);
-  const descSafe = escapeHtml(meta.description);
-  const robotsContent = meta.noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+  const normalized = normalizeMeta(meta);
+  const titleSafe = escapeHtml(normalized.title);
+  const descSafe = escapeHtml(normalized.description);
+  const robotsContent = normalized.noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 
   // BreadcrumbList JSON-LD for crawlers (only on indexable pages)
-  const breadcrumbLD = meta.noindex ? '' : buildBreadcrumbLD(pathname, meta.title);
+  const breadcrumbLD = normalized.noindex ? '' : buildBreadcrumbLD(pathname, normalized.title);
 
   let out = html;
   out = out.replace(/<title>[^<]*<\/title>/i, `<title>${titleSafe}</title>`);

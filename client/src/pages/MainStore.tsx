@@ -45,7 +45,7 @@ const productBenefitList = [
   "18,000 live channels worldwide",
   "+24k VODs and Series",
   "PPV Channels (UFC, NFL…)",
-  "No Freezing",
+  "Stable streaming quality",
   "Regular Updates",
   "M3U Delivered Instantly",
   "24/7 Support"
@@ -575,7 +575,7 @@ export default function MainStore() {
               className="mb-6"
             >
               <span className="inline-block px-6 py-2 bg-gradient-to-r from-orange-500/30 to-red-500/30 backdrop-blur-sm border-2 border-orange-400/50 rounded-full text-sm font-bold text-orange-200 animate-pulse shadow-lg shadow-orange-500/30">
-                36 HOUR FREE TRIAL – 18K+ Channels Live Now
+                FREE 36-HOUR TRIAL • Start in Minutes
               </span>
               <span className="ml-3 inline-flex items-center gap-1 rounded-full bg-green-500/20 px-3 py-1 text-green-300 font-bold">
                 <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" aria-hidden="true" />
@@ -591,7 +591,7 @@ export default function MainStore() {
               className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-5 leading-[1.1] tracking-tight text-white"
             >
               IPTV Fire Stick 2026
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-red-500 mt-2">18K+ Live Channels | 36-Hour Trial</span>
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-red-500 mt-2">18K+ Live Channels • Fire Stick & ONN</span>
             </motion.h1>
 
             {/* Trust above fold + geo for US/UK/CA impressions */}
@@ -655,7 +655,7 @@ export default function MainStore() {
                   role="button"
                 >
                   <Zap className="w-6 h-6" aria-hidden="true" />
-                  ONN GOOGLE TV SETUP
+                  VIEW ONN OPTIONS
                 </motion.span>
               </Link>
             </motion.div>
@@ -722,7 +722,7 @@ export default function MainStore() {
               Built for fast decisions on mobile and desktop
             </p>
             <h2 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-              Pick your path in under 30 seconds
+              Choose your streaming setup in under 30 seconds
             </h2>
             <p className="mt-3 text-gray-300 max-w-3xl mx-auto text-sm sm:text-base">
               Start with a trial, buy a ready-to-use device, or compare options before checkout. Every step is designed for clarity and easy access.
@@ -785,7 +785,7 @@ export default function MainStore() {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Fire Stick Device Options & IPTV Plans</span>
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Trusted by 2,700+ customers. Recommended on Reddit (r/firetvstick, r/IPTV). 18,000+ channels, 100,000+ movies and series, and instant setup guidance. No downloader codes needed.
+              Trusted by 2,700+ customers. 18,000+ channels, 100,000+ movies and series, and clear setup guidance for Fire Stick, ONN, and Android TV.
             </p>
           </motion.div>
 
