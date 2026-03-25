@@ -36,6 +36,41 @@ const WEBSITE_REMINDER_HTML = (name: string) => `
 
 const SUPABASE_URL_FALLBACK = 'https://emlqlmfzqsnqokrqvmcm.supabase.co';
 
+const TEST_EMAIL_DOMAIN_MARKERS = [
+  '@example.com',
+  '@example.org',
+  '@example.net',
+  '@mailinator.com',
+  '@guerrillamail.com',
+  '@tempmail.com',
+  '@10minutemail.com',
+];
+
+function isLikelyTestEmail(rawEmail: string): boolean {
+  const email = String(rawEmail || '').trim().toLowerCase();
+  if (!email || !email.includes('@')) return true;
+  if (TEST_EMAIL_DOMAIN_MARKERS.some((d) => email.endsWith(d))) return true;
+  const local = email.split('@')[0] || '';
+  if (local.includes('+test') || local.includes('+qa') || local.includes('+smoke')) return true;
+  if (
+    local.startsWith('test') ||
+    local.startsWith('qa') ||
+    local.startsWith('smoke') ||
+    local.startsWith('debug') ||
+    local === 'demo'
+  ) return true;
+  if (email.includes('test@test') || email.includes('noreply@example')) return true;
+  return false;
+}
+
+function chunkArray<T>(list: T[], size = 500): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < list.length; i += size) {
+    chunks.push(list.slice(i, i + size));
+  }
+  return chunks;
+}
+
 export function createAdminRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
@@ -963,6 +998,8 @@ export function createAdminRoutes() {
         return c.json({ error: 'Marketing unavailable: missing Supabase configuration', details: 'Set VITE_SUPABASE_URL and SUPABASE_SERVICE_KEY' }, 503);
       }
       const supabase = createClient(supabaseUrl, supabaseKey);
+      const includeTestData = c.req.query('includeTestData') === 'true';
+      let excludedTestCount = 0;
 
       const contactMap = new Map<string, { email: string; name: string; username?: string; type: string; date: string; source: string; isSubscribed?: boolean }>();
       const typePriority = (type: string) => {
@@ -1012,6 +1049,10 @@ export function createAdminRoutes() {
         (contactRows || []).forEach((row: any) => {
           const email = (row.email || '').trim().toLowerCase();
           if (!email || !email.includes('@')) return;
+          if (!includeTestData && isLikelyTestEmail(email)) {
+            excludedTestCount++;
+            return;
+          }
           const fullName = [row.first_name, row.last_name].filter(Boolean).join(' ').trim();
           const source = row.source || 'contacts';
           const type =
@@ -1039,6 +1080,10 @@ export function createAdminRoutes() {
       customers.forEach((cust: any) => {
         const email = (cust.email || '').trim().toLowerCase();
         if (!email || !email.includes('@')) return;
+        if (!includeTestData && isLikelyTestEmail(email)) {
+          excludedTestCount++;
+          return;
+        }
         mergeContact({
           email,
           name: cust.fullName || cust.username || '',
@@ -1054,6 +1099,10 @@ export function createAdminRoutes() {
       orders.forEach((o: any) => {
         const email = (o.customerEmail || '').trim().toLowerCase();
         if (!email || !email.includes('@')) return;
+        if (!includeTestData && isLikelyTestEmail(email)) {
+          excludedTestCount++;
+          return;
+        }
         const isTrial = o.paymentMethod === 'free-trial' || o.amount === 0;
         mergeContact({
           email,
@@ -1071,6 +1120,10 @@ export function createAdminRoutes() {
         (campaigns || []).forEach((row: any) => {
           const email = (row.customer_email || '').trim().toLowerCase();
           if (!email || !email.includes('@')) return;
+          if (!includeTestData && isLikelyTestEmail(email)) {
+            excludedTestCount++;
+            return;
+          }
           mergeContact({
             email,
             name: row.customer_name || '',
@@ -1091,10 +1144,72 @@ export function createAdminRoutes() {
         return new Date(b.date).getTime() - new Date(a.date).getTime();
       });
 
-      return c.json({ data: contacts, total: contacts.length });
+      return c.json({ data: contacts, total: contacts.length, excludedTestCount });
     } catch (error: any) {
       console.error('Marketing contacts error:', error);
       return c.json({ error: 'Failed to fetch marketing contacts', details: error.message }, 500);
+    }
+  });
+
+  app.post('/marketing/cleanup-test-data', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabaseUrl = c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK;
+      const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+      if (!supabaseUrl || !supabaseKey) {
+        return c.json({ error: 'Marketing unavailable: missing Supabase configuration', details: 'Set VITE_SUPABASE_URL and SUPABASE_SERVICE_KEY' }, 503);
+      }
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      const { data: allContacts, error: contactsError } = await supabase.from('contacts').select('id,email');
+      if (contactsError) {
+        return c.json({ error: 'Failed to load contacts', details: contactsError.message }, 500);
+      }
+
+      const testContacts = (allContacts || []).filter((row: any) => isLikelyTestEmail(row.email));
+      const testContactIds = testContacts.map((row: any) => row.id).filter(Boolean);
+      const testEmails = testContacts.map((row: any) => String(row.email || '').trim().toLowerCase()).filter(Boolean);
+
+      let deletedEvents = 0;
+      let deletedSends = 0;
+      let deletedContacts = 0;
+      let deletedCampaigns = 0;
+
+      for (const ids of chunkArray(testContactIds, 500)) {
+        if (ids.length === 0) continue;
+        const eventsDelete = await supabase.from('email_events').delete().in('contact_id', ids).select('id');
+        if (!eventsDelete.error) deletedEvents += eventsDelete.data?.length || 0;
+
+        const sendsDelete = await supabase.from('email_sends').delete().in('contact_id', ids).select('id');
+        if (!sendsDelete.error) deletedSends += sendsDelete.data?.length || 0;
+
+        const contactsDelete = await supabase.from('contacts').delete().in('id', ids).select('id');
+        if (!contactsDelete.error) deletedContacts += contactsDelete.data?.length || 0;
+      }
+
+      for (const emails of chunkArray(testEmails, 200)) {
+        if (emails.length === 0) continue;
+        const campaignsDelete = await supabase
+          .from('email_campaigns')
+          .delete()
+          .in('customer_email', emails)
+          .select('id');
+        if (!campaignsDelete.error) deletedCampaigns += campaignsDelete.data?.length || 0;
+      }
+
+      return c.json({
+        success: true,
+        scannedContacts: allContacts?.length || 0,
+        testContactsFound: testContacts.length,
+        deleted: {
+          contacts: deletedContacts,
+          emailSends: deletedSends,
+          emailEvents: deletedEvents,
+          emailCampaigns: deletedCampaigns,
+        },
+      });
+    } catch (error: any) {
+      return c.json({ error: 'Failed to clean test marketing data', details: error.message }, 500);
     }
   });
 
@@ -1128,6 +1243,17 @@ export function createAdminRoutes() {
             .filter((r: string) => r.includes('@'))
         )
       );
+      const skippedTestRecipients: string[] = [];
+      const deliverableRecipients = normalizedRecipients.filter((email) => {
+        if (isLikelyTestEmail(email)) {
+          skippedTestRecipients.push(email);
+          return false;
+        }
+        return true;
+      });
+      if (deliverableRecipients.length === 0) {
+        return c.json({ error: 'No valid non-test recipients selected', skippedTestRecipients }, 400);
+      }
 
       const bodyText = String(htmlBody)
         .replace(/<style[\s\S]*?<\/style>/gi, ' ')
@@ -1140,10 +1266,10 @@ export function createAdminRoutes() {
       const { data: existingContacts } = await supabase
         .from('contacts')
         .select('id,email,first_name,last_name,source,is_subscribed')
-        .in('email', normalizedRecipients);
+        .in('email', deliverableRecipients);
 
       const existingByEmail = new Map((existingContacts || []).map((row: any) => [String(row.email).toLowerCase(), row]));
-      const missing = normalizedRecipients.filter((email) => !existingByEmail.has(email));
+      const missing = deliverableRecipients.filter((email) => !existingByEmail.has(email));
 
       if (missing.length > 0) {
         await supabase.from('contacts').upsert(
@@ -1162,7 +1288,7 @@ export function createAdminRoutes() {
       const { data: contactRows, error: contactsError } = await supabase
         .from('contacts')
         .select('id,email,first_name,last_name,source,is_subscribed')
-        .in('email', normalizedRecipients);
+        .in('email', deliverableRecipients);
 
       if (contactsError) {
         return c.json({ error: 'Failed to load contacts for campaign', details: contactsError.message }, 500);
@@ -1175,7 +1301,7 @@ export function createAdminRoutes() {
           subject: subject.trim(),
           body_html: htmlBody,
           body_text: bodyText,
-          segment: { recipients: normalizedRecipients, count: normalizedRecipients.length },
+          segment: { recipients: deliverableRecipients, count: deliverableRecipients.length },
           status: 'sending',
         })
         .select('id')
@@ -1268,8 +1394,9 @@ export function createAdminRoutes() {
         success: true,
         sent,
         failed,
-        total: normalizedRecipients.length,
+        total: deliverableRecipients.length,
         campaignId,
+        skippedTestRecipients,
         errors: errors.slice(0, 50),
       });
     } catch (error: any) {

@@ -404,6 +404,8 @@ export default function AdminPanel() {
   const [broadcastResult, setBroadcastResult] = useState<{ sent: number; failed: number; total: number; message: string; errors?: string[] } | null>(null);
 
   const [marketingContacts, setMarketingContacts] = useState<Array<{email: string, name: string, username?: string, type: string, date: string, source: string}>>([]);
+  const [excludedTestContacts, setExcludedTestContacts] = useState(0);
+  const [cleaningMarketingTests, setCleaningMarketingTests] = useState(false);
   const [marketingLoading, setMarketingLoading] = useState(false);
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [campaignName, setCampaignName] = useState('');
@@ -1116,12 +1118,32 @@ export default function AdminPanel() {
       const result = await response.json();
       if (result.data) {
         setMarketingContacts(result.data);
+        setExcludedTestContacts(Number(result.excludedTestCount || 0));
       }
     } catch (error) {
       console.error('Error loading marketing contacts:', error);
       showToast('Failed to load contacts', 'error');
     } finally {
       setMarketingLoading(false);
+    }
+  };
+
+  const cleanupMarketingTestData = async () => {
+    setCleaningMarketingTests(true);
+    try {
+      const response = await authFetch('/api/admin/marketing/cleanup-test-data', { method: 'POST' });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result?.error || 'Cleanup failed');
+      showToast(
+        `Removed test data: contacts ${result?.deleted?.contacts || 0}, sends ${result?.deleted?.emailSends || 0}, events ${result?.deleted?.emailEvents || 0}`,
+        'success'
+      );
+      await Promise.all([loadMarketingContacts(), loadMarketingCampaigns()]);
+    } catch (error: any) {
+      console.error('Error cleaning marketing test data:', error);
+      showToast(error?.message || 'Failed to clean test data', 'error');
+    } finally {
+      setCleaningMarketingTests(false);
     }
   };
 
@@ -3586,6 +3608,16 @@ export default function AdminPanel() {
                   <Button
                     variant="outline"
                     size="sm"
+                    className="border-amber-600 text-amber-300"
+                    onClick={cleanupMarketingTestData}
+                    disabled={cleaningMarketingTests}
+                  >
+                    {cleaningMarketingTests ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                    Remove test contacts
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="border-gray-600 text-gray-200"
                     onClick={async () => {
                       await Promise.all([loadMarketingContacts(), loadMarketingCampaigns()]);
@@ -3622,7 +3654,8 @@ export default function AdminPanel() {
                     <div>
                       <CardTitle className="text-white">Recipients</CardTitle>
                       <CardDescription className="text-gray-400">
-                        {marketingContacts.length} contacts • {selectedEmails.size} selected
+                        {marketingContacts.length} real contacts • {selectedEmails.size} selected
+                        {excludedTestContacts > 0 ? ` • ${excludedTestContacts} test contacts excluded` : ''}
                       </CardDescription>
                     </div>
                     <div className="relative w-full sm:w-80">
