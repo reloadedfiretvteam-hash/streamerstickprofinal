@@ -10,6 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useCart } from "@/lib/store";
+import { getPillarNode, getRelatedPillarNodes, normalizeSeoPath } from "@/lib/seo-pillar-graph";
 
 export interface BreadcrumbItemType {
   label: string;
@@ -27,6 +28,22 @@ const SITE_URL = "https://streamstickpro.com";
 
 export function PillarLayout({ title, description, breadcrumbs, children }: PillarLayoutProps) {
   const { items, openCart } = useCart();
+  const canonicalPath = normalizeSeoPath(breadcrumbs[breadcrumbs.length - 1]?.href || "/");
+  const currentNode = getPillarNode(canonicalPath);
+  const relatedNodes = getRelatedPillarNodes(canonicalPath, 6);
+  const relatedSchema = currentNode && relatedNodes.length > 0
+    ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: `${currentNode.title} related guides`,
+        itemListElement: relatedNodes.map((node, idx) => ({
+          "@type": "ListItem",
+          position: idx + 1,
+          name: node.title,
+          url: `${SITE_URL}${node.path}`,
+        })),
+      }
+    : null;
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -81,9 +98,46 @@ export function PillarLayout({ title, description, breadcrumbs, children }: Pill
           {children}
         </article>
 
+        {currentNode && (
+          <section className="mt-10 p-6 rounded-xl border border-sky-400/30 bg-gradient-to-br from-sky-500/10 to-blue-600/10" data-testid="section-seo-internal-graph">
+            <h2 className="text-2xl font-bold text-white mb-2">Topical map for this guide</h2>
+            <p className="text-gray-300 mb-3">
+              Primary target: <strong className="text-white">{currentNode.primaryKeyword}</strong> ({currentNode.intent} intent)
+            </p>
+            <div className="flex flex-wrap gap-2 mb-5">
+              {currentNode.supportKeywords.slice(0, 6).map((keyword) => (
+                <span key={keyword} className="text-xs md:text-sm px-2.5 py-1 rounded-full border border-white/20 bg-white/5 text-gray-200">
+                  {keyword}
+                </span>
+              ))}
+            </div>
+            {relatedNodes.length > 0 && (
+              <div>
+                <p className="text-sm text-gray-300 mb-3">Related internal guides:</p>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {relatedNodes.map((node) => (
+                    <Link
+                      key={node.path}
+                      href={node.path}
+                      className="block rounded-lg border border-white/15 bg-white/5 px-3 py-2 hover:bg-white/10 transition-colors"
+                    >
+                      <span className="block text-white font-medium text-sm">{node.title}</span>
+                      <span className="block text-gray-400 text-xs mt-0.5">{node.primaryKeyword}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {relatedSchema && (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(relatedSchema) }} />
+        )}
+
         <section className="mt-12 p-6 rounded-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-400/30">
           <h2 className="text-2xl font-bold text-white mb-2">Ready to stream?</h2>
-          <p className="text-gray-300 mb-4">Get a pre-configured Fire Stick or IPTV plan. 18,000+ channels, 100,000+ movies. Free trial available.</p>
+          <p className="text-gray-300 mb-4">Explore Fire Stick device options or IPTV plans. 18,000+ channels, 100,000+ movies, and setup support. Free trial available.</p>
           <div className="flex flex-wrap gap-3">
             <Link href="/"><Button className="bg-orange-500 hover:bg-orange-600">View Home & Shop</Button></Link>
             <Link href="/shop"><Button variant="outline" className="border-white/30 text-white hover:bg-white/10">Shop Plans</Button></Link>

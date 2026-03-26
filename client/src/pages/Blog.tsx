@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { SEOSchema, BlogPostSchema } from "@/components/SEOSchema";
 import { truncateMetaDescription, truncateTitle } from "@/lib/seo";
+import { CORE_INTERNAL_LINKS } from "@/lib/seo-pillar-graph";
 
 interface BlogPost {
   id: string;
@@ -545,6 +546,27 @@ export default function Blog() {
           </div>
         </div>
       </div>
+
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-2" data-testid="section-core-guides">
+        <div className="rounded-2xl border border-orange-200 dark:border-orange-900/40 bg-orange-50 dark:bg-orange-950/20 p-4 sm:p-5">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Core money guides</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+            Start with these high-intent pages for plans, devices, and setup help.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {CORE_INTERNAL_LINKS.map((item) => (
+              <a
+                key={item.path}
+                href={item.path}
+                className="block rounded-lg border border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900 px-3 py-2 hover:border-orange-400 dark:hover:border-orange-500 transition-colors"
+              >
+                <span className="block text-sm font-semibold text-gray-900 dark:text-white">{item.label}</span>
+                <span className="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">{item.keyword}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ── Search & Filters ── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
