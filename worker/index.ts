@@ -1372,6 +1372,7 @@ function injectMeta(html: string, pathname: string, meta: { title: string; descr
   out = out.replace(/<meta[^>]*property=["']og:url["'][^>]*>/i, `<meta property="og:url" content="${canon}">`);
   out = out.replace(/<meta[^>]*name=["']twitter:title["'][^>]*>/i, `<meta name="twitter:title" content="${titleSafe}">`);
   out = out.replace(/<meta[^>]*name=["']twitter:description["'][^>]*>/i, `<meta name="twitter:description" content="${descSafe}">`);
+  if (!/<meta[^>]*name=["']robots["'][^>]*>/i.test(out)) out = out.replace('</head>', `<meta name="robots" content="${robotsContent}"></head>`);
   if (breadcrumbLD) out = out.replace('</head>', `${breadcrumbLD}</head>`);
   return out;
 }
