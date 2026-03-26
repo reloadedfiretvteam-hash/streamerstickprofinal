@@ -988,6 +988,23 @@ const EXCLUDED_BLOG_SLUGS = new Set([
   'watch-cricket-live-ipl-test-world-cup',
 ]);
 
+// Keep only high-value location pages indexable/sitemap-listed to reduce duplicate-content crawl waste.
+const PRIORITY_LOCATION_PREFIXES = [
+  'new-york', 'los-angeles', 'chicago', 'houston', 'dallas', 'miami', 'atlanta', 'seattle', 'phoenix', 'philadelphia',
+  'san-antonio', 'san-diego', 'san-jose', 'austin', 'jacksonville', 'columbus', 'charlotte', 'indianapolis', 'denver', 'boston',
+  'nashville', 'detroit', 'portland', 'las-vegas', 'orlando', 'tampa', 'sacramento', 'kansas-city', 'minneapolis', 'cincinnati',
+  'cleveland', 'pittsburgh', 'st-louis', 'raleigh', 'milwaukee', 'baltimore',
+  'toronto', 'vancouver', 'montreal', 'calgary', 'edmonton', 'ottawa', 'winnipeg',
+  'london', 'manchester', 'birmingham', 'glasgow', 'liverpool', 'leeds', 'bristol',
+];
+
+function isPriorityLocationPath(path: string): boolean {
+  const m = String(path || '').toLowerCase().match(/^\/l\/[^/]+\/[^/]+\/([^/]+)$/);
+  if (!m) return false;
+  const slug = m[1];
+  return PRIORITY_LOCATION_PREFIXES.some((prefix) => slug === prefix || slug.startsWith(`${prefix}-`));
+}
+
 // sitemap-pages.xml: static + location pages only (SEO/AEO prompt)
 app.get('/sitemap-pages.xml', async (c) => {
   const baseUrl = 'https://streamstickpro.com';
@@ -1000,12 +1017,14 @@ app.get('/sitemap-pages.xml', async (c) => {
     const storage = getStorage(c.env);
     const seoPages = await storage.getSeoPagesForSitemap(50000);
     for (const page of seoPages) {
+      if (String(page.path || '').startsWith('/l/') && !isPriorityLocationPath(page.path || '')) continue;
       const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : today;
       xml += `<url><loc>${baseUrl}${page.path}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`;
     }
     if (seoPages.length < 2000) {
       const idx = await getLocationPagesIndex(c);
       for (const item of idx?.list || []) {
+        if (String(item.path || '').startsWith('/l/') && !isPriorityLocationPath(item.path || '')) continue;
         xml += `<url><loc>${baseUrl}${item.path}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`;
       }
     }
@@ -1104,6 +1123,7 @@ app.get('/sitemap.xml', async (c) => {
   }
 
   for (const page of seoPages) {
+    if (String(page.path || '').startsWith('/l/') && !isPriorityLocationPath(page.path || '')) continue;
     const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : today;
     sitemap += `  <url>
     <loc>${baseUrl}${page.path}</loc>
@@ -1117,6 +1137,7 @@ app.get('/sitemap.xml', async (c) => {
     try {
       const idx = await getLocationPagesIndex(c);
       for (const item of idx?.list || []) {
+        if (String(item.path || '').startsWith('/l/') && !isPriorityLocationPath(item.path || '')) continue;
         sitemap += `  <url>
     <loc>${baseUrl}${item.path}</loc>
     <lastmod>${today}</lastmod>
@@ -1240,7 +1261,8 @@ function applySecurityHeaders(res: Response, pathname?: string, hostname?: strin
   // X-Robots-Tag: redundant signal that reinforces meta robots at HTTP level
   const noindexPaths = new Set(['/checkout', '/success', '/cancel', '/admin', '/customer-login', '/my-account', '/forgot-password', '/reset-password', '/shadow-services']);
   const isSecureDomain = hostname && (hostname === 'secure.streamstickpro.com' || hostname.endsWith('.secure.streamstickpro.com'));
-  if (isSecureDomain || (pathname && noindexPaths.has(pathname))) {
+  const isLowValueLocationPath = !!pathname && pathname.startsWith('/l/') && !isPriorityLocationPath(pathname);
+  if (isSecureDomain || (pathname && noindexPaths.has(pathname)) || isLowValueLocationPath) {
     next.headers.set('X-Robots-Tag', 'noindex, nofollow');
   } else {
     next.headers.set('X-Robots-Tag', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
@@ -1359,6 +1381,14 @@ app.get('*', async (c) => {
   const pathname = url.pathname;
   const hostname = url.hostname;
   const meta = await resolvePageMeta(pathname, c.env);
+  const isLowValueLocationPath = pathname.startsWith('/l/') && !isPriorityLocationPath(pathname);
+  const effectiveMeta = isLowValueLocationPath
+    ? {
+        title: 'Location Guide | StreamStickPro',
+        description: 'Explore StreamStickPro IPTV and device setup resources.',
+        noindex: true,
+      }
+    : meta;
 
   // Known SPA routes that should always return 200 (even without a static asset).
   // Blog slugs are only considered known if metadata resolves (post exists).
@@ -1387,7 +1417,7 @@ app.get('*', async (c) => {
     const html = await res.text();
     const status = isKnownRoute ? 200 : 404;
     const fixed = isKnownRoute
-      ? injectMeta(html, pathname, meta)
+      ? injectMeta(html, pathname, effectiveMeta)
       : injectMeta(html, pathname, { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
     return applySecurityHeaders(new Response(fixed, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   } catch {
@@ -1395,7 +1425,7 @@ app.get('*', async (c) => {
     const html = await fallback.text();
     // Unknown routes get 404 so Google doesn't report "soft 404" for non-existent pages
     const status = isKnownRoute ? 200 : 404;
-    const fixed = isKnownRoute ? injectMeta(html, pathname, meta) : injectMeta(html, pathname, { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
+    const fixed = isKnownRoute ? injectMeta(html, pathname, effectiveMeta) : injectMeta(html, pathname, { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
     return applySecurityHeaders(new Response(fixed, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   }
 });
