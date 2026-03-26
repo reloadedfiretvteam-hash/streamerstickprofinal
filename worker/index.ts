@@ -1496,7 +1496,10 @@ app.get('*', async (c) => {
         description: 'Explore StreamStickPro IPTV and device setup resources.',
         noindex: true,
       }
-    : resolvedMeta;
+    : (resolvedMeta || (isBlogSlug ? {
+        title: 'IPTV Blog Guide | StreamStickPro',
+        description: 'IPTV guides, Fire Stick tutorials, and streaming setup help from StreamStickPro.',
+      } : null));
 
   // Known SPA routes that should always return 200 (even without a static asset).
   // Blog slugs are only considered known if metadata resolves (post exists).
@@ -1514,7 +1517,7 @@ app.get('*', async (c) => {
     /^\/l\/[^/]+\/[^/]+\/[^/]+$/i.test(pathname) ||
     /^\/vs-[a-z0-9\-]+$/i.test(pathname) ||
     /^\/seo-ads\/[a-z0-9\-]+$/i.test(pathname) ||
-    (isBlogSlug ? !!resolvedMeta : false) ||
+    isBlogSlug ||
     !!resolvedMeta;
 
   try {
