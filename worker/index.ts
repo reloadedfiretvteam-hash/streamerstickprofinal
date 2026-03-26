@@ -879,7 +879,22 @@ app.get('/robots.txt', async (c) => {
   const res = await c.env.ASSETS.fetch(c.req.raw);
   const headers = new Headers(res.headers);
   headers.set('Cache-Control', 'public, max-age=21600, s-maxage=21600');
-  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+  headers.set('Content-Type', 'text/plain; charset=utf-8');
+  let body = await res.text();
+
+  const requiredSnippets = [
+    'Allow: /llms.txt',
+    'Allow: /ai.txt',
+    'User-agent: ChatGPT-User',
+    'User-agent: OAI-SearchBot',
+    'User-agent: ClaudeBot',
+    'User-agent: PerplexityBot',
+  ];
+  for (const snippet of requiredSnippets) {
+    if (!body.includes(snippet)) body += `\n${snippet}\nAllow: /`;
+  }
+
+  return new Response(body, { status: 200, headers });
 });
 
 // ── RSS/Atom Feed (content freshness signal + aggregator traffic) ──
@@ -1359,6 +1374,15 @@ async function resolvePageMeta(pathname: string, env: Env): Promise<{ title: str
         const titleRaw = (post.title || 'Blog | StreamStickPro').toString();
         const fullTitle = titleRaw.length > 60 ? titleRaw.slice(0, 57) + '...' : titleRaw;
         const descRaw = (post.excerpt || post.metaDescription || post.title || '').toString().slice(0, 160) || 'IPTV guides, Fire Stick tutorials, and streaming tips from StreamStickPro.';
+        return normalizeMeta({ title: fullTitle, description: descRaw });
+      }
+      // Fallback path for slug visibility: if per-slug lookup is stale, resolve from published list.
+      const posts = await storage.getBlogPosts();
+      const candidate = (posts || []).find((p: any) => String(p?.slug || '').toLowerCase() === blogMatch[1].toLowerCase());
+      if (candidate) {
+        const titleRaw = (candidate.title || 'Blog | StreamStickPro').toString();
+        const fullTitle = titleRaw.length > 60 ? titleRaw.slice(0, 57) + '...' : titleRaw;
+        const descRaw = (candidate.excerpt || candidate.metaDescription || candidate.title || '').toString().slice(0, 160) || 'IPTV guides, Fire Stick tutorials, and streaming tips from StreamStickPro.';
         return normalizeMeta({ title: fullTitle, description: descRaw });
       }
     } catch { /* DB unavailable — fall through */ }
