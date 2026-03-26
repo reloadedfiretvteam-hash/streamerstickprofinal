@@ -1468,7 +1468,27 @@ app.get('*', async (c) => {
   const url = new URL(c.req.url);
   const pathname = url.pathname;
   const hostname = url.hostname;
-  const meta = await resolvePageMeta(pathname, c.env);
+  const isBlogSlug = /^\/blog\/[a-z0-9][a-z0-9\-]*[a-z0-9]$/i.test(pathname);
+  let resolvedMeta = await resolvePageMeta(pathname, c.env);
+  // Extra runtime guard: if blog page meta lookup fails, ask public API before treating as 404.
+  if (isBlogSlug && !resolvedMeta) {
+    try {
+      const slug = pathname.split('/')[2];
+      const api = await fetch(`https://streamstickpro.com/api/blog/${encodeURIComponent(slug)}`);
+      if (api.ok) {
+        const payload: any = await api.json().catch(() => null);
+        const post = payload?.data;
+        if (post?.title) {
+          resolvedMeta = normalizeMeta({
+            title: String(post.title),
+            description: String(post.excerpt || post.metaDescription || post.title || 'IPTV guides, Fire Stick tutorials, and streaming tips from StreamStickPro.').slice(0, 160),
+          });
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }
   const isLowValueLocationPath = pathname.startsWith('/l/') && !isPriorityLocationPath(pathname);
   const effectiveMeta = isLowValueLocationPath
     ? {
@@ -1476,7 +1496,7 @@ app.get('*', async (c) => {
         description: 'Explore StreamStickPro IPTV and device setup resources.',
         noindex: true,
       }
-    : meta;
+    : resolvedMeta;
 
   // Known SPA routes that should always return 200 (even without a static asset).
   // Blog slugs are only considered known if metadata resolves (post exists).
@@ -1489,14 +1509,13 @@ app.get('*', async (c) => {
     '/onn-google-tv', '/iptv-smarters-pro', '/tivimate', '/ultimate-iptv-catalog-2026',
     '/tools/catalog', '/tutorials', '/seo-ads', '/locations', '/trial', '/firestick',
   ]);
-  const isBlogSlug = /^\/blog\/[a-z0-9][a-z0-9\-]*[a-z0-9]$/i.test(pathname);
   const isKnownRoute =
     staticKnownRoutes.has(pathname) ||
     /^\/l\/[^/]+\/[^/]+\/[^/]+$/i.test(pathname) ||
     /^\/vs-[a-z0-9\-]+$/i.test(pathname) ||
     /^\/seo-ads\/[a-z0-9\-]+$/i.test(pathname) ||
-    (isBlogSlug ? !!meta : false) ||
-    !!meta;
+    (isBlogSlug ? !!resolvedMeta : false) ||
+    !!resolvedMeta;
 
   try {
     const res = await c.env.ASSETS.fetch(c.req.raw);
