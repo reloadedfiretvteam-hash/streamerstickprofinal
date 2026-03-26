@@ -918,6 +918,51 @@ ${items}  </channel>
   return c.text(rss, 200, { 'Content-Type': 'application/rss+xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600, s-maxage=7200' });
 });
 app.get('/rss.xml', (c) => c.redirect('https://streamstickpro.com/feed.xml', 301));
+app.get('/ai.txt', (c) => c.redirect('https://streamstickpro.com/llms.txt', 301));
+
+// ── LLM guidance map (AEO discoverability for assistants/search copilots) ──
+app.get('/llms.txt', (c) => {
+  const body = `# StreamStickPro
+
+> Canonical domain: https://streamstickpro.com
+> Primary market: IPTV setup guides, Fire Stick and ONN streaming guidance, subscriptions and device options.
+
+## Primary pages
+- https://streamstickpro.com/
+- https://streamstickpro.com/shop
+- https://streamstickpro.com/trial
+- https://streamstickpro.com/pricing
+
+## Core guides
+- https://streamstickpro.com/iptv-services
+- https://streamstickpro.com/iptv-firestick
+- https://streamstickpro.com/jailbroken-fire-sticks
+- https://streamstickpro.com/onn-google-tv
+- https://streamstickpro.com/iptv-media-players
+- https://streamstickpro.com/tivimate
+- https://streamstickpro.com/iptv-smarters-pro
+- https://streamstickpro.com/tutorials
+- https://streamstickpro.com/resources
+
+## Content feeds
+- https://streamstickpro.com/feed.xml
+- https://streamstickpro.com/sitemap-index.xml
+- https://streamstickpro.com/sitemap-posts.xml
+
+## Policy pages
+- https://streamstickpro.com/privacy
+- https://streamstickpro.com/terms
+- https://streamstickpro.com/refund
+
+## Excluded from indexing intent
+- https://secure.streamstickpro.com (shadow/secure checkout domain)
+- /checkout, /success, /cancel, /admin routes
+`;
+  return c.text(body, 200, {
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Cache-Control': 'public, max-age=21600, s-maxage=21600',
+  });
+});
 
 // ── OpenSearch XML (browser search integration) ──
 app.get('/opensearch.xml', (c) => {
@@ -1005,6 +1050,14 @@ function isPriorityLocationPath(path: string): boolean {
   return PRIORITY_LOCATION_PREFIXES.some((prefix) => slug === prefix || slug.startsWith(`${prefix}-`));
 }
 
+function isRecentDate(input?: string | null, days = 21): boolean {
+  if (!input) return false;
+  const t = Date.parse(String(input));
+  if (!Number.isFinite(t)) return false;
+  const ageMs = Date.now() - t;
+  return ageMs <= days * 24 * 60 * 60 * 1000;
+}
+
 // sitemap-pages.xml: static + location pages only (SEO/AEO prompt)
 app.get('/sitemap-pages.xml', async (c) => {
   const baseUrl = 'https://streamstickpro.com';
@@ -1047,12 +1100,11 @@ app.get('/sitemap-posts.xml', async (c) => {
     for (const post of blogPosts) {
       const slug = String(post?.slug || '').toLowerCase();
       if (!post.published || !slug || EXCLUDED_BLOG_SLUGS.has(slug) || seen.has(slug)) continue;
-      const livePost = await storage.getBlogPostBySlug(slug);
-      if (livePost?.slug) {
-        seen.add(slug);
-        const lastmod = post.publishedAt ? new Date(post.publishedAt).toISOString().split('T')[0] : today;
-        xml += `<url><loc>${baseUrl}/blog/${post.slug}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`;
-      }
+      seen.add(slug);
+      const postDate = post.updatedAt || post.publishedAt || null;
+      const lastmod = postDate ? new Date(postDate).toISOString().split('T')[0] : today;
+      const fresh = isRecentDate(postDate, 21);
+      xml += `<url><loc>${baseUrl}/blog/${post.slug}</loc><lastmod>${lastmod}</lastmod><changefreq>${fresh ? 'daily' : 'weekly'}</changefreq><priority>${fresh ? '0.9' : '0.8'}</priority></url>`;
     }
   } catch {
     /* ignore */
@@ -1100,23 +1152,21 @@ app.get('/sitemap.xml', async (c) => {
   }
 
   try {
-    const storage = getStorage(c.env);
     const seen = new Set<string>();
     for (const post of blogPosts) {
       const slug = String(post?.slug || '').toLowerCase();
       if (!post.published || !slug || EXCLUDED_BLOG_SLUGS.has(slug) || seen.has(slug)) continue;
-      const livePost = await storage.getBlogPostBySlug(slug);
-      if (livePost?.slug) {
-        seen.add(slug);
-        const lastmod = post.publishedAt ? new Date(post.publishedAt).toISOString().split('T')[0] : today;
-        sitemap += `  <url>
+      seen.add(slug);
+      const postDate = post.updatedAt || post.publishedAt || null;
+      const lastmod = postDate ? new Date(postDate).toISOString().split('T')[0] : today;
+      const fresh = isRecentDate(postDate, 21);
+      sitemap += `  <url>
     <loc>${baseUrl}/blog/${post.slug}</loc>
     <lastmod>${lastmod}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <changefreq>${fresh ? 'daily' : 'weekly'}</changefreq>
+    <priority>${fresh ? '0.9' : '0.8'}</priority>
   </url>
 `;
-      }
     }
   } catch {
     /* ignore */

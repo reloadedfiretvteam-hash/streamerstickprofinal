@@ -5,6 +5,8 @@ User-agent: *
 Allow: /
 Allow: /feed.xml
 Allow: /opensearch.xml
+Allow: /llms.txt
+Allow: /ai.txt
 Disallow: /api/
 Disallow: /admin
 Disallow: /admin/
@@ -16,6 +18,31 @@ Disallow: /customer-login
 Disallow: /my-account
 Disallow: /forgot-password
 Disallow: /reset-password
+
+# Explicit allow rules for search/assistant crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
 
 # Clean URL parameters (prevents duplicate content from query strings)
 Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&ref&fbclid&gclid /

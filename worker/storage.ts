@@ -831,6 +831,8 @@ export function createStorage(config: StorageConfig) {
         keywords: data.keywords,
         metaDescription: data.meta_description,
         publishedAt: data.published_at,
+        updatedAt: data.updated_at || data.created_at || null,
+        image: data.image_url || data.image || null,
       };
     },
 

@@ -50,6 +50,7 @@ const SUPABASE_SERVICE_KEY =
 const ADMIN_API_BASE = process.env.ADMIN_API_BASE || "https://streamstickpro.com";
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+const SITE_BASE = "https://streamstickpro.com";
 
 const TOPICS: Topic[] = [
   { label: "IPTV on Fire Stick 4K Max", keyword: "iptv fire stick 4k max", slugRoot: "iptv-fire-stick-4k-max", owner: "/iptv-firestick", related: ["/firestick-devices", "/iptv-services"], category: "Fire Stick Guides" },
@@ -211,6 +212,21 @@ function buildRows(limit: number, offset: number): BlogRow[] {
   return allRows.slice(offset, offset + limit);
 }
 
+async function submitIndexNowForUrls(urls: string[]) {
+  if (!urls.length) return;
+  try {
+    const res = await fetch(`${SITE_BASE}/api/indexnow/ping`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ urls: urls.slice(0, 10000) }),
+    });
+    const body = await res.text();
+    console.log(`[elite-publish] indexnow status=${res.status} body=${body.slice(0, 160)}`);
+  } catch (err) {
+    console.warn(`[elite-publish] indexnow warn: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
 async function main() {
   const limit = parseLimitArg(60);
   const offset = parseOffsetArg(0);
@@ -221,6 +237,7 @@ async function main() {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
     let success = 0;
     let errors = 0;
+    const changedUrls: string[] = [];
     const batchSize = 20;
 
     for (let i = 0; i < rows.length; i += batchSize) {
@@ -228,6 +245,7 @@ async function main() {
       const { error } = await supabase.from("blog_posts").upsert(batch, { onConflict: "slug" });
       if (!error) {
         success += batch.length;
+        changedUrls.push(...batch.map((row) => `${SITE_BASE}/blog/${row.slug}`));
         console.log(`[elite-publish] db batch ${Math.floor(i / batchSize) + 1}: +${batch.length} (${success}/${rows.length})`);
         continue;
       }
@@ -240,6 +258,7 @@ async function main() {
           console.error(`[elite-publish] row failed ${row.slug}: ${singleError.message}`);
         } else {
           success += 1;
+          changedUrls.push(`${SITE_BASE}/blog/${row.slug}`);
         }
       }
     }
@@ -251,6 +270,7 @@ async function main() {
 
     console.log(`[elite-publish] db mode complete success=${success} errors=${errors}`);
     console.log(`[elite-publish] total published count=${count ?? "unknown"}`);
+    await submitIndexNowForUrls(changedUrls);
     return;
   }
 
@@ -285,6 +305,7 @@ async function main() {
   let success = 0;
   let skipped = 0;
   let errors = 0;
+  const changedUrls: string[] = [];
   for (const row of rows) {
     if (existingSlugs.has(row.slug.toLowerCase())) {
       skipped += 1;
@@ -309,6 +330,7 @@ async function main() {
     });
     if (createRes.ok) {
       success += 1;
+      changedUrls.push(`${SITE_BASE}/blog/${row.slug}`);
       if (success % 10 === 0) console.log(`[elite-publish] api progress ${success}/${rows.length} created`);
     } else {
       errors += 1;
@@ -318,6 +340,7 @@ async function main() {
   }
 
   console.log(`[elite-publish] api mode complete success=${success} skipped=${skipped} errors=${errors}`);
+  await submitIndexNowForUrls(changedUrls);
 }
 
 main().catch((err) => {
