@@ -103,6 +103,14 @@ function parseLimitArg(defaultValue: number): number {
   return Math.floor(parsed);
 }
 
+function parseOffsetArg(defaultValue: number): number {
+  const arg = process.argv.find((x) => x.startsWith("--offset="));
+  if (!arg) return defaultValue;
+  const parsed = Number(arg.split("=")[1]);
+  if (!Number.isFinite(parsed) || parsed < 0) return defaultValue;
+  return Math.floor(parsed);
+}
+
 function normalizeSlug(input: string): string {
   return input
     .toLowerCase()
@@ -176,18 +184,17 @@ function buildKeywords(topic: Topic, angle: Angle): string[] {
   ];
 }
 
-function buildRows(limit: number): BlogRow[] {
-  const rows: BlogRow[] = [];
+function buildRows(limit: number, offset: number): BlogRow[] {
+  const allRows: BlogRow[] = [];
   const now = Date.now();
   for (const topic of TOPICS) {
     for (const angle of ANGLES) {
-      if (rows.length >= limit) return rows;
       const title = angle.title(topic.label);
       const slug = normalizeSlug(`${topic.slugRoot}-${angle.slug}`);
       const excerpt = buildExcerpt(topic, angle);
       const content = buildContent(topic, angle);
       const keywords = buildKeywords(topic, angle);
-      rows.push({
+      allRows.push({
         title,
         slug,
         excerpt,
@@ -195,19 +202,20 @@ function buildRows(limit: number): BlogRow[] {
         category: topic.category,
         featured: false,
         is_published: true,
-        published_at: new Date(now - rows.length * 3600000).toISOString(),
+        published_at: new Date(now - allRows.length * 3600000).toISOString(),
         keywords,
         meta_description: trim160(`${title}. ${excerpt}`),
       });
     }
   }
-  return rows;
+  return allRows.slice(offset, offset + limit);
 }
 
 async function main() {
   const limit = parseLimitArg(60);
-  const rows = buildRows(limit);
-  console.log(`[elite-publish] prepared ${rows.length} rows`);
+  const offset = parseOffsetArg(0);
+  const rows = buildRows(limit, offset);
+  console.log(`[elite-publish] prepared ${rows.length} rows (offset=${offset}, limit=${limit})`);
 
   if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
