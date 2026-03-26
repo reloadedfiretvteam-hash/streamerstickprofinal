@@ -1360,12 +1360,13 @@ const VS_META: Record<string, { title: string; description: string }> = {
 
 /** Resolve per-page meta: static map, vs pages, or fetch blog post from DB. */
 async function resolvePageMeta(pathname: string, env: Env): Promise<{ title: string; description: string; noindex?: boolean } | null> {
+  const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/+$/, '');
   // 1. Static page map
-  if (PAGE_META[pathname]) return normalizeMeta(PAGE_META[pathname]);
+  if (PAGE_META[normalizedPath]) return normalizeMeta(PAGE_META[normalizedPath]);
   // 2. VS competitor pages
-  if (VS_META[pathname]) return normalizeMeta(VS_META[pathname]);
+  if (VS_META[normalizedPath]) return normalizeMeta(VS_META[normalizedPath]);
   // 3. Blog post: /blog/<slug>
-  const blogMatch = pathname.match(/^\/blog\/([a-z0-9][a-z0-9\-]*[a-z0-9])$/);
+  const blogMatch = normalizedPath.match(/^\/blog\/([a-z0-9][a-z0-9\-]*[a-z0-9])$/);
   if (blogMatch) {
     try {
       const storage = getStorage(env);
@@ -1468,7 +1469,7 @@ app.get('*', async (c) => {
   const url = new URL(c.req.url);
   const pathname = url.pathname;
   const hostname = url.hostname;
-  const isBlogSlug = /^\/blog\/[a-z0-9][a-z0-9\-]*[a-z0-9]$/i.test(pathname);
+  const isBlogSlug = /^\/blog\/[a-z0-9][a-z0-9\-]*[a-z0-9]\/?$/i.test(pathname);
   let resolvedMeta = await resolvePageMeta(pathname, c.env);
   // Extra runtime guard: if blog page meta lookup fails, ask public API before treating as 404.
   if (isBlogSlug && !resolvedMeta) {
