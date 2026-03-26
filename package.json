@@ -13,6 +13,7 @@
     "seo:audit": "tsx scripts/seo-audit.ts",
     "seo:submit": "tsx scripts/submit-to-search-engines.ts",
     "seo:indexnow-live": "tsx scripts/indexnow-from-live-sitemap.ts",
+    "seo:briefs:elite": "node scripts/generate-elite-blog-briefs.mjs",
     "seo:create-key": "tsx scripts/create-indexnow-key-file.ts",
     "seed:25k": "tsx scripts/seed-25k-location-pages.ts",
     "seed:25k:db": "tsx scripts/seed-25k-via-database-url.ts",
