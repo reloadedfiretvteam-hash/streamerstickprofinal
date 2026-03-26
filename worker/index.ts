@@ -1385,6 +1385,18 @@ async function resolvePageMeta(pathname: string, env: Env): Promise<{ title: str
         const descRaw = (candidate.excerpt || candidate.metaDescription || candidate.title || '').toString().slice(0, 160) || 'IPTV guides, Fire Stick tutorials, and streaming tips from StreamStickPro.';
         return normalizeMeta({ title: fullTitle, description: descRaw });
       }
+      // Final fallback: hit the public blog API route (same worker deployment) for authoritative slug lookup.
+      const apiRes = await fetch(`https://streamstickpro.com/api/blog/${blogMatch[1]}`);
+      if (apiRes.ok) {
+        const json: any = await apiRes.json().catch(() => null);
+        const fallbackPost = json?.data;
+        if (fallbackPost?.title) {
+          const titleRaw = (fallbackPost.title || 'Blog | StreamStickPro').toString();
+          const fullTitle = titleRaw.length > 60 ? titleRaw.slice(0, 57) + '...' : titleRaw;
+          const descRaw = (fallbackPost.excerpt || fallbackPost.metaDescription || fallbackPost.title || '').toString().slice(0, 160) || 'IPTV guides, Fire Stick tutorials, and streaming tips from StreamStickPro.';
+          return normalizeMeta({ title: fullTitle, description: descRaw });
+        }
+      }
     } catch { /* DB unavailable — fall through */ }
   }
   return null;
