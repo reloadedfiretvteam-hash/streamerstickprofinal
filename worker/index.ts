@@ -1312,7 +1312,8 @@ function applySecurityHeaders(res: Response, pathname?: string, hostname?: strin
   const noindexPaths = new Set(['/checkout', '/success', '/cancel', '/admin', '/customer-login', '/my-account', '/forgot-password', '/reset-password', '/shadow-services']);
   const isSecureDomain = hostname && (hostname === 'secure.streamstickpro.com' || hostname.endsWith('.secure.streamstickpro.com'));
   const isLowValueLocationPath = !!pathname && pathname.startsWith('/l/') && !isPriorityLocationPath(pathname);
-  if (isSecureDomain || (pathname && noindexPaths.has(pathname)) || isLowValueLocationPath) {
+  const isErrorStatus = next.status >= 400;
+  if (isSecureDomain || (pathname && noindexPaths.has(pathname)) || isLowValueLocationPath || isErrorStatus) {
     next.headers.set('X-Robots-Tag', 'noindex, nofollow');
   } else {
     next.headers.set('X-Robots-Tag', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
@@ -1464,7 +1465,16 @@ app.get('*', async (c) => {
   try {
     const res = await c.env.ASSETS.fetch(c.req.raw);
     const ct = res.headers.get('content-type') || '';
-    if (!ct.includes('text/html')) return applySecurityHeaders(res, pathname, hostname);
+    if (!ct.includes('text/html')) {
+      // Some SPA routes may come back as non-HTML 404 from asset lookup; force shell fallback for known routes.
+      if (isKnownRoute && res.status >= 400) {
+        const fallback = await c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
+        const html = await fallback.text();
+        const fixed = injectMeta(html, pathname, effectiveMeta);
+        return applySecurityHeaders(new Response(fixed, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
+      }
+      return applySecurityHeaders(res, pathname, hostname);
+    }
     const html = await res.text();
     const status = isKnownRoute ? 200 : 404;
     const fixed = isKnownRoute
