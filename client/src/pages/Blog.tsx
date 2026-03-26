@@ -56,6 +56,35 @@ function extractTocHeadings(content: string): string[] {
   return html.slice(0, 12);
 }
 
+function renderBlogContent(content: string): string {
+  const raw = (content || "").trim();
+  if (!raw) return "<p style='margin-bottom:1.25rem;'>Content coming soon.</p>";
+
+  // Preserve authored HTML content; normalize markdown-style content only.
+  if (/<\/?[a-z][\s\S]*>/i.test(raw)) return raw;
+
+  let html = raw
+    .replace(/\r\n/g, "\n")
+    .replace(/^# (.+)$/gm, "<h2 style='font-size: 1.75rem; font-weight: 800; margin-top: 2.5rem; margin-bottom: 1rem; line-height: 1.3; border-bottom: 2px solid rgba(249,115,22,0.2); padding-bottom: 0.5rem;'>$1</h2>")
+    .replace(/^## (.+)$/gm, "<h2 style='font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 0.75rem; line-height: 1.4;'>$1</h2>")
+    .replace(/^### (.+)$/gm, "<h3 style='font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; line-height: 1.4;'>$1</h3>")
+    .replace(/\*\*(.+?)\*\*/g, "<strong style='font-weight: 700;'>$1</strong>")
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "<a href='$2' style='color: #ea580c; text-decoration: underline; text-underline-offset: 3px;'>$1</a>")
+    .replace(/^- (.+)$/gm, "<li style='margin-left: 1.25rem; margin-bottom: 0.5rem; padding-left: 0.5rem;'>$1</li>")
+    .replace(/^\d+\.\s+(.+)$/gm, "<li style='margin-left: 1.25rem; margin-bottom: 0.5rem; padding-left: 0.5rem;'>$1</li>");
+
+  html = html.replace(/(?:<li[\s\S]*?<\/li>\s*)+/g, (chunk) => {
+    return `<ul style='margin: 0.5rem 0 1.25rem 0; padding-left: 0.25rem;'>${chunk}</ul>`;
+  });
+
+  const blocks = html.split(/\n{2,}/).map((block) => block.trim()).filter(Boolean);
+  const wrapped = blocks.map((block) => {
+    if (/^<(h2|h3|ul|ol|blockquote|figure|table|pre)\b/i.test(block)) return block;
+    return `<p style='margin-bottom: 1.25rem;'>${block.replace(/\n/g, "<br/>")}</p>`;
+  });
+  return wrapped.join("");
+}
+
 const CATEGORY_COLORS: Record<string, { from: string; to: string; icon: string }> = {
   "Fire Stick Guides": { from: "from-orange-600", to: "to-red-700", icon: "flame" },
   "IPTV Services": { from: "from-purple-600", to: "to-indigo-700", icon: "tv" },
@@ -357,17 +386,25 @@ export default function Blog() {
               letterSpacing: '0.01em',
             }}
             dangerouslySetInnerHTML={{ 
-              __html: selectedPost.content
-                .replace(/\n\n/g, "</p><p style='margin-bottom: 1.25rem;'>")
-                .replace(/\*\*(.+?)\*\*/g, "<strong style='font-weight: 700;'>$1</strong>")
-                .replace(/^- (.+)$/gm, "<li style='margin-left: 1.25rem; margin-bottom: 0.5rem; padding-left: 0.5rem;'>$1</li>")
-                .replace(/^# (.+)$/gm, "<h2 style='font-size: 1.75rem; font-weight: 800; margin-top: 2.5rem; margin-bottom: 1rem; line-height: 1.3; border-bottom: 2px solid rgba(249,115,22,0.2); padding-bottom: 0.5rem;'>$1</h2>")
-                .replace(/^## (.+)$/gm, "<h2 style='font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 0.75rem; line-height: 1.4;'>$1</h2>")
-                .replace(/^### (.+)$/gm, "<h3 style='font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; line-height: 1.4;'>$1</h3>")
-                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "<a href='$2' style='color: #ea580c; text-decoration: underline; text-underline-offset: 3px;'>$1</a>")
+              __html: renderBlogContent(selectedPost.content)
             }}
             data-testid="text-blog-content"
           />
+
+          <div className="mb-10 grid gap-3 sm:grid-cols-3">
+            <a href="/" className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-orange-400 transition-colors">
+              <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Main Site</p>
+              <p className="font-semibold text-gray-900 dark:text-white">Visit StreamStickPro homepage</p>
+            </a>
+            <a href="/trial" className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-green-400 transition-colors">
+              <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Try First</p>
+              <p className="font-semibold text-gray-900 dark:text-white">Start 36-hour trial</p>
+            </a>
+            <a href="/shop" className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-orange-400 transition-colors">
+              <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Plans & Devices</p>
+              <p className="font-semibold text-gray-900 dark:text-white">View plans and devices</p>
+            </a>
+          </div>
 
           {/* ── Inline CTA — natural-looking, not spammy ── */}
           <div className="my-12 p-8 rounded-2xl bg-gradient-to-br from-gray-50 to-orange-50 dark:from-gray-900 dark:to-gray-900 border border-gray-200 dark:border-gray-800">
