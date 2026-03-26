@@ -165,6 +165,23 @@ async function getLocationPagesIndex(c: any): Promise<LocationPagesIndex | null>
   return LOCATION_CACHE_PROMISE;
 }
 
+/** Avoid slow Supabase cold paths blocking /l/* crawler HTML (smoke tests + bots time out at ~15s). */
+const SEO_PAGE_LOOKUP_MS = 4500;
+
+function raceWithTimeout<T>(p: Promise<T>, ms: number, onTimeout: T): Promise<T> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = (v: T) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(v);
+    };
+    const timer = setTimeout(() => done(onTimeout), ms);
+    p.then((v) => done(v)).catch(() => done(onTimeout));
+  });
+}
+
 app.use('*', cors({
   origin: ['https://streamstickpro.com', 'https://www.streamstickpro.com', 'https://secure.streamstickpro.com'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -594,7 +611,11 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
   let faqJson: { question: string; answer: string }[] = [];
   try {
     const storage = getStorage(c.env);
-    const page = await storage.getSeoPageByPath(country, pageType, slug);
+    // Parallel: location index (cached) + DB row. Do not chain: sum of latencies was tripping 15s crawls.
+    const [idx, page] = await Promise.all([
+      getLocationPagesIndex(c),
+      raceWithTimeout(storage.getSeoPageByPath(country, pageType, slug), SEO_PAGE_LOOKUP_MS, undefined),
+    ]);
     if (page) {
       title = (page.title || page.h1 || 'IPTV & Jailbroken Fire Stick').replace(/\[LOCATION\]/g, page.location || page.region || slug);
       desc = (page.meta_description || page.p1_snippet || '').trim().substring(0, 160) || 'IPTV and Fire Stick guides for your area. StreamStickPro—18K+ channels, free trial. USA, Canada, UK.';
@@ -602,7 +623,6 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
         faqJson = page.faq_json.map((f: any) => ({ question: f.question || f.q || '', answer: f.answer || f.a || '' })).filter((f: any) => f.question && f.answer);
       }
     } else {
-      const idx = await getLocationPagesIndex(c);
       const staticPage = idx?.byPath.get(path);
       if (staticPage) {
         title = staticPage.t;
@@ -637,7 +657,6 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
     // Dynamic internal linking (same region) for crawl depth + topical authority.
     let dynamicRelated = '';
     try {
-      const idx = await getLocationPagesIndex(c);
       const k = regionKey(country, pageType, slug);
       const rel = (idx?.byRegionKey.get(k) || []).filter((p) => p !== path).slice(0, 8);
       if (rel.length) {
@@ -725,7 +744,15 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
   <noscript><p>Continue to <a href="${url}">${h1Text}</a>.</p></noscript>
 </body>
 </html>`;
-    return applySecurityHeaders(new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }), path);
+    return applySecurityHeaders(
+      new Response(html, {
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'public, max-age=600, s-maxage=86400, stale-while-revalidate=86400',
+        },
+      }),
+      path,
+    );
   } catch {
     const ua = (c.req.header('User-Agent') || '').toLowerCase();
     if (/bot|crawler|spider|slurp|facebookexternalhit|twitterbot/i.test(ua)) {
