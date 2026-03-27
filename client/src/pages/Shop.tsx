@@ -54,7 +54,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     description: "Premium Live TV streaming plan with 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
     features: ["18,000+ Live TV Channels", "100,000+ Movies & Series", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support"],
     prices: [
-      { devices: 1, price: 15, productId: "iptv-1mo-1d" },
+      { devices: 1, price: 11, productId: "iptv-1mo-1d" },
       { devices: 2, price: 25, productId: "iptv-1mo-2d" },
       { devices: 3, price: 35, productId: "iptv-1mo-3d" },
       { devices: 4, price: 40, productId: "iptv-1mo-4d" },
@@ -110,7 +110,7 @@ const defaultProducts: Product[] = [
   {
     id: 'fs-hd',
     name: 'Fire Stick HD',
-    price: 130,
+    price: 115,
     description: 'Full HD streaming device with 1 Year Live TV Plan included. Perfect entry-level option for crystal-clear streaming.',
     features: ['1080p Full HD', '1 Year Live TV Included', '18,000+ Live TV Channels', '100,000+ Movies & Series', 'Comprehensive Sports Coverage', '24/7 Customer Support'],
     image: firestickHdImg,
@@ -120,7 +120,7 @@ const defaultProducts: Product[] = [
   {
     id: 'fs-4k',
     name: 'Fire Stick 4K',
-    price: 140,
+    price: 125,
     description: '4K Ultra HD streaming device with 1 Year Live TV Plan included. Experience stunning picture quality with HDR support.',
     features: ['4K Ultra HD', 'HDR Support', 'Dolby Vision & Atmos', '1 Year Live TV Included', '18,000+ Live TV Channels', '100,000+ Movies & Series', 'Comprehensive Sports Coverage', '24/7 Customer Support'],
     image: firestick4kImg,
@@ -131,7 +131,7 @@ const defaultProducts: Product[] = [
   {
     id: 'fs-max',
     name: 'Fire Stick 4K Max',
-    price: 150,
+    price: 135,
     description: 'The ultimate streaming experience! 4K Max with Wi-Fi 6E and 1 Year Live TV Plan included. Fastest streaming available.',
     features: ['4K Ultra HD', 'Wi-Fi 6E (Fastest)', 'HDR Support', 'Dolby Vision & Atmos', '1 Year Live TV Included', 'Extensive Content Library', 'Thousands of Movies & Shows', 'Comprehensive Sports Coverage', '24/7 Customer Support'],
     image: firestick4kMaxImg,
@@ -160,7 +160,7 @@ export default function Shop() {
     document.documentElement.classList.add("dark");
     setPageMeta({
       title: "IPTV Subscription Plans 2026 | Fire Stick & Devices | StreamStick Pro",
-      description: "Shop IPTV plans from $15/mo and Fire Stick device options. 18K+ channels, 4K, and 99.9% uptime. Start a 36-hour subscription trial or buy now with StreamStick Pro.",
+      description: "Shop IPTV plans from $11/mo and Fire Stick device options. 18K+ channels, 4K, and 99.9% uptime. Start a 36-hour subscription trial or buy now with StreamStick Pro.",
       path: "/shop",
     });
     loadProducts();

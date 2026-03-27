@@ -45,7 +45,7 @@ export default function IptvFirestick() {
         <p>Setup is simple: install your chosen IPTV app, enter your M3U URL or Xtream Codes (provided by StreamStickPro instantly), and start watching. If you want the easiest path, choose a Fire Stick option from <Link href="/">our homepage</Link>, then follow the short setup video to begin streaming.</p>
 
         <h2 id="plans">IPTV Plans for Fire Stick</h2>
-        <p>Plans start at $15/month with options for 1–5 devices. Longer plans (3, 6, 12 months) save money. You can use one subscription on multiple Fire Sticks or mix Fire Stick with Android and Smart TV. Check <Link href="/shop">Shop</Link> for current plans and <Link href="/iptv-services">IPTV services</Link> for the full guide.</p>
+        <p>Plans start at $11/month with options for 1–5 devices. Longer plans (3, 6, 12 months) save money. You can use one subscription on multiple Fire Sticks or mix Fire Stick with Android and Smart TV. Check <Link href="/shop">Shop</Link> for current plans and <Link href="/iptv-services">IPTV services</Link> for the full guide.</p>
 
         <h2 id="faq">IPTV for Firestick FAQ</h2>
         <ul>

@@ -84,7 +84,7 @@ export function FloatingCTA({ onBuyNow, onContact, onFreeTrial }: FloatingCTAPro
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-bold text-base">Ready to Cut the Cord?</p>
-                    <p className="text-gray-200 text-sm">18,000+ channels from $15/mo</p>
+                    <p className="text-gray-200 text-sm">18,000+ channels from $11/mo</p>
                   </div>
                   <div className="flex gap-2">
                     <Button

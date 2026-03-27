@@ -82,7 +82,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     description: "Premium Live TV streaming plan with 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
     features: productBenefitList,
     prices: [
-      { devices: 1, price: 15, productId: "iptv-1mo-1d" },
+      { devices: 1, price: 11, productId: "iptv-1mo-1d" },
       { devices: 2, price: 25, productId: "iptv-1mo-2d" },
       { devices: 3, price: 35, productId: "iptv-1mo-3d" },
       { devices: 4, price: 40, productId: "iptv-1mo-4d" },
@@ -138,7 +138,7 @@ const defaultProducts: Product[] = [
   {
     id: "firestick-hd",
     name: "StreamStick Starter Kit",
-    price: 130,
+    price: 115,
     description: "Start in about 10 minutes. Plug in your Fire Stick, enter your credentials (sent instantly after purchase), and follow our quick setup video. You'll unlock 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage including NFL, NBA, UFC, and live events. Includes a 1 Year Live TV plan, 24/7 customer support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: firestickHdImg,
@@ -148,7 +148,7 @@ const defaultProducts: Product[] = [
   {
     id: "firestick-4k",
     name: "StreamStick 4K Kit",
-    price: 140,
+    price: 125,
     description: "Best-selling Fire Stick setup in about 10 minutes. Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision. Enjoy 18,000+ live TV channels, 100,000+ movies & series, and all major sports - NFL, NBA, UFC, and live events. Includes a 1 Year premium Live TV plan, 24/7 support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: firestick4kImg,
@@ -159,7 +159,7 @@ const defaultProducts: Product[] = [
   {
     id: "firestick-4k-max",
     name: "StreamStick Max Kit",
-    price: 150,
+    price: 135,
     description: "Ultimate 4K Max with Wi-Fi 6E setup in about 10 minutes. Plug in, use your instant credentials, follow our quick setup video, and experience breathtaking 4K with Dolby Atmos sound. Access 18,000+ live TV channels, 100,000+ movies & series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: firestick4kMaxImg,
@@ -169,7 +169,7 @@ const defaultProducts: Product[] = [
   {
     id: "android-onn-4k",
     name: "ONN 4K Streaming Device Kit",
-    price: 140,
+    price: 105,
     description: "Upgrade from Fire Stick to Android. The ONN 4K Streaming Device with Google TV delivers the same great features you love, plus built-in storage for live DVR recording. Setup takes about 10 minutes - plug in, enter your instant credentials, and access 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage. Includes a 1 Year Live TV plan, 24/7 support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: onn4kImg,
@@ -179,7 +179,7 @@ const defaultProducts: Product[] = [
   {
     id: "android-onn-pro",
     name: "ONN 4K Ultra HD Pro Kit",
-    price: 160,
+    price: 115,
     description: "The ultimate Android streaming upgrade. ONN 4K Ultra HD Pro features expanded storage for extensive DVR recording, Google TV interface, and premium performance. Setup takes about 10 minutes - plug in, use your instant credentials, and experience crystal-clear 4K with Dolby Audio. Access 18,000+ live TV channels, 100,000+ movies & series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: onn4kProImg,
@@ -977,18 +977,18 @@ export default function MainStore() {
                     <th className="text-left p-4 text-gray-200 font-medium">Features</th>
                     <th className="text-center p-4">
                       <div className="text-lg font-bold text-white">Starter Kit</div>
-                      <div className="text-2xl font-bold text-orange-400">$130</div>
+                      <div className="text-2xl font-bold text-orange-400">$115</div>
                       <div className="text-xs text-gray-200">1080p Full HD</div>
                     </th>
                     <th className="text-center p-4 bg-orange-500/10 relative">
                       <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-b">BEST VALUE</div>
                       <div className="text-lg font-bold text-white pt-4">4K Kit</div>
-                      <div className="text-2xl font-bold text-orange-400">$140</div>
+                      <div className="text-2xl font-bold text-orange-400">$125</div>
                       <div className="text-xs text-gray-200">4K Ultra HD</div>
                     </th>
                     <th className="text-center p-4">
                       <div className="text-lg font-bold text-white">Max Kit</div>
-                      <div className="text-2xl font-bold text-orange-400">$150</div>
+                      <div className="text-2xl font-bold text-orange-400">$135</div>
                       <div className="text-xs text-gray-200">4K + Wi-Fi 6E</div>
                     </th>
                   </tr>

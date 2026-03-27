@@ -10,7 +10,7 @@ export default function Pricing() {
   useEffect(() => {
     setPageMeta({
       title: "IPTV Subscription Plans 2026 | Cheapest & Best | StreamStick Pro",
-      description: "IPTV plans from $15/mo: 18K+ live channels, 4K sports, PPV, 99.9% uptime. Cancel anytime. 36hr trial for subscription plans. StreamStick Pro.",
+      description: "IPTV plans from $11/mo: 18K+ live channels, 4K sports, PPV, 99.9% uptime. Cancel anytime. 36hr trial for subscription plans. StreamStick Pro.",
       path: "/pricing",
     });
   }, []);
@@ -19,11 +19,11 @@ export default function Pricing() {
     <>
       <BreadcrumbSchema items={breadcrumbs.map((b) => ({ name: b.label, url: "https://streamstickpro.com" + b.href }))} />
       <PillarLayout title="IPTV Pricing" description="Subscription tiers. 18K+ channels." breadcrumbs={breadcrumbs}>
-        <p className="text-gray-200 mb-8">Plans from $15/mo. 18K+ channels, 100K+ VOD. Fire Stick, Onn, Smart TV, Smarters Pro, TiviMate.</p>
+        <p className="text-gray-200 mb-8">Plans from $11/mo. 18K+ channels, 100K+ VOD. Fire Stick, Onn, Smart TV, Smarters Pro, TiviMate.</p>
         <div className="grid md:grid-cols-3 gap-6 mb-10">
           <div className="rounded-2xl border border-white/20 bg-white/5 p-6">
             <h3 className="text-xl font-bold text-white">Starter</h3>
-            <p className="text-3xl font-black text-white mt-2">$15<span className="text-lg text-gray-400">/mo</span></p>
+            <p className="text-3xl font-black text-white mt-2">$11<span className="text-lg text-gray-400">/mo</span></p>
             <ul className="mt-4 space-y-2 text-gray-200 text-sm">
               <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400 shrink-0" /> 18K+ channels</li>
             </ul>

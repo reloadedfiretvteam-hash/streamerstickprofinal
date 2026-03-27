@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Check, X, Tv, DollarSign, Zap } from "lucide-react";
 
 const comparisonData = [
-  { feature: "Monthly Cost", streamstick: "$15/mo", cable: "$150+/mo", netflix: "$23/mo" },
+  { feature: "Monthly Cost", streamstick: "$11/mo", cable: "$150+/mo", netflix: "$23/mo" },
   { feature: "Live TV Channels", streamstick: "18,000+", cable: "200-300", netflix: false },
   { feature: "Movies & Shows", streamstick: "100,000+", cable: "Limited", netflix: "15,000+" },
   { feature: "Live Sports Coverage", streamstick: true, cable: "Extra $$", netflix: false },
@@ -19,7 +19,7 @@ function CellValue({ value }: { value: boolean | string }) {
   if (value === false) {
     return <X className="w-5 h-5 text-red-400 mx-auto" />;
   }
-  return <span className={value.includes("$") && !value.includes("15") ? "text-red-400" : "text-gray-300"}>{value}</span>;
+  return <span className={value.includes("$") && !value.includes("$11") ? "text-red-400" : "text-gray-300"}>{value}</span>;
 }
 
 export function ComparisonTable() {

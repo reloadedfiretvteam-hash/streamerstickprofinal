@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 export function SavingsCalculator({ className = "" }: { className?: string }) {
   const [cableBill, setCableBill] = useState(150);
 
-  const yearlyPriceFireStick = 150; // StreamStick 4K with 1 year Live TV
+  const yearlyPriceFireStick = 135; // StreamStick 4K with 1 year Live TV
   const yearlyRenewal = 65; // Live TV 1 Year renewal price
   const yearlyCable = cableBill * 12;
   const yearlySavings = yearlyCable - yearlyPriceFireStick;
@@ -96,7 +96,7 @@ export function SavingsCalculator({ className = "" }: { className?: string }) {
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-300">StreamStick 4K + 1yr Live TV</span>
-                    <span className="text-green-400 font-semibold">$150 one-time</span>
+                    <span className="text-green-400 font-semibold">$135 one-time</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-300">Yearly renewal</span>
