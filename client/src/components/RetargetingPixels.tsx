@@ -58,39 +58,36 @@ export default function RetargetingPixels() {
     // Google Ads (Google Tag Manager / gtag.js)
     const googleAdsId = import.meta.env.VITE_GOOGLE_ADS_ID;
     if (googleAdsId) {
-      // Initialize dataLayer first
+      // Reuse existing global gtag from index.html to avoid duplicate tags.
       window.dataLayer = window.dataLayer || [];
       function gtag(...args: any[]) {
         window.dataLayer.push(args);
       }
-      (window as any).gtag = gtag;
-      
-      // Load Google Tag Manager script and wait for it to load
-      const gtmScript = document.createElement('script');
-      gtmScript.async = true;
-      gtmScript.src = `https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`;
-      
-      // Wait for script to load before initializing
-      gtmScript.onload = () => {
+      (window as any).gtag = (window as any).gtag || gtag;
+
+      const scriptSelector = `script[src*="googletagmanager.com/gtag/js?id=${googleAdsId}"]`;
+      const hasGoogleTagScript = !!document.querySelector(scriptSelector);
+      if (!hasGoogleTagScript) {
+        const gtmScript = document.createElement('script');
+        gtmScript.async = true;
+        gtmScript.src = `https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`;
+        document.head.appendChild(gtmScript);
+      }
+
+      if ((window as any).__awConfigured !== googleAdsId) {
         gtag('js', new Date());
+        gtag('consent', 'default', {
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          ad_storage: 'denied',
+          analytics_storage: 'denied',
+          wait_for_update: 500,
+        });
         gtag('config', googleAdsId, {
           send_page_view: true,
         });
-
-        // Track page views after script is loaded
-        gtag('event', 'page_view', {
-          page_path: window.location.pathname,
-          page_title: document.title,
-        });
-        
-        console.log('✅ Google Ads pixel initialized:', googleAdsId);
-      };
-      
-      gtmScript.onerror = () => {
-        console.error('❌ Failed to load Google Tag Manager script');
-      };
-      
-      document.head.appendChild(gtmScript);
+        (window as any).__awConfigured = googleAdsId;
+      }
     }
 
     // Track page views on route changes
