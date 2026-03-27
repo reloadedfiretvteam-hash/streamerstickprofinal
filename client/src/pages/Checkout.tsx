@@ -64,7 +64,7 @@ export default function Checkout() {
   useEffect(() => {
     setPageMeta({
       title: "Checkout | StreamStickPro",
-      description: "Secure checkout for Fire Sticks and IPTV plans. StreamStickPro—18,000+ channels, 100,000+ movies. Free trial available.",
+      description: "Secure checkout for Fire Sticks and IPTV plans. StreamStickPro—18,000+ channels, 100,000+ movies. 36-hour trial available for IPTV subscriptions.",
       path: "/checkout",
       noindex: true,
     });

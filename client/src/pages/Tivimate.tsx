@@ -16,7 +16,7 @@ export default function Tivimate() {
     const ogImg = fullImageUrl(getImageForSlot(APP_IMAGES, 1).src);
     setPageMeta({
       title: "TiviMate IPTV Setup 2026 | 5 Min Guide | StreamStick Pro",
-      description: "TiviMate IPTV setup 2026: use StreamStickPro with TiviMate on Fire Stick, Android, Onn. 18K+ channels, 36hr trial. 5-min guide—best IPTV for TiviMate.",
+      description: "TiviMate IPTV setup 2026: use StreamStickPro with TiviMate on Fire Stick, Android, Onn. 18K+ channels, 36hr subscription trial. 5-min guide—best IPTV for TiviMate.",
       path: "/tivimate",
       ogImage: ogImg,
     });
@@ -31,7 +31,7 @@ export default function Tivimate() {
   }, []);
 
   const howToSteps = [
-    { name: "Get credentials", text: "Sign up for the 36hr free trial or a subscription at StreamStickPro to get your M3U or Xtream Codes." },
+    { name: "Get credentials", text: "Sign up for the 36hr subscription trial or a paid subscription at StreamStickPro to get your M3U or Xtream Codes." },
     { name: "Install TiviMate", text: "Install TiviMate on your Fire Stick, Onn Google TV, or Android TV device." },
     { name: "Add playlist", text: "Add your M3U playlist or enter Xtream Codes in TiviMate settings." },
     { name: "Enjoy", text: "Use the premium EPG and DVR features with 18K+ live channels and 100K+ VOD." },
@@ -48,7 +48,7 @@ export default function Tivimate() {
       />
       <PillarLayout
         title="TiviMate – Premium IPTV App Setup"
-        description="StreamStickPro works with TiviMate. Premium setup guide for Fire Stick, Onn, Android. 18K+ channels. Start 36hr trial or shop plans."
+        description="StreamStickPro works with TiviMate. Premium setup guide for Fire Stick, Onn, Android. 18K+ channels. Start 36hr subscription trial or shop plans."
         breadcrumbs={breadcrumbs}
       >
         <p className="text-gray-200 mb-6">
@@ -59,14 +59,14 @@ export default function Tivimate() {
         </figure>
         <h2 id="setup">TiviMate + StreamStickPro Setup</h2>
         <ol className="list-decimal list-inside text-gray-200 space-y-2 mb-6">
-          <li>Get your credentials: <Link href="/36hr-trial"><span className="text-orange-400 hover:underline">36hr free trial</span></Link> or <Link href="/shop"><span className="text-orange-400 hover:underline">subscription</span></Link>.</li>
+          <li>Get your credentials: <Link href="/36hr-trial"><span className="text-orange-400 hover:underline">36hr subscription trial</span></Link> or <Link href="/shop"><span className="text-orange-400 hover:underline">subscription</span></Link>.</li>
           <li>Install TiviMate on your device (Fire Stick, Onn, Android TV).</li>
           <li>Add playlist (M3U) or use Xtream Codes in TiviMate.</li>
           <li>Enjoy premium EPG and recording (where supported).</li>
         </ol>
         <p className="flex items-center gap-2 text-green-300 mb-6"><Check className="w-5 h-5" /> Optimized for TiviMate—no “basic” support; full channel and VOD access.</p>
         <p>
-          <Link href="/36hr-trial"><span className="text-orange-400 font-semibold hover:underline">Start 36hr trial →</span></Link>
+          <Link href="/36hr-trial"><span className="text-orange-400 font-semibold hover:underline">Start 36hr subscription trial →</span></Link>
           {" · "}
           <Link href="/iptv-smarters-pro"><span className="text-orange-400 font-semibold hover:underline">IPTV Smarters Pro guide →</span></Link>
         </p>

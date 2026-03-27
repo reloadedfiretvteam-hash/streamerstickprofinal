@@ -190,7 +190,7 @@ export default function Blog() {
     };
     
     const baseUrl = 'https://streamstickpro.com';
-    const defaultDescription = 'IPTV guides: what you get with 18K+ channels, Fire Stick setup, ONN Google TV, free trial. StreamStick Pro blog—streaming tips and niche guides.';
+    const defaultDescription = 'IPTV guides: what you get with 18K+ channels, Fire Stick setup, ONN Google TV, and 36-hour subscription trial info. StreamStick Pro blog—streaming tips and niche guides.';
     const defaultTitle = 'IPTV & Fire Stick Blog 2026 | Guides & Tips | StreamStick Pro';
 
     if (params.slug && posts.length > 0) {
@@ -288,7 +288,7 @@ export default function Blog() {
             </div>
             <div className="flex items-center gap-3">
               <a href="/shop" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Shop</a>
-              <a href="/36hr-trial" className="text-sm px-4 py-1.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-medium transition-colors">Free Trial</a>
+              <a href="/36hr-trial" className="text-sm px-4 py-1.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-medium transition-colors">Subscription Trial</a>
               <a href="/" className="text-sm px-4 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 hover:border-orange-500 text-gray-700 dark:text-gray-300 hover:text-orange-500 font-medium transition-colors flex items-center gap-1.5">
                 Visit Website <ExternalLink className="w-3.5 h-3.5" />
               </a>
@@ -398,7 +398,7 @@ export default function Blog() {
             </a>
             <a href="/trial" className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-green-400 transition-colors">
               <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Try First</p>
-              <p className="font-semibold text-gray-900 dark:text-white">Start 36-hour trial</p>
+              <p className="font-semibold text-gray-900 dark:text-white">Start 36-hour subscription trial</p>
             </a>
             <a href="/shop" className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-orange-400 transition-colors">
               <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Plans & Devices</p>
@@ -415,7 +415,7 @@ export default function Blog() {
               <div className="flex-1">
                 <h3 className="text-xl font-bold mb-1">Ready to start streaming?</h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  StreamStickPro offers pre-configured Fire Sticks with 18,000+ live channels. Free 36-hour trial, no credit card required.
+                  StreamStickPro offers ready-to-use Fire Stick options with 18,000+ live channels. 36-hour subscription trial available, no credit card required.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 w-full sm:w-auto">
@@ -423,7 +423,7 @@ export default function Blog() {
                   Visit Website
                 </a>
                 <a href="/36hr-trial" className="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 hover:border-orange-500 text-gray-700 dark:text-gray-300 hover:text-orange-500 font-semibold text-sm transition-colors text-center flex-1 sm:flex-none">
-                  Free Trial
+                  Subscription Trial
                 </a>
               </div>
             </div>
@@ -436,7 +436,7 @@ export default function Blog() {
             </a>
             <a href="/blog" className="px-4 py-2 rounded-full border border-gray-300 dark:border-gray-700 hover:border-orange-500 text-gray-600 dark:text-gray-400 hover:text-orange-500 transition-colors">All Articles</a>
             <a href="/shop" className="px-4 py-2 rounded-full border border-gray-300 dark:border-gray-700 hover:border-orange-500 text-gray-600 dark:text-gray-400 hover:text-orange-500 transition-colors">Shop</a>
-            <a href="/36hr-trial" className="px-4 py-2 rounded-full border border-gray-300 dark:border-gray-700 hover:border-green-500 text-gray-600 dark:text-gray-400 hover:text-green-500 transition-colors">Free Trial</a>
+            <a href="/36hr-trial" className="px-4 py-2 rounded-full border border-gray-300 dark:border-gray-700 hover:border-green-500 text-gray-600 dark:text-gray-400 hover:text-green-500 transition-colors">Subscription Trial</a>
           </div>
 
           {/* Article schema for SEO */}
@@ -538,7 +538,7 @@ export default function Blog() {
           </div>
           <div className="flex items-center gap-3">
             <a href="/shop" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors hidden sm:block">Shop</a>
-            <a href="/36hr-trial" className="text-sm px-4 py-1.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-medium transition-colors">Free Trial</a>
+            <a href="/36hr-trial" className="text-sm px-4 py-1.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-medium transition-colors">Subscription Trial</a>
             <a href="/" className="text-sm px-4 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 hover:border-orange-500 text-gray-700 dark:text-gray-300 hover:text-orange-500 font-medium transition-colors flex items-center gap-1.5">
               Visit Website <ExternalLink className="w-3.5 h-3.5" />
             </a>
@@ -550,7 +550,7 @@ export default function Blog() {
         "@context": "https://schema.org",
         "@type": "Blog",
         "name": "IPTV & Fire Stick Blog | StreamStick Pro",
-        "description": "What you get with IPTV: 18K+ channels, Fire Stick setup, ONN Google TV, free trial. Niche guides and streaming tips from StreamStick Pro.",
+        "description": "What you get with IPTV: 18K+ channels, Fire Stick setup, ONN Google TV, and 36-hour subscription trial details. Niche guides and streaming tips from StreamStick Pro.",
         "url": "https://streamstickpro.com/blog",
         "blogPost": posts.slice(0, 50).map(post => ({
           "@type": "BlogPosting",
@@ -736,14 +736,14 @@ export default function Blog() {
         <div className="mt-16 p-8 sm:p-12 rounded-2xl bg-gradient-to-br from-gray-900 to-orange-950 text-center">
           <h2 className="text-3xl font-bold text-white mb-3">Ready to Cut the Cord?</h2>
           <p className="text-gray-300 mb-8 max-w-xl mx-auto">
-            Join thousands of cord-cutters streaming 18,000+ channels. Pre-configured Fire Sticks, free trial, 24/7 support.
+            Join thousands of cord-cutters streaming 18,000+ channels. Ready-to-use Fire Stick options, 36-hour subscription trial, and 24/7 support.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <a href="/" className="px-8 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm transition-colors">
               Visit StreamStickPro.com
             </a>
             <a href="/36hr-trial" className="px-8 py-3 rounded-xl border border-white/20 hover:border-white/40 text-white font-medium text-sm transition-colors">
-              Start Free Trial
+              Start Subscription Trial
             </a>
           </div>
         </div>

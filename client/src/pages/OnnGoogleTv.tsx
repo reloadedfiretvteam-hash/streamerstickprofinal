@@ -15,7 +15,7 @@ export default function OnnGoogleTv() {
     const ogImg = fullImageUrl(getImageForSlot(ONN_IMAGES, 0).src);
     setPageMeta({
       title: "IPTV ONN Google TV 2026 | Setup in 5 Min | StreamStick Pro",
-      description: "Set up IPTV on Onn Google TV. Native support for Onn 4K and Onn Pro. 36hr trial, then subscribe. StreamStick Pro.",
+      description: "Set up IPTV on Onn Google TV. Native support for Onn 4K and Onn Pro. 36hr subscription trial available. StreamStick Pro.",
       path: "/onn-google-tv",
       ogImage: ogImg,
     });
@@ -54,13 +54,13 @@ export default function OnnGoogleTv() {
         </figure>
         <h2 id="setup">Quick Setup</h2>
         <ol className="list-decimal list-inside text-gray-200 space-y-2 mb-6">
-          <li>Get your credentials from StreamStickPro (36hr trial or subscription)</li>
+          <li>Get your credentials from StreamStickPro (36hr subscription trial or paid subscription)</li>
           <li>On your Onn device, install IPTV Smarters Pro or TiviMate from the Play Store</li>
           <li>Enter your M3U or login - you are live</li>
         </ol>
         <p className="flex items-center gap-2 text-green-300"><Check className="w-5 h-5" /> Beats TroyPoint: we support Onn and Roku natively.</p>
         <p className="mt-6">
-          <Link href="/36hr-trial"><span className="text-orange-400 font-semibold hover:underline">Start 36hr trial</span></Link>
+          <Link href="/36hr-trial"><span className="text-orange-400 font-semibold hover:underline">Start 36hr subscription trial</span></Link>
           {" · "}
           <Link href="/shop"><span className="text-orange-400 font-semibold hover:underline">Shop Onn devices and plan</span></Link>
         </p>

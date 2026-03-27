@@ -67,7 +67,7 @@ export default function LocationsHub() {
         ? params.pageType
           ? `Browse ${labelType} guides by region and city in ${labelCountry}.`
           : `Browse IPTV, Fire Stick, and Google TV guides by region and city in ${labelCountry}.`
-        : "Browse IPTV, Fire Stick, and Google TV guides by location. Find setup tips, device options, and free trial info."
+        : "Browse IPTV, Fire Stick, and Google TV guides by location. Find setup tips, device options, and 36-hour subscription trial info."
     );
 
     setPageMeta({

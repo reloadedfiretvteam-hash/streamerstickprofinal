@@ -160,7 +160,7 @@ export default function Shop() {
     document.documentElement.classList.add("dark");
     setPageMeta({
       title: "IPTV Subscription Plans 2026 | Fire Stick & Devices | StreamStick Pro",
-      description: "Shop IPTV plans from $15/mo and Fire Stick device options. 18K+ channels, 4K, and 99.9% uptime. Start a free trial or buy now with StreamStick Pro.",
+      description: "Shop IPTV plans from $15/mo and Fire Stick device options. 18K+ channels, 4K, and 99.9% uptime. Start a 36-hour subscription trial or buy now with StreamStick Pro.",
       path: "/shop",
     });
     loadProducts();
@@ -285,7 +285,7 @@ export default function Shop() {
               Premium Live TV Subscriptions
             </h3>
             <p className="text-center text-gray-200 mb-8 max-w-2xl mx-auto">
-              Choose your subscription length and number of devices. Multi-device plans let you stream on multiple TVs, phones, or tablets at the same time!
+              Choose your subscription length and number of devices. The 36-hour trial applies to IPTV subscription plans only. Multi-device plans let you stream on multiple TVs, phones, or tablets at the same time.
             </p>
             
             {/* Free Trial Box */}

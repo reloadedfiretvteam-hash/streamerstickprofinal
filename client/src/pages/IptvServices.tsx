@@ -13,7 +13,7 @@ export default function IptvServices() {
     const ogImg = fullImageUrl(getImageForSlot(IPTV_IMAGES, 0).src);
     setPageMeta({
       title: "IPTV Subscription Plans 2026 | Cheapest & Best | StreamStick Pro",
-      description: "IPTV plans from $15/mo: 18K+ live channels, 4K sports, PPV, 99.9% uptime. Fire Stick and Android. Cancel anytime. 36hr free trial. StreamStick Pro.",
+      description: "IPTV plans from $15/mo: 18K+ live channels, 4K sports, PPV, 99.9% uptime. Fire Stick and Android. Cancel anytime. 36hr trial for subscription plans. StreamStick Pro.",
       path: "/iptv-services",
       ogImage: ogImg,
     });
@@ -34,7 +34,7 @@ export default function IptvServices() {
 
   const faq = [
     { question: "What is IPTV?", answer: "IPTV (Internet Protocol Television) delivers live TV and on-demand content over the internet. Unlike cable, IPTV works on Fire Sticks, Android devices, Smart TVs, and phones. You get thousands of channels and VOD for a fraction of cable cost." },
-    { question: "What is the best IPTV service in 2026?", answer: "The best IPTV service offers 18,000+ live channels, 100,000+ movies and series, stable streams, multi-device support, and 24/7 support. StreamStickPro provides instant credentials, works with TiviMate and IPTV Smarters, and offers a free trial." },
+    { question: "What is the best IPTV service in 2026?", answer: "The best IPTV service offers 18,000+ live channels, 100,000+ movies and series, stable streams, multi-device support, and 24/7 support. StreamStickPro provides instant credentials, works with TiviMate and IPTV Smarters, and offers a subscription trial." },
     { question: "Is IPTV legal?", answer: "IPTV technology is legal. Using licensed content depends on your provider and region. Choose providers that operate within legal frameworks. StreamStickPro focuses on reliable delivery and customer support for streaming devices." },
     { question: "How much does a cheap IPTV subscription cost?", answer: "Cheap IPTV subscriptions typically start around $15/month for one device. Longer plans (3, 6, or 12 months) offer better value. StreamStickPro plans range from $15/month to yearly options with multi-device support." },
     { question: "Can I use IPTV on Fire Stick?", answer: "Yes. IPTV works great on Fire Stick. You can use apps like TiviMate, IPTV Smarters Pro, or Perfect Player. StreamStickPro offers Fire Stick device options, setup guidance, and instant credentials so you can stream in minutes." },
@@ -68,7 +68,7 @@ export default function IptvServices() {
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
           <img src={getImageForSlot(IPTV_IMAGES, 1).src} alt={getImageForSlot(IPTV_IMAGES, 1).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
         </figure>
-        <p>StreamStickPro meets these with instant M3U delivery, TiviMate-friendly setup, and a <Link href="/">free trial</Link> so you can test before committing. For the best <Link href="/iptv-media-players">IPTV media players</Link> (TiviMate, IPTV Smarters, VLC), see our full guide.</p>
+        <p>StreamStickPro meets these with instant M3U delivery, TiviMate-friendly setup, and a <Link href="/36hr-trial">36-hour subscription trial</Link> so you can test before committing. For the best <Link href="/iptv-media-players">IPTV media players</Link> (TiviMate, IPTV Smarters, VLC), see our full guide.</p>
 
         <h2 id="cheap-iptv-subscription">Cheap IPTV Subscription vs Cable</h2>
         <p>A cheap IPTV subscription often starts at $15–25/month. Cable usually runs $100–200+/month. With IPTV you get more channels, on-demand libraries, and the flexibility to use <Link href="/jailbroken-fire-sticks">streaming devices</Link> like Fire Stick and ONN Google TV. Yearly plans bring the per-month cost down further.</p>

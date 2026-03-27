@@ -139,7 +139,7 @@ const defaultProducts: Product[] = [
     id: "firestick-hd",
     name: "StreamStick Starter Kit",
     price: 130,
-    description: "Get fully loaded in just 10 minutes! Your Fire Stick arrives ready - simply plug in, enter your credentials (sent instantly after purchase), and follow our quick setup video. You'll unlock 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage including NFL, NBA, UFC, and live events. Includes 1 Year Live TV plan and 24/7 customer support.",
+    description: "Start in about 10 minutes. Plug in your Fire Stick, enter your credentials (sent instantly after purchase), and follow our quick setup video. You'll unlock 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage including NFL, NBA, UFC, and live events. Includes a 1 Year Live TV plan, 24/7 customer support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: firestickHdImg,
     category: "firestick",
@@ -149,7 +149,7 @@ const defaultProducts: Product[] = [
     id: "firestick-4k",
     name: "StreamStick 4K Kit",
     price: 140,
-    description: "Best-selling Fire Stick - get fully loaded in 10 minutes! Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision. Enjoy 18,000+ live TV channels, 100,000+ movies & series, and all major sports - NFL, NBA, UFC, and live events. Includes 1 Year premium Live TV plan and 24/7 support.",
+    description: "Best-selling Fire Stick setup in about 10 minutes. Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision. Enjoy 18,000+ live TV channels, 100,000+ movies & series, and all major sports - NFL, NBA, UFC, and live events. Includes a 1 Year premium Live TV plan, 24/7 support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: firestick4kImg,
     category: "firestick",
@@ -160,7 +160,7 @@ const defaultProducts: Product[] = [
     id: "firestick-4k-max",
     name: "StreamStick Max Kit",
     price: 150,
-    description: "Ultimate 4K Max with Wi-Fi 6E - get fully loaded in just 10 minutes! Your device arrives ready. Plug in, use your instant credentials, follow our quick setup video, and experience breathtaking 4K with Dolby Atmos sound. Access 18,000+ live TV channels, 100,000+ movies & series, and all major sports. Includes 1 Year premium Live TV plan and priority 24/7 support.",
+    description: "Ultimate 4K Max with Wi-Fi 6E setup in about 10 minutes. Plug in, use your instant credentials, follow our quick setup video, and experience breathtaking 4K with Dolby Atmos sound. Access 18,000+ live TV channels, 100,000+ movies & series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: firestick4kMaxImg,
     category: "firestick",
@@ -170,7 +170,7 @@ const defaultProducts: Product[] = [
     id: "android-onn-4k",
     name: "ONN 4K Streaming Device Kit",
     price: 140,
-    description: "Upgrade from Fire Stick to Android! The ONN 4K Streaming Device with Google TV delivers the same great features you love, plus built-in storage for live DVR recording. Get fully loaded in 10 minutes - plug in, enter your instant credentials, and access 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage. Includes 1 Year Live TV plan and 24/7 support.",
+    description: "Upgrade from Fire Stick to Android. The ONN 4K Streaming Device with Google TV delivers the same great features you love, plus built-in storage for live DVR recording. Setup takes about 10 minutes - plug in, enter your instant credentials, and access 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage. Includes a 1 Year Live TV plan, 24/7 support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: onn4kImg,
     category: "firestick",
@@ -180,7 +180,7 @@ const defaultProducts: Product[] = [
     id: "android-onn-pro",
     name: "ONN 4K Ultra HD Pro Kit",
     price: 160,
-    description: "The ultimate Android streaming upgrade! ONN 4K Ultra HD Pro features expanded storage for extensive DVR recording, Google TV interface, and premium performance. Get fully loaded in 10 minutes - plug in, use your instant credentials, and experience crystal-clear 4K with Dolby Audio. Access 18,000+ live TV channels, 100,000+ movies & series, and all major sports. Includes 1 Year premium Live TV plan and priority 24/7 support.",
+    description: "The ultimate Android streaming upgrade. ONN 4K Ultra HD Pro features expanded storage for extensive DVR recording, Google TV interface, and premium performance. Setup takes about 10 minutes - plug in, use your instant credentials, and experience crystal-clear 4K with Dolby Audio. Access 18,000+ live TV channels, 100,000+ movies & series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: onn4kProImg,
     category: "firestick",
@@ -303,8 +303,8 @@ export default function MainStore() {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
     setPageMeta({
-      title: "IPTV Fire Stick 2026 | 18K+ Channels | StreamStickPro 36hr Trial",
-      description: "IPTV for Fire Stick and ONN Google TV with 18K+ live channels. Start a 36-hour trial, buy devices, and activate in minutes.",
+      title: "IPTV Fire Stick 2026 | 18K+ Channels | StreamStickPro",
+      description: "IPTV subscriptions for Fire Stick and ONN Google TV with 18K+ live channels. 36-hour trial available on subscription plans only.",
       path: "/",
     });
     loadProducts();
@@ -575,7 +575,7 @@ export default function MainStore() {
               className="mb-6"
             >
               <span className="inline-block px-6 py-2 bg-gradient-to-r from-orange-500/30 to-red-500/30 backdrop-blur-sm border-2 border-orange-400/50 rounded-full text-sm font-bold text-orange-200 animate-pulse shadow-lg shadow-orange-500/30">
-                FREE 36-HOUR TRIAL • Start in Minutes
+                36-HOUR TRIAL FOR IPTV SUBSCRIPTIONS • Start in Minutes
               </span>
               <span className="ml-3 inline-flex items-center gap-1 rounded-full bg-green-500/20 px-3 py-1 text-green-300 font-bold">
                 <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" aria-hidden="true" />
@@ -725,7 +725,7 @@ export default function MainStore() {
               Choose your streaming setup in under 30 seconds
             </h2>
             <p className="mt-3 text-gray-300 max-w-3xl mx-auto text-sm sm:text-base">
-              Start with a trial, buy a ready-to-use device, or compare options before checkout. Every step is designed for clarity and easy access.
+              Start with a subscription trial, choose a device bundle, or compare options before checkout. Every step is designed for clarity and easy access.
             </p>
           </div>
 
@@ -733,7 +733,7 @@ export default function MainStore() {
             <div className="rounded-2xl border border-orange-400/25 bg-gradient-to-br from-orange-500/15 to-orange-500/5 p-5 md:p-6">
               <p className="text-orange-300 text-xs font-semibold tracking-wide">STEP 1</p>
               <h3 className="text-white text-xl font-bold mt-2">Start 36-Hour Trial</h3>
-              <p className="text-gray-300 text-sm mt-2">See channel quality, speed, and setup flow before you buy.</p>
+              <p className="text-gray-300 text-sm mt-2">Trial applies to IPTV subscription plans only so you can check quality, speed, and setup flow before buying.</p>
               <Link href="/36hr-trial">
                 <span className="mt-5 inline-flex items-center justify-center gap-2 w-full min-h-[72px] rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black transition-colors cursor-pointer">
                   Start Trial <ChevronRight className="w-5 h-5" />
@@ -793,10 +793,10 @@ export default function MainStore() {
           <div className="mt-6 mb-16">
             <h3 className="text-3xl font-bold mb-4 text-center flex items-center justify-center gap-3">
               <Zap className="w-8 h-8 text-blue-500" />
-              Live TV Plans & Free Trial
+              Live TV Plans & Subscription Trial
             </h3>
             <p className="text-center text-gray-200 mb-8 max-w-2xl mx-auto">
-              Choose your subscription length and number of devices. Multi-device plans let you stream on multiple TVs, phones, or tablets at the same time!
+              Choose your subscription length and number of devices. The 36-hour trial is for subscription plans only. Multi-device plans let you stream on multiple TVs, phones, or tablets at the same time.
             </p>
             
             {/* Free Trial Box */}
@@ -967,7 +967,7 @@ export default function MainStore() {
                 Fire Stick Comparison
               </h3>
               <p className="text-gray-200 max-w-2xl mx-auto">
-                Be streaming in 10 minutes! Your StreamStick includes 1 Year Live TV Plan, instant login credentials, a quick setup video, and 24/7 support. Live TV, Movies, Series & Sports await!
+                Be streaming in about 10 minutes. Each StreamStick bundle includes a 1 Year Live TV plan, instant login credentials, setup tutorials, 24/7 support, and shipping included.
               </p>
             </div>
             <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl border border-slate-700/50 overflow-hidden" data-testid="tier-comparison-table">
@@ -1605,8 +1605,8 @@ export default function MainStore() {
                 <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mb-4">
                   <Flame className="w-6 h-6 text-orange-500" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">What is a Fully Loaded Streaming Device?</h3>
-                <p className="text-gray-200 text-sm mb-4">Learn how to get fully loaded with streaming content in just 10 minutes.</p>
+                <h3 className="text-lg font-bold text-white mb-2">What Is a Streaming Device Setup?</h3>
+                <p className="text-gray-200 text-sm mb-4">Learn how device setup works and how to start streaming in about 10 minutes.</p>
                 <span className="text-orange-400 text-sm font-semibold flex items-center gap-1">
                   Read More <ChevronRight className="w-4 h-4" />
                 </span>
@@ -1876,7 +1876,7 @@ export default function MainStore() {
             <AccordionItem value="item-1" className="border border-white/10 rounded-xl px-6 bg-white/5">
               <AccordionTrigger className="text-lg font-semibold hover:text-orange-400">What's included with a StreamStick?</AccordionTrigger>
               <AccordionContent className="text-gray-200">
-                Get fully loaded in just 10 minutes! Your StreamStick arrives ready - after purchase you'll receive your login credentials instantly and an easy setup video. Follow the quick tutorial and unlock 1 Year of Live TV, Movies, Series & Sports!
+                Setup takes about 10 minutes. After purchase you'll receive login credentials instantly and an easy setup video. Each bundle includes 1 Year of Live TV, Movies, and Series, plus shipping included and 24/7 support.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2" className="border border-white/10 rounded-xl px-6 bg-white/5">

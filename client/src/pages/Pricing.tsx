@@ -10,7 +10,7 @@ export default function Pricing() {
   useEffect(() => {
     setPageMeta({
       title: "IPTV Subscription Plans 2026 | Cheapest & Best | StreamStick Pro",
-      description: "IPTV plans from $15/mo: 18K+ live channels, 4K sports, PPV, 99.9% uptime. Cancel anytime. 36hr free trial. StreamStick Pro.",
+      description: "IPTV plans from $15/mo: 18K+ live channels, 4K sports, PPV, 99.9% uptime. Cancel anytime. 36hr trial for subscription plans. StreamStick Pro.",
       path: "/pricing",
     });
   }, []);
@@ -47,7 +47,7 @@ export default function Pricing() {
             <Link href="/shop"><span className="mt-6 inline-flex items-center justify-center w-full py-3 rounded-xl bg-orange-500 text-white font-semibold"><ShoppingCart className="w-4 h-4 mr-2" /> View Shop</span></Link>
           </div>
         </div>
-        <p className="text-center"><Link href="/36hr-trial"><span className="text-orange-400 font-semibold hover:underline">Start 36hr FREE trial</span></Link></p>
+        <p className="text-center"><Link href="/36hr-trial"><span className="text-orange-400 font-semibold hover:underline">Start 36hr subscription trial</span></Link></p>
       </PillarLayout>
     </>
   );

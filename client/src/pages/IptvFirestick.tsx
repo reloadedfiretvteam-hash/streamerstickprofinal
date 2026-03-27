@@ -13,7 +13,7 @@ export default function IptvFirestick() {
   useEffect(() => {
     setPageMeta({
       title: "IPTV Fire Stick 2026 | 18K+ Channels | StreamStick Pro",
-      description: "Best IPTV for Fire Stick: 18K+ live channels, TiviMate and Smarters setup in minutes. Free trial and ready-to-use device options. StreamStick Pro.",
+      description: "Best IPTV for Fire Stick: 18K+ live channels, TiviMate and Smarters setup in minutes. 36-hour subscription trial and ready-to-use device options. StreamStick Pro.",
       path: "/iptv-firestick",
     });
   }, []);
@@ -22,7 +22,7 @@ export default function IptvFirestick() {
     { question: "What is the best IPTV for Firestick?", answer: "The best IPTV for Firestick in 2026 combines a reliable subscription (18,000+ channels, 100,000+ VOD) with a compatible player. TiviMate and IPTV Smarters Pro are top choices. StreamStickPro offers instant credentials and works with both." },
     { question: "How do I set up IPTV on my Fire Stick?", answer: "Install an IPTV player (e.g. TiviMate or IPTV Smarters), add your subscription (M3U or Xtream Codes), and start streaming. With StreamStickPro, you get instant credentials and a quick setup video so you're live in minutes." },
     { question: "Does IPTV work on Fire Stick 4K and 4K Max?", answer: "Yes. IPTV works on all Fire Stick models including HD, 4K, and 4K Max. 4K and 4K Max support better picture quality. StreamStickPro supports all major Fire Stick models with subscription plans and setup guidance." },
-    { question: "Can I get a free trial for IPTV on Fire Stick?", answer: "Yes. StreamStickPro offers a 36-hour free trial so you can test the service on your Fire Stick before buying. No credit card required." },
+    { question: "Can I get a free trial for IPTV on Fire Stick?", answer: "Yes. StreamStickPro offers a 36-hour trial for IPTV subscription plans so you can test the service on your Fire Stick before buying. No credit card required." },
     { question: "What IPTV apps work on Fire Stick?", answer: "TiviMate, IPTV Smarters Pro, Perfect Player, and OTT Navigator are popular IPTV apps for Fire Stick. StreamStickPro credentials work with TiviMate and IPTV Smarters. See our blog for step-by-step app guides." },
   ];
 

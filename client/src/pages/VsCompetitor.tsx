@@ -13,7 +13,7 @@ export default function VsCompetitor() {
   useEffect(() => {
     setPageMeta({
       title: `StreamStickPro vs ${name} 2026 | Why We Win | StreamStick Pro`,
-      description: `${name} alternative. StreamStick Pro 36hr trial beats ${name}. Compare trial, channels, Onn TV, Smarters Pro, price. We win.`,
+      description: `${name} alternative. StreamStick Pro 36hr subscription trial beats ${name}. Compare trial, channels, Onn TV, Smarters Pro, price. We win.`,
       path: `/vs-${slug}`,
     });
   }, [name, slug]);
@@ -28,11 +28,11 @@ export default function VsCompetitor() {
       <BreadcrumbSchema items={breadcrumbs.map((b) => ({ name: b.label, url: "https://streamstickpro.com" + b.href }))} />
       <PillarLayout
         title={`StreamStickPro vs ${name} 2026 - Why We WIN`}
-        description={`${name} alternative. StreamStickPro 36hr trial beats ${name}. Compare and get the trial ${name} can't match.`}
+        description={`${name} alternative. StreamStickPro 36hr subscription trial beats ${name}. Compare and get the trial ${name} can't match.`}
         breadcrumbs={breadcrumbs}
       >
         <p className="text-gray-200 mb-8">
-          Comparing StreamStickPro to {name}. See why customers switch: 36hr trial, 18K+ channels, native Onn/Roku support, IPTV Smarters Pro optimized, best price.
+          Comparing StreamStickPro to {name}. See why customers switch: 36hr subscription trial, 18K+ channels, native Onn/Roku support, IPTV Smarters Pro optimized, best price.
         </p>
 
         <div className="overflow-x-auto mb-10">
@@ -56,16 +56,16 @@ export default function VsCompetitor() {
         </div>
 
         <div className="p-6 rounded-2xl bg-orange-500/20 border border-orange-400/30 text-center mb-8">
-          <h2 className="text-xl font-bold text-white mb-2">Get the 36hr trial {name} can't match</h2>
+          <h2 className="text-xl font-bold text-white mb-2">Get the 36hr subscription trial {name} can't match</h2>
           <Link href="/36hr-trial">
             <span className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg">
-              <Gift className="w-6 h-6" /> Start 36hr Trial
+              <Gift className="w-6 h-6" /> Start 36hr Subscription Trial
             </span>
           </Link>
         </div>
 
         <p className="text-gray-400 text-sm">
-          <Link href="/">Home</Link> · <Link href="/vs-iptvstronger">vs IPTVStronger</Link> · <Link href="/vs-troypoint">vs TroyPoint</Link> · <Link href="/36hr-trial">36hr Trial</Link>
+          <Link href="/">Home</Link> · <Link href="/vs-iptvstronger">vs IPTVStronger</Link> · <Link href="/vs-troypoint">vs TroyPoint</Link> · <Link href="/36hr-trial">36hr Subscription Trial</Link>
         </p>
       </PillarLayout>
     </>

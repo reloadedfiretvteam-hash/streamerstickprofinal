@@ -68,7 +68,7 @@ export default function UltimateIptvCatalog() {
             Live TV, movies, and series on ONN Google TV and Fire Stick. One subscription, one catalog.
           </p>
           <Link href="/36hr-trial">
-            <span className="inline-flex items-center px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold">Explore 93K Catalog – Start 36hr Trial</span>
+            <span className="inline-flex items-center px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold">Explore 93K Catalog - Start 36hr Subscription Trial</span>
           </Link>
         </div>
 
@@ -126,7 +126,7 @@ export default function UltimateIptvCatalog() {
         </ul>
 
         <p className="mt-8">
-          <Link href="/36hr-trial"><span className="text-orange-400 font-semibold hover:underline">Start 36hr trial</span></Link>
+          <Link href="/36hr-trial"><span className="text-orange-400 font-semibold hover:underline">Start 36hr subscription trial</span></Link>
           {" · "}
           <Link href="/shop"><span className="text-orange-400 font-semibold hover:underline">Shop plans</span></Link>
           {" · "}
