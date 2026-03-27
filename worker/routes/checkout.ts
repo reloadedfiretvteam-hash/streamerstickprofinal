@@ -237,6 +237,21 @@ export function createCheckoutRoutes() {
         errors: [] as string[],
       };
 
+      // If credentials were already sent, treat this call as idempotent success.
+      // This avoids duplicate confirmation/owner emails when success page retries.
+      if (order.credentialsSent) {
+        return c.json({
+          success: true,
+          results: {
+            orderConfirmation: true,
+            credentials: true,
+            ownerNotification: true,
+            errors: [] as string[],
+          },
+          message: "Emails were already sent previously",
+        });
+      }
+
       // Send order confirmation
       try {
         console.log(`[EMAIL] Attempting to send order confirmation for order ${order.id}`);

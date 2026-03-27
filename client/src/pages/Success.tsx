@@ -55,8 +55,18 @@ export default function Success() {
               });
             }
             
-            // Email sending now happens server-side in Stripe webhook processing.
-            // This keeps delivery reliable even if the success page fails to execute.
+            // Primary path: Stripe webhook sends emails server-side.
+            // Fallback path: success page requests send-emails once payment is confirmed.
+            // Backend route is idempotent and skips duplicates when already sent.
+            if (data.paymentStatus === 'paid') {
+              fetch(`/api/checkout/send-emails`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId }),
+              }).catch(() => {
+                // Silent fallback; webhook remains primary source of truth.
+              });
+            }
           }
           setLoading(false);
         })
