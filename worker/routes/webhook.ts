@@ -234,14 +234,12 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
     return;
   }
 
-  console.log(`[EMAIL] Starting email delivery for order ${order.id}`);
+  console.log(`[EMAIL] Starting webhook email delivery for order ${order.id}`);
   console.log(`[EMAIL] Sending to: ${updatedOrder.customerEmail}`);
   console.log(`[EMAIL] RESEND_API_KEY configured: ${!!env.RESEND_API_KEY}`);
   console.log(`[EMAIL] RESEND_FROM_EMAIL: ${env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com'}`);
-  
-  // Note: Emails are sent via the /api/checkout/send-emails endpoint called from the success page
-  // This webhook handler only updates order status - keeping webhook and email separate as requested
-  // Send owner notification immediately (this is critical for knowing when products are sold)
+
+  // Always notify owner from webhook so fulfillment visibility does not depend on browser redirects.
   try {
     console.log(`[EMAIL] Attempting to send owner notification...`);
     await sendOwnerOrderNotification(updatedOrder, env);
@@ -250,6 +248,26 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
     console.error(`[EMAIL] ❌ ERROR sending owner notification: ${error.message}`);
     console.error(`[EMAIL] Error details:`, error);
     console.error(`[EMAIL] Error stack: ${error.stack}`);
+  }
+
+  // Customer emails are sent from webhook to avoid relying on success-page JS execution.
+  // Idempotency: credentialsSent marks that customer email bundle already ran.
+  if (!updatedOrder.credentialsSent) {
+    try {
+      await sendOrderConfirmation(updatedOrder, env);
+      console.log(`[EMAIL] ✅ Order confirmation sent from webhook`);
+    } catch (error: any) {
+      console.error(`[EMAIL] ❌ Failed webhook order confirmation: ${error.message}`);
+    }
+
+    try {
+      await sendCredentialsEmail(updatedOrder, env, storage);
+      console.log(`[EMAIL] ✅ Credentials sent from webhook`);
+    } catch (error: any) {
+      console.error(`[EMAIL] ❌ Failed webhook credentials email: ${error.message}`);
+    }
+  } else {
+    console.log(`[EMAIL] Skipping customer emails for ${order.id} (already sent)`);
   }
   
   console.log(`[CHECKOUT] Completed processing order ${order.id}`);
