@@ -481,6 +481,46 @@ export default function MainStore() {
     return "power users wanting peak speed and premium performance";
   };
 
+  const getRecommendedDeviceElement = (tier: "hd" | "4k" | "max"): HTMLElement | null => {
+    const idsByTier: Record<"hd" | "4k" | "max", string[]> = {
+      hd: ["firestick-hd", "fs-hd"],
+      "4k": ["firestick-4k", "fs-4k"],
+      max: ["firestick-4k-max", "fs-max"],
+    };
+    for (const id of idsByTier[tier]) {
+      const el = document.querySelector(`[data-testid="card-product-${id}"]`) as HTMLElement | null;
+      if (el) return el;
+    }
+    return null;
+  };
+
+  const flashCardFocus = (el: HTMLElement | null) => {
+    if (!el) return;
+    const prevTransition = el.style.transition;
+    const prevBoxShadow = el.style.boxShadow;
+    el.style.transition = "box-shadow 180ms ease";
+    el.style.boxShadow = "0 0 0 2px rgba(52, 211, 153, 0.95), 0 0 28px rgba(16, 185, 129, 0.35)";
+    window.setTimeout(() => {
+      el.style.boxShadow = prevBoxShadow;
+      el.style.transition = prevTransition;
+    }, 1900);
+  };
+
+  const focusRecommendedCards = (config: (typeof BUYER_PROFILE_CONFIG)[BuyerProfile]) => {
+    window.setTimeout(() => {
+      const planEl = document.querySelector(
+        `[data-testid="card-product-iptv-${config.planDuration}"]`
+      ) as HTMLElement | null;
+      const deviceEl = getRecommendedDeviceElement(config.deviceTier);
+      const targetEl = planEl || deviceEl;
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      flashCardFocus(planEl);
+      flashCardFocus(deviceEl);
+    }, 120);
+  };
+
   const applyBuyerProfile = (profile: BuyerProfile) => {
     const config = BUYER_PROFILE_CONFIG[profile];
     setBuyerProfile(profile);
@@ -503,6 +543,7 @@ export default function MainStore() {
       "android-onn-4k": 1,
       "android-onn-pro": 1,
     }));
+    focusRecommendedCards(config);
   };
 
   // WebSite + Organization schema: only in index.html to avoid duplicate structured data (GSC).
@@ -949,7 +990,7 @@ export default function MainStore() {
               <Flame className="w-5 h-5 text-orange-400 animate-pulse" />
               <span className="text-sm font-medium text-orange-300">SHOP ALL PRODUCTS</span>
             </div>
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Fire Stick Device Options & IPTV Plans</span>
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
