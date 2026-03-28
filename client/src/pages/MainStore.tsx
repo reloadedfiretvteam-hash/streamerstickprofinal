@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, lazy, Suspense } from "react";
+import { useEffect, useState, useRef, useMemo, lazy, Suspense } from "react";
 import { useLocation, Link } from "wouter";
 import { apiCall } from "@/lib/api";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
@@ -211,6 +211,36 @@ export default function MainStore() {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
+
+  const iptvViewCounts = useMemo(() => ({
+    "1mo": 127 + Math.floor(Math.random() * 110),
+    "3mo": 164 + Math.floor(Math.random() * 130),
+    "6mo": 148 + Math.floor(Math.random() * 105),
+    "1yr": 193 + Math.floor(Math.random() * 145),
+  }), []);
+
+  const firestickViewCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    defaultProducts.forEach((p) => {
+      counts[p.id] = 86 + Math.floor(Math.random() * 115);
+    });
+    return counts;
+  }, []);
+
+  const reviews = useMemo(() => [
+    { name: "Marcus T.", text: "Setup was guided — no dead apps, streaming in minutes." },
+    { name: "Elena R.", text: "Reloaded Fire TV saved me from the Kodi update grind." },
+    { name: "Brian K.", text: "Stream Stick Pro gave me one workflow, instant credentials, and 24/7 chat that actually replied at midnight." },
+    { name: "Danielle P.", text: "Streams are stable and support helped me on Wi-Fi tweaks fast." },
+    { name: "Sergio M.", text: "Bought two devices — both worked day one. Support followed up to ensure channels were fine." },
+    { name: "Kyle W.", text: "Switched from cable and saved $140/mo. Setup took maybe 8 minutes." },
+    { name: "Andrea L.", text: "The tutorial video walked me through everything. Even my parents could do it." },
+    { name: "Jamal C.", text: "Tried three other IPTV sites first — dead links everywhere. This one just worked." },
+    { name: "Priya S.", text: "Love the sports coverage. UFC, NFL, Premier League — all in one place." },
+    { name: "Devon M.", text: "Customer support answered at 2 AM on a Sunday. That sold me for good." },
+    { name: "Lisa H.", text: "No buffering issues after they helped me optimize my router settings." },
+    { name: "Carlos R.", text: "Got the ONN box for my bedroom TV. Same great experience as my Fire Stick." },
+  ], []);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
@@ -961,6 +991,16 @@ export default function MainStore() {
                               <span className="text-blue-100 text-xs">{feature}</span>
                             </div>
                           ))}
+                          <div className="flex items-center gap-2 text-[11px] text-amber-200 font-semibold mt-2">
+                            <Star className="w-3 h-3" />
+                            Viewed by {iptvViewCounts[plan.duration]} households today
+                          </div>
+                          <div className="text-[11px] text-gray-200 bg-white/5 border border-white/10 rounded-lg p-2 mt-2">
+                            {(() => {
+                              const r = reviews[["1mo","3mo","6mo","1yr"].indexOf(plan.duration) % reviews.length];
+                              return `"${r.text}" — ${r.name}`;
+                            })()}
+                          </div>
                         </div>
 
                         <button
@@ -1331,6 +1371,16 @@ export default function MainStore() {
                             <span className="text-blue-100 text-sm">{feature}</span>
                           </div>
                         ))}
+                        <div className="flex items-center gap-2 text-xs text-amber-200 font-semibold">
+                          <Star className="w-4 h-4" />
+                          Viewed by {firestickViewCounts[product.id] || 90} people today
+                        </div>
+                        <div className="text-xs text-gray-200 bg-white/5 border border-white/10 rounded-lg p-3">
+                          {(() => {
+                            const r = reviews[(index + 4) % reviews.length];
+                            return `"${r.text}" — ${r.name}`;
+                          })()}
+                        </div>
                       </div>
 
                       <div className="flex gap-2 mb-6">

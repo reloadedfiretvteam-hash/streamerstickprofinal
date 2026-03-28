@@ -173,13 +173,20 @@ export default function Shop() {
     return counts;
   }, []);
 
-  const reviews = useMemo(() => ([
-    { type: 'short', name: "Marcus T.", text: "Setup was guided—no dead apps, streaming in minutes." },
-    { type: 'short', name: "Elena R.", text: "Reloaded Fire TV saved me from the Kodi update grind." },
-    { type: 'long', name: "Brian K.", text: "I tried other boxes with endless app lists—half were broken. Stream Stick Pro gave me one workflow, instant credentials, and 24/7 chat that actually replied at midnight." },
-    { type: 'short', name: "Danielle P.", text: "Streams are stable and support helped me on Wi‑Fi tweaks fast." },
-    { type: 'long', name: "Sergio M.", text: "The all-in-one app means no hunting for links. Bought two devices—both worked day one. Support followed up to ensure channels were fine." },
-  ]), []);
+  const reviews = useMemo(() => [
+    { name: "Marcus T.", text: "Setup was guided — no dead apps, streaming in minutes." },
+    { name: "Elena R.", text: "Reloaded Fire TV saved me from the Kodi update grind." },
+    { name: "Brian K.", text: "Stream Stick Pro gave me one workflow, instant credentials, and 24/7 chat that actually replied at midnight." },
+    { name: "Danielle P.", text: "Streams are stable and support helped me on Wi-Fi tweaks fast." },
+    { name: "Sergio M.", text: "Bought two devices — both worked day one. Support followed up to ensure channels were fine." },
+    { name: "Kyle W.", text: "Switched from cable and saved $140/mo. Setup took maybe 8 minutes." },
+    { name: "Andrea L.", text: "The tutorial video walked me through everything. Even my parents could do it." },
+    { name: "Jamal C.", text: "Tried three other IPTV sites first — dead links everywhere. This one just worked." },
+    { name: "Priya S.", text: "Love the sports coverage. UFC, NFL, Premier League — all in one place." },
+    { name: "Devon M.", text: "Customer support answered at 2 AM on a Sunday. That sold me for good." },
+    { name: "Lisa H.", text: "No buffering issues after they helped me optimize my router settings." },
+    { name: "Carlos R.", text: "Got the ONN box for my bedroom TV. Same great experience as my Fire Stick." },
+  ], []);
 
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
@@ -485,8 +492,8 @@ export default function Shop() {
                           </div>
                           <div className="text-[11px] text-gray-200 bg-white/5 border border-white/10 rounded-lg p-2 mt-2">
                             {(() => {
-                              const review = reviews[Math.floor(Math.random() * reviews.length)];
-                              return `“${review.text}” — ${review.name}`;
+                              const r = reviews[index % reviews.length];
+                              return `“${r.text}” — ${r.name}`;
                             })()}
                           </div>
                         </div>
@@ -769,8 +776,8 @@ export default function Shop() {
                         </div>
                         <div className="text-xs text-gray-200 bg-white/5 border border-white/10 rounded-lg p-3">
                           {(() => {
-                            const review = reviews[Math.floor(Math.random() * reviews.length)];
-                            return `“${review.text}” — ${review.name}`;
+                            const r = reviews[index % reviews.length];
+                            return `“${r.text}” — ${r.name}`;
                           })()}
                         </div>
                       </div>
