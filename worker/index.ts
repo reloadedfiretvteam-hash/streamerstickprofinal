@@ -915,8 +915,9 @@ app.get('*', async (c, next) => {
   }
   // Avoid redirect ping-pong on blog slugs where upstream may enforce trailing slash.
   // Example loop: /blog/slug -> 308 /blog/slug/ -> 301 /blog/slug (this rule).
+  const isBlogIndexWithTrailingSlash = /^\/blog\/$/i.test(path);
   const isBlogSlugWithTrailingSlash = /^\/blog\/[a-z0-9][a-z0-9\-]*\/$/i.test(path);
-  if (path !== '/' && path.endsWith('/') && !isBlogSlugWithTrailingSlash) {
+  if (path !== '/' && path.endsWith('/') && !isBlogIndexWithTrailingSlash && !isBlogSlugWithTrailingSlash) {
     const clean = path.replace(/\/+$/, '');
     return c.redirect('https://streamstickpro.com' + clean + reqUrl.search, 301);
   }
