@@ -391,6 +391,8 @@ app.get('/api/health', (c) => {
   const hasSupabaseUrl = !!c.env.VITE_SUPABASE_URL;
   const hasSupabaseServiceKey = !!(c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY);
   const hasSupabaseAnonKey = !!c.env.VITE_SUPABASE_ANON_KEY;
+  const configuredFromEmail = (c.env.RESEND_FROM_EMAIL || '').trim();
+  const effectiveFromEmail = configuredFromEmail || 'noreply@streamstickpro.com';
 
   return c.json({
     status: 'ok',
@@ -404,7 +406,8 @@ app.get('/api/health', (c) => {
       hasSupabaseServiceKey,
       hasSupabaseAnonKey,
       hasWebhookSecret: !!c.env.STRIPE_WEBHOOK_SECRET,
-      hasFromEmail: !!c.env.RESEND_FROM_EMAIL,
+      hasFromEmailConfigured: !!configuredFromEmail,
+      effectiveFromEmail,
       hasAdminUsername: !!c.env.ADMIN_USERNAME,
       hasAdminPassword: !!c.env.ADMIN_PASSWORD,
       hasJwtSecret: !!c.env.JWT_SECRET,
