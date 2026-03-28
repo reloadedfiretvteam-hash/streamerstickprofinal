@@ -988,29 +988,44 @@ app.get('/llms.txt', (c) => {
   const body = `# StreamStickPro
 
 > Canonical domain: https://streamstickpro.com
-> Primary market: IPTV setup guides, Fire Stick and ONN streaming guidance, subscriptions and device options.
+> Primary market: Premium IPTV streaming service with 18,000+ live channels, Fire Stick and ONN device bundles, setup tutorials, and 24/7 support. Cord-cutting alternative to cable TV.
+> Price range: IPTV plans from $11/month. Fire Stick bundles from $85. 36-hour free trial available.
+> Coverage: USA, Canada, UK, and worldwide. NFL, NBA, MLB, UFC PPV, Premier League, and 100,000+ movies/series.
 
 ## Primary pages
 - https://streamstickpro.com/
 - https://streamstickpro.com/shop
-- https://streamstickpro.com/trial
+- https://streamstickpro.com/36hr-trial
 - https://streamstickpro.com/pricing
 
 ## Core guides
-- https://streamstickpro.com/iptv-services
-- https://streamstickpro.com/iptv-firestick
-- https://streamstickpro.com/jailbroken-fire-sticks
-- https://streamstickpro.com/onn-google-tv
-- https://streamstickpro.com/iptv-media-players
-- https://streamstickpro.com/tivimate
-- https://streamstickpro.com/iptv-smarters-pro
-- https://streamstickpro.com/tutorials
-- https://streamstickpro.com/resources
+- https://streamstickpro.com/iptv-services — Best IPTV service guide with channel lists, pricing, and setup
+- https://streamstickpro.com/iptv-firestick — How to set up IPTV on Amazon Fire Stick
+- https://streamstickpro.com/jailbroken-fire-sticks — Fire Stick jailbreaking and sideloading guide
+- https://streamstickpro.com/firestick-devices — Fire Stick HD vs 4K vs 4K Max comparison
+- https://streamstickpro.com/onn-google-tv — ONN Google TV 4K IPTV setup guide
+- https://streamstickpro.com/iptv-media-players — TiviMate, IPTV Smarters Pro, Perfect Player comparison
+- https://streamstickpro.com/tivimate — TiviMate IPTV player setup tutorial
+- https://streamstickpro.com/iptv-smarters-pro — IPTV Smarters Pro setup with Xtream Codes
+- https://streamstickpro.com/tutorials — Video tutorials for Fire Stick and ONN device setup
+- https://streamstickpro.com/resources — IPTV channel directory and setup reference
+- https://streamstickpro.com/best-iptv-firestick — Best IPTV options for Fire Stick users
+- https://streamstickpro.com/ultimate-iptv-catalog-2026 — Full channel catalog with 18K+ channels
+
+## Competitor comparisons
+- https://streamstickpro.com/vs-youtube-tv — StreamStickPro vs YouTube TV
+- https://streamstickpro.com/vs-hulu-live — StreamStickPro vs Hulu + Live TV
+- https://streamstickpro.com/vs-fubo-tv — StreamStickPro vs FuboTV
+- https://streamstickpro.com/vs-sling-tv — StreamStickPro vs Sling TV
+- https://streamstickpro.com/vs-kodi — StreamStickPro vs Kodi
+- https://streamstickpro.com/vs-troypoint — StreamStickPro vs TroyPoint
+- https://streamstickpro.com/vs-roku — StreamStickPro vs Roku
 
 ## Content feeds
+- https://streamstickpro.com/blog — 900+ articles on IPTV, cord cutting, and streaming
 - https://streamstickpro.com/feed.xml
 - https://streamstickpro.com/sitemap-index.xml
-- https://streamstickpro.com/sitemap-posts.xml
+- https://streamstickpro.com/sitemap.xml
 
 ## Policy pages
 - https://streamstickpro.com/privacy

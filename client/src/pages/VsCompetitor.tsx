@@ -64,9 +64,22 @@ export default function VsCompetitor() {
           </Link>
         </div>
 
-        <p className="text-gray-400 text-sm">
-          <Link href="/">Home</Link> · <Link href="/vs-iptvstronger">vs IPTVStronger</Link> · <Link href="/vs-troypoint">vs TroyPoint</Link> · <Link href="/36hr-trial">36hr Subscription Trial</Link>
-        </p>
+        <div className="text-gray-400 text-sm space-y-2">
+          <p className="font-medium text-gray-300">Compare us to others:</p>
+          <div className="flex flex-wrap gap-x-3 gap-y-1">
+            <Link href="/vs-troypoint"><span className="hover:text-orange-400">vs TroyPoint</span></Link>·
+            <Link href="/vs-youtube-tv"><span className="hover:text-orange-400">vs YouTube TV</span></Link>·
+            <Link href="/vs-hulu-live"><span className="hover:text-orange-400">vs Hulu Live</span></Link>·
+            <Link href="/vs-fubo-tv"><span className="hover:text-orange-400">vs FuboTV</span></Link>·
+            <Link href="/vs-sling-tv"><span className="hover:text-orange-400">vs Sling TV</span></Link>·
+            <Link href="/vs-kodi"><span className="hover:text-orange-400">vs Kodi</span></Link>·
+            <Link href="/vs-roku"><span className="hover:text-orange-400">vs Roku</span></Link>·
+            <Link href="/vs-iptvstronger"><span className="hover:text-orange-400">vs IPTVStronger</span></Link>·
+            <Link href="/vs-downloader-app"><span className="hover:text-orange-400">vs Downloader App</span></Link>·
+            <Link href="/vs-nvidia-shield"><span className="hover:text-orange-400">vs NVIDIA Shield</span></Link>·
+            <Link href="/36hr-trial"><span className="text-orange-400 font-semibold">Start 36hr Trial</span></Link>
+          </div>
+        </div>
       </PillarLayout>
     </>
   );
