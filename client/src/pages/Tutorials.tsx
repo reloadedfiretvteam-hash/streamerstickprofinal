@@ -2,29 +2,51 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout } from "@/components/PillarLayout";
 import { Button } from "@/components/ui/button";
-import { Play, Home } from "lucide-react";
+import { Play, Home, Check, ShieldCheck, Zap } from "lucide-react";
 import { setPageMeta } from "@/lib/seo";
+import { SEOSchema } from "@/components/SEOSchema";
 
-const TITLE = "Adding IPTV Media Players to Your Devices";
-const DESC = "Step-by-step video tutorials: install IPTV media player on Fire Stick and ONN Google TV. Quick setup guides from StreamStickPro.";
+const TITLE = "How to Set Up Fire Stick & ONN for IPTV at Home";
+const DESC = "Step-by-step video tutorials: learn how to set up IPTV on Fire Stick and ONN Google TV. The same guided walkthrough included with every StreamStickPro device purchase.";
 
 const VIDEOS = [
   {
     id: "9pZOoS-1NHg",
     title: "Install IPTV Media Player on Fire Stick",
-    label: "Install IPTV Media Player on Fire Stick",
+    label: "How to Set Up IPTV on Fire Stick",
+    description: "This is the same tutorial video every Fire Stick customer receives after purchase. Follow along to install the IPTV media player and get streaming in minutes.",
   },
   {
     id: "w6s_Tcnnbpo",
     title: "Install IPTV Media Player on ONN Google Device",
-    label: "Install IPTV Media Player on ONN Google Device",
+    label: "How to Set Up IPTV on ONN Google TV",
+    description: "ONN Google TV setup walkthrough. This is included with every ONN device order — plug in, follow the steps, and start watching.",
+  },
+];
+
+const FAQ_ITEMS = [
+  {
+    question: "Is this the same tutorial I get after purchasing?",
+    answer: "Yes. Every customer receives this exact tutorial video after purchase. We also make it available here so you can preview the setup process before buying, or revisit it anytime."
+  },
+  {
+    question: "Do I need technical skills to follow these tutorials?",
+    answer: "No. The tutorials are designed for beginners. Each step is shown on screen with clear instructions. Most customers finish setup in under 10 minutes."
+  },
+  {
+    question: "What devices do these tutorials cover?",
+    answer: "We have tutorials for Amazon Fire Stick (HD, 4K, 4K Max) and ONN Google TV (4K, 4K Pro). The setup process is similar across all devices."
+  },
+  {
+    question: "Can I contact support if I get stuck during setup?",
+    answer: "Absolutely. Our 24/7 support team is available via email at reloadedfiretvteam@gmail.com or WhatsApp. We walk you through any step you need help with."
   },
 ];
 
 export default function Tutorials() {
   useEffect(() => {
     setPageMeta({
-      title: `${TITLE} | Video Tutorials | StreamStick Pro`,
+      title: `${TITLE} | Setup Tutorial | StreamStick Pro`,
       description: DESC,
       path: "/tutorials",
     });
@@ -32,11 +54,12 @@ export default function Tutorials() {
 
   const breadcrumbs = [
     { label: "Home", href: "/" },
-    { label: "Tutorials", href: "/tutorials" },
+    { label: "Setup Tutorial", href: "/tutorials" },
   ];
 
   return (
     <>
+      <SEOSchema faqItems={FAQ_ITEMS} />
       <PillarLayout title={TITLE} description={DESC} breadcrumbs={breadcrumbs}>
         <div className="mb-8">
           <Link href="/">
@@ -47,18 +70,41 @@ export default function Tutorials() {
           </Link>
         </div>
 
+        <div className="mb-10 rounded-2xl bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-400/30 p-6 md:p-8">
+          <h2 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-orange-400" />
+            Included With Every Purchase
+          </h2>
+          <p className="text-gray-200 mb-4">
+            These are the exact same setup tutorials every StreamStickPro customer receives after purchasing a Fire Stick or ONN device. Preview them here, or bookmark this page to revisit during setup.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-3 text-sm">
+            {[
+              "Guided step-by-step walkthrough",
+              "No technical skills needed",
+              "24/7 support if you get stuck",
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2 text-green-300">
+                <Check className="w-4 h-4 shrink-0" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <section aria-labelledby="tutorial-videos-heading" className="space-y-12">
           <h2 id="tutorial-videos-heading" className="text-2xl font-bold text-white sr-only">
             Video tutorials
           </h2>
 
-          {VIDEOS.map((video, index) => (
+          {VIDEOS.map((video) => (
             <article key={video.id} className="rounded-2xl bg-gray-800/50 border border-white/10 overflow-hidden">
               <div className="p-4 md:p-6">
-                <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-white mb-2 flex items-center gap-2">
                   <Play className="w-5 h-5 text-orange-400" aria-hidden="true" />
                   {video.label}
                 </h3>
+                <p className="text-gray-300 text-sm mb-4">{video.description}</p>
                 <div className="aspect-video w-full max-w-3xl rounded-xl overflow-hidden bg-black">
                   <iframe
                     src={`https://www.youtube.com/embed/${video.id}`}
@@ -66,6 +112,7 @@ export default function Tutorials() {
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
                     className="w-full h-full"
+                    loading="lazy"
                   />
                 </div>
               </div>
@@ -73,11 +120,29 @@ export default function Tutorials() {
           ))}
         </section>
 
-        <div className="mt-12 pt-8 border-t border-white/10">
+        <section className="mt-16">
+          <h2 className="text-2xl font-bold text-white mb-6">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            {FAQ_ITEMS.map((faq, i) => (
+              <div key={i} className="rounded-xl bg-gray-800/50 border border-white/10 p-5">
+                <h3 className="text-white font-semibold mb-2">{faq.question}</h3>
+                <p className="text-gray-300 text-sm">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row gap-4">
           <Link href="/">
             <Button className="bg-orange-500 hover:bg-orange-600 text-white gap-2">
               <Home className="w-4 h-4" aria-hidden="true" />
               Back to Home
+            </Button>
+          </Link>
+          <Link href="/shop">
+            <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white gap-2">
+              <Zap className="w-4 h-4" aria-hidden="true" />
+              Shop Devices & Plans
             </Button>
           </Link>
         </div>

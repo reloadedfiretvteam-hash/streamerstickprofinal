@@ -547,7 +547,7 @@ export default function MainStore() {
             <Link href="/iptv-firestick"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Firestick</span></Link>
             <Link href="/firestick-devices"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Devices</span></Link>
             <Link href="/iptv-media-players"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Media Players</span></Link>
-            <Link href="/tutorials"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Tutorials</span></Link>
+            <Link href="/tutorials"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Setup Tutorial</span></Link>
             <Link href="/locations"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Locations</span></Link>
             <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToAbout} data-testid="nav-how-it-works" aria-label="Scroll to How It Works section">How It Works</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToShop} data-testid="nav-shop" aria-label="Scroll to Shop section">Shop</Button>
@@ -1592,20 +1592,23 @@ export default function MainStore() {
         <IPTVMediaPlayersSection />
       </Suspense>
 
-      {/* Tutorials: Adding IPTV Media Players to Your Devices */}
+      {/* Setup Tutorial Section */}
       <section id="tutorials" className="py-16 bg-gradient-to-b from-gray-800/80 to-gray-900/80 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold mb-3 text-white">
-              Adding IPTV Media Players to Your Devices
+              How to Set Up Fire Stick & ONN for IPTV
             </h2>
-            <p className="text-gray-300 text-lg max-w-2xl mx-auto mb-8">
-              Step-by-step video tutorials: install IPTV media player on Fire Stick and ONN Google TV.
+            <p className="text-gray-300 text-lg max-w-2xl mx-auto mb-4">
+              The same guided walkthrough every customer receives after purchase. Preview it here or watch during setup.
+            </p>
+            <p className="text-gray-400 text-sm max-w-xl mx-auto mb-8">
+              No technical skills needed — just follow the video step by step. Most customers finish in under 10 minutes.
             </p>
             <Link href="/tutorials">
               <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-4 text-lg gap-2">
                 <Play className="w-5 h-5" aria-hidden="true" />
-                Watch Tutorials
+                Watch Setup Tutorial
               </Button>
             </Link>
           </div>
