@@ -396,7 +396,7 @@ export default function Blog() {
               <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Main Site</p>
               <p className="font-semibold text-gray-900 dark:text-white">Visit StreamStickPro homepage</p>
             </a>
-            <a href="/trial" className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-green-400 transition-colors">
+            <a href="/36hr-trial" className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 hover:border-green-400 transition-colors">
               <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Try First</p>
               <p className="font-semibold text-gray-900 dark:text-white">Start 36-hour subscription trial</p>
             </a>

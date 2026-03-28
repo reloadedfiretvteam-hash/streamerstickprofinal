@@ -23,7 +23,7 @@ const NODES: SeoPillarNode[] = [
       "iptv channels",
     ],
     intent: "commercial",
-    linksTo: ["/iptv-firestick", "/iptv-media-players", "/pricing", "/trial", "/blog", "/shop"],
+    linksTo: ["/iptv-firestick", "/iptv-media-players", "/pricing", "/36hr-trial", "/blog", "/shop"],
   },
   {
     path: "/iptv-firestick",
@@ -37,7 +37,7 @@ const NODES: SeoPillarNode[] = [
       "iptv smarters firestick",
     ],
     intent: "commercial",
-    linksTo: ["/firestick-devices", "/best-iptv-firestick", "/jailbroken-fire-sticks", "/iptv-services", "/trial", "/shop"],
+    linksTo: ["/firestick-devices", "/best-iptv-firestick", "/jailbroken-fire-sticks", "/iptv-services", "/36hr-trial", "/shop"],
   },
   {
     path: "/jailbroken-fire-sticks",
@@ -65,7 +65,7 @@ const NODES: SeoPillarNode[] = [
       "onn tv guide",
     ],
     intent: "commercial",
-    linksTo: ["/iptv-media-players", "/iptv-services", "/iptv-firestick", "/trial", "/shop"],
+    linksTo: ["/iptv-media-players", "/iptv-services", "/iptv-firestick", "/36hr-trial", "/shop"],
   },
   {
     path: "/iptv-media-players",
@@ -121,7 +121,7 @@ const NODES: SeoPillarNode[] = [
       "firestick device options",
     ],
     intent: "transactional",
-    linksTo: ["/shop", "/trial", "/iptv-firestick", "/jailbroken-fire-sticks", "/best-iptv-firestick"],
+    linksTo: ["/shop", "/36hr-trial", "/iptv-firestick", "/jailbroken-fire-sticks", "/best-iptv-firestick"],
   },
   {
     path: "/best-iptv-firestick",
@@ -135,7 +135,7 @@ const NODES: SeoPillarNode[] = [
       "fire tv iptv options",
     ],
     intent: "transactional",
-    linksTo: ["/shop", "/trial", "/iptv-firestick", "/firestick-devices", "/iptv-services"],
+    linksTo: ["/shop", "/36hr-trial", "/iptv-firestick", "/firestick-devices", "/iptv-services"],
   },
   {
     path: "/resources",
@@ -163,21 +163,7 @@ const NODES: SeoPillarNode[] = [
       "tivimate tutorial",
     ],
     intent: "informational",
-    linksTo: ["/iptv-firestick", "/onn-google-tv", "/iptv-media-players", "/blog", "/trial"],
-  },
-  {
-    path: "/trial",
-    title: "36hr Trial",
-    primaryKeyword: "iptv free trial",
-    supportKeywords: [
-      "36 hour trial",
-      "test iptv service",
-      "free trial fire stick",
-      "trial live tv streaming",
-      "iptv demo access",
-    ],
-    intent: "transactional",
-    linksTo: ["/shop", "/iptv-services", "/iptv-firestick", "/onn-google-tv", "/pricing"],
+    linksTo: ["/iptv-firestick", "/onn-google-tv", "/iptv-media-players", "/blog", "/36hr-trial"],
   },
   {
     path: "/pricing",
@@ -191,7 +177,7 @@ const NODES: SeoPillarNode[] = [
       "multi device pricing",
     ],
     intent: "transactional",
-    linksTo: ["/shop", "/trial", "/iptv-services", "/iptv-firestick"],
+    linksTo: ["/shop", "/36hr-trial", "/iptv-services", "/iptv-firestick"],
   },
   {
     path: "/shop",
@@ -206,7 +192,7 @@ const NODES: SeoPillarNode[] = [
       "iptv plan checkout",
     ],
     intent: "transactional",
-    linksTo: ["/pricing", "/trial", "/iptv-services", "/firestick-devices", "/onn-google-tv"],
+    linksTo: ["/pricing", "/36hr-trial", "/iptv-services", "/firestick-devices", "/onn-google-tv"],
   },
   {
     path: "/blog",
@@ -236,7 +222,7 @@ const NODES: SeoPillarNode[] = [
       "ppv channels iptv",
     ],
     intent: "informational",
-    linksTo: ["/iptv-services", "/shop", "/trial", "/pricing", "/blog"],
+    linksTo: ["/iptv-services", "/shop", "/36hr-trial", "/pricing", "/blog"],
   },
   {
     path: "/36hr-trial",
@@ -260,16 +246,22 @@ const byPath = new Map(NODES.map((node) => [node.path, node]));
 export function normalizeSeoPath(rawPath: string): string {
   const input = String(rawPath || "").trim();
   if (!input) return "/";
+  const LEGACY_PATH_ALIASES: Record<string, string> = {
+    "/trial": "/36hr-trial",
+    "/free-trial": "/36hr-trial",
+  };
   if (input.startsWith("http://") || input.startsWith("https://")) {
     try {
       const parsed = new URL(input);
       const p = parsed.pathname || "/";
-      return p === "/" ? "/" : p.replace(/\/+$/, "");
+      const normalized = p === "/" ? "/" : p.replace(/\/+$/, "");
+      return LEGACY_PATH_ALIASES[normalized] || normalized;
     } catch {
       return "/";
     }
   }
-  return input === "/" ? "/" : `/${input.replace(/^\/+/, "").replace(/\/+$/, "")}`;
+  const normalized = input === "/" ? "/" : `/${input.replace(/^\/+/, "").replace(/\/+$/, "")}`;
+  return LEGACY_PATH_ALIASES[normalized] || normalized;
 }
 
 export function getPillarNode(path: string): SeoPillarNode | null {
