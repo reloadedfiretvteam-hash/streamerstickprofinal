@@ -8,9 +8,78 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, ArrowLeft, CreditCard, Lock, ShieldCheck, Zap, CheckCircle, Loader2, Globe, MessageSquare, Phone } from "lucide-react";
+import { Trash2, ArrowLeft, CreditCard, Lock, ShieldCheck, Zap, CheckCircle, Loader2, Globe, MessageSquare, Phone, Shield, ChevronRight } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { setPageMeta } from "@/lib/seo";
+
+const PAYMENT_METHODS = [
+  { name: "Visa", icon: "💳" },
+  { name: "Mastercard", icon: "💳" },
+  { name: "Amex", icon: "💳" },
+  { name: "Discover", icon: "💳" },
+  { name: "Apple Pay", icon: "🍎" },
+  { name: "Google Pay", icon: "📱" },
+  { name: "Cash App", icon: "💵" },
+  { name: "Affirm", icon: "🅰️" },
+  { name: "Klarna", icon: "🟡" },
+  { name: "Link", icon: "⚡" },
+];
+
+function ProgressBar({ step }: { step: number }) {
+  const steps = [
+    { label: "Cart", num: 1 },
+    { label: "Info", num: 2 },
+    { label: "Payment", num: 3 },
+  ];
+  return (
+    <div className="flex items-center justify-center gap-0 w-full max-w-md mx-auto mb-8">
+      {steps.map((s, i) => (
+        <div key={s.num} className="flex items-center flex-1 last:flex-initial">
+          <div className="flex flex-col items-center">
+            <div
+              className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
+                step >= s.num
+                  ? "bg-gradient-to-br from-orange-500 to-red-500 border-orange-400 text-white shadow-lg shadow-orange-500/30"
+                  : "border-white/20 text-white/40 bg-white/5"
+              }`}
+            >
+              {step > s.num ? <CheckCircle className="w-5 h-5" /> : s.num}
+            </div>
+            <span className={`text-[11px] mt-1.5 font-medium ${step >= s.num ? "text-orange-300" : "text-white/40"}`}>
+              {s.label}
+            </span>
+          </div>
+          {i < steps.length - 1 && (
+            <div className={`flex-1 h-0.5 mx-2 mb-5 rounded-full transition-all ${step > s.num ? "bg-gradient-to-r from-orange-500 to-red-500" : "bg-white/10"}`} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TrustBanner() {
+  return (
+    <div className="bg-gradient-to-r from-emerald-900/40 via-emerald-800/30 to-emerald-900/40 border border-emerald-500/20 rounded-2xl p-4 mb-6 backdrop-blur">
+      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+        <div className="flex items-center gap-2">
+          <Lock className="w-4 h-4 text-emerald-400" />
+          <span className="text-sm font-semibold text-emerald-200">SSL Encrypted</span>
+        </div>
+        <div className="hidden sm:block w-px h-4 bg-emerald-500/30" />
+        <div className="flex items-center gap-2">
+          <Shield className="w-4 h-4 text-emerald-400" />
+          <span className="text-sm font-semibold text-emerald-200">Powered by Stripe</span>
+        </div>
+        <div className="hidden sm:block w-px h-4 bg-emerald-500/30" />
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <span className="text-sm font-semibold text-emerald-200">PCI Compliant</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const productIdMap: Record<string, string> = {
   "fs-hd": "firestick-hd",
@@ -257,18 +326,30 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-black text-foreground">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <Button 
-          variant="ghost" 
-          onClick={() => setLocation("/")} 
-          className="mb-8 hover:bg-white/10"
-          data-testid="button-back"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Store
-        </Button>
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-background to-black text-foreground">
+      <div className="container mx-auto px-4 py-6 max-w-6xl">
+        <div className="flex items-center justify-between mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => setLocation("/")} 
+            className="hover:bg-white/10"
+            data-testid="button-back"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Store
+          </Button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-lg font-bold text-white tracking-tight hidden sm:inline">StreamStickPro</span>
+            <span className="text-lg font-bold text-white tracking-tight sm:hidden">SSP</span>
+          </div>
+        </div>
 
-        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-foreground">Checkout – Complete Your Order</h1>
+        <TrustBanner />
+        <ProgressBar step={2} />
+
+        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-foreground text-center">Complete Your Order</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3 space-y-6">
@@ -596,16 +677,19 @@ export default function Checkout() {
           </div>
 
           <div className="lg:col-span-2">
-            <Card className="border-white/10 bg-gradient-to-b from-card/80 to-card/50 backdrop-blur sticky top-8">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Order Summary</CardTitle>
+            <Card className="border-orange-500/20 bg-gradient-to-b from-gray-900/90 to-gray-950/90 backdrop-blur sticky top-8 shadow-xl shadow-orange-500/5">
+              <CardHeader className="pb-4 border-b border-white/5">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-orange-400" />
+                  Order Summary
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-5 pt-5">
                 <div className="space-y-3">
                   {items.map(item => (
                     <div key={item.id} className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{item.name} x{item.quantity}</span>
-                      <span>${item.price * item.quantity}</span>
+                      <span className="text-gray-300">{item.name} <span className="text-gray-500">x{item.quantity}</span></span>
+                      <span className="font-medium text-white">${(item.price * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -614,20 +698,20 @@ export default function Checkout() {
                 
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>${total()}</span>
+                    <span className="text-gray-400">Subtotal</span>
+                    <span className="text-white">${total()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Shipping</span>
-                    <span className="text-green-400">FREE</span>
+                    <span className="text-gray-400">Shipping</span>
+                    <span className="text-emerald-400 font-medium">FREE</span>
                   </div>
                 </div>
                 
-                <Separator className="bg-white/10" />
-                
-                <div className="flex justify-between text-2xl font-bold">
-                  <span>Total</span>
-                  <span className="text-primary">${total()}</span>
+                <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-xl p-4">
+                  <div className="flex justify-between items-center text-2xl font-bold">
+                    <span className="text-white">Total</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">${total()}</span>
+                  </div>
                 </div>
                 
                 {error && (
@@ -636,9 +720,9 @@ export default function Checkout() {
                   </div>
                 )}
 
-                <div className="space-y-4 pt-2">
+                <div className="space-y-4 pt-1">
                   <Button 
-                    className="w-full bg-primary hover:bg-primary/90 h-14 text-lg font-semibold shadow-lg shadow-primary/25"
+                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 h-14 text-lg font-bold shadow-lg shadow-orange-500/25 transition-all hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.01]"
                     onClick={handlePayment}
                     disabled={isProcessing}
                     data-testid="button-pay"
@@ -646,59 +730,57 @@ export default function Checkout() {
                     {isProcessing ? (
                       <>
                         <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Processing...
+                        Redirecting to Stripe...
                       </>
                     ) : (
                       <>
-                        <Lock className="w-5 h-5 mr-2" />
-                        Pay Securely
+                        Continue to Secure Payment
+                        <ChevronRight className="w-5 h-5 ml-1" />
                       </>
                     )}
                   </Button>
 
-                  <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl space-y-3">
-                    <div className="flex items-start gap-3">
-                      <ShieldCheck className="w-5 h-5 text-blue-400 mt-0.5 shrink-0" />
-                      <div className="text-sm text-blue-200">
-                        <p className="font-medium mb-1">Discrete Billing</p>
-                        <p className="text-blue-300/80">Your bank statement will show "Digital Services" for privacy.</p>
+                  <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+                    <Lock className="w-3 h-3" />
+                    <span>256-bit SSL encryption by Stripe</span>
+                  </div>
+
+                  <div className="bg-blue-500/8 border border-blue-500/15 p-3 rounded-xl">
+                    <div className="flex items-start gap-2.5">
+                      <ShieldCheck className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
+                      <div className="text-xs text-blue-200">
+                        <p className="font-medium">Discrete Billing</p>
+                        <p className="text-blue-300/70 mt-0.5">Your statement will show "Digital Services" for privacy.</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-                      <span>Instant credentials via email</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-                      <span>Setup tutorial video included</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-                      <span>24/7 human support if you get stuck</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-                      <span>Secure 256-bit encryption (Stripe)</span>
-                    </div>
+                  <div className="space-y-2 text-sm">
+                    {[
+                      "Instant credentials via email",
+                      "Setup tutorial video included",
+                      "24/7 human support",
+                      "Coupon codes accepted at checkout",
+                    ].map((text) => (
+                      <div key={text} className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span className="text-gray-300">{text}</span>
+                      </div>
+                    ))}
                   </div>
                   
-                  <div className="pt-2 space-y-3">
-                    <div className="flex justify-center items-center gap-3">
-                      <CreditCard className="w-8 h-8 text-muted-foreground" />
-                      <div className="text-xs text-muted-foreground">
-                        Powered by Stripe
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {["Visa", "Mastercard", "Amex", "Discover", "Apple Pay", "Google Pay", "Link"].map((method) => (
+                  <Separator className="bg-white/5" />
+
+                  <div className="space-y-3">
+                    <p className="text-xs text-gray-500 text-center font-medium uppercase tracking-wider">We accept</p>
+                    <div className="flex flex-wrap justify-center gap-1.5">
+                      {PAYMENT_METHODS.map((method) => (
                         <span
-                          key={method}
-                          className="px-2.5 py-1 rounded-full border border-white/15 bg-white/5 text-[11px] font-semibold text-muted-foreground"
+                          key={method.name}
+                          className="px-2 py-1 rounded-md border border-white/10 bg-white/5 text-[10px] font-semibold text-gray-300 flex items-center gap-1"
                         >
-                          {method}
+                          <span className="text-xs">{method.icon}</span>
+                          {method.name}
                         </span>
                       ))}
                     </div>

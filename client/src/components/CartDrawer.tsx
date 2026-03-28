@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Package, Sparkles, Check } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Package, Sparkles, Check, Lock } from "lucide-react";
 import { useCart } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -213,6 +213,20 @@ export function CartDrawer() {
                   Proceed to Checkout
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
+
+                <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-400">
+                  <Lock className="w-3 h-3" />
+                  <span>Secure checkout powered by Stripe</span>
+                </div>
+
+                <div className="flex flex-wrap justify-center gap-1 pt-1">
+                  {["Visa", "MC", "Amex", "Apple Pay", "Google Pay", "Cash App", "Affirm", "Klarna"].map((m) => (
+                    <span key={m} className="px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-[9px] font-semibold text-gray-400">
+                      {m}
+                    </span>
+                  ))}
+                </div>
+
                 <Button
                   variant="outline"
                   onClick={closeCart}

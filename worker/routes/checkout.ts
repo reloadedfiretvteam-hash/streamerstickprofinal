@@ -68,11 +68,10 @@ export function createCheckoutRoutes() {
         line_items: lineItems,
         mode: 'payment',
         success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${baseUrl}/cancel`,
+        cancel_url: `${baseUrl}/checkout`,
         customer_email: customerEmail,
-        // Enable cards + Link (Apple Pay / Google Pay ride on card payment requests)
-        payment_method_types: ['card', 'link'],
-        // Always collect shipping address so fulfillment has a delivery destination.
+        payment_method_types: ['card', 'link', 'cashapp', 'affirm', 'klarna'],
+        allow_promotion_codes: true,
         shipping_address_collection: {
           allowed_countries: ['US', 'CA'],
         },
