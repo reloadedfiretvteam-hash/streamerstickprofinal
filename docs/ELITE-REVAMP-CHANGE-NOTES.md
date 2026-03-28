@@ -539,3 +539,38 @@ This file is intentionally operational, not marketing-focused.
 - SEO audit result stayed clean:
   - `Pages scanned: 929`
   - `Issues found: 0`
+
+---
+
+## Deployment: 2026-03-28 Batch Push to clean-main
+
+### Commit
+- `78c822b` — Elite revamp: performance, mobile polish, security hardening, admin tools.
+
+### What went live
+- Lazy-loading all routes and heavy components (App.tsx, MainStore.tsx)
+- Vendor chunking for React, Framer Motion, icons, data libs (vite configs)
+- Mobile layout fixes: overflow-x, header branding, WhatsApp button spacing
+- Reassurance chips on IPTV and device product cards (MainStore, Shop)
+- QuickViewButton split for lighter initial bundle
+- Security: disable /generate-hash and /orders/:email in production (requires NODE_ENV=production)
+- Admin: /env-status route for operator diagnostics
+- Updated device descriptions and pricing in worker defaults
+
+### Rollback instructions
+If anything breaks, revert to the pre-deployment state with one command:
+```
+git push origin pre-elite-revamp-20260328:clean-main --force
+```
+This restores the exact code that was live before this batch was pushed. The tag `pre-elite-revamp-20260328` points to commit `600298b`.
+
+### Post-deploy verification
+- `/api/health` returns new format with Stripe/Resend/Supabase diagnostics: all connected
+- `/api/products` returns all 29 products with correct pricing ($11/mo IPTV, $65/yr IPTV, device prices $15 lower)
+- Homepage and Shop pages load correctly
+- SEO audit: 929 pages, 0 issues
+
+### Known issue
+- `NODE_ENV` is not set to `production` in Cloudflare Pages environment variables
+- This means the security guards on `/api/orders/:email` and `/api/auth/generate-hash` are not active yet
+- To fix: set `NODE_ENV=production` in Cloudflare Pages dashboard > Settings > Environment variables
