@@ -143,6 +143,45 @@ const defaultProducts: Product[] = [
   },
 ];
 
+type BuyerProfile = "new" | "family" | "power";
+
+const BUYER_PROFILE_CONFIG: Record<
+  BuyerProfile,
+  {
+    label: string;
+    planDuration: "1mo" | "3mo" | "6mo" | "1yr";
+    streamCount: number;
+    deviceTier: "hd" | "4k" | "max";
+    deviceQty: number;
+    note: string;
+  }
+> = {
+  new: {
+    label: "New User",
+    planDuration: "1mo",
+    streamCount: 1,
+    deviceTier: "4k",
+    deviceQty: 1,
+    note: "Low-risk starter path",
+  },
+  family: {
+    label: "Family",
+    planDuration: "3mo",
+    streamCount: 3,
+    deviceTier: "4k",
+    deviceQty: 2,
+    note: "Best value for most homes",
+  },
+  power: {
+    label: "Power User",
+    planDuration: "1yr",
+    streamCount: 5,
+    deviceTier: "max",
+    deviceQty: 1,
+    note: "Maximum performance and value",
+  },
+};
+
 export default function Shop() {
   const [, setLocation] = useLocation();
   const { addItem, addItemWithQuantity } = useCart();
@@ -155,6 +194,7 @@ export default function Shop() {
     "6mo": 1,
     "1yr": 1,
   });
+  const [buyerProfile, setBuyerProfile] = useState<BuyerProfile>("new");
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
@@ -293,6 +333,42 @@ export default function Shop() {
 
   const firestickProducts = products.filter(p => p.category === 'firestick');
 
+  const getDeviceTier = (id: string): "hd" | "4k" | "max" => {
+    const k = id.toLowerCase();
+    if (k.includes("max")) return "max";
+    if (k.includes("4k")) return "4k";
+    return "hd";
+  };
+
+  const getDeviceBestFor = (id: string): string => {
+    const tier = getDeviceTier(id);
+    if (tier === "hd") return "budget-friendly streaming on 1080p TVs";
+    if (tier === "4k") return "most homes wanting 4K quality and best overall value";
+    return "power users wanting peak speed and premium performance";
+  };
+
+  const applyBuyerProfile = (profile: BuyerProfile) => {
+    const config = BUYER_PROFILE_CONFIG[profile];
+    setBuyerProfile(profile);
+
+    setSelectedDevices({
+      "1mo": config.streamCount,
+      "3mo": config.streamCount,
+      "6mo": config.streamCount,
+      "1yr": config.streamCount,
+    });
+
+    setFirestickQuantities((prev) => ({
+      ...prev,
+      "firestick-hd": config.deviceTier === "hd" ? config.deviceQty : 1,
+      "firestick-4k": config.deviceTier === "4k" ? config.deviceQty : 1,
+      "firestick-4k-max": config.deviceTier === "max" ? config.deviceQty : 1,
+      "fs-hd": config.deviceTier === "hd" ? config.deviceQty : 1,
+      "fs-4k": config.deviceTier === "4k" ? config.deviceQty : 1,
+      "fs-max": config.deviceTier === "max" ? config.deviceQty : 1,
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-gray-900">
       <SEOSchema faq={[
@@ -385,6 +461,34 @@ export default function Shop() {
                 </div>
               ))}
             </div>
+
+            <div className="max-w-4xl mx-auto mb-8 rounded-2xl border border-white/15 bg-white/5 p-4">
+              <p className="text-sm font-semibold text-white mb-3 text-center">Quick Compare: pick your setup style</p>
+              <div className="grid sm:grid-cols-3 gap-2.5">
+                {(Object.keys(BUYER_PROFILE_CONFIG) as BuyerProfile[]).map((profile) => {
+                  const config = BUYER_PROFILE_CONFIG[profile];
+                  const active = buyerProfile === profile;
+                  return (
+                    <button
+                      key={profile}
+                      type="button"
+                      onClick={() => applyBuyerProfile(profile)}
+                      className={`rounded-xl border px-3 py-2.5 text-left transition-all ${
+                        active
+                          ? "border-orange-400 bg-orange-500/20 text-orange-100 shadow-lg shadow-orange-500/20"
+                          : "border-white/15 bg-white/5 text-gray-200 hover:bg-white/10"
+                      }`}
+                      data-testid={`button-profile-${profile}`}
+                    >
+                      <div className="font-semibold text-sm">{config.label}</div>
+                      <div className="text-[11px] opacity-90 mt-0.5">
+                        {config.note} • {config.streamCount} stream{config.streamCount > 1 ? "s" : ""}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             
             {/* Free Trial Box */}
             <FreeTrial />
@@ -393,6 +497,7 @@ export default function Shop() {
               {iptvPricingMatrix.map((plan, index) => {
                 const deviceCount = selectedDevices[plan.duration];
                 const selectedPrice = plan.prices.find(p => p.devices === deviceCount) || plan.prices[0];
+                const recommendedPlan = BUYER_PROFILE_CONFIG[buyerProfile].planDuration === plan.duration;
                 const cardGradients = [
                   'from-slate-800 via-slate-900 to-gray-900',
                   'from-blue-950/50 via-slate-900 to-gray-900',
@@ -406,6 +511,8 @@ export default function Shop() {
                     className={`relative rounded-2xl overflow-hidden transform transition-all duration-300 group ${
                       plan.popular 
                         ? 'ring-4 ring-blue-500 shadow-2xl shadow-blue-500/50 scale-105' 
+                        : recommendedPlan
+                          ? 'ring-2 ring-orange-400 shadow-2xl shadow-orange-500/25'
                         : 'hover:shadow-2xl hover:shadow-blue-500/20'
                     }`}
                     data-testid={`card-product-iptv-${plan.duration}`}
@@ -425,6 +532,13 @@ export default function Shop() {
                         <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
                           <Star className="w-4 h-4 fill-current" />
                           POPULAR
+                        </div>
+                      </div>
+                    )}
+                    {!plan.popular && recommendedPlan && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
+                        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-full font-bold shadow-lg text-xs">
+                          BEST FOR {BUYER_PROFILE_CONFIG[buyerProfile].label.toUpperCase()}
                         </div>
                       </div>
                     )}
@@ -616,6 +730,7 @@ export default function Shop() {
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               {firestickProducts.map((product, index) => {
+                const recommendedDevice = getDeviceTier(product.id) === BUYER_PROFILE_CONFIG[buyerProfile].deviceTier;
                 const cardGradients = [
                   'from-slate-800 via-slate-900 to-gray-900',
                   'from-orange-950/60 via-slate-900 to-gray-900',
@@ -643,6 +758,8 @@ export default function Shop() {
                   className={`relative rounded-2xl overflow-hidden transform transition-all duration-500 hover:scale-105 group ${
                     product.popular 
                       ? 'ring-4 ring-orange-500 scale-105 shadow-2xl shadow-orange-500/50' 
+                      : recommendedDevice
+                        ? 'ring-2 ring-orange-400 shadow-2xl shadow-orange-500/25'
                       : `hover:shadow-2xl ${glowColors[index]}`
                   }`}
                   data-testid={`card-product-${product.id}`}
@@ -668,6 +785,13 @@ export default function Shop() {
                       <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce">
                         <Star className="w-4 h-4 fill-current" />
                         MOST POPULAR
+                      </div>
+                    </div>
+                  )}
+                  {!product.popular && recommendedDevice && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2 rounded-full font-bold shadow-lg text-xs">
+                        BEST FOR {BUYER_PROFILE_CONFIG[buyerProfile].label.toUpperCase()}
                       </div>
                     </div>
                   )}
@@ -722,11 +846,7 @@ export default function Shop() {
                       <h4 className="text-2xl font-bold mb-3 text-white">{product.name}</h4>
                       <div className="mb-4 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-[11px] text-blue-100">
                         <span className="font-semibold text-white">Best for:</span>{" "}
-                        {product.id === "firestick-hd"
-                          ? "budget-friendly streaming on 1080p TVs"
-                          : product.id === "firestick-4k"
-                          ? "most homes wanting 4K quality and best overall value"
-                          : "power users wanting peak speed and premium performance"}
+                        {getDeviceBestFor(product.id)}
                       </div>
 
                       <div className="mb-4">
