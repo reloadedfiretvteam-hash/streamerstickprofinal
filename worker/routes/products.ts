@@ -6,8 +6,8 @@ const defaultProducts = [
   {
     id: "firestick-hd",
     name: "StreamStick Starter Kit",
-    price: 13000,
-    description: "Get fully loaded in just 10 minutes! Your Fire Stick arrives ready - simply plug in, enter your credentials (sent instantly after purchase), and follow our quick setup video.",
+    price: 11500,
+    description: "Entry-level Fire Stick bundle with Reloaded Fire TV, instant credentials, educational tutorial, 1-year included access, and 24/7 support. No dead apps or Kodi rebuilds.",
     imageUrl: "",
     category: "firestick",
     shadowProductId: "prod_TYEEobMjXf5B3d",
@@ -17,8 +17,8 @@ const defaultProducts = [
   {
     id: "firestick-4k",
     name: "StreamStick 4K Kit",
-    price: 14000,
-    description: "Best-selling Fire Stick - get fully loaded in 10 minutes! Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision.",
+    price: 12500,
+    description: "Best-value Fire Stick 4K bundle with Reloaded Fire TV, instant credentials, tutorial video, 1-year included access, and 24/7 support for a smoother all-in-one setup.",
     imageUrl: "",
     category: "firestick",
     shadowProductId: "prod_TYEEFruD8obUE7",
@@ -28,8 +28,8 @@ const defaultProducts = [
   {
     id: "firestick-4k-max",
     name: "StreamStick Max Kit",
-    price: 15000,
-    description: "Ultimate 4K Max with Wi-Fi 6E - get fully loaded in just 10 minutes! Your device arrives ready with breathtaking 4K and Dolby Atmos sound.",
+    price: 13500,
+    description: "Premium Fire Stick 4K Max bundle with Reloaded Fire TV, instant credentials, educational tutorial, 1-year included access, and priority 24/7 support.",
     imageUrl: "",
     category: "firestick",
     shadowProductId: "prod_TYEEeLmZMqrUxh",

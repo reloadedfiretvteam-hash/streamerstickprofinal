@@ -6,6 +6,10 @@ export function createOrderRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
   app.get('/:email', async (c) => {
+    if ((c.env.NODE_ENV || '').toLowerCase() === 'production') {
+      return c.json({ error: "Not found" }, 404);
+    }
+
     try {
       const storage = getStorage(c.env);
       const orders = await storage.getOrdersByEmail(c.req.param('email'));

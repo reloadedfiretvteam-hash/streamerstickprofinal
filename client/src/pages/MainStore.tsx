@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { useLocation, Link } from "wouter";
 import { apiCall } from "@/lib/api";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
@@ -13,24 +13,26 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { SportsCarousel } from "@/components/SportsCarousel";
-import { ExitPopup } from "@/components/ExitPopup";
-import { DemoVideo } from "@/components/DemoVideo";
-import { FreeTrial } from "@/components/FreeTrial";
-import { TrustBadges, PaymentBadges, GuaranteeBadge } from "@/components/TrustBadges";
-import { TrustStats } from "@/components/SocialProof";
-import { ChannelLogos } from "@/components/ChannelLogos";
-import { IPTVMediaPlayersSection } from "@/components/IPTVMediaPlayersSection";
-import { SavingsCalculator } from "@/components/SavingsCalculator";
-import { StickyMobileCTA, ScrollToTopButton } from "@/components/StickyMobileCTA";
+import { TrustBadges } from "@/components/TrustBadges";
 import { SEOSchema, ServiceSchema, ItemListSchema } from "@/components/SEOSchema";
 import { setPageMeta } from "@/lib/seo";
-import { ProductQuickView, QuickViewButton } from "@/components/ProductQuickView";
 import { MobileNav } from "@/components/MobileNav";
-import { ComparisonTable } from "@/components/ComparisonTable";
-import { FloatingCTA } from "@/components/FloatingCTA";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
-import SupportMessageBox from "@/components/SupportMessageBox";
+import { QuickViewButton } from "@/components/QuickViewButton";
+
+const ProductQuickView = lazy(() => import("@/components/ProductQuickView").then((module) => ({ default: module.ProductQuickView })));
+const SportsCarousel = lazy(() => import("@/components/SportsCarousel").then((module) => ({ default: module.SportsCarousel })));
+const ExitPopup = lazy(() => import("@/components/ExitPopup").then((module) => ({ default: module.ExitPopup })));
+const DemoVideo = lazy(() => import("@/components/DemoVideo").then((module) => ({ default: module.DemoVideo })));
+const FreeTrial = lazy(() => import("@/components/FreeTrial").then((module) => ({ default: module.FreeTrial })));
+const TrustStats = lazy(() => import("@/components/SocialProof").then((module) => ({ default: module.TrustStats })));
+const ChannelLogos = lazy(() => import("@/components/ChannelLogos").then((module) => ({ default: module.ChannelLogos })));
+const IPTVMediaPlayersSection = lazy(() => import("@/components/IPTVMediaPlayersSection").then((module) => ({ default: module.IPTVMediaPlayersSection })));
+const SavingsCalculator = lazy(() => import("@/components/SavingsCalculator").then((module) => ({ default: module.SavingsCalculator })));
+const FloatingCTA = lazy(() => import("@/components/FloatingCTA").then((module) => ({ default: module.FloatingCTA })));
+const StickyMobileCTA = lazy(() => import("@/components/StickyMobileCTA").then((module) => ({ default: module.StickyMobileCTA })));
+const ScrollToTopButton = lazy(() => import("@/components/StickyMobileCTA").then((module) => ({ default: module.ScrollToTopButton })));
+const SupportMessageBox = lazy(() => import("@/components/SupportMessageBox"));
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
 const firestickHdImg = `${SUPABASE_BASE}/OIP_(11)99_1764978938773.jpg`;
@@ -435,7 +437,7 @@ export default function MainStore() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white pb-32 md:pb-20 relative">
+    <div className="min-h-screen overflow-x-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white pb-32 md:pb-20 relative">
       {/* Parallax Hero Background - Optimized with lazy loading and performance hints */}
       <div
         className="fixed inset-0 z-0 pointer-events-none bg-cover bg-center bg-no-repeat bg-scroll md:bg-fixed"
@@ -477,10 +479,10 @@ export default function MainStore() {
       
       {/* Navigation - Elite Glassmorphism Design */}
       <nav className="sticky top-0 z-50 w-full border-b border-white/20 bg-gradient-to-r from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-2xl shadow-2xl shadow-black/50" aria-label="Main navigation">
-        <div className="container mx-auto px-4 h-16 md:h-[72px] flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="container mx-auto px-4 h-16 md:h-[72px] flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <MobileNav scrollToShop={scrollToShop} scrollToAbout={scrollToAbout} scrollToFaq={scrollToFaq} onSupportClick={openSupport} />
-            <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
+            <div className="flex items-center gap-2 min-w-0 font-bold tracking-tighter">
               <motion.div
                 animate={{
                   scale: [1, 1.1, 0.95, 1.05, 1],
@@ -501,7 +503,12 @@ export default function MainStore() {
               >
                 <Flame className="w-7 h-7 text-orange-500" />
               </motion.div>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Stream Stick Pro</span>
+              <span className="sm:hidden text-sm text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
+                SSP
+              </span>
+              <span className="hidden sm:inline max-w-[140px] truncate whitespace-nowrap text-base sm:max-w-none sm:text-xl text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
+                Stream Stick Pro
+              </span>
             </div>
           </div>
           
@@ -817,7 +824,9 @@ export default function MainStore() {
             </p>
             
             {/* Free Trial Box */}
-            <FreeTrial />
+            <Suspense fallback={null}>
+              <FreeTrial />
+            </Suspense>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {iptvPricingMatrix.map((plan, index) => {
@@ -932,6 +941,19 @@ export default function MainStore() {
                           </p>
                         </div>
 
+                        <div className="grid grid-cols-1 gap-2 mb-4 text-[11px] text-blue-100">
+                          {[
+                            "Instant email credentials",
+                            "Setup tutorial included",
+                            "24/7 human support",
+                          ].map((line, idx) => (
+                            <div key={idx} className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 py-2">
+                              <Check className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                              <span className="leading-tight">{line}</span>
+                            </div>
+                          ))}
+                        </div>
+
                         <div className="space-y-1.5 mb-4">
                           {productBenefitList.map((feature, idx) => (
                             <div key={idx} className="flex items-start gap-2">
@@ -968,7 +990,9 @@ export default function MainStore() {
           </div>
 
           {/* What You Get Video */}
-          <DemoVideo />
+          <Suspense fallback={null}>
+            <DemoVideo />
+          </Suspense>
 
           {/* Fire Stick Tier Comparison Table */}
           <motion.div 
@@ -1287,6 +1311,19 @@ export default function MainStore() {
                         })()}
                       </div>
 
+                      <div className="grid grid-cols-1 gap-2 mb-6 text-[11px] text-gray-100">
+                        {[
+                          "Reloaded Fire TV all-in-one flow",
+                          "Educational tutorial included",
+                          "1-year access + support",
+                        ].map((line, idx) => (
+                          <div key={idx} className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                            <Check className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                            <span className="leading-tight">{line}</span>
+                          </div>
+                        ))}
+                      </div>
+
                       <div className="space-y-3 mb-6">
                         {productBenefitList.map((feature, idx) => (
                           <div key={idx} className="flex items-start gap-3">
@@ -1429,7 +1466,9 @@ export default function MainStore() {
           </section>
 
           {/* Sports Carousel */}
-          <SportsCarousel />
+          <Suspense fallback={null}>
+            <SportsCarousel />
+          </Suspense>
         </div>
       </section>
 
@@ -1477,7 +1516,9 @@ export default function MainStore() {
       {/* Trust Stats */}
       <div className="py-8 bg-gradient-to-r from-gray-800/50 via-gray-900/50 to-gray-800/50 border-y border-white/10">
         <div className="container mx-auto px-4">
-          <TrustStats />
+          <Suspense fallback={null}>
+            <TrustStats />
+          </Suspense>
         </div>
       </div>
 
@@ -1497,7 +1538,9 @@ export default function MainStore() {
       </div>
 
       {/* IPTV Media Players Section */}
-      <IPTVMediaPlayersSection />
+      <Suspense fallback={null}>
+        <IPTVMediaPlayersSection />
+      </Suspense>
 
       {/* Tutorials: Adding IPTV Media Players to Your Devices */}
       <section id="tutorials" className="py-16 bg-gradient-to-b from-gray-800/80 to-gray-900/80 backdrop-blur-sm">
@@ -1520,7 +1563,9 @@ export default function MainStore() {
       </section>
 
       {/* Channel Logos */}
-      <ChannelLogos />
+      <Suspense fallback={null}>
+        <ChannelLogos />
+      </Suspense>
 
       {/* Comparison Section - StreamStickPro vs Competitors */}
       <section className="py-16 bg-gradient-to-b from-gray-900 to-gray-800">
@@ -1668,7 +1713,9 @@ export default function MainStore() {
       </section>
 
       {/* Savings Calculator */}
-      <SavingsCalculator />
+      <Suspense fallback={null}>
+        <SavingsCalculator />
+      </Suspense>
 
       {/* From Our Blog Section */}
       <section className="py-16 bg-gradient-to-b from-gray-900 to-gray-800/50">
@@ -1988,13 +2035,13 @@ export default function MainStore() {
       </section>
 
       {/* Customer Support Email Banner - Fixed at bottom - More Prominent */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-orange-600 via-orange-500 to-red-500 text-white py-4 px-4 z-[99] border-t-4 border-orange-300/50 shadow-2xl">
-        <div className="container mx-auto flex items-center justify-center gap-4 flex-wrap">
+      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-orange-600 via-orange-500 to-red-500 text-white py-3 md:py-4 px-3 md:px-4 z-[99] border-t-4 border-orange-300/50 shadow-2xl">
+        <div className="container mx-auto flex items-center justify-center gap-2 md:gap-4 flex-wrap pr-16 md:pr-0 text-center">
           <Mail className="w-6 h-6 flex-shrink-0" />
-          <span className="text-base md:text-lg font-semibold">Need Help? Contact us:</span>
+          <span className="text-sm sm:text-base md:text-lg font-semibold">Need Help? Contact us:</span>
           <button 
             onClick={() => setIsSupportOpen(true)}
-            className="font-bold text-white hover:text-orange-100 underline decoration-2 underline-offset-2 transition-colors text-base md:text-lg cursor-pointer bg-transparent border-none p-0 hover:bg-white/10 rounded px-2 py-1"
+            className="font-bold text-white hover:text-orange-100 underline decoration-2 underline-offset-2 transition-colors text-sm sm:text-base md:text-lg cursor-pointer bg-transparent border-none p-0 hover:bg-white/10 rounded px-2 py-1 break-all sm:break-normal"
             data-testid="link-support-email"
             aria-label="Open contact support message box"
           >
@@ -2009,17 +2056,17 @@ export default function MainStore() {
         href="https://wa.me/15853037381" 
         target="_blank" 
         rel="noopener noreferrer"
-        className="fixed bottom-20 md:bottom-24 right-6 z-[100] group"
+        className="fixed bottom-28 md:bottom-24 right-3 md:right-6 z-[100] group"
         data-testid="link-whatsapp"
         aria-label="Chat with us on WhatsApp"
       >
         <div className="relative">
           <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75"></div>
-          <Button className="rounded-full w-16 h-16 shadow-2xl bg-green-500 hover:bg-green-600 border-4 border-white/30 relative z-10 transition-all transform hover:scale-110" data-testid="button-chat">
-            <MessageCircle className="w-7 h-7 text-white" />
+          <Button className="rounded-full w-14 h-14 md:w-16 md:h-16 shadow-2xl bg-green-500 hover:bg-green-600 border-4 border-white/30 relative z-10 transition-all transform hover:scale-110" data-testid="button-chat">
+            <MessageCircle className="w-6 h-6 md:w-7 md:h-7 text-white" />
         </Button>
         </div>
-        <div className="absolute right-20 top-1/2 -translate-y-1/2 bg-white text-gray-900 px-4 py-2 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-sm font-semibold pointer-events-none">
+        <div className="absolute right-20 top-1/2 -translate-y-1/2 bg-white text-gray-900 px-4 py-2 rounded-lg shadow-xl opacity-0 md:group-hover:opacity-100 transition-opacity whitespace-nowrap text-sm font-semibold pointer-events-none hidden md:block">
           Chat with us!
         </div>
       </a>
@@ -2130,29 +2177,41 @@ export default function MainStore() {
       </main>
 
       {/* Exit Intent Popup */}
-      <ExitPopup />
+      <Suspense fallback={null}>
+        <ExitPopup />
+      </Suspense>
 
       {/* Floating CTA */}
-      <FloatingCTA onContact={openSupport} onFreeTrial={scrollToFreeTrial} />
+      <Suspense fallback={null}>
+        <FloatingCTA onContact={openSupport} onFreeTrial={scrollToFreeTrial} />
+      </Suspense>
 
       {/* Sticky Mobile CTA */}
-      <StickyMobileCTA onContact={openSupport} />
+      <Suspense fallback={null}>
+        <StickyMobileCTA onContact={openSupport} />
+      </Suspense>
 
       {/* Scroll to Top */}
-      <ScrollToTopButton />
+      <Suspense fallback={null}>
+        <ScrollToTopButton />
+      </Suspense>
 
       {/* Product Quick View Modal */}
-      <ProductQuickView 
-        product={quickViewProduct} 
-        isOpen={isQuickViewOpen} 
-        onClose={closeQuickView} 
-      />
+      <Suspense fallback={null}>
+        <ProductQuickView 
+          product={quickViewProduct} 
+          isOpen={isQuickViewOpen} 
+          onClose={closeQuickView} 
+        />
+      </Suspense>
 
       {/* Support Message Box */}
-      <SupportMessageBox 
-        isOpen={isSupportOpen} 
-        onClose={() => setIsSupportOpen(false)} 
-      />
+      <Suspense fallback={null}>
+        <SupportMessageBox 
+          isOpen={isSupportOpen} 
+          onClose={() => setIsSupportOpen(false)} 
+        />
+      </Suspense>
       </div>
     </div>
   );

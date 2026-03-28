@@ -427,8 +427,12 @@ export default function AdminPanel() {
     hasResendKey?: boolean;
     hasFromEmail?: boolean;
     hasSupabaseKey?: boolean;
+    isUsingAnonFallback?: boolean;
     hasAdminUsername?: boolean;
     hasAdminPassword?: boolean;
+    hasJwtSecret?: boolean;
+    isUsingDefaultAdminCredentials?: boolean;
+    isUsingDefaultJwtSecret?: boolean;
     nodeEnv?: string;
     fromEmail?: string;
     supabaseUrl?: string;
@@ -597,19 +601,24 @@ export default function AdminPanel() {
     // Load environment status
     const loadEnvStatus = async () => {
       try {
-        const response = await authFetch('/api/debug');
+        const response = await authFetch('/api/admin/env-status');
         const data = await response.json();
+        const env = data.data || {};
         setEnvStatus({
-          hasStripeKey: !!data.stripe?.hasSecretKey,
-          hasWebhookSecret: !!data.stripe?.hasWebhookSecret,
-          hasResendKey: !!data.email?.hasResendKey,
-          hasFromEmail: !!data.email?.hasFromEmail,
-          hasSupabaseKey: !!data.supabase?.hasServiceKey,
-          hasAdminUsername: !!data.auth?.hasAdminUsername,
-          hasAdminPassword: !!data.auth?.hasAdminPassword,
-          nodeEnv: data.nodeEnv,
-          fromEmail: data.email?.fromEmail,
-          supabaseUrl: data.supabase?.url
+          hasStripeKey: !!env.hasStripeKey,
+          hasWebhookSecret: !!env.hasWebhookSecret,
+          hasResendKey: !!env.hasResendKey,
+          hasFromEmail: !!env.hasFromEmail,
+          hasSupabaseKey: !!env.hasSupabaseKey,
+          isUsingAnonFallback: !!env.isUsingAnonFallback,
+          hasAdminUsername: !!env.hasAdminUsername,
+          hasAdminPassword: !!env.hasAdminPassword,
+          hasJwtSecret: !!env.hasJwtSecret,
+          isUsingDefaultAdminCredentials: !!env.isUsingDefaultAdminCredentials,
+          isUsingDefaultJwtSecret: !!env.isUsingDefaultJwtSecret,
+          nodeEnv: env.nodeEnv,
+          fromEmail: env.fromEmail,
+          supabaseUrl: env.supabaseUrl
         });
       } catch (error) {
         console.error('Failed to load environment status:', error);
@@ -4969,11 +4978,30 @@ export default function AdminPanel() {
                           <p className="text-white font-medium">Admin Username</p>
                           <p className="text-xs text-gray-400">ADMIN_USERNAME</p>
                         </div>
-                        <Badge className={envStatus?.hasAdminUsername ? 'bg-green-500' : 'bg-yellow-500'}>
-                          {envStatus?.hasAdminUsername ? 'Configured' : 'Using Default'}
+                        <Badge className={envStatus?.isUsingDefaultAdminCredentials ? 'bg-yellow-500' : 'bg-green-500'}>
+                          {envStatus?.isUsingDefaultAdminCredentials ? 'Using Default' : 'Configured'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                        <div>
+                          <p className="text-white font-medium">JWT Secret</p>
+                          <p className="text-xs text-gray-400">JWT_SECRET</p>
+                        </div>
+                        <Badge className={envStatus?.isUsingDefaultJwtSecret ? 'bg-yellow-500' : 'bg-green-500'}>
+                          {envStatus?.isUsingDefaultJwtSecret ? 'Using Default' : 'Configured'}
                         </Badge>
                       </div>
                     </div>
+                    {(envStatus?.isUsingAnonFallback || envStatus?.isUsingDefaultAdminCredentials || envStatus?.isUsingDefaultJwtSecret) && (
+                      <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 text-sm text-yellow-100">
+                        <p className="font-semibold mb-1">Operator warning</p>
+                        <ul className="space-y-1 text-yellow-100/90">
+                          {envStatus?.isUsingAnonFallback && <li>Supabase is using the anon fallback instead of a service key.</li>}
+                          {envStatus?.isUsingDefaultAdminCredentials && <li>Admin auth is still relying on default credential fallback behavior.</li>}
+                          {envStatus?.isUsingDefaultJwtSecret && <li>JWT auth is still relying on the default fallback secret.</li>}
+                        </ul>
+                      </div>
+                    )}
                     <div className="pt-4 border-t border-gray-700">
                       <Button 
                         variant="outline" 
@@ -5023,19 +5051,24 @@ export default function AdminPanel() {
                         className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
                         onClick={async () => {
                           try {
-                            const response = await authFetch('/api/debug');
+                            const response = await authFetch('/api/admin/env-status');
                             const data = await response.json();
+                            const env = data.data || {};
                             setEnvStatus({
-                              hasStripeKey: !!data.stripe?.hasSecretKey,
-                              hasWebhookSecret: !!data.stripe?.hasWebhookSecret,
-                              hasResendKey: !!data.email?.hasResendKey,
-                              hasFromEmail: !!data.email?.hasFromEmail,
-                              hasSupabaseKey: !!data.supabase?.hasServiceKey,
-                              hasAdminUsername: !!data.auth?.hasAdminUsername,
-                              hasAdminPassword: !!data.auth?.hasAdminPassword,
-                              nodeEnv: data.nodeEnv,
-                              fromEmail: data.email?.fromEmail,
-                              supabaseUrl: data.supabase?.url
+                              hasStripeKey: !!env.hasStripeKey,
+                              hasWebhookSecret: !!env.hasWebhookSecret,
+                              hasResendKey: !!env.hasResendKey,
+                              hasFromEmail: !!env.hasFromEmail,
+                              hasSupabaseKey: !!env.hasSupabaseKey,
+                              isUsingAnonFallback: !!env.isUsingAnonFallback,
+                              hasAdminUsername: !!env.hasAdminUsername,
+                              hasAdminPassword: !!env.hasAdminPassword,
+                              hasJwtSecret: !!env.hasJwtSecret,
+                              isUsingDefaultAdminCredentials: !!env.isUsingDefaultAdminCredentials,
+                              isUsingDefaultJwtSecret: !!env.isUsingDefaultJwtSecret,
+                              nodeEnv: env.nodeEnv,
+                              fromEmail: env.fromEmail,
+                              supabaseUrl: env.supabaseUrl
                             });
                             showToast('Environment status refreshed', 'success');
                           } catch (error) {

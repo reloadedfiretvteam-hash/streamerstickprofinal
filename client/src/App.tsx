@@ -10,13 +10,13 @@ import RetargetingPixels from "@/components/RetargetingPixels";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
 import { Spinner } from "@/components/ui/spinner";
 
-// Critical routes - load immediately
+// Only the public homepage loads immediately.
 import MainStore from "@/pages/MainStore";
-import ShadowStore from "@/pages/ShadowStore";
-import Checkout from "@/pages/Checkout";
-import Shop from "@/pages/Shop";
 
 // Non-critical routes - lazy load for better performance
+const ShadowStore = lazy(() => import("@/pages/ShadowStore"));
+const Checkout = lazy(() => import("@/pages/Checkout"));
+const Shop = lazy(() => import("@/pages/Shop"));
 const AdminPanel = lazy(() => import("@/pages/AdminPanel"));
 const Blog = lazy(() => import("@/pages/Blog"));
 const Success = lazy(() => import("@/pages/Success"));
@@ -47,6 +47,9 @@ const ToolsCatalog = lazy(() => import("@/pages/ToolsCatalog"));
 const Tutorials = lazy(() => import("@/pages/Tutorials"));
 const SeoAds = lazy(() => import("@/pages/SeoAds"));
 const NotFound = lazy(() => import("@/pages/not-found"));
+const CartDrawer = lazy(() => import("@/components/CartDrawer").then((module) => ({ default: module.CartDrawer })));
+const WishlistDrawer = lazy(() => import("@/components/WishlistDrawer").then((module) => ({ default: module.WishlistDrawer })));
+const ExitIntentPopup = lazy(() => import("@/components/ExitIntentPopup"));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -57,8 +60,6 @@ const LoadingFallback = () => (
     </div>
   </div>
 );
-import { CartDrawer } from "@/components/CartDrawer";
-import { WishlistDrawer } from "@/components/WishlistDrawer";
 import CanonicalTag from "@/components/CanonicalTag";
 
 const SECURE_HOSTS = (import.meta.env.VITE_SECURE_HOSTS || 'secure.streamstickpro.com').split(',').map((h: string) => h.trim().toLowerCase());
@@ -135,15 +136,17 @@ function AppContent() {
     <>
       <CanonicalTag />
       <RetargetingPixels />
-      <ExitIntentPopup 
-        onClose={() => {}} 
-        onAction={() => {
-          // Optional: Scroll to shop section or open cart
-        }}
-      />
       <Toaster />
-      <CartDrawer />
-      <WishlistDrawer />
+      <Suspense fallback={null}>
+        <ExitIntentPopup 
+          onClose={() => {}} 
+          onAction={() => {
+            // Optional: Scroll to shop section or open cart
+          }}
+        />
+        <CartDrawer />
+        <WishlistDrawer />
+      </Suspense>
       <Router />
     </>
   );

@@ -388,7 +388,28 @@ app.get('/api/stripe/config', async (c) => {
 });
 
 app.get('/api/health', (c) => {
-  return c.json({ status: 'ok', timestamp: new Date().toISOString(), version: '2.0.1' });
+  const hasSupabaseUrl = !!c.env.VITE_SUPABASE_URL;
+  const hasSupabaseServiceKey = !!(c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY);
+  const hasSupabaseAnonKey = !!c.env.VITE_SUPABASE_ANON_KEY;
+
+  return c.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    version: '2.0.1',
+    stripe: !!c.env.STRIPE_SECRET_KEY,
+    resend: !!c.env.RESEND_API_KEY,
+    supabase: hasSupabaseUrl && (hasSupabaseServiceKey || hasSupabaseAnonKey),
+    details: {
+      hasSupabaseUrl,
+      hasSupabaseServiceKey,
+      hasSupabaseAnonKey,
+      hasWebhookSecret: !!c.env.STRIPE_WEBHOOK_SECRET,
+      hasFromEmail: !!c.env.RESEND_FROM_EMAIL,
+      hasAdminUsername: !!c.env.ADMIN_USERNAME,
+      hasAdminPassword: !!c.env.ADMIN_PASSWORD,
+      hasJwtSecret: !!c.env.JWT_SECRET,
+    }
+  });
 });
 
 // Catalog API: 93K catalog summary for Schema.org Dataset / AI citation (Nuclear SEO)

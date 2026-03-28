@@ -1,5 +1,5 @@
 // Build timestamp: 2026-01-13T02:19:49.886Z
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, lazy, Suspense } from "react";
 import { useLocation } from "wouter";
 import { apiCall } from "@/lib/api";
 import { motion } from "framer-motion";
@@ -10,9 +10,11 @@ import { getStorageUrl } from "@/lib/supabase";
 import { SportsCarousel } from "@/components/SportsCarousel";
 import { DemoVideo } from "@/components/DemoVideo";
 import { FreeTrial } from "@/components/FreeTrial";
-import { ProductQuickView, QuickViewButton } from "@/components/ProductQuickView";
+import { QuickViewButton } from "@/components/QuickViewButton";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { setPageMeta } from "@/lib/seo";
+
+const ProductQuickView = lazy(() => import("@/components/ProductQuickView").then((module) => ({ default: module.ProductQuickView })));
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
 const firestickHdImg = `${SUPABASE_BASE}/OIP_(11)99_1764978938773.jpg`;
@@ -439,6 +441,19 @@ export default function Shop() {
                           </p>
                         </div>
 
+                        <div className="grid grid-cols-1 gap-2 mb-4 text-[11px] text-blue-100">
+                          {[
+                            "Instant email credentials",
+                            "Setup tutorial included",
+                            "24/7 human support",
+                          ].map((line, idx) => (
+                            <div key={idx} className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 py-2">
+                              <Check className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                              <span className="leading-tight">{line}</span>
+                            </div>
+                          ))}
+                        </div>
+
                         <button
                           onClick={() => addItem({
                             id: selectedPrice.productId,
@@ -707,6 +722,19 @@ export default function Shop() {
                         })()}
                       </div>
 
+                      <div className="grid grid-cols-1 gap-2 mb-6 text-[11px] text-gray-100">
+                        {[
+                          "Reloaded Fire TV all-in-one flow",
+                          "Educational tutorial included",
+                          "1-year access + support",
+                        ].map((line, idx) => (
+                          <div key={idx} className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                            <Check className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                            <span className="leading-tight">{line}</span>
+                          </div>
+                        ))}
+                      </div>
+
                       <div className="flex gap-2 mb-6">
                         <button
                           onClick={() => {
@@ -722,7 +750,9 @@ export default function Shop() {
                           data-testid={`button-add-${product.id}`}
                         >
                           <ShoppingCart className="w-5 h-5" />
-                          Add {firestickQuantities[product.id] > 1 ? `${firestickQuantities[product.id]} ` : ''}to Cart
+                          {firestickQuantities[product.id] > 1
+                            ? `Add ${firestickQuantities[product.id]} to Cart`
+                            : 'Add to Cart'}
                         </button>
                       </div>
 
@@ -756,11 +786,13 @@ export default function Shop() {
       </section>
 
       {isQuickViewOpen && quickViewProduct && (
-        <ProductQuickView
-          product={quickViewProduct}
-          isOpen={isQuickViewOpen}
-          onClose={closeQuickView}
-        />
+        <Suspense fallback={null}>
+          <ProductQuickView
+            product={quickViewProduct}
+            isOpen={isQuickViewOpen}
+            onClose={closeQuickView}
+          />
+        </Suspense>
       )}
     </div>
   );

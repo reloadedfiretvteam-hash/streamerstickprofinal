@@ -86,6 +86,10 @@ export function createAuthRoutes() {
   });
 
   app.post('/generate-hash', async (c) => {
+    if ((c.env.NODE_ENV || '').toLowerCase() === 'production') {
+      return c.json({ error: 'Not found' }, 404);
+    }
+
     try {
       const body = await c.req.json();
       const { password } = body;

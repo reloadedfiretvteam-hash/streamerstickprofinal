@@ -1908,6 +1908,38 @@ export function createAdminRoutes() {
     }
   });
 
+  app.get('/env-status', async (c) => {
+    try {
+      const hasServiceKey = !!(c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY);
+      const hasAnonKey = !!c.env.VITE_SUPABASE_ANON_KEY;
+      const hasAdminUsername = !!c.env.ADMIN_USERNAME;
+      const hasAdminPassword = !!c.env.ADMIN_PASSWORD;
+      const hasJwtSecret = !!c.env.JWT_SECRET;
+
+      return c.json({
+        data: {
+          hasStripeKey: !!c.env.STRIPE_SECRET_KEY,
+          hasWebhookSecret: !!c.env.STRIPE_WEBHOOK_SECRET,
+          hasResendKey: !!c.env.RESEND_API_KEY,
+          hasFromEmail: !!c.env.RESEND_FROM_EMAIL,
+          hasSupabaseKey: hasServiceKey,
+          isUsingAnonFallback: !hasServiceKey && hasAnonKey,
+          hasAdminUsername,
+          hasAdminPassword,
+          hasJwtSecret,
+          isUsingDefaultAdminCredentials: !hasAdminUsername || !hasAdminPassword,
+          isUsingDefaultJwtSecret: !hasJwtSecret,
+          nodeEnv: c.env.NODE_ENV || 'not set',
+          fromEmail: c.env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com',
+          supabaseUrl: c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
+        }
+      });
+    } catch (error: any) {
+      console.error("Error fetching env status:", error);
+      return c.json({ error: "Failed to fetch environment status" }, 500);
+    }
+  });
+
   // Resend credentials to all orders missing them
   app.post('/fix-missing-credentials', async (c) => {
     try {
