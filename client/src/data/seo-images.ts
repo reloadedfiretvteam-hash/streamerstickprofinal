@@ -40,9 +40,9 @@ export const JAILBREAK_IMAGES: ImageDef[] = [
   SEO_IMAGES.firestickOriginal,
   SEO_IMAGES.firestickApk,
   SEO_IMAGES.firestick4k,
-  { src: `${SUPABASE}/OIP_(11)99_1764978938773.jpg`, alt: "Fire Stick HD for IPTV – StreamStickPro" },
-  { src: `${SUPABASE}/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg`, alt: "Fire Stick 4K streaming device – StreamStickPro" },
-  { src: `${SUPABASE}/71E1te69hZL._AC_SL1500__1764978938773.jpg`, alt: "Fire Stick 4K Max – StreamStickPro" },
+  { src: `${SUPABASE}/firestick-original-jailbroken.jpg`, alt: "Fire Stick HD for IPTV – StreamStickPro" },
+  { src: `${SUPABASE}/firestick-4k-jailbroken.jpg`, alt: "Fire Stick 4K streaming device – StreamStickPro" },
+  { src: `${SUPABASE}/firestick-4k-max-jailbroken.jpg`, alt: "Fire Stick 4K Max – StreamStickPro" },
 ];
 
 /** Pool of IPTV / live TV images */
@@ -58,8 +58,8 @@ export const IPTV_IMAGES: ImageDef[] = [
 export const ONN_IMAGES: ImageDef[] = [
   SEO_IMAGES.onnGoogleTvBox,
   SEO_IMAGES.onn4kUltraHd,
-  { src: `${SUPABASE}/s-l1600onnbok_1766008738774.webp`, alt: "Onn 4K Google TV streaming device – StreamStickPro" },
-  { src: `${SUPABASE}/OIPonnbox4k_1766008832103.webp`, alt: "Onn 4K Pro Android TV – StreamStickPro" },
+  { src: `${SUPABASE}/onn-4k-streaming.webp`, alt: "Onn 4K Google TV streaming device – StreamStickPro" },
+  { src: `${SUPABASE}/onn-4k-ultra-hd.webp`, alt: "Onn 4K Pro Android TV – StreamStickPro" },
 ];
 
 /** Pool for IPTV Smarters / TiviMate app pages */
@@ -74,7 +74,7 @@ export const HERO_AND_DEVICE_IMAGES: ImageDef[] = [
   { src: `${SUPABASE}/hero-firestick-breakout.jpg`, alt: "StreamStickPro Fire Stick and IPTV – 36hr free trial" },
   SEO_IMAGES.iptvAmerica,
   SEO_IMAGES.jailbrokenChain,
-  { src: `${SUPABASE}/stock_images/amazon_fire_tv_stick_cc445778.jpg`, alt: "Amazon Fire TV Stick for IPTV – StreamStickPro" },
+  { src: `${SUPABASE}/firestick-4k-jailbroken.jpg`, alt: "Amazon Fire TV Stick for IPTV – StreamStickPro" },
 ];
 
 /** Pick one image from the group so each section gets a different one (sectionIndex = 0, 1, 2, …). */

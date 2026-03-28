@@ -35,13 +35,13 @@ const ScrollToTopButton = lazy(() => import("@/components/StickyMobileCTA").then
 const SupportMessageBox = lazy(() => import("@/components/SupportMessageBox"));
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
-const firestickHdImg = `${SUPABASE_BASE}/OIP_(11)99_1764978938773.jpg`;
-const firestick4kImg = `${SUPABASE_BASE}/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg`;
-const firestick4kMaxImg = `${SUPABASE_BASE}/71E1te69hZL._AC_SL1500__1764978938773.jpg`;
-const onn4kImg = `${SUPABASE_BASE}/s-l1600onnbok_1766008738774.webp`;
-const onn4kProImg = `${SUPABASE_BASE}/OIPonnbox4k_1766008832103.webp`;
+const firestickHdImg = `${SUPABASE_BASE}/firestick-original-jailbroken.jpg`;
+const firestick4kImg = `${SUPABASE_BASE}/firestick-4k-jailbroken.jpg`;
+const firestick4kMaxImg = `${SUPABASE_BASE}/firestick-4k-max-jailbroken.jpg`;
+const onn4kImg = `${SUPABASE_BASE}/onn-4k-streaming.webp`;
+const onn4kProImg = `${SUPABASE_BASE}/onn-4k-ultra-hd.webp`;
 const iptvImg = `${SUPABASE_BASE}/iptv-subscription.jpg`;
-const fallbackHeroImg = `${SUPABASE_BASE}/stock_images/amazon_fire_tv_stick_cc445778.jpg`;
+const fallbackHeroImg = `${SUPABASE_BASE}/firestick-4k-jailbroken.jpg`;
 const heroImg = `${SUPABASE_BASE}/hero-firestick-breakout.jpg`;
 const productBenefitList = [
   "18,000 live channels worldwide",
@@ -1869,28 +1869,28 @@ export default function MainStore() {
                 title: "Choose Your Device", 
                 description: "Select from Fire Stick HD, 4K, or 4K Max. All device options include clear setup guidance.",
                 icon: "📱",
-                image: "firestick-device-selection.jpg"
+                image: firestick4kImg
               },
               { 
                 step: "2", 
                 title: "Add IPTV Subscription", 
                 description: "Choose your Live TV plan - 1 month, 3 months, or save with longer plans. Multi-device options available.",
                 icon: "📺",
-                image: "iptv-subscription-selection.jpg"
+                image: iptvImg
               },
               { 
                 step: "3", 
                 title: "We Ship & Setup", 
                 description: "Your device arrives with credentials and clear setup guidance so you can get started quickly.",
                 icon: "🚀",
-                image: "device-setup-ready.jpg"
+                image: firestick4kMaxImg
               },
               { 
                 step: "4", 
                 title: "Start Streaming", 
                 description: "Plug in, connect to WiFi, and start watching 18,000+ channels and 100,000+ movies instantly.",
                 icon: "🎬",
-                image: "streaming-content.jpg"
+                image: `${SUPABASE_BASE}/4k-live-iptv.jpg`
               }
             ].map((item, index) => (
               <motion.div
@@ -1907,19 +1907,12 @@ export default function MainStore() {
                 </div>
                 <h3 className="text-xl font-black text-white mb-3">{item.title}</h3>
                 <p className="text-gray-200 leading-relaxed">{item.description}</p>
-                {/* Image loads from Supabase when uploaded */}
-                <div className="mt-6 h-32 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl flex items-center justify-center border border-gray-600/30 overflow-hidden">
+                <div className="mt-6 h-32 rounded-xl overflow-hidden border border-white/10">
                   <img 
-                    src={`https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/${item.image}`}
+                    src={item.image}
                     alt={item.title}
-                    className="w-full h-full object-cover opacity-50 hover:opacity-100 transition-opacity"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      if (target.parentElement) {
-                        target.parentElement.innerHTML = `<span class="text-gray-400 text-xs text-center px-4">Upload image: ${item.image}</span>`;
-                      }
-                    }}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </div>
               </motion.div>
@@ -1946,7 +1939,7 @@ export default function MainStore() {
                 title: "No Tech Skills Required",
                 description: "Clear setup guidance with no guesswork. Start quickly with step-by-step support.",
                 visual: "💻",
-                image: "no-tech-skills.jpg",
+                image: firestickHdImg,
                 color: "from-green-500/15 to-emerald-500/5",
                 border: "border-green-400/30"
               },
@@ -1954,7 +1947,7 @@ export default function MainStore() {
                 title: "Instant Access",
                 description: "Your credentials arrive instantly via email. Start streaming in minutes, not days.",
                 visual: "⚡",
-                image: "instant-access.jpg",
+                image: onn4kImg,
                 color: "from-yellow-500/15 to-orange-500/5",
                 border: "border-yellow-400/30"
               },
@@ -1962,7 +1955,7 @@ export default function MainStore() {
                 title: "All Premium Content",
                 description: "18,000+ channels, 100,000+ movies, all sports including NFL, NBA, UFC PPV.",
                 visual: "🎯",
-                image: "premium-content.jpg",
+                image: heroImg,
                 color: "from-purple-500/15 to-pink-500/5",
                 border: "border-purple-400/30"
               }
@@ -1978,17 +1971,12 @@ export default function MainStore() {
                 <div className="text-7xl mb-6">{item.visual}</div>
                 <h3 className="text-2xl font-black text-white mb-4">{item.title}</h3>
                 <p className="text-gray-200 text-lg leading-relaxed mb-6">{item.description}</p>
-                {/* Image loads from Supabase when uploaded */}
-                <div className="h-40 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl flex items-center justify-center border border-gray-600/30 overflow-hidden">
+                <div className="h-40 rounded-xl overflow-hidden border border-white/10">
                   <img 
-                    src={getStorageUrl('images', item.image)} 
+                    src={item.image} 
                     alt={item.title}
-                    className="w-full h-full object-cover opacity-50 hover:opacity-100 transition-opacity"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      target.parentElement!.innerHTML = `<span class="text-gray-400 text-xs text-center px-4">Upload image: ${item.image}</span>`;
-                    }}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </div>
               </motion.div>

@@ -17,9 +17,9 @@ import { setPageMeta } from "@/lib/seo";
 const ProductQuickView = lazy(() => import("@/components/ProductQuickView").then((module) => ({ default: module.ProductQuickView })));
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
-const firestickHdImg = `${SUPABASE_BASE}/OIP_(11)99_1764978938773.jpg`;
-const firestick4kImg = `${SUPABASE_BASE}/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg`;
-const firestick4kMaxImg = `${SUPABASE_BASE}/71E1te69hZL._AC_SL1500__1764978938773.jpg`;
+const firestickHdImg = `${SUPABASE_BASE}/firestick-original-jailbroken.jpg`;
+const firestick4kImg = `${SUPABASE_BASE}/firestick-4k-jailbroken.jpg`;
+const firestick4kMaxImg = `${SUPABASE_BASE}/firestick-4k-max-jailbroken.jpg`;
 const iptvImg = `${SUPABASE_BASE}/iptv-subscription.jpg`;
 
 // Force new bundle - v2.0.$(date +%s)
