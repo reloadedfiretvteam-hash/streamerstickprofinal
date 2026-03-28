@@ -55,8 +55,8 @@ export function IPTVMediaPlayersSection() {
               </span>
             </h2>
             <p className="text-xl text-gray-200 max-w-3xl mx-auto">
-              Our IPTV service works with all major IPTV media players including TiviMate, IPTV Smarters, Perfect Player, and VLC. 
-              Pre-configured Fire Sticks come with the best player already installed and optimized.
+              Our IPTV service works with all major IPTV media players including TiviMate, IPTV Smarters, Perfect Player, and VLC.
+              Fire Stick device options are supported with straightforward setup guidance.
             </p>
           </div>
 
@@ -110,25 +110,25 @@ export function IPTVMediaPlayersSection() {
             className="bg-gradient-to-r from-gray-800/80 via-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl p-8 border border-white/10"
           >
             <h3 className="text-2xl font-bold text-white mb-6 text-center">
-              Why Choose Pre-Configured Fire Sticks?
+              Why Choose Fire Stick Device Options?
             </h3>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Zap className="w-8 h-8 text-white" />
                 </div>
-                <h4 className="text-lg font-bold text-white mb-2">Best Player Pre-Installed</h4>
+                <h4 className="text-lg font-bold text-white mb-2">Recommended Player Guidance</h4>
                 <p className="text-gray-300 text-sm">
-                  We install and configure the optimal IPTV player for your device - no setup needed
+                  We recommend the best IPTV player for your device and provide clear setup steps.
                 </p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-8 h-8 text-white" />
                 </div>
-                <h4 className="text-lg font-bold text-white mb-2">Optimized Settings</h4>
+                <h4 className="text-lg font-bold text-white mb-2">Optimized Setup</h4>
                 <p className="text-gray-300 text-sm">
-                  All players are pre-configured with optimal settings for best streaming performance
+                  Follow proven setup guidance and settings for stable, high-quality streaming performance.
                 </p>
               </div>
               <div className="text-center">
@@ -137,7 +137,7 @@ export function IPTVMediaPlayersSection() {
                 </div>
                 <h4 className="text-lg font-bold text-white mb-2">Instant Access</h4>
                 <p className="text-gray-300 text-sm">
-                  Start streaming immediately - no app installation or configuration required
+                  Start streaming quickly with instant credentials and step-by-step support.
                 </p>
               </div>
             </div>

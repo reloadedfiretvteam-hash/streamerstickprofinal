@@ -3,13 +3,15 @@ import { Play, Pause, Volume2, VolumeX, Maximize, Tv, Zap, Star } from "lucide-r
 import { motion } from "framer-motion";
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
-const iptvCoverImg = `/opengraph.jpg`;
+const preferredPoster = "/images/reloaded-firetv-guide-cover.png"; // place provided cover image here
+const fallbackPoster = `/opengraph.jpg`;
 const demoVideoSrc = `${SUPABASE_BASE}/demo-video.mp4`;
 
 export function DemoVideo() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [posterSrc, setPosterSrc] = useState(preferredPoster);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const togglePlay = () => {
@@ -60,7 +62,7 @@ export function DemoVideo() {
             </span>
           </h2>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Watch what's included with every Fire Stick purchase - premium channels, sports, movies & more!
+            Reloaded Fire TV all-in-one preview: educational setup walkthrough, fast activation steps, and what is included with every Fire Stick and ONN device order.
           </p>
         </motion.div>
         
@@ -72,7 +74,7 @@ export function DemoVideo() {
           className="relative max-w-4xl mx-auto"
         >
           <div 
-            className="relative aspect-video rounded-2xl overflow-hidden border-2 border-purple-500/30 shadow-2xl shadow-purple-500/20 bg-black group cursor-pointer"
+            className="relative aspect-video rounded-3xl overflow-hidden border-2 border-purple-500/40 shadow-2xl shadow-purple-500/25 bg-black group cursor-pointer"
             onMouseEnter={() => setShowControls(true)}
             onMouseLeave={() => isPlaying && setShowControls(false)}
             onClick={togglePlay}
@@ -81,9 +83,10 @@ export function DemoVideo() {
             <video
               ref={videoRef}
               src={demoVideoSrc}
-              poster={iptvCoverImg}
+              poster={posterSrc}
               className="w-full h-full object-cover"
               onEnded={() => setIsPlaying(false)}
+              onError={() => setPosterSrc(fallbackPoster)}
               playsInline
               data-testid="demo-video"
             >
@@ -91,12 +94,12 @@ export function DemoVideo() {
             </video>
             
             {!isPlaying && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-tr from-purple-900/60 via-black/40 to-orange-900/40">
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-30"></div>
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-tr from-purple-900/60 via-black/45 to-orange-900/45">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-25"></div>
                 
                 <motion.div 
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.96 }}
                   className="relative z-10"
                 >
                   <div className="w-24 h-24 rounded-full bg-gradient-to-r from-purple-500 to-orange-500 flex items-center justify-center shadow-2xl shadow-purple-500/50 animate-pulse">
@@ -104,7 +107,7 @@ export function DemoVideo() {
                   </div>
                 </motion.div>
                 
-                <div className="absolute top-6 right-6 z-20 bg-black/60 text-white text-xs md:text-sm px-3 py-1.5 rounded-full border border-white/20">
+                <div className="absolute top-6 right-6 z-20 bg-black/70 text-white text-xs md:text-sm px-3 py-1.5 rounded-full border border-white/20">
                   Click to Play Video
                 </div>
 
@@ -114,16 +117,16 @@ export function DemoVideo() {
                       <Zap className="w-5 h-5 text-white" />
                     </div>
                     <div className="text-left">
-                      <p className="text-white font-bold text-lg">Stream Stick Pro - What You Get</p>
-                      <p className="text-sm text-gray-300">Setup Guide & Live Demo</p>
+                      <p className="text-white font-bold text-lg">Reloaded Fire TV - What You Get</p>
+                      <p className="text-sm text-gray-300">Educational Tutorial + 1 Year Included Access</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-300">
-                    <span>24/7 Support</span>
+                    <span>Educational Tutorial</span>
                     <span>•</span>
-                    <span>Instant Setup</span>
+                    <span>Easy Setup</span>
                     <span>•</span>
-                    <span>18,000+ Channels</span>
+                    <span>All-in-One App</span>
                   </div>
                 </div>
               </div>

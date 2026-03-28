@@ -6,7 +6,7 @@ import { setPageMeta } from "@/lib/seo";
 import { IPTV_IMAGES, getImageForSlot, fullImageUrl } from "@/data/seo-images";
 
 const TITLE = "Ultimate IPTV Guide 2026: Best IPTV Service & Live TV Streaming";
-const DESC = "Complete guide to the best IPTV service for 2026. Compare live TV streaming, cheap IPTV subscriptions, and cord-cutting. 18,000+ channels, Fire Stick & Android.";
+const DESC = "Complete guide to the best IPTV service for 2026. Compare live TV streaming, cheap IPTV subscriptions, and cord-cutting. 18,000+ channels, Fire Stick & Android. No dead apps—guided setup, tutorial, and 24/7 support.";
 
 export default function IptvServices() {
   useEffect(() => {
@@ -46,11 +46,11 @@ export default function IptvServices() {
       <SEOSchema faq={faq} />
       <PillarLayout
         title={TITLE}
-        description="Your complete guide to the best IPTV service and live TV streaming in 2026. Compare options, learn how IPTV works, and find the right plan for Fire Stick and Android."
+        description="Your complete guide to the best IPTV service and live TV streaming in 2026. Compare options, learn how IPTV works, and find the right plan for Fire Stick and Android—with guided setup, tutorial video, and 24/7 support."
         breadcrumbs={breadcrumbs}
       >
         <h2 id="what-is-iptv">What Is IPTV and How Does Live TV Streaming Work?</h2>
-        <p>IPTV (Internet Protocol Television) is a way to watch live TV and on-demand content over the internet. Instead of cable or satellite, your TV signal comes through your broadband connection. That means you can watch on <Link href="/iptv-firestick">Fire Stick</Link>, Android boxes, Smart TVs, phones, and tablets—anywhere you have internet.</p>
+        <p>IPTV (Internet Protocol Television) is a way to watch live TV and on-demand content over the internet. Instead of cable or satellite, your TV signal comes through your broadband connection. That means you can watch on <Link href="/iptv-firestick">Fire Stick</Link>, Android boxes, Smart TVs, phones, and tablets—anywhere you have internet—without hunting through broken app lists.</p>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
           <img src={getImageForSlot(IPTV_IMAGES, 0).src} alt={getImageForSlot(IPTV_IMAGES, 0).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
         </figure>
@@ -61,14 +61,14 @@ export default function IptvServices() {
         <ul>
           <li><strong>Channel count and quality</strong> — 18,000+ live channels and 100,000+ movies/series is a strong offering.</li>
           <li><strong>Compatibility</strong> — Works on <Link href="/firestick-devices">Fire Stick</Link>, Android, and Smart TV.</li>
-          <li><strong>Stability</strong> — Reliable playback, strong uptime, and EPG (TV guide) support.</li>
+          <li><strong>Stability</strong> — Reliable playback, strong uptime, and EPG (TV guide) support without dead links.</li>
           <li><strong>Multi-device</strong> — Plans that allow 2–5 devices are ideal for families.</li>
-          <li><strong>Support</strong> — 24/7 support and instant delivery of credentials.</li>
+          <li><strong>Support</strong> — 24/7 support, instant delivery of credentials, and a quick tutorial to avoid trial-and-error installs.</li>
         </ul>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
           <img src={getImageForSlot(IPTV_IMAGES, 1).src} alt={getImageForSlot(IPTV_IMAGES, 1).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
         </figure>
-        <p>StreamStickPro meets these with instant M3U delivery, TiviMate-friendly setup, and a <Link href="/36hr-trial">36-hour subscription trial</Link> so you can test before committing. For the best <Link href="/iptv-media-players">IPTV media players</Link> (TiviMate, IPTV Smarters, VLC), see our full guide.</p>
+        <p>StreamStickPro meets these with instant M3U delivery, TiviMate-friendly setup, an educational tutorial, and 24/7 support. Try the <Link href="/36hr-trial">36-hour subscription trial</Link> before committing. For the best <Link href="/iptv-media-players">IPTV media players</Link> (TiviMate, IPTV Smarters, VLC), see our full guide.</p>
 
         <h2 id="cheap-iptv-subscription">Cheap IPTV Subscription vs Cable</h2>
         <p>A cheap IPTV subscription often starts at $11/month. Cable usually runs $100–200+/month. With IPTV you get more channels, on-demand libraries, and the flexibility to use <Link href="/jailbroken-fire-sticks">streaming devices</Link> like Fire Stick and ONN Google TV. Yearly plans bring the per-month cost down further.</p>

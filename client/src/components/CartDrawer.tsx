@@ -1,6 +1,6 @@
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Package, Sparkles } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Package, Sparkles, Check } from "lucide-react";
 import { useCart } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -168,9 +168,24 @@ export function CartDrawer() {
             <div className="mt-auto pt-4 space-y-4">
               <Separator className="bg-gray-800" />
 
-              <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-lg p-3 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-orange-400" />
-                <span className="text-sm text-orange-200">Free setup guide included with every order!</span>
+              <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-xl p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-orange-400 shrink-0" />
+                  <span className="text-sm font-semibold text-orange-100">After you pay</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-orange-100/95">
+                  {[
+                    "Instant credentials to your email",
+                    "Tutorial video + guided steps",
+                    "24/7 human support",
+                    "IPTV plans + optional device bundles",
+                  ].map((line, idx) => (
+                    <div key={idx} className="flex items-start gap-1.5">
+                      <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />
+                      <span className="leading-snug">{line}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-2">

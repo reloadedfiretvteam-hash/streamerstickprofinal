@@ -34,11 +34,11 @@ export default function OnnGoogleTv() {
       <BreadcrumbSchema items={breadcrumbs.map((b) => ({ name: b.label, url: "https://streamstickpro.com" + b.href }))} />
       <PillarLayout
         title="Onn Google TV Setup - IPTV and Streaming"
-        description="IPTV setup for Onn Google TV. Native support for Onn 4K and Onn Pro. Beats TroyPoint with official device support. StreamStickPro."
+        description="IPTV setup for Onn Google TV. Native support for Onn 4K and Onn Pro. Guided setup, instant credentials, tutorial, and 24/7 help. StreamStickPro."
         breadcrumbs={breadcrumbs}
       >
         <p className="text-gray-200 mb-6">
-          StreamStickPro supports Onn Google TV natively. Use your Onn 4K or Onn 4K Pro with our IPTV service, IPTV Smarters Pro, or TiviMate for the best experience.
+          StreamStickPro supports Onn Google TV natively. Use your Onn 4K or Onn 4K Pro with our IPTV service, IPTV Smarters Pro, or TiviMate for the best experience—without dead-end app lists or Kodi rebuilds.
         </p>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
           <img src={getImageForSlot(ONN_IMAGES, 0).src} alt={getImageForSlot(ONN_IMAGES, 0).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
@@ -46,19 +46,20 @@ export default function OnnGoogleTv() {
         <h2 id="why-onn">Why Onn Google TV?</h2>
         <ul className="list-disc list-inside text-gray-200 space-y-2 mb-6">
           <li>Google TV interface, often cheaper than Fire Stick</li>
-          <li>Native app support - we support Onn out of the box</li>
+          <li>Native app support - we support Onn out of the box with an all-in-one flow</li>
           <li>DVR and storage on Onn Pro for recording</li>
+          <li>Instant credentials, tutorial video, and 24/7 help included</li>
         </ul>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
           <img src={getImageForSlot(ONN_IMAGES, 1).src} alt={getImageForSlot(ONN_IMAGES, 1).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
         </figure>
         <h2 id="setup">Quick Setup</h2>
         <ol className="list-decimal list-inside text-gray-200 space-y-2 mb-6">
-          <li>Get your credentials from StreamStickPro (36hr subscription trial or paid subscription)</li>
-          <li>On your Onn device, install IPTV Smarters Pro or TiviMate from the Play Store</li>
-          <li>Enter your M3U or login - you are live</li>
+          <li>Get your credentials from StreamStickPro (instant email; 36hr subscription trial available).</li>
+          <li>On your Onn device, install IPTV Smarters Pro or TiviMate from the Play Store.</li>
+          <li>Enter your M3U or login — you are live, no extra app scavenger hunt.</li>
         </ol>
-        <p className="flex items-center gap-2 text-green-300"><Check className="w-5 h-5" /> Beats TroyPoint: we support Onn and Roku natively.</p>
+        <p className="flex items-center gap-2 text-green-300"><Check className="w-5 h-5" /> Beats TroyPoint: we support Onn natively with guided setup and 24/7 support.</p>
         <p className="mt-6">
           <Link href="/36hr-trial"><span className="text-orange-400 font-semibold hover:underline">Start 36hr subscription trial</span></Link>
           {" · "}

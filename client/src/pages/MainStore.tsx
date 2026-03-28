@@ -303,8 +303,8 @@ export default function MainStore() {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
     setPageMeta({
-      title: "IPTV Fire Stick 2026 | 18K+ Channels | StreamStickPro",
-      description: "IPTV subscriptions for Fire Stick and ONN Google TV with 18K+ live channels. 36-hour trial available on subscription plans only.",
+      title: "Premium IPTV + Devices | 18K+ Channels | StreamStickPro",
+      description: "IPTV-first experience with instant credentials, tutorial video, 24/7 support, and optional Fire Stick/ONN bundles with Reloaded Fire TV. 36-hour trial on subscriptions; devices include 1-year access.",
       path: "/",
     });
     loadProducts();
@@ -437,19 +437,16 @@ export default function MainStore() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white font-sans selection:bg-orange-500 selection:text-white pb-32 md:pb-20 relative">
       {/* Parallax Hero Background - Optimized with lazy loading and performance hints */}
-      <div 
-        className="fixed inset-0 z-0 pointer-events-none"
+      <div
+        className="fixed inset-0 z-0 pointer-events-none bg-cover bg-center bg-no-repeat bg-scroll md:bg-fixed"
         style={{
           backgroundImage: `url(${heroImg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed',
-          willChange: 'transform', // Optimize for parallax
-          contentVisibility: 'auto', // Defer rendering until visible
+          willChange: "transform",
+          contentVisibility: "auto",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-black/35 via-black/25 to-black/45" />
+        {/* Stronger overlay on small screens for readability; lighter on desktop */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/45 to-black/55 md:from-black/35 md:via-black/25 md:to-black/45" />
       </div>
 
       {/* Content Layer */}
@@ -460,7 +457,7 @@ export default function MainStore() {
       {/* Service Schema for IPTV Service Offerings */}
       <ServiceSchema 
         name="Premium IPTV Streaming Service"
-        description="Access 18,000+ live TV channels, 100,000+ movies and series, all premium sports including NFL, NBA, MLB, UFC PPV events. Multi-device streaming with 24/7 support."
+        description="Access 18,000+ live TV channels, 100,000+ movies and series, premium sports including NFL, NBA, MLB, UFC PPV. Multi-device streaming with instant credentials, setup tutorial, 24/7 human support, and optional Fire Stick / ONN bundles with Reloaded Fire TV."
         serviceType="IPTV Streaming Service"
         areaServed="Worldwide"
       />
@@ -468,7 +465,7 @@ export default function MainStore() {
       {/* ItemList Schema for Product Listings */}
       <ItemListSchema 
         name="StreamStickPro Products"
-        description="Fire Stick device options and IPTV subscription plans"
+        description="Premium IPTV subscription plans and optional Fire Stick / ONN device bundles with Reloaded Fire TV"
         items={products.slice(0, 6).map(p => ({
           name: p.name,
           description: getSchemaDescription(p),
@@ -583,15 +580,15 @@ export default function MainStore() {
               </span>
             </motion.div>
 
-            {/* Nuclear H1 */}
+            {/* Hero Title */}
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-5 leading-[1.1] tracking-tight text-white"
             >
-              IPTV Fire Stick 2026
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-red-500 mt-2">18K+ Live Channels • Fire Stick & ONN</span>
+              Premium IPTV + Devices (Reloaded Fire TV Included)
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-red-500 mt-2">18K+ Live Channels • Instant Credentials • Tutorial + 24/7 Help</span>
             </motion.h1>
 
             {/* Trust above fold + geo for US/UK/CA impressions */}
@@ -601,7 +598,7 @@ export default function MainStore() {
               transition={{ duration: 0.5, delay: 0.15 }}
               className="text-base sm:text-lg md:text-xl text-gray-100 mb-2"
             >
-              Premium IPTV for Fire Stick, ONN Google TV, and Smart TVs with secure checkout and 24/7 human support.
+              IPTV-first experience with optional Fire Stick and ONN bundles. Secure checkout, instant email credentials, guided setup tutorial, and 24/7 human support.
             </motion.p>
             <motion.p 
               initial={{ opacity: 0, y: 10 }}
@@ -609,7 +606,7 @@ export default function MainStore() {
               transition={{ duration: 0.5, delay: 0.16 }}
               className="text-sm sm:text-base text-gray-300 mb-6 max-w-3xl mx-auto"
             >
-              18,000+ live channels, 100,000+ movies & series, premium sports, and instant activation in <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">USA</span></Link>, <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">Canada</span></Link>, and <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">UK</span></Link>.
+              18,000+ live channels, 100,000+ movies & series, premium sports, and instant activation in <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">USA</span></Link>, <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">Canada</span></Link>, and <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">UK</span></Link>. Devices ship with Reloaded Fire TV all-in-one access—no dead apps or Kodi rebuilds.
             </motion.p>
 
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.18 }} className="mb-4">
@@ -636,7 +633,7 @@ export default function MainStore() {
                   START 36HR TRIAL
                 </motion.span>
               </Link>
-              <Link href="/jailbroken-fire-sticks">
+              <Link href="/firestick-devices">
                 <motion.span
                   className="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-5 sm:py-6 min-h-[72px] bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl font-black text-lg sm:text-xl text-white border-2 border-purple-300/50 shadow-xl shadow-purple-500/40 hover:shadow-2xl transition-all cursor-pointer"
                   whileHover={{ scale: 1.05 }}
@@ -644,7 +641,7 @@ export default function MainStore() {
                   role="button"
                 >
                   <ShoppingCart className="w-6 h-6" aria-hidden="true" />
-                  BUY FIRE STICK NOW
+                  SHOP DEVICES (FIRE STICK & ONN)
                 </motion.span>
               </Link>
               <Link href="/onn-google-tv">
@@ -658,6 +655,26 @@ export default function MainStore() {
                   VIEW ONN OPTIONS
                 </motion.span>
               </Link>
+            </motion.div>
+
+            {/* Reassurance bar */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.24 }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-2 max-w-4xl mx-auto text-left"
+            >
+              {[
+                { icon: Zap, label: "Instant credentials via email" },
+                { icon: Play, label: "Tutorial video included" },
+                { icon: MessageCircle, label: "24/7 human support" },
+                { icon: ShieldCheck, label: "No dead apps or Kodi rebuilds" },
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-100">
+                  <item.icon className="w-4 h-4 text-orange-300" />
+                  <span className="leading-snug">{item.label}</span>
+                </div>
+              ))}
             </motion.div>
 
             {/* Payment methods above the fold */}
@@ -967,7 +984,7 @@ export default function MainStore() {
                 Fire Stick Comparison
               </h3>
               <p className="text-gray-200 max-w-2xl mx-auto">
-                Be streaming in about 10 minutes. Each StreamStick bundle includes a 1 Year Live TV plan, instant login credentials, setup tutorials, 24/7 support, and shipping included.
+                Be streaming in about 10 minutes. Each Stream Stick Pro device bundle includes Reloaded Fire TV all-in-one access, educational setup tutorials, a 1-year included plan, 24/7 support, and shipping included.
               </p>
             </div>
             <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl border border-slate-700/50 overflow-hidden" data-testid="tier-comparison-table">
@@ -1312,31 +1329,100 @@ export default function MainStore() {
               <div className="grid gap-6 lg:grid-cols-2">
                 <div className="rounded-2xl bg-slate-900/60 border border-white/10 p-6 md:p-8">
                   <h3 className="text-2xl md:text-3xl font-bold text-orange-400 mb-4">
-                    Unleash Endless Entertainment w/ the Amazon Fire Stick
+                    Stream Stick Pro Fire Stick & ONN Device Experience
                   </h3>
                   <p className="text-gray-200 mb-4">
-                    Experience a world of endless entertainment possibilities with the Amazon Fire Stick, available exclusively on our website. This powerful device transforms any TV into a smart TV, giving you access to your favorite streaming services, apps, games, and more—all from the comfort of your home.
+                    Say goodbye to cable bills and hello to faster, simpler streaming. With Stream Stick Pro device bundles (Fire Stick and ONN options), you get Reloaded Fire TV all-in-one access plus guided setup made for real households.
                   </p>
                   <p className="text-gray-200 mb-4">
-                    These home cinema style platforms will give you a truckload of Movies & TV Shows. Classics & new releases searchable by “most popular, in theaters, top rated, horror, family, comedy, adventure and more!
+                    You get extensive live channels, movies, series, sports, and events in one place without bouncing through dozens of broken app links. We focus on a clean, usable setup so customers spend time watching, not troubleshooting.
                   </p>
                   <p className="text-gray-200">
-                    We have done all the hard work ahead of time and made screen recorded tutorial videos for the most common requests from customers! Anytime you may need assistance, we offer lifetime customer support with the purchase of our devices.
+                    Every Fire Stick and ONN order includes educational tutorial videos, an easy setup path, a 1-year included access plan, and responsive support whenever you need help.
                   </p>
                 </div>
                 <div className="rounded-2xl bg-slate-900/60 border border-white/10 p-6 md:p-8">
                   <h3 className="text-2xl md:text-3xl font-bold text-orange-400 mb-4">
-                    Exclusive Educational Videos
+                    Why Reloaded Fire TV Stands Out
                   </h3>
                   <p className="text-gray-200 mb-6">
-                    When you purchase the Fire Stick from us, you will also receive access to a series of educational videos that demonstrate how to maximize your device's potential. These videos provide step-by-step instructions on how to customize your Fire Stick experience.
+                    Many so-called jailbroken Fire Stick sites send customers into huge app lists, dead links, and long tutorials that still do not work. Stream Stick Pro is different: Reloaded Fire TV is designed as an all-in-one app workflow with practical, beginner-friendly setup guidance.
                   </p>
                   <h4 className="text-xl font-bold text-orange-400 mb-3">
                     Important Legal Notice
                   </h4>
                   <p className="text-gray-200">
-                    Please be aware that while our educational videos are designed to help you make the most of your device, we cannot verify the legality of any 3rd party applications mentioned. These apps are developed and maintained by independent entities over which we have no control. It is crucial that you conduct your own research and due diligence before downloading, installing, and using any 3rd party applications to ensure that they comply with all applicable laws and regulations.
+                    Stream Stick Pro is not endorsed by or affiliated with Amazon. Devices are sold as hardware with educational setup guidance. Any third-party apps or external streams are controlled by their own providers, and customers are responsible for compliant use under local laws and service terms.
                   </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Reloaded Fire TV - Device Value Section */}
+          <section className="py-10">
+            <div className="max-w-6xl mx-auto space-y-8">
+              <div className="text-center">
+                <h3 className="text-3xl md:text-4xl font-black text-white mb-4">
+                  Reloaded Fire TV Device Bundles Built For Real Households
+                </h3>
+                <p className="text-gray-200 max-w-3xl mx-auto text-lg">
+                  Stream Stick Pro bundles are made for easy setup, stable daily use, and less guesswork. You get guided onboarding, educational tutorials, and a 1-year included access plan with Fire Stick or ONN device options.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="rounded-2xl border border-orange-400/30 bg-gradient-to-br from-orange-500/10 to-red-500/5 p-6">
+                  <h4 className="text-2xl font-bold text-orange-300 mb-4">What You Get With Every Device Order</h4>
+                  <ul className="space-y-3 text-gray-100">
+                    {[
+                      "Fire Stick or ONN device option ready for guided setup",
+                      "Reloaded Fire TV all-in-one app workflow",
+                      "Educational tutorial videos for first-time users",
+                      "1-year included access plan on device bundles",
+                      "Instant login details and setup steps after purchase",
+                      "24/7 support if you need help"
+                    ].map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="rounded-2xl border border-blue-400/30 bg-gradient-to-br from-blue-500/10 to-cyan-500/5 p-6">
+                  <h4 className="text-2xl font-bold text-blue-300 mb-4">Why Customers Switch To Stream Stick Pro</h4>
+                  <ul className="space-y-3 text-gray-100">
+                    {[
+                      "No endless list of random apps to sort through",
+                      "No dead links hunt every time you want to watch",
+                      "Simple setup path designed for beginners",
+                      "Cleaner all-in-one experience instead of fragmented apps",
+                      "Consistent support team instead of 'figure it out' forums",
+                      "Built to save time and reduce frustration"
+                    ].map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <ShieldCheck className="w-5 h-5 text-blue-300 flex-shrink-0 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-5">
+                <div className="rounded-2xl bg-gray-900/70 border border-white/10 p-5">
+                  <h5 className="text-lg font-bold text-white mb-2">Perfect For</h5>
+                  <p className="text-gray-200 text-sm">Cord-cutters, families with multiple TVs, and customers who want fast setup without technical headaches.</p>
+                </div>
+                <div className="rounded-2xl bg-gray-900/70 border border-white/10 p-5">
+                  <h5 className="text-lg font-bold text-white mb-2">Fast Start</h5>
+                  <p className="text-gray-200 text-sm">Most customers are up and running in about 10 minutes using the included educational walkthrough.</p>
+                </div>
+                <div className="rounded-2xl bg-gray-900/70 border border-white/10 p-5">
+                  <h5 className="text-lg font-bold text-white mb-2">Clear Value</h5>
+                  <p className="text-gray-200 text-sm">One device bundle, one setup path, one support team - made to keep streaming straightforward.</p>
                 </div>
               </div>
             </div>
@@ -1493,17 +1579,17 @@ export default function MainStore() {
                 <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
                   <Check className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-green-400">Stream Stick Pro Experience</h3>
+                <h3 className="text-2xl font-bold text-green-400">Reloaded Fire TV + Stream Stick Pro</h3>
               </div>
               <ul className="space-y-4">
                 {[
-                  "ONE app does it all - no confusion, no hassle",
-                  "Daily automatic updates - always fresh content",
-                  "User-friendly interface - even grandma can use it",
-                  "No broken links - premium, stable streams",
-                  "Plug in and watch - ready in 5 minutes",
-                  "Full 24/7 customer support - we're always here",
-                  "You won't be disappointed - this is the future of streaming"
+                  "Reloaded Fire TV all-in-one app flow - easy to use",
+                  "Educational tutorials included with every device order",
+                  "1-year included plan on Fire Stick and ONN bundles",
+                  "No hunting through huge app lists to find working links",
+                  "Fast setup path built for beginners and families",
+                  "24/7 support when you need real help",
+                  "Built for reliable daily viewing, not trial-and-error"
                 ].map((item, idx) => (
                   <li key={idx} className="flex items-start gap-3">
                     <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />

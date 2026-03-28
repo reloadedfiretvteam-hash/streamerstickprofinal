@@ -150,6 +150,20 @@ export function ProductQuickView({ product, isOpen, onClose }: ProductQuickViewP
             </ScrollArea>
           </div>
 
+          <div className="mb-4 grid grid-cols-2 gap-2 text-[11px] text-gray-200">
+            {[
+              "Instant credentials",
+              "Tutorial video",
+              "24/7 human support",
+              "No dead apps / Kodi rebuilds",
+            ].map((line, idx) => (
+              <div key={idx} className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5">
+                <Check className="w-3 h-3 text-green-400 shrink-0" />
+                <span className="leading-tight">{line}</span>
+              </div>
+            ))}
+          </div>
+
           <div className="flex gap-3">
             <Button
               onClick={handleAddToCart}
@@ -186,15 +200,15 @@ export function ProductQuickView({ product, isOpen, onClose }: ProductQuickViewP
             </Button>
           </div>
 
-          <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-500">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-gray-400">
             <span className="flex items-center gap-1">
               <Zap className="w-3 h-3 text-yellow-500" />
-              Instant Email Delivery
+              Secure checkout
             </span>
-            <span>•</span>
-            <span>24/7 Support</span>
-            <span>•</span>
-            <span>Secure Payment</span>
+            <span className="hidden sm:inline">•</span>
+            <span>Instant email delivery</span>
+            <span className="hidden sm:inline">•</span>
+            <span>Reloaded Fire TV on device bundles</span>
           </div>
         </div>
       </DialogContent>

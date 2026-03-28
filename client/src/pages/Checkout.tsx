@@ -64,7 +64,7 @@ export default function Checkout() {
   useEffect(() => {
     setPageMeta({
       title: "Checkout | StreamStickPro",
-      description: "Secure checkout for Fire Sticks and IPTV plans. StreamStickPro—18,000+ channels, 100,000+ movies. 36-hour trial available for IPTV subscriptions.",
+      description: "Secure checkout for premium IPTV and optional Fire Stick / ONN bundles. Instant credentials, tutorial video, 24/7 support. 18K+ channels. 36-hour trial on IPTV subscriptions.",
       path: "/checkout",
       noindex: true,
     });
@@ -668,16 +668,20 @@ export default function Checkout() {
 
                   <div className="space-y-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                      <span>Instant delivery via email</span>
+                      <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                      <span>Instant credentials via email</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                      <span>24/7 customer support</span>
+                      <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                      <span>Setup tutorial video included</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                      <span>Secure 256-bit encryption</span>
+                      <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                      <span>24/7 human support if you get stuck</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                      <span>Secure 256-bit encryption (Stripe)</span>
                     </div>
                   </div>
                   

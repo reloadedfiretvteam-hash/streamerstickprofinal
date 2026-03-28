@@ -12,8 +12,8 @@ const breadcrumbs = [
 export default function IptvFirestick() {
   useEffect(() => {
     setPageMeta({
-      title: "IPTV Fire Stick 2026 | 18K+ Channels | StreamStick Pro",
-      description: "Best IPTV for Fire Stick: 18K+ live channels, TiviMate and Smarters setup in minutes. 36-hour subscription trial and ready-to-use device options. StreamStick Pro.",
+      title: "IPTV Fire Stick 2026 | Instant Credentials + Tutorial | StreamStick Pro",
+      description: "Best IPTV for Fire Stick: 18K+ live channels, instant credentials, tutorial video, and 24/7 support. No dead apps/Kodi rebuilds. 36-hour trial for subscriptions; device bundles with Reloaded Fire TV.",
       path: "/iptv-firestick",
     });
   }, []);
@@ -36,16 +36,30 @@ export default function IptvFirestick() {
         breadcrumbs={breadcrumbs}
       >
         <h2 id="best-iptv-firestick">Why Fire Stick Is Perfect for IPTV</h2>
-        <p>Amazon Fire Stick is one of the most popular devices for <strong>IPTV live TV streaming</strong>. It’s affordable, supports all major IPTV apps, and runs smoothly with a good subscription. Whether you use Fire Stick HD, 4K, or <Link href="/firestick-devices">4K Max</Link>, you can enjoy thousands of channels and on-demand content.</p>
+        <p>Amazon Fire Stick is one of the most popular devices for <strong>IPTV live TV streaming</strong>. It’s affordable, supports all major IPTV apps, and runs smoothly with a good subscription. Whether you use Fire Stick HD, 4K, or <Link href="/firestick-devices">4K Max</Link>, you can enjoy thousands of channels and on-demand content—without dead-end app lists or Kodi rebuilds.</p>
 
         <h2 id="best-iptv-apps">Best IPTV Apps for Fire Stick</h2>
         <p><strong>TiviMate</strong> is a favorite for Fire Stick: fast EPG, multi-playlist support, and a clean interface. <strong>IPTV Smarters Pro</strong> works on Fire Stick and many other devices with M3U and Xtream Codes. <strong>Perfect Player</strong> is lightweight and good for older sticks. StreamStickPro credentials work with TiviMate and IPTV Smarters—see our <Link href="/iptv-media-players">IPTV media players</Link> guide and <Link href="/blog">blog</Link> for setup.</p>
 
         <h2 id="setup">IPTV Fire Stick Setup in Minutes</h2>
-        <p>Setup is simple: install your chosen IPTV app, enter your M3U URL or Xtream Codes (provided by StreamStickPro instantly), and start watching. If you want the easiest path, choose a Fire Stick option from <Link href="/">our homepage</Link>, then follow the short setup video to begin streaming.</p>
+        <p>Setup is simple: install your chosen IPTV app, enter your M3U URL or Xtream Codes (provided by StreamStickPro instantly), and start watching. If you want the easiest path, choose a Fire Stick option from <Link href="/">our homepage</Link>, then follow the short setup video to begin streaming. Instant credentials, tutorial video, and 24/7 support are included with all plans.</p>
+
+        <div className="my-6 grid grid-cols-1 md:grid-cols-2 gap-3 bg-gradient-to-r from-gray-900/70 via-gray-900/40 to-gray-900/60 border border-white/10 rounded-xl p-4 text-gray-100">
+          {[
+            "Instant credentials via email; no waiting",
+            "Tutorial video + guided steps (minutes, not hours)",
+            "24/7 human support if playback is blocked",
+            "No dead apps or Kodi rebuilds—Reloaded Fire TV all-in-one flow",
+          ].map((item, idx) => (
+            <div key={idx} className="flex items-start gap-2 text-sm">
+              <span className="text-green-300 font-bold mt-0.5">•</span>
+              <span className="leading-snug">{item}</span>
+            </div>
+          ))}
+        </div>
 
         <h2 id="plans">IPTV Plans for Fire Stick</h2>
-        <p>Plans start at $11/month with options for 1–5 devices. Longer plans (3, 6, 12 months) save money. You can use one subscription on multiple Fire Sticks or mix Fire Stick with Android and Smart TV. Check <Link href="/shop">Shop</Link> for current plans and <Link href="/iptv-services">IPTV services</Link> for the full guide.</p>
+        <p>Plans start at $11/month with options for 1–5 devices. Longer plans (3, 6, 12 months) save money. You can use one subscription on multiple Fire Sticks or mix Fire Stick with Android and Smart TV. Check <Link href="/shop">Shop</Link> for current plans and <Link href="/iptv-services">IPTV services</Link> for the full guide. Device bundles include 1-year access and the Reloaded Fire TV all-in-one experience.</p>
 
         <h2 id="faq">IPTV for Firestick FAQ</h2>
         <ul>
