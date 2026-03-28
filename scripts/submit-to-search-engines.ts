@@ -37,35 +37,62 @@ interface SubmissionResult {
   urlsSubmitted?: number;
 }
 
+function extractLocs(xml: string): string[] {
+  const matches = xml.match(/<loc>(.*?)<\/loc>/g) || [];
+  return matches.map((m) => m.replace(/<\/?loc>/g, '').trim()).filter(Boolean);
+}
+
+async function fetchSitemapUrlsFromLive(): Promise<string[]> {
+  const sitemapIndexUrl = `${SITE_URL}/sitemap-index.xml`;
+  try {
+    const indexRes = await fetch(sitemapIndexUrl);
+    if (indexRes.ok) {
+      const sitemapUrls = extractLocs(await indexRes.text());
+      const all = new Set<string>();
+      for (const sitemapUrl of sitemapUrls) {
+        const childRes = await fetch(sitemapUrl);
+        if (!childRes.ok) continue;
+        extractLocs(await childRes.text()).forEach((u) => all.add(u));
+      }
+      if (all.size > 0) return Array.from(all);
+    }
+  } catch (error: any) {
+    console.warn(`⚠️  Could not fetch sitemap-index.xml: ${error.message}`);
+  }
+
+  // Fallback to direct sitemap.xml
+  const sitemapRes = await fetch(SITEMAP_URL);
+  if (!sitemapRes.ok) {
+    throw new Error(`Live sitemap fetch failed with status ${sitemapRes.status}`);
+  }
+  return extractLocs(await sitemapRes.text());
+}
+
 /**
  * Extract URLs from sitemap.xml
  */
 async function getUrlsFromSitemap(): Promise<string[]> {
   const sitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
-  
-  if (!existsSync(sitemapPath)) {
-    console.error('❌ Sitemap not found at:', sitemapPath);
-    return [];
-  }
-
   try {
-    const sitemapContent = await readFile(sitemapPath, 'utf-8');
-    const urlMatches = sitemapContent.match(/<loc>(.*?)<\/loc>/g);
-    
-    if (!urlMatches) {
-      console.warn('⚠️  No URLs found in sitemap');
-      return [];
+    if (existsSync(sitemapPath)) {
+      const sitemapContent = await readFile(sitemapPath, 'utf-8');
+      const urls = extractLocs(sitemapContent).map((url) =>
+        url.startsWith('http') ? url : `${SITE_URL}${url}`
+      );
+      if (urls.length > 0) {
+        console.log(`✅ Found ${urls.length} URLs in local sitemap`);
+        return urls;
+      }
+      console.warn('⚠️  Local sitemap had no URLs, falling back to live sitemap');
+    } else {
+      console.warn(`⚠️  Local sitemap not found at ${sitemapPath}, using live sitemap`);
     }
 
-    const urls = urlMatches.map(match => {
-      const url = match.replace(/<\/?loc>/g, '');
-      return url.startsWith('http') ? url : `${SITE_URL}${url}`;
-    });
-
-    console.log(`✅ Found ${urls.length} URLs in sitemap`);
-    return urls;
+    const liveUrls = await fetchSitemapUrlsFromLive();
+    console.log(`✅ Found ${liveUrls.length} URLs in live sitemap`);
+    return liveUrls;
   } catch (error: any) {
-    console.error('❌ Error reading sitemap:', error.message);
+    console.error('❌ Error loading sitemap URLs:', error.message);
     return [];
   }
 }
