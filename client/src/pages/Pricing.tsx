@@ -2,7 +2,16 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { setPageMeta } from "@/lib/seo";
+import { SEOSchema } from "@/components/SEOSchema";
 import { Check, ShoppingCart } from "lucide-react";
+
+const PRICING_FAQ = [
+  { question: "What is the cheapest IPTV plan?", answer: "The Starter plan is $11/month for 1 device with access to 18,000+ live channels, 100,000+ movies and series, premium sports, and 4K streaming. Multi-month plans reduce the cost even further." },
+  { question: "Can I try before I buy?", answer: "Yes. Every IPTV subscription plan includes a free 36-hour trial. No credit card required — just enter your email, receive instant credentials, and test all channels and features before committing." },
+  { question: "What is the best value IPTV plan?", answer: "The 1-year plan at $65 per device offers the best per-month rate at roughly $5.42/month. It includes the same 18K+ channels, 4K quality, and 24/7 support as shorter plans." },
+  { question: "Can I use one plan on multiple devices?", answer: "Each plan is for 1 device connection at a time. If you need simultaneous streams on multiple TVs or devices, add extra device connections during checkout — multi-device plans are available for 2, 3, 4, or 5 devices." },
+  { question: "How do I cancel my IPTV subscription?", answer: "Plans are one-time payments, not recurring subscriptions. There is nothing to cancel. When your plan expires, simply purchase a new plan if you want to continue." },
+];
 
 const breadcrumbs = [{ label: "Home", href: "/" }, { label: "Pricing", href: "/pricing" }];
 
@@ -47,8 +56,22 @@ export default function Pricing() {
             <Link href="/shop"><span className="mt-6 inline-flex items-center justify-center w-full py-3 rounded-xl bg-orange-500 text-white font-semibold"><ShoppingCart className="w-4 h-4 mr-2" /> View Shop</span></Link>
           </div>
         </div>
-        <p className="text-center"><Link href="/36hr-trial"><span className="text-orange-400 font-semibold hover:underline">Start 36hr subscription trial</span></Link></p>
+        <p className="text-center mb-12"><Link href="/36hr-trial"><span className="text-orange-400 font-semibold hover:underline">Start 36hr subscription trial</span></Link></p>
+
+        <h2 className="text-2xl font-bold text-white mb-6">Frequently Asked Questions</h2>
+        <div className="space-y-4 mb-8">
+          {PRICING_FAQ.map((item, i) => (
+            <details key={i} className="group rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+              <summary className="cursor-pointer p-4 font-semibold text-white hover:bg-white/5 transition-colors list-none flex items-center justify-between">
+                {item.question}
+                <span className="text-orange-400 group-open:rotate-45 transition-transform text-xl ml-2">+</span>
+              </summary>
+              <div className="px-4 pb-4 text-gray-300 text-sm leading-relaxed">{item.answer}</div>
+            </details>
+          ))}
+        </div>
       </PillarLayout>
+      <SEOSchema faq={PRICING_FAQ} />
     </>
   );
 }

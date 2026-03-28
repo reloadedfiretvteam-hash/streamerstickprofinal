@@ -13,6 +13,7 @@ import { FreeTrial } from "@/components/FreeTrial";
 import { QuickViewButton } from "@/components/QuickViewButton";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { setPageMeta } from "@/lib/seo";
+import { SEOSchema, ItemListSchema } from "@/components/SEOSchema";
 
 const ProductQuickView = lazy(() => import("@/components/ProductQuickView").then((module) => ({ default: module.ProductQuickView })));
 
@@ -294,6 +295,24 @@ export default function Shop() {
 
   return (
     <div className="min-h-screen bg-gray-900">
+      <SEOSchema faq={[
+        { question: "How much does StreamStickPro IPTV cost?", answer: "IPTV plans start at $11/month for 1 device. Multi-device plans and 3-month, 6-month, and 1-year options offer deeper savings — the 1-year plan is $65 per device." },
+        { question: "What devices work with StreamStickPro IPTV?", answer: "StreamStickPro works on Amazon Fire Stick (HD, 4K, 4K Max), ONN Google TV (4K, 4K Pro), Android phones/tablets, iOS via IPTV Smarters, Smart TVs, and TiviMate on any Android-based device." },
+        { question: "Is there a free trial before I buy?", answer: "Yes — every IPTV subscription plan includes a free 36-hour trial so you can test channel quality, speed, and the setup process before committing." },
+        { question: "How do I get my IPTV credentials after purchase?", answer: "Credentials are delivered instantly to your email after checkout. You also receive a step-by-step setup tutorial video and have access to 24/7 human support if you need help." },
+        { question: "What payment methods do you accept?", answer: "We accept Visa, Mastercard, Amex, Discover, Apple Pay, Google Pay, Cash App, Affirm (buy now pay later), Klarna, and Stripe Link for one-click checkout." },
+      ]} />
+      <ItemListSchema
+        name="StreamStickPro IPTV Plans & Devices"
+        description="Premium IPTV subscription plans and optional Fire Stick / ONN streaming device bundles"
+        items={products.map(p => ({
+          name: p.name,
+          description: p.description,
+          url: `https://streamstickpro.com/shop#${p.id}`,
+          image: p.image,
+          price: p.price,
+        }))}
+      />
       {/* Shop Section */}
       <section className="py-20 bg-gray-900">
         <div className="container mx-auto px-4">

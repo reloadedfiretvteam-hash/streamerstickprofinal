@@ -206,7 +206,7 @@ export default function Blog() {
         setMetaTag('og:description', metaDesc, true);
         setMetaTag('og:url', `${baseUrl}/blog/${postFromSlug.slug}`, true);
         setMetaTag('og:type', 'article', true);
-        setMetaTag('og:site_name', 'StreamStick Pro', true);
+        setMetaTag('og:site_name', 'StreamStickPro', true);
         const imageUrl = postFromSlug.image && postFromSlug.image.startsWith('http') ? postFromSlug.image : `${baseUrl}/opengraph.jpg`;
         setMetaTag('og:image', imageUrl, true);
         setMetaTag('og:image:width', '1200', true);

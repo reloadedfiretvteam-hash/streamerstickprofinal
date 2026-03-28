@@ -35,7 +35,7 @@ async function main() {
   const staticPages = [
     { url: "/", priority: "1.0", changefreq: "weekly" },
     { url: "/blog", priority: "0.9", changefreq: "daily" },
-    { url: "/checkout", priority: "0.8", changefreq: "monthly" },
+    { url: "/36hr-trial", priority: "0.9", changefreq: "monthly" },
     { url: "/free-trial", priority: "0.9", changefreq: "monthly" },
     { url: "/terms", priority: "0.5", changefreq: "yearly" },
     { url: "/privacy", priority: "0.5", changefreq: "yearly" },

@@ -809,7 +809,7 @@ const SEO_REDIRECTS_STATIC: Record<string, string> = {
   // Guides & trial
   '/guides': '/iptv-services',
   '/guide': '/iptv-services',
-  '/trial': '/',
+  '/trial': '/36hr-trial',
   '/free-trial': '/36hr-trial',
   // Fire Stick & jailbreak
   '/firestick': '/jailbroken-fire-sticks',
