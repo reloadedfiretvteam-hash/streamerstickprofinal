@@ -964,7 +964,7 @@ app.get('/feed.xml', async (c) => {
       const pubDate = post.publishedAt ? new Date(post.publishedAt).toUTCString() : now;
       const title = escapeHtml((post.title || 'Blog Post').toString());
       const desc = escapeHtml(((post.excerpt || post.metaDescription || post.title || '').toString()).slice(0, 300));
-      const link = `${baseUrl}/blog/${post.slug}`;
+      const link = `${baseUrl}/blog/${post.slug}/`;
       items += `    <item>\n      <title>${title}</title>\n      <link>${link}</link>\n      <guid isPermaLink="true">${link}</guid>\n      <pubDate>${pubDate}</pubDate>\n      <description>${desc}</description>\n      <category>${escapeHtml((post.category || 'Guides').toString())}</category>\n    </item>\n`;
     }
   } catch { /* DB unavailable — empty feed is valid */ }
@@ -972,7 +972,7 @@ app.get('/feed.xml', async (c) => {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>StreamStickPro – IPTV &amp; Fire Stick Blog</title>
-    <link>${baseUrl}/blog</link>
+    <link>${baseUrl}/blog/</link>
     <description>IPTV guides, Fire Stick tutorials, streaming tips, and cord-cutting news from StreamStickPro.</description>
     <language>en-us</language>
     <lastBuildDate>${now}</lastBuildDate>
@@ -1078,7 +1078,7 @@ app.get('/sitemap-index.xml', (c) => {
 const STATIC_SITEMAP_PAGES = [
   { url: '/', priority: '1.0', changefreq: 'daily' },
   { url: '/shop', priority: '0.9', changefreq: 'daily' },
-  { url: '/blog', priority: '0.9', changefreq: 'daily' },
+  { url: '/blog/', priority: '0.9', changefreq: 'daily' },
   { url: '/locations', priority: '0.85', changefreq: 'daily' },
   { url: '/36hr-trial', priority: '0.95', changefreq: 'daily' },
   { url: '/pricing', priority: '0.9', changefreq: 'weekly' },
@@ -1188,7 +1188,7 @@ app.get('/sitemap-posts.xml', async (c) => {
       const postDate = post.updatedAt || post.publishedAt || null;
       const lastmod = postDate ? new Date(postDate).toISOString().split('T')[0] : today;
       const fresh = isRecentDate(postDate, 21);
-      xml += `<url><loc>${baseUrl}/blog/${post.slug}</loc><lastmod>${lastmod}</lastmod><changefreq>${fresh ? 'daily' : 'weekly'}</changefreq><priority>${fresh ? '0.9' : '0.8'}</priority></url>`;
+      xml += `<url><loc>${baseUrl}/blog/${post.slug}/</loc><lastmod>${lastmod}</lastmod><changefreq>${fresh ? 'daily' : 'weekly'}</changefreq><priority>${fresh ? '0.9' : '0.8'}</priority></url>`;
     }
   } catch {
     /* ignore */
@@ -1245,7 +1245,7 @@ app.get('/sitemap.xml', async (c) => {
       const lastmod = postDate ? new Date(postDate).toISOString().split('T')[0] : today;
       const fresh = isRecentDate(postDate, 21);
       sitemap += `  <url>
-    <loc>${baseUrl}/blog/${post.slug}</loc>
+    <loc>${baseUrl}/blog/${post.slug}/</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>${fresh ? 'daily' : 'weekly'}</changefreq>
     <priority>${fresh ? '0.9' : '0.8'}</priority>
@@ -1378,6 +1378,15 @@ function trimToWordBoundary(input: string, max: number): string {
   return `${head}...`;
 }
 
+function canonicalizePath(pathname: string): string {
+  if (pathname === '/') return '/';
+  // Blog index and blog slugs are served with trailing slash on production.
+  if (/^\/blog(?:\/[a-z0-9][a-z0-9\-]*)?\/?$/i.test(pathname)) {
+    return pathname.endsWith('/') ? pathname : `${pathname}/`;
+  }
+  return pathname.replace(/\/+$/, '');
+}
+
 function normalizeMeta(meta: { title: string; description: string; noindex?: boolean }) {
   return {
     title: trimToWordBoundary(meta.title || 'StreamStick Pro', SEO_LIMITS.titleMax),
@@ -1404,7 +1413,7 @@ function applySecurityHeaders(res: Response, pathname?: string, hostname?: strin
   }
   // Link: canonical HTTP header (complements HTML <link rel="canonical">)
   if (pathname) {
-    const canon = `https://streamstickpro.com${pathname === '/' ? '/' : pathname.replace(/\/+$/, '')}`;
+    const canon = `https://streamstickpro.com${canonicalizePath(pathname)}`;
     next.headers.set('Link', `<${canon}>; rel="canonical"`);
   }
   // Cache-Control for HTML (short TTL, stale-while-revalidate for speed)
@@ -1504,7 +1513,7 @@ function buildBreadcrumbLD(pathname: string, pageTitle: string): string {
 /** Inject per-page meta tags into the SPA shell so Googlebot sees unique title/canonical/description per URL. */
 function injectMeta(html: string, pathname: string, meta: { title: string; description: string; noindex?: boolean } | null): string {
   const base = 'https://streamstickpro.com';
-  const canon = `${base}${pathname === '/' ? '/' : pathname.replace(/\/+$/, '')}`;
+  const canon = `${base}${canonicalizePath(pathname)}`;
 
   if (!meta) {
     return html

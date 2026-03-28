@@ -221,7 +221,7 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
     "dateModified": date,
     "author": { "@type": "Organization", "name": "StreamStickPro", "url": SITE_URL },
     "publisher": { "@type": "Organization", "name": "StreamStickPro", "logo": { "@type": "ImageObject", "url": `${SITE_URL}/favicon.png` } },
-    "mainEntityOfPage": { "@type": "WebPage", "@id": `${SITE_URL}/blog/${post.slug}` },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": `${SITE_URL}/blog/${post.slug}/` },
     "keywords": keywords,
     "inLanguage": "en-US"
   });
@@ -231,8 +231,8 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
     "@type": "BreadcrumbList",
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Home", "item": `${SITE_URL}/` },
-      { "@type": "ListItem", "position": 2, "name": "Blog", "item": `${SITE_URL}/blog` },
-      { "@type": "ListItem", "position": 3, "name": title, "item": `${SITE_URL}/blog/${post.slug}` }
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": `${SITE_URL}/blog/` },
+      { "@type": "ListItem", "position": 3, "name": title, "item": `${SITE_URL}/blog/${post.slug}/` }
     ]
   });
 
@@ -245,13 +245,13 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
   <meta name="description" content="${description}">
   <meta name="keywords" content="${keywords}">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="${SITE_URL}/blog/${post.slug}">
+  <link rel="canonical" href="${SITE_URL}/blog/${post.slug}/">
   
   <!-- Open Graph -->
   <meta property="og:type" content="article">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">
-  <meta property="og:url" content="${SITE_URL}/blog/${post.slug}">
+  <meta property="og:url" content="${SITE_URL}/blog/${post.slug}/">
   <meta property="og:image" content="${SITE_URL}/opengraph.jpg">
   <meta property="og:site_name" content="StreamStickPro">
   <meta property="article:published_time" content="${date}">
@@ -342,7 +342,7 @@ function generateBlogPostHTML(post: BlogPost, cssPath: string, jsPath: string): 
 
 function generateBlogIndexHTML(posts: BlogPost[], cssPath: string, jsPath: string): string {
   const postCards = posts.slice(0, 20).map(post => `
-    <a href="/blog/${post.slug}" class="block bg-gray-800 rounded-lg p-6 hover:bg-gray-750 transition-colors border border-gray-700 hover:border-orange-500">
+    <a href="/blog/${post.slug}/" class="block bg-gray-800 rounded-lg p-6 hover:bg-gray-750 transition-colors border border-gray-700 hover:border-orange-500">
       <span class="bg-orange-600/20 text-orange-400 px-2 py-1 rounded text-xs">${post.category || "Guides"}</span>
       <h2 class="text-xl font-bold mt-2 mb-2">${post.title}</h2>
       <p class="text-gray-400 text-sm mb-4">${post.excerpt || ""}</p>
@@ -357,7 +357,7 @@ function generateBlogIndexHTML(posts: BlogPost[], cssPath: string, jsPath: strin
     "@type": "Blog",
     "name": "StreamStickPro Blog",
     "description": "Guides on IPTV, Fire Stick setup, ONN Google TV, and cord cutting.",
-    "url": `${SITE_URL}/blog`,
+    "url": `${SITE_URL}/blog/`,
     "publisher": { "@type": "Organization", "name": "StreamStickPro", "url": SITE_URL }
   });
 
@@ -467,7 +467,7 @@ function generateSitemap(posts: BlogPost[]): string {
   const staticPages = [
     { url: "/", priority: "1.0", changefreq: "weekly" },
     { url: "/shop", priority: "0.9", changefreq: "weekly" },
-    { url: "/blog", priority: "0.9", changefreq: "daily" },
+    { url: "/blog/", priority: "0.9", changefreq: "daily" },
     { url: "/pricing", priority: "0.9", changefreq: "monthly" },
     { url: "/36hr-trial", priority: "0.9", changefreq: "monthly" },
     { url: "/iptv-services", priority: "0.9", changefreq: "monthly" },
@@ -503,7 +503,7 @@ function generateSitemap(posts: BlogPost[]): string {
     const date = post.createdAt ? new Date(post.createdAt).toISOString().split("T")[0] : today;
     return `
   <url>
-    <loc>${SITE_URL}/blog/${post.slug}</loc>
+    <loc>${SITE_URL}/blog/${post.slug}/</loc>
     <lastmod>${date}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

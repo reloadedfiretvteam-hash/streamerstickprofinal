@@ -57,7 +57,7 @@ async function main() {
   const staticPages = [
     { url: "/", priority: "1.0", changefreq: "weekly" },
     { url: "/shop", priority: "0.9", changefreq: "weekly" },
-    { url: "/blog", priority: "0.9", changefreq: "daily" },
+    { url: "/blog/", priority: "0.9", changefreq: "daily" },
     { url: "/pricing", priority: "0.9", changefreq: "monthly" },
     { url: "/36hr-trial", priority: "0.9", changefreq: "monthly" },
     { url: "/iptv-services", priority: "0.9", changefreq: "monthly" },
@@ -95,7 +95,7 @@ async function main() {
     const lastmod = post.published_at 
       ? new Date(post.published_at).toISOString().split("T")[0] 
       : today;
-    xml += `  <url><loc>${DOMAIN}/blog/${post.slug}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`;
+    xml += `  <url><loc>${DOMAIN}/blog/${post.slug}/</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`;
   }
 
   xml += `</urlset>`;
