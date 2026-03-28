@@ -602,7 +602,8 @@ async function main() {
   console.log("🗺️ Generating sitemap.xml...");
   const sitemap = generateSitemap(posts);
   await writeFile(path.join(distDir, "sitemap.xml"), sitemap);
-  console.log(`   Sitemap includes ${posts.length + 3} URLs`);
+  const sitemapUrlCount = (sitemap.match(/<url>/g) || []).length;
+  console.log(`   Sitemap includes ${sitemapUrlCount} URLs`);
   
   // Generate robots.txt
   console.log("🤖 Generating robots.txt...");

@@ -701,6 +701,35 @@ export default function MainStore() {
               </Link>
             </motion.div>
 
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.22 }}
+              className="max-w-4xl mx-auto mb-5 rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4 sm:p-5"
+            >
+              <p className="text-white font-semibold text-sm sm:text-base mb-3">Not sure where to start?</p>
+              <div className="grid sm:grid-cols-3 gap-2.5 text-left text-xs sm:text-sm">
+                <Link href="/36hr-trial">
+                  <span className="block rounded-xl border border-orange-400/30 bg-orange-500/10 px-3 py-2.5 text-orange-200 hover:bg-orange-500/20 transition-colors">
+                    <strong className="block text-orange-100">New customer</strong>
+                    Start with the 36hr trial
+                  </span>
+                </Link>
+                <Link href="/pricing">
+                  <span className="block rounded-xl border border-blue-400/30 bg-blue-500/10 px-3 py-2.5 text-blue-200 hover:bg-blue-500/20 transition-colors">
+                    <strong className="block text-blue-100">Comparing plans</strong>
+                    View full pricing first
+                  </span>
+                </Link>
+                <Link href="/tutorials">
+                  <span className="block rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-2.5 text-emerald-200 hover:bg-emerald-500/20 transition-colors">
+                    <strong className="block text-emerald-100">Need setup help?</strong>
+                    Watch tutorial before buying
+                  </span>
+                </Link>
+              </div>
+            </motion.div>
+
             {/* Reassurance bar */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}

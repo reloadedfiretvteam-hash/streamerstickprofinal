@@ -334,6 +334,35 @@ export default function Shop() {
             </p>
           </motion.div>
 
+          <div className="max-w-5xl mx-auto mb-10 rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4 sm:p-5">
+            <p className="text-white font-semibold text-sm sm:text-base mb-3">Fast decision path for new buyers</p>
+            <div className="grid md:grid-cols-3 gap-3">
+              <div className="rounded-xl border border-orange-400/30 bg-orange-500/10 p-3">
+                <div className="flex items-center gap-2 text-orange-200 font-semibold text-sm mb-1">
+                  <Gift className="w-4 h-4" /> Try first
+                </div>
+                <p className="text-gray-200 text-xs sm:text-sm">Start with the 36-hour trial to validate stream quality before committing.</p>
+              </div>
+              <div className="rounded-xl border border-blue-400/30 bg-blue-500/10 p-3">
+                <div className="flex items-center gap-2 text-blue-200 font-semibold text-sm mb-1">
+                  <DollarSign className="w-4 h-4" /> Best value
+                </div>
+                <p className="text-gray-200 text-xs sm:text-sm">Monthly starts at $11; yearly plan is $65 for strongest long-term value.</p>
+              </div>
+              <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 p-3">
+                <div className="flex items-center gap-2 text-emerald-200 font-semibold text-sm mb-1">
+                  <Check className="w-4 h-4" /> Risk reduction
+                </div>
+                <p className="text-gray-200 text-xs sm:text-sm">Instant credentials, setup tutorial, and 24/7 support included after checkout.</p>
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2 text-[11px] sm:text-xs">
+              {["Visa", "Mastercard", "Amex", "Apple Pay", "Google Pay", "Cash App", "Affirm", "Klarna", "Link"].map((pm) => (
+                <span key={pm} className="px-2 py-1 rounded-full border border-white/15 bg-white/5 text-gray-200 font-semibold">{pm}</span>
+              ))}
+            </div>
+          </div>
+
           {/* IPTV Live TV Plans - DISPLAYED FIRST (Most Popular) */}
           <div className="mb-20">
             <h3 className="text-3xl md:text-4xl font-bold mb-4 text-center flex items-center justify-center gap-3">
