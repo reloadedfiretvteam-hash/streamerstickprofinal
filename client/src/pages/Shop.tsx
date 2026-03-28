@@ -198,21 +198,48 @@ export default function Shop() {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
-  // Stable per-render randomization for social proof
+  const hashText = (value: string): number => {
+    let hash = 0;
+    for (let i = 0; i < value.length; i += 1) {
+      hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+    }
+    return hash;
+  };
+
+  const socialProofSeed = useMemo(() => {
+    const timeBucket = Math.floor(Date.now() / (1000 * 60 * 20)); // refreshes every 20 min
+    let sessionSalt = 71;
+    if (typeof window !== "undefined") {
+      const key = "ssp-social-proof-salt";
+      const existing = window.sessionStorage.getItem(key);
+      if (existing) {
+        sessionSalt = Number(existing) || sessionSalt;
+      } else {
+        sessionSalt = 100 + Math.floor(Math.random() * 900);
+        window.sessionStorage.setItem(key, String(sessionSalt));
+      }
+    }
+    return timeBucket + sessionSalt;
+  }, []);
+
+  const countForKey = (key: string, base: number, spread: number) =>
+    base + (hashText(`${key}-${socialProofSeed}`) % spread);
+
+  // Stable for session bucket while still rotating realistically
   const iptvViewCounts = useMemo(() => ({
-    "1mo": 120 + Math.floor(Math.random() * 120),
-    "3mo": 160 + Math.floor(Math.random() * 140),
-    "6mo": 140 + Math.floor(Math.random() * 120),
-    "1yr": 180 + Math.floor(Math.random() * 160),
-  }), []);
+    "1mo": countForKey("iptv-1mo", 122, 112),
+    "3mo": countForKey("iptv-3mo", 155, 126),
+    "6mo": countForKey("iptv-6mo", 142, 118),
+    "1yr": countForKey("iptv-1yr", 178, 137),
+  }), [socialProofSeed]);
 
   const firestickViewCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    defaultProducts.forEach((p) => {
-      counts[p.id] = 80 + Math.floor(Math.random() * 120);
+    defaultProducts.forEach((p, idx) => {
+      counts[p.id] = countForKey(`device-${p.id}-${idx}`, 82, 121);
     });
     return counts;
-  }, []);
+  }, [socialProofSeed]);
 
   const reviews = useMemo(() => [
     { name: "Marcus T.", text: "Setup was guided — no dead apps, streaming in minutes." },
@@ -228,6 +255,10 @@ export default function Shop() {
     { name: "Lisa H.", text: "No buffering issues after they helped me optimize my router settings." },
     { name: "Carlos R.", text: "Got the ONN box for my bedroom TV. Same great experience as my Fire Stick." },
   ], []);
+
+  const reviewOffset = socialProofSeed % reviews.length;
+  const pickReview = (key: string, fallbackIndex = 0) =>
+    reviews[(reviewOffset + fallbackIndex + (hashText(key) % reviews.length)) % reviews.length];
 
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
@@ -539,6 +570,7 @@ export default function Shop() {
                 const deviceCount = selectedDevices[plan.duration];
                 const selectedPrice = plan.prices.find(p => p.devices === deviceCount) || plan.prices[0];
                 const recommendedPlan = BUYER_PROFILE_CONFIG[buyerProfile].planDuration === plan.duration;
+                const durationKey = plan.duration as keyof typeof iptvViewCounts;
                 const cardGradients = [
                   'from-slate-800 via-slate-900 to-gray-900',
                   'from-blue-950/50 via-slate-900 to-gray-900',
@@ -701,11 +733,11 @@ export default function Shop() {
                           ))}
                           <div className="flex items-center gap-2 text-[11px] text-amber-200 font-semibold mt-2">
                             <Star className="w-3 h-3" />
-                            Viewed by {iptvViewCounts[plan.duration]} households today
+                            {iptvViewCounts[durationKey]} households just viewed this plan
                           </div>
                           <div className="text-[11px] text-gray-200 bg-white/5 border border-white/10 rounded-lg p-2 mt-2">
                             {(() => {
-                              const r = reviews[index % reviews.length];
+                              const r = pickReview(`iptv-${plan.duration}`, index);
                               return `“${r.text}” — ${r.name}`;
                             })()}
                           </div>
@@ -999,11 +1031,11 @@ export default function Shop() {
                         ))}
                         <div className="flex items-center gap-2 text-xs text-amber-200 font-semibold">
                           <Star className="w-4 h-4" />
-                          Viewed by {firestickViewCounts[product.id] || 90} people today
+                          {firestickViewCounts[product.id] || 90} people just viewed this product
                         </div>
                         <div className="text-xs text-gray-200 bg-white/5 border border-white/10 rounded-lg p-3">
                           {(() => {
-                            const r = reviews[index % reviews.length];
+                            const r = pickReview(`device-${product.id}`, index + 4);
                             return `“${r.text}” — ${r.name}`;
                           })()}
                         </div>

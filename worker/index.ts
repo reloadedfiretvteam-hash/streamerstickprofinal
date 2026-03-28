@@ -489,8 +489,11 @@ app.get('/api/seo-related/:country/:pageType/:slug', async (c) => {
 });
 
 app.get('/api/debug', async (c) => {
-  // This endpoint is useful during development but should not be exposed in production.
-  if ((c.env.NODE_ENV || '').toLowerCase() === 'production') {
+  // Only expose in explicit local development to avoid leaking config diagnostics.
+  const nodeEnv = (c.env.NODE_ENV || '').toLowerCase();
+  const host = new URL(c.req.url).hostname.toLowerCase();
+  const isLocalHost = host === 'localhost' || host === '127.0.0.1';
+  if (nodeEnv !== 'development' || !isLocalHost) {
     return c.json({ error: 'Not found' }, 404);
   }
   const supabaseUrl = c.env.VITE_SUPABASE_URL || '';

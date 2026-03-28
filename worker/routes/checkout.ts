@@ -4,24 +4,37 @@ import { getStorage } from '../helpers';
 import { checkoutRequestSchema } from '../../shared/schema';
 import type { Env } from '../index';
 
+const isProduction = (env: Env) => (env.NODE_ENV || '').toLowerCase() === 'production';
+
+const maskEmail = (email?: string | null): string => {
+  if (!email || !email.includes('@')) return 'unknown';
+  const [local, domain] = email.split('@');
+  if (!local || !domain) return 'unknown';
+  if (local.length <= 2) return `${local[0] || '*'}***@${domain}`;
+  return `${local.slice(0, 2)}***@${domain}`;
+};
+
 export function createCheckoutRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
   app.post('/', async (c) => {
     try {
-      console.log("Checkout: Starting checkout process");
+      const debugLog = (...args: unknown[]) => {
+        if (!isProduction(c.env)) console.log(...args);
+      };
+      debugLog("Checkout: Starting checkout process");
       const storage = getStorage(c.env);
       const body = await c.req.json();
-      console.log("Checkout: Received body:", JSON.stringify(body));
+      debugLog("Checkout: Received checkout payload");
       
       const parseResult = checkoutRequestSchema.safeParse(body);
       if (!parseResult.success) {
-        console.log("Checkout: Validation failed:", parseResult.error.message);
+        debugLog("Checkout: Validation failed:", parseResult.error.message);
         return c.json({ error: parseResult.error.message }, 400);
       }
       
       const { items, customerEmail, customerName, customerPhone, customerMessage, isRenewal, existingUsername, countryPreference } = parseResult.data;
-      console.log("Checkout: Parsed data - items:", items.length, "email:", customerEmail);
+      debugLog("Checkout: Parsed data - items:", items.length, "email:", maskEmail(customerEmail));
 
       let existingCustomer: Awaited<ReturnType<typeof storage.getCustomerByUsername>> | null = null;
       if (isRenewal && existingUsername) {
@@ -36,21 +49,21 @@ export function createCheckoutRoutes() {
       const productsWithQuantity: Array<{ product: any; quantity: number }> = [];
       
       for (const item of items) {
-        console.log("Checkout: Looking up product:", item.productId);
+        debugLog("Checkout: Looking up product:", item.productId);
         const product = await storage.getRealProduct(item.productId);
         if (!product) {
-          console.log("Checkout: Product not found:", item.productId);
+          debugLog("Checkout: Product not found:", item.productId);
           return c.json({ error: `Product not found: ${item.productId}` }, 404);
         }
         if (!product.shadowPriceId) {
-          console.log("Checkout: Product not configured:", item.productId);
+          debugLog("Checkout: Product not configured:", item.productId);
           return c.json({ error: `Product not configured for checkout: ${item.productId}` }, 400);
         }
-        console.log("Checkout: Found product:", product.name, "shadowPriceId:", product.shadowPriceId);
+        debugLog("Checkout: Found product:", product.name, "shadowPriceId:", product.shadowPriceId);
         productsWithQuantity.push({ product, quantity: item.quantity });
       }
 
-      console.log("Checkout: Creating Stripe session");
+      debugLog("Checkout: Creating Stripe session");
       const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
 
       const baseUrl = new URL(c.req.url).origin;
@@ -88,16 +101,16 @@ export function createCheckoutRoutes() {
         },
       };
 
-      console.log("Checkout: Calling stripe.checkout.sessions.create with lineItems:", JSON.stringify(lineItems));
+      debugLog("Checkout: Calling stripe.checkout.sessions.create with lineItems:", lineItems.length);
       const session = await stripe.checkout.sessions.create(sessionConfig);
-      console.log("Checkout: Stripe session created:", session.id);
+      debugLog("Checkout: Stripe session created:", session.id);
 
       const totalAmount = productsWithQuantity.reduce(
         (sum, { product, quantity }) => sum + product.price * quantity, 
         0
       );
 
-      console.log("Checkout: Creating order in database");
+      debugLog("Checkout: Creating order in database");
       const order = await storage.createOrder({
         customerEmail,
         customerName: customerName || null,
@@ -114,7 +127,7 @@ export function createCheckoutRoutes() {
         customerId: existingCustomer?.id || null,
         countryPreference: countryPreference || null,
       });
-      console.log("Checkout: Order created:", order.id);
+      debugLog("Checkout: Order created:", order.id);
 
       return c.json({ 
         sessionId: session.id,
@@ -153,6 +166,9 @@ export function createCheckoutRoutes() {
   // Direct email endpoint - separate from webhooks (like free trials)
   app.post('/send-emails', async (c) => {
     try {
+      const debugLog = (...args: unknown[]) => {
+        if (!isProduction(c.env)) console.log(...args);
+      };
       const storage = getStorage(c.env);
       const body = await c.req.json();
       const { sessionId, orderId } = body;
@@ -253,17 +269,17 @@ export function createCheckoutRoutes() {
 
       // Send order confirmation
       try {
-        console.log(`[EMAIL] Attempting to send order confirmation for order ${order.id}`);
-        console.log(`[EMAIL] Order details:`, {
+        debugLog(`[EMAIL] Attempting to send order confirmation for order ${order.id}`);
+        debugLog(`[EMAIL] Order details:`, {
           id: order.id,
-          email: order.customerEmail,
+          email: maskEmail(order.customerEmail),
           amount: order.amount,
           productName: order.realProductName,
           hasResendKey: !!c.env.RESEND_API_KEY,
         });
         await sendOrderConfirmation(order, c.env);
         results.orderConfirmation = true;
-        console.log(`[EMAIL] ✅ Order confirmation sent to ${order.customerEmail}`);
+        debugLog(`[EMAIL] ✅ Order confirmation sent to ${maskEmail(order.customerEmail)}`);
       } catch (error: any) {
         results.errors.push(`Order confirmation: ${error.message}`);
         console.error(`[EMAIL] ❌ Failed to send order confirmation:`, error);
@@ -272,10 +288,10 @@ export function createCheckoutRoutes() {
 
       // Send owner notification
       try {
-        console.log(`[EMAIL] Attempting to send owner notification for order ${order.id}`);
+        debugLog(`[EMAIL] Attempting to send owner notification for order ${order.id}`);
         await sendOwnerOrderNotification(order, c.env);
         results.ownerNotification = true;
-        console.log(`[EMAIL] ✅ Owner notification sent`);
+        debugLog(`[EMAIL] ✅ Owner notification sent`);
       } catch (error: any) {
         results.errors.push(`Owner notification: ${error.message}`);
         console.error(`[EMAIL] ❌ Failed to send owner notification:`, error);
@@ -285,10 +301,10 @@ export function createCheckoutRoutes() {
       // Send credentials if not already sent
       if (!order.credentialsSent) {
         try {
-          console.log(`[EMAIL] Attempting to send credentials for order ${order.id}`);
+          debugLog(`[EMAIL] Attempting to send credentials for order ${order.id}`);
           await sendCredentialsEmail(order, c.env, storage);
           results.credentials = true;
-          console.log(`[EMAIL] ✅ Credentials sent to ${order.customerEmail}`);
+          debugLog(`[EMAIL] ✅ Credentials sent to ${maskEmail(order.customerEmail)}`);
         } catch (error: any) {
           results.errors.push(`Credentials: ${error.message}`);
           console.error(`[EMAIL] ❌ Failed to send credentials:`, error);
@@ -296,7 +312,7 @@ export function createCheckoutRoutes() {
         }
       } else {
         results.credentials = true; // Already sent
-        console.log(`[EMAIL] Credentials already sent for order ${order.id}`);
+        debugLog(`[EMAIL] Credentials already sent for order ${order.id}`);
       }
 
       // Create email campaign for customer
