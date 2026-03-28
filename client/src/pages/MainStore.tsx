@@ -512,45 +512,48 @@ export default function MainStore() {
         <div className="container mx-auto px-4 h-16 md:h-[72px] flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <MobileNav scrollToShop={scrollToShop} scrollToAbout={scrollToAbout} scrollToFaq={scrollToFaq} onSupportClick={openSupport} />
-            <div className="flex items-center gap-2 min-w-0 font-bold tracking-tighter">
-              <motion.div
-                animate={{
-                  scale: [1, 1.1, 0.95, 1.05, 1],
-                  opacity: [1, 0.8, 1, 0.9, 1],
-                  filter: [
-                    "brightness(1)",
-                    "brightness(1.3)",
-                    "brightness(1.1)",
-                    "brightness(1.2)",
-                    "brightness(1)"
-                  ]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                <Flame className="w-7 h-7 text-orange-500" />
-              </motion.div>
-              <span className="sm:hidden text-sm text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
-                SSP
+            <Link href="/">
+              <span className="flex items-center gap-2 min-w-0 font-bold tracking-tighter cursor-pointer" aria-label="Go to Stream Stick Pro homepage">
+                <motion.div
+                  animate={{
+                    scale: [1, 1.1, 0.95, 1.05, 1],
+                    opacity: [1, 0.8, 1, 0.9, 1],
+                    filter: [
+                      "brightness(1)",
+                      "brightness(1.3)",
+                      "brightness(1.1)",
+                      "brightness(1.2)",
+                      "brightness(1)"
+                    ]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <Flame className="w-7 h-7 text-orange-500" />
+                </motion.div>
+                <span className="sm:hidden text-sm text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
+                  SSP
+                </span>
+                <span className="hidden sm:inline max-w-[140px] truncate whitespace-nowrap text-base sm:max-w-none sm:text-xl text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
+                  Stream Stick Pro
+                </span>
               </span>
-              <span className="hidden sm:inline max-w-[140px] truncate whitespace-nowrap text-base sm:max-w-none sm:text-xl text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">
-                Stream Stick Pro
-              </span>
-            </div>
+            </Link>
           </div>
           
           <div className="flex items-center gap-2">
-            <Link href="/iptv-services"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">IPTV</span></Link>
-            <Link href="/iptv-firestick"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Firestick</span></Link>
-            <Link href="/firestick-devices"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Devices</span></Link>
-            <Link href="/iptv-media-players"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Media Players</span></Link>
-            <Link href="/tutorials"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Setup Tutorial</span></Link>
-            <Link href="/pricing"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Pricing</span></Link>
-            <Link href="/blog"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Blog</span></Link>
-            <Link href="/locations"><span className="hidden md:inline px-2 py-1.5 text-sm text-gray-100 hover:text-white hover:bg-white/10 rounded font-medium">Locations</span></Link>
+            <Link href="/iptv-services"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">IPTV</span></Link>
+            <Link href="/iptv-firestick"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Firestick</span></Link>
+            <Link href="/firestick-devices"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Devices</span></Link>
+            <Link href="/iptv-media-players"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Media Players</span></Link>
+            <Link href="/tutorials"><span className="hidden lg:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">How to Jailbreak Fire Stick</span></Link>
+            <Link href="/36hr-trial"><span className="hidden lg:inline px-2 py-1.5 text-[13px] text-orange-200 hover:text-white hover:bg-orange-500/20 rounded font-semibold">Trial</span></Link>
+            <Link href="/pricing"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Pricing</span></Link>
+            <Link href="/blog"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Blog</span></Link>
+            <Link href="/locations"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Locations</span></Link>
             <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToAbout} data-testid="nav-how-it-works" aria-label="Scroll to How It Works section">How It Works</Button>
             <Button variant="ghost" className="hidden md:flex text-gray-100 hover:text-white hover:bg-white/10 font-medium" onClick={scrollToShop} data-testid="nav-shop" aria-label="Scroll to Shop section">Shop</Button>
             <Button 
@@ -631,22 +634,24 @@ export default function MainStore() {
             </motion.h1>
 
             {/* Trust above fold + geo for US/UK/CA impressions */}
-            <motion.p 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.15 }}
-              className="text-base sm:text-lg md:text-xl text-gray-100 mb-2"
-            >
-              IPTV-first experience with optional Fire Stick and ONN bundles. Secure checkout, instant email credentials, guided setup tutorial, and 24/7 human support.
-            </motion.p>
-            <motion.p 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.16 }}
-              className="text-sm sm:text-base text-gray-300 mb-6 max-w-3xl mx-auto"
-            >
-              18,000+ live channels, 100,000+ movies & series, premium sports, and instant activation in <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">USA</span></Link>, <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">Canada</span></Link>, and <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">UK</span></Link>. Devices ship with Reloaded Fire TV all-in-one access—no dead apps or Kodi rebuilds.
-            </motion.p>
+            <div className="max-w-4xl mx-auto mb-6 rounded-2xl border border-white/15 bg-black/30 backdrop-blur-md px-4 py-4 sm:px-5 sm:py-5">
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="text-base sm:text-lg md:text-[1.15rem] leading-relaxed text-gray-100 mb-2"
+              >
+                IPTV-first experience with optional Fire Stick and ONN bundles. Secure checkout, instant email credentials, guided setup tutorial, and 24/7 human support.
+              </motion.p>
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.16 }}
+                className="text-sm sm:text-base leading-relaxed text-gray-200 max-w-3xl mx-auto"
+              >
+                18,000+ live channels, 100,000+ movies & series, premium sports, and instant activation in <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">USA</span></Link>, <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">Canada</span></Link>, and <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">UK</span></Link>. Devices ship with Reloaded Fire TV all-in-one access—no dead apps or Kodi rebuilds.
+              </motion.p>
+            </div>
 
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.18 }} className="mb-4">
               <Link href="/ultimate-iptv-catalog-2026">
@@ -669,7 +674,7 @@ export default function MainStore() {
                   role="button"
                 >
                   <Gift className="w-6 h-6" aria-hidden="true" />
-                  START 36HR TRIAL
+                  Start 36hr Trial
                 </motion.span>
               </Link>
               <Link href="/firestick-devices">
@@ -680,7 +685,7 @@ export default function MainStore() {
                   role="button"
                 >
                   <ShoppingCart className="w-6 h-6" aria-hidden="true" />
-                  SHOP DEVICES (FIRE STICK & ONN)
+                  Shop Devices (Fire Stick & ONN)
                 </motion.span>
               </Link>
               <Link href="/onn-google-tv">
@@ -691,7 +696,7 @@ export default function MainStore() {
                   role="button"
                 >
                   <Zap className="w-6 h-6" aria-hidden="true" />
-                  VIEW ONN OPTIONS
+                  View ONN Options
                 </motion.span>
               </Link>
             </motion.div>

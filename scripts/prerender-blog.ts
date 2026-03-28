@@ -1,6 +1,7 @@
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { createClient } from "@supabase/supabase-js";
+import { TIER_1_CRUSH_SLUGS } from "../client/src/data/crushCompetitors";
 
 const SITE_URL = "https://streamstickpro.com";
 
@@ -441,6 +442,27 @@ function generateBlogIndexHTML(posts: BlogPost[], cssPath: string, jsPath: strin
 
 function generateSitemap(posts: BlogPost[]): string {
   const today = new Date().toISOString().split("T")[0];
+  const highIntentComparisonSlugs = new Set([
+    "youtube-tv",
+    "hulu-live",
+    "fubo-tv",
+    "sling-tv",
+    "kodi",
+    "troypoint",
+    "roku",
+    "iptvstronger",
+    "downloader-app",
+    "nvidia-shield",
+    "apple-tv",
+    "chromecast",
+    "directv-stream",
+    "peacock",
+  ]);
+  const comparisonPages = TIER_1_CRUSH_SLUGS.map((slug) => ({
+    url: `/vs-${slug}`,
+    priority: highIntentComparisonSlugs.has(slug) ? "0.7" : "0.6",
+    changefreq: "monthly",
+  }));
   
   const staticPages = [
     { url: "/", priority: "1.0", changefreq: "weekly" },
@@ -462,28 +484,7 @@ function generateSitemap(posts: BlogPost[]): string {
     { url: "/ultimate-iptv-catalog-2026", priority: "0.7", changefreq: "monthly" },
     { url: "/locations", priority: "0.85", changefreq: "daily" },
     { url: "/seo-ads", priority: "0.6", changefreq: "monthly" },
-    // VS competitor pages
-    { url: "/vs-youtube-tv", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-hulu-live", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-fubo-tv", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-sling-tv", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-kodi", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-troypoint", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-roku", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-iptvstronger", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-downloader-app", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-nvidia-shield", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-apple-tv", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-chromecast", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-directv-stream", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-peacock", priority: "0.7", changefreq: "monthly" },
-    { url: "/vs-plex", priority: "0.6", changefreq: "monthly" },
-    { url: "/vs-perfect-player", priority: "0.6", changefreq: "monthly" },
-    { url: "/vs-stbemu", priority: "0.6", changefreq: "monthly" },
-    { url: "/vs-tivimate", priority: "0.6", changefreq: "monthly" },
-    { url: "/vs-iptvsmarters", priority: "0.6", changefreq: "monthly" },
-    { url: "/vs-dazn", priority: "0.6", changefreq: "monthly" },
-    { url: "/vs-espn-plus", priority: "0.6", changefreq: "monthly" },
+    ...comparisonPages,
     // Policy pages
     { url: "/terms", priority: "0.5", changefreq: "yearly" },
     { url: "/privacy", priority: "0.5", changefreq: "yearly" },
