@@ -218,6 +218,7 @@ export function CartDrawer() {
                   <Lock className="w-3 h-3" />
                   <span>Secure checkout powered by Stripe</span>
                 </div>
+                <p className="text-center text-[11px] text-gray-500">One-time payment. No auto-renew subscription.</p>
 
                 <div className="flex flex-wrap justify-center gap-1 pt-1">
                   {["Visa", "MC", "Amex", "Apple Pay", "Google Pay", "Cash App", "Affirm", "Klarna"].map((m) => (

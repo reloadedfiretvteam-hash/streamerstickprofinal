@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { apiCall } from "@/lib/api";
 import { useCart } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -165,6 +165,7 @@ export default function Checkout() {
   );
 
   const showCountryOptions = hasIPTVProduct || hasFireStickProduct || hasFreeTrial;
+  const orderTotal = Number(total() || 0);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -350,6 +351,9 @@ export default function Checkout() {
         <ProgressBar step={2} />
 
         <h1 className="text-2xl md:text-3xl font-bold mb-6 text-foreground text-center">Complete Your Order</h1>
+        <p className="text-center text-sm text-gray-300 mb-6">
+          Typical checkout time: under 2 minutes. One-time payment, no auto-renew subscription.
+        </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3 space-y-6">
@@ -531,6 +535,9 @@ export default function Checkout() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
+                  We only use your details for order delivery, account setup, and support updates.
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address *</Label>
                   <Input 
@@ -672,6 +679,9 @@ export default function Checkout() {
                     />
                   </div>
                 )}
+                <p className="text-xs text-muted-foreground pt-1">
+                  Required fields are marked with *.
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -699,7 +709,7 @@ export default function Checkout() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Subtotal</span>
-                    <span className="text-white">${total()}</span>
+                    <span className="text-white">${orderTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Shipping</span>
@@ -710,8 +720,9 @@ export default function Checkout() {
                 <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-xl p-4">
                   <div className="flex justify-between items-center text-2xl font-bold">
                     <span className="text-white">Total</span>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">${total()}</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">${orderTotal.toFixed(2)}</span>
                   </div>
+                  <p className="text-xs text-gray-300 mt-1">One-time payment. No automatic renewal.</p>
                 </div>
                 
                 {error && (
@@ -739,6 +750,9 @@ export default function Checkout() {
                       </>
                     )}
                   </Button>
+                  <p className="text-center text-xs text-gray-400">
+                    Next step opens secure Stripe checkout to finish payment.
+                  </p>
 
                   <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
                     <Lock className="w-3 h-3" />
@@ -785,6 +799,13 @@ export default function Checkout() {
                       ))}
                     </div>
                   </div>
+
+                  <p className="text-[11px] text-gray-500 text-center leading-relaxed">
+                    By continuing, you agree to our{" "}
+                    <Link href="/terms"><span className="underline hover:text-gray-300">Terms</span></Link>,{" "}
+                    <Link href="/privacy"><span className="underline hover:text-gray-300">Privacy</span></Link>, and{" "}
+                    <Link href="/refund"><span className="underline hover:text-gray-300">Refund Policy</span></Link>.
+                  </p>
                 </div>
               </CardContent>
             </Card>
