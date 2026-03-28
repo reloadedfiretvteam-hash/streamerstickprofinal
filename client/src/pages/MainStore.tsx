@@ -969,7 +969,17 @@ export default function MainStore() {
 
                       <div className="p-5">
                         <h4 className="text-xl font-bold mb-2 text-white">{plan.durationLabel} Live TV</h4>
-                        <p className="text-gray-200 text-xs mb-4 line-clamp-2">{plan.description}</p>
+                        <p className="text-gray-200 text-xs mb-3 line-clamp-2">{plan.description}</p>
+                        <div className="mb-4 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-[11px] text-blue-100">
+                          <span className="font-semibold text-white">Best for:</span>{" "}
+                          {plan.duration === "1mo"
+                            ? "new customers testing quality with lowest risk"
+                            : plan.duration === "3mo"
+                            ? "most customers who want best short-term value"
+                            : plan.duration === "6mo"
+                            ? "families or heavy users who want fewer renewals"
+                            : "buyers who want the strongest yearly value per month"}
+                        </div>
 
                         <div className="mb-4">
                           <label className="text-sm text-gray-200 mb-2 block">Number of Devices:</label>
@@ -1317,7 +1327,15 @@ export default function MainStore() {
                     </div>
 
                     <div className="p-8 relative">
-                      <h4 className="text-2xl font-bold mb-4 text-white">{product.name}</h4>
+                      <h4 className="text-2xl font-bold mb-3 text-white">{product.name}</h4>
+                      <div className="mb-4 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-[11px] text-blue-100">
+                        <span className="font-semibold text-white">Best for:</span>{" "}
+                        {product.id === "firestick-hd"
+                          ? "budget-friendly streaming on 1080p TVs"
+                          : product.id === "firestick-4k"
+                          ? "most homes wanting 4K quality and best overall value"
+                          : "power users wanting peak speed and premium performance"}
+                      </div>
 
                       {/* Quantity Selector */}
                       <div className="mb-4">
