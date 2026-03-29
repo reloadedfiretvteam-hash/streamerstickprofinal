@@ -71,6 +71,252 @@ function chunkArray<T>(list: T[], size = 500): T[][] {
   return chunks;
 }
 
+type MarketingAudience = 'all' | 'free_trial' | 'purchase';
+type MarketingSegment = 'free_trial' | 'purchase' | 'other';
+
+type MarketingContact = {
+  email: string;
+  name: string;
+  username?: string;
+  type: string;
+  date: string;
+  source: string;
+  isSubscribed?: boolean;
+  segment: MarketingSegment;
+};
+
+type MarketingAccumulator = {
+  email: string;
+  name: string;
+  username?: string;
+  type: string;
+  date: string;
+  source: string;
+  isSubscribed?: boolean;
+  hasTrial: boolean;
+  hasPurchase: boolean;
+};
+
+function normalizeEmail(value: unknown): string {
+  return String(value || '').trim().toLowerCase();
+}
+
+function isTrialSource(source: unknown): boolean {
+  const value = String(source || '').trim().toLowerCase();
+  return value === 'free_trial' || value === 'trial' || value.includes('trial');
+}
+
+function isPurchaseSource(source: unknown): boolean {
+  const value = String(source || '').trim().toLowerCase();
+  return (
+    value === 'subscription' ||
+    value === 'firestick' ||
+    value === 'purchase' ||
+    value === 'orders' ||
+    value === 'customers' ||
+    value.includes('purchase')
+  );
+}
+
+function typePriority(type: string): number {
+  if (type === 'purchase') return 3;
+  if (type === 'trial') return 2;
+  if (type === 'contact') return 1;
+  return 0;
+}
+
+function parseTime(value: unknown): number {
+  if (!value) return 0;
+  const t = new Date(String(value)).getTime();
+  return Number.isFinite(t) ? t : 0;
+}
+
+function getSegment(hasTrial: boolean, hasPurchase: boolean): MarketingSegment {
+  if (hasPurchase) return 'purchase';
+  if (hasTrial) return 'free_trial';
+  return 'other';
+}
+
+function filterContactsByAudience(list: MarketingContact[], audience: MarketingAudience): MarketingContact[] {
+  if (audience === 'all') return list;
+  return list.filter((item) => item.segment === audience);
+}
+
+async function buildMarketingContacts(env: Env, includeTestData: boolean): Promise<{ contacts: MarketingContact[]; excludedTestCount: number }> {
+  const storage = getStorage(env);
+  const { createClient } = await import('@supabase/supabase-js');
+  const supabaseUrl = env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK;
+  const supabaseKey = env.SUPABASE_SERVICE_KEY || env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLL_KEY || env.VITE_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Marketing unavailable: missing Supabase configuration');
+  }
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  const contactMap = new Map<string, MarketingAccumulator>();
+  let excludedTestCount = 0;
+
+  const mergeContact = (incoming: {
+    email: unknown;
+    name?: unknown;
+    username?: unknown;
+    type?: unknown;
+    date?: unknown;
+    source?: unknown;
+    isSubscribed?: unknown;
+    hasTrial?: boolean;
+    hasPurchase?: boolean;
+  }) => {
+    const email = normalizeEmail(incoming.email);
+    if (!email || !email.includes('@')) return;
+    if (!includeTestData && isLikelyTestEmail(email)) {
+      excludedTestCount++;
+      return;
+    }
+
+    const incomingType = String(incoming.type || 'contact');
+    const incomingSource = String(incoming.source || 'unknown');
+    const incomingHasTrial = Boolean(incoming.hasTrial || incomingType === 'trial' || isTrialSource(incomingSource));
+    const incomingHasPurchase = Boolean(incoming.hasPurchase || incomingType === 'purchase' || isPurchaseSource(incomingSource));
+    const incomingDate = String(incoming.date || '');
+    const incomingName = String(incoming.name || '');
+    const incomingUsername = String(incoming.username || '');
+    const incomingIsSubscribed = incoming.isSubscribed === undefined ? undefined : Boolean(incoming.isSubscribed);
+
+    const existing = contactMap.get(email);
+    if (!existing) {
+      contactMap.set(email, {
+        email,
+        name: incomingName,
+        username: incomingUsername,
+        type: incomingType,
+        date: incomingDate,
+        source: incomingSource,
+        isSubscribed: incomingIsSubscribed,
+        hasTrial: incomingHasTrial,
+        hasPurchase: incomingHasPurchase,
+      });
+      return;
+    }
+
+    existing.hasTrial = existing.hasTrial || incomingHasTrial;
+    existing.hasPurchase = existing.hasPurchase || incomingHasPurchase;
+
+    const shouldReplace =
+      typePriority(incomingType) > typePriority(existing.type) ||
+      (typePriority(incomingType) === typePriority(existing.type) && parseTime(incomingDate) > parseTime(existing.date));
+
+    if (shouldReplace) {
+      existing.type = incomingType;
+      existing.date = incomingDate || existing.date;
+      existing.source = incomingSource || existing.source;
+      existing.name = incomingName || existing.name;
+      existing.username = incomingUsername || existing.username;
+      if (incomingIsSubscribed !== undefined) {
+        existing.isSubscribed = incomingIsSubscribed;
+      }
+      return;
+    }
+
+    if (!existing.name && incomingName) existing.name = incomingName;
+    if (!existing.username && incomingUsername) existing.username = incomingUsername;
+    if (existing.isSubscribed === undefined && incomingIsSubscribed !== undefined) {
+      existing.isSubscribed = incomingIsSubscribed;
+    }
+  };
+
+  try {
+    const { data: contactRows } = await supabase.from('contacts').select('*');
+    for (const row of contactRows || []) {
+      const source = String((row as any).source || 'contacts');
+      const hasTrial = isTrialSource(source);
+      const hasPurchase = isPurchaseSource(source);
+      mergeContact({
+        email: (row as any).email,
+        name: [row.first_name, row.last_name].filter(Boolean).join(' ').trim() || (row as any).name || (row as any).full_name || '',
+        username: (row as any).username || '',
+        type: hasTrial ? 'trial' : hasPurchase ? 'purchase' : 'contact',
+        date: (row as any).created_at || (row as any).updated_at || '',
+        source,
+        isSubscribed: (row as any).is_subscribed !== false,
+        hasTrial,
+        hasPurchase,
+      });
+    }
+  } catch {
+    // contacts table can be missing in older environments
+  }
+
+  const customers = await storage.getAllCustomers();
+  for (const customer of customers as any[]) {
+    mergeContact({
+      email: customer.email,
+      name: customer.fullName || customer.username || '',
+      username: customer.username || '',
+      type: 'purchase',
+      date: customer.createdAt || '',
+      source: 'customers',
+      hasPurchase: true,
+    });
+  }
+
+  const orders = await storage.getAllOrders();
+  for (const order of orders as any[]) {
+    const productName = String(order.realProductName || '').toLowerCase();
+    const amount = Number(order.amount || 0);
+    const isTrial = amount <= 0 || productName.includes('trial');
+    mergeContact({
+      email: order.customerEmail,
+      name: order.customerName || '',
+      username: order.username || '',
+      type: isTrial ? 'trial' : 'purchase',
+      date: order.createdAt || '',
+      source: 'orders',
+      hasTrial: isTrial,
+      hasPurchase: !isTrial,
+    });
+  }
+
+  try {
+    const { data: legacyCampaignRows } = await supabase
+      .from('email_campaigns')
+      .select('customer_email,customer_name,campaign_type,created_at');
+    for (const row of legacyCampaignRows || []) {
+      const campaignType = String((row as any).campaign_type || '').toLowerCase();
+      const hasTrial = campaignType === 'free_trial' || campaignType === 'trial';
+      const hasPurchase = campaignType === 'purchase';
+      mergeContact({
+        email: (row as any).customer_email,
+        name: (row as any).customer_name || '',
+        type: hasTrial ? 'trial' : hasPurchase ? 'purchase' : 'campaign',
+        date: (row as any).created_at || '',
+        source: 'email_campaigns',
+        hasTrial,
+        hasPurchase,
+      });
+    }
+  } catch {
+    // new email_campaigns schema does not contain legacy customer_email/campaign_type fields
+  }
+
+  const contacts = Array.from(contactMap.values())
+    .map((entry) => {
+      const segment = getSegment(entry.hasTrial, entry.hasPurchase);
+      return {
+        email: entry.email,
+        name: entry.name || '',
+        username: entry.username || '',
+        type: segment === 'purchase' ? 'purchase' : segment === 'free_trial' ? 'trial' : entry.type,
+        date: entry.date || '',
+        source: entry.source || 'unknown',
+        isSubscribed: entry.isSubscribed,
+        segment,
+      } as MarketingContact;
+    })
+    .sort((a, b) => parseTime(b.date) - parseTime(a.date));
+
+  return { contacts, excludedTestCount };
+}
+
 export function createAdminRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
@@ -990,161 +1236,22 @@ export function createAdminRoutes() {
 
   app.get('/marketing/contacts', async (c) => {
     try {
-      const storage = getStorage(c.env);
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabaseUrl = c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK;
-      const supabaseKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY;
-      if (!supabaseUrl || !supabaseKey) {
-        return c.json({ error: 'Marketing unavailable: missing Supabase configuration', details: 'Set VITE_SUPABASE_URL and SUPABASE_SERVICE_KEY' }, 503);
-      }
-      const supabase = createClient(supabaseUrl, supabaseKey);
       const includeTestData = c.req.query('includeTestData') === 'true';
-      let excludedTestCount = 0;
+      const audienceRaw = String(c.req.query('audience') || 'all').trim().toLowerCase();
+      const audience: MarketingAudience =
+        audienceRaw === 'free_trial' || audienceRaw === 'purchase' || audienceRaw === 'all'
+          ? (audienceRaw as MarketingAudience)
+          : 'all';
 
-      const contactMap = new Map<string, { email: string; name: string; username?: string; type: string; date: string; source: string; isSubscribed?: boolean }>();
-      const typePriority = (type: string) => {
-        if (type === 'purchase') return 3;
-        if (type === 'trial') return 2;
-        if (type === 'contact') return 1;
-        return 0;
-      };
-      const mergeContact = (incoming: { email: string; name: string; username?: string; type: string; date: string; source: string; isSubscribed?: boolean }) => {
-        const existing = contactMap.get(incoming.email);
-        if (!existing) {
-          contactMap.set(incoming.email, incoming);
-          return;
-        }
+      const { contacts, excludedTestCount } = await buildMarketingContacts(c.env, includeTestData);
+      const filtered = filterContactsByAudience(contacts, audience);
 
-        const incomingPriority = typePriority(incoming.type);
-        const existingPriority = typePriority(existing.type);
-        const incomingDate = incoming.date ? new Date(incoming.date).getTime() : 0;
-        const existingDate = existing.date ? new Date(existing.date).getTime() : 0;
-        const shouldReplace = incomingPriority > existingPriority || (incomingPriority === existingPriority && incomingDate > existingDate);
-
-        if (shouldReplace) {
-          contactMap.set(incoming.email, {
-            ...existing,
-            ...incoming,
-            isSubscribed: incoming.isSubscribed ?? existing.isSubscribed,
-            name: incoming.name || existing.name,
-            username: incoming.username || existing.username,
-          });
-          return;
-        }
-
-        if (!existing.name && incoming.name) {
-          existing.name = incoming.name;
-        }
-        if (!existing.username && incoming.username) {
-          existing.username = incoming.username;
-        }
-        if (existing.isSubscribed === undefined && incoming.isSubscribed !== undefined) {
-          existing.isSubscribed = incoming.isSubscribed;
-        }
-      };
-
-      // 1. Contacts table (if it exists)
-      try {
-        const { data: contactRows } = await supabase.from('contacts').select('*');
-        (contactRows || []).forEach((row: any) => {
-          const email = (row.email || '').trim().toLowerCase();
-          if (!email || !email.includes('@')) return;
-          if (!includeTestData && isLikelyTestEmail(email)) {
-            excludedTestCount++;
-            return;
-          }
-          const fullName = [row.first_name, row.last_name].filter(Boolean).join(' ').trim();
-          const source = row.source || 'contacts';
-          const type =
-            source === 'free_trial'
-              ? 'trial'
-              : source === 'subscription' || source === 'firestick'
-                ? 'purchase'
-                : 'contact';
-          mergeContact({
-            email,
-            name: fullName || row.name || row.full_name || '',
-            username: row.username || '',
-            type,
-            date: row.created_at || row.updated_at || '',
-            source,
-            isSubscribed: row.is_subscribed !== false,
-          });
-        });
-      } catch {
-        // contacts table may not exist — ignore
-      }
-
-      // 2. Customers from storage
-      const customers = await storage.getAllCustomers();
-      customers.forEach((cust: any) => {
-        const email = (cust.email || '').trim().toLowerCase();
-        if (!email || !email.includes('@')) return;
-        if (!includeTestData && isLikelyTestEmail(email)) {
-          excludedTestCount++;
-          return;
-        }
-        mergeContact({
-          email,
-          name: cust.fullName || cust.username || '',
-          username: cust.username || '',
-          type: 'purchase',
-          date: cust.createdAt || '',
-          source: 'customers',
-        });
+      return c.json({
+        data: filtered,
+        total: filtered.length,
+        excludedTestCount,
+        audience,
       });
-
-      // 3. Orders from storage (captures free-trial users too)
-      const orders = await storage.getAllOrders();
-      orders.forEach((o: any) => {
-        const email = (o.customerEmail || '').trim().toLowerCase();
-        if (!email || !email.includes('@')) return;
-        if (!includeTestData && isLikelyTestEmail(email)) {
-          excludedTestCount++;
-          return;
-        }
-        const isTrial = o.paymentMethod === 'free-trial' || o.amount === 0;
-        mergeContact({
-          email,
-          name: o.customerName || '',
-            username: o.username || '',
-          type: isTrial ? 'trial' : 'purchase',
-          date: o.createdAt || '',
-          source: 'orders',
-        });
-      });
-
-      // 4. email_campaigns table (picks up any stragglers)
-      try {
-        const { data: campaigns } = await supabase.from('email_campaigns').select('customer_email, customer_name, created_at');
-        (campaigns || []).forEach((row: any) => {
-          const email = (row.customer_email || '').trim().toLowerCase();
-          if (!email || !email.includes('@')) return;
-          if (!includeTestData && isLikelyTestEmail(email)) {
-            excludedTestCount++;
-            return;
-          }
-          mergeContact({
-            email,
-            name: row.customer_name || '',
-            username: '',
-            type: 'campaign',
-            date: row.created_at || '',
-            source: 'email_campaigns',
-          });
-        });
-      } catch {
-        // table may not exist
-      }
-
-      const contacts = Array.from(contactMap.values()).sort((a, b) => {
-        if (!a.date && !b.date) return 0;
-        if (!a.date) return 1;
-        if (!b.date) return -1;
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      });
-
-      return c.json({ data: contacts, total: contacts.length, excludedTestCount });
     } catch (error: any) {
       console.error('Marketing contacts error:', error);
       return c.json({ error: 'Failed to fetch marketing contacts', details: error.message }, 500);
@@ -1217,6 +1324,11 @@ export function createAdminRoutes() {
     try {
       const body = await c.req.json();
       const { recipients, subject, htmlBody, campaignName } = body;
+      const audienceRaw = String(body?.audience || 'all').trim().toLowerCase();
+      const audience: MarketingAudience =
+        audienceRaw === 'free_trial' || audienceRaw === 'purchase' || audienceRaw === 'all'
+          ? (audienceRaw as MarketingAudience)
+          : 'all';
 
       if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
         return c.json({ error: 'recipients (array of emails) is required' }, 400);
@@ -1243,16 +1355,30 @@ export function createAdminRoutes() {
             .filter((r: string) => r.includes('@'))
         )
       );
+      const { contacts: allContactsForAudience } = await buildMarketingContacts(c.env, false);
+      const allowedAudienceEmails = new Set(
+        filterContactsByAudience(allContactsForAudience, audience).map((cRow) => cRow.email)
+      );
       const skippedTestRecipients: string[] = [];
+      const skippedAudienceRecipients: string[] = [];
       const deliverableRecipients = normalizedRecipients.filter((email) => {
         if (isLikelyTestEmail(email)) {
           skippedTestRecipients.push(email);
           return false;
         }
+        if (audience !== 'all' && !allowedAudienceEmails.has(email)) {
+          skippedAudienceRecipients.push(email);
+          return false;
+        }
         return true;
       });
       if (deliverableRecipients.length === 0) {
-        return c.json({ error: 'No valid non-test recipients selected', skippedTestRecipients }, 400);
+        return c.json({
+          error: 'No valid recipients selected for chosen audience',
+          audience,
+          skippedTestRecipients,
+          skippedAudienceRecipients,
+        }, 400);
       }
 
       const bodyText = String(htmlBody)
@@ -1301,7 +1427,7 @@ export function createAdminRoutes() {
           subject: subject.trim(),
           body_html: htmlBody,
           body_text: bodyText,
-          segment: { recipients: deliverableRecipients, count: deliverableRecipients.length },
+          segment: { audience, recipients: deliverableRecipients, count: deliverableRecipients.length },
           status: 'sending',
         })
         .select('id')
@@ -1396,7 +1522,9 @@ export function createAdminRoutes() {
         failed,
         total: deliverableRecipients.length,
         campaignId,
+        audience,
         skippedTestRecipients,
+        skippedAudienceRecipients,
         errors: errors.slice(0, 50),
       });
     } catch (error: any) {

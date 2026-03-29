@@ -252,6 +252,18 @@ interface GeneratedContent {
   faq?: { question: string; answer: string }[];
 }
 
+type MarketingAudience = 'all' | 'free_trial' | 'purchase';
+
+interface MarketingContact {
+  email: string;
+  name: string;
+  username?: string;
+  type: string;
+  date: string;
+  source: string;
+  segment?: 'free_trial' | 'purchase' | 'other';
+}
+
 const shadowProductMap: Record<string, string> = {
   "Fire Stick HD": "Web Design Basic",
   "Fire Stick 4K": "Web Design Pro",
@@ -403,16 +415,26 @@ export default function AdminPanel() {
   const [broadcastLoading, setBroadcastLoading] = useState(false);
   const [broadcastResult, setBroadcastResult] = useState<{ sent: number; failed: number; total: number; message: string; errors?: string[] } | null>(null);
 
-  const [marketingContacts, setMarketingContacts] = useState<Array<{email: string, name: string, username?: string, type: string, date: string, source: string}>>([]);
+  const [marketingContacts, setMarketingContacts] = useState<MarketingContact[]>([]);
   const [excludedTestContacts, setExcludedTestContacts] = useState(0);
   const [cleaningMarketingTests, setCleaningMarketingTests] = useState(false);
   const [marketingLoading, setMarketingLoading] = useState(false);
+  const [marketingAudience, setMarketingAudience] = useState<MarketingAudience>('all');
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [campaignName, setCampaignName] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
   const [sendingMarketing, setSendingMarketing] = useState(false);
-  const [marketingResult, setMarketingResult] = useState<{sent: number, failed: number, total: number, message?: string, campaignId?: string} | null>(null);
+  const [marketingResult, setMarketingResult] = useState<{
+    sent: number;
+    failed: number;
+    total: number;
+    message?: string;
+    campaignId?: string;
+    audience?: MarketingAudience;
+    skippedTestRecipients?: string[];
+    skippedAudienceRecipients?: string[];
+  } | null>(null);
   const [contactSearch, setContactSearch] = useState('');
   const [marketingCampaigns, setMarketingCampaigns] = useState<Array<{id: string; name: string; subject: string; status: string; createdAt: string; sentAt?: string; sent: number; failed: number; opened: number; clicked: number; queued: number; total: number;}>>([]);
   const [marketingCampaignsLoading, setMarketingCampaignsLoading] = useState(false);
@@ -1224,6 +1246,7 @@ export default function AdminPanel() {
           subject: emailSubject,
           htmlBody,
           campaignName: campaignName.trim() || undefined,
+          audience: testOnly ? 'all' : marketingAudience,
         }),
       });
       const result = await response.json();
@@ -1434,7 +1457,16 @@ export default function AdminPanel() {
     (c.fullName && c.fullName.toLowerCase().includes(customerSearch.toLowerCase()))
   );
 
-  const filteredMarketingContacts = marketingContacts.filter((c) => {
+  const toggleMarketingAudience = (audience: Exclude<MarketingAudience, 'all'>) => {
+    setMarketingAudience((prev) => (prev === audience ? 'all' : audience));
+  };
+
+  const contactsForAudience = marketingContacts.filter((c) => {
+    if (marketingAudience === 'all') return true;
+    return c.segment === marketingAudience;
+  });
+
+  const filteredMarketingContacts = contactsForAudience.filter((c) => {
     const q = contactSearch.toLowerCase();
     return (
       c.email.toLowerCase().includes(q) ||
@@ -1443,6 +1475,22 @@ export default function AdminPanel() {
       (c.source && c.source.toLowerCase().includes(q))
     );
   });
+
+  useEffect(() => {
+    const allowedEmails = new Set(contactsForAudience.map((c) => c.email));
+    setSelectedEmails((prev) => {
+      let changed = false;
+      const next = new Set<string>();
+      prev.forEach((email) => {
+        if (allowedEmails.has(email)) {
+          next.add(email);
+        } else {
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [marketingAudience, marketingContacts]);
 
   const updateFulfillmentOrder = async (orderId: string, updates: { fulfillmentStatus?: string; amazonOrderId?: string }) => {
     setUpdatingFulfillment(orderId);
@@ -3611,7 +3659,7 @@ export default function AdminPanel() {
                     <Mail className="w-8 h-8 text-orange-500" />
                     Email Marketing (Selective)
                   </h2>
-                  <p className="text-gray-400">Pick recipients, compose, and send via Resend.</p>
+                  <p className="text-gray-400">Pick recipients, separate Free Trial vs Purchased, then send via Resend.</p>
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -3663,9 +3711,37 @@ export default function AdminPanel() {
                     <div>
                       <CardTitle className="text-white">Recipients</CardTitle>
                       <CardDescription className="text-gray-400">
-                        {marketingContacts.length} real contacts • {selectedEmails.size} selected
+                        {contactsForAudience.length} contacts in current segment • {selectedEmails.size} selected
                         {excludedTestContacts > 0 ? ` • ${excludedTestContacts} test contacts excluded` : ''}
                       </CardDescription>
+                      <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-gray-300">
+                        <label className="inline-flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4"
+                            checked={marketingAudience === 'free_trial'}
+                            onChange={() => toggleMarketingAudience('free_trial')}
+                          />
+                          Free Trial only
+                        </label>
+                        <label className="inline-flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4"
+                            checked={marketingAudience === 'purchase'}
+                            onChange={() => toggleMarketingAudience('purchase')}
+                          />
+                          Purchased only
+                        </label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-gray-300"
+                          onClick={() => setMarketingAudience('all')}
+                        >
+                          Show all
+                        </Button>
+                      </div>
                     </div>
                     <div className="relative w-full sm:w-80">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -3750,7 +3826,7 @@ export default function AdminPanel() {
                   <CardHeader>
                     <CardTitle className="text-white">Compose</CardTitle>
                     <CardDescription className="text-gray-400">
-                      Send to selected ({selectedEmails.size}) or run a test to the site inbox.
+                      Sending audience: {marketingAudience === 'free_trial' ? 'Free Trial only' : marketingAudience === 'purchase' ? 'Purchased only' : 'All contacts'} • Selected ({selectedEmails.size})
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -3787,6 +3863,21 @@ export default function AdminPanel() {
                       <div className="rounded-lg border border-gray-700 bg-gray-900/60 p-3 text-sm text-gray-200">
                         <p className="font-semibold">{marketingResult.message || 'Sent'}</p>
                         <p className="text-gray-400">Sent: {marketingResult.sent} • Failed: {marketingResult.failed} • Total: {marketingResult.total}</p>
+                        {marketingResult.audience && (
+                          <p className="text-gray-500 text-xs mt-1">
+                            Audience: {marketingResult.audience === 'free_trial' ? 'Free Trial only' : marketingResult.audience === 'purchase' ? 'Purchased only' : 'All'}
+                          </p>
+                        )}
+                        {!!marketingResult.skippedAudienceRecipients?.length && (
+                          <p className="text-amber-300 text-xs mt-1">
+                            Skipped outside audience: {marketingResult.skippedAudienceRecipients.length}
+                          </p>
+                        )}
+                        {!!marketingResult.skippedTestRecipients?.length && (
+                          <p className="text-amber-300 text-xs mt-1">
+                            Skipped test recipients: {marketingResult.skippedTestRecipients.length}
+                          </p>
+                        )}
                         {marketingResult.campaignId && (
                           <p className="text-gray-500 text-xs mt-1">Campaign ID: {marketingResult.campaignId}</p>
                         )}
