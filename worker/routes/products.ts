@@ -6,7 +6,7 @@ const defaultProducts = [
   {
     id: "firestick-hd",
     name: "StreamStick Starter Kit",
-    price: 11500,
+    price: 12500,
     description: "Entry-level Fire Stick bundle with Reloaded Fire TV, instant credentials, educational tutorial, 1-year included access, and 24/7 support. No dead apps or Kodi rebuilds.",
     imageUrl: "",
     category: "firestick",
@@ -17,7 +17,7 @@ const defaultProducts = [
   {
     id: "firestick-4k",
     name: "StreamStick 4K Kit",
-    price: 12500,
+    price: 13500,
     description: "Best-value Fire Stick 4K bundle with Reloaded Fire TV, instant credentials, tutorial video, 1-year included access, and 24/7 support for a smoother all-in-one setup.",
     imageUrl: "",
     category: "firestick",
@@ -28,7 +28,7 @@ const defaultProducts = [
   {
     id: "firestick-4k-max",
     name: "StreamStick Max Kit",
-    price: 13500,
+    price: 14500,
     description: "Premium Fire Stick 4K Max bundle with Reloaded Fire TV, instant credentials, educational tutorial, 1-year included access, and priority 24/7 support.",
     imageUrl: "",
     category: "firestick",

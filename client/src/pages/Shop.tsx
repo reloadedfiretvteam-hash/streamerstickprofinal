@@ -113,7 +113,7 @@ const defaultProducts: Product[] = [
   {
     id: 'fs-hd',
     name: 'Fire Stick HD',
-    price: 115,
+    price: 125,
     description: 'Entry-level Stream Stick Pro device bundle with Reloaded Fire TV all-in-one setup flow, educational tutorials, and 1-year included access.',
     features: ['1080p Full HD', 'Reloaded Fire TV All-in-One Access', 'Educational Setup Tutorial Included', '1 Year Included Access', '18,000+ Live TV Channels', '24/7 Customer Support'],
     image: firestickHdImg,
@@ -123,7 +123,7 @@ const defaultProducts: Product[] = [
   {
     id: 'fs-4k',
     name: 'Fire Stick 4K',
-    price: 125,
+    price: 135,
     description: 'Most popular Stream Stick Pro Fire Stick bundle with Reloaded Fire TV all-in-one access, guided setup, and 1-year included access.',
     features: ['4K Ultra HD', 'HDR Support', 'Dolby Vision & Atmos', 'Reloaded Fire TV All-in-One Access', 'Educational Setup Tutorial Included', '1 Year Included Access', '24/7 Customer Support'],
     image: firestick4kImg,
@@ -134,7 +134,7 @@ const defaultProducts: Product[] = [
   {
     id: 'fs-max',
     name: 'Fire Stick 4K Max',
-    price: 135,
+    price: 145,
     description: 'Performance-first Stream Stick Pro Fire Stick Max bundle with Reloaded Fire TV all-in-one access, educational setup, and 1-year included access.',
     features: ['4K Ultra HD', 'Wi-Fi 6E (Fastest)', 'HDR Support', 'Dolby Vision & Atmos', 'Reloaded Fire TV All-in-One Access', 'Educational Setup Tutorial Included', '1 Year Included Access', '24/7 Customer Support'],
     image: firestick4kMaxImg,
