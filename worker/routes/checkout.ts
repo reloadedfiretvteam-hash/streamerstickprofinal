@@ -14,6 +14,21 @@ const maskEmail = (email?: string | null): string => {
   return `${local.slice(0, 2)}***@${domain}`;
 };
 
+const DEFAULT_PAYMENT_METHODS: Stripe.Checkout.SessionCreateParams.PaymentMethodType[] = [
+  'card',
+  'link',
+  'cashapp',
+  'klarna',
+  'affirm',
+];
+
+function extractInvalidPaymentMethod(error: unknown): string | null {
+  const message = String((error as any)?.message || '').toLowerCase();
+  if (!message.includes('payment method type') || !message.includes('invalid')) return null;
+  const match = message.match(/provided:\s*([a-z0-9_]+)/i);
+  return match?.[1]?.toLowerCase() || null;
+}
+
 export function createCheckoutRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
@@ -83,7 +98,7 @@ export function createCheckoutRoutes() {
         success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${baseUrl}/checkout`,
         customer_email: customerEmail,
-        payment_method_types: ['card', 'link', 'cashapp', 'affirm', 'klarna'],
+        payment_method_types: [...DEFAULT_PAYMENT_METHODS],
         allow_promotion_codes: true,
         shipping_address_collection: {
           allowed_countries: ['US', 'CA'],
@@ -102,7 +117,24 @@ export function createCheckoutRoutes() {
       };
 
       debugLog("Checkout: Calling stripe.checkout.sessions.create with lineItems:", lineItems.length);
-      const session = await stripe.checkout.sessions.create(sessionConfig);
+      let session: Stripe.Checkout.Session | null = null;
+      let workingMethods = [...DEFAULT_PAYMENT_METHODS];
+
+      while (!session) {
+        try {
+          sessionConfig.payment_method_types = workingMethods;
+          session = await stripe.checkout.sessions.create(sessionConfig);
+        } catch (err: any) {
+          const invalidMethod = extractInvalidPaymentMethod(err);
+          // If Stripe rejects a specific method (e.g. affirm not enabled), remove it and retry.
+          if (invalidMethod && workingMethods.includes(invalidMethod as any) && workingMethods.length > 2) {
+            workingMethods = workingMethods.filter((m) => m !== (invalidMethod as any));
+            debugLog(`Checkout: Removed unsupported payment method '${invalidMethod}', retrying with`, workingMethods);
+            continue;
+          }
+          throw err;
+        }
+      }
       debugLog("Checkout: Stripe session created:", session.id);
 
       const totalAmount = productsWithQuantity.reduce(
