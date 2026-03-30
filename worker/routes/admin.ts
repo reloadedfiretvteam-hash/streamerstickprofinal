@@ -154,6 +154,10 @@ function filterContactsByAudience(list: MarketingContact[], audience: MarketingA
   return list.filter((item) => item.segment === audience);
 }
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+}
+
 async function buildMarketingContacts(env: Env, includeTestData: boolean): Promise<{ contacts: MarketingContact[]; excludedTestCount: number }> {
   const storage = getStorage(env);
   const { createClient } = await import('@supabase/supabase-js');
@@ -337,6 +341,35 @@ async function buildMarketingContacts(env: Env, includeTestData: boolean): Promi
     }
   } catch {
     // new email_campaigns schema does not contain legacy customer_email/campaign_type fields
+  }
+
+  try {
+    const { data: campaignRows } = await supabase
+      .from('email_campaigns')
+      .select('segment,created_at');
+    for (const row of campaignRows || []) {
+      const segment = asRecord((row as any).segment);
+      if (!segment) continue;
+      const audience = String(segment.audience || '').trim().toLowerCase();
+      const recipientsRaw = (segment as any).recipients;
+      const recipients = Array.isArray(recipientsRaw) ? recipientsRaw : [];
+      for (const recipient of recipients) {
+        const recipientEmail = normalizeEmail(recipient);
+        if (!recipientEmail) continue;
+        const hasTrial = audience === 'free_trial';
+        const hasPurchase = audience === 'purchase';
+        mergeContact({
+          email: recipientEmail,
+          type: hasTrial ? 'trial' : hasPurchase ? 'purchase' : 'campaign',
+          date: (row as any).created_at || '',
+          source: 'email_campaigns.segment',
+          hasTrial,
+          hasPurchase,
+        });
+      }
+    }
+  } catch {
+    // segment JSON can be absent or unavailable in older schemas
   }
 
   try {
@@ -1021,6 +1054,41 @@ export function createAdminRoutes() {
         expiresAt: order.iptv_credentials?.expires_at || null,
         isRenewal: false,
       }));
+
+      // Trial signups can exist as marketing/contact records when no order row was created.
+      try {
+        const { data: trialContacts } = await supabase
+          .from('contacts')
+          .select('id,email,first_name,last_name,full_name,name,created_at,source')
+          .ilike('source', '%trial%');
+        const trialContactRows = (trialContacts || []).map((row: any) => ({
+          id: `trial-contact-${row.id || normalizeEmail(row.email)}`,
+          type: 'free-trial',
+          customerEmail: row.email,
+          customerName:
+            [row.first_name, row.last_name].filter(Boolean).join(' ').trim() ||
+            row.full_name ||
+            row.name ||
+            '',
+          productName: 'Free Trial - 36 Hours',
+          amount: 0,
+          status: 'completed',
+          createdAt: row.created_at,
+          credentialsSent: false,
+          generatedUsername: null,
+          expiresAt: null,
+          isRenewal: false,
+        }));
+
+        const existingTrialEmails = new Set(trialOrdersFormatted.map((row: any) => normalizeEmail(row.customerEmail)));
+        for (const row of trialContactRows) {
+          if (!existingTrialEmails.has(normalizeEmail(row.customerEmail))) {
+            trialOrdersFormatted.push(row as any);
+          }
+        }
+      } catch {
+        // contacts source can vary by environment
+      }
 
       if (!includeTestData) {
         paidOrdersFormatted = paidOrdersFormatted.filter((order: any) => !isLikelyTestEmail(String(order.customerEmail || '')));
