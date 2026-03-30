@@ -17,7 +17,6 @@ import { TrustBadges } from "@/components/TrustBadges";
 import { SEOSchema, ServiceSchema, ItemListSchema } from "@/components/SEOSchema";
 import { setPageMeta } from "@/lib/seo";
 import { MobileNav } from "@/components/MobileNav";
-import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { QuickViewButton } from "@/components/QuickViewButton";
 
 const ProductQuickView = lazy(() => import("@/components/ProductQuickView").then((module) => ({ default: module.ProductQuickView })));
@@ -45,7 +44,8 @@ const fallbackHeroImg = `${SUPABASE_BASE}/firestick-4k-jailbroken.jpg`;
 const heroImg = `${SUPABASE_BASE}/hero-firestick-breakout.jpg`;
 const productBenefitList = [
   "18,000 live channels worldwide",
-  "+24k VODs and Series",
+  "60,000+ movies (on-demand)",
+  "15,000+ TV series",
   "PPV Channels (UFC, NFL…)",
   "Stable streaming quality",
   "Regular Updates",
@@ -81,7 +81,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     duration: "1mo",
     durationLabel: "1 Month",
     badge: "STARTER",
-    description: "Premium Live TV streaming plan with 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
+    description: "Premium Live TV streaming plan with 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and comprehensive sports coverage.",
     features: productBenefitList,
     prices: [
       { devices: 1, price: 11, productId: "iptv-1mo-1d" },
@@ -96,7 +96,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     durationLabel: "3 Months",
     badge: "POPULAR",
     popular: true,
-    description: "Save more with 3 months! Premium Live TV plan with 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
+    description: "Save more with 3 months! Premium Live TV plan with 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and comprehensive sports coverage.",
     features: productBenefitList,
     prices: [
       { devices: 1, price: 25, productId: "iptv-3mo-1d" },
@@ -110,7 +110,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     duration: "6mo",
     durationLabel: "6 Months",
     badge: "GREAT VALUE",
-    description: "10% OFF! 6-month premium Live TV streaming plan with 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
+    description: "10% OFF! 6-month premium Live TV streaming plan with 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and comprehensive sports coverage.",
     features: productBenefitList,
     prices: [
       { devices: 1, price: 40, productId: "iptv-6mo-1d" },
@@ -141,7 +141,7 @@ const defaultProducts: Product[] = [
     id: "firestick-hd",
     name: "StreamStick Starter Kit",
     price: 125,
-    description: "Start in about 10 minutes. Plug in your Fire Stick, enter your credentials (sent instantly after purchase), and follow our quick setup video. You'll unlock 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage including NFL, NBA, UFC, and live events. Includes a 1 Year Live TV plan, 24/7 customer support, tutorial videos, and shipping included.",
+    description: "Start in about 10 minutes. Plug in your Fire Stick, enter your credentials (sent instantly after purchase), and follow our quick setup video. You'll unlock 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and comprehensive sports coverage including NFL, NBA, UFC, and live events. Includes a 1 Year Live TV plan, 24/7 customer support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: firestickHdImg,
     category: "firestick",
@@ -151,7 +151,7 @@ const defaultProducts: Product[] = [
     id: "firestick-4k",
     name: "StreamStick 4K Kit",
     price: 135,
-    description: "Best-selling Fire Stick setup in about 10 minutes. Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision. Enjoy 18,000+ live TV channels, 100,000+ movies & series, and all major sports - NFL, NBA, UFC, and live events. Includes a 1 Year premium Live TV plan, 24/7 support, tutorial videos, and shipping included.",
+    description: "Best-selling Fire Stick setup in about 10 minutes. Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision. Enjoy 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and all major sports - NFL, NBA, UFC, and live events. Includes a 1 Year premium Live TV plan, 24/7 support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: firestick4kImg,
     category: "firestick",
@@ -162,7 +162,7 @@ const defaultProducts: Product[] = [
     id: "firestick-4k-max",
     name: "StreamStick Max Kit",
     price: 145,
-    description: "Ultimate 4K Max with Wi-Fi 6E setup in about 10 minutes. Plug in, use your instant credentials, follow our quick setup video, and experience breathtaking 4K with Dolby Atmos sound. Access 18,000+ live TV channels, 100,000+ movies & series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, tutorial videos, and shipping included.",
+    description: "Ultimate 4K Max with Wi-Fi 6E setup in about 10 minutes. Plug in, use your instant credentials, follow our quick setup video, and experience breathtaking 4K with Dolby Atmos sound. Access 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: firestick4kMaxImg,
     category: "firestick",
@@ -172,7 +172,7 @@ const defaultProducts: Product[] = [
     id: "android-onn-4k",
     name: "ONN 4K Streaming Device Kit",
     price: 115,
-    description: "Upgrade from Fire Stick to Android. The ONN 4K Streaming Device with Google TV delivers the same great features you love, plus built-in storage for live DVR recording. Setup takes about 10 minutes - plug in, enter your instant credentials, and access 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage. Includes a 1 Year Live TV plan, 24/7 support, tutorial videos, and shipping included.",
+    description: "Upgrade from Fire Stick to Android. The ONN 4K Streaming Device with Google TV delivers the same great features you love, plus built-in storage for live DVR recording. Setup takes about 10 minutes - plug in, enter your instant credentials, and access 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and comprehensive sports coverage. Includes a 1 Year Live TV plan, 24/7 support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: onn4kImg,
     category: "firestick",
@@ -182,7 +182,7 @@ const defaultProducts: Product[] = [
     id: "android-onn-pro",
     name: "ONN 4K Ultra HD Pro Kit",
     price: 125,
-    description: "The ultimate Android streaming upgrade. ONN 4K Ultra HD Pro features expanded storage for extensive DVR recording, Google TV interface, and premium performance. Setup takes about 10 minutes - plug in, use your instant credentials, and experience crystal-clear 4K with Dolby Audio. Access 18,000+ live TV channels, 100,000+ movies & series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, tutorial videos, and shipping included.",
+    description: "The ultimate Android streaming upgrade. ONN 4K Ultra HD Pro features expanded storage for extensive DVR recording, Google TV interface, and premium performance. Setup takes about 10 minutes - plug in, use your instant credentials, and experience crystal-clear 4K with Dolby Audio. Access 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, tutorial videos, and shipping included.",
     features: productBenefitList,
     image: onn4kProImg,
     category: "firestick",
@@ -406,8 +406,8 @@ export default function MainStore() {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
     setPageMeta({
-      title: "Premium IPTV + Devices | 18K+ Channels | StreamStickPro",
-      description: "IPTV-first experience with instant credentials, tutorial video, 24/7 support, and optional Fire Stick/ONN bundles with Reloaded Fire TV. 36-hour trial on subscriptions; devices include 1-year access.",
+      title: "IPTV Subscriptions & Streaming Devices | StreamStickPro",
+      description: "Access IPTV subscriptions with thousands of live channels, movies, and series, or choose ready-to-use streaming devices with simple setup.",
       path: "/",
     });
     loadProducts();
@@ -583,9 +583,9 @@ export default function MainStore() {
   const getSchemaDescription = (product: Product): string => {
     if (!product.description?.startsWith("Real product mapped to")) return product.description;
     if (product.category === "iptv") {
-      return `Premium Live TV plan: ${product.name}. 18,000+ live channels, 100,000+ movies and series, sports and PPV. Multi-device options. StreamStickPro.`;
+      return `Premium Live TV plan: ${product.name}. 18,000+ live channels, 60,000+ movies, 15,000+ series, sports and PPV. Multi-device options. StreamStickPro.`;
     }
-    return `${product.name} with 1 year Live TV included, plus setup guidance and support. 18,000+ channels, 100,000+ movies and series. StreamStickPro.`;
+    return `${product.name} with 1 year Live TV included, plus setup guidance and support. 18,000+ channels, 60,000+ movies, and 15,000+ series. StreamStickPro.`;
   };
 
   const productListData = {
@@ -639,7 +639,7 @@ export default function MainStore() {
       {/* Service Schema for IPTV Service Offerings */}
       <ServiceSchema 
         name="Premium IPTV Streaming Service"
-        description="Access 18,000+ live TV channels, 100,000+ movies and series, premium sports including NFL, NBA, MLB, UFC PPV. Multi-device streaming with instant credentials, setup tutorial, 24/7 human support, and optional Fire Stick / ONN bundles with Reloaded Fire TV."
+        description="Access 18,000+ live TV channels, 60,000+ movies, and 15,000+ series, plus premium sports including NFL, NBA, MLB, UFC PPV. Multi-device streaming with instant credentials, setup tutorial, 24/7 human support, and optional Fire Stick / ONN bundles with Reloaded Fire TV."
         serviceType="IPTV Streaming Service"
         areaServed="Worldwide"
       />
@@ -749,262 +749,154 @@ export default function MainStore() {
 
       {/* Main Content */}
       <main id="main-content" role="main">
-      {/* Hero Section */}
-      {/* Elite Hero Section - Enhanced Visuals */}
-      <section ref={heroRef} className="relative text-white overflow-hidden min-h-[620px] md:min-h-[780px] flex items-center z-10">
-
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-20"></div>
-
-        <div className="container mx-auto px-4 py-12 md:py-20 relative z-10">
-          <div className="max-w-6xl mx-auto text-center">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="mb-6"
-            >
-              <span className="inline-block px-6 py-2 bg-gradient-to-r from-orange-500/30 to-red-500/30 backdrop-blur-sm border-2 border-orange-400/50 rounded-full text-sm font-bold text-orange-200 animate-pulse shadow-lg shadow-orange-500/30">
-                36-HOUR TRIAL FOR IPTV SUBSCRIPTIONS • Start in Minutes
-              </span>
-              <span className="ml-3 inline-flex items-center gap-1 rounded-full bg-green-500/20 px-3 py-1 text-green-300 font-bold">
-                <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" aria-hidden="true" />
-                <AnimatedCounter end={2847} suffix=" active" className="text-green-300" />
-              </span>
-            </motion.div>
-
-            {/* Hero Title */}
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-5 leading-[1.1] tracking-tight text-white"
-            >
-              Premium IPTV + Devices (Reloaded Fire TV Included)
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-red-500 mt-2">18K+ Live Channels • Instant Credentials • Tutorial + 24/7 Help</span>
-            </motion.h1>
-
-            {/* Trust above fold + geo for US/UK/CA impressions */}
-            <div className="max-w-4xl mx-auto mb-6 rounded-2xl border border-white/15 bg-black/30 backdrop-blur-md px-4 py-4 sm:px-5 sm:py-5">
-              <motion.p 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.15 }}
-                className="text-base sm:text-lg md:text-[1.15rem] leading-relaxed text-gray-100 mb-2"
-              >
-                IPTV-first experience with optional Fire Stick and ONN bundles. Secure checkout, instant email credentials, guided setup tutorial, and 24/7 human support.
-              </motion.p>
-              <motion.p 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.16 }}
-                className="text-sm sm:text-base leading-relaxed text-gray-200 max-w-3xl mx-auto"
-              >
-                18,000+ live channels, 100,000+ movies & series, premium sports, and instant activation in <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">USA</span></Link>, <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">Canada</span></Link>, and <Link href="/iptv-services"><span className="text-orange-300 hover:text-orange-200 font-semibold">UK</span></Link>. Devices ship with Reloaded Fire TV all-in-one access—no dead apps or Kodi rebuilds.
-              </motion.p>
-            </div>
-
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.18 }} className="mb-4">
-              <Link href="/ultimate-iptv-catalog-2026">
-                <span className="text-orange-300 hover:text-orange-200 font-semibold underline">Explore 93K Catalog →</span>
-              </Link>
-            </motion.p>
-
-            {/* 3 Nuclear CTAs */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex flex-col lg:flex-row justify-center gap-3 sm:gap-4 mb-6 px-2 sm:px-4 max-w-4xl mx-auto"
-            >
+      {/* Section 1 — Hero */}
+      <section ref={heroRef} className="relative z-10 py-20 md:py-28 bg-[#0B0B0F]/85 border-b border-[#00AEEF]/25">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto text-center">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
+              IPTV Subscriptions &amp; Ready-To-Use Streaming Devices
+            </h1>
+            <p className="mt-6 text-base sm:text-lg md:text-xl text-gray-200 max-w-4xl mx-auto leading-relaxed">
+              Get instant IPTV access with 18,000+ live TV channels, 60,000+ movies, and 15,000+ series, or choose a fully configured device ready to plug in and start watching.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/36hr-trial">
-                <motion.span
-                  className="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-5 sm:py-6 min-h-[72px] bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 rounded-2xl font-black text-lg sm:text-xl text-white border-2 border-orange-300/50 shadow-xl shadow-orange-500/40 hover:shadow-2xl transition-all cursor-pointer"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
-                  role="button"
-                >
-                  <Gift className="w-6 h-6" aria-hidden="true" />
-                  Start 36hr Trial
-                </motion.span>
+                <span className="inline-flex items-center justify-center rounded-xl px-8 py-4 min-h-[56px] bg-[#00AEEF] hover:bg-[#0098d8] text-[#0B0B0F] font-extrabold cursor-pointer">
+                  Start Free IPTV Trial
+                </span>
               </Link>
               <Link href="/firestick-devices">
-                <motion.span
-                  className="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-5 sm:py-6 min-h-[72px] bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl font-black text-lg sm:text-xl text-white border-2 border-purple-300/50 shadow-xl shadow-purple-500/40 hover:shadow-2xl transition-all cursor-pointer"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
-                  role="button"
-                >
-                  <ShoppingCart className="w-6 h-6" aria-hidden="true" />
-                  Shop Devices (Fire Stick & ONN)
-                </motion.span>
-              </Link>
-              <Link href="/onn-google-tv">
-                <motion.span
-                  className="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-5 sm:py-6 min-h-[72px] bg-gradient-to-br from-white/20 to-white/10 rounded-2xl font-black text-lg sm:text-xl text-white border-2 border-white/40 shadow-xl hover:shadow-2xl transition-all cursor-pointer"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
-                  role="button"
-                >
-                  <Zap className="w-6 h-6" aria-hidden="true" />
-                  View ONN Options
-                </motion.span>
-              </Link>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.22 }}
-              className="max-w-4xl mx-auto mb-5 rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4 sm:p-5"
-            >
-              <p className="text-white font-semibold text-sm sm:text-base mb-3">Not sure where to start?</p>
-              <div className="grid sm:grid-cols-3 gap-2.5 text-left text-xs sm:text-sm">
-                <Link href="/36hr-trial">
-                  <span className="block rounded-xl border border-orange-400/30 bg-orange-500/10 px-3 py-2.5 text-orange-200 hover:bg-orange-500/20 transition-colors">
-                    <strong className="block text-orange-100">New customer</strong>
-                    Start with the 36hr trial
-                  </span>
-                </Link>
-                <Link href="/pricing">
-                  <span className="block rounded-xl border border-blue-400/30 bg-blue-500/10 px-3 py-2.5 text-blue-200 hover:bg-blue-500/20 transition-colors">
-                    <strong className="block text-blue-100">Comparing plans</strong>
-                    View full pricing first
-                  </span>
-                </Link>
-                <Link href="/tutorials">
-                  <span className="block rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-2.5 text-emerald-200 hover:bg-emerald-500/20 transition-colors">
-                    <strong className="block text-emerald-100">Need setup help?</strong>
-                    Watch tutorial before buying
-                  </span>
-                </Link>
-              </div>
-            </motion.div>
-
-            {/* Reassurance bar */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.24 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-2 max-w-4xl mx-auto text-left"
-            >
-              {[
-                { icon: Zap, label: "Instant credentials via email" },
-                { icon: Play, label: "Tutorial video included" },
-                { icon: MessageCircle, label: "24/7 human support" },
-                { icon: ShieldCheck, label: "No dead apps or Kodi rebuilds" },
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-100">
-                  <item.icon className="w-4 h-4 text-orange-300" />
-                  <span className="leading-snug">{item.label}</span>
-                </div>
-              ))}
-            </motion.div>
-
-            {/* Payment methods above the fold */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.28 }}
-              className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-6 text-xs sm:text-sm text-gray-100"
-            >
-              {[
-                "Visa",
-                "Mastercard",
-                "Amex",
-                "Discover",
-                "Apple Pay",
-                "Google Pay",
-                "Link by Stripe",
-              ].map((label) => (
-                <span
-                  key={label}
-                  className="px-3 py-1 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm font-semibold"
-                >
-                  {label}
+                <span className="inline-flex items-center justify-center rounded-xl px-8 py-4 min-h-[56px] border border-[#14F1D9]/60 bg-[#14F1D9]/15 hover:bg-[#14F1D9]/25 text-[#14F1D9] font-extrabold cursor-pointer">
+                  Browse Streaming Devices
                 </span>
-              ))}
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.35 }}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto text-sm md:text-base"
-            >
-              <motion.div className="bg-gradient-to-br from-orange-500/10 via-red-500/5 to-transparent backdrop-blur-xl rounded-2xl px-6 py-5 border border-orange-400/20">
-                <div className="text-orange-400 font-extrabold text-2xl md:text-3xl mb-1">
-                  <AnimatedCounter end={18000} suffix="+" className="text-orange-400" />
-                </div>
-                <div className="text-blue-100 font-semibold">Live Channels</div>
-              </motion.div>
-              <motion.div className="bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-transparent backdrop-blur-xl rounded-2xl px-6 py-5 border border-purple-400/20">
-                <div className="text-purple-400 font-extrabold text-2xl md:text-3xl mb-1">
-                  <AnimatedCounter end={100000} suffix="+" className="text-purple-400" />
-                </div>
-                <div className="text-blue-100 font-semibold">Movies & Series</div>
-              </motion.div>
-              <motion.div className="bg-gradient-to-br from-green-500/10 via-emerald-500/5 to-transparent backdrop-blur-xl rounded-2xl px-6 py-5 border border-green-400/20">
-                <div className="text-green-400 font-extrabold text-2xl md:text-3xl mb-1">99.9%</div>
-                <div className="text-blue-100 font-semibold">Uptime</div>
-              </motion.div>
-            </motion.div>
+              </Link>
+            </div>
+            <p className="mt-5 text-sm sm:text-base text-gray-300 font-medium">
+              Instant login delivery • Works on Fire TV &amp; Android • Secure checkout
+            </p>
           </div>
         </div>
-
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none"></div>
       </section>
 
-      {/* Elite Conversion Strip */}
-      <section className="py-12 md:py-16 bg-gradient-to-b from-gray-900 to-gray-950 border-y border-white/10">
+      {/* Section 2 — What You Get */}
+      <section className="py-20 bg-[#0B0B0F]/90 border-b border-white/10">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <p className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/15 border border-orange-400/30 text-orange-200 text-xs sm:text-sm font-semibold">
-              Built for fast decisions on mobile and desktop
-            </p>
-            <h2 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-              Choose your streaming setup in under 30 seconds
-            </h2>
-            <p className="mt-3 text-gray-300 max-w-3xl mx-auto text-sm sm:text-base">
-              Start with a subscription trial, choose a device bundle, or compare options before checkout. Every step is designed for clarity and easy access.
-            </p>
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="rounded-2xl border border-[#00AEEF]/35 bg-white/5 p-6">
+              <h2 className="text-2xl font-bold text-white mb-3">IPTV Subscription Access</h2>
+              <p className="text-gray-200 mb-4">
+                Receive login credentials that give you access to a streaming service through supported apps. Start watching live TV, movies, and series within minutes.
+              </p>
+              <ul className="space-y-2 text-gray-100">
+                {[
+                  "18,000+ live TV channels",
+                  "60,000+ movies (on-demand)",
+                  "15,000+ TV series",
+                  "Sports, news, and international content",
+                  "Works across multiple supported apps",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-[#14F1D9] mt-0.5 shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-[#14F1D9]/35 bg-white/5 p-6">
+              <h2 className="text-2xl font-bold text-white mb-3">Pre-Configured Streaming Devices</h2>
+              <p className="text-gray-200 mb-4">
+                Order a streaming device that is already set up and optimized, so you can plug it in and start streaming immediately.
+              </p>
+              <ul className="space-y-2 text-gray-100">
+                {[
+                  "Pre-installed apps and setup",
+                  "Optimized performance",
+                  "Plug-and-play experience",
+                  "No technical setup required",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-[#14F1D9] mt-0.5 shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-white/20 bg-white/5 p-6">
+              <h2 className="text-2xl font-bold text-white mb-3">Setup Guides &amp; Support</h2>
+              <p className="text-gray-200">
+                Step-by-step tutorials that show you how to install and use streaming services on your own devices.
+              </p>
+            </div>
           </div>
+        </div>
+      </section>
 
-          <div className="grid md:grid-cols-3 gap-4 md:gap-6">
-            <div className="rounded-2xl border border-orange-400/25 bg-gradient-to-br from-orange-500/15 to-orange-500/5 p-5 md:p-6">
-              <p className="text-orange-300 text-xs font-semibold tracking-wide">STEP 1</p>
-              <h3 className="text-white text-xl font-bold mt-2">Start 36-Hour Trial</h3>
-              <p className="text-gray-300 text-sm mt-2">Trial applies to IPTV subscription plans only so you can check quality, speed, and setup flow before buying.</p>
-              <Link href="/36hr-trial">
-                <span className="mt-5 inline-flex items-center justify-center gap-2 w-full min-h-[72px] rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black transition-colors cursor-pointer">
-                  Start Trial <ChevronRight className="w-5 h-5" />
-                </span>
-              </Link>
-            </div>
+      {/* Section 3 — Why Choose This Setup */}
+      <section className="py-20 bg-[#0B0B0F]/85 border-b border-white/10">
+        <div className="container mx-auto px-4 max-w-4xl text-center">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-white">All-In-One Streaming Solution</h2>
+          <p className="mt-4 text-gray-200 text-lg">
+            Instead of juggling multiple apps and services, this setup brings everything together in one place, making it easier to access live TV and on-demand content from a single system.
+          </p>
+        </div>
+      </section>
 
-            <div className="rounded-2xl border border-blue-400/25 bg-gradient-to-br from-blue-500/15 to-blue-500/5 p-5 md:p-6">
-              <p className="text-blue-300 text-xs font-semibold tracking-wide">STEP 2</p>
-              <h3 className="text-white text-xl font-bold mt-2">Choose Device or Plan</h3>
-              <p className="text-gray-300 text-sm mt-2">Fire Stick and ONN options, plus multi-device IPTV plans.</p>
-              <button
-                onClick={scrollToShop}
-                className="mt-5 inline-flex items-center justify-center gap-2 w-full min-h-[72px] rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-black transition-colors"
-                data-testid="button-jump-to-shop"
-              >
-                View Options <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+      {/* Section 4 — Device Compatibility */}
+      <section className="py-20 bg-[#0B0B0F]/90 border-b border-white/10">
+        <div className="container mx-auto px-4 max-w-4xl text-center">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-white">Works With Popular Devices</h2>
+          <p className="mt-4 text-gray-200 text-lg">
+            Compatible with Fire TV devices, Android TV boxes, smart TVs, and mobile devices using supported applications.
+          </p>
+        </div>
+      </section>
 
-            <div className="rounded-2xl border border-emerald-400/25 bg-gradient-to-br from-emerald-500/15 to-emerald-500/5 p-5 md:p-6">
-              <p className="text-emerald-300 text-xs font-semibold tracking-wide">STEP 3</p>
-              <h3 className="text-white text-xl font-bold mt-2">Checkout Securely</h3>
-              <p className="text-gray-300 text-sm mt-2">Stripe checkout with card and wallet support in one flow.</p>
-              <Link href="/checkout">
-                <span className="mt-5 inline-flex items-center justify-center gap-2 w-full min-h-[72px] rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black transition-colors cursor-pointer">
-                  Go to Checkout <ChevronRight className="w-5 h-5" />
-                </span>
-              </Link>
-            </div>
+      {/* Section 5 — How It Works */}
+      <section className="py-20 bg-[#0B0B0F]/85 border-b border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+            {[
+              { step: "Step 1", label: "Choose IPTV Access or Device" },
+              { step: "Step 2", label: "Receive Login Details or Device" },
+              { step: "Step 3", label: "Start Streaming Instantly" },
+            ].map((item) => (
+              <div key={item.step} className="rounded-2xl border border-white/15 bg-white/5 p-6">
+                <p className="text-[#14F1D9] font-bold text-sm">{item.step}</p>
+                <p className="text-white font-semibold text-lg mt-2">{item.label}</p>
+              </div>
+            ))}
           </div>
+        </div>
+      </section>
+
+      {/* Section 6 — CTA Block */}
+      <section className="py-20 bg-[#0B0B0F]/90 border-b border-white/10">
+        <div className="container mx-auto px-4 max-w-4xl text-center">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-white">Start Watching in Minutes</h2>
+          <p className="mt-4 text-gray-200 text-lg">
+            Choose your option and begin streaming with a simple and guided setup.
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="/36hr-trial">
+              <span className="inline-flex items-center justify-center rounded-xl px-8 py-4 min-h-[56px] bg-[#00AEEF] hover:bg-[#0098d8] text-[#0B0B0F] font-extrabold cursor-pointer">
+                Start Free IPTV Trial
+              </span>
+            </Link>
+            <Link href="/firestick-devices">
+              <span className="inline-flex items-center justify-center rounded-xl px-8 py-4 min-h-[56px] border border-[#14F1D9]/60 bg-[#14F1D9]/15 hover:bg-[#14F1D9]/25 text-[#14F1D9] font-extrabold cursor-pointer">
+                Browse Devices
+              </span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 7 — Disclaimer */}
+      <section className="py-20 bg-[#0B0B0F]/95">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <p className="rounded-2xl border border-white/15 bg-white/5 p-6 text-sm sm:text-base text-gray-300">
+            StreamStickPro does not host or provide any media content. Users are responsible for how they access and use streaming services. Content availability depends on the service provider and location.
+          </p>
         </div>
       </section>
 
@@ -1025,7 +917,7 @@ export default function MainStore() {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Fire Stick Device Options & IPTV Plans</span>
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Trusted by 2,700+ customers. 18,000+ channels, 100,000+ movies and series, and clear setup guidance for Fire Stick, ONN, and Android TV.
+              Trusted by 2,700+ customers. 18,000+ channels, 60,000+ movies, 15,000+ series, and clear setup guidance for Fire Stick, ONN, and Android TV.
             </p>
           </motion.div>
 
@@ -1347,7 +1239,7 @@ export default function MainStore() {
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-200">100,000+ Movies & Series</td>
+                    <td className="p-4 text-gray-200">60,000+ Movies &amp; 15,000+ Series</td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
                     <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
@@ -1773,25 +1665,6 @@ export default function MainStore() {
 
 
 
-      {/* Section 2: Competitor Domination */}
-      <section className="relative z-10 py-12 md:py-16 bg-gradient-to-b from-gray-900/80 to-gray-900 border-y border-white/10" aria-labelledby="competitor-domination">
-        <div className="container mx-auto px-4">
-          <h2 id="competitor-domination" className="text-2xl md:text-3xl font-bold text-center text-white mb-8">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Competitor Domination</span>
-          </h2>
-          <div className="max-w-3xl mx-auto space-y-4 text-lg text-gray-200">
-            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> Beats IPTVStronger — 36hr vs 24hr trial</p>
-            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> Beats TroyPoint — Onn/Roku native support</p>
-            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> More channels than ANY competitor — 18K+ live</p>
-          </div>
-          <p className="text-center mt-6">
-            <Link href="/vs-iptvstronger"><span className="text-orange-400 hover:text-orange-300 font-semibold">Compare vs IPTVStronger →</span></Link>
-            {" · "}
-            <Link href="/vs-troypoint"><span className="text-orange-400 hover:text-orange-300 font-semibold">Compare vs TroyPoint →</span></Link>
-          </p>
-        </div>
-      </section>
-
       {/* Section 3: Device Support */}
       <section className="relative z-10 py-12 md:py-16 bg-gray-900/60 border-b border-white/10" aria-labelledby="device-support">
         <div className="container mx-auto px-4">
@@ -1869,86 +1742,6 @@ export default function MainStore() {
         <ChannelLogos />
       </Suspense>
 
-      {/* Comparison Section - StreamStickPro vs Competitors */}
-      <section className="py-16 bg-gradient-to-b from-gray-900 to-gray-800">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">The Stream Stick Pro Difference</span>
-            </h2>
-            <p className="text-gray-200 text-lg">See why customers choose us over the competition</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* Elite Glassmorphism Comparison - Competitors */}
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="bg-gradient-to-br from-red-950/40 via-red-900/20 to-transparent backdrop-blur-2xl border-2 border-red-500/40 rounded-3xl p-10 shadow-2xl shadow-red-500/20"
-              data-testid="comparison-competitors"
-              whileHover={{ scale: 1.02, borderColor: "rgba(239, 68, 68, 0.6)" }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
-                  <X className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-red-400">Other Fire Stick Websites</h3>
-              </div>
-              <ul className="space-y-4">
-                {[
-                  "Hundreds of apps that fail on a daily basis",
-                  "Broken links and dead streams constantly",
-                  "Apps don't update themselves - manual maintenance required",
-                  "Confusing interfaces that aren't user-friendly",
-                  "Long, complicated tutorials just to get started",
-                  "Poor or no customer support when things break",
-                  "You end up frustrated with a bad product"
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <X className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-200">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-
-            {/* Elite Glassmorphism Comparison - StreamStickPro */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-gradient-to-br from-green-950/40 via-emerald-900/20 to-transparent backdrop-blur-2xl border-2 border-green-500/40 rounded-3xl p-10 shadow-2xl shadow-green-500/20 ring-2 ring-green-400/30"
-              data-testid="comparison-streamstickpro"
-              whileHover={{ scale: 1.02, borderColor: "rgba(34, 197, 94, 0.6)", boxShadow: "0 25px 50px rgba(34, 197, 94, 0.3)" }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                  <Check className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-green-400">Reloaded Fire TV + Stream Stick Pro</h3>
-              </div>
-              <ul className="space-y-4">
-                {[
-                  "Reloaded Fire TV all-in-one app flow - easy to use",
-                  "Educational tutorials included with every device order",
-                  "1-year included plan on Fire Stick and ONN bundles",
-                  "No hunting through huge app lists to find working links",
-                  "Fast setup path built for beginners and families",
-                  "24/7 support when you need real help",
-                  "Built for reliable daily viewing, not trial-and-error"
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-200">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
       {/* About Section */}
       <section id="about" ref={aboutRef} className="py-24 bg-gradient-to-b from-gray-800/80 to-gray-900/80 backdrop-blur-sm">
         <div className="container mx-auto px-4">
@@ -1997,7 +1790,7 @@ export default function MainStore() {
                 <Star className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-black mb-4 text-white">Premium Content</h3>
-              <p className="text-gray-100 text-lg leading-relaxed">Access 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.</p>
+              <p className="text-gray-100 text-lg leading-relaxed">Access 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and comprehensive sports coverage.</p>
             </motion.div>
             <motion.div 
               variants={fadeInUp}
@@ -2140,7 +1933,7 @@ export default function MainStore() {
               { 
                 step: "4", 
                 title: "Start Streaming", 
-                description: "Plug in, connect to WiFi, and start watching 18,000+ channels and 100,000+ movies instantly.",
+                description: "Plug in, connect to WiFi, and start watching 18,000+ channels, 60,000+ movies, and 15,000+ series instantly.",
                 icon: "🎬",
                 image: `${SUPABASE_BASE}/4k-live-iptv.jpg`
               }
@@ -2205,7 +1998,7 @@ export default function MainStore() {
               },
               {
                 title: "All Premium Content",
-                description: "18,000+ channels, 100,000+ movies, all sports including NFL, NBA, UFC PPV.",
+                description: "18,000+ channels, 60,000+ movies, 15,000+ series, and major sports including NFL, NBA, UFC PPV.",
                 visual: "🎯",
                 image: heroImg,
                 color: "from-purple-500/15 to-pink-500/5",
@@ -2371,7 +2164,7 @@ export default function MainStore() {
                 <span className="text-xl font-bold text-white">StreamStickPro</span>
               </div>
               <p className="text-sm text-gray-200 mb-4">
-                Premium Live TV streaming with 18,000+ channels and 100,000+ movies & series. Fire Stick and streaming device options available.
+                Premium Live TV streaming with 18,000+ channels, 60,000+ movies, and 15,000+ series. Fire Stick and streaming device options available.
               </p>
               <div className="flex gap-3">
                 <a href="mailto:reloadedfiretvteam@gmail.com" className="w-10 h-10 bg-gray-800 hover:bg-orange-600 rounded-lg flex items-center justify-center transition-colors" data-testid="link-email" aria-label="Email us">
