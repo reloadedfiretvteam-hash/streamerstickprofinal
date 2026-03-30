@@ -44,13 +44,23 @@ const TEST_EMAIL_DOMAIN_MARKERS = [
   '@guerrillamail.com',
   '@tempmail.com',
   '@10minutemail.com',
+  '@streamstickpro.com',
 ];
+
+const TEST_EMAIL_EXACT_MARKERS = new Set([
+  'support@streamstickpro.com',
+  'reloadedfiretvteam@gmail.com',
+  'reloadedfiretv.team@gmail.com',
+]);
+
+const TEST_LOCAL_MARKER_REGEX = /(^|[._+-])(test|qa|smoke|debug|check|audit|forensic|demo|sample|staging|internal)([._+-]|$)/i;
 
 function isLikelyTestEmail(rawEmail: string): boolean {
   const email = String(rawEmail || '').trim().toLowerCase();
   if (!email || !email.includes('@')) return true;
+  if (TEST_EMAIL_EXACT_MARKERS.has(email)) return true;
   if (TEST_EMAIL_DOMAIN_MARKERS.some((d) => email.endsWith(d))) return true;
-  const local = email.split('@')[0] || '';
+  const [local = '', domain = ''] = email.split('@');
   if (local.includes('+test') || local.includes('+qa') || local.includes('+smoke')) return true;
   if (
     local.startsWith('test') ||
@@ -59,6 +69,8 @@ function isLikelyTestEmail(rawEmail: string): boolean {
     local.startsWith('debug') ||
     local === 'demo'
   ) return true;
+  if (TEST_LOCAL_MARKER_REGEX.test(local)) return true;
+  if (domain === 'gmail.com' && /(streamstickpro|reloadedfiretv)/i.test(local)) return true;
   if (email.includes('test@test') || email.includes('noreply@example')) return true;
   return false;
 }
@@ -248,32 +260,61 @@ async function buildMarketingContacts(env: Env, includeTestData: boolean): Promi
 
   const customers = await storage.getAllCustomers();
   for (const customer of customers as any[]) {
+    // Customer records can come from trial/account flows, so keep neutral unless purchase evidence exists.
     mergeContact({
       email: customer.email,
       name: customer.fullName || customer.username || '',
       username: customer.username || '',
-      type: 'purchase',
+      type: 'contact',
       date: customer.createdAt || '',
       source: 'customers',
-      hasPurchase: true,
+      hasPurchase: false,
+      hasTrial: false,
     });
   }
 
-  const orders = await storage.getAllOrders();
-  for (const order of orders as any[]) {
-    const productName = String(order.realProductName || '').toLowerCase();
-    const amount = Number(order.amount || 0);
-    const isTrial = amount <= 0 || productName.includes('trial');
-    mergeContact({
-      email: order.customerEmail,
-      name: order.customerName || '',
-      username: order.username || '',
-      type: isTrial ? 'trial' : 'purchase',
-      date: order.createdAt || '',
-      source: 'orders',
-      hasTrial: isTrial,
-      hasPurchase: !isTrial,
-    });
+  try {
+    const { data: orderRows } = await supabase
+      .from('orders')
+      .select('customer_email,customer_name,created_at,amount,payment_method,status,payment_status,real_product_name');
+
+    for (const row of orderRows || []) {
+      const amount = Number((row as any).amount || 0);
+      const paymentMethod = String((row as any).payment_method || '').toLowerCase();
+      const productName = String((row as any).real_product_name || '').toLowerCase();
+      const status = String((row as any).status || '').toLowerCase();
+      const paymentStatus = String((row as any).payment_status || '').toLowerCase();
+      const isTrial = paymentMethod === 'free-trial' || amount <= 0 || productName.includes('trial') || status === 'free-trial' || paymentStatus === 'trial';
+      const isPurchase = !isTrial && amount > 0;
+
+      mergeContact({
+        email: (row as any).customer_email,
+        name: (row as any).customer_name || '',
+        type: isTrial ? 'trial' : isPurchase ? 'purchase' : 'contact',
+        date: (row as any).created_at || '',
+        source: 'orders',
+        hasTrial: isTrial,
+        hasPurchase: isPurchase,
+      });
+    }
+  } catch {
+    // Fallback for legacy environments: use storage-mapped orders
+    const orders = await storage.getAllOrders();
+    for (const order of orders as any[]) {
+      const productName = String(order.realProductName || '').toLowerCase();
+      const amount = Number(order.amount || 0);
+      const isTrial = amount <= 0 || productName.includes('trial');
+      mergeContact({
+        email: order.customerEmail,
+        name: order.customerName || '',
+        username: order.username || '',
+        type: isTrial ? 'trial' : 'purchase',
+        date: order.createdAt || '',
+        source: 'orders',
+        hasTrial: isTrial,
+        hasPurchase: !isTrial,
+      });
+    }
   }
 
   try {
@@ -296,6 +337,28 @@ async function buildMarketingContacts(env: Env, includeTestData: boolean): Promi
     }
   } catch {
     // new email_campaigns schema does not contain legacy customer_email/campaign_type fields
+  }
+
+  try {
+    const { data: legacyRows } = await supabase
+      .from('email_campaigns_legacy')
+      .select('customer_email,customer_name,campaign_type,created_at,status');
+    for (const row of legacyRows || []) {
+      const campaignType = String((row as any).campaign_type || '').toLowerCase();
+      const hasTrial = campaignType === 'free_trial' || campaignType === 'trial';
+      const hasPurchase = campaignType === 'purchase';
+      mergeContact({
+        email: (row as any).customer_email,
+        name: (row as any).customer_name || '',
+        type: hasTrial ? 'trial' : hasPurchase ? 'purchase' : 'campaign',
+        date: (row as any).created_at || '',
+        source: 'email_campaigns_legacy',
+        hasTrial,
+        hasPurchase,
+      });
+    }
+  } catch {
+    // legacy table may not exist in some environments
   }
 
   const contacts = Array.from(contactMap.values())
@@ -911,6 +974,7 @@ export function createAdminRoutes() {
     try {
       const storage = getStorage(c.env);
       const { createClient } = await import('@supabase/supabase-js');
+      const includeTestData = c.req.query('includeTestData') === 'true';
       const supabase = createClient(
         c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
         c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
@@ -927,7 +991,9 @@ export function createAdminRoutes() {
         .order('created_at', { ascending: false });
       
       // Combine and format
-      const paidOrdersFormatted = allOrders.map(order => ({
+      let paidOrdersFormatted = allOrders
+        .filter((order: any) => Number(order.amount || 0) > 0)
+        .map(order => ({
         id: order.id,
         type: 'paid',
         customerEmail: order.customerEmail,
@@ -941,7 +1007,7 @@ export function createAdminRoutes() {
         isRenewal: order.isRenewal,
       }));
       
-      const trialOrdersFormatted = (trialOrders || []).map((order: any) => ({
+      let trialOrdersFormatted = (trialOrders || []).map((order: any) => ({
         id: order.id,
         type: 'free-trial',
         customerEmail: order.customer_email,
@@ -955,6 +1021,11 @@ export function createAdminRoutes() {
         expiresAt: order.iptv_credentials?.expires_at || null,
         isRenewal: false,
       }));
+
+      if (!includeTestData) {
+        paidOrdersFormatted = paidOrdersFormatted.filter((order: any) => !isLikelyTestEmail(String(order.customerEmail || '')));
+        trialOrdersFormatted = trialOrdersFormatted.filter((order: any) => !isLikelyTestEmail(String(order.customerEmail || '')));
+      }
       
       // Combine and sort by date
       const allCustomerOrders = [...paidOrdersFormatted, ...trialOrdersFormatted]
@@ -1275,12 +1346,36 @@ export function createAdminRoutes() {
 
       const testContacts = (allContacts || []).filter((row: any) => isLikelyTestEmail(row.email));
       const testContactIds = testContacts.map((row: any) => row.id).filter(Boolean);
-      const testEmails = testContacts.map((row: any) => String(row.email || '').trim().toLowerCase()).filter(Boolean);
+      const testEmails = new Set(
+        testContacts.map((row: any) => String(row.email || '').trim().toLowerCase()).filter(Boolean)
+      );
+
+      const { data: allOrders } = await supabase.from('orders').select('id,customer_email');
+      const testOrderIds = (allOrders || [])
+        .filter((row: any) => isLikelyTestEmail(row.customer_email))
+        .map((row: any) => row.id)
+        .filter(Boolean);
+      for (const row of allOrders || []) {
+        if (isLikelyTestEmail((row as any).customer_email)) testEmails.add(normalizeEmail((row as any).customer_email));
+      }
+
+      const { data: allCustomers } = await supabase.from('customers').select('id,email');
+      const testCustomerIds = (allCustomers || [])
+        .filter((row: any) => isLikelyTestEmail(row.email))
+        .map((row: any) => row.id)
+        .filter(Boolean);
+      for (const row of allCustomers || []) {
+        if (isLikelyTestEmail((row as any).email)) testEmails.add(normalizeEmail((row as any).email));
+      }
+
+      const testEmailList = Array.from(testEmails);
 
       let deletedEvents = 0;
       let deletedSends = 0;
       let deletedContacts = 0;
       let deletedCampaigns = 0;
+      let deletedOrders = 0;
+      let deletedCustomers = 0;
 
       for (const ids of chunkArray(testContactIds, 500)) {
         if (ids.length === 0) continue;
@@ -1294,7 +1389,19 @@ export function createAdminRoutes() {
         if (!contactsDelete.error) deletedContacts += contactsDelete.data?.length || 0;
       }
 
-      for (const emails of chunkArray(testEmails, 200)) {
+      for (const ids of chunkArray(testOrderIds, 500)) {
+        if (ids.length === 0) continue;
+        const ordersDelete = await supabase.from('orders').delete().in('id', ids).select('id');
+        if (!ordersDelete.error) deletedOrders += ordersDelete.data?.length || 0;
+      }
+
+      for (const ids of chunkArray(testCustomerIds, 500)) {
+        if (ids.length === 0) continue;
+        const customersDelete = await supabase.from('customers').delete().in('id', ids).select('id');
+        if (!customersDelete.error) deletedCustomers += customersDelete.data?.length || 0;
+      }
+
+      for (const emails of chunkArray(testEmailList, 200)) {
         if (emails.length === 0) continue;
         const campaignsDelete = await supabase
           .from('email_campaigns')
@@ -1302,6 +1409,15 @@ export function createAdminRoutes() {
           .in('customer_email', emails)
           .select('id');
         if (!campaignsDelete.error) deletedCampaigns += campaignsDelete.data?.length || 0;
+      }
+
+      for (const emails of chunkArray(testEmailList, 200)) {
+        if (emails.length === 0) continue;
+        await supabase
+          .from('email_campaigns_legacy')
+          .delete()
+          .in('customer_email', emails)
+          .select('id');
       }
 
       return c.json({
@@ -1313,6 +1429,8 @@ export function createAdminRoutes() {
           emailSends: deletedSends,
           emailEvents: deletedEvents,
           emailCampaigns: deletedCampaigns,
+          orders: deletedOrders,
+          customers: deletedCustomers,
         },
       });
     } catch (error: any) {
