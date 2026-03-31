@@ -36,10 +36,10 @@ export default function BestIptvFirestick() {
         breadcrumbs={breadcrumbs}
       >
         <h2 id="best-iptv-firestick">What Makes the Best IPTV Firestick?</h2>
-        <p>The <strong>best IPTV Firestick</strong> setup in 2026 means two things: a solid IPTV service (channels, VOD, reliability) and a device that runs it well. Fire Stick is ideal because it supports TiviMate, IPTV Smarters, and other players. You can use your own Fire Stick with a subscription or choose a device option from <Link href="/firestick-devices">our device guide</Link>.</p>
+        <p>The <strong>best IPTV Firestick</strong> setup in 2026 means two things: a solid IPTV service (channels, VOD, reliability) and a device that runs it well. Fire Stick is ideal because it supports TiviMate, IPTV Smarters, and other players. You can use your own Fire Stick with a subscription or choose a device option from <Link href="/devices">our device guide</Link>.</p>
 
         <h2 id="service-vs-device">IPTV Service vs Device</h2>
-        <p><strong>Service:</strong> An <Link href="/iptv-services">IPTV subscription</Link> gives you credentials (M3U or Xtream Codes) to use in any compatible app on Fire Stick, Android, or Smart TV. StreamStickPro delivers credentials instantly and supports 1–5 devices per plan.</p>
+        <p><strong>Service:</strong> An <Link href="/iptv">IPTV subscription</Link> gives you credentials (M3U or Xtream Codes) to use in any compatible app on Fire Stick, Android, or Smart TV. StreamStickPro delivers credentials instantly and supports 1–5 devices per plan.</p>
         <p><strong>Device:</strong> A Fire Stick device option includes hardware plus a 1-year plan and setup guidance so you can start streaming quickly.</p>
 
         <h2 id="apps">Best Apps for IPTV on Fire Stick</h2>

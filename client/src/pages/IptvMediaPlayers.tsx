@@ -40,12 +40,12 @@ export default function IptvMediaPlayers() {
       >
         <h2 id="best-iptv-media-players">Best IPTV Media Players & Apps 2026</h2>
         <p>
-          IPTV media players are the apps you use to watch live TV and VOD from your IPTV subscription. The best players offer EPG (TV guide), favorites, recording, and stable playback. StreamStickPro works with all major players—including <strong>TiviMate</strong>, <strong>IPTV Smarters Pro</strong>, <strong>Perfect Player</strong>, and <strong>VLC</strong>—across <Link href="/firestick-devices">Fire Stick devices</Link>, Android TV, and Smart TV.
+          IPTV media players are the apps you use to watch live TV and VOD from your IPTV subscription. The best players offer EPG (TV guide), favorites, recording, and stable playback. StreamStickPro works with all major players—including <strong>TiviMate</strong>, <strong>IPTV Smarters Pro</strong>, <strong>Perfect Player</strong>, and <strong>VLC</strong>—across <Link href="/devices">Fire Stick devices</Link>, Android TV, and Smart TV.
         </p>
 
         <h2 id="tivimate">TiviMate</h2>
         <p>
-          TiviMate is a premium IPTV player with a clean interface, full EPG support, favorites, and recording. It runs on Fire Stick, Android TV, and Smart TV. Many users consider it the best IPTV app for Fire Stick. Pair it with <Link href="/iptv-services">StreamStickPro IPTV</Link> for instant credentials and 18,000+ channels.
+          TiviMate is a premium IPTV player with a clean interface, full EPG support, favorites, and recording. It runs on Fire Stick, Android TV, and Smart TV. Many users consider it the best IPTV app for Fire Stick. Pair it with <Link href="/iptv">StreamStickPro IPTV</Link> for instant credentials and 18,000+ channels.
         </p>
 
         <h2 id="iptv-smarters">IPTV Smarters Pro</h2>
@@ -60,7 +60,7 @@ export default function IptvMediaPlayers() {
 
         <h2 id="compatibility">Devices & Compatibility</h2>
         <p>
-          Our IPTV service and these media players work on <Link href="/firestick-devices">Fire Stick HD, 4K, and 4K Max</Link>, Android boxes, Smart TVs, and mobile. StreamStickPro includes setup guidance and device options to help you get started quickly.
+          Our IPTV service and these media players work on <Link href="/devices">Fire Stick HD, 4K, and 4K Max</Link>, Android boxes, Smart TVs, and mobile. StreamStickPro includes setup guidance and device options to help you get started quickly.
         </p>
 
         <h2 id="faq">IPTV Media Players FAQ</h2>

@@ -136,10 +136,10 @@ export async function submitProductsToIndexNow(productSlugs: string[]): Promise<
  * Submit homepage and main pages to IndexNow
  */
 export const PILLAR_PATHS = [
-  '/iptv-services',
+  '/iptv',
   '/iptv-firestick',
   '/jailbroken-fire-sticks',
-  '/firestick-devices',
+  '/devices',
   '/best-iptv-firestick',
   '/iptv-media-players',
 ] as const;

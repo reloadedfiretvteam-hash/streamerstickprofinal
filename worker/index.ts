@@ -757,7 +757,7 @@ app.get('/l/:country/:pageType/:slug', async (c, next) => {
           <li><a href="https://streamstickpro.com/">Home &amp; 36hr Free Trial</a></li>
           <li><a href="https://streamstickpro.com/36hr-trial">Start 36-Hour Free Trial</a></li>
           <li><a href="https://streamstickpro.com/jailbroken-fire-sticks">Jailbroken Fire Sticks</a></li>
-          <li><a href="https://streamstickpro.com/iptv-services">IPTV Services</a></li>
+          <li><a href="https://streamstickpro.com/iptv">IPTV access &amp; plans</a></li>
           <li><a href="https://streamstickpro.com/onn-google-tv">ONN Google TV Setup</a></li>
           <li><a href="https://streamstickpro.com/pricing">Pricing</a></li>
           <li><a href="https://streamstickpro.com/shop">Shop</a></li>
@@ -812,11 +812,22 @@ function sanitizeFaq(items: { question: string; answer: string }[]): { question:
 
 // SEO 301 redirects: DB (redirect_map) first, then static. Flood niche: IPTV, jailbreak, Canada/US/UK, devices, media players.
 const SEO_REDIRECTS_STATIC: Record<string, string> = {
-  // Guides & trial
-  '/guides': '/iptv-services',
-  '/guide': '/iptv-services',
+  // Canonical aliases (legacy URLs → preferred paths)
+  '/homepage': '/',
+  '/iptv-services': '/iptv',
+  '/firestick-devices': '/devices',
+  '/live-tv': '/iptv',
+  '/streaming': '/iptv',
+  '/tutorial': '/setup',
+  '/tutorials': '/setup',
+  '/tutorials/iptv-media-players': '/setup',
+  '/setup-firestick': '/setup',
+  '/setup-onn': '/setup',
   '/trial': '/36hr-trial',
   '/free-trial': '/36hr-trial',
+  // Guides
+  '/guides': '/iptv',
+  '/guide': '/iptv',
   // Fire Stick & jailbreak
   '/firestick': '/jailbroken-fire-sticks',
   '/fire-stick': '/jailbroken-fire-sticks',
@@ -829,10 +840,7 @@ const SEO_REDIRECTS_STATIC: Record<string, string> = {
   '/preloaded-fire-stick': '/jailbroken-fire-sticks',
   '/kodi-fire-stick': '/jailbroken-fire-sticks',
   // Devices & players
-  '/devices': '/firestick-devices',
   '/media-players': '/iptv-media-players',
-  '/tutorial': '/tutorials',
-  '/tutorials/iptv-media-players': '/tutorials',
   '/iptv-apps': '/iptv-media-players',
   '/iptv-players': '/iptv-media-players',
   '/iptv-smarters': '/iptv-smarters-pro',
@@ -844,15 +852,15 @@ const SEO_REDIRECTS_STATIC: Record<string, string> = {
   '/stremio': '/iptv-media-players',
   '/stremio-iptv': '/iptv-media-players',
   // Regions (pillar; location pages cover cities)
-  '/iptv-canada': '/iptv-services',
-  '/iptv-usa': '/iptv-services',
-  '/iptv-us': '/iptv-services',
-  '/iptv-uk': '/iptv-services',
-  '/iptv-united-kingdom': '/iptv-services',
-  '/best-iptv-canada': '/iptv-services',
-  '/best-iptv-usa': '/iptv-services',
-  '/best-iptv-uk': '/iptv-services',
-  '/iptv-service': '/iptv-services',
+  '/iptv-canada': '/iptv',
+  '/iptv-usa': '/iptv',
+  '/iptv-us': '/iptv',
+  '/iptv-uk': '/iptv',
+  '/iptv-united-kingdom': '/iptv',
+  '/best-iptv-canada': '/iptv',
+  '/best-iptv-usa': '/iptv',
+  '/best-iptv-uk': '/iptv',
+  '/iptv-service': '/iptv',
   '/iptv-subscription': '/shop',
   '/iptv-plans': '/pricing',
   '/iptv-pricing': '/pricing',
@@ -875,13 +883,9 @@ const SEO_REDIRECTS_STATIC: Record<string, string> = {
   // Best / comparison
   '/best-iptv': '/best-iptv-firestick',
   '/best-iptv-firestick-2026': '/best-iptv-firestick',
-  '/best-iptv-service': '/iptv-services',
-  // '/resources': removed — was self-redirect loop (301 → /resources → 301 → infinite)
+  '/best-iptv-service': '/iptv',
   '/catalog': '/ultimate-iptv-catalog-2026',
   '/tools': '/tools/catalog',
-  '/iptv': '/iptv-services',
-  '/live-tv': '/iptv-services',
-  '/streaming': '/iptv-services',
 };
 app.get('*', async (c, next) => {
   const reqUrl = new URL(c.req.url);
@@ -1006,15 +1010,15 @@ app.get('/llms.txt', (c) => {
 - https://streamstickpro.com/pricing
 
 ## Core guides
-- https://streamstickpro.com/iptv-services — Best IPTV service guide with channel lists, pricing, and setup
+- https://streamstickpro.com/iptv — Best IPTV service guide with channel lists, pricing, and setup
 - https://streamstickpro.com/iptv-firestick — How to set up IPTV on Amazon Fire Stick
 - https://streamstickpro.com/jailbroken-fire-sticks — Fire Stick jailbreaking and sideloading guide
-- https://streamstickpro.com/firestick-devices — Fire Stick HD vs 4K vs 4K Max comparison
+- https://streamstickpro.com/devices — Fire Stick HD vs 4K vs 4K Max comparison
 - https://streamstickpro.com/onn-google-tv — ONN Google TV 4K IPTV setup guide
 - https://streamstickpro.com/iptv-media-players — TiviMate, IPTV Smarters Pro, Perfect Player comparison
 - https://streamstickpro.com/tivimate — TiviMate IPTV player setup tutorial
 - https://streamstickpro.com/iptv-smarters-pro — IPTV Smarters Pro setup with Xtream Codes
-- https://streamstickpro.com/tutorials — Video tutorials for Fire Stick and ONN device setup
+- https://streamstickpro.com/setup — Video tutorials for Fire Stick and ONN device setup
 - https://streamstickpro.com/resources — IPTV channel directory and setup reference
 - https://streamstickpro.com/best-iptv-firestick — Best IPTV options for Fire Stick users
 - https://streamstickpro.com/ultimate-iptv-catalog-2026 — Full channel catalog with 18K+ channels
@@ -1087,12 +1091,13 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/onn-google-tv', priority: '0.9', changefreq: 'weekly' },
   { url: '/iptv-smarters-pro', priority: '0.9', changefreq: 'weekly' },
   { url: '/tivimate', priority: '0.9', changefreq: 'weekly' },
-  { url: '/iptv-services', priority: '0.9', changefreq: 'weekly' },
+  { url: '/iptv', priority: '0.9', changefreq: 'weekly' },
   { url: '/iptv-firestick', priority: '0.9', changefreq: 'weekly' },
-  { url: '/firestick-devices', priority: '0.9', changefreq: 'weekly' },
+  { url: '/devices', priority: '0.9', changefreq: 'weekly' },
+  { url: '/bundles', priority: '0.9', changefreq: 'weekly' },
   { url: '/best-iptv-firestick', priority: '0.9', changefreq: 'weekly' },
   { url: '/iptv-media-players', priority: '0.9', changefreq: 'weekly' },
-  { url: '/tutorials', priority: '0.9', changefreq: 'weekly' },
+  { url: '/setup', priority: '0.9', changefreq: 'weekly' },
   { url: '/resources', priority: '0.85', changefreq: 'weekly' },
   { url: '/terms', priority: '0.5', changefreq: 'yearly' },
   { url: '/privacy', priority: '0.5', changefreq: 'yearly' },
@@ -1328,17 +1333,18 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/pricing': { title: 'IPTV Pricing & Subscription Plans 2026 | StreamStick Pro', description: 'IPTV pricing with multi-device options and Fire Stick bundles. 18,000+ channels, 100,000+ VOD, instant activation, 24/7 support. Compare plans now.' },
   '/blog': { title: 'IPTV & Streaming Blog | Guides, News, Tips | StreamStick Pro', description: 'Expert IPTV guides, Fire Stick tutorials, streaming tips, and cord-cutting news. Updated weekly by the StreamStickPro editorial team.' },
   '/locations': { title: 'IPTV by City & Region | USA, Canada, UK | StreamStick Pro', description: 'Find IPTV service in your city. StreamStickPro covers 40,000+ locations across USA, Canada, and UK. Local guides, setup help, free trial.' },
-  '/iptv-services': { title: 'Best IPTV Service 2026 | 18K+ Channels | StreamStick Pro', description: 'StreamStickPro IPTV: 18,000+ live channels, 100,000+ VOD, EPG guide, catch-up TV. Works on Fire Stick, Google TV, Smart TVs. Free 36-hour trial.' },
+  '/iptv': { title: 'IPTV Subscription — 18K+ Channels & VOD | StreamStickPro', description: 'StreamStickPro IPTV: 18,000+ live channels, huge VOD library, sports & international lineups. Instant credentials, TiviMate & Smarters-friendly setup, 36-hour trial. Works on Fire TV, ONN Google TV, and more.' },
   '/jailbroken-fire-sticks': { title: 'Jailbroken Fire Stick Guide 2026 | StreamStick Pro', description: 'Explore jailbroken Fire Stick options, IPTV setup, and streaming guidance. 18K+ channels and support for USA, Canada, and UK.' },
   '/onn-google-tv': { title: 'ONN Google TV IPTV Setup Guide 2026 | StreamStick Pro', description: 'Set up IPTV on ONN Google TV in minutes. 18,000+ channels, TiviMate & Smarters Pro compatible. Step-by-step guide by StreamStickPro.' },
   '/36hr-trial': { title: 'Free 36-Hour IPTV Trial | 18K+ Channels | StreamStick Pro', description: 'Try StreamStickPro free for 36 hours. 18,000+ live channels, VOD, EPG guide. No credit card required. Instant activation on all devices.' },
   '/iptv-firestick': { title: 'IPTV for Fire Stick 2026 | Setup Guide | StreamStick Pro', description: 'How to set up IPTV on Amazon Fire Stick. Step-by-step guide for IPTV Smarters Pro, TiviMate, and more. 18K+ channels with StreamStickPro.' },
   '/best-iptv-firestick': { title: 'Best IPTV for Fire Stick 2026 | Top Picks | StreamStick Pro', description: 'Best IPTV services for Amazon Fire Stick in 2026. Compare features, channels, prices. StreamStickPro rated #1 with 18K+ channels and free trial.' },
-  '/firestick-devices': { title: 'Fire Stick Devices for IPTV 2026 | StreamStick Pro', description: 'Best Fire Stick devices for IPTV streaming in 2026. Fire Stick 4K Max, Lite, and ONN Google TV options compared by experts.' },
+  '/devices': { title: 'Reloaded Fire TV Devices — Fire Stick & ONN | StreamStickPro', description: 'Shop Fire Stick HD, 4K, and 4K Max plus ONN Google TV options with Reloaded Fire TV built in—guided onboarding, instant credentials, 1-year access included, 24/7 support.' },
   '/iptv-media-players': { title: 'Best IPTV Media Players 2026 | Devices | StreamStick Pro', description: 'Top IPTV media players and apps: TiviMate, IPTV Smarters Pro, Kodi, Perfect Player, VLC. Expert setup guides and side-by-side comparisons.' },
   '/iptv-smarters-pro': { title: 'IPTV Smarters Pro Setup Guide 2026 | StreamStick Pro', description: 'Complete IPTV Smarters Pro setup guide. Install on Fire Stick, Android, iOS. Add StreamStickPro credentials and start streaming 18K+ channels.' },
   '/tivimate': { title: 'TiviMate IPTV Player Setup Guide 2026 | StreamStick Pro', description: 'TiviMate setup guide for IPTV. Install on Fire Stick and Android TV. EPG, catch-up, multi-view. Best settings for StreamStickPro streaming.' },
-  '/tutorials': { title: 'IPTV & Fire Stick Setup Tutorials 2026 | StreamStick Pro', description: 'Step-by-step IPTV tutorials: Fire Stick setup, app installation, troubleshooting, VPN guides. StreamStickPro video and text guides.' },
+  '/setup': { title: 'IPTV & Device Setup Guides | Fire TV, ONN, Roku | StreamStickPro', description: 'Step-by-step setup for IPTV on Fire TV Stick, ONN Google TV, and Roku paths—walkthroughs, player tips, and what to do after you get credentials.' },
+  '/bundles': { title: 'IPTV & Device Bundles | Fire Stick & ONN | StreamStickPro', description: 'Device plus IPTV bundles with Reloaded Fire TV, instant login delivery, guided setup, and 1-year access options—fewer dead links, clearer path to live TV.' },
   '/resources': { title: 'IPTV Streaming Resources & Tools 2026 | StreamStick Pro', description: 'IPTV resources, tools, speed tests, VPN guides, and troubleshooting. Everything you need for the best StreamStickPro streaming experience.' },
   '/ultimate-iptv-catalog-2026': { title: 'IPTV Channel Catalog 2026 | 93K+ Channels | StreamStick Pro', description: 'Explore the ultimate IPTV channel catalog: 93,000+ channels from 150+ countries. Search by country, genre, language. StreamStickPro.' },
   '/tools/catalog': { title: 'Free IPTV Tools & Streaming Utilities | StreamStick Pro', description: 'Free IPTV tools: speed test, M3U playlist validator, EPG checker, channel finder. StreamStickPro utilities for the best streaming setup.' },
@@ -1379,13 +1385,30 @@ function trimToWordBoundary(input: string, max: number): string {
   return `${head}...`;
 }
 
+/** Legacy URL paths that should emit canonical hrefs pointing at preferred URLs (matches SEO_REDIRECTS_STATIC where applicable). */
+const LEGACY_CANONICAL_MAP: Record<string, string> = {
+  '/homepage': '/',
+  '/iptv-services': '/iptv',
+  '/firestick-devices': '/devices',
+  '/live-tv': '/iptv',
+  '/streaming': '/iptv',
+  '/tutorial': '/setup',
+  '/tutorials': '/setup',
+  '/setup-firestick': '/setup',
+  '/setup-onn': '/setup',
+  '/trial': '/36hr-trial',
+  '/free-trial': '/36hr-trial',
+};
+
 function canonicalizePath(pathname: string): string {
-  if (pathname === '/') return '/';
+  const trimmed = pathname === '/' ? '/' : pathname.replace(/\/+$/, '');
+  const mapped = LEGACY_CANONICAL_MAP[trimmed] ?? trimmed;
+  if (mapped === '/') return '/';
   // Blog index and blog slugs are served with trailing slash on production.
-  if (/^\/blog(?:\/[a-z0-9][a-z0-9\-]*)?\/?$/i.test(pathname)) {
-    return pathname.endsWith('/') ? pathname : `${pathname}/`;
+  if (/^\/blog(?:\/[a-z0-9][a-z0-9\-]*)?\/?$/i.test(mapped)) {
+    return mapped.endsWith('/') ? mapped : `${mapped}/`;
   }
-  return pathname.replace(/\/+$/, '');
+  return mapped.replace(/\/+$/, '');
 }
 
 function normalizeMeta(meta: { title: string; description: string; noindex?: boolean }) {
@@ -1440,10 +1463,11 @@ const VS_META: Record<string, { title: string; description: string }> = {
 /** Resolve per-page meta: static map, vs pages, or fetch blog post from DB. */
 async function resolvePageMeta(pathname: string, env: Env): Promise<{ title: string; description: string; noindex?: boolean } | null> {
   const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/+$/, '');
-  // 1. Static page map
-  if (PAGE_META[normalizedPath]) return normalizeMeta(PAGE_META[normalizedPath]);
+  const metaLookupPath = LEGACY_CANONICAL_MAP[normalizedPath] ?? normalizedPath;
+  // 1. Static page map (legacy alias paths resolve to preferred PAGE_META keys)
+  if (PAGE_META[metaLookupPath]) return normalizeMeta(PAGE_META[metaLookupPath]);
   // 2. VS competitor pages
-  if (VS_META[normalizedPath]) return normalizeMeta(VS_META[normalizedPath]);
+  if (VS_META[metaLookupPath]) return normalizeMeta(VS_META[metaLookupPath]);
   // 3. Blog post: /blog/<slug>
   const blogMatch = normalizedPath.match(/^\/blog\/([a-z0-9][a-z0-9\-]*[a-z0-9])$/);
   if (blogMatch) {
@@ -1491,11 +1515,11 @@ function buildBreadcrumbLD(pathname: string, pageTitle: string): string {
     if (pathname.startsWith('/blog')) {
       if (pathname !== '/blog') crumbs.push({ name: 'Blog', url: base + '/blog' });
     } else if (pathname.startsWith('/vs-')) {
-      crumbs.push({ name: 'Comparisons', url: base + '/iptv-services' });
+      crumbs.push({ name: 'Comparisons', url: base + '/iptv' });
     } else if (pathname.startsWith('/l/')) {
       crumbs.push({ name: 'Locations', url: base + '/locations' });
     }
-    crumbs.push({ name: pageTitle.replace(/ \| StreamStick Pro$/i, '').slice(0, 60), url: base + pathname });
+    crumbs.push({ name: pageTitle.replace(/ \| StreamStick Pro$/i, '').slice(0, 60), url: base + canonicalizePath(pathname) });
   }
   if (crumbs.length < 2) return '';
   const ld = {
@@ -1586,11 +1610,11 @@ app.get('*', async (c) => {
   const staticKnownRoutes = new Set([
     '/', '/shop', '/shadow-services', '/admin', '/checkout', '/success', '/blog',
     '/customer-login', '/my-account', '/forgot-password', '/reset-password',
-    '/terms', '/privacy', '/refund', '/iptv-services', '/iptv-firestick',
-    '/jailbroken-fire-sticks', '/firestick-devices', '/best-iptv-firestick',
+    '/terms', '/privacy', '/refund', '/iptv', '/iptv-firestick',
+    '/jailbroken-fire-sticks', '/devices', '/bundles', '/best-iptv-firestick',
     '/iptv-media-players', '/resources', '/36hr-trial', '/pricing',
     '/onn-google-tv', '/iptv-smarters-pro', '/tivimate', '/ultimate-iptv-catalog-2026',
-    '/tools/catalog', '/tutorials', '/seo-ads', '/locations', '/trial', '/firestick',
+    '/tools/catalog', '/setup', '/seo-ads', '/locations', '/trial', '/firestick',
   ]);
   const isKnownRoute =
     staticKnownRoutes.has(pathname) ||

@@ -58,10 +58,10 @@ export default function FirestickDevices() {
       >
         <div className="space-y-12">
           <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Link href="/iptv"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/iptv</span></Link>
-            <Link href="/bundles"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/bundles</span></Link>
-            <Link href="/setup-onn"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/setup-onn</span></Link>
-            <Link href="/homepage"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/homepage</span></Link>
+            <Link href="/iptv"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">IPTV access &amp; plans</span></Link>
+            <Link href="/bundles"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">IPTV &amp; device bundles</span></Link>
+            <Link href="/setup"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">ONN &amp; Google TV setup</span></Link>
+            <Link href="/"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">Home</span></Link>
           </section>
           <section className="rounded-3xl border border-orange-500/25 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 p-8 shadow-2xl shadow-orange-500/15">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
@@ -98,9 +98,9 @@ export default function FirestickDevices() {
                       <Zap className="w-5 h-5" /> Shop Fire Stick & ONN Bundles
                     </a>
                   </Link>
-                  <Link href="/iptv-services">
+                  <Link href="/iptv">
                     <a className="inline-flex items-center gap-2 bg-white/10 text-white px-5 py-3 rounded-xl font-semibold border border-white/15 hover:bg-white/15 transition-colors">
-                      Explore IPTV Plans
+                      Explore IPTV plans
                     </a>
                   </Link>
                 </div>
@@ -296,9 +296,9 @@ export default function FirestickDevices() {
                         Shop Elite Bundles
                       </a>
                     </Link>
-                    <Link href="/iptv-services">
+                    <Link href="/iptv">
                       <a className="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-lg font-semibold border border-white/15 hover:bg-white/15 transition-colors">
-                        View IPTV Plans
+                        View IPTV plans
                       </a>
                     </Link>
                   </div>
@@ -331,7 +331,7 @@ export default function FirestickDevices() {
         <p>Android streaming devices (e.g. ONN 4K, ONN 4K Pro) run Google TV and support the same IPTV apps. They’re a strong alternative to Fire Stick, often with more storage for DVR-style use. We offer ONN 4K and ONN 4K Pro bundles with Reloaded Fire TV all-in-one setup—see our <Link href="/shop">Shop</Link>.</p>
 
         <h2 id="pre-configured">Why Choose a Guided Device Option?</h2>
-        <p>A guided device option means fewer setup steps and faster activation. You get educational tutorials, easier onboarding, and 24/7 support. Ideal if you want to avoid technical friction and go straight to <Link href="/iptv-services">live TV streaming</Link>.</p>
+        <p>A guided device option means fewer setup steps and faster activation. You get educational tutorials, easier onboarding, and 24/7 support. Ideal if you want to avoid technical friction and go straight to <Link href="/iptv">live TV streaming</Link>.</p>
 
         <h2 id="faq">Fire Stick & Streaming Devices FAQ</h2>
         <ul>

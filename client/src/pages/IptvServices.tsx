@@ -55,10 +55,10 @@ export default function IptvServices() {
         breadcrumbs={breadcrumbs}
       >
         <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Link href="/devices"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/devices</span></Link>
-          <Link href="/bundles"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/bundles</span></Link>
-          <Link href="/setup-firestick"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/setup-firestick</span></Link>
-          <Link href="/homepage"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/homepage</span></Link>
+          <Link href="/devices"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">Fire TV &amp; streaming devices</span></Link>
+          <Link href="/bundles"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">IPTV &amp; device bundles</span></Link>
+          <Link href="/setup"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">Setup guides &amp; tutorials</span></Link>
+          <Link href="/"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">Back to home</span></Link>
         </div>
         <h2 id="what-is-iptv">What Is IPTV and How Does Live TV Streaming Work?</h2>
         <p>IPTV (Internet Protocol Television) is a way to watch live TV and on-demand content over the internet. Instead of cable or satellite, your TV signal comes through your broadband connection. That means you can watch on <Link href="/iptv-firestick">Fire Stick</Link>, Android boxes, Smart TVs, phones, and tablets—anywhere you have internet—without hunting through broken app lists.</p>
@@ -71,7 +71,7 @@ export default function IptvServices() {
         <p>When choosing the best IPTV service for 2026, look for:</p>
         <ul>
           <li><strong>Channel count and quality</strong> — 18,000+ live channels and 100,000+ movies/series is a strong offering.</li>
-          <li><strong>Compatibility</strong> — Works on <Link href="/firestick-devices">Fire Stick</Link>, Android, and Smart TV.</li>
+          <li><strong>Compatibility</strong> — Works on <Link href="/devices">Fire Stick</Link>, Android, and Smart TV.</li>
           <li><strong>Stability</strong> — Reliable playback, strong uptime, and EPG (TV guide) support without dead links.</li>
           <li><strong>Multi-device</strong> — Plans that allow 2–5 devices are ideal for families.</li>
           <li><strong>Support</strong> — 24/7 support, instant delivery of credentials, and a quick tutorial to avoid trial-and-error installs.</li>

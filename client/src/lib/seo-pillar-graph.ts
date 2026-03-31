@@ -11,7 +11,7 @@ export interface SeoPillarNode {
 
 const NODES: SeoPillarNode[] = [
   {
-    path: "/iptv-services",
+    path: "/iptv",
     title: "IPTV Services Guide",
     primaryKeyword: "best iptv service",
     supportKeywords: [
@@ -23,7 +23,7 @@ const NODES: SeoPillarNode[] = [
       "iptv channels",
     ],
     intent: "commercial",
-    linksTo: ["/iptv-firestick", "/iptv-media-players", "/pricing", "/36hr-trial", "/blog", "/shop"],
+    linksTo: ["/devices", "/bundles", "/setup", "/iptv-firestick", "/iptv-media-players", "/pricing", "/36hr-trial", "/blog", "/shop"],
   },
   {
     path: "/iptv-firestick",
@@ -37,7 +37,7 @@ const NODES: SeoPillarNode[] = [
       "iptv smarters firestick",
     ],
     intent: "commercial",
-    linksTo: ["/firestick-devices", "/best-iptv-firestick", "/jailbroken-fire-sticks", "/iptv-services", "/36hr-trial", "/shop"],
+    linksTo: ["/devices", "/best-iptv-firestick", "/jailbroken-fire-sticks", "/iptv", "/36hr-trial", "/shop"],
   },
   {
     path: "/jailbroken-fire-sticks",
@@ -51,7 +51,7 @@ const NODES: SeoPillarNode[] = [
       "streaming device guide",
     ],
     intent: "commercial",
-    linksTo: ["/firestick-devices", "/iptv-firestick", "/onn-google-tv", "/iptv-services", "/shop"],
+    linksTo: ["/devices", "/iptv-firestick", "/onn-google-tv", "/iptv", "/shop"],
   },
   {
     path: "/onn-google-tv",
@@ -65,7 +65,7 @@ const NODES: SeoPillarNode[] = [
       "onn tv guide",
     ],
     intent: "commercial",
-    linksTo: ["/iptv-media-players", "/iptv-services", "/iptv-firestick", "/36hr-trial", "/shop"],
+    linksTo: ["/iptv-media-players", "/iptv", "/iptv-firestick", "/36hr-trial", "/shop"],
   },
   {
     path: "/iptv-media-players",
@@ -79,7 +79,7 @@ const NODES: SeoPillarNode[] = [
       "m3u player",
     ],
     intent: "informational",
-    linksTo: ["/tivimate", "/iptv-smarters-pro", "/iptv-firestick", "/iptv-services", "/tutorials"],
+    linksTo: ["/tivimate", "/iptv-smarters-pro", "/iptv-firestick", "/iptv", "/setup"],
   },
   {
     path: "/tivimate",
@@ -93,7 +93,7 @@ const NODES: SeoPillarNode[] = [
       "best player for iptv",
     ],
     intent: "informational",
-    linksTo: ["/iptv-media-players", "/iptv-firestick", "/iptv-services", "/blog"],
+    linksTo: ["/iptv-media-players", "/iptv-firestick", "/iptv", "/blog"],
   },
   {
     path: "/iptv-smarters-pro",
@@ -107,10 +107,10 @@ const NODES: SeoPillarNode[] = [
       "iptv app tutorial",
     ],
     intent: "informational",
-    linksTo: ["/iptv-media-players", "/iptv-firestick", "/iptv-services", "/tutorials", "/blog"],
+    linksTo: ["/iptv-media-players", "/iptv-firestick", "/iptv", "/setup", "/blog"],
   },
   {
-    path: "/firestick-devices",
+    path: "/devices",
     title: "Fire Stick Devices",
     primaryKeyword: "fire stick devices",
     supportKeywords: [
@@ -121,7 +121,7 @@ const NODES: SeoPillarNode[] = [
       "firestick device options",
     ],
     intent: "transactional",
-    linksTo: ["/shop", "/36hr-trial", "/iptv-firestick", "/jailbroken-fire-sticks", "/best-iptv-firestick"],
+    linksTo: ["/shop", "/bundles", "/setup", "/iptv", "/36hr-trial", "/iptv-firestick", "/jailbroken-fire-sticks", "/best-iptv-firestick"],
   },
   {
     path: "/best-iptv-firestick",
@@ -135,7 +135,7 @@ const NODES: SeoPillarNode[] = [
       "fire tv iptv options",
     ],
     intent: "transactional",
-    linksTo: ["/shop", "/36hr-trial", "/iptv-firestick", "/firestick-devices", "/iptv-services"],
+    linksTo: ["/shop", "/36hr-trial", "/iptv-firestick", "/devices", "/iptv"],
   },
   {
     path: "/resources",
@@ -149,10 +149,10 @@ const NODES: SeoPillarNode[] = [
       "iptv reference",
     ],
     intent: "informational",
-    linksTo: ["/tools/catalog", "/tutorials", "/blog", "/iptv-services", "/locations"],
+    linksTo: ["/tools/catalog", "/setup", "/blog", "/iptv", "/locations"],
   },
   {
-    path: "/tutorials",
+    path: "/setup",
     title: "IPTV Tutorials",
     primaryKeyword: "iptv tutorial",
     supportKeywords: [
@@ -177,7 +177,7 @@ const NODES: SeoPillarNode[] = [
       "multi device pricing",
     ],
     intent: "transactional",
-    linksTo: ["/shop", "/36hr-trial", "/iptv-services", "/iptv-firestick"],
+    linksTo: ["/shop", "/bundles", "/devices", "/36hr-trial", "/iptv", "/iptv-firestick"],
   },
   {
     path: "/shop",
@@ -192,7 +192,7 @@ const NODES: SeoPillarNode[] = [
       "iptv plan checkout",
     ],
     intent: "transactional",
-    linksTo: ["/pricing", "/36hr-trial", "/iptv-services", "/firestick-devices", "/onn-google-tv"],
+    linksTo: ["/pricing", "/bundles", "/36hr-trial", "/iptv", "/devices", "/setup", "/onn-google-tv"],
   },
   {
     path: "/blog",
@@ -207,7 +207,7 @@ const NODES: SeoPillarNode[] = [
       "jailbreak tutorials",
     ],
     intent: "informational",
-    linksTo: ["/iptv-services", "/iptv-firestick", "/tutorials", "/resources", "/iptv-media-players"],
+    linksTo: ["/iptv", "/iptv-firestick", "/setup", "/resources", "/iptv-media-players"],
   },
   {
     path: "/ultimate-iptv-catalog-2026",
@@ -222,7 +222,7 @@ const NODES: SeoPillarNode[] = [
       "ppv channels iptv",
     ],
     intent: "informational",
-    linksTo: ["/iptv-services", "/shop", "/36hr-trial", "/pricing", "/blog"],
+    linksTo: ["/iptv", "/shop", "/36hr-trial", "/pricing", "/blog"],
   },
   {
     path: "/36hr-trial",
@@ -237,7 +237,7 @@ const NODES: SeoPillarNode[] = [
       "test live tv streaming",
     ],
     intent: "transactional",
-    linksTo: ["/shop", "/iptv-services", "/pricing", "/iptv-firestick", "/onn-google-tv"],
+    linksTo: ["/shop", "/iptv", "/bundles", "/setup", "/devices", "/pricing", "/iptv-firestick", "/onn-google-tv"],
   },
 ];
 
@@ -249,6 +249,15 @@ export function normalizeSeoPath(rawPath: string): string {
   const LEGACY_PATH_ALIASES: Record<string, string> = {
     "/trial": "/36hr-trial",
     "/free-trial": "/36hr-trial",
+    "/homepage": "/",
+    "/iptv-services": "/iptv",
+    "/firestick-devices": "/devices",
+    "/live-tv": "/iptv",
+    "/streaming": "/iptv",
+    "/tutorial": "/setup",
+    "/tutorials": "/setup",
+    "/setup-firestick": "/setup",
+    "/setup-onn": "/setup",
   };
   if (input.startsWith("http://") || input.startsWith("https://")) {
     try {
@@ -279,7 +288,7 @@ export function getRelatedPillarNodes(path: string, max = 6): SeoPillarNode[] {
 }
 
 export const CORE_INTERNAL_LINKS = [
-  { path: "/iptv-services", label: "Best IPTV Service Guide", keyword: "best iptv service" },
+  { path: "/iptv", label: "Best IPTV Service Guide", keyword: "best iptv service" },
   { path: "/iptv-firestick", label: "IPTV for Fire Stick", keyword: "iptv fire stick" },
   { path: "/jailbroken-fire-sticks", label: "Jailbroken Fire Stick Guide", keyword: "jailbroken fire stick" },
   { path: "/onn-google-tv", label: "ONN Google TV IPTV Setup", keyword: "onn google tv iptv" },
@@ -287,8 +296,9 @@ export const CORE_INTERNAL_LINKS = [
   { path: "/36hr-trial", label: "Start 36hr Trial", keyword: "iptv free trial" },
   { path: "/tivimate", label: "TiviMate IPTV Setup", keyword: "tivimate setup" },
   { path: "/iptv-smarters-pro", label: "IPTV Smarters Pro Guide", keyword: "iptv smarters pro" },
-  { path: "/firestick-devices", label: "Fire Stick Devices", keyword: "fire stick devices" },
+  { path: "/devices", label: "Fire Stick Devices", keyword: "fire stick devices" },
+  { path: "/bundles", label: "IPTV & Device Bundles", keyword: "iptv fire stick bundle" },
   { path: "/pricing", label: "IPTV Plans & Pricing", keyword: "iptv pricing" },
-  { path: "/tutorials", label: "Setup Tutorial Videos", keyword: "iptv setup tutorial" },
+  { path: "/setup", label: "Setup Tutorial Videos", keyword: "iptv setup tutorial" },
   { path: "/shop", label: "Shop IPTV & Devices", keyword: "buy iptv subscription" },
 ];

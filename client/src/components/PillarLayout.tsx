@@ -55,11 +55,11 @@ export function PillarLayout({ title, description, breadcrumbs, children }: Pill
               <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">Stream Stick Pro</span>
             </Link>
             <div className="hidden md:flex items-center gap-1">
-              <Link href="/iptv-services"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">IPTV</span></Link>
+              <Link href="/iptv"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">IPTV</span></Link>
               <Link href="/iptv-firestick"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Firestick</span></Link>
-              <Link href="/firestick-devices"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Devices</span></Link>
+              <Link href="/devices"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Devices</span></Link>
               <Link href="/iptv-media-players"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Media Players</span></Link>
-              <Link href="/tutorials"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Tutorials</span></Link>
+              <Link href="/setup"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Tutorials</span></Link>
               <Link href="/jailbroken-fire-sticks"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Jailbroken</span></Link>
               <Link href="/locations"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Locations</span></Link>
               <Link href="/blog"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Blog</span></Link>

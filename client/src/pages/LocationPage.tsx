@@ -185,7 +185,7 @@ export default function LocationPage() {
   const breadcrumbs = [
     { label: "Home", href: "/" },
     { label: countryLabel, href: "/" },
-    { label: typeLabel, href: page.pillar_url || (page.page_type === "iptv" ? "/iptv-services" : page.page_type === "jailbreak" || page.page_type === "unlocked" ? "/jailbroken-fire-sticks" : page.page_type === "onn" ? "/onn-google-tv" : "/iptv-media-players") },
+    { label: typeLabel, href: page.pillar_url || (page.page_type === "iptv" ? "/iptv" : page.page_type === "jailbreak" || page.page_type === "unlocked" ? "/jailbroken-fire-sticks" : page.page_type === "onn" ? "/onn-google-tv" : "/iptv-media-players") },
     { label: locationLabel, href: `/l/${country}/${pageType}/${slug}` },
   ];
 
@@ -345,7 +345,7 @@ export default function LocationPage() {
             <Link href="/jailbroken-fire-sticks">
               <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">Jailbroken Fire Sticks</Button>
             </Link>
-            <Link href="/iptv-services">
+            <Link href="/iptv">
               <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">IPTV Guide</Button>
             </Link>
             <Link href="/iptv-media-players">

@@ -188,7 +188,7 @@ function getVsStrategy(slug: string, name: string): VsStrategy {
       relatedLinks: [
         { href: "/vs-troypoint", label: "vs TroyPoint" },
         { href: "/vs-downloader-app", label: "vs Downloader App" },
-        { href: "/tutorials", label: "Setup Tutorials" },
+        { href: "/setup", label: "Setup Tutorials" },
         { href: "/iptv-firestick", label: "IPTV Fire Stick Guide" },
       ],
     };
@@ -328,7 +328,7 @@ export default function VsCompetitor() {
             <span className="text-gray-600">·</span>
             <Link href="/pricing"><span className="hover:text-orange-400">Pricing</span></Link>
             <span className="text-gray-600">·</span>
-            <Link href="/tutorials"><span className="hover:text-orange-400">Tutorials</span></Link>
+            <Link href="/setup"><span className="hover:text-orange-400">Tutorials</span></Link>
             <span className="text-gray-600">·</span>
             <Link href="/shop"><span className="hover:text-orange-400">Shop</span></Link>
             <span className="text-gray-600">·</span>

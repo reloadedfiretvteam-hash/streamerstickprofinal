@@ -34,7 +34,7 @@ export default function Resources() {
         <p className="text-gray-300 mb-4">
           StreamStickPro delivers 18,000+ live TV channels including sports, news, entertainment, and international content. Use our channel list with TiviMate, IPTV Smarters, or Perfect Player on Fire Stick and Google TV.
         </p>
-        <Link href="/iptv-services">
+        <Link href="/iptv">
           <span className="text-orange-400 hover:underline font-medium">View IPTV Services Guide →</span>
         </Link>
       </section>
@@ -126,7 +126,7 @@ export default function Resources() {
         <div className="flex flex-wrap gap-3">
           <Link href="/"><span className="inline-block px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg text-white font-medium">Home</span></Link>
           <Link href="/shop"><span className="inline-block px-4 py-2 border border-white/30 text-white hover:bg-white/10 rounded-lg font-medium">Shop</span></Link>
-          <Link href="/iptv-services"><span className="inline-block px-4 py-2 border border-white/30 text-white hover:bg-white/10 rounded-lg font-medium">IPTV Guide</span></Link>
+          <Link href="/iptv"><span className="inline-block px-4 py-2 border border-white/30 text-white hover:bg-white/10 rounded-lg font-medium">IPTV Guide</span></Link>
         </div>
       </section>
     </PillarLayout>

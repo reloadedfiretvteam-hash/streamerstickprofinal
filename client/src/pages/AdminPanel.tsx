@@ -180,6 +180,44 @@ interface OrderStats {
   }>;
 }
 
+interface PaymentHealth {
+  summary: {
+    totalOrders: number;
+    paidOrders: number;
+    pendingOrders: number;
+    failedOrders: number;
+    missingCredentials: number;
+    totalRevenue: number;
+    weekRevenue: number;
+    recentOrdersCount: number;
+  };
+  ordersNeedingAttention: Array<{
+    id: string;
+    customerEmail: string;
+    customerName: string | null;
+    productName: string | null;
+    amount: number;
+    createdAt: string | null;
+    status: string;
+    credentialsSent: boolean;
+    generatedUsername?: string | null;
+  }>;
+  recentFailures: Array<{
+    id: string;
+    customerEmail: string;
+    productName: string | null;
+    amount: number;
+    createdAt: string | null;
+  }>;
+  pendingOrdersList: Array<{
+    id: string;
+    customerEmail: string;
+    productName: string | null;
+    amount: number;
+    createdAt: string | null;
+  }>;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -363,6 +401,8 @@ export default function AdminPanel() {
     recentOrders: []
   });
   const [loadingOrderStats, setLoadingOrderStats] = useState(true);
+  const [paymentHealth, setPaymentHealth] = useState<PaymentHealth | null>(null);
+  const [loadingPaymentHealth, setLoadingPaymentHealth] = useState(true);
 
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loadingBlogPosts, setLoadingBlogPosts] = useState(true);
@@ -614,6 +654,7 @@ export default function AdminPanel() {
     
     loadVisitorStats();
     loadOrderStats();
+    loadPaymentHealth();
     loadProducts();
     loadPageEdits();
     loadFulfillmentOrders();
@@ -651,6 +692,7 @@ export default function AdminPanel() {
     const interval = setInterval(() => {
       loadVisitorStats();
       loadOrderStats();
+      loadPaymentHealth();
       setLastUpdate(new Date());
     }, 30000);
 
@@ -682,6 +724,21 @@ export default function AdminPanel() {
       console.error('Error loading order statistics:', error);
     } finally {
       setLoadingOrderStats(false);
+    }
+  };
+
+  const loadPaymentHealth = async () => {
+    try {
+      setLoadingPaymentHealth(true);
+      const response = await authFetch('/api/admin/payment-status');
+      const result = await response.json();
+      if (result.data) {
+        setPaymentHealth(result.data);
+      }
+    } catch (error) {
+      console.error('Error loading payment health:', error);
+    } finally {
+      setLoadingPaymentHealth(false);
     }
   };
 
@@ -2349,12 +2406,156 @@ export default function AdminPanel() {
                     <Button 
                       variant="outline" 
                       className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
-                      onClick={() => { loadVisitorStats(); loadOrderStats(); }}
+                      onClick={() => { loadVisitorStats(); loadOrderStats(); loadPaymentHealth(); }}
                     >
                       <RefreshCw className="w-4 h-4 mr-2" /> Refresh Stats
                     </Button>
                   </CardContent>
                 </Card>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                  <Mail className="w-5 h-5 text-cyan-400" />
+                  Email & Payment Health
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-300">Emails / Credentials Missing</p>
+                          <p className="text-2xl font-bold text-white mt-1">
+                            {loadingPaymentHealth ? "..." : (paymentHealth?.summary.missingCredentials ?? 0)}
+                          </p>
+                        </div>
+                        <AlertCircle className="w-8 h-8 text-amber-400 opacity-80" />
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2">Paid orders that still need customer delivery follow-up.</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-300">Pending Checkouts</p>
+                          <p className="text-2xl font-bold text-white mt-1">
+                            {loadingPaymentHealth ? "..." : (paymentHealth?.summary.pendingOrders ?? 0)}
+                          </p>
+                        </div>
+                        <Timer className="w-8 h-8 text-blue-400 opacity-80" />
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2">Recent sessions that reached checkout but are not paid yet.</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-gray-300">Recent Failed Orders</p>
+                          <p className="text-2xl font-bold text-white mt-1">
+                            {loadingPaymentHealth ? "..." : (paymentHealth?.summary.failedOrders ?? 0)}
+                          </p>
+                        </div>
+                        <Mail className="w-8 h-8 text-red-400 opacity-80" />
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2">Use this to spot payment or delivery friction quickly.</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                  <Card className="bg-gray-800 border-gray-700 xl:col-span-2">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-white">
+                        <Send className="w-5 h-5 text-cyan-400" />
+                        Orders Needing Email Attention
+                      </CardTitle>
+                      <CardDescription className="text-gray-400">
+                        Paid orders with missing credential delivery or follow-up risk.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {(paymentHealth?.ordersNeedingAttention || []).slice(0, 6).map((order) => (
+                          <div key={order.id} className="rounded-lg border border-gray-700 bg-gray-900/40 p-4">
+                            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                              <div>
+                                <p className="font-medium text-white">{order.customerName || order.customerEmail}</p>
+                                <p className="text-sm text-gray-400">{order.customerEmail}</p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {order.productName || 'Unknown product'} • ${order.amount.toFixed(2)} • {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'No date'}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <Badge className="bg-amber-500/20 text-amber-300">Needs attention</Badge>
+                                <Button
+                                  size="sm"
+                                  className="bg-cyan-500 hover:bg-cyan-600 text-white"
+                                  onClick={() => resendConfirmationEmail(order.id, order.customerEmail)}
+                                  disabled={resendingEmail === order.id}
+                                >
+                                  {resendingEmail === order.id ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                                  Resend Email
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {!loadingPaymentHealth && (paymentHealth?.ordersNeedingAttention || []).length === 0 && (
+                          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-200">
+                            No paid orders are currently missing customer delivery emails or credentials.
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-white">
+                        <Lock className="w-5 h-5 text-orange-400" />
+                        Checkout Watchlist
+                      </CardTitle>
+                      <CardDescription className="text-gray-400">
+                        Fast glance at recent failed or pending checkout activity.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Recent Failures</p>
+                        <div className="space-y-2">
+                          {(paymentHealth?.recentFailures || []).slice(0, 3).map((order) => (
+                            <div key={order.id} className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
+                              <p className="text-sm text-white">{order.productName || 'Unknown product'}</p>
+                              <p className="text-xs text-gray-400">{order.customerEmail}</p>
+                            </div>
+                          ))}
+                          {!loadingPaymentHealth && (paymentHealth?.recentFailures || []).length === 0 && (
+                            <p className="text-sm text-gray-400">No recent failed orders.</p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Pending Orders</p>
+                        <div className="space-y-2">
+                          {(paymentHealth?.pendingOrdersList || []).slice(0, 3).map((order) => (
+                            <div key={order.id} className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3">
+                              <p className="text-sm text-white">{order.productName || 'Unknown product'}</p>
+                              <p className="text-xs text-gray-400">{order.customerEmail}</p>
+                            </div>
+                          ))}
+                          {!loadingPaymentHealth && (paymentHealth?.pendingOrdersList || []).length === 0 && (
+                            <p className="text-sm text-gray-400">No recent pending orders.</p>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
 
               <Card className="bg-gray-800 border-gray-700">

@@ -350,10 +350,17 @@ export default function Checkout() {
         <TrustBanner />
         <ProgressBar step={2} />
 
-        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-foreground text-center">Complete Your Order</h1>
-        <p className="text-center text-sm text-gray-300 mb-6">
-          Typical checkout time: under 2 minutes. One-time payment, no auto-renew subscription.
+        <h1 className="text-2xl md:text-3xl font-bold mb-4 text-foreground text-center">Complete Your Order</h1>
+        <p className="text-center text-sm text-gray-300 mb-3">
+          Typical checkout time: under 2 minutes. Secure Stripe checkout. One-time payment, no auto-renew subscription.
         </p>
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-2 text-xs text-gray-300">
+          {["Stripe secured", "Cards + Link", "Klarna/Affirm when eligible", "Coupon codes accepted"].map((item) => (
+            <span key={item} className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+              {item}
+            </span>
+          ))}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3 space-y-6">
@@ -751,7 +758,7 @@ export default function Checkout() {
                     )}
                   </Button>
                   <p className="text-center text-xs text-gray-400">
-                    Next step opens secure Stripe checkout to finish payment.
+                    Next step opens secure Stripe checkout where available payment options are shown automatically.
                   </p>
 
                   <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
@@ -771,16 +778,33 @@ export default function Checkout() {
 
                   <div className="space-y-2 text-sm">
                     {[
-                      "Instant credentials via email",
-                      "Setup tutorial video included",
-                      "24/7 human support",
-                      "Coupon codes accepted at checkout",
+                      "Instant credentials sent by email",
+                      "Separate setup tutorial video emailed after purchase",
+                      "24/7 human support if you get stuck",
+                      "Coupon codes accepted inside Stripe checkout",
                     ].map((text) => (
                       <div key={text} className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
                         <span className="text-gray-300">{text}</span>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+                    <p className="text-xs uppercase tracking-wider text-cyan-300 mb-3">What happens after payment</p>
+                    <div className="space-y-2 text-sm">
+                      {[
+                        "IPTV orders: credentials are delivered by email right after payment.",
+                        "Device orders: we email your order details and send the device-specific setup tutorial separately.",
+                        "Physical devices: shipping details are reviewed right after checkout.",
+                        "Support stays available if email delivery or setup needs help.",
+                      ].map((text) => (
+                        <div key={text} className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                          <span className="text-gray-200">{text}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   
                   <Separator className="bg-white/5" />
