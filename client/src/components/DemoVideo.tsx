@@ -54,7 +54,7 @@ export function DemoVideo() {
         >
           <div className="inline-flex items-center gap-2 bg-[#7C3AED]/20 backdrop-blur-sm border border-[#7C3AED]/30 rounded-full px-6 py-2 mb-6">
             <Tv className="w-5 h-5 text-[#00D4FF]" />
-            <span className="text-sm font-medium text-[#D9CCFF]">SEE WHAT CUSTOMERS RECEIVE</span>
+            <span className="text-sm font-medium text-[#D9CCFF]">SEE RELOADED FIRE TV IN ACTION</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] via-[#7C3AED] to-[#10F7BE]">
@@ -62,7 +62,7 @@ export function DemoVideo() {
             </span>
           </h2>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Preview the same guided walkthrough customers use after purchase: setup flow, activation steps, and what is included with devices that come with Reloaded Fire TV.
+            This preview shows Reloaded Fire TV in action and the overall setup flow. After purchase, customers receive a separate device-specific tutorial video by email with the exact steps for their order.
           </p>
         </motion.div>
         
@@ -117,8 +117,8 @@ export function DemoVideo() {
                       <Zap className="w-5 h-5 text-white" />
                     </div>
                     <div className="text-left">
-                      <p className="text-white font-bold text-lg">Reloaded Fire TV walkthrough</p>
-                      <p className="text-sm text-gray-300">Educational tutorial + guided device setup</p>
+                      <p className="text-white font-bold text-lg">Reloaded Fire TV preview</p>
+                      <p className="text-sm text-gray-300">Service demo + setup overview before the emailed tutorial</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-300">

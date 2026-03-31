@@ -136,7 +136,7 @@ const defaultProducts: Product[] = [
     id: "firestick-hd",
     name: "StreamStick Starter Kit",
     price: 125,
-    description: "Start in about 10 minutes. Plug in your Fire Stick, enter your credentials (sent instantly after purchase), and follow our quick setup video. You'll unlock 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and comprehensive sports coverage including NFL, NBA, UFC, and live events. Includes a 1 Year Live TV plan, 24/7 customer support, tutorial videos, and shipping included.",
+    description: "Start in about 10 minutes. Plug in your Fire Stick, enter your credentials sent instantly after purchase, and follow the device-specific tutorial emailed with your order. You'll unlock 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and comprehensive sports coverage including NFL, NBA, UFC, and live events. Includes a 1 Year Live TV plan, 24/7 customer support, setup guidance, and shipping included.",
     features: productBenefitList,
     image: firestickHdImg,
     category: "firestick",
@@ -146,7 +146,7 @@ const defaultProducts: Product[] = [
     id: "firestick-4k",
     name: "StreamStick 4K Kit",
     price: 135,
-    description: "Best-selling Fire Stick setup in about 10 minutes. Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision. Enjoy 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and all major sports - NFL, NBA, UFC, and live events. Includes a 1 Year premium Live TV plan, 24/7 support, tutorial videos, and shipping included.",
+    description: "Best-selling Fire Stick setup in about 10 minutes. Plug in, enter your instant credentials, follow the device-specific tutorial emailed with your order, and you're streaming in 4K with Dolby Vision. Enjoy 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and all major sports - NFL, NBA, UFC, and live events. Includes a 1 Year premium Live TV plan, 24/7 support, setup guidance, and shipping included.",
     features: productBenefitList,
     image: firestick4kImg,
     category: "firestick",
@@ -157,7 +157,7 @@ const defaultProducts: Product[] = [
     id: "firestick-4k-max",
     name: "StreamStick Max Kit",
     price: 145,
-    description: "Ultimate 4K Max with Wi-Fi 6E setup in about 10 minutes. Plug in, use your instant credentials, follow our quick setup video, and experience breathtaking 4K with Dolby Atmos sound. Access 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, tutorial videos, and shipping included.",
+    description: "Ultimate 4K Max with Wi-Fi 6E setup in about 10 minutes. Plug in, use your instant credentials, follow the device-specific tutorial emailed with your order, and experience breathtaking 4K with Dolby Atmos sound. Access 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, setup guidance, and shipping included.",
     features: productBenefitList,
     image: firestick4kMaxImg,
     category: "firestick",
@@ -167,7 +167,7 @@ const defaultProducts: Product[] = [
     id: "android-onn-4k",
     name: "ONN 4K Streaming Device Kit",
     price: 115,
-    description: "Upgrade from Fire Stick to Android. The ONN 4K Streaming Device with Google TV delivers the same great features you love, plus built-in storage for live DVR recording. Setup takes about 10 minutes - plug in, enter your instant credentials, and access 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and comprehensive sports coverage. Includes a 1 Year Live TV plan, 24/7 support, tutorial videos, and shipping included.",
+    description: "Upgrade from Fire Stick to Android. The ONN 4K Streaming Device with Google TV delivers the same great features you love, plus built-in storage for live DVR recording. Setup takes about 10 minutes - plug in, enter your instant credentials, and follow the device-specific tutorial emailed with your order. Access 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and comprehensive sports coverage. Includes a 1 Year Live TV plan, 24/7 support, setup guidance, and shipping included.",
     features: productBenefitList,
     image: onn4kImg,
     category: "firestick",
@@ -177,7 +177,7 @@ const defaultProducts: Product[] = [
     id: "android-onn-pro",
     name: "ONN 4K Ultra HD Pro Kit",
     price: 125,
-    description: "The ultimate Android streaming upgrade. ONN 4K Ultra HD Pro features expanded storage for extensive DVR recording, Google TV interface, and premium performance. Setup takes about 10 minutes - plug in, use your instant credentials, and experience crystal-clear 4K with Dolby Audio. Access 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, tutorial videos, and shipping included.",
+    description: "The ultimate Android streaming upgrade. ONN 4K Ultra HD Pro features expanded storage for extensive DVR recording, Google TV interface, and premium performance. Setup takes about 10 minutes - plug in, use your instant credentials, and follow the device-specific tutorial emailed with your order. Access 18,000+ live TV channels, 60,000+ movies, 15,000+ series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, setup guidance, and shipping included.",
     features: productBenefitList,
     image: onn4kProImg,
     category: "firestick",
@@ -882,19 +882,19 @@ export default function MainStore() {
       <section className="border-b border-[#2A2A33] bg-[#1A1A22] py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-6xl">
-            <h2 className="text-center text-3xl md:text-4xl font-bold text-white">StreamStickPro vs Typical Jailbreak</h2>
+            <h2 className="text-center text-3xl md:text-4xl font-bold text-white">StreamStickPro vs Other Jailbreak Sites</h2>
             <div className="mt-8 overflow-hidden rounded-xl border border-[#2A2A33] bg-[#0A0A0F] shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
               <div className="hidden md:grid md:grid-cols-3 border-b border-[#2A2A33] bg-white/5">
                 <div className="p-4 font-semibold text-white">Feature</div>
-                <div className="p-4 font-semibold text-white">StreamStickPro</div>
-                <div className="p-4 font-semibold text-white">Typical Kodi Setup</div>
+                <div className="p-4 font-semibold text-white">Us</div>
+                <div className="p-4 font-semibold text-white">Other Jailbreak Sites</div>
               </div>
               {[
                 ["Setup Time", "60 seconds", "30+ minutes"],
-                ["Apps Needed", "1 app", "5-15 apps"],
+                ["Apps Needed", "1 all-in-one app", "5-15 apps to juggle"],
                 ["Maintenance", "Automatic", "Constant fixes"],
                 ["Device Bundle", "1-year included", "None"],
-                ["Support", "Available", "Forums only"],
+                ["Support", "Direct support", "Forums or trial-and-error"],
                 ["Mobile Friendly", "Yes", "No"],
               ].map(([feature, ours, theirs]) => (
                 <div key={feature} className="grid gap-2 border-t border-[#2A2A33] p-4 md:grid-cols-3">

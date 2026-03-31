@@ -14,20 +14,20 @@ const VIDEOS = [
     id: "9pZOoS-1NHg",
     title: "Install IPTV Media Player on Fire Stick",
     label: "How to Set Up IPTV on Fire Stick",
-    description: "This is the same tutorial video every Fire Stick customer receives after purchase. Follow along to install the IPTV media player and get streaming in minutes.",
+    description: "Preview the Fire Stick setup flow before buying. After purchase, customers receive a separate device-specific tutorial video by email with the exact steps for their order.",
   },
   {
     id: "w6s_Tcnnbpo",
     title: "Install IPTV Media Player on ONN Google Device",
     label: "How to Set Up IPTV on ONN Google TV",
-    description: "ONN Google TV setup walkthrough. This is included with every ONN device order — plug in, follow the steps, and start watching.",
+    description: "Preview the ONN Google TV setup flow before buying. After purchase, customers receive a separate device-specific tutorial video by email with the exact steps for their order.",
   },
 ];
 
 const FAQ_ITEMS = [
   {
-    question: "Is this the same tutorial I get after purchasing?",
-    answer: "Yes. Every customer receives this exact tutorial video after purchase. We also make it available here so you can preview the setup process before buying, or revisit it anytime."
+    question: "Are these the same tutorials sent after purchase?",
+    answer: "No. These are public preview videos. After purchase, customers receive a separate tutorial video by email with the exact setup steps for the specific device they ordered."
   },
   {
     question: "Do I need technical skills to follow these tutorials?",
@@ -93,10 +93,10 @@ export default function Tutorials() {
         <div className="mb-10 rounded-2xl bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-400/30 p-6 md:p-8">
           <h2 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-orange-400" />
-            Included With Every Purchase
+            Setup Preview Before Purchase
           </h2>
           <p className="text-gray-200 mb-4">
-            These are the exact same setup tutorials every StreamStickPro customer receives after purchasing a Fire Stick or ONN device. Preview them here, or bookmark this page to revisit during setup.
+            These videos show the general setup flow before purchase. After checkout, customers receive a separate device-specific tutorial video by email, along with their credentials and support details.
           </p>
           <div className="grid sm:grid-cols-3 gap-3 text-sm">
             {[

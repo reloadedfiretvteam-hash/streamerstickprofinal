@@ -762,7 +762,7 @@ export default function Shop() {
             <div className="grid md:grid-cols-2 gap-3 text-gray-100 text-sm">
               {[
                 "Instant email with your credentials",
-                "Follow the included tutorial video (minutes, not hours)",
+                "Separate setup tutorial video emailed after purchase",
                 "All-in-one app flow—no dead-end app lists or Kodi rebuilds",
                 "24/7 human support if anything blocks playback",
               ].map((item, idx) => (
