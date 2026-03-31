@@ -52,17 +52,17 @@ export function DemoVideo() {
           viewport={{ once: true }}
           className="max-w-4xl mx-auto text-center mb-10"
         >
-          <div className="inline-flex items-center gap-2 bg-purple-500/20 backdrop-blur-sm border border-purple-400/30 rounded-full px-6 py-2 mb-6">
-            <Tv className="w-5 h-5 text-purple-400" />
-            <span className="text-sm font-medium text-purple-300">SEE WHAT YOU GET</span>
+          <div className="inline-flex items-center gap-2 bg-[#7C3AED]/20 backdrop-blur-sm border border-[#7C3AED]/30 rounded-full px-6 py-2 mb-6">
+            <Tv className="w-5 h-5 text-[#00D4FF]" />
+            <span className="text-sm font-medium text-[#D9CCFF]">SEE WHAT CUSTOMERS RECEIVE</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-orange-400">
-              Experience Stream Stick Pro
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] via-[#7C3AED] to-[#10F7BE]">
+              Watch the Setup Walkthrough
             </span>
           </h2>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Reloaded Fire TV all-in-one preview: educational setup walkthrough, fast activation steps, and what is included with every Fire Stick and ONN device order.
+            Preview the same guided walkthrough customers use after purchase: setup flow, activation steps, and what is included with devices that come with Reloaded Fire TV.
           </p>
         </motion.div>
         
@@ -74,7 +74,7 @@ export function DemoVideo() {
           className="relative max-w-4xl mx-auto"
         >
           <div 
-            className="relative aspect-video rounded-3xl overflow-hidden border-2 border-purple-500/40 shadow-2xl shadow-purple-500/25 bg-black group cursor-pointer"
+            className="relative aspect-video rounded-3xl overflow-hidden border-2 border-[#7C3AED]/40 shadow-2xl shadow-cyan-500/15 bg-black group cursor-pointer"
             onMouseEnter={() => setShowControls(true)}
             onMouseLeave={() => isPlaying && setShowControls(false)}
             onClick={togglePlay}
@@ -94,7 +94,7 @@ export function DemoVideo() {
             </video>
             
             {!isPlaying && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-tr from-purple-900/60 via-black/45 to-orange-900/45">
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-tr from-[#0A0A0F]/80 via-black/45 to-[#1A1A22]/70">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-25"></div>
                 
                 <motion.div 
@@ -102,7 +102,7 @@ export function DemoVideo() {
                   whileTap={{ scale: 0.96 }}
                   className="relative z-10"
                 >
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-r from-purple-500 to-orange-500 flex items-center justify-center shadow-2xl shadow-purple-500/50 animate-pulse">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-r from-[#00D4FF] to-[#7C3AED] flex items-center justify-center shadow-2xl shadow-cyan-500/30 animate-pulse">
                     <Play className="w-10 h-10 text-white fill-white ml-1" />
                   </div>
                 </motion.div>
@@ -113,12 +113,12 @@ export function DemoVideo() {
 
                 <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-r from-[#00D4FF] to-[#7C3AED] rounded-lg flex items-center justify-center">
                       <Zap className="w-5 h-5 text-white" />
                     </div>
                     <div className="text-left">
-                      <p className="text-white font-bold text-lg">Reloaded Fire TV - What You Get</p>
-                      <p className="text-sm text-gray-300">Educational Tutorial + 1 Year Included Access</p>
+                      <p className="text-white font-bold text-lg">Reloaded Fire TV walkthrough</p>
+                      <p className="text-sm text-gray-300">Educational tutorial + guided device setup</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-300">
@@ -164,17 +164,17 @@ export function DemoVideo() {
           </div>
           
           <div className="grid grid-cols-3 gap-4 mt-6">
-            <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-orange-400">18,000+</div>
+            <div className="bg-gradient-to-r from-[#00D4FF]/15 to-[#7C3AED]/15 border border-[#00D4FF]/30 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-[#00D4FF]">18,000+</div>
               <div className="text-sm text-gray-300">Live TV Channels</div>
             </div>
             <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-blue-400">100,000+</div>
-              <div className="text-sm text-gray-300">Movies & Series</div>
+              <div className="text-2xl font-bold text-blue-400">60K + 15K</div>
+              <div className="text-sm text-gray-300">Movies + Series</div>
             </div>
-            <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-purple-400">Full Sports</div>
-              <div className="text-sm text-gray-300">Coverage</div>
+            <div className="bg-gradient-to-r from-[#7C3AED]/20 to-pink-500/20 border border-[#7C3AED]/30 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-purple-400">Sports + News</div>
+              <div className="text-sm text-gray-300">International coverage</div>
             </div>
           </div>
         </motion.div>

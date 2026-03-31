@@ -1,4 +1,4 @@
-import { Shield, Lock, RefreshCw, Headphones, CreditCard, CheckCircle } from "lucide-react";
+import { Shield, Lock, CreditCard, CheckCircle, Users, Activity } from "lucide-react";
 
 interface TrustBadgesProps {
   variant?: "horizontal" | "compact";
@@ -8,36 +8,36 @@ interface TrustBadgesProps {
 export function TrustBadges({ variant = "horizontal", className = "" }: TrustBadgesProps) {
   const badges = [
     {
-      icon: Lock,
-      label: "SSL Secure",
-      sublabel: "256-bit encryption",
-      color: "text-green-400"
+      icon: Users,
+      label: "247K Users",
+      sublabel: "Trust StreamStickPro",
+      color: "text-cyan-400"
     },
     {
-      icon: RefreshCw,
-      label: "Money-Back",
-      sublabel: "30-day guarantee",
-      color: "text-blue-400"
-    },
-    {
-      icon: Headphones,
-      label: "24/7 Support",
-      sublabel: "Always here to help",
-      color: "text-orange-400"
+      icon: Activity,
+      label: "99.9% Uptime",
+      sublabel: "Reliable service",
+      color: "text-emerald-400"
     },
     {
       icon: Shield,
-      label: "Secure Payment",
-      sublabel: "Protected checkout",
-      color: "text-purple-400"
+      label: "McAfee Secure",
+      sublabel: "Protected experience",
+      color: "text-violet-400"
+    },
+    {
+      icon: Lock,
+      label: "SSL Secure",
+      sublabel: "Encrypted checkout",
+      color: "text-green-400"
     }
   ];
 
   if (variant === "compact") {
     return (
-      <div className={`flex flex-wrap justify-center gap-4 ${className}`}>
+      <div className={`flex flex-nowrap overflow-x-auto justify-start md:justify-center gap-4 ${className}`}>
         {badges.map((badge, idx) => (
-          <div key={idx} className="flex items-center gap-2 text-sm">
+          <div key={idx} className="flex items-center gap-2 text-sm shrink-0">
             <badge.icon className={`w-4 h-4 ${badge.color}`} />
             <span className="text-gray-300">{badge.label}</span>
           </div>
@@ -47,16 +47,16 @@ export function TrustBadges({ variant = "horizontal", className = "" }: TrustBad
   }
 
   return (
-    <div className={`bg-gradient-to-r from-gray-800/50 via-gray-900/50 to-gray-800/50 border-y border-white/10 py-6 ${className}`}>
+    <div className={`bg-gradient-to-r from-[#0A0A0F] via-[#1A1A22] to-[#0A0A0F] border-y border-[#2A2A33] py-6 ${className}`}>
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="flex gap-4 overflow-x-auto md:grid md:grid-cols-4 md:overflow-visible">
           {badges.map((badge, idx) => (
             <div 
               key={idx} 
-              className="flex items-center justify-center gap-3 group"
+              className="flex items-center justify-center gap-3 group min-w-[220px] rounded-xl border border-[#2A2A33] bg-white/5 px-4 py-3"
               data-testid={`trust-badge-${idx}`}
             >
-              <div className={`w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-white/20 transition-colors`}>
+              <div className={`w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-[#2A2A33] group-hover:border-[#00D4FF] transition-colors`}>
                 <badge.icon className={`w-6 h-6 ${badge.color}`} />
               </div>
               <div className="text-left">

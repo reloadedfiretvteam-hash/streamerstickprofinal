@@ -125,7 +125,7 @@ export function FreeTrial() {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto mb-12 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 border-2 border-purple-500/50 rounded-2xl overflow-hidden"
+      className="max-w-4xl mx-auto mb-12 bg-gradient-to-r from-[#7C3AED]/20 via-[#1A1A22] to-[#00D4FF]/15 border-2 border-[#7C3AED]/40 rounded-2xl overflow-hidden"
       data-testid="free-trial-box"
       onAnimationStart={() => {}}
     >
@@ -141,7 +141,7 @@ export function FreeTrial() {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent to-purple-900/80 md:bg-gradient-to-r md:from-transparent md:to-gray-900"></div>
           <div className="absolute bottom-4 left-4 md:hidden">
-            <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+            <span className="bg-[#7C3AED] text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
               FREE TRIAL
             </span>
           </div>
@@ -149,11 +149,11 @@ export function FreeTrial() {
         
         <div className="md:col-span-3 p-6 md:p-8">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center animate-pulse">
+            <div className="w-12 h-12 bg-gradient-to-r from-[#7C3AED] to-[#00D4FF] rounded-full flex items-center justify-center animate-pulse">
               <Gift className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+              <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#7C3AED]">
                 FREE 36-Hour Trial
               </p>
               <p className="text-gray-300 text-sm">No credit card required • Instant access</p>
@@ -161,8 +161,8 @@ export function FreeTrial() {
           </div>
 
           <div className="flex items-center gap-2 text-gray-300 mb-6">
-            <Clock className="w-5 h-5 text-purple-400" />
-            <span>Try our premium 4K Live TV service FREE - experience our extensive channel library!</span>
+            <Clock className="w-5 h-5 text-[#00D4FF]" />
+            <span>Test the IPTV subscription path first, check stream quality, and see if the service fits your setup before buying.</span>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -199,14 +199,14 @@ export function FreeTrial() {
             {/* Country Preferences */}
             <div className="space-y-3">
               <Label className="text-sm font-medium text-gray-200 flex items-center gap-2">
-                <Globe className="w-4 h-4 text-purple-400" />
+                <Globe className="w-4 h-4 text-[#00D4FF]" />
                 Channel Preferences
               </Label>
               <div className="grid grid-cols-3 gap-2">
                 <div 
                   className={`flex items-center space-x-2 p-3 rounded-lg border transition-all ${
                     countryOptions.usaOnly 
-                      ? "border-purple-500 bg-purple-500/20" 
+                      ? "border-[#7C3AED] bg-[#7C3AED]/20" 
                       : "border-gray-600 hover:border-gray-500"
                   }`}
                   data-testid="checkbox-trial-usa-only"
@@ -224,7 +224,7 @@ export function FreeTrial() {
                 <div 
                   className={`flex items-center space-x-2 p-3 rounded-lg border transition-all ${
                     countryOptions.usaCanadaUk 
-                      ? "border-purple-500 bg-purple-500/20" 
+                      ? "border-[#7C3AED] bg-[#7C3AED]/20" 
                       : "border-gray-600 hover:border-gray-500"
                   }`}
                   data-testid="checkbox-trial-usa-canada-uk"
@@ -240,7 +240,7 @@ export function FreeTrial() {
                 <div 
                   className={`flex items-center space-x-2 p-3 rounded-lg border transition-all ${
                     countryOptions.allCountries 
-                      ? "border-purple-500 bg-purple-500/20" 
+                      ? "border-[#7C3AED] bg-[#7C3AED]/20" 
                       : "border-gray-600 hover:border-gray-500"
                   }`}
                   data-testid="checkbox-trial-all-countries"
@@ -269,7 +269,7 @@ export function FreeTrial() {
             {/* Message */}
             <div className="space-y-2">
               <Label htmlFor="trial-message" className="text-sm font-medium text-gray-200 flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-purple-400" />
+                <MessageSquare className="w-4 h-4 text-[#00D4FF]" />
                 Message (Optional)
               </Label>
               <Textarea
@@ -289,7 +289,7 @@ export function FreeTrial() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-bold text-lg"
+              className="w-full h-12 bg-gradient-to-r from-[#00D4FF] to-[#7C3AED] hover:from-[#10F7BE] hover:to-[#00D4FF] font-bold text-lg text-white"
               data-testid="button-start-trial"
             >
               {loading ? (

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ShoppingCart, ArrowUp, MessageCircle, Gift } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/lib/store";
+import { playCtaClick } from "@/lib/ctaSound";
 
 interface StickyMobileCTAProps {
   onContact?: () => void;
@@ -22,18 +23,14 @@ export function StickyMobileCTA({ onContact }: StickyMobileCTAProps = {}) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToShop = () => {
-    document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
+  const goToDevices = () => {
+    playCtaClick();
+    window.location.href = "/devices";
   };
 
-  const scrollToFreeTrial = () => {
-    const shopSection = document.getElementById('shop');
-    if (shopSection) {
-      shopSection.scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => {
-        window.scrollBy({ top: 200, behavior: 'smooth' });
-      }, 500);
-    }
+  const goToTrial = () => {
+    playCtaClick();
+    window.location.href = "/36hr-trial";
   };
 
   return (
@@ -46,15 +43,15 @@ export function StickyMobileCTA({ onContact }: StickyMobileCTAProps = {}) {
           className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
         >
           <div className="bg-gray-900/98 backdrop-blur-xl border-t-2 border-white/20 px-4 py-4 safe-area-pb shadow-2xl">
-            <div className="flex gap-2">
+            <div className="grid grid-cols-[1fr_auto_1fr] gap-2">
               <button
-                onClick={scrollToFreeTrial}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 px-3 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30 transition-all"
+                onClick={goToTrial}
+                className="flex-1 bg-[#00D4FF] hover:bg-[#10F7BE] text-[#0A0A0F] font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all"
                 data-testid="sticky-trial-button"
-                aria-label="Free 36-hour trial"
-                title="Free Trial"
+                aria-label="Start Trial"
               >
                 <Gift className="w-5 h-5" />
+                Start Trial
               </button>
               {onContact && (
                 <button
@@ -67,23 +64,23 @@ export function StickyMobileCTA({ onContact }: StickyMobileCTAProps = {}) {
                 </button>
               )}
               <button
-                onClick={scrollToShop}
-                className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30 text-base"
+                onClick={goToDevices}
+                className="flex-1 border border-[#00D4FF] bg-transparent hover:bg-[#00D4FF]/10 text-[#00D4FF] font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg text-base transition-all"
                 data-testid="sticky-shop-button"
               >
                 <ShoppingCart className="w-5 h-5" />
-                Shop Now
+                Shop Devices
               </button>
-              {items.length > 0 && (
-                <button
-                  onClick={openCart}
-                  className="bg-white text-black font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-base"
-                  data-testid="sticky-cart-button"
-                >
-                  Cart ({items.length})
-                </button>
-              )}
             </div>
+            {items.length > 0 && (
+              <button
+                onClick={openCart}
+                className="mt-2 w-full bg-white text-black font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-base"
+                data-testid="sticky-cart-button"
+              >
+                Cart ({items.length})
+              </button>
+            )}
           </div>
         </motion.div>
       )}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Zap, X, MessageCircle, Gift } from "lucide-react";
+import { playCtaClick } from "@/lib/ctaSound";
 import { Button } from "@/components/ui/button";
 
 interface FloatingCTAProps {
@@ -34,7 +35,8 @@ export function FloatingCTA({ onBuyNow, onContact, onFreeTrial }: FloatingCTAPro
     setIsVisible(false);
   };
 
-  const scrollToProducts = () => {
+  const goToProducts = () => {
+    playCtaClick();
     const shopSection = document.getElementById("shop");
     if (shopSection) {
       shopSection.scrollIntoView({ behavior: "smooth" });
@@ -42,15 +44,8 @@ export function FloatingCTA({ onBuyNow, onContact, onFreeTrial }: FloatingCTAPro
     if (onBuyNow) onBuyNow();
   };
 
-  const scrollToFreeTrial = () => {
-    const shopSection = document.getElementById("shop");
-    if (shopSection) {
-      shopSection.scrollIntoView({ behavior: "smooth" });
-      // Scroll a bit more to show free trial box
-      setTimeout(() => {
-        window.scrollBy({ top: 200, behavior: "smooth" });
-      }, 500);
-    }
+  const goToFreeTrial = () => {
+    playCtaClick();
     if (onFreeTrial) onFreeTrial();
   };
 
@@ -74,23 +69,23 @@ export function FloatingCTA({ onBuyNow, onContact, onFreeTrial }: FloatingCTAPro
               <X className="w-3 h-3" />
             </button>
             
-            <div className="bg-gradient-to-r from-orange-600 to-purple-600 p-1 rounded-2xl shadow-2xl shadow-orange-500/30">
-              <div className="bg-gray-900/95 backdrop-blur-lg rounded-xl p-4">
+            <div className="bg-gradient-to-r from-[#00D4FF] to-[#7C3AED] p-1 rounded-2xl shadow-2xl shadow-cyan-500/20">
+              <div className="bg-[#0A0A0F]/95 backdrop-blur-lg rounded-xl p-4">
                 <div className="flex items-center gap-4">
                   <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-purple-500 rounded-xl flex items-center justify-center animate-pulse">
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#00D4FF] to-[#7C3AED] rounded-xl flex items-center justify-center animate-pulse">
                       <Zap className="w-6 h-6 text-white" />
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-base">Ready to Cut the Cord?</p>
-                    <p className="text-gray-200 text-sm">18,000+ channels from $11/mo</p>
+                    <p className="text-white font-bold text-base">Choose IPTV, Devices, or Bundles</p>
+                    <p className="text-gray-300 text-sm">Start with a trial or jump straight into loaded devices.</p>
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      onClick={scrollToFreeTrial}
+                      onClick={goToFreeTrial}
                       variant="outline"
-                      className="bg-purple-500/20 hover:bg-purple-500/30 border-purple-400/50 text-white font-semibold px-3 shadow-lg"
+                      className="bg-[#7C3AED]/20 hover:bg-[#7C3AED]/30 border-[#7C3AED]/50 text-white font-semibold px-3 shadow-lg"
                       data-testid="button-floating-trial"
                       title="Free 36-Hour Trial"
                     >
@@ -106,12 +101,12 @@ export function FloatingCTA({ onBuyNow, onContact, onFreeTrial }: FloatingCTAPro
                       <MessageCircle className="w-4 h-4" />
                     </Button>
                     <Button
-                      onClick={scrollToProducts}
-                      className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold px-6 shadow-lg shadow-orange-500/30"
+                      onClick={goToProducts}
+                      className="bg-[#00D4FF] hover:bg-[#10F7BE] text-[#0A0A0F] font-bold px-6 shadow-lg shadow-cyan-500/20"
                       data-testid="button-floating-cta"
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
-                      Shop Now
+                      View Options
                     </Button>
                   </div>
                 </div>

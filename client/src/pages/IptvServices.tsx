@@ -5,16 +5,16 @@ import { SEOSchema } from "@/components/SEOSchema";
 import { setPageMeta } from "@/lib/seo";
 import { IPTV_IMAGES, getImageForSlot, fullImageUrl } from "@/data/seo-images";
 
-const TITLE = "Ultimate IPTV Guide 2026: Best IPTV Service & Live TV Streaming";
-const DESC = "Complete guide to the best IPTV service for 2026. Compare live TV streaming, cheap IPTV subscriptions, and cord-cutting. 18,000+ channels, Fire Stick & Android. No dead apps—guided setup, tutorial, and 24/7 support.";
+const TITLE = "IPTV Subscription - 18K Channels, 60K Movies";
+const DESC = "Instant IPTV access - 18,000+ live channels, 60K+ movies, sports, international. 36hr free trial.";
 
 export default function IptvServices() {
   useEffect(() => {
     const ogImg = fullImageUrl(getImageForSlot(IPTV_IMAGES, 0).src);
     setPageMeta({
-      title: "IPTV Subscription Plans 2026 | Cheapest & Best | StreamStick Pro",
-      description: "IPTV plans from $11/mo: 18K+ live channels, 4K sports, PPV, 99.9% uptime. Fire Stick and Android. Cancel anytime. 36hr trial for subscription plans. StreamStick Pro.",
-      path: "/iptv-services",
+      title: "IPTV Subscription 18K+ Channels | StreamStickPro",
+      description: DESC,
+      path: "/iptv",
       ogImage: ogImg,
     });
     const setMeta = (name: string, content: string, isProperty = false) => {
@@ -23,13 +23,18 @@ export default function IptvServices() {
       if (!tag) { tag = document.createElement("meta"); tag.setAttribute(attr, name); document.head.appendChild(tag); }
       tag.setAttribute("content", content);
     };
-    setMeta("og:image", ogImg, true);
-    setMeta("twitter:image", ogImg);
+    setMeta("og:title", "StreamStickPro IPTV – 18K Channels, 60K Movies", true);
+    setMeta("og:description", "Instant access to IPTV with 36hr free trial. Over 18K live channels and 60K movies on Fire TV, Onn, Roku.", true);
+    setMeta("og:image", "https://streamstickpro.com/images/iptv-og.webp", true);
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", "StreamStickPro IPTV – 18K Channels, 60K Movies");
+    setMeta("twitter:description", "Instant access to IPTV with 36hr free trial. Over 18K live channels and 60K movies on Fire TV, Onn, Roku.");
+    setMeta("twitter:image", "https://streamstickpro.com/images/iptv-og.webp");
   }, []);
 
   const breadcrumbs = [
     { label: "Home", href: "/" },
-    { label: "IPTV Services", href: "/iptv-services" },
+    { label: "IPTV Subscription", href: "/iptv" },
   ];
 
   const faq = [
@@ -46,9 +51,15 @@ export default function IptvServices() {
       <SEOSchema faq={faq} />
       <PillarLayout
         title={TITLE}
-        description="Your complete guide to the best IPTV service and live TV streaming in 2026. Compare options, learn how IPTV works, and find the right plan for Fire Stick and Android—with guided setup, tutorial video, and 24/7 support."
+        description={DESC}
         breadcrumbs={breadcrumbs}
       >
+        <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Link href="/devices"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/devices</span></Link>
+          <Link href="/bundles"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/bundles</span></Link>
+          <Link href="/setup-firestick"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/setup-firestick</span></Link>
+          <Link href="/homepage"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/homepage</span></Link>
+        </div>
         <h2 id="what-is-iptv">What Is IPTV and How Does Live TV Streaming Work?</h2>
         <p>IPTV (Internet Protocol Television) is a way to watch live TV and on-demand content over the internet. Instead of cable or satellite, your TV signal comes through your broadband connection. That means you can watch on <Link href="/iptv-firestick">Fire Stick</Link>, Android boxes, Smart TVs, phones, and tablets—anywhere you have internet—without hunting through broken app lists.</p>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">

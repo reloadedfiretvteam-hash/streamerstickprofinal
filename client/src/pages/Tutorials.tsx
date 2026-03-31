@@ -6,8 +6,8 @@ import { Play, Home, Check, ShieldCheck, Zap } from "lucide-react";
 import { setPageMeta } from "@/lib/seo";
 import { SEOSchema } from "@/components/SEOSchema";
 
-const TITLE = "How to Set Up Fire Stick & ONN for IPTV at Home";
-const DESC = "Step-by-step video tutorials: learn how to set up IPTV on Fire Stick and ONN Google TV. The same guided walkthrough included with every StreamStickPro device purchase.";
+const TITLE = "IPTV Setup Guides - Firestick, Onn, Roku";
+const DESC = "Step-by-step guides to setup IPTV on Firestick, Onn Google TV, Roku devices.";
 
 const VIDEOS = [
   {
@@ -46,15 +46,35 @@ const FAQ_ITEMS = [
 export default function Tutorials() {
   useEffect(() => {
     setPageMeta({
-      title: `${TITLE} | Setup Tutorial | StreamStick Pro`,
+      title: "IPTV Setup Guide Firestick Onn Roku | StreamStickPro",
       description: DESC,
-      path: "/tutorials",
+      path: "/setup",
+      ogImage: "https://streamstickpro.com/images/setup-og.webp",
     });
+
+    const setMeta = (name: string, content: string, isProperty = false) => {
+      const attr = isProperty ? "property" : "name";
+      let tag = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute(attr, name);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute("content", content);
+    };
+
+    setMeta("og:title", "StreamStickPro Setup Guides", true);
+    setMeta("og:description", "Learn how to set up IPTV quickly and easily on all major devices.", true);
+    setMeta("og:image", "https://streamstickpro.com/images/setup-og.webp", true);
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", "StreamStickPro Setup Guides");
+    setMeta("twitter:description", "Learn how to set up IPTV quickly and easily on all major devices.");
+    setMeta("twitter:image", "https://streamstickpro.com/images/setup-og.webp");
   }, []);
 
   const breadcrumbs = [
     { label: "Home", href: "/" },
-    { label: "Setup Tutorial", href: "/tutorials" },
+    { label: "Setup Guides", href: "/setup" },
   ];
 
   return (

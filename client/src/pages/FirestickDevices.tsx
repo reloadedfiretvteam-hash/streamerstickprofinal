@@ -7,16 +7,36 @@ import { setPageMeta } from "@/lib/seo";
 
 const breadcrumbs = [
   { label: "Home", href: "/" },
-  { label: "Fire Stick & Streaming Devices", href: "/firestick-devices" },
+  { label: "Reloaded Fire TV Devices", href: "/devices" },
 ];
 
 export default function FirestickDevices() {
   useEffect(() => {
     setPageMeta({
-      title: "Fire Stick & Streaming Devices 2026 | IPTV Ready | StreamStick Pro",
-      description: "Best streaming devices 2026: Fire Stick HD, 4K, 4K Max, ONN 4K. IPTV-ready with guided setup. Compare and shop with StreamStick Pro.",
-      path: "/firestick-devices",
+      title: "Reloaded Fire TV Devices | Fire Stick, Onn Google TV",
+      description: "Fire Stick and Onn Google TV devices with Reloaded Fire TV included, guided setup, and a 1-year plan.",
+      path: "/devices",
+      ogImage: "https://streamstickpro.com/images/devices-og.webp",
     });
+
+    const setMeta = (name: string, content: string, isProperty = false) => {
+      const attr = isProperty ? "property" : "name";
+      let tag = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute(attr, name);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute("content", content);
+    };
+
+    setMeta("og:title", "StreamStickPro Reloaded Fire TV Devices", true);
+    setMeta("og:description", "Fire Stick and Onn devices with Reloaded Fire TV included, guided setup, and a 1-year plan.", true);
+    setMeta("og:image", "https://streamstickpro.com/images/devices-og.webp", true);
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", "StreamStickPro Reloaded Fire TV Devices");
+    setMeta("twitter:description", "Fire Stick and Onn devices with Reloaded Fire TV included, guided setup, and a 1-year plan.");
+    setMeta("twitter:image", "https://streamstickpro.com/images/devices-og.webp");
   }, []);
 
   const faq = [
@@ -32,11 +52,17 @@ export default function FirestickDevices() {
       <BreadcrumbSchema items={breadcrumbs.map(b => ({ name: b.label, url: b.href }))} />
       <SEOSchema faq={faq} />
       <PillarLayout
-        title="Fire Stick & Android Streaming Devices 2026: Comparison & Buyer Guide"
-        description="Compare Fire Stick HD, 4K, 4K Max, and Android devices. IPTV-ready with guided setup, Reloaded Fire TV all-in-one app, and 1-year included access."
+        title="Reloaded Fire TV Devices + 1-Year Included"
+        description="Fire Stick and Onn Google TV devices with Reloaded Fire TV included, guided setup, and a 1-year plan."
         breadcrumbs={breadcrumbs}
       >
         <div className="space-y-12">
+          <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Link href="/iptv"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/iptv</span></Link>
+            <Link href="/bundles"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/bundles</span></Link>
+            <Link href="/setup-onn"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/setup-onn</span></Link>
+            <Link href="/homepage"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">/homepage</span></Link>
+          </section>
           <section className="rounded-3xl border border-orange-500/25 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 p-8 shadow-2xl shadow-orange-500/15">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
               <div className="space-y-5 max-w-3xl">

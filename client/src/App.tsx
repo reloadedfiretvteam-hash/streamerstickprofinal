@@ -7,7 +7,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useTracking } from "@/hooks/useTracking";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import RetargetingPixels from "@/components/RetargetingPixels";
-import ExitIntentPopup from "@/components/ExitIntentPopup";
 import { Spinner } from "@/components/ui/spinner";
 
 // Only the public homepage loads immediately.
@@ -45,6 +44,7 @@ const VsCompetitor = lazy(() => import("@/pages/VsCompetitor"));
 const UltimateIptvCatalog = lazy(() => import("@/pages/UltimateIptvCatalog"));
 const ToolsCatalog = lazy(() => import("@/pages/ToolsCatalog"));
 const Tutorials = lazy(() => import("@/pages/Tutorials"));
+const Bundles = lazy(() => import("@/pages/Bundles"));
 const SeoAds = lazy(() => import("@/pages/SeoAds"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const CartDrawer = lazy(() => import("@/components/CartDrawer").then((module) => ({ default: module.CartDrawer })));
@@ -89,6 +89,8 @@ function Router() {
     <Suspense fallback={<LoadingFallback />}>
       <Switch>
         <Route path="/" component={MainStore} />
+        <Route path="/homepage" component={MainStore} />
+        <Route path="/faq" component={MainStore} />
         <Route path="/shop" component={Shop} />
         <Route path="/shadow-services" component={ShadowStore} />
         <Route path="/admin" component={AdminPanel} />
@@ -103,9 +105,11 @@ function Router() {
         <Route path="/terms" component={TermsOfService} />
         <Route path="/privacy" component={PrivacyPolicy} />
         <Route path="/refund" component={RefundPolicy} />
+        <Route path="/iptv" component={IptvServices} />
         <Route path="/iptv-services" component={IptvServices} />
         <Route path="/iptv-firestick" component={IptvFirestick} />
         <Route path="/jailbroken-fire-sticks" component={JailbrokenFireSticks} />
+        <Route path="/devices" component={FirestickDevices} />
         <Route path="/firestick-devices" component={FirestickDevices} />
         <Route path="/best-iptv-firestick" component={BestIptvFirestick} />
         <Route path="/iptv-media-players" component={IptvMediaPlayers} />
@@ -118,7 +122,11 @@ function Router() {
         <Route path="/vs-:competitor" component={VsCompetitor} />
         <Route path="/ultimate-iptv-catalog-2026" component={UltimateIptvCatalog} />
         <Route path="/tools/catalog" component={ToolsCatalog} />
+        <Route path="/setup" component={Tutorials} />
+        <Route path="/setup-firestick" component={Tutorials} />
+        <Route path="/setup-onn" component={Tutorials} />
         <Route path="/tutorials" component={Tutorials} />
+        <Route path="/bundles" component={Bundles} />
         <Route path="/seo-ads" component={SeoAds} />
         <Route path="/seo-ads/:slug" component={SeoAds} />
         <Route path="/l/:country/:pageType/:slug" component={LocationPage} />
