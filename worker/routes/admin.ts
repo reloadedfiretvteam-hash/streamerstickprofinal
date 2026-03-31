@@ -158,6 +158,32 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
 }
 
+/** Best-effort label for admin email / fulfillment views (not used for billing). */
+function classifyOrderTypeForEmailLog(o: {
+  realProductId: string | null | undefined;
+  realProductName: string | null | undefined;
+  amount: number | null | undefined;
+  status: string | null | undefined;
+}): 'trial' | 'iptv' | 'device' | 'other' {
+  const name = (o.realProductName || '').toLowerCase();
+  const id = (o.realProductId || '').toLowerCase();
+  const amt = o.amount ?? 0;
+  const st = (o.status || '').toLowerCase();
+  if (amt === 0 || name.includes('trial') || st.includes('trial')) return 'trial';
+  if (
+    name.includes('fire stick') ||
+    name.includes('firestick') ||
+    name.includes('onn') ||
+    id.includes('firestick') ||
+    id.includes('fs-') ||
+    id.includes('android-onn')
+  ) {
+    return 'device';
+  }
+  if (name.includes('iptv') || id.includes('iptv') || name.includes('subscription')) return 'iptv';
+  return 'other';
+}
+
 async function buildMarketingContacts(env: Env, includeTestData: boolean): Promise<{ contacts: MarketingContact[]; excludedTestCount: number }> {
   const storage = getStorage(env);
   const { createClient } = await import('@supabase/supabase-js');
@@ -2174,6 +2200,21 @@ export function createAdminRoutes() {
       const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
       const weekRevenue = recentPaid.reduce((sum, o) => sum + (o.amount || 0), 0);
       
+      const emailLogLimit = 100;
+      const emailDeliveryLog = allOrders.slice(0, emailLogLimit).map((o) => ({
+        id: o.id,
+        customerEmail: o.customerEmail,
+        customerName: o.customerName ?? null,
+        orderType: classifyOrderTypeForEmailLog(o),
+        productName: o.realProductName ?? null,
+        status: o.status ?? null,
+        amount: (o.amount || 0) / 100,
+        credentialsSent: !!o.credentialsSent,
+        fulfillmentStatus: o.fulfillmentStatus ?? null,
+        createdAt: o.createdAt ? new Date(o.createdAt as Date | string).toISOString() : null,
+        source: 'order' as const,
+      }));
+
       return c.json({
         data: {
           summary: {
@@ -2186,6 +2227,7 @@ export function createAdminRoutes() {
             weekRevenue: weekRevenue / 100,
             recentOrdersCount: recentOrders.length,
           },
+          emailDeliveryLog,
           // Orders that need attention (paid but no credentials sent)
           ordersNeedingAttention: missingCredentials.map(o => ({
             id: o.id,

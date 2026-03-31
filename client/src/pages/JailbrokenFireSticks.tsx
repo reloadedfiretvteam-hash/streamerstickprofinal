@@ -51,7 +51,7 @@ export default function JailbrokenFireSticks() {
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
           <img src={getImageForSlot(JAILBREAK_IMAGES, 0).src} alt={getImageForSlot(JAILBREAK_IMAGES, 0).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
         </figure>
-        <p>At StreamStickPro we focus on <Link href="/firestick-devices">Fire Stick device options</Link> and <Link href="/iptv-services">IPTV plans</Link> so you can start quickly with less setup time.</p>
+        <p>At StreamStickPro we focus on <Link href="/devices">Fire Stick device options</Link> and <Link href="/iptv">IPTV plans</Link> so you can start quickly with less setup time.</p>
 
         <h2 id="fully-loaded-vs-diy">Setup Support vs Doing It Yourself</h2>
         <p>Doing it yourself means buying a Fire Stick, installing an IPTV app, and adding a subscription. A guided option means you get instant credentials, an educational tutorial, and 24/7 help. That is ideal if you want to skip trial-and-error and get straight to <Link href="/iptv-firestick">IPTV on Fire Stick</Link> without dead links.</p>
@@ -60,7 +60,7 @@ export default function JailbrokenFireSticks() {
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
           <img src={getImageForSlot(JAILBREAK_IMAGES, 1).src} alt={getImageForSlot(JAILBREAK_IMAGES, 1).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
         </figure>
-        <p>Fire Stick HD, Fire Stick 4K, and Fire Stick 4K Max all work well for IPTV. 4K and 4K Max support 4K and HDR/Dolby Vision. We also offer ONN 4K streaming devices with Google TV. Compare options on our <Link href="/shop">Shop</Link> and <Link href="/firestick-devices">Fire Stick devices</Link> page.</p>
+        <p>Fire Stick HD, Fire Stick 4K, and Fire Stick 4K Max all work well for IPTV. 4K and 4K Max support 4K and HDR/Dolby Vision. We also offer ONN 4K streaming devices with Google TV. Compare options on our <Link href="/shop">Shop</Link> and <Link href="/devices">Fire Stick devices</Link> page.</p>
 
         <h2 id="what-you-get">What You Get With a Fire Stick Option</h2>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">

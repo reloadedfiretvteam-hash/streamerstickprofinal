@@ -44,12 +44,6 @@ Allow: /
 User-agent: OAI-SearchBot
 Allow: /
 
-# Clean URL parameters (prevents duplicate content from query strings)
-Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&ref&fbclid&gclid /
-
-# Canonical host
-Host: https://streamstickpro.com
-
 # Sitemaps (GSC: submit both; index contains sitemap-pages + sitemap-posts)
 Sitemap: https://streamstickpro.com/sitemap-index.xml
 Sitemap: https://streamstickpro.com/sitemap.xml

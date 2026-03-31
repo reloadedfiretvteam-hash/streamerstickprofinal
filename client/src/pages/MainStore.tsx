@@ -1661,9 +1661,9 @@ export default function MainStore() {
                 <div className="mt-3 flex flex-wrap gap-2 text-sm">
                   <Link href="/bundles"><span className="cursor-pointer text-[#00D4FF] hover:text-[#10F7BE]">Device + IPTV bundles</span></Link>
                   <span className="text-[#2A2A33]">|</span>
-                  <Link href="/setup-firestick"><span className="cursor-pointer text-[#00D4FF] hover:text-[#10F7BE]">Firestick setup</span></Link>
+                  <Link href="/setup"><span className="cursor-pointer text-[#00D4FF] hover:text-[#10F7BE]">Fire TV setup guides</span></Link>
                   <span className="text-[#2A2A33]">|</span>
-                  <Link href="/setup-onn"><span className="cursor-pointer text-[#00D4FF] hover:text-[#10F7BE]">Onn setup</span></Link>
+                  <Link href="/setup"><span className="cursor-pointer text-[#00D4FF] hover:text-[#10F7BE]">ONN &amp; Google TV setup</span></Link>
                 </div>
               </div>
             </div>
@@ -1828,7 +1828,7 @@ export default function MainStore() {
             <div>
               <h3 className="text-white font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/homepage"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">Home</span></Link></li>
+                <li><Link href="/"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">Home</span></Link></li>
                 <li><Link href="/iptv"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">IPTV</span></Link></li>
                 <li><Link href="/devices"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">Devices</span></Link></li>
                 <li><Link href="/bundles"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">Bundles</span></Link></li>

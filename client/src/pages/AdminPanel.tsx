@@ -216,6 +216,20 @@ interface PaymentHealth {
     amount: number;
     createdAt: string | null;
   }>;
+  /** Last ~100 orders; same payload as payment-status (no extra request). */
+  emailDeliveryLog?: Array<{
+    id: string;
+    customerEmail: string;
+    customerName: string | null;
+    orderType: string;
+    productName: string | null;
+    status: string | null;
+    amount: number;
+    credentialsSent: boolean;
+    fulfillmentStatus: string | null;
+    createdAt: string | null;
+    source: string;
+  }>;
 }
 
 interface Product {
@@ -2556,6 +2570,125 @@ export default function AdminPanel() {
                     </CardContent>
                   </Card>
                 </div>
+
+                <Card className="bg-gray-800 border-gray-700 mt-6">
+                  <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="space-y-1">
+                      <CardTitle className="flex items-center gap-2 text-white">
+                        <List className="w-5 h-5 text-cyan-400" />
+                        Email & credential delivery log
+                      </CardTitle>
+                      <CardDescription className="text-gray-400 max-w-3xl text-sm leading-relaxed">
+                        Recent rows from the orders table (newest first). &quot;Credentials&quot; shows the stored{' '}
+                        <code className="text-gray-300 bg-gray-900/80 px-1 rounded">credentials_sent</code> flag after fulfillment email runs — not a full SMTP history.
+                        Order type is inferred from product name/id for quick scanning.
+                      </CardDescription>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="border-gray-600 text-gray-300 shrink-0"
+                      onClick={() => loadPaymentHealth()}
+                      disabled={loadingPaymentHealth}
+                    >
+                      {loadingPaymentHealth ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 inline" />
+                          Refresh log
+                        </>
+                      )}
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-auto max-h-[min(28rem,55vh)] rounded-md border border-gray-700">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-gray-700 hover:bg-transparent">
+                            <TableHead className="text-gray-400 whitespace-nowrap">Created</TableHead>
+                            <TableHead className="text-gray-400">Order ID</TableHead>
+                            <TableHead className="text-gray-400">Email</TableHead>
+                            <TableHead className="text-gray-400">Type</TableHead>
+                            <TableHead className="text-gray-400">Product</TableHead>
+                            <TableHead className="text-gray-400">Status</TableHead>
+                            <TableHead className="text-gray-400 text-center">Creds sent</TableHead>
+                            <TableHead className="text-gray-400">Fulfillment</TableHead>
+                            <TableHead className="text-gray-400 text-right">Amt</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {(paymentHealth?.emailDeliveryLog || []).length > 0 ? (
+                            (paymentHealth?.emailDeliveryLog || []).map((row) => (
+                              <TableRow key={row.id} className="border-gray-700 hover:bg-gray-700/40">
+                                <TableCell className="text-gray-400 whitespace-nowrap text-xs">
+                                  {row.createdAt ? new Date(row.createdAt).toLocaleString() : "—"}
+                                </TableCell>
+                                <TableCell
+                                  className="text-gray-500 text-[11px] font-mono max-w-[7rem] truncate"
+                                  title={row.id}
+                                >
+                                  {row.id}
+                                </TableCell>
+                                <TableCell className="text-gray-200 text-xs max-w-[200px]">
+                                  <div className="truncate" title={row.customerEmail}>
+                                    {row.customerEmail}
+                                  </div>
+                                  {row.customerName ? (
+                                    <div className="text-[11px] text-gray-500 truncate">{row.customerName}</div>
+                                  ) : null}
+                                </TableCell>
+                                <TableCell className="whitespace-nowrap">
+                                  <Badge variant="outline" className="border-gray-600 text-gray-300 text-[10px] uppercase">
+                                    {row.orderType}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-gray-300 text-xs max-w-[180px] truncate" title={row.productName || ""}>
+                                  {row.productName || "—"}
+                                </TableCell>
+                                <TableCell className="whitespace-nowrap">
+                                  <Badge
+                                    className={
+                                      row.status === "paid"
+                                        ? "bg-green-500/20 text-green-300"
+                                        : row.status === "pending"
+                                          ? "bg-yellow-500/20 text-yellow-300"
+                                          : row.status === "failed"
+                                            ? "bg-red-500/20 text-red-300"
+                                            : "bg-gray-500/20 text-gray-300"
+                                    }
+                                  >
+                                    {row.status || "—"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  {row.credentialsSent ? (
+                                    <CheckCheck className="w-4 h-4 text-emerald-400 inline" aria-label="Yes" />
+                                  ) : (
+                                    <span className="text-gray-500 text-xs">No</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-gray-400 text-xs whitespace-nowrap">
+                                  {row.fulfillmentStatus || "—"}
+                                </TableCell>
+                                <TableCell className="text-right text-emerald-400/90 text-xs font-medium whitespace-nowrap">
+                                  ${row.amount.toFixed(2)}
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={9} className="py-10 text-center text-gray-400 text-sm">
+                                {loadingPaymentHealth ? "Loading…" : "No order rows returned yet."}
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               <Card className="bg-gray-800 border-gray-700">

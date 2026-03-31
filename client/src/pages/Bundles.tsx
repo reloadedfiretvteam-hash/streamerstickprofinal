@@ -82,8 +82,8 @@ export default function Bundles() {
         </section>
 
         <section className="mt-4">
-          <Link href="/homepage">
-            <a className="text-cyan-300 hover:text-cyan-200">Return to /homepage</a>
+          <Link href="/">
+            <a className="text-cyan-300 hover:text-cyan-200">Return to home</a>
           </Link>
         </section>
       </PillarLayout>

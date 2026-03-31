@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, ArrowLeft, CreditCard, Lock, ShieldCheck, Zap, CheckCircle, Loader2, Globe, MessageSquare, Phone, Shield, ChevronRight } from "lucide-react";
+import { Trash2, ArrowLeft, CreditCard, Lock, ShieldCheck, Zap, CheckCircle, Loader2, Globe, MessageSquare, Phone, Shield, ChevronRight, Sparkles, Truck } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { setPageMeta } from "@/lib/seo";
 
@@ -54,6 +54,79 @@ function ProgressBar({ step }: { step: number }) {
           )}
         </div>
       ))}
+    </div>
+  );
+}
+
+function CheckoutTrustReassuranceSection({
+  hasIPTVProduct,
+  hasPhysicalProduct,
+  hasFreeTrial,
+}: {
+  hasIPTVProduct: boolean;
+  hasPhysicalProduct: boolean;
+  hasFreeTrial: boolean;
+}) {
+  const showServiceDelivery = hasIPTVProduct || hasFreeTrial;
+  return (
+    <div className="mb-8 rounded-2xl border border-orange-500/25 bg-gradient-to-br from-gray-900/85 via-gray-950/95 to-black/90 p-5 md:p-6 shadow-xl shadow-orange-500/10 backdrop-blur">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/25 to-red-500/20 border border-orange-500/35">
+          <Sparkles className="w-6 h-6 text-orange-300" />
+        </div>
+        <div className="min-w-0 flex-1 space-y-2">
+          <h2 className="text-lg md:text-xl font-bold text-white tracking-tight">Secure checkout & what happens next</h2>
+          <p className="text-sm text-gray-400 leading-relaxed">
+            When you continue, you&apos;ll finish payment on <strong className="text-gray-200">Stripe&apos;s secure hosted page</strong>. Major cards and{" "}
+            <strong className="text-gray-200">Link</strong> are always available; Apple Pay, Google Pay, Klarna, Affirm, and other methods appear automatically when Stripe supports them for your device and region.
+          </p>
+        </div>
+      </div>
+      <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+        <li className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-3.5 text-sm text-gray-200">
+          <Lock className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+          <span>
+            <span className="font-semibold text-white">Bank-grade security</span>
+            <span className="text-gray-400"> — Card data stays with Stripe (PCI). We don&apos;t store your full card on our servers.</span>
+          </span>
+        </li>
+        {showServiceDelivery && (
+          <li className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-3.5 text-sm text-gray-200">
+            <Zap className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <span>
+              <span className="font-semibold text-white">Instant credentials</span>
+              <span className="text-gray-400"> — For live TV / service plans, login details are emailed right after successful payment (check spam).</span>
+            </span>
+          </li>
+        )}
+        <li className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-3.5 text-sm text-gray-200">
+          <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+          <span>
+            <span className="font-semibold text-white">Setup tutorial</span>
+            <span className="text-gray-400"> — A separate step-by-step video link is emailed after purchase so you can get running quickly.</span>
+          </span>
+        </li>
+        {hasPhysicalProduct ? (
+          <li className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-3.5 text-sm text-gray-200">
+            <Truck className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
+            <span>
+              <span className="font-semibold text-white">Device orders</span>
+              <span className="text-gray-400">
+                {" "}
+                — We confirm shipping details by email and fulfill as quickly as possible. Questions? Our team is here for setup and tracking help.
+              </span>
+            </span>
+          </li>
+        ) : (
+          <li className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-3.5 text-sm text-gray-200">
+            <MessageSquare className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
+            <span>
+              <span className="font-semibold text-white">Human support</span>
+              <span className="text-gray-400"> — If anything is unclear after checkout, reach out and we&apos;ll walk you through it.</span>
+            </span>
+          </li>
+        )}
+      </ul>
     </div>
   );
 }
@@ -361,6 +434,12 @@ export default function Checkout() {
             </span>
           ))}
         </div>
+
+        <CheckoutTrustReassuranceSection
+          hasIPTVProduct={hasIPTVProduct}
+          hasPhysicalProduct={hasPhysicalProduct}
+          hasFreeTrial={hasFreeTrial}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3 space-y-6">
