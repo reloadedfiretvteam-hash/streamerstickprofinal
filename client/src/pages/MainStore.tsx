@@ -1668,6 +1668,28 @@ export default function MainStore() {
               </div>
             </div>
           </div>
+          <div className="mx-auto mt-6 grid max-w-6xl gap-6 lg:grid-cols-2">
+            <div className="rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-cyan-500/10 via-[#1A1A22] to-[#0A0A0F] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#00D4FF]">Package Clarity</p>
+              <h3 className="mt-3 text-xl font-bold text-white">What device customers receive</h3>
+              <ul className="mt-4 space-y-2 text-sm text-[#B0B3B8]">
+                <li>• Fire Stick or ONN device based on selected option.</li>
+                <li>• Reloaded Fire TV setup path included with order.</li>
+                <li>• Credentials and setup instructions sent by email.</li>
+                <li>• Separate tutorial video delivered after purchase.</li>
+                <li>• Support help for onboarding and troubleshooting.</li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-[#2A2A33] bg-[#1A1A22] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#10F7BE]">Important Information</p>
+              <div className="mt-4 space-y-2 text-sm text-[#B0B3B8]">
+                <p>Playback quality depends on internet speed, network conditions, and device model.</p>
+                <p>Third-party player apps and interfaces may change, so setup steps can vary over time.</p>
+                <p>Manufacturer OS updates can occasionally require minor reconfiguration.</p>
+                <p>We provide setup guidance and support, while users remain responsible for local compliance and account use.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -189,6 +189,31 @@ export default function FirestickDevices() {
             </div>
           </section>
 
+          <section className="grid lg:grid-cols-2 gap-6">
+            <div className="rounded-3xl border border-cyan-400/25 bg-gradient-to-br from-cyan-500/10 via-gray-950 to-gray-900 p-6 shadow-xl shadow-cyan-500/10">
+              <h3 className="text-2xl font-bold text-white mb-3">What is included in your package</h3>
+              <p className="text-gray-300 mb-4">
+                Every device order is built around a clear handoff so customers know exactly what they get and what happens next.
+              </p>
+              <ul className="space-y-2 text-gray-100">
+                <li>• Your selected Fire Stick or ONN device.</li>
+                <li>• Reloaded Fire TV access path included with the order.</li>
+                <li>• Instant credentials and setup steps delivered by email.</li>
+                <li>• A separate tutorial video sent after purchase.</li>
+                <li>• 24/7 support for setup and activation help.</li>
+              </ul>
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 via-gray-950 to-gray-900 p-6 shadow-xl shadow-black/20">
+              <h3 className="text-2xl font-bold text-white mb-3">Important information</h3>
+              <div className="space-y-3 text-sm text-gray-300">
+                <p>Performance depends on your internet speed, home network quality, and the device model selected. A stable home connection is recommended for best playback quality.</p>
+                <p>Reloaded Fire TV setup uses third-party apps and player workflows that can change over time. Layouts and menu steps may vary after app or device updates.</p>
+                <p>We provide onboarding guidance, tutorials, and support, but users are responsible for local compliance, account use, and routine hardware/software updates.</p>
+                <p>We focus on a cleaner and more reliable setup path, but no streaming setup can guarantee that every third-party app or future update behaves exactly the same forever.</p>
+              </div>
+            </div>
+          </section>
+
           <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 p-7 space-y-6">
             <div className="flex flex-col gap-3">
               <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 text-white px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide">
@@ -331,7 +356,7 @@ export default function FirestickDevices() {
         <p>Android streaming devices (e.g. ONN 4K, ONN 4K Pro) run Google TV and support the same player apps. They’re a strong alternative to Fire Stick, often with more storage for DVR-style use. We offer ONN 4K and ONN 4K Pro bundles with Reloaded Fire TV all-in-one setup—see our <Link href="/shop">Shop</Link>.</p>
 
         <h2 id="pre-configured">Why Choose a Guided Device Option?</h2>
-        <p>A guided device option means fewer setup steps and faster activation. You get educational tutorials, easier onboarding, and 24/7 support. Ideal if you want to avoid technical friction and go straight to <Link href="/iptv">live TV streaming</Link>.</p>
+        <p>A guided device option means fewer setup steps and faster activation. You get educational tutorials, easier onboarding, and 24/7 support. Ideal if you want to avoid technical friction and go straight to a cleaner streaming setup.</p>
 
         <h2 id="faq">Fire Stick & Streaming Devices FAQ</h2>
         <ul>

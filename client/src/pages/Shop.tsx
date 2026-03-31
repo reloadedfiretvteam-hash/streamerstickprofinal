@@ -788,6 +788,27 @@ export default function Shop() {
             <p className="text-center text-gray-300 mb-4 max-w-2xl mx-auto">
               Each device includes 1 year of Live TV access, an educational tutorial video, and 24/7 setup help—no Kodi rebuilds, no dead-end app lists, no broken APK scavenger hunts.
             </p>
+            <div className="grid md:grid-cols-2 gap-4 mb-8 max-w-5xl mx-auto">
+              <div className="rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-cyan-500/10 via-gray-950 to-gray-900 p-5">
+                <h4 className="text-white font-semibold mb-2">What your order includes</h4>
+                <ul className="space-y-2 text-sm text-gray-100">
+                  <li>• Chosen Fire Stick or ONN device hardware.</li>
+                  <li>• Reloaded Fire TV setup access path included.</li>
+                  <li>• Credentials and next-step instructions by email.</li>
+                  <li>• Separate tutorial video after purchase.</li>
+                  <li>• Support help if you need setup assistance.</li>
+                </ul>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 via-gray-950 to-gray-900 p-5">
+                <h4 className="text-white font-semibold mb-2">Important information</h4>
+                <ul className="space-y-2 text-sm text-gray-300">
+                  <li>• Stream quality depends on internet speed and Wi-Fi stability.</li>
+                  <li>• Third-party player app interfaces can change over time.</li>
+                  <li>• Device OS updates may require minor setup adjustments.</li>
+                  <li>• We provide guidance and support, while users are responsible for local compliance.</li>
+                </ul>
+              </div>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 max-w-4xl mx-auto text-left">
               {[
                 "Reloaded Fire TV all-in-one flow",
