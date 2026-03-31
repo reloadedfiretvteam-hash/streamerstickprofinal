@@ -790,22 +790,34 @@ export default function Shop() {
             </p>
             <div className="grid md:grid-cols-2 gap-4 mb-8 max-w-5xl mx-auto">
               <div className="rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-cyan-500/10 via-gray-950 to-gray-900 p-5">
-                <h4 className="text-white font-semibold mb-2">What your order includes</h4>
+                <h4 className="text-white font-semibold mb-2">What ships in your order</h4>
                 <ul className="space-y-2 text-sm text-gray-100">
-                  <li>• Chosen Fire Stick or ONN device hardware.</li>
-                  <li>• Reloaded Fire TV setup access path included.</li>
-                  <li>• Credentials and next-step instructions by email.</li>
-                  <li>• Separate tutorial video after purchase.</li>
-                  <li>• Support help if you need setup assistance.</li>
+                  <li>• 1x selected device (Fire Stick HD/4K/4K Max or ONN model).</li>
+                  <li>• Power cable + power adapter.</li>
+                  <li>• Remote and standard in-box accessories.</li>
+                  <li>• Quick-start setup instructions from StreamStickPro.</li>
+                </ul>
+                <h4 className="text-white font-semibold mt-5 mb-2">What you receive digitally</h4>
+                <ul className="space-y-2 text-sm text-gray-100">
+                  <li>• Reloaded Fire TV access credentials by email.</li>
+                  <li>• Separate setup tutorial video after purchase.</li>
+                  <li>• Support contact details for activation help.</li>
                 </ul>
               </div>
               <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 via-gray-950 to-gray-900 p-5">
-                <h4 className="text-white font-semibold mb-2">Important information</h4>
+                <h4 className="text-white font-semibold mb-2">Shipping and delivery</h4>
                 <ul className="space-y-2 text-sm text-gray-300">
-                  <li>• Stream quality depends on internet speed and Wi-Fi stability.</li>
-                  <li>• Third-party player app interfaces can change over time.</li>
-                  <li>• Device OS updates may require minor setup adjustments.</li>
-                  <li>• We provide guidance and support, while users are responsible for local compliance.</li>
+                  <li>• Processing begins after payment confirmation.</li>
+                  <li>• Shipping timelines vary by carrier and destination.</li>
+                  <li>• Tracking is sent when your order is packed and shipped.</li>
+                  <li>• Confirm shipping address and email at checkout.</li>
+                </ul>
+                <h4 className="text-white font-semibold mt-5 mb-2">Important information</h4>
+                <ul className="space-y-2 text-sm text-gray-300">
+                  <li>• Streaming quality depends on internet speed, Wi-Fi strength, and device model.</li>
+                  <li>• Third-party app interfaces can change over time.</li>
+                  <li>• Manufacturer OS updates may require minor setup adjustments.</li>
+                  <li>• We provide setup guidance and support; customers are responsible for local compliance and account use.</li>
                 </ul>
               </div>
             </div>

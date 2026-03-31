@@ -1671,22 +1671,34 @@ export default function MainStore() {
           <div className="mx-auto mt-6 grid max-w-6xl gap-6 lg:grid-cols-2">
             <div className="rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-cyan-500/10 via-[#1A1A22] to-[#0A0A0F] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#00D4FF]">Package Clarity</p>
-              <h3 className="mt-3 text-xl font-bold text-white">What device customers receive</h3>
+              <h3 className="mt-3 text-xl font-bold text-white">What ships in your order</h3>
               <ul className="mt-4 space-y-2 text-sm text-[#B0B3B8]">
-                <li>• Fire Stick or ONN device based on selected option.</li>
-                <li>• Reloaded Fire TV setup path included with order.</li>
-                <li>• Credentials and setup instructions sent by email.</li>
-                <li>• Separate tutorial video delivered after purchase.</li>
-                <li>• Support help for onboarding and troubleshooting.</li>
+                <li>• 1x selected device (Fire Stick HD/4K/4K Max or ONN model).</li>
+                <li>• Power cable + power adapter.</li>
+                <li>• Remote and standard in-box accessories.</li>
+                <li>• Quick-start setup instructions from StreamStickPro.</li>
+              </ul>
+              <h3 className="mt-6 text-lg font-bold text-white">What you receive digitally</h3>
+              <ul className="mt-3 space-y-2 text-sm text-[#B0B3B8]">
+                <li>• Reloaded Fire TV access credentials by email.</li>
+                <li>• Separate setup tutorial video after purchase.</li>
+                <li>• Support contact details for activation help.</li>
               </ul>
             </div>
             <div className="rounded-2xl border border-[#2A2A33] bg-[#1A1A22] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#10F7BE]">Important Information</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#10F7BE]">Shipping and delivery</p>
               <div className="mt-4 space-y-2 text-sm text-[#B0B3B8]">
-                <p>Playback quality depends on internet speed, network conditions, and device model.</p>
-                <p>Third-party player apps and interfaces may change, so setup steps can vary over time.</p>
-                <p>Manufacturer OS updates can occasionally require minor reconfiguration.</p>
-                <p>We provide setup guidance and support, while users remain responsible for local compliance and account use.</p>
+                <p>Processing begins after payment confirmation.</p>
+                <p>Shipping timelines vary by carrier and destination.</p>
+                <p>Tracking is sent when your order is packed and shipped.</p>
+                <p>Please confirm shipping address and email at checkout.</p>
+              </div>
+              <p className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-[#10F7BE]">Important Information</p>
+              <div className="mt-4 space-y-2 text-sm text-[#B0B3B8]">
+                <p>Streaming quality depends on internet speed, Wi-Fi strength, and device model.</p>
+                <p>Third-party app interfaces can change over time.</p>
+                <p>Manufacturer OS updates may require minor setup adjustments.</p>
+                <p>We provide setup guidance and support; customers are responsible for local compliance and account use.</p>
               </div>
             </div>
           </div>

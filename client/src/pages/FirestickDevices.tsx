@@ -191,25 +191,34 @@ export default function FirestickDevices() {
 
           <section className="grid lg:grid-cols-2 gap-6">
             <div className="rounded-3xl border border-cyan-400/25 bg-gradient-to-br from-cyan-500/10 via-gray-950 to-gray-900 p-6 shadow-xl shadow-cyan-500/10">
-              <h3 className="text-2xl font-bold text-white mb-3">What is included in your package</h3>
-              <p className="text-gray-300 mb-4">
-                Every device order is built around a clear handoff so customers know exactly what they get and what happens next.
-              </p>
+              <h3 className="text-2xl font-bold text-white mb-3">What ships in your order</h3>
               <ul className="space-y-2 text-gray-100">
-                <li>• Your selected Fire Stick or ONN device.</li>
-                <li>• Reloaded Fire TV access path included with the order.</li>
-                <li>• Instant credentials and setup steps delivered by email.</li>
-                <li>• A separate tutorial video sent after purchase.</li>
-                <li>• 24/7 support for setup and activation help.</li>
+                <li>• 1x selected device (Fire Stick HD, Fire Stick 4K, Fire Stick 4K Max, or ONN model).</li>
+                <li>• Power cable + power adapter.</li>
+                <li>• Remote and standard in-box accessories from the device manufacturer.</li>
+                <li>• Quick-start setup instructions from StreamStickPro.</li>
               </ul>
             </div>
             <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 via-gray-950 to-gray-900 p-6 shadow-xl shadow-black/20">
-              <h3 className="text-2xl font-bold text-white mb-3">Important information</h3>
+              <h3 className="text-2xl font-bold text-white mb-3">What you receive digitally</h3>
               <div className="space-y-3 text-sm text-gray-300">
-                <p>Performance depends on your internet speed, home network quality, and the device model selected. A stable home connection is recommended for best playback quality.</p>
-                <p>Reloaded Fire TV setup uses third-party apps and player workflows that can change over time. Layouts and menu steps may vary after app or device updates.</p>
-                <p>We provide onboarding guidance, tutorials, and support, but users are responsible for local compliance, account use, and routine hardware/software updates.</p>
-                <p>We focus on a cleaner and more reliable setup path, but no streaming setup can guarantee that every third-party app or future update behaves exactly the same forever.</p>
+                <p>Reloaded Fire TV access credentials by email.</p>
+                <p>Separate step-by-step setup tutorial video.</p>
+                <p>Support contact details for activation help.</p>
+              </div>
+              <h3 className="text-xl font-bold text-white mt-6 mb-3">Shipping and delivery</h3>
+              <div className="space-y-2 text-sm text-gray-300">
+                <p>Processing begins after payment confirmation.</p>
+                <p>Shipping timelines vary by carrier and destination.</p>
+                <p>Tracking is sent when your order is packed and shipped.</p>
+                <p>Please confirm shipping address and email during checkout.</p>
+              </div>
+              <h3 className="text-xl font-bold text-white mt-6 mb-3">Important information</h3>
+              <div className="space-y-2 text-sm text-gray-300">
+                <p>Streaming quality depends on internet speed, Wi-Fi strength, and device model.</p>
+                <p>Third-party app interfaces can change over time.</p>
+                <p>Manufacturer OS updates may require minor setup adjustments.</p>
+                <p>We provide setup guidance and support; customers are responsible for local compliance and account use.</p>
               </div>
             </div>
           </section>
