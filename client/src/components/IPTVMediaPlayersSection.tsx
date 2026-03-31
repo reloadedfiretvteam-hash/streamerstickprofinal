@@ -6,28 +6,28 @@ export function IPTVMediaPlayersSection() {
   const mediaPlayers = [
     {
       name: "TiviMate",
-      description: "Premium IPTV player with EPG support, favorites, and recording",
+      description: "Premium player with EPG support, favorites, and recording",
       features: ["Electronic Program Guide", "Favorites & Playlists", "Recording Support", "Multi-account"],
       icon: "📺",
       compatible: ["Fire Stick", "Android TV", "Smart TV", "Mobile"]
     },
     {
-      name: "IPTV Smarters Pro",
-      description: "User-friendly IPTV player with modern interface and multi-screen support",
+      name: "Smarters Pro",
+      description: "User-friendly player with modern interface and multi-screen support",
       features: ["Multi-screen Viewing", "Catch-up TV", "VOD Library", "Parental Control"],
       icon: "🎬",
       compatible: ["Fire Stick", "Android", "iOS", "Smart TV"]
     },
     {
       name: "Perfect Player",
-      description: "Advanced IPTV player with extensive customization options",
+      description: "Advanced player with extensive customization options",
       features: ["Customizable UI", "EPG Integration", "Recording", "Multi-playlist"],
       icon: "⚡",
       compatible: ["Android TV", "Fire Stick", "Smart TV"]
     },
     {
       name: "VLC Media Player",
-      description: "Universal media player supporting IPTV streams and M3U playlists",
+      description: "Universal media player supporting live streams and M3U playlists",
       features: ["M3U Playlist Support", "Live Streaming", "Cross-platform", "Free & Open Source"],
       icon: "🔷",
       compatible: ["All Platforms", "Fire Stick", "PC", "Mobile"]
@@ -47,15 +47,15 @@ export function IPTVMediaPlayersSection() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 rounded-full px-6 py-2 mb-6">
               <Play className="w-5 h-5 text-blue-400" />
-              <span className="text-sm font-medium text-blue-300">IPTV MEDIA PLAYERS & APPS</span>
+              <span className="text-sm font-medium text-blue-300">RELOADED FIRE TV PLAYERS & APPS</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-500">
-                Compatible IPTV Players & Apps
+                Compatible Reloaded Fire TV Players & Apps
               </span>
             </h2>
             <p className="text-xl text-gray-200 max-w-3xl mx-auto">
-              Our IPTV service works with all major IPTV media players including TiviMate, IPTV Smarters, Perfect Player, and VLC.
+              Our Reloaded Fire TV service works with all major media players including TiviMate, Smarters Pro, Perfect Player, and VLC.
               Fire Stick device options are supported with straightforward setup guidance.
             </p>
           </div>
@@ -119,7 +119,7 @@ export function IPTVMediaPlayersSection() {
                 </div>
                 <h4 className="text-lg font-bold text-white mb-2">Recommended Player Guidance</h4>
                 <p className="text-gray-300 text-sm">
-                  We recommend the best IPTV player for your device and provide clear setup steps.
+                  We recommend the best player for your device and provide clear setup steps.
                 </p>
               </div>
               <div className="text-center">

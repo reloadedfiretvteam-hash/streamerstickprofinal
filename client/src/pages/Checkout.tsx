@@ -206,7 +206,7 @@ export default function Checkout() {
   useEffect(() => {
     setPageMeta({
       title: "Checkout | StreamStickPro",
-      description: "Secure checkout for premium IPTV and optional Fire Stick / ONN bundles. Instant credentials, tutorial video, 24/7 support. 18K+ channels. 36-hour trial on IPTV subscriptions.",
+      description: "Secure checkout for premium Reloaded Fire TV access and optional Fire Stick / ONN bundles. Instant credentials, tutorial video, 24/7 support. 18K+ channels. 36-hour trial on subscription plans.",
       path: "/checkout",
       noindex: true,
     });
@@ -873,7 +873,7 @@ export default function Checkout() {
                     <p className="text-xs uppercase tracking-wider text-cyan-300 mb-3">What happens after payment</p>
                     <div className="space-y-2 text-sm">
                       {[
-                        "IPTV orders: credentials are delivered by email right after payment.",
+                        "Reloaded Fire TV orders: credentials are delivered by email right after payment.",
                         "Device orders: we email your order details and send the device-specific setup tutorial separately.",
                         "Physical devices: shipping details are reviewed right after checkout.",
                         "Support stays available if email delivery or setup needs help.",

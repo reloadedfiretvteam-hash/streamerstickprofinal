@@ -69,7 +69,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     durationLabel: "3 Months",
     badge: "POPULAR",
     popular: true,
-    description: "Save more with 3 months. All-in-one IPTV—no dead-end apps, no Kodi maintenance, just working streams and faster ticket response.",
+    description: "Save more with 3 months. All-in-one Reloaded Fire TV—no dead-end apps, no Kodi maintenance, just working streams and faster ticket response.",
     features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support (24/7)"],
     prices: [
       { devices: 1, price: 25, productId: "iptv-3mo-1d" },
@@ -83,7 +83,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     duration: "6mo",
     durationLabel: "6 Months",
     badge: "VALUE",
-    description: "Best value 6-month IPTV with stable links and an all-in-one app flow—no random app installs or failing Kodi builds.",
+    description: "Best value 6-month Reloaded Fire TV with stable links and an all-in-one app flow—no random app installs or failing Kodi builds.",
     features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support", "10% Savings"],
     prices: [
       { devices: 1, price: 45, productId: "iptv-6mo-1d" },
@@ -97,7 +97,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     duration: "1yr",
     durationLabel: "1 Year",
     badge: "BEST DEAL",
-    description: "Ultimate value. One year of premium IPTV with curated, working streams—no dead Kodi builds, no broken apps, no scavenger hunts.",
+    description: "Ultimate value. One year of premium Reloaded Fire TV with curated, working streams—no dead Kodi builds, no broken apps, no scavenger hunts.",
     features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support (24/7)", "Maximum Savings"],
     prices: [
       { devices: 1, price: 65, productId: "iptv-1yr-1d" },
@@ -227,16 +227,16 @@ export default function Shop() {
 
   // Stable for session bucket while still rotating realistically
   const iptvViewCounts = useMemo(() => ({
-    "1mo": countForKey("iptv-1mo", 122, 112),
-    "3mo": countForKey("iptv-3mo", 155, 126),
-    "6mo": countForKey("iptv-6mo", 142, 118),
-    "1yr": countForKey("iptv-1yr", 178, 137),
+    "1mo": countForKey("iptv-1mo", 18, 19),
+    "3mo": countForKey("iptv-3mo", 22, 21),
+    "6mo": countForKey("iptv-6mo", 20, 18),
+    "1yr": countForKey("iptv-1yr", 24, 24),
   }), [socialProofSeed]);
 
   const firestickViewCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     defaultProducts.forEach((p, idx) => {
-      counts[p.id] = countForKey(`device-${p.id}-${idx}`, 82, 121);
+      counts[p.id] = countForKey(`device-${p.id}-${idx}`, 12, 28);
     });
     return counts;
   }, [socialProofSeed]);
@@ -249,7 +249,7 @@ export default function Shop() {
     { name: "Sergio M.", text: "Bought two devices — both worked day one. Support followed up to ensure channels were fine." },
     { name: "Kyle W.", text: "Switched from cable and saved $140/mo. Setup took maybe 8 minutes." },
     { name: "Andrea L.", text: "The tutorial video walked me through everything. Even my parents could do it." },
-    { name: "Jamal C.", text: "Tried three other IPTV sites first — dead links everywhere. This one just worked." },
+    { name: "Jamal C.", text: "Tried three other live TV sites first — dead links everywhere. This one just worked." },
     { name: "Priya S.", text: "Love the sports coverage. UFC, NFL, Premier League — all in one place." },
     { name: "Devon M.", text: "Customer support answered at 2 AM on a Sunday. That sold me for good." },
     { name: "Lisa H.", text: "No buffering issues after they helped me optimize my router settings." },
@@ -264,8 +264,8 @@ export default function Shop() {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
     setPageMeta({
-      title: "IPTV Subscription Plans 2026 | Fire Stick & Devices | StreamStick Pro",
-      description: "Shop IPTV plans from $11/mo and Fire Stick device options. 18K+ channels, 4K, and 99.9% uptime. Start a 36-hour subscription trial or buy now with StreamStick Pro.",
+      title: "Reloaded Fire TV Subscription Plans 2026 | Fire Stick & Devices | StreamStick Pro",
+      description: "Shop Reloaded Fire TV plans from $11/mo and Fire Stick device options. 18K+ channels, 4K, and 99.9% uptime. Start a 36-hour subscription trial or buy now with StreamStick Pro.",
       path: "/shop",
     });
     loadProducts();
@@ -444,15 +444,15 @@ export default function Shop() {
   return (
     <div className="min-h-screen bg-gray-900">
       <SEOSchema faq={[
-        { question: "How much does StreamStickPro IPTV cost?", answer: "IPTV plans start at $11/month for 1 device. Multi-device plans and 3-month, 6-month, and 1-year options offer deeper savings — the 1-year plan is $65 per device." },
-        { question: "What devices work with StreamStickPro IPTV?", answer: "StreamStickPro works on Amazon Fire Stick (HD, 4K, 4K Max), ONN Google TV (4K, 4K Pro), Android phones/tablets, iOS via IPTV Smarters, Smart TVs, and TiviMate on any Android-based device." },
-        { question: "Is there a free trial before I buy?", answer: "Yes — every IPTV subscription plan includes a free 36-hour trial so you can test channel quality, speed, and the setup process before committing." },
-        { question: "How do I get my IPTV credentials after purchase?", answer: "Credentials are delivered instantly to your email after checkout. You also receive a step-by-step setup tutorial video and have access to 24/7 human support if you need help." },
+        { question: "How much does StreamStickPro Reloaded Fire TV cost?", answer: "Reloaded Fire TV plans start at $11/month for 1 device. Multi-device plans and 3-month, 6-month, and 1-year options offer deeper savings — the 1-year plan is $65 per device." },
+        { question: "What devices work with StreamStickPro Reloaded Fire TV?", answer: "StreamStickPro works on Amazon Fire Stick (HD, 4K, 4K Max), ONN Google TV (4K, 4K Pro), Android phones/tablets, iOS via Smarters, Smart TVs, and TiviMate on any Android-based device." },
+        { question: "Is there a free trial before I buy?", answer: "Yes — every Reloaded Fire TV subscription plan includes a free 36-hour trial so you can test channel quality, speed, and the setup process before committing." },
+        { question: "How do I get my Reloaded Fire TV credentials after purchase?", answer: "Credentials are delivered instantly to your email after checkout. You also receive a step-by-step setup tutorial video and have access to 24/7 human support if you need help." },
         { question: "What payment methods do you accept?", answer: "We accept Visa, Mastercard, Amex, Discover, Apple Pay, Google Pay, Cash App, Affirm (buy now pay later), Klarna, and Stripe Link for one-click checkout." },
       ]} />
       <ItemListSchema
-        name="StreamStickPro IPTV Plans & Devices"
-        description="Premium IPTV subscription plans and optional Fire Stick / ONN streaming device bundles"
+        name="StreamStickPro Reloaded Fire TV Plans & Devices"
+        description="Premium Reloaded Fire TV subscription plans and optional Fire Stick / ONN streaming device bundles"
         items={products.map(p => ({
           name: p.name,
           description: p.description,
@@ -511,14 +511,14 @@ export default function Shop() {
             </div>
           </div>
 
-          {/* IPTV Live TV Plans - DISPLAYED FIRST (Most Popular) */}
+          {/* Reloaded Fire TV live TV plans - DISPLAYED FIRST (Most Popular) */}
           <div className="mb-20">
             <h3 className="text-3xl md:text-4xl font-bold mb-4 text-center flex items-center justify-center gap-3">
               <Zap className="w-8 h-8 text-blue-500" />
               Premium Live TV Subscriptions
             </h3>
             <p className="text-center text-gray-200 mb-8 max-w-2xl mx-auto">
-              Choose your subscription length and number of devices. No “preloaded” claims—just curated, working IPTV with an all-in-one app, no Kodi rebuilds, and no dead-end app lists. Instant login credentials + tutorial video + 24/7 support. 36-hour trial applies to IPTV plans. Multi-device plans stream on multiple TVs, phones, or tablets at once.
+              Choose your subscription length and number of devices. No “preloaded” claims—just curated, working Reloaded Fire TV with an all-in-one app, no Kodi rebuilds, and no dead-end app lists. Instant login credentials + tutorial video + 24/7 support. 36-hour trial applies to Reloaded Fire TV plans. Multi-device plans stream on multiple TVs, phones, or tablets at once.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 max-w-4xl mx-auto text-left">
               {[

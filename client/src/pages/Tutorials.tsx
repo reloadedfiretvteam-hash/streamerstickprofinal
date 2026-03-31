@@ -6,20 +6,20 @@ import { Play, Home, Check, ShieldCheck, Zap } from "lucide-react";
 import { setPageMeta } from "@/lib/seo";
 import { SEOSchema } from "@/components/SEOSchema";
 
-const TITLE = "IPTV Setup Guides - Firestick, Onn, Roku";
-const DESC = "Step-by-step guides to setup IPTV on Firestick, Onn Google TV, Roku devices.";
+const TITLE = "Reloaded Fire TV Setup Guides - Firestick, Onn, Roku";
+const DESC = "Step-by-step guides to setup Reloaded Fire TV on Firestick, Onn Google TV, Roku devices.";
 
 const VIDEOS = [
   {
     id: "9pZOoS-1NHg",
-    title: "Install IPTV Media Player on Fire Stick",
-    label: "How to Set Up IPTV on Fire Stick",
+    title: "Install Media Player on Fire Stick",
+    label: "How to Set Up Reloaded Fire TV on Fire Stick",
     description: "Preview the Fire Stick setup flow before buying. After purchase, customers receive a separate device-specific tutorial video by email with the exact steps for their order.",
   },
   {
     id: "w6s_Tcnnbpo",
-    title: "Install IPTV Media Player on ONN Google Device",
-    label: "How to Set Up IPTV on ONN Google TV",
+    title: "Install Media Player on ONN Google Device",
+    label: "How to Set Up Reloaded Fire TV on ONN Google TV",
     description: "Preview the ONN Google TV setup flow before buying. After purchase, customers receive a separate device-specific tutorial video by email with the exact steps for their order.",
   },
 ];
@@ -46,7 +46,7 @@ const FAQ_ITEMS = [
 export default function Tutorials() {
   useEffect(() => {
     setPageMeta({
-      title: "IPTV Setup Guide Firestick Onn Roku | StreamStickPro",
+      title: "Reloaded Fire TV Setup Guide Firestick Onn Roku | StreamStickPro",
       description: DESC,
       path: "/setup",
       ogImage: "https://streamstickpro.com/images/setup-og.webp",
@@ -64,11 +64,11 @@ export default function Tutorials() {
     };
 
     setMeta("og:title", "StreamStickPro Setup Guides", true);
-    setMeta("og:description", "Learn how to set up IPTV quickly and easily on all major devices.", true);
+    setMeta("og:description", "Learn how to set up Reloaded Fire TV quickly and easily on all major devices.", true);
     setMeta("og:image", "https://streamstickpro.com/images/setup-og.webp", true);
     setMeta("twitter:card", "summary_large_image");
     setMeta("twitter:title", "StreamStickPro Setup Guides");
-    setMeta("twitter:description", "Learn how to set up IPTV quickly and easily on all major devices.");
+    setMeta("twitter:description", "Learn how to set up Reloaded Fire TV quickly and easily on all major devices.");
     setMeta("twitter:image", "https://streamstickpro.com/images/setup-og.webp");
   }, []);
 

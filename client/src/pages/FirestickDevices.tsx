@@ -43,8 +43,8 @@ export default function FirestickDevices() {
     { question: "What is the best streaming device in 2026?", answer: "For most homes, Fire Stick 4K or 4K Max gives the best speed/value. ONN 4K with Google TV is a strong alternative. Stream Stick Pro bundles both with Reloaded Fire TV all-in-one setup and educational tutorials." },
     { question: "Fire Stick 4K vs 4K Max: which should I get?", answer: "4K Max adds Wi‑Fi 6E and faster performance. If you have a 4K TV and want the smoothest experience, choose 4K Max. For 1080p or lighter use, Fire Stick 4K or HD works great. All include our guided setup." },
     { question: "Do you sell Fire Stick options?", answer: "Yes. Stream Stick Pro offers Fire Stick HD, 4K, and 4K Max bundles with Reloaded Fire TV all-in-one access, educational setup guidance, and a 1-year included plan." },
-    { question: "What are Android streaming devices for IPTV?", answer: "Android streaming devices (e.g. ONN 4K, ONN 4K Pro) run Google TV and support the same IPTV players. We bundle ONN devices with Reloaded Fire TV, guided setup, and a 1-year included plan." },
-    { question: "Can I use my Fire Stick for IPTV only?", answer: "Yes. Many customers use Fire Stick or ONN primarily for IPTV. Stream Stick Pro plans support multiple devices, so you can share across Fire Sticks and other devices with one subscription." },
+    { question: "What are Android streaming devices for Reloaded Fire TV?", answer: "Android streaming devices (e.g. ONN 4K, ONN 4K Pro) run Google TV and support the same player setup path. We bundle ONN devices with Reloaded Fire TV, guided setup, and a 1-year included plan." },
+    { question: "Can I use my Fire Stick for Reloaded Fire TV only?", answer: "Yes. Many customers use Fire Stick or ONN primarily for Reloaded Fire TV. Stream Stick Pro plans support multiple devices, so you can share across Fire Sticks and other devices with one subscription." },
   ];
 
   return (
@@ -58,8 +58,8 @@ export default function FirestickDevices() {
       >
         <div className="space-y-12">
           <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Link href="/iptv"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">IPTV access &amp; plans</span></Link>
-            <Link href="/bundles"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">IPTV &amp; device bundles</span></Link>
+            <Link href="/iptv"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">Reloaded Fire TV access &amp; plans</span></Link>
+            <Link href="/bundles"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">Reloaded Fire TV &amp; device bundles</span></Link>
             <Link href="/setup"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">ONN &amp; Google TV setup</span></Link>
             <Link href="/"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">Home</span></Link>
           </section>
@@ -100,7 +100,7 @@ export default function FirestickDevices() {
                   </Link>
                   <Link href="/iptv">
                     <a className="inline-flex items-center gap-2 bg-white/10 text-white px-5 py-3 rounded-xl font-semibold border border-white/15 hover:bg-white/15 transition-colors">
-                      Explore IPTV plans
+                      Explore Reloaded Fire TV plans
                     </a>
                   </Link>
                 </div>
@@ -219,7 +219,7 @@ export default function FirestickDevices() {
                 <Check className="w-5 h-5 text-orange-200" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">Best Streaming Devices for IPTV in 2026</h3>
+                <h3 className="text-xl font-bold text-white">Best Streaming Devices for Reloaded Fire TV in 2026</h3>
                 <p className="text-gray-300">Fire Stick (HD, 4K, 4K Max) and ONN 4K are the top picks. The difference is setup: we deliver a guided, all-in-one experience that works on day one.</p>
               </div>
             </div>
@@ -298,7 +298,7 @@ export default function FirestickDevices() {
                     </Link>
                     <Link href="/iptv">
                       <a className="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-lg font-semibold border border-white/15 hover:bg-white/15 transition-colors">
-                        View IPTV plans
+                        View Reloaded Fire TV plans
                       </a>
                     </Link>
                   </div>
@@ -328,7 +328,7 @@ export default function FirestickDevices() {
         <p>Stream Stick Pro supports all three with Reloaded Fire TV all-in-one access, educational tutorials, and a 1-year included plan so you can start quickly.</p>
 
         <h2 id="android-devices">Android TV & ONN 4K Devices</h2>
-        <p>Android streaming devices (e.g. ONN 4K, ONN 4K Pro) run Google TV and support the same IPTV apps. They’re a strong alternative to Fire Stick, often with more storage for DVR-style use. We offer ONN 4K and ONN 4K Pro bundles with Reloaded Fire TV all-in-one setup—see our <Link href="/shop">Shop</Link>.</p>
+        <p>Android streaming devices (e.g. ONN 4K, ONN 4K Pro) run Google TV and support the same player apps. They’re a strong alternative to Fire Stick, often with more storage for DVR-style use. We offer ONN 4K and ONN 4K Pro bundles with Reloaded Fire TV all-in-one setup—see our <Link href="/shop">Shop</Link>.</p>
 
         <h2 id="pre-configured">Why Choose a Guided Device Option?</h2>
         <p>A guided device option means fewer setup steps and faster activation. You get educational tutorials, easier onboarding, and 24/7 support. Ideal if you want to avoid technical friction and go straight to <Link href="/iptv">live TV streaming</Link>.</p>

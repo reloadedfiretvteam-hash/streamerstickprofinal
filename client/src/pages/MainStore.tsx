@@ -226,8 +226,8 @@ const BUYER_PROFILE_CONFIG: Record<
 
 const HOMEPAGE_FAQ = [
   {
-    question: "IPTV vs Device - What's the difference?",
-    answer: "IPTV is the service-only path that gives you streaming access through supported apps. Devices are hardware options that ship ready-to-use and include 1-year Reloaded Fire TV subscription access.",
+    question: "Reloaded Fire TV vs Device - What's the difference?",
+    answer: "Reloaded Fire TV is the service-only path that gives you streaming access through supported apps. Devices are hardware options that ship ready-to-use and include 1-year Reloaded Fire TV subscription access.",
   },
   {
     question: "Does every device include 1-year subscription?",
@@ -247,11 +247,11 @@ const HOMEPAGE_FAQ = [
   },
   {
     question: "36hr trial - any catch?",
-    answer: "The 36-hour trial is the try-before-you-buy option for IPTV subscription access so you can test quality and fit before committing.",
+    answer: "The 36-hour trial is the try-before-you-buy option for Reloaded Fire TV subscription access so you can test quality and fit before committing.",
   },
   {
     question: "International channels available?",
-    answer: "Yes. IPTV access includes sports, news, and international channel options across supported applications.",
+    answer: "Yes. Reloaded Fire TV access includes sports, news, and international channel options across supported applications.",
   },
   {
     question: "Cancel anytime?",
@@ -310,16 +310,16 @@ export default function MainStore() {
     base + (hashText(`${key}-${socialProofSeed}`) % spread);
 
   const iptvViewCounts = useMemo(() => ({
-    "1mo": countForKey("iptv-1mo", 122, 112),
-    "3mo": countForKey("iptv-3mo", 155, 126),
-    "6mo": countForKey("iptv-6mo", 142, 118),
-    "1yr": countForKey("iptv-1yr", 178, 137),
+    "1mo": countForKey("iptv-1mo", 18, 19),
+    "3mo": countForKey("iptv-3mo", 22, 21),
+    "6mo": countForKey("iptv-6mo", 20, 18),
+    "1yr": countForKey("iptv-1yr", 24, 24),
   }), [socialProofSeed]);
 
   const firestickViewCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     defaultProducts.forEach((p, idx) => {
-      counts[p.id] = countForKey(`device-${p.id}-${idx}`, 82, 121);
+      counts[p.id] = countForKey(`device-${p.id}-${idx}`, 12, 28);
     });
     return counts;
   }, [socialProofSeed]);
@@ -332,7 +332,7 @@ export default function MainStore() {
     { name: "Sergio M.", text: "Bought two devices — both worked day one. Support followed up to ensure channels were fine." },
     { name: "Kyle W.", text: "Switched from cable and saved $140/mo. Setup took maybe 8 minutes." },
     { name: "Andrea L.", text: "The tutorial video walked me through everything. Even my parents could do it." },
-    { name: "Jamal C.", text: "Tried three other IPTV sites first — dead links everywhere. This one just worked." },
+    { name: "Jamal C.", text: "Tried three other live TV sites first — dead links everywhere. This one just worked." },
     { name: "Priya S.", text: "Love the sports coverage. UFC, NFL, Premier League — all in one place." },
     { name: "Devon M.", text: "Customer support answered at 2 AM on a Sunday. That sold me for good." },
     { name: "Lisa H.", text: "No buffering issues after they helped me optimize my router settings." },
@@ -408,8 +408,8 @@ export default function MainStore() {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
     setPageMeta({
-      title: "IPTV Subscriptions & Streaming Devices | StreamStickPro",
-      description: "Access IPTV subscriptions with thousands of live channels, movies, and series, or choose ready-to-use streaming devices with simple setup.",
+      title: "Reloaded Fire TV Subscriptions & Streaming Devices | StreamStickPro",
+      description: "Access Reloaded Fire TV subscriptions with thousands of live channels, movies, and series, or choose ready-to-use streaming devices with simple setup.",
       path: "/",
     });
     loadProducts();
@@ -644,18 +644,18 @@ export default function MainStore() {
 
       <SEOSchema faq={HOMEPAGE_FAQ} />
 
-      {/* Service Schema for IPTV Service Offerings */}
+      {/* Service schema for Reloaded Fire TV offerings */}
       <ServiceSchema 
-        name="Premium IPTV Streaming Service"
+        name="Premium Reloaded Fire TV Streaming Service"
         description="Access 18,000+ live TV channels, 60,000+ movies, and 15,000+ series, plus premium sports including NFL, NBA, MLB, UFC PPV. Multi-device streaming with instant credentials, setup tutorial, 24/7 human support, and optional Fire Stick / ONN bundles with Reloaded Fire TV."
-        serviceType="IPTV Streaming Service"
+        serviceType="Reloaded Fire TV Streaming Service"
         areaServed="Worldwide"
       />
 
       {/* ItemList Schema for Product Listings */}
       <ItemListSchema 
         name="StreamStickPro Products"
-        description="Premium IPTV subscription plans and optional Fire Stick / ONN device bundles with Reloaded Fire TV"
+        description="Premium Reloaded Fire TV subscription plans and optional Fire Stick / ONN device bundles"
         items={products.slice(0, 6).map(p => ({
           name: p.name,
           description: getSchemaDescription(p),
@@ -703,7 +703,7 @@ export default function MainStore() {
           </div>
           
           <div className="flex items-center gap-2">
-            <Link href="/iptv"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">IPTV</span></Link>
+            <Link href="/iptv"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Reloaded Fire TV</span></Link>
             <Link href="/devices"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Devices</span></Link>
             <Link href="/bundles"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Bundles</span></Link>
             <Link href="/setup"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Setup</span></Link>
@@ -756,7 +756,7 @@ export default function MainStore() {
         <div className="container mx-auto px-4">
           <div className="mx-auto flex max-w-6xl flex-col items-center justify-center text-center">
             <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-              StreamStickPro: IPTV + Devices with Reloaded Fire TV
+              StreamStickPro: Reloaded Fire TV + Devices
             </h1>
             <p className="mt-6 max-w-4xl text-base md:text-xl text-[#B0B3B8]">
               18K+ live channels • 60K+ movies • 15K+ series across all your devices
@@ -774,7 +774,7 @@ export default function MainStore() {
                   onClick={() => playCtaClick()}
                   className="inline-flex min-h-[56px] w-full cursor-pointer items-center justify-center rounded-xl bg-[#00D4FF] px-8 py-4 text-base font-semibold text-[#0A0A0F] shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all hover:bg-[#10F7BE]"
                 >
-                  START IPTV TRIAL
+                  START RELOADED FIRE TV TRIAL
                 </span>
               </Link>
               <Link href="/devices">
@@ -787,7 +787,7 @@ export default function MainStore() {
               </Link>
             </div>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-[#B0B3B8]">
-              <Link href="/iptv"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">Explore IPTV Plans</span></Link>
+              <Link href="/iptv"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">Explore Reloaded Fire TV Plans</span></Link>
               <Link href="/devices"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">Shop Reloaded Fire TV Devices</span></Link>
               <Link href="/bundles"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">View Bundles</span></Link>
               <Link href="/setup"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">Setup Guides</span></Link>
@@ -802,7 +802,7 @@ export default function MainStore() {
         <div className="container mx-auto px-4">
           <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
             <div className="rounded-xl border border-[#2A2A33] bg-[#0A0A0F] p-6 md:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
-              <h2 className="text-white text-3xl md:text-4xl font-bold">IPTV Subscription</h2>
+              <h2 className="text-white text-3xl md:text-4xl font-bold">Reloaded Fire TV Subscription</h2>
               <p className="mt-4 text-[#B0B3B8]">
                 All-in-one streaming app. One login. No app juggling. Works on Fire TV Stick, Onn Google TV, Roku, Android.
               </p>
@@ -927,7 +927,7 @@ export default function MainStore() {
             <h2 className="text-center text-3xl md:text-4xl font-bold text-white">Works in 3 Steps</h2>
             <div className="mt-8 grid gap-4 md:grid-cols-3">
               {[
-                "Choose IPTV, Device, or Bundle",
+                "Choose Reloaded Fire TV, Device, or Bundle",
                 "Checkout securely",
                 "Start streaming instantly",
               ].map((label, index) => (
@@ -970,10 +970,10 @@ export default function MainStore() {
               <span className="text-sm font-medium text-[#B8F5FF]">SHOP ALL PRODUCTS</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#7C3AED]">Device Kits, IPTV Plans, and Clear Next Steps</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#7C3AED]">Device Kits, Reloaded Fire TV Plans, and Clear Next Steps</span>
             </h2>
             <p className="text-xl text-[#B0B3B8] max-w-3xl mx-auto">
-                Choose the path that fits how you stream: IPTV access, devices with Reloaded Fire TV, or a bundle with guided setup and support.
+                Choose the path that fits how you stream: Reloaded Fire TV access, ready-to-use devices, or a bundle with guided setup and support.
             </p>
           </motion.div>
 
@@ -1636,7 +1636,7 @@ export default function MainStore() {
                 </Link>
                 <Link href="/iptv">
                   <span className="inline-flex min-h-[52px] cursor-pointer items-center justify-center rounded-xl border border-[#00D4FF] px-6 py-3 text-sm font-semibold text-[#00D4FF] transition-all hover:border-[#10F7BE] hover:text-[#10F7BE]">
-                    Explore IPTV Access
+                    Explore Reloaded Fire TV Access
                   </span>
                 </Link>
               </div>
@@ -1659,7 +1659,7 @@ export default function MainStore() {
               <div className="mt-6 rounded-xl border border-[#2A2A33] bg-[#0A0A0F] p-4">
                 <p className="text-sm font-semibold text-white">Related guides</p>
                 <div className="mt-3 flex flex-wrap gap-2 text-sm">
-                  <Link href="/bundles"><span className="cursor-pointer text-[#00D4FF] hover:text-[#10F7BE]">Device + IPTV bundles</span></Link>
+                  <Link href="/bundles"><span className="cursor-pointer text-[#00D4FF] hover:text-[#10F7BE]">Device + Reloaded Fire TV bundles</span></Link>
                   <span className="text-[#2A2A33]">|</span>
                   <Link href="/setup"><span className="cursor-pointer text-[#00D4FF] hover:text-[#10F7BE]">Fire TV setup guides</span></Link>
                   <span className="text-[#2A2A33]">|</span>
@@ -1811,7 +1811,7 @@ export default function MainStore() {
                 <span className="text-xl font-bold text-white">StreamStickPro</span>
               </div>
               <p className="text-sm text-gray-200 mb-4">
-                Premium IPTV subscriptions, devices with Reloaded Fire TV, and cleaner streaming paths built for customers who want clarity, speed, and support.
+                Premium Reloaded Fire TV subscriptions, streaming devices, and cleaner paths built for customers who want clarity, speed, and support.
               </p>
               <div className="flex gap-3">
                 <a href="mailto:reloadedfiretvteam@gmail.com" className="w-10 h-10 bg-white/5 hover:bg-[#00D4FF]/15 rounded-lg flex items-center justify-center transition-colors border border-[#2A2A33]" data-testid="link-email" aria-label="Email us">
@@ -1829,7 +1829,7 @@ export default function MainStore() {
               <h3 className="text-white font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2 text-sm">
                 <li><Link href="/"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">Home</span></Link></li>
-                <li><Link href="/iptv"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">IPTV</span></Link></li>
+                <li><Link href="/iptv"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">Reloaded Fire TV</span></Link></li>
                 <li><Link href="/devices"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">Devices</span></Link></li>
                 <li><Link href="/bundles"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">Bundles</span></Link></li>
                 <li><Link href="/setup"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">Setup</span></Link></li>
@@ -1839,7 +1839,7 @@ export default function MainStore() {
             <div>
               <h3 className="text-white font-semibold mb-4">Guides</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/iptv"><span className="hover:text-[#00D4FF] transition-colors">IPTV Subscription</span></Link></li>
+                <li><Link href="/iptv"><span className="hover:text-[#00D4FF] transition-colors">Reloaded Fire TV Subscription</span></Link></li>
                 <li><Link href="/devices"><span className="hover:text-[#00D4FF] transition-colors">Reloaded Fire TV Devices</span></Link></li>
                 <li><Link href="/bundles"><span className="hover:text-[#00D4FF] transition-colors">Bundles</span></Link></li>
                 <li><Link href="/setup"><span className="hover:text-[#00D4FF] transition-colors">Setup Guides</span></Link></li>

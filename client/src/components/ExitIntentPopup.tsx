@@ -131,7 +131,7 @@ export default function ExitIntentPopup({ onClose, onAction }: ExitIntentPopupPr
           </h2>
           
           <p className="text-lg mb-2 text-white/90">
-            Get the best IPTV streaming experience
+            Get the best Reloaded Fire TV streaming experience
           </p>
           
           <p className="text-sm mb-6 text-white/80">

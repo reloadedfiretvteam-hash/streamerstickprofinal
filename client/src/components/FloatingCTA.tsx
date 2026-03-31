@@ -78,7 +78,7 @@ export function FloatingCTA({ onBuyNow, onContact, onFreeTrial }: FloatingCTAPro
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-base">Choose IPTV, Devices, or Bundles</p>
+                    <p className="text-white font-bold text-base">Choose Reloaded Fire TV, Devices, or Bundles</p>
                     <p className="text-gray-300 text-sm">Start with a trial or jump straight into loaded devices.</p>
                   </div>
                   <div className="flex gap-2">
