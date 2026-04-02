@@ -45,6 +45,7 @@ const UltimateIptvCatalog = lazy(() => import("@/pages/UltimateIptvCatalog"));
 const ToolsCatalog = lazy(() => import("@/pages/ToolsCatalog"));
 const Tutorials = lazy(() => import("@/pages/Tutorials"));
 const Bundles = lazy(() => import("@/pages/Bundles"));
+const VpnProtection = lazy(() => import("@/pages/VpnProtection"));
 const SeoAds = lazy(() => import("@/pages/SeoAds"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const CartDrawer = lazy(() => import("@/components/CartDrawer").then((module) => ({ default: module.CartDrawer })));
@@ -127,6 +128,7 @@ function Router() {
         <Route path="/setup-onn" component={Tutorials} />
         <Route path="/tutorials" component={Tutorials} />
         <Route path="/bundles" component={Bundles} />
+        <Route path="/vpn-protection" component={VpnProtection} />
         <Route path="/seo-ads" component={SeoAds} />
         <Route path="/seo-ads/:slug" component={SeoAds} />
         <Route path="/l/:country/:pageType/:slug" component={LocationPage} />

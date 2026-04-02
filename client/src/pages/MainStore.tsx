@@ -18,6 +18,7 @@ import { setPageMeta } from "@/lib/seo";
 import { MobileNav } from "@/components/MobileNav";
 import { QuickViewButton } from "@/components/QuickViewButton";
 import { playCtaClick } from "@/lib/ctaSound";
+import { trackCustomEvent } from "@/components/RetargetingPixels";
 
 const ProductQuickView = lazy(() => import("@/components/ProductQuickView").then((module) => ({ default: module.ProductQuickView })));
 const ExitPopup = lazy(() => import("@/components/ExitPopup").then((module) => ({ default: module.ExitPopup })));
@@ -281,6 +282,15 @@ export default function MainStore() {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const handleVpnClick = () => {
+    trackCustomEvent("vpn_affiliate_click", { placement: "homepage" });
+    void fetch("/api/track-outbound-click", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ target: "vpn_affiliate", source: "/" }),
+      keepalive: true,
+    }).catch(() => {});
+  };
 
   const hashText = (value: string): number => {
     let hash = 0;
@@ -723,6 +733,7 @@ export default function MainStore() {
             <Link href="/iptv"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Reloaded Fire TV</span></Link>
             <Link href="/devices"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Devices</span></Link>
             <Link href="/bundles"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Bundles</span></Link>
+            <Link href="/vpn-protection"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">VPN</span></Link>
             <Link href="/setup"><span className="hidden md:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">Setup</span></Link>
             <Link href="/faq"><span className="hidden lg:inline px-2 py-1.5 text-[13px] text-gray-100 hover:text-white hover:bg-white/10 rounded font-semibold">FAQ</span></Link>
             <Button 
@@ -809,8 +820,53 @@ export default function MainStore() {
               <Link href="/onn-google-tv"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">ONN Device Setup Page</span></Link>
               <Link href="/jailbroken-fire-sticks"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">Firestick Device Page</span></Link>
               <Link href="/bundles"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">View Bundles</span></Link>
+              <Link href="/vpn-protection"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">VPN Protection</span></Link>
               <Link href="/setup"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">Setup Guides</span></Link>
               <Link href="/faq"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">FAQ</span></Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* VPN Protection Section */}
+      <section className="border-b border-[#2A2A33] bg-[#0A0A0F] py-16">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-6xl rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-cyan-500/10 via-[#1A1A22] to-[#0A0A0F] p-6 md:p-8">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#00D4FF]">VPN Protection</p>
+                <h2 className="mt-3 text-2xl md:text-3xl font-bold text-white">What a VPN can do for streaming households</h2>
+                <p className="mt-3 text-[#B0B3B8]">
+                  VPN protection adds an encrypted privacy layer, helps reduce exposure of your public IP, and can improve consistency where ISP traffic shaping affects streaming quality.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-[#B0B3B8]">
+                  <li>• Stronger privacy on home and public Wi-Fi</li>
+                  <li>• Better network consistency in some regions</li>
+                  <li>• Cleaner streaming setup for many users</li>
+                </ul>
+              </div>
+              <div className="rounded-xl border border-[#2A2A33] bg-[#1A1A22] p-5">
+                <p className="text-white font-semibold">Recommended add-on</p>
+                <p className="mt-2 text-sm text-[#B0B3B8]">
+                  Check VPN protection options and pair them with your setup guides for best results.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <a
+                    href="https://get.surfshark.net/aff_c?offer_id=926&aff_id=44830"
+                    target="_blank"
+                    rel="noopener noreferrer sponsored"
+                    onClick={handleVpnClick}
+                    className="inline-flex min-h-[50px] items-center justify-center rounded-xl bg-[#00D4FF] px-5 py-3 text-sm font-semibold text-[#0A0A0F] hover:bg-[#10F7BE] transition-colors"
+                  >
+                    Get VPN Protection
+                  </a>
+                  <Link href="/vpn-protection">
+                    <span className="inline-flex min-h-[50px] cursor-pointer items-center justify-center rounded-xl border border-[#2A2A33] bg-white/5 px-5 py-3 text-sm font-semibold text-white hover:border-[#00D4FF] transition-colors">
+                      Learn More
+                    </span>
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1806,6 +1862,7 @@ export default function MainStore() {
                 <li><Link href="/iptv"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">Reloaded Fire TV</span></Link></li>
                 <li><Link href="/devices"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">Devices</span></Link></li>
                 <li><Link href="/bundles"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">Bundles</span></Link></li>
+                <li><Link href="/vpn-protection"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">VPN Protection</span></Link></li>
                 <li><Link href="/setup"><span className="hover:text-[#00D4FF] transition-colors cursor-pointer">Setup</span></Link></li>
               </ul>
             </div>
@@ -1816,6 +1873,7 @@ export default function MainStore() {
                 <li><Link href="/iptv"><span className="hover:text-[#00D4FF] transition-colors">Reloaded Fire TV Subscription</span></Link></li>
                 <li><Link href="/devices"><span className="hover:text-[#00D4FF] transition-colors">Reloaded Fire TV Devices</span></Link></li>
                 <li><Link href="/bundles"><span className="hover:text-[#00D4FF] transition-colors">Bundles</span></Link></li>
+                <li><Link href="/vpn-protection"><span className="hover:text-[#00D4FF] transition-colors">VPN Protection</span></Link></li>
                 <li><Link href="/setup"><span className="hover:text-[#00D4FF] transition-colors">Setup Guides</span></Link></li>
                 <li><Link href="/faq"><span className="hover:text-[#00D4FF] transition-colors">FAQ</span></Link></li>
               </ul>

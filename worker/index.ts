@@ -379,6 +379,52 @@ app.post('/api/track-cart', async (c) => {
   }
 });
 
+app.post('/api/track-outbound-click', async (c) => {
+  try {
+    const body = await c.req.json().catch(() => ({} as any));
+    const target = typeof body?.target === 'string' ? body.target : '';
+    const source = typeof body?.source === 'string' ? body.source : null;
+
+    if (target !== 'vpn_affiliate') {
+      return c.json({ ok: true });
+    }
+
+    const cookies = parseCookies(c.req.header('cookie') ?? null);
+    let vid = cookies['vid'];
+    let setCookie: string | null = null;
+    if (!vid) {
+      vid = crypto.randomUUID();
+      setCookie = setCookieHeader('vid', vid, 60 * 60 * 24 * 30);
+    }
+
+    const ua = c.req.header('user-agent') || '';
+    const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0] || 'unknown';
+    const salt = c.env.VISITOR_HASH_SALT || c.env.JWT_SECRET || 'streamstickpro';
+    const ip_hash = await sha256Hex(`vid:${vid}|salt:${salt}`) || await sha256Hex(`ip:${ip}|ua:${ua}|salt:${salt}`);
+    const cfData = (c.req.raw as any).cf || {};
+    const storage = getStorage(c.env);
+
+    await storage.trackVisitByHash({
+      ip_hash,
+      state: cfData.region ?? null,
+      city: cfData.city ?? null,
+      country: cfData.country ?? null,
+      user_agent: ua || null,
+      session_id: null,
+      page: '/outbound/vpn',
+      page_url: source ? `https://streamstickpro.com${source}` : null,
+      referrer: c.req.header('referer') || null,
+      is_bot: isBotUA(ua),
+    });
+
+    if (setCookie) c.header('Set-Cookie', setCookie);
+    return c.json({ ok: true });
+  } catch (err: any) {
+    console.error('[track-outbound-click]', err?.message || err);
+    return c.json({ ok: true });
+  }
+});
+
 app.get('/api/stripe/config', async (c) => {
   const publishableKey = c.env.STRIPE_PUBLISHABLE_KEY;
   if (!publishableKey) {

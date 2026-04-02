@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Menu, Flame, ShoppingCart, Tv, Wifi, HelpCircle, Home, Package } from "lucide-react";
+import { Menu, Flame, ShoppingCart, Tv, Wifi, Home, Package, Shield } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +36,7 @@ export function MobileNav({ scrollToShop, scrollToFaq, onSupportClick }: MobileN
     { label: "Reloaded Fire TV", icon: Wifi, action: () => { setLocation("/iptv"); } },
     { label: "Devices", icon: Tv, action: () => { setLocation("/devices"); } },
     { label: "Bundles", icon: Package, action: () => { setLocation("/bundles"); } },
-    { label: "FAQ", icon: HelpCircle, action: () => { setLocation("/faq"); } },
+    { label: "VPN Protection", icon: Shield, action: () => { setLocation("/vpn-protection"); } },
   ];
 
   return (

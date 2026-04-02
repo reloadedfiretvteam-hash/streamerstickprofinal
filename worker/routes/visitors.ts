@@ -208,6 +208,8 @@ export function createVisitorRoutes() {
           weekVisitors: stats.weekVisitors,
           monthVisitors: stats.monthVisitors,
           onlineNow: stats.onlineNow,
+          vpnClicksToday: stats.vpnClicksToday,
+          vpnClicksWeek: stats.vpnClicksWeek,
           deviceBreakdown: stats.deviceBreakdown,
           topCountries: stats.topCountries,
           countryBreakdown: stats.topCountries,

@@ -483,6 +483,8 @@ export function createStorage(config: StorageConfig) {
       weekVisitors: number;
       monthVisitors: number;
       onlineNow: number;
+      vpnClicksToday: number;
+      vpnClicksWeek: number;
       recentVisitors: any[];
       deviceBreakdown: { desktop: number; mobile: number; tablet: number; bot: number };
       topCountries: Array<{ name: string; count: number }>;
@@ -490,6 +492,7 @@ export function createStorage(config: StorageConfig) {
       const empty = {
         totalVisitors: 0, todayVisitors: 0, yesterdayVisitors: 0,
         weekVisitors: 0, monthVisitors: 0, onlineNow: 0,
+        vpnClicksToday: 0, vpnClicksWeek: 0,
         recentVisitors: [] as any[], deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0, bot: 0 },
         topCountries: [] as Array<{ name: string; count: number }>,
       };
@@ -522,13 +525,23 @@ export function createStorage(config: StorageConfig) {
           return q;
         };
 
-        let [totalRes, todayRes, yesterdayRes, weekRes, monthRes, onlineRes] = await Promise.all([
+        const vpnCountQ = (sinceISO: string, dateField: string) => (
+          supabase
+            .from('visitors')
+            .select('*', { count: 'exact', head: true })
+            .eq('page', '/outbound/vpn')
+            .gte(dateField, sinceISO)
+        );
+
+        let [totalRes, todayRes, yesterdayRes, weekRes, monthRes, onlineRes, vpnTodayRes, vpnWeekRes] = await Promise.all([
           countQ(),
           countQ(q => q.gte(dateCol, todayISO)),
           countQ(q => q.gte(dateCol, yesterdayISO).lt(dateCol, todayISO)),
           countQ(q => q.gte(dateCol, weekAgoISO)),
           countQ(q => q.gte(dateCol, monthAgoISO)),
           countQ(q => q.gte(dateCol, fiveMinutesAgoISO)),
+          vpnCountQ(todayISO, dateCol),
+          vpnCountQ(weekAgoISO, dateCol),
         ]);
 
         // If last_visit column doesn't exist, retry with created_at
@@ -539,13 +552,15 @@ export function createStorage(config: StorageConfig) {
             if (extra) q = extra(q);
             return q;
           };
-          [totalRes, todayRes, yesterdayRes, weekRes, monthRes, onlineRes] = await Promise.all([
+          [totalRes, todayRes, yesterdayRes, weekRes, monthRes, onlineRes, vpnTodayRes, vpnWeekRes] = await Promise.all([
             simpleQ(),
             simpleQ(q => q.gte('created_at', todayISO)),
             simpleQ(q => q.gte('created_at', yesterdayISO).lt('created_at', todayISO)),
             simpleQ(q => q.gte('created_at', weekAgoISO)),
             simpleQ(q => q.gte('created_at', monthAgoISO)),
             simpleQ(q => q.gte('created_at', fiveMinutesAgoISO)),
+            supabase.from('visitors').select('*', { count: 'exact', head: true }).eq('page', '/outbound/vpn').gte('created_at', todayISO),
+            supabase.from('visitors').select('*', { count: 'exact', head: true }).eq('page', '/outbound/vpn').gte('created_at', weekAgoISO),
           ]);
         }
 
@@ -605,6 +620,8 @@ export function createStorage(config: StorageConfig) {
           weekVisitors: weekRes.count || 0,
           monthVisitors: monthRes.count || 0,
           onlineNow: onlineRes.count || 0,
+          vpnClicksToday: vpnTodayRes.count || 0,
+          vpnClicksWeek: vpnWeekRes.count || 0,
           recentVisitors,
           deviceBreakdown: device,
           topCountries,

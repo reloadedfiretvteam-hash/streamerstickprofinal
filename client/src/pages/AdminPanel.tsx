@@ -88,6 +88,8 @@ interface VisitorStats {
   monthVisitors: number;
   lastMonthVisitors?: number;
   onlineNow: number;
+  vpnClicksToday?: number;
+  vpnClicksWeek?: number;
   topCountries: Array<{ country: string; count: number }>;
   topStates?: Array<{ state: string; country: string; count: number }>;
   deviceBreakdown: { desktop: number; mobile: number; tablet: number };
@@ -367,6 +369,8 @@ export default function AdminPanel() {
     monthVisitors: 0,
     lastMonthVisitors: 0,
     onlineNow: 0,
+    vpnClicksToday: 0,
+    vpnClicksWeek: 0,
     topCountries: [],
     topStates: [],
     deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
@@ -776,6 +780,8 @@ export default function AdminPanel() {
           monthVisitors: 0,
           lastMonthVisitors: 0,
           onlineNow: 0,
+          vpnClicksToday: 0,
+          vpnClicksWeek: 0,
           topCountries: [],
           topStates: [],
           deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
@@ -823,6 +829,8 @@ export default function AdminPanel() {
         monthVisitors: data.monthVisitors || 0,
         lastMonthVisitors,
         onlineNow: data.onlineNow || 0,
+        vpnClicksToday: data.vpnClicksToday || 0,
+        vpnClicksWeek: data.vpnClicksWeek || 0,
         topCountries,
         topStates: [], // API doesn't provide this yet
         deviceBreakdown: data.deviceBreakdown || { desktop: 0, mobile: 0, tablet: 0 },
@@ -847,6 +855,8 @@ export default function AdminPanel() {
         monthVisitors: 0,
         lastMonthVisitors: 0,
         onlineNow: 0,
+        vpnClicksToday: 0,
+        vpnClicksWeek: 0,
         topCountries: [],
         topStates: [],
         deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 },
@@ -2332,6 +2342,22 @@ export default function AdminPanel() {
                       <span className="text-2xl font-bold" data-testid="text-online-now">{visitorStats.onlineNow.toLocaleString()}</span>
                     </div>
                     <p className="text-rose-100 text-sm">Online Now</p>
+                  </div>
+                </div>
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg p-6 text-white shadow-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <Activity className="w-8 h-8 opacity-80" />
+                      <span className="text-2xl font-bold" data-testid="text-vpn-clicks-today">{(visitorStats.vpnClicksToday || 0).toLocaleString()}</span>
+                    </div>
+                    <p className="text-cyan-100 text-sm">VPN Clicks Today</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-sky-500 to-indigo-500 rounded-lg p-6 text-white shadow-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <TrendingUp className="w-8 h-8 opacity-80" />
+                      <span className="text-2xl font-bold" data-testid="text-vpn-clicks-week">{(visitorStats.vpnClicksWeek || 0).toLocaleString()}</span>
+                    </div>
+                    <p className="text-sky-100 text-sm">VPN Clicks (7 Days)</p>
                   </div>
                 </div>
               </div>
