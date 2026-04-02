@@ -38,7 +38,7 @@ export default function Trial36hr() {
         </div>
         <FreeTrial />
         <p className="mt-6 text-center text-gray-400">
-          Prefer a device? <Link href="/jailbroken-fire-sticks"><span className="text-orange-400 hover:underline">Buy a jailbroken Fire Stick</span></Link> or <Link href="/shop"><span className="text-orange-400 hover:underline">view plans</span></Link>.
+          Prefer a device? <Link href="/devices"><span className="text-orange-400 hover:underline">View Firestick & ONN device options</span></Link> or <Link href="/shop"><span className="text-orange-400 hover:underline">view all plans</span></Link>.
         </p>
       </PillarLayout>
     </>

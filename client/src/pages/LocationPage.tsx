@@ -333,7 +333,7 @@ export default function LocationPage() {
         <section className="mt-12 p-6 rounded-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-400/30">
           <h2 className="text-2xl font-bold text-white mb-2">Ready to stream?</h2>
           <p className="text-gray-300 mb-4">
-            StreamStickPro delivers 18,000+ IPTV channels and jailbroken Fire Sticks with Kodi/Stremio pre-installed. Works on Google TV and Chromecast. A 36-hour trial is available on IPTV subscription plans.
+            StreamStickPro delivers Reloaded Fire TV plans plus Fire Stick and ONN device options with easy setup guidance. Works across major supported apps and devices. A 36-hour trial is available for service plans.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/">
@@ -342,14 +342,14 @@ export default function LocationPage() {
             <Link href="/shop">
               <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">Shop Plans</Button>
             </Link>
-            <Link href="/jailbroken-fire-sticks">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">Jailbroken Fire Sticks</Button>
+            <Link href="/devices">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">Firestick & ONN Devices</Button>
             </Link>
             <Link href="/iptv">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">IPTV Guide</Button>
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">Reloaded Fire TV Guide</Button>
             </Link>
             <Link href="/iptv-media-players">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">Google TV IPTV</Button>
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">Media Player Setup</Button>
             </Link>
           </div>
         </section>
