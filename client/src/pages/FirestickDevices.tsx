@@ -14,7 +14,7 @@ export default function FirestickDevices() {
   useEffect(() => {
     setPageMeta({
       title: "Reloaded Fire TV Devices | Fire Stick, Onn Google TV",
-      description: "Fire Stick and Onn Google TV devices with Reloaded Fire TV included, guided setup, and a 1-year plan.",
+      description: "Fire Stick and Onn Google TV device options with easy setup, guided onboarding, and a 1-year Reloaded Fire TV plan.",
       path: "/devices",
       ogImage: "https://streamstickpro.com/images/devices-og.webp",
     });
@@ -31,19 +31,19 @@ export default function FirestickDevices() {
     };
 
     setMeta("og:title", "StreamStickPro Reloaded Fire TV Devices", true);
-    setMeta("og:description", "Fire Stick and Onn devices with Reloaded Fire TV included, guided setup, and a 1-year plan.", true);
+    setMeta("og:description", "Fire Stick and Onn device options with easy setup, guided onboarding, and a 1-year Reloaded Fire TV plan.", true);
     setMeta("og:image", "https://streamstickpro.com/images/devices-og.webp", true);
     setMeta("twitter:card", "summary_large_image");
     setMeta("twitter:title", "StreamStickPro Reloaded Fire TV Devices");
-    setMeta("twitter:description", "Fire Stick and Onn devices with Reloaded Fire TV included, guided setup, and a 1-year plan.");
+    setMeta("twitter:description", "Fire Stick and Onn device options with easy setup, guided onboarding, and a 1-year Reloaded Fire TV plan.");
     setMeta("twitter:image", "https://streamstickpro.com/images/devices-og.webp");
   }, []);
 
   const faq = [
     { question: "What is the best streaming device in 2026?", answer: "For most homes, Fire Stick 4K or 4K Max gives the best speed/value. ONN 4K with Google TV is a strong alternative. Stream Stick Pro bundles both with Reloaded Fire TV all-in-one setup and educational tutorials." },
     { question: "Fire Stick 4K vs 4K Max: which should I get?", answer: "4K Max adds Wi‑Fi 6E and faster performance. If you have a 4K TV and want the smoothest experience, choose 4K Max. For 1080p or lighter use, Fire Stick 4K or HD works great. All include our guided setup." },
-    { question: "Do you sell Fire Stick options?", answer: "Yes. Stream Stick Pro offers Fire Stick HD, 4K, and 4K Max bundles with Reloaded Fire TV all-in-one access, educational setup guidance, and a 1-year included plan." },
-    { question: "What are Android streaming devices for Reloaded Fire TV?", answer: "Android streaming devices (e.g. ONN 4K, ONN 4K Pro) run Google TV and support the same player setup path. We bundle ONN devices with Reloaded Fire TV, guided setup, and a 1-year included plan." },
+    { question: "Do you sell Fire Stick options?", answer: "Yes. Stream Stick Pro offers Fire Stick HD, 4K, and 4K Max bundles with Reloaded Fire TV all-in-one access, educational setup guidance, and a 1-year plan." },
+    { question: "What are Android streaming devices for Reloaded Fire TV?", answer: "Android streaming devices (e.g. ONN 4K, ONN 4K Pro) run Google TV and support the same player setup path. We bundle ONN devices with Reloaded Fire TV, guided setup, and a 1-year plan." },
     { question: "Can I use my Fire Stick for Reloaded Fire TV only?", answer: "Yes. Many customers use Fire Stick or ONN primarily for Reloaded Fire TV. Stream Stick Pro plans support multiple devices, so you can share across Fire Sticks and other devices with one subscription." },
   ];
 
@@ -52,8 +52,8 @@ export default function FirestickDevices() {
       <BreadcrumbSchema items={breadcrumbs.map(b => ({ name: b.label, url: b.href }))} />
       <SEOSchema faq={faq} />
       <PillarLayout
-        title="Reloaded Fire TV Devices + 1-Year Included"
-        description="Fire Stick and Onn Google TV devices with Reloaded Fire TV included, guided setup, and a 1-year plan."
+        title="Reloaded Fire TV Devices + Easy Setup"
+        description="Fire Stick and Onn Google TV device options with guided setup and a 1-year Reloaded Fire TV plan."
         breadcrumbs={breadcrumbs}
       >
         <div className="space-y-12">
@@ -63,6 +63,9 @@ export default function FirestickDevices() {
             <Link href="/setup"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">ONN &amp; Google TV setup</span></Link>
             <Link href="/"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">Home</span></Link>
           </section>
+          <p className="text-sm text-gray-300">
+            This page includes all Fire Stick and ONN device options, what ships in the box, what you receive digitally, and setup expectations before checkout.
+          </p>
           <section className="rounded-3xl border border-orange-500/25 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 p-8 shadow-2xl shadow-orange-500/15">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
               <div className="space-y-5 max-w-3xl">
@@ -74,13 +77,13 @@ export default function FirestickDevices() {
                   Built for households that want streaming without broken-link scavenger hunts.
                 </h2>
                 <p className="text-lg text-gray-200">
-                  Many “jailbroken” sites dump hundreds of apps that fail or force constant Kodi rebuilds. We deliver an all-in-one Reloaded Fire TV experience with guided onboarding, instant credentials, and a 1-year included plan on every Fire Stick or ONN bundle—plus 24/7 help if anything blocks playback.
+                  Many “jailbroken” sites dump hundreds of apps that fail or force constant Kodi rebuilds. We deliver an all-in-one Reloaded Fire TV experience with easy setup guidance, instant credentials, and a 1-year plan on every Fire Stick or ONN bundle—plus 24/7 help if anything blocks playback.
                 </p>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {[
                     { icon: BookOpen, label: "Educational tutorial", desc: "Step-by-step walkthrough for first-time users." },
                     { icon: Check, label: "All-in-one app", desc: "No hunting through random apps or dead links." },
-                    { icon: ShieldCheck, label: "1-year included access", desc: "Every device order comes with your plan." },
+                    { icon: ShieldCheck, label: "1-year access plan", desc: "Every device order includes guided activation." },
                     { icon: Headphones, label: "24/7 support", desc: "Real humans so you never get stuck." },
                   ].map((item, idx) => (
                     <div key={idx} className="flex gap-3 items-start rounded-2xl border border-white/5 bg-white/5 p-4">
@@ -263,7 +266,7 @@ export default function FirestickDevices() {
                 <h4 className="text-white font-semibold mb-2">Reloaded Fire TV + Stream Stick Pro bundles (what you get)</h4>
                 <ul className="space-y-2 text-gray-100">
                   <li>Educational tutorial and onboarding walkthrough for first-time users.</li>
-                  <li>1-year included access plan bundled with every Fire Stick or ONN device order.</li>
+                  <li>1-year access plan with every Fire Stick or ONN device order.</li>
                   <li>All-in-one app workflow—no hunting through hundreds of random apps or dead links.</li>
                   <li>Instant login credentials after purchase and clear setup steps.</li>
                   <li>Support for Fire Stick HD, 4K, 4K Max, and ONN 4K/Pro options.</li>
@@ -289,7 +292,7 @@ export default function FirestickDevices() {
                   </div>
                   <h4 className="text-2xl font-bold text-white">Fire Stick Max vs ONN Pro—pick your elite daily driver</h4>
                   <p className="text-gray-200">
-                    Choose the platform that matches your Wi‑Fi and household load. Both ship with Reloaded Fire TV, the all-in-one app, educational tutorial, 1-year included access, and 24/7 support—no scavenger hunts for dead links.
+                    Choose the platform that matches your Wi‑Fi and household load. Both ship with easy setup guidance, the all-in-one app flow, educational tutorial, a 1-year access plan, and 24/7 support—no scavenger hunts for dead links.
                   </p>
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
@@ -320,7 +323,7 @@ export default function FirestickDevices() {
                   <p className="text-white font-semibold flex items-center gap-2"><Zap className="w-4 h-4 text-amber-200" /> Elite bundle checklist</p>
                   <ul className="space-y-2 text-gray-100 text-sm">
                     <li>Guided onboarding with educational tutorial.</li>
-                    <li>1-year included access + instant credentials.</li>
+                    <li>1-year access plan + instant credentials.</li>
                     <li>All-in-one app, no “hundreds of apps” chaos.</li>
                     <li>24/7 support and aftercare.</li>
                   </ul>
@@ -347,7 +350,7 @@ export default function FirestickDevices() {
               </div>
               <ul className="space-y-2 text-gray-100 text-sm">
                 <li>Quality-first build: curated app stack, no bloatware.</li>
-                <li>1-year included access with your device bundle.</li>
+                <li>1-year access plan with your device bundle.</li>
                 <li>24/7 support plus guided onboarding for non-technical households.</li>
                 <li>Stream securely with an all-in-one flow—fewer moving parts to break.</li>
               </ul>
@@ -359,7 +362,7 @@ export default function FirestickDevices() {
         <p><strong>Fire Stick HD</strong> — 1080p, most affordable. Good for standard TVs and basic streaming.<br />
         <strong>Fire Stick 4K</strong> — 4K, HDR, Dolby Vision. Best value for 4K TVs.<br />
         <strong>Fire Stick 4K Max</strong> — 4K, Wi-Fi 6E, fastest. Best for 4K and heavy use.</p>
-        <p>Stream Stick Pro supports all three with Reloaded Fire TV all-in-one access, educational tutorials, and a 1-year included plan so you can start quickly.</p>
+        <p>Stream Stick Pro supports all three with Reloaded Fire TV all-in-one access, educational tutorials, and a 1-year access plan so you can start quickly.</p>
 
         <h2 id="android-devices">Android TV & ONN 4K Devices</h2>
         <p>Android streaming devices (e.g. ONN 4K, ONN 4K Pro) run Google TV and support the same player apps. They’re a strong alternative to Fire Stick, often with more storage for DVR-style use. We offer ONN 4K and ONN 4K Pro bundles with Reloaded Fire TV all-in-one setup—see our <Link href="/shop">Shop</Link>.</p>

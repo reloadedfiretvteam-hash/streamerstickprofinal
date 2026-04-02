@@ -334,7 +334,7 @@ export default function VsCompetitor() {
             <span className="text-gray-600">·</span>
             <Link href="/36hr-trial"><span className="text-orange-400 font-semibold">Start 36hr Trial</span></Link>
             <span className="text-gray-600">·</span>
-            <Link href="/blog"><span className="hover:text-orange-400">Blog Guides</span></Link>
+            <Link href="/setup"><span className="hover:text-orange-400">Setup Guides</span></Link>
           </div>
         </div>
       </PillarLayout>

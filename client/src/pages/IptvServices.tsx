@@ -54,6 +54,11 @@ export default function IptvServices() {
         description={DESC}
         breadcrumbs={breadcrumbs}
       >
+        <section className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-4 md:p-5">
+          <p className="text-sm text-gray-300">
+            This page explains Reloaded Fire TV service plans, supported devices, setup flow, and what customers should expect before they subscribe.
+          </p>
+        </section>
         <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Link href="/devices"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">Fire TV &amp; streaming devices</span></Link>
           <Link href="/bundles"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">Reloaded Fire TV &amp; device bundles</span></Link>
@@ -88,7 +93,7 @@ export default function IptvServices() {
         <p>Quality Reloaded Fire TV lineups offer local and international channels, sports (NFL, NBA, UFC, soccer), news, movies, and series. Look for services that include catch-up TV and a solid VOD library. StreamStickPro provides 18,000+ live channels and 100,000+ movies and series with regular updates.</p>
 
         <h2 id="faq">Reloaded Fire TV Services FAQ</h2>
-        <p>Common questions about Reloaded Fire TV, live TV streaming, and choosing a service are answered below. For more guides, see our <Link href="/blog">blog</Link> and <Link href="/iptv-firestick">Reloaded Fire TV for Firestick</Link> pillar.</p>
+        <p>Common questions about Reloaded Fire TV, live TV streaming, and choosing a service are answered below. For more setup help, see our <Link href="/setup">setup guides</Link> and <Link href="/iptv-firestick">Reloaded Fire TV for Firestick</Link> pillar.</p>
         <ul>
           {faq.map((item, i) => (
             <li key={i}><strong>{item.question}</strong> — {item.answer}</li>

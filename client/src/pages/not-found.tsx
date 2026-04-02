@@ -38,7 +38,7 @@ export default function NotFound() {
             {" · "}
             <a href="/shop" className="text-orange-400 hover:underline">Shop</a>
             {" · "}
-            <a href="/blog" className="text-orange-400 hover:underline">Blog</a>
+            <a href="/setup" className="text-orange-400 hover:underline">Setup</a>
           </p>
           <Button 
             onClick={() => setLocation("/")}

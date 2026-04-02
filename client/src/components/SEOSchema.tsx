@@ -369,7 +369,7 @@ export function QASchema({
   return null;
 }
 
-// Service Schema for IPTV Service Offerings
+// Service Schema for Reloaded Fire TV service offerings
 export function ServiceSchema({
   name,
   description,

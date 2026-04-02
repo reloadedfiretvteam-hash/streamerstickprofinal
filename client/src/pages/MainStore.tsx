@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useMemo, lazy, Suspense } from "react";
 import { useLocation, Link } from "wouter";
 import { apiCall } from "@/lib/api";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
-import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, X, Gift, ChevronRight, Heart } from "lucide-react";
+import { ShoppingCart, Flame, Check, Star, Zap, Mail, DollarSign, CreditCard, MessageCircle, X, Gift, Heart } from "lucide-react";
 import { useCart, useWishlist } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -231,7 +231,7 @@ const HOMEPAGE_FAQ = [
   },
   {
     question: "Does every device include 1-year subscription?",
-    answer: "Yes. Fully loaded device messaging is built around hardware plus 1-year Reloaded Fire TV subscription included.",
+    answer: "Yes. Device messaging is built around hardware plus a 1-year Reloaded Fire TV plan with easy setup guidance.",
   },
   {
     question: "Firestick, Onn, Roku - which works best?",
@@ -310,19 +310,36 @@ export default function MainStore() {
     base + (hashText(`${key}-${socialProofSeed}`) % spread);
 
   const iptvViewCounts = useMemo(() => ({
-    "1mo": countForKey("iptv-1mo", 18, 19),
-    "3mo": countForKey("iptv-3mo", 22, 21),
-    "6mo": countForKey("iptv-6mo", 20, 18),
-    "1yr": countForKey("iptv-1yr", 24, 24),
+    "1mo": countForKey("iptv-1mo", 4, 8),
+    "3mo": countForKey("iptv-3mo", 5, 9),
+    "6mo": countForKey("iptv-6mo", 4, 10),
+    "1yr": countForKey("iptv-1yr", 6, 11),
   }), [socialProofSeed]);
 
   const firestickViewCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     defaultProducts.forEach((p, idx) => {
-      counts[p.id] = countForKey(`device-${p.id}-${idx}`, 12, 28);
+      counts[p.id] = countForKey(`device-${p.id}-${idx}`, 3, 9);
     });
     return counts;
   }, [socialProofSeed]);
+
+  const socialProofMessage = (type: "plan" | "device", key: string, count: number) => {
+    if (type === "plan") {
+      const options = [
+        `${count} people are checking this plan now`,
+        `${count} shoppers looked at this plan recently`,
+        `${count} people viewed this plan in the last hour`,
+      ];
+      return options[hashText(`plan-msg-${key}-${socialProofSeed}`) % options.length];
+    }
+    const options = [
+      `${count} people are viewing this right now`,
+      `${count} shoppers viewed this device recently`,
+      `${count} people checked this device in the last hour`,
+    ];
+    return options[hashText(`device-msg-${key}-${socialProofSeed}`) % options.length];
+  };
 
   const reviews = useMemo(() => [
     { name: "Marcus T.", text: "Setup was guided — no dead apps, streaming in minutes." },
@@ -756,10 +773,10 @@ export default function MainStore() {
         <div className="container mx-auto px-4">
           <div className="mx-auto flex max-w-6xl flex-col items-center justify-center text-center">
             <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-              StreamStickPro: Reloaded Fire TV + Devices
+              StreamStickPro: Reloaded Fire TV Plans + Firestick & ONN Devices
             </h1>
             <p className="mt-6 max-w-4xl text-base md:text-xl text-[#B0B3B8]">
-              18K+ live channels • 60K+ movies • 15K+ series across all your devices
+              Choose a service plan, device option, or bundle with easy setup guidance.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
               {["247K Users", "99.9% Uptime", "McAfee Secure", "36hr Free Trial"].map((item) => (
@@ -782,13 +799,15 @@ export default function MainStore() {
                   onClick={() => playCtaClick()}
                   className="inline-flex min-h-[56px] w-full cursor-pointer items-center justify-center rounded-xl border border-[#00D4FF] bg-transparent px-8 py-4 text-base font-semibold text-[#00D4FF] shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all hover:border-[#10F7BE] hover:text-[#10F7BE]"
                 >
-                  SHOP RELOADED FIRE TV
+                  SHOP FIRESTICK & ONN DEVICES
                 </span>
               </Link>
             </div>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-[#B0B3B8]">
               <Link href="/iptv"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">Explore Reloaded Fire TV Plans</span></Link>
               <Link href="/devices"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">Shop Reloaded Fire TV Devices</span></Link>
+              <Link href="/onn-google-tv"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">ONN Device Setup Page</span></Link>
+              <Link href="/jailbroken-fire-sticks"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">Firestick Device Page</span></Link>
               <Link href="/bundles"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">View Bundles</span></Link>
               <Link href="/setup"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">Setup Guides</span></Link>
               <Link href="/faq"><span className="cursor-pointer rounded-full border border-[#2A2A33] bg-white/5 px-3 py-1.5 hover:text-white hover:border-[#00D4FF]">FAQ</span></Link>
@@ -831,12 +850,12 @@ export default function MainStore() {
             <div className="rounded-xl border border-[#2A2A33] bg-[#0A0A0F] p-6 md:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
               <h2 className="text-white text-3xl md:text-4xl font-bold">Reloaded Fire TV Devices</h2>
               <p className="mt-4 text-[#B0B3B8]">
-                Fire Stick, Onn, and Android device options with Reloaded Fire TV included for a clearer, faster setup path.
+                Fire Stick, Onn, and Android device options with a 1-year Reloaded Fire TV plan and easy setup guidance.
               </p>
               <ul className="mt-5 space-y-3 text-white">
                 {[
                   "Fire TV Stick 4K • Onn Google TV • Android boxes",
-                  "Zero setup required • 1-year service included",
+                  "Easy setup • 1-year plan",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#10F7BE]" />
@@ -849,7 +868,7 @@ export default function MainStore() {
                   onClick={() => playCtaClick()}
                   className="mt-6 inline-flex min-h-[56px] w-full cursor-pointer items-center justify-center rounded-xl bg-[#00D4FF] px-6 py-4 text-base font-semibold text-[#0A0A0F] transition-all hover:bg-[#10F7BE]"
                 >
-                  SHOP RELOADED FIRE TV
+                  SHOP FIRESTICK & ONN DEVICES
                 </span>
               </Link>
             </div>
@@ -867,7 +886,7 @@ export default function MainStore() {
             {[
               ["SIMPLE", "One app vs 10+ apps, addons, sideloading"],
               ["RELIABLE", "No constant updates/repairs vs Kodi breakage"],
-              ["COMPLETE", "Devices ship with 1-year service vs empty hardware"],
+              ["COMPLETE", "Devices include easy setup + 1-year plan vs empty hardware"],
             ].map(([title, body]) => (
               <div key={title} className="rounded-xl border border-[#2A2A33] bg-[#1A1A22] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
                 <h3 className="text-white text-2xl font-bold">{title}</h3>
@@ -890,10 +909,10 @@ export default function MainStore() {
                 <div className="p-4 font-semibold text-white">Other Jailbreak Sites</div>
               </div>
               {[
-                ["Setup Time", "60 seconds", "30+ minutes"],
+                ["Setup Time", "About 10 minutes", "30+ minutes"],
                 ["Apps Needed", "1 all-in-one app", "5-15 apps to juggle"],
                 ["Maintenance", "Automatic", "Constant fixes"],
-                ["Device Bundle", "1-year included", "None"],
+                ["Device Bundle", "Easy setup + 1-year plan", "None"],
                 ["Support", "Direct support", "Forums or trial-and-error"],
                 ["Mobile Friendly", "Yes", "No"],
               ].map(([feature, ours, theirs]) => (
@@ -929,7 +948,7 @@ export default function MainStore() {
               {[
                 "Choose Reloaded Fire TV, Device, or Bundle",
                 "Checkout securely",
-                "Start streaming instantly",
+                "Start streaming in about 10 minutes",
               ].map((label, index) => (
                 <div key={label} className="rounded-xl border border-[#2A2A33] bg-[#1A1A22] p-6 text-center">
                   <p className="text-sm font-semibold text-[#00D4FF]">STEP {index + 1}</p>
@@ -1150,14 +1169,14 @@ export default function MainStore() {
                             </span>
                           </div>
                           <p className="text-xs text-gray-200 mt-1">
-                            {deviceCount} device{deviceCount > 1 ? 's' : ''} included
+                            Works on {deviceCount} device{deviceCount > 1 ? 's' : ''}
                           </p>
                         </div>
 
                         <div className="grid grid-cols-1 gap-2 mb-4 text-[11px] text-blue-100">
                           {[
                             "Instant email credentials",
-                            "Setup tutorial included",
+                            "Easy setup tutorial",
                             "24/7 human support",
                           ].map((line, idx) => (
                             <div key={idx} className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 py-2">
@@ -1176,7 +1195,7 @@ export default function MainStore() {
                           ))}
                           <div className="flex items-center gap-2 text-[11px] text-amber-200 font-semibold mt-2">
                             <Star className="w-3 h-3" />
-                            {iptvViewCounts[durationKey]} households just viewed this plan
+                            {socialProofMessage("plan", durationKey, iptvViewCounts[durationKey])}
                           </div>
                           <div className="text-[11px] text-gray-200 bg-white/5 border border-white/10 rounded-lg p-2 mt-2">
                             {(() => {
@@ -1570,7 +1589,7 @@ export default function MainStore() {
                         ))}
                         <div className="flex items-center gap-2 text-xs text-amber-200 font-semibold">
                           <Star className="w-4 h-4" />
-                          {firestickViewCounts[product.id] || 90} people just viewed this product
+                          {socialProofMessage("device", product.id, firestickViewCounts[product.id] || countForKey(`device-fallback-${product.id}`, 3, 9))}
                         </div>
                         <div className="text-xs text-gray-200 bg-white/5 border border-white/10 rounded-lg p-3">
                           {(() => {
@@ -1701,85 +1720,6 @@ export default function MainStore() {
                 <p>We provide setup guidance and support; customers are responsible for local compliance and account use.</p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* From Our Blog Section */}
-      <section className="border-b border-[#2A2A33] bg-gradient-to-b from-[#0A0A0F] to-[#1A1A22] py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#7C3AED]">Learn More</span>
-            </h2>
-            <p className="text-[#B0B3B8] text-lg">Helpful guides that support setup, buying confidence, and smarter streaming decisions.</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <a href="/blog/what-is-fully-loaded-streaming-device" className="block" data-testid="blog-card-1">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="bg-[#1A1A22] border border-[#2A2A33] rounded-2xl p-6 hover:border-[#00D4FF]/50 transition-all cursor-pointer h-full"
-              >
-                <div className="w-12 h-12 bg-[#00D4FF]/15 rounded-xl flex items-center justify-center mb-4">
-                  <Flame className="w-6 h-6 text-[#00D4FF]" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">What Is a Streaming Device Setup?</h3>
-                <p className="text-gray-200 text-sm mb-4">Learn how device setup works and how to start streaming in about 10 minutes.</p>
-                <span className="text-[#00D4FF] text-sm font-semibold flex items-center gap-1">
-                  Read More <ChevronRight className="w-4 h-4" />
-                </span>
-              </motion.div>
-            </a>
-
-            <a href="/blog/streaming-vs-cable-cost-comparison" className="block" data-testid="blog-card-2">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 }}
-                className="bg-[#1A1A22] border border-[#2A2A33] rounded-2xl p-6 hover:border-[#00D4FF]/50 transition-all cursor-pointer h-full"
-              >
-                <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4">
-                  <DollarSign className="w-6 h-6 text-green-500" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Streaming vs Cable: Complete Cost Guide</h3>
-                <p className="text-gray-200 text-sm mb-4">See how much you can save by switching from cable TV to streaming.</p>
-                <span className="text-[#00D4FF] text-sm font-semibold flex items-center gap-1">
-                  Read More <ChevronRight className="w-4 h-4" />
-                </span>
-              </motion.div>
-            </a>
-
-            <a href="/blog/best-live-tv-sports-streaming-2026" className="block" data-testid="blog-card-3">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-                className="bg-[#1A1A22] border border-[#2A2A33] rounded-2xl p-6 hover:border-[#00D4FF]/50 transition-all cursor-pointer h-full"
-              >
-                <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4">
-                  <Star className="w-6 h-6 text-blue-500" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Best Live TV Sports Streaming 2026</h3>
-                <p className="text-gray-200 text-sm mb-4">Discover comprehensive sports coverage including NFL, NBA, UFC, and more.</p>
-                <span className="text-[#00D4FF] text-sm font-semibold flex items-center gap-1">
-                  Read More <ChevronRight className="w-4 h-4" />
-                </span>
-              </motion.div>
-            </a>
-          </div>
-
-          <div className="text-center mt-8">
-            <Button
-              variant="outline"
-              onClick={() => setLocation("/blog")}
-              className="border-[#00D4FF]/50 text-[#00D4FF] hover:bg-[#00D4FF]/10"
-              data-testid="button-view-all-articles"
-            >
-              View All Articles <ChevronRight className="w-4 h-4 ml-2" />
-            </Button>
           </div>
         </div>
       </section>

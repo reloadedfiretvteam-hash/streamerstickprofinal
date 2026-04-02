@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import * as fs from "fs";
-import { TIER_1_CRUSH_SLUGS } from "../client/src/data/crushCompetitors";
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -31,51 +30,13 @@ async function main() {
   console.log(`📝 Found ${posts?.length || 0} published blog posts\n`);
 
   const today = new Date().toISOString().split("T")[0];
-  const highIntentComparisonSlugs = new Set([
-    "youtube-tv",
-    "hulu-live",
-    "fubo-tv",
-    "sling-tv",
-    "kodi",
-    "troypoint",
-    "roku",
-    "iptvstronger",
-    "downloader-app",
-    "nvidia-shield",
-    "apple-tv",
-    "chromecast",
-    "directv-stream",
-    "peacock",
-  ]);
-  const comparisonPages = TIER_1_CRUSH_SLUGS.map((slug) => ({
-    url: `/vs-${slug}`,
-    priority: highIntentComparisonSlugs.has(slug) ? "0.7" : "0.6",
-    changefreq: "monthly",
-  }));
 
   // Static pages
   const staticPages = [
     { url: "/", priority: "1.0", changefreq: "weekly" },
-    { url: "/shop", priority: "0.9", changefreq: "weekly" },
-    { url: "/blog/", priority: "0.9", changefreq: "daily" },
-    { url: "/pricing", priority: "0.9", changefreq: "monthly" },
-    { url: "/36hr-trial", priority: "0.9", changefreq: "monthly" },
-    { url: "/iptv-services", priority: "0.9", changefreq: "monthly" },
-    { url: "/iptv-firestick", priority: "0.9", changefreq: "monthly" },
-    { url: "/jailbroken-fire-sticks", priority: "0.9", changefreq: "monthly" },
-    { url: "/firestick-devices", priority: "0.9", changefreq: "monthly" },
-    { url: "/onn-google-tv", priority: "0.8", changefreq: "monthly" },
-    { url: "/iptv-media-players", priority: "0.8", changefreq: "monthly" },
-    { url: "/tivimate", priority: "0.8", changefreq: "monthly" },
-    { url: "/iptv-smarters-pro", priority: "0.8", changefreq: "monthly" },
-    { url: "/best-iptv-firestick", priority: "0.8", changefreq: "monthly" },
-    { url: "/tutorials", priority: "0.8", changefreq: "monthly" },
-    { url: "/resources", priority: "0.7", changefreq: "monthly" },
-    { url: "/ultimate-iptv-catalog-2026", priority: "0.7", changefreq: "monthly" },
-    { url: "/locations", priority: "0.7", changefreq: "monthly" },
-    { url: "/seo-ads", priority: "0.6", changefreq: "monthly" },
-    ...comparisonPages,
-    // Policy pages
+    { url: "/blog", priority: "0.9", changefreq: "daily" },
+    { url: "/checkout", priority: "0.8", changefreq: "monthly" },
+    { url: "/free-trial", priority: "0.9", changefreq: "monthly" },
     { url: "/terms", priority: "0.5", changefreq: "yearly" },
     { url: "/privacy", priority: "0.5", changefreq: "yearly" },
     { url: "/refund", priority: "0.5", changefreq: "yearly" },
@@ -95,7 +56,7 @@ async function main() {
     const lastmod = post.published_at 
       ? new Date(post.published_at).toISOString().split("T")[0] 
       : today;
-    xml += `  <url><loc>${DOMAIN}/blog/${post.slug}/</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`;
+    xml += `  <url><loc>${DOMAIN}/blog/${post.slug}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`;
   }
 
   xml += `</urlset>`;

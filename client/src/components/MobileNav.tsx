@@ -33,7 +33,7 @@ export function MobileNav({ scrollToShop, scrollToFaq, onSupportClick }: MobileN
 
   const menuItems = [
     { label: "Home", icon: Home, action: () => { setLocation("/"); } },
-    { label: "IPTV", icon: Wifi, action: () => { setLocation("/iptv"); } },
+    { label: "Reloaded Fire TV", icon: Wifi, action: () => { setLocation("/iptv"); } },
     { label: "Devices", icon: Tv, action: () => { setLocation("/devices"); } },
     { label: "Bundles", icon: Package, action: () => { setLocation("/bundles"); } },
     { label: "FAQ", icon: HelpCircle, action: () => { setLocation("/faq"); } },

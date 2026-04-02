@@ -178,7 +178,7 @@ export function CartDrawer() {
                     "Instant credentials to your email",
                     "Tutorial video + guided steps",
                     "24/7 human support",
-                    "IPTV plans + optional device bundles",
+                    "Reloaded Fire TV plans + optional device bundles",
                   ].map((line, idx) => (
                     <div key={idx} className="flex items-start gap-1.5">
                       <Check className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />

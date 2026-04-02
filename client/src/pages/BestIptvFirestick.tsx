@@ -43,7 +43,7 @@ export default function BestIptvFirestick() {
         <p><strong>Device:</strong> A Fire Stick device option includes hardware plus a 1-year plan and setup guidance so you can start streaming quickly.</p>
 
         <h2 id="apps">Best Apps for Reloaded Fire TV on Fire Stick</h2>
-        <p>TiviMate (premium) and Smarters Pro are the most popular. Both work with StreamStickPro. TiviMate is optimized for Fire TV with fast EPG and a clean interface. Smarters is user-friendly and works on many platforms. See our <Link href="/blog">blog</Link> for step-by-step setup.</p>
+        <p>TiviMate (premium) and Smarters Pro are the most popular. Both work with StreamStickPro. TiviMate is optimized for Fire TV with fast EPG and a clean interface. Smarters is user-friendly and works on many platforms. See our <Link href="/setup">setup guides</Link> for step-by-step setup.</p>
 
         <h2 id="free-trial">Try Reloaded Fire TV on Firestick Risk-Free</h2>
         <p>StreamStickPro offers a 36-hour trial on Reloaded Fire TV subscription plans—no credit card. Test the full channel list and VOD on your Fire Stick. If you like it, choose a monthly or longer plan, or pick a device option from <Link href="/">the homepage</Link>.</p>

@@ -46,7 +46,7 @@ export default function TermsOfService() {
 
           <h2 className="text-xl font-bold text-white mt-8 mb-4">2. Products and Services</h2>
           <p className="text-gray-300 mb-4">
-            StreamStickPro provides pre-configured streaming devices and IPTV subscription services. Our products are designed for easy setup and come with digital credentials and support.
+            StreamStickPro provides streaming devices and Reloaded Fire TV subscription services. Our products are designed for easy setup and come with digital credentials and support.
           </p>
 
           <h2 className="text-xl font-bold text-white mt-8 mb-4">3. Orders and Payment</h2>

@@ -3675,7 +3675,7 @@ export default function AdminPanel() {
                     <ShoppingCart className="w-8 h-8 text-purple-500" />
                     Customer Management
                   </h2>
-                  <p className="text-gray-400">Manage IPTV customers, credentials, and order history</p>
+                  <p className="text-gray-400">Manage Reloaded Fire TV customers, credentials, and order history</p>
                 </div>
                 <Button 
                   className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
@@ -4765,7 +4765,7 @@ export default function AdminPanel() {
                             >
                               <option value="streaming">Streaming</option>
                               <option value="firestick">Fire Stick</option>
-                              <option value="iptv">IPTV</option>
+                              <option value="iptv">Reloaded Fire TV</option>
                               <option value="cord-cutting">Cord Cutting</option>
                               <option value="guides">Guides</option>
                               <option value="reviews">Reviews</option>

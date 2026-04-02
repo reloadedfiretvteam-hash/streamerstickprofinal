@@ -114,7 +114,7 @@ const defaultProducts: Product[] = [
     id: 'fs-hd',
     name: 'Fire Stick HD',
     price: 125,
-    description: 'Entry-level Stream Stick Pro device bundle with Reloaded Fire TV all-in-one setup flow, educational tutorials, and 1-year included access.',
+    description: 'Entry-level Stream Stick Pro device bundle with Reloaded Fire TV all-in-one setup flow, educational tutorials, and a 1-year access plan.',
     features: ['1080p Full HD', 'Reloaded Fire TV All-in-One Access', 'Educational Setup Tutorial Included', '1 Year Included Access', '18,000+ Live TV Channels', '24/7 Customer Support'],
     image: firestickHdImg,
     category: 'firestick',
@@ -124,7 +124,7 @@ const defaultProducts: Product[] = [
     id: 'fs-4k',
     name: 'Fire Stick 4K',
     price: 135,
-    description: 'Most popular Stream Stick Pro Fire Stick bundle with Reloaded Fire TV all-in-one access, guided setup, and 1-year included access.',
+    description: 'Most popular Stream Stick Pro Fire Stick bundle with Reloaded Fire TV all-in-one access, guided setup, and a 1-year access plan.',
     features: ['4K Ultra HD', 'HDR Support', 'Dolby Vision & Atmos', 'Reloaded Fire TV All-in-One Access', 'Educational Setup Tutorial Included', '1 Year Included Access', '24/7 Customer Support'],
     image: firestick4kImg,
     category: 'firestick',
@@ -135,7 +135,7 @@ const defaultProducts: Product[] = [
     id: 'fs-max',
     name: 'Fire Stick 4K Max',
     price: 145,
-    description: 'Performance-first Stream Stick Pro Fire Stick Max bundle with Reloaded Fire TV all-in-one access, educational setup, and 1-year included access.',
+    description: 'Performance-first Stream Stick Pro Fire Stick Max bundle with Reloaded Fire TV all-in-one access, educational setup, and a 1-year access plan.',
     features: ['4K Ultra HD', 'Wi-Fi 6E (Fastest)', 'HDR Support', 'Dolby Vision & Atmos', 'Reloaded Fire TV All-in-One Access', 'Educational Setup Tutorial Included', '1 Year Included Access', '24/7 Customer Support'],
     image: firestick4kMaxImg,
     category: 'firestick',
@@ -227,19 +227,36 @@ export default function Shop() {
 
   // Stable for session bucket while still rotating realistically
   const iptvViewCounts = useMemo(() => ({
-    "1mo": countForKey("iptv-1mo", 18, 19),
-    "3mo": countForKey("iptv-3mo", 22, 21),
-    "6mo": countForKey("iptv-6mo", 20, 18),
-    "1yr": countForKey("iptv-1yr", 24, 24),
+    "1mo": countForKey("iptv-1mo", 4, 8),
+    "3mo": countForKey("iptv-3mo", 5, 9),
+    "6mo": countForKey("iptv-6mo", 4, 10),
+    "1yr": countForKey("iptv-1yr", 6, 11),
   }), [socialProofSeed]);
 
   const firestickViewCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     defaultProducts.forEach((p, idx) => {
-      counts[p.id] = countForKey(`device-${p.id}-${idx}`, 12, 28);
+      counts[p.id] = countForKey(`device-${p.id}-${idx}`, 3, 9);
     });
     return counts;
   }, [socialProofSeed]);
+
+  const socialProofMessage = (type: "plan" | "device", key: string, count: number) => {
+    if (type === "plan") {
+      const options = [
+        `${count} people are checking this plan now`,
+        `${count} shoppers looked at this plan recently`,
+        `${count} people viewed this plan in the last hour`,
+      ];
+      return options[hashText(`plan-msg-${key}-${socialProofSeed}`) % options.length];
+    }
+    const options = [
+      `${count} people are viewing this right now`,
+      `${count} shoppers viewed this device recently`,
+      `${count} people checked this device in the last hour`,
+    ];
+    return options[hashText(`device-msg-${key}-${socialProofSeed}`) % options.length];
+  };
 
   const reviews = useMemo(() => [
     { name: "Marcus T.", text: "Setup was guided — no dead apps, streaming in minutes." },
@@ -472,14 +489,19 @@ export default function Shop() {
           >
             <div className="inline-flex items-center gap-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full px-6 py-2 mb-6">
               <Flame className="w-5 h-5 text-orange-400 animate-pulse" />
-              <span className="text-sm font-medium text-orange-300">SHOP ALL PRODUCTS</span>
+              <span className="text-sm font-medium text-orange-300">ALL PLANS + FIRESTICK/ONN DEVICES</span>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Premium Products</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Reloaded Fire TV Plans + Device Options</span>
             </h1>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Browse our complete collection of streaming device options and Live TV plans
+              This page includes all subscription plans and all Firestick/ONN device options in one place.
             </p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm">
+              <Link href="/iptv"><span className="cursor-pointer rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-gray-100 hover:text-white hover:border-orange-300">View service plans</span></Link>
+              <Link href="/devices"><span className="cursor-pointer rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-gray-100 hover:text-white hover:border-orange-300">View Firestick &amp; ONN details</span></Link>
+              <Link href="/bundles"><span className="cursor-pointer rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-gray-100 hover:text-white hover:border-orange-300">View bundles</span></Link>
+            </div>
           </motion.div>
 
           <div className="max-w-5xl mx-auto mb-10 rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4 sm:p-5">
@@ -518,7 +540,7 @@ export default function Shop() {
               Premium Live TV Subscriptions
             </h3>
             <p className="text-center text-gray-200 mb-8 max-w-2xl mx-auto">
-              Choose your subscription length and number of devices. No “preloaded” claims—just curated, working Reloaded Fire TV with an all-in-one app, no Kodi rebuilds, and no dead-end app lists. Instant login credentials + tutorial video + 24/7 support. 36-hour trial applies to Reloaded Fire TV plans. Multi-device plans stream on multiple TVs, phones, or tablets at once.
+              Choose your subscription length and number of devices. Curated, working Reloaded Fire TV with an all-in-one app path, no Kodi rebuilds, and no dead-end app lists. Instant login credentials + tutorial video + 24/7 support. 36-hour trial applies to Reloaded Fire TV plans. Multi-device plans stream on multiple TVs, phones, or tablets at once.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 max-w-4xl mx-auto text-left">
               {[
@@ -733,7 +755,7 @@ export default function Shop() {
                           ))}
                           <div className="flex items-center gap-2 text-[11px] text-amber-200 font-semibold mt-2">
                             <Star className="w-3 h-3" />
-                            {iptvViewCounts[durationKey]} households just viewed this plan
+                            {socialProofMessage("plan", durationKey, iptvViewCounts[durationKey])}
                           </div>
                           <div className="text-[11px] text-gray-200 bg-white/5 border border-white/10 rounded-lg p-2 mt-2">
                             {(() => {
@@ -783,7 +805,7 @@ export default function Shop() {
           <div className="mb-16">
             <h3 className="text-3xl md:text-4xl font-bold mb-4 text-center flex items-center justify-center gap-3">
               <Flame className="w-8 h-8 text-orange-500" />
-              Fire Stick Device Options
+              Firestick + ONN Device Options
             </h3>
             <p className="text-center text-gray-300 mb-4 max-w-2xl mx-auto">
               Each device includes 1 year of Live TV access, an educational tutorial video, and 24/7 setup help—no Kodi rebuilds, no dead-end app lists, no broken APK scavenger hunts.
@@ -1064,7 +1086,7 @@ export default function Shop() {
                         ))}
                         <div className="flex items-center gap-2 text-xs text-amber-200 font-semibold">
                           <Star className="w-4 h-4" />
-                          {firestickViewCounts[product.id] || 90} people just viewed this product
+                          {socialProofMessage("device", product.id, firestickViewCounts[product.id] || countForKey(`device-fallback-${product.id}`, 3, 9))}
                         </div>
                         <div className="text-xs text-gray-200 bg-white/5 border border-white/10 rounded-lg p-3">
                           {(() => {

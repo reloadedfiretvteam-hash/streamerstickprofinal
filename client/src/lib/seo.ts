@@ -25,7 +25,7 @@ export function truncateMetaDescription(
     const extra = ` ${appendBrand}`.slice(0, max - s.length);
     if (extra.length > 0) s = (s + extra).slice(0, max);
   }
-  return s || 'StreamStickPro – IPTV, Fire Sticks, 18K+ channels. USA, Canada, UK.';
+  return s || 'StreamStickPro – Reloaded Fire TV, Fire Sticks, 18K+ channels. USA, Canada, UK.';
 }
 
 /**

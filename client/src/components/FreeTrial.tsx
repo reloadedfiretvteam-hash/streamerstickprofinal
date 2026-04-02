@@ -162,7 +162,7 @@ export function FreeTrial() {
 
           <div className="flex items-center gap-2 text-gray-300 mb-6">
             <Clock className="w-5 h-5 text-[#00D4FF]" />
-            <span>Test the IPTV subscription path first, check stream quality, and see if the service fits your setup before buying.</span>
+            <span>Test the Reloaded Fire TV subscription path first, check stream quality, and see if the service fits your setup before buying.</span>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

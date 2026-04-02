@@ -109,10 +109,10 @@ export default function Resources() {
       <section className="mb-10">
         <h2 className="text-2xl font-bold text-white mb-3">2,000+ Free Reloaded Fire TV &amp; Streaming Resources</h2>
         <p className="text-gray-300 mb-4">
-          Free trials, setup tutorials, cord-cutting guides, and device comparisons. StreamStickPro blog and pillar guides cover Fire Stick, Google TV, and Reloaded Fire TV from A to Z.
+          Free trials, setup tutorials, cord-cutting guides, and device comparisons. Use the setup page and pillar guides to go from first login to daily streaming with fewer steps.
         </p>
-        <Link href="/blog">
-          <span className="text-orange-400 hover:underline font-medium">Blog &amp; Guides →</span>
+        <Link href="/setup">
+          <span className="text-orange-400 hover:underline font-medium">Setup Guides →</span>
         </Link>
       </section>
 

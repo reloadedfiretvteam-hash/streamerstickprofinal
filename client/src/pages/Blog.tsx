@@ -46,7 +46,28 @@ interface Product {
   category: string | null;
 }
 
-const categories = ["All", "Guides", "IPTV Services", "Fire Stick Guides", "ONN Devices", "Sports Streaming", "IPTV Apps", "Troubleshooting", "VPN & Security", "Reviews"];
+/** Filter `value` must match blog post `category` from the API; `label` is customer-facing copy. */
+const CATEGORY_FILTERS: { value: string; label: string }[] = [
+  { value: "All", label: "All" },
+  { value: "Guides", label: "Guides" },
+  { value: "IPTV Services", label: "Reloaded Fire TV Services" },
+  { value: "Fire Stick Guides", label: "Fire Stick Guides" },
+  { value: "ONN Devices", label: "ONN Devices" },
+  { value: "Sports Streaming", label: "Sports Streaming" },
+  { value: "IPTV Apps", label: "Reloaded Fire TV Apps" },
+  { value: "Troubleshooting", label: "Troubleshooting" },
+  { value: "VPN & Security", label: "VPN & Security" },
+  { value: "Reviews", label: "Reviews" },
+];
+
+const CATEGORY_DISPLAY_LABEL: Record<string, string> = {
+  "IPTV Services": "Reloaded Fire TV Services",
+  "IPTV Apps": "Reloaded Fire TV Apps",
+};
+
+function categoryDisplayLabel(category: string): string {
+  return CATEGORY_DISPLAY_LABEL[category] || category;
+}
 
 function extractTocHeadings(content: string): string[] {
   const c = content || "";
@@ -190,8 +211,8 @@ export default function Blog() {
     };
     
     const baseUrl = 'https://streamstickpro.com';
-    const defaultDescription = 'IPTV guides: what you get with 18K+ channels, Fire Stick setup, ONN Google TV, and 36-hour subscription trial info. StreamStick Pro blog—streaming tips and niche guides.';
-    const defaultTitle = 'IPTV & Fire Stick Blog 2026 | Guides & Tips | StreamStick Pro';
+    const defaultDescription = 'Reloaded Fire TV guides: what you get with 18K+ channels, Fire Stick setup, ONN Google TV, and 36-hour subscription trial info. StreamStick Pro blog—streaming tips and niche guides.';
+    const defaultTitle = 'Reloaded Fire TV & Fire Stick Blog 2026 | Guides & Tips | StreamStick Pro';
 
     if (params.slug && posts.length > 0) {
       const postFromSlug = posts.find(p => p.slug === params.slug);
@@ -303,7 +324,7 @@ export default function Blog() {
           <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
             <div className="flex items-center gap-3 mb-6">
               <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-xs px-3 py-1">
-                {selectedPost.category}
+                {categoryDisplayLabel(selectedPost.category)}
               </Badge>
               <span className="text-white/70 text-sm flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" />
@@ -549,8 +570,8 @@ export default function Blog() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Blog",
-        "name": "IPTV & Fire Stick Blog | StreamStick Pro",
-        "description": "What you get with IPTV: 18K+ channels, Fire Stick setup, ONN Google TV, and 36-hour subscription trial details. Niche guides and streaming tips from StreamStick Pro.",
+        "name": "Reloaded Fire TV & Fire Stick Blog | StreamStick Pro",
+        "description": "What you get with Reloaded Fire TV: 18K+ channels, Fire Stick setup, ONN Google TV, and 36-hour subscription trial details. Niche guides and streaming tips from StreamStick Pro.",
         "url": "https://streamstickpro.com/blog",
         "blogPost": posts.slice(0, 50).map(post => ({
           "@type": "BlogPosting",
@@ -567,10 +588,10 @@ export default function Blog() {
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20 text-center">
           <Badge className="mb-4 bg-orange-500/20 text-orange-300 border-orange-500/30">Updated February 2026</Badge>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight">
-            IPTV & Fire Stick Blog
+            Reloaded Fire TV & Fire Stick Blog
           </h1>
           <p className="text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            Expert guides on IPTV, jailbroken Fire Sticks, ONN Google TV, cord-cutting, and streaming. 
+            Expert guides on Reloaded Fire TV, jailbroken Fire Sticks, ONN Google TV, cord-cutting, and streaming. 
             Trusted by thousands of cord-cutters.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -621,18 +642,18 @@ export default function Blog() {
         </div>
 
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-          {categories.map(cat => (
+          {CATEGORY_FILTERS.map(({ value, label }) => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
+              key={value}
+              onClick={() => setActiveCategory(value)}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                activeCategory === cat 
+                activeCategory === value
                   ? "bg-orange-500 text-white shadow-md" 
                   : "bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800"
               }`}
-              data-testid={`button-category-${cat}`}
+              data-testid={`button-category-${value.replace(/\s+/g, "-").toLowerCase()}`}
             >
-              {cat}
+              {label}
             </button>
           ))}
         </div>
@@ -676,7 +697,7 @@ export default function Blog() {
                         </div>
                         <div className="p-5">
                           <div className="flex items-center gap-2 mb-2">
-                            <Badge variant="secondary" className="text-xs">{post.category}</Badge>
+                            <Badge variant="secondary" className="text-xs">{categoryDisplayLabel(post.category)}</Badge>
                             <span className="text-xs text-gray-400">{post.date}</span>
                           </div>
                           <h3 className="text-lg font-bold group-hover:text-orange-500 transition-colors line-clamp-2 mb-2">{post.title}</h3>
@@ -713,7 +734,7 @@ export default function Blog() {
                     </div>
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary" className="text-xs">{post.category}</Badge>
+                        <Badge variant="secondary" className="text-xs">{categoryDisplayLabel(post.category)}</Badge>
                         <span className="text-xs text-gray-400">{post.readTime}</span>
                       </div>
                       <h3 className="font-bold text-sm group-hover:text-orange-500 transition-colors line-clamp-2 mb-1">{post.title}</h3>

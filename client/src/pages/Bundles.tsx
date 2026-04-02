@@ -57,6 +57,12 @@ export default function Bundles() {
       <BreadcrumbSchema items={breadcrumbs.map((b) => ({ name: b.label, url: b.href }))} />
       <SEOSchema faq={FAQ} />
       <PillarLayout title={TITLE} description={DESC} breadcrumbs={breadcrumbs}>
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-4 md:p-5">
+          <p className="text-sm text-gray-300">
+            This page shows bundle-ready paths so you can compare service plans, device options, and combined purchase flow in one place.
+          </p>
+        </section>
+
         <section className="rounded-3xl border border-white/10 bg-white/5 p-6 md:p-8">
           <h2 className="text-2xl font-bold text-white mb-3">Everything you need in one path</h2>
           <p className="text-gray-300 mb-4">
