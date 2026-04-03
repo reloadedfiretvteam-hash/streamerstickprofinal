@@ -191,6 +191,7 @@ export default function Checkout() {
     allCountries: true,
   });
   const [customCountries, setCustomCountries] = useState("");
+  const [vpnUpsellInterest, setVpnUpsellInterest] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -330,8 +331,13 @@ export default function Checkout() {
         checkoutPayload.customerPhone = formData.phone.trim();
       }
 
-      if (formData.message.trim()) {
-        checkoutPayload.customerMessage = formData.message.trim();
+      const baseMsg = formData.message.trim();
+      const vpnNote = vpnUpsellInterest
+        ? "Add Surfshark VPN? (Customer checked interest — see https://streamstickpro.com/vpn)"
+        : "";
+      const mergedMsg = [baseMsg, vpnNote].filter(Boolean).join("\n\n");
+      if (mergedMsg) {
+        checkoutPayload.customerMessage = mergedMsg;
       }
 
       if (hasPhysicalProduct) {
@@ -496,6 +502,35 @@ export default function Checkout() {
                     </div>
                   </div>
                 ))}
+              </CardContent>
+            </Card>
+
+            <Card className="border-[#0DD9D2]/30 bg-[#0DD9D2]/5 backdrop-blur">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2 text-[#0DD9D2]">
+                  <ShieldCheck className="w-5 h-5" />
+                  Add Surfshark VPN?
+                </CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Reduce ISP throttling and buffering. We&apos;ll note your interest on this order.{" "}
+                  <Link href="/vpn">
+                    <span className="text-[#0DD9D2] hover:underline font-medium cursor-pointer">Learn more on our VPN page</span>
+                  </Link>
+                  .
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div
+                  className={`flex items-center space-x-3 p-4 rounded-lg border transition-all ${
+                    vpnUpsellInterest ? "border-[#0DD9D2] bg-[#0DD9D2]/10" : "border-white/10"
+                  }`}
+                  data-testid="checkbox-vpn-upsell"
+                >
+                  <Checkbox checked={vpnUpsellInterest} onCheckedChange={(c) => setVpnUpsellInterest(!!c)} id="vpn-upsell" />
+                  <Label htmlFor="vpn-upsell" className="font-medium cursor-pointer flex-1 leading-snug">
+                    Yes — I want Surfshark VPN info with my order
+                  </Label>
+                </div>
               </CardContent>
             </Card>
 

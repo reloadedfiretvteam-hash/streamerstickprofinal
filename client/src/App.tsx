@@ -47,6 +47,7 @@ const Tutorials = lazy(() => import("@/pages/Tutorials"));
 const Bundles = lazy(() => import("@/pages/Bundles"));
 const VpnProtection = lazy(() => import("@/pages/VpnProtection"));
 const SeoAds = lazy(() => import("@/pages/SeoAds"));
+const VpnPage = lazy(() => import("@/pages/VpnPage"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const CartDrawer = lazy(() => import("@/components/CartDrawer").then((module) => ({ default: module.CartDrawer })));
 const WishlistDrawer = lazy(() => import("@/components/WishlistDrawer").then((module) => ({ default: module.WishlistDrawer })));
@@ -92,6 +93,8 @@ function Router() {
         <Route path="/" component={MainStore} />
         <Route path="/homepage" component={MainStore} />
         <Route path="/faq" component={MainStore} />
+        <Route path="/vpn" component={VpnPage} />
+        <Route path="/onn" component={OnnGoogleTv} />
         <Route path="/shop" component={Shop} />
         <Route path="/shadow-services" component={ShadowStore} />
         <Route path="/admin" component={AdminPanel} />

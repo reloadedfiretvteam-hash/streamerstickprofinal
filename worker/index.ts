@@ -39,6 +39,8 @@ export interface Env {
   CLOUDFLARE_API_TOKEN?: string;
   CLOUDFLARE_ACCOUNT_ID?: string;
   NODE_ENV?: string;
+  /** Surfshark affiliate landing (order/credentials emails). Optional; defaults to surfshark.com */
+  SURFSHARK_AFFILIATE_URL?: string;
   ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
 
@@ -1130,6 +1132,8 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/', priority: '1.0', changefreq: 'daily' },
   { url: '/shop', priority: '0.9', changefreq: 'daily' },
   { url: '/blog/', priority: '0.9', changefreq: 'daily' },
+  { url: '/vpn', priority: '0.92', changefreq: 'weekly' },
+  { url: '/onn', priority: '0.92', changefreq: 'weekly' },
   { url: '/locations', priority: '0.85', changefreq: 'daily' },
   { url: '/36hr-trial', priority: '0.95', changefreq: 'daily' },
   { url: '/pricing', priority: '0.9', changefreq: 'weekly' },
@@ -1374,7 +1378,21 @@ app.post('/api/indexnow/ping', async (c) => {
 
 // ── Per-page SEO meta for SPA pages (critical: Googlebot sees unique meta per page) ──
 const PAGE_META: Record<string, { title: string; description: string; noindex?: boolean }> = {
-  '/': { title: 'IPTV Fire Stick 2026 | 18K+ Live Channels | StreamStick Pro', description: 'Best IPTV for Fire Stick 2026: 18,000+ live channels, VOD movies, 24/7 support. Free 36-hour trial. Jailbroken Fire Sticks and ONN Google TV included.' },
+  '/': {
+    title: 'IPTV Subscriptions Loaded Firesticks Onn VPN | StreamStickPro',
+    description:
+      'IPTV subscriptions, loaded Firesticks, ONN Google TV, Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, McAfee Secure. StreamStickPro.',
+  },
+  '/vpn': {
+    title: 'Surfshark VPN IPTV Buffering ISP Throttle Firestick | StreamStickPro',
+    description:
+      'Stop ISP throttling on IPTV with Surfshark VPN. Firestick and ONN setup, unlimited devices, camouflage mode. StreamStickPro guide and special offer.',
+  },
+  '/onn': {
+    title: 'ONN Google TV Devices | IPTV Ready | StreamStick Pro',
+    description:
+      'ONN Google TV streaming devices pre-configured for IPTV. 1-year Reloaded Fire TV included. Budget 4K power from StreamStickPro.',
+  },
   '/shop': { title: 'Shop IPTV Subscriptions & Fire Sticks | StreamStick Pro', description: 'Buy IPTV subscriptions, jailbroken Fire Sticks, and ONN Google TV devices. 18,000+ channels, instant setup, 24/7 support. Shop StreamStickPro now.' },
   '/pricing': { title: 'IPTV Pricing & Subscription Plans 2026 | StreamStick Pro', description: 'IPTV pricing with multi-device options and Fire Stick bundles. 18,000+ channels, 100,000+ VOD, instant activation, 24/7 support. Compare plans now.' },
   '/blog': { title: 'IPTV & Streaming Blog | Guides, News, Tips | StreamStick Pro', description: 'Expert IPTV guides, Fire Stick tutorials, streaming tips, and cord-cutting news. Updated weekly by the StreamStickPro editorial team.' },
@@ -1660,7 +1678,8 @@ app.get('*', async (c) => {
     '/jailbroken-fire-sticks', '/devices', '/bundles', '/best-iptv-firestick',
     '/iptv-media-players', '/resources', '/36hr-trial', '/pricing',
     '/onn-google-tv', '/iptv-smarters-pro', '/tivimate', '/ultimate-iptv-catalog-2026',
-    '/tools/catalog', '/setup', '/seo-ads', '/locations', '/trial', '/firestick',
+    '/tools/catalog', '/setup', '/tutorials', '/seo-ads', '/locations', '/trial', '/firestick',
+    '/vpn', '/onn', '/homepage', '/faq', '/vpn-protection',
   ]);
   const isKnownRoute =
     staticKnownRoutes.has(pathname) ||

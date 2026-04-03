@@ -8,6 +8,12 @@ const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
 const IPTV_PORTAL_URL = 'http://ky-tv.cc';
 const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
 
+function surfsharkAffiliateUrl(env: Env): string {
+  const u = (env.SURFSHARK_AFFILIATE_URL || '').trim();
+  if (u && /^https?:\/\//i.test(u)) return u;
+  return 'https://surfshark.com/';
+}
+
 export async function sendOrderConfirmation(order: Order, env: Env): Promise<void> {
   if (!order.customerEmail) {
     const error = `Cannot send order confirmation: missing customerEmail for order ${order.id}`;
@@ -17,7 +23,8 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
   
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
   const priceFormatted = (order.amount / 100).toFixed(2);
-  
+  const surf = surfsharkAffiliateUrl(env);
+
   const emailHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h1 style="color: #1a1a1a;">Thank You for Your Order!</h1>
@@ -32,6 +39,11 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
         <p><strong>Product:</strong> ${order.realProductName}</p>
         <p><strong>Amount:</strong> $${priceFormatted}</p>
         ${order.countryPreference ? `<p><strong>Channel Preferences:</strong> ${order.countryPreference}</p>` : ''}
+      </div>
+
+      <div style="background: #ecfeff; border-left: 4px solid #0dd9d2; padding: 16px; margin: 20px 0; border-radius: 8px;">
+        <p style="margin: 0 0 8px 0;"><strong>Surfshark VPN reminder (post-purchase)</strong></p>
+        <p style="margin: 0; font-size: 14px; line-height: 1.5;">ISP throttling causes most IPTV buffering. A VPN encrypts your traffic so your ISP can&apos;t throttle streams as easily. Read the full guide at <a href="https://streamstickpro.com/vpn" style="color: #0891b2;">streamstickpro.com/vpn</a> — special offer: <a href="${surf}" style="color: #0891b2; font-weight: bold;">Get Surfshark VPN</a>.</p>
       </div>
       
       <p>You will receive your login credentials in a separate email within the next 5 minutes.</p>
@@ -95,6 +107,15 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
   const hasIPTV = productIds.some(id => id.trim().startsWith('iptv-'));
   const hasFireStick = productIds.some(id => id.trim().startsWith('firestick-'));
   const hasAnyDigitalProduct = hasIPTV || hasFireStick;
+  const surf = surfsharkAffiliateUrl(env);
+  const vpnCredentialsNote = hasIPTV
+    ? `
+    <div style="background: #ecfeff; border-left: 4px solid #0dd9d2; padding: 16px; margin: 20px 0; border-radius: 8px;">
+      <p style="margin: 0 0 8px 0;"><strong>VPN reminder for smoother IPTV</strong></p>
+      <p style="margin: 0; font-size: 14px;">If you see buffering, your ISP may be throttling streaming traffic. Surfshark VPN helps mask that traffic. Guide: <a href="https://streamstickpro.com/vpn" style="color: #0891b2;">streamstickpro.com/vpn</a> — <a href="${surf}" style="color: #0891b2; font-weight: bold;">Get Surfshark</a>.</p>
+    </div>
+  `
+    : '';
 
   // Default credentials section that always includes credentials
   const defaultCredentialsSection = `
@@ -130,6 +151,7 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
       <p>Here are your login credentials for ${order.realProductName}:</p>
       
       ${productInstructions}
+      ${vpnCredentialsNote}
       
       <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
         <strong>Important:</strong> Please save these credentials in a safe place. Do not share them with anyone.

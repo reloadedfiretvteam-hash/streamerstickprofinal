@@ -63,13 +63,17 @@ export function setPageMeta(options: {
   type?: 'website' | 'article';
   publishedTime?: string;
   modifiedTime?: string;
+  /** Optional comma-separated keywords (some engines still read this). */
+  keywords?: string;
 }): void {
   if (typeof document === 'undefined') return;
-  const { title, description, path, noindex, ogImage, type = 'website', publishedTime, modifiedTime } = options;
+  const { title, description, path, noindex, ogImage, type = 'website', publishedTime, modifiedTime, keywords } = options;
   const fullTitle = title.includes('|') ? truncateTitle(title, '') : truncateTitle(title, ' | StreamStick Pro');
   const safeDesc = truncateMetaDescription(description);
   document.title = fullTitle;
   setMeta('description', safeDesc);
+  if (keywords) setMeta('keywords', keywords);
+  else document.querySelector('meta[name="keywords"]')?.remove();
   const url = path ? `${SITE_URL}${path.startsWith('/') ? path : '/' + path}` : SITE_URL + (window.location.pathname || '/');
   setMeta('og:title', fullTitle, true);
   setMeta('og:description', safeDesc, true);
