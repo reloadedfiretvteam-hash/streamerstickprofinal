@@ -2,8 +2,12 @@
 # ATTEMPT TO EXECUTE DATABASE SETUP VIA API
 # ============================================================
 
-$supabaseUrl = "https://emlqlmfzqsnqokrqvmcm.supabase.co"
-$supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg"
+$supabaseUrl = $env:VITE_SUPABASE_URL; if (-not $supabaseUrl) { $supabaseUrl = $env:SUPABASE_URL }
+$supabaseAnonKey = $env:VITE_SUPABASE_ANON_KEY
+if (-not $supabaseUrl -or -not $supabaseAnonKey) {
+  Write-Host "Set VITE_SUPABASE_URL (or SUPABASE_URL) and VITE_SUPABASE_ANON_KEY" -ForegroundColor Red
+  exit 1
+}
 
 Write-Host "Attempting database setup..." -ForegroundColor Yellow
 

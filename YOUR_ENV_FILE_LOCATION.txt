@@ -24,7 +24,7 @@ Method 2: VS Code
 YOUR .env FILE CURRENTLY CONTAINS:
 ===========================================
 
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpd2tncHN2Y3Z6aXRudWV2cXh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3NzAzNTksImV4cCI6MjA3OTM0NjM1OX0.1FXqUCMa2FUX5ll4Q3MwWc4__MDCyD2jJLQ3yYnM8-Y
+VITE_SUPABASE_ANON_KEY=[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]
 VITE_SUPABASE_URL=https://fiwkgpsvcvzitnuevqxz.supabase.co
 VITE_ADMIN_DEFAULT_USER=admin
 VITE_ADMIN_DEFAULT_PASSWORD=admin123

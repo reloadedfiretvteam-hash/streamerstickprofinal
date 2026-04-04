@@ -3,7 +3,7 @@
 cd "C:\Users\rdela\Downloads\New folder\project-bolt-sb1-19o8d5ja\project\streamerstickprofinal"
 
 Write-Host "Setting remote URL..." -ForegroundColor Yellow
-git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
+git remote set-url origin https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
 
 Write-Host "Checking out clean-main..." -ForegroundColor Yellow
 git checkout clean-main

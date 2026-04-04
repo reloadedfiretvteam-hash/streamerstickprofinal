@@ -4,10 +4,10 @@
 
 ### Supabase
 - **URL**: `https://emlqlmfzqsnqokrqvmcm.supabase.co`
-- **Anon Key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg`
+- **Anon Key**: `[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]`
 
 ### Stripe
-- **Secret Key (Live)**: `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`
+- **Secret Key (Live)**: `[REDACTED — Stripe Dashboard → Developers → API keys]`
 - **Publishable Key**: Get from https://dashboard.stripe.com/apikeys
 
 ### GitHub (Cloudflare)

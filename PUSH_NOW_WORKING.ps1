@@ -16,7 +16,7 @@ Write-Host ""
 
 # Step 3: Configure remote with token
 Write-Host "3. Configuring remote with token..." -ForegroundColor Yellow
-git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamstickprofinal.git
+git remote set-url origin https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamstickprofinal.git
 Write-Host "Remote configured" -ForegroundColor Green
 Write-Host ""
 

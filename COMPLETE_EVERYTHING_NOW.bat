@@ -10,7 +10,7 @@ echo.
 
 set PROJECT_REF=emlqlmfzqsnqokrqvmcm
 set SUPABASE_URL=https://emlqlmfzqsnqokrqvmcm.supabase.co
-set STRIPE_KEY=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
+set STRIPE_KEY=[REDACTED — Stripe Dashboard → Developers → API keys]
 
 echo Step 1: Opening all setup pages...
 start https://supabase.com/dashboard/project/%PROJECT_REF%/sql/new

@@ -38,7 +38,7 @@
 
 ### 2. Supabase Secrets (5 min)
 - [ ] Add secrets in Supabase Dashboard:
-  - `STRIPE_SECRET_KEY` = `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`
+  - `STRIPE_SECRET_KEY` = `[REDACTED — Stripe Dashboard → Developers → API keys]`
   - `SUPABASE_URL` = `https://emlqlmfzqsnqokrqvmcm.supabase.co`
   - `SUPABASE_SERVICE_ROLE_KEY` = (Get from Dashboard)
   - `STRIPE_WEBHOOK_SECRET` = (Get after webhook creation)
@@ -75,10 +75,10 @@ Or follow: `AUTOMATED_SETUP_COMPLETE.md`
 
 ### Supabase
 - **URL**: `https://emlqlmfzqsnqokrqvmcm.supabase.co`
-- **Anon Key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg`
+- **Anon Key**: `[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]`
 
 ### Stripe
-- **Secret Key**: `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`
+- **Secret Key**: `[REDACTED — Stripe Dashboard → Developers → API keys]`
 - **Publishable Key**: Get from https://dashboard.stripe.com/apikeys
 
 ---

@@ -10,7 +10,7 @@ Write-Host @"
 
 $PROJECT_REF = "emlqlmfzqsnqokrqvmcm"
 $SUPABASE_URL = "https://emlqlmfzqsnqokrqvmcm.supabase.co"
-$SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mzg4NDQ5MiwiZXhwIjoyMDc5NDYwNDkyfQ.m3xw006mSdP1DeunLo4CoNDonIIXkQSt353VL-ibb0c"
+$SERVICE_ROLE_KEY = "[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]"
 
 Write-Host "`n[1/3] Installing Supabase CLI...`n" -ForegroundColor Yellow
 
@@ -112,7 +112,7 @@ foreach ($func in $functions) {
 Write-Host "[3/3] Setting Supabase Secrets...`n" -ForegroundColor Yellow
 
 $secrets = @{
-    "STRIPE_SECRET_KEY" = "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"
+    "STRIPE_SECRET_KEY" = "[REDACTED — Stripe Dashboard → Developers → API keys]"
     "SUPABASE_URL" = $SUPABASE_URL
     "SUPABASE_SERVICE_ROLE_KEY" = $SERVICE_ROLE_KEY
 }
@@ -161,7 +161,7 @@ NEXT STEPS:
    
    Add these 4 variables:
    • VITE_SUPABASE_URL = $SUPABASE_URL
-   • VITE_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg
+   • VITE_SUPABASE_ANON_KEY = [REDACTED — use Supabase Dashboard → Settings → API → Project API keys]
    • VITE_STRIPE_PUBLISHABLE_KEY = pk_live_51SXXh4HBw27Y92Ci4r7de3JTz13uAz7EF04b2ZpW8KhtDQYaa2mh1ayE8RiCKSRxRYtn3o7VNMINWJd9f7oGYsxT002VVUcvC8
    • VITE_STORAGE_BUCKET_NAME = images
 

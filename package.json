@@ -12,6 +12,7 @@
     "audit:promotion": "tsx scripts/audit-site-promotion.ts",
     "smoke:flows": "tsx scripts/smoke-flows.ts",
     "smoke:live": "tsx scripts/smoke-live-prod.ts",
+    "redact:secrets": "node scripts/redact-embedded-jwts.mjs",
     "db:push": "drizzle-kit push",
     "seo:audit": "tsx scripts/seo-audit.ts",
     "seo:submit": "tsx scripts/submit-to-search-engines.ts",

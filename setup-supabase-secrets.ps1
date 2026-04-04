@@ -25,7 +25,7 @@ Write-Host ""
 
 # Set secrets
 $secrets = @{
-    "STRIPE_SECRET_KEY" = "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"
+    "STRIPE_SECRET_KEY" = "[REDACTED — Stripe Dashboard → Developers → API keys]"
     "SUPABASE_URL" = "https://emlqlmfzqsnqokrqvmcm.supabase.co"
 }
 

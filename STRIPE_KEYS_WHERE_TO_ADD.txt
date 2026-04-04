@@ -80,7 +80,7 @@ WHAT THE KEYS LOOK LIKE:
    Format: pk_test_... or pk_live_...
 
 ✅ SECRET KEY (sk_):
-   Example: sk_test_51AbC123...xyz789  
+   Example: [REDACTED — Stripe Dashboard → Developers → API keys]...xyz789  
    Length: Usually 100+ characters
    Format: sk_test_... or sk_live_...
 

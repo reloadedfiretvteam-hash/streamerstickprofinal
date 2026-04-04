@@ -36,7 +36,7 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "❌ Connection failed:" -ForegroundColor Red
     Write-Host $test -ForegroundColor Red
     Write-Host "Trying with token..." -ForegroundColor Yellow
-    git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
+    git remote set-url origin https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
     $test2 = git ls-remote origin 2>&1
     Write-Host $test2
 }

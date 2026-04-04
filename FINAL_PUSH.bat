@@ -24,7 +24,7 @@ git commit -m "Restore checkout pages - fix Bolt's mistakes"
 
 echo.
 echo Setting GitHub remote with token...
-git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
+git remote set-url origin https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
 
 echo.
 echo Pulling latest...

@@ -8,7 +8,7 @@
 npx supabase --version
 npx supabase login
 npx supabase link --project-ref emlqlmfzqsnqokrqvmcm
-npx supabase secrets set "STRIPE_SECRET_KEY=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" --project-ref emlqlmfzqsnqokrqvmcm
+npx supabase secrets set "STRIPE_SECRET_KEY=[REDACTED — Stripe Dashboard → Developers → API keys]" --project-ref emlqlmfzqsnqokrqvmcm
 npx supabase secrets set "SUPABASE_URL=https://emlqlmfzqsnqokrqvmcm.supabase.co" --project-ref emlqlmfzqsnqokrqvmcm
 npx supabase functions deploy stripe-payment-intent --project-ref emlqlmfzqsnqokrqvmcm
 npx supabase functions deploy stripe-webhook --project-ref emlqlmfzqsnqokrqvmcm
@@ -60,7 +60,7 @@ supabase login
 supabase link --project-ref emlqlmfzqsnqokrqvmcm
 
 # 3. Set secrets
-supabase secrets set "STRIPE_SECRET_KEY=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" --project-ref emlqlmfzqsnqokrqvmcm
+supabase secrets set "STRIPE_SECRET_KEY=[REDACTED — Stripe Dashboard → Developers → API keys]" --project-ref emlqlmfzqsnqokrqvmcm
 supabase secrets set "SUPABASE_URL=https://emlqlmfzqsnqokrqvmcm.supabase.co" --project-ref emlqlmfzqsnqokrqvmcm
 
 # 4. Deploy functions
@@ -82,7 +82,7 @@ npx supabase login
 npx supabase link --project-ref emlqlmfzqsnqokrqvmcm
 
 # Set secrets
-npx supabase secrets set "STRIPE_SECRET_KEY=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" --project-ref emlqlmfzqsnqokrqvmcm
+npx supabase secrets set "STRIPE_SECRET_KEY=[REDACTED — Stripe Dashboard → Developers → API keys]" --project-ref emlqlmfzqsnqokrqvmcm
 npx supabase secrets set "SUPABASE_URL=https://emlqlmfzqsnqokrqvmcm.supabase.co" --project-ref emlqlmfzqsnqokrqvmcm
 
 # Deploy

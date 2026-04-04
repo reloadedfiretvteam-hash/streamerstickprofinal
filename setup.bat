@@ -10,7 +10,7 @@ echo.
 
 set PROJECT_REF=emlqlmfzqsnqokrqvmcm
 set SUPABASE_URL=https://emlqlmfzqsnqokrqvmcm.supabase.co
-set STRIPE_SECRET_KEY=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
+set STRIPE_SECRET_KEY=[REDACTED — Stripe Dashboard → Developers → API keys]
 
 echo Step 1: Checking for npx...
 where npx >nul 2>&1

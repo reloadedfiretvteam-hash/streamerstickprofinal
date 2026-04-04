@@ -34,7 +34,7 @@ I've opened all the necessary browser tabs for you. Just follow these steps:
 
 ### 2. Supabase Secrets (5 min)
 **Tab already open:** Supabase Edge Functions Settings
-1. Add secret: `STRIPE_SECRET_KEY` = `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`
+1. Add secret: `STRIPE_SECRET_KEY` = `[REDACTED — Stripe Dashboard → Developers → API keys]`
 2. Add secret: `SUPABASE_URL` = `https://emlqlmfzqsnqokrqvmcm.supabase.co`
 3. Get service role key from: https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/settings/api
 4. Add secret: `SUPABASE_SERVICE_ROLE_KEY` = (the key you just got)
@@ -53,7 +53,7 @@ I've opened all the necessary browser tabs for you. Just follow these steps:
 2. Settings → Environment Variables
 3. Add:
    - `VITE_SUPABASE_URL` = `https://emlqlmfzqsnqokrqvmcm.supabase.co`
-   - `VITE_SUPABASE_ANON_KEY` = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg`
+   - `VITE_SUPABASE_ANON_KEY` = `[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]`
    - `VITE_STRIPE_PUBLISHABLE_KEY` = (Get from Stripe API Keys tab - already open)
    - `VITE_STORAGE_BUCKET_NAME` = `images`
 

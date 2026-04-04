@@ -11,7 +11,7 @@ Write-Host ""
 
 $projectRef = "emlqlmfzqsnqokrqvmcm"
 $supabaseUrl = "https://emlqlmfzqsnqokrqvmcm.supabase.co"
-$stripeSecretKey = "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"
+$stripeSecretKey = "[REDACTED — Stripe Dashboard → Developers → API keys]"
 
 # Check if CLI is installed
 if (-not (Get-Command supabase -ErrorAction SilentlyContinue)) {

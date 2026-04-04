@@ -26,11 +26,11 @@ git commit -m "Fix: Image upload bucket bug + hardcoded Supabase URL + checkout 
 
 echo.
 echo Pulling latest from GitHub...
-git pull https://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@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git clean-main --no-edit
+git pull https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git clean-main --no-edit
 
 echo.
 echo Pushing to GitHub...
-git push https://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@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git clean-main
+git push https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git clean-main
 
 echo.
 echo ================================================

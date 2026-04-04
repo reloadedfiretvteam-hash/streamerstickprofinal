@@ -36,7 +36,7 @@ git commit -m "Fix: 14 critical bugs - Supabase project, Google/Bing codes, stri
 
 echo.
 echo Setting GitHub remote...
-git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
+git remote set-url origin https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
 
 echo.
 echo Pulling latest...

@@ -83,7 +83,7 @@ CREATE INDEX IF NOT EXISTS idx_payment_transactions_email ON payment_transaction
 
 **1. STRIPE_SECRET_KEY**
 ```
-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
+[REDACTED — Stripe Dashboard → Developers → API keys]
 ```
 
 **2. SUPABASE_URL**
@@ -125,7 +125,7 @@ https://emlqlmfzqsnqokrqvmcm.supabase.co
 
 **2. VITE_SUPABASE_ANON_KEY**
 ```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg
+[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]
 ```
 
 **3. VITE_STRIPE_PUBLISHABLE_KEY**

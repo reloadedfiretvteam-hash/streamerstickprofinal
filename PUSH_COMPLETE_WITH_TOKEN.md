@@ -1,7 +1,7 @@
 # ✅ PUSH COMPLETE - Using GitHub Token
 
 ## 🔐 Authentication
-**Token configured:** `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`
+**Token configured:** `[REDACTED — GitHub PAT; use gh auth login or SSH]`
 
 ## ✅ Actions Completed
 

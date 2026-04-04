@@ -14,7 +14,7 @@ This guide will help you configure:
 
 ### Your Supabase Credentials:
 - **Supabase URL**: `https://emlqlmfzqsnqokrqvmcm.supabase.co`
-- **Supabase Anon Key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg`
+- **Supabase Anon Key**: `[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]`
 
 ### Get Your Service Role Key:
 1. Go to: https://supabase.com/dashboard/project/emlqlmfzqsnqokrqvmcm/settings/api
@@ -26,7 +26,7 @@ This guide will help you configure:
 ## 💳 STEP 2: STRIPE CONFIGURATION
 
 ### Your Stripe Credentials:
-- **Stripe Secret Key (Live)**: `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`
+- **Stripe Secret Key (Live)**: `[REDACTED — Stripe Dashboard → Developers → API keys]`
 - **Stripe Publishable Key**: Get from Stripe Dashboard → Developers → API Keys
 
 ### Get Your Stripe Publishable Key:
@@ -48,7 +48,7 @@ This guide will help you configure:
 | Variable Name | Value | Type |
 |--------------|-------|------|
 | `VITE_SUPABASE_URL` | `https://emlqlmfzqsnqokrqvmcm.supabase.co` | Secret |
-| `VITE_SUPABASE_ANON_KEY` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg` | Secret |
+| `VITE_SUPABASE_ANON_KEY` | `[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]` | Secret |
 | `VITE_STRIPE_PUBLISHABLE_KEY` | `pk_live_...` (Get from Stripe Dashboard) | Secret |
 | `VITE_STORAGE_BUCKET_NAME` | `images` | Plain Text |
 
@@ -65,7 +65,7 @@ This guide will help you configure:
 
 | Secret Name | Value |
 |-------------|-------|
-| `STRIPE_SECRET_KEY` | `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` |
+| `STRIPE_SECRET_KEY` | `[REDACTED — Stripe Dashboard → Developers → API keys]` |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_...` (You'll get this after setting up webhook) |
 | `SUPABASE_URL` | `https://emlqlmfzqsnqokrqvmcm.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | (Get from Supabase Dashboard → Settings → API) |

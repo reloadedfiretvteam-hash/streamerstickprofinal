@@ -5,4 +5,5 @@ server/public
 vite.config.ts.*
 *.tar.gz
 .env.local
+.local/
 docs/seed-25k-inserts.sql

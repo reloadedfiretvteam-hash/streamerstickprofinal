@@ -145,7 +145,7 @@ Value: SG.YOUR_SENDGRID_KEY
 
 **Stripe Secret Keys:**
 - Format: `sk_live_lowercase_letters_numbers`
-- Example: `sk_live_123abc456def`
+- Example: `[REDACTED — Stripe Dashboard → Developers → API keys]`
 - Start with: **lowercase `sk_live_` or `sk_test_`**
 
 ---

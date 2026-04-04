@@ -6,11 +6,16 @@ Write-Host "DEEP AUDIT - CHECKING EVERYTHING" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Tokens
-$SUPABASE_URL = "https://emlqlmfzqsnqokrqvmcm.supabase.co"
-$ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg"
-$SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mzg4NDQ5MiwiZXhwIjoyMDc5NDYwNDkyfQ.m3xw006mSdP1DeunLo4CoNDonIIXkQSt353VL-ibb0c"
-$GITHUB_TOKEN = "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"
+# Set in your shell (never commit real values): VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY,
+# SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY, optional GITHUB_TOKEN.
+$SUPABASE_URL = $env:VITE_SUPABASE_URL; if (-not $SUPABASE_URL) { $SUPABASE_URL = $env:SUPABASE_URL }
+$ANON_KEY = $env:VITE_SUPABASE_ANON_KEY
+$SERVICE_KEY = $env:SUPABASE_SERVICE_ROLE_KEY; if (-not $SERVICE_KEY) { $SERVICE_KEY = $env:SUPABASE_SERVICE_KEY }
+$GITHUB_TOKEN = $env:GITHUB_TOKEN
+if (-not $SUPABASE_URL -or -not $ANON_KEY -or -not $SERVICE_KEY) {
+  Write-Host "Missing env: VITE_SUPABASE_URL (or SUPABASE_URL), VITE_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY" -ForegroundColor Red
+  exit 1
+}
 
 $headers = @{
     "Authorization" = "Bearer $SERVICE_KEY"

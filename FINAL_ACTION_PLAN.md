@@ -63,11 +63,11 @@ supabase functions deploy send-credentials-email --project-ref emlqlmfzqsnqokrqv
 
 **Via CLI:**
 ```powershell
-supabase secrets set STRIPE_SECRET_KEY=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 --project-ref emlqlmfzqsnqokrqvmcm
+supabase secrets set STRIPE_SECRET_KEY=[REDACTED — Stripe Dashboard → Developers → API keys] --project-ref emlqlmfzqsnqokrqvmcm
 
 supabase secrets set SUPABASE_URL=https://emlqlmfzqsnqokrqvmcm.supabase.co --project-ref emlqlmfzqsnqokrqvmcm
 
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mzg4NDQ5MiwiZXhwIjoyMDc5NDYwNDkyfQ.m3xw006mSdP1DeunLo4CoNDonIIXkQSt353VL-ibb0c --project-ref emlqlmfzqsnqokrqvmcm
+supabase secrets set SUPABASE_SERVICE_ROLE_KEY=[REDACTED — use Supabase Dashboard → Settings → API → Project API keys] --project-ref emlqlmfzqsnqokrqvmcm
 
 # Get webhook secret from Stripe dashboard first:
 # https://dashboard.stripe.com/webhooks → Click we_1SYe14HBw27Y92Ci0z5p0Wkl → Reveal signing secret
@@ -80,13 +80,13 @@ supabase secrets set STRIPE_WEBHOOK_SECRET=[PASTE_WEBHOOK_SECRET_HERE] --project
 2. Scroll to "Secrets" section
 3. Click "Add secret" for each:
    - Name: `STRIPE_SECRET_KEY`
-     Value: `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`
+     Value: `[REDACTED — Stripe Dashboard → Developers → API keys]`
    
    - Name: `SUPABASE_URL`
      Value: `https://emlqlmfzqsnqokrqvmcm.supabase.co`
    
    - Name: `SUPABASE_SERVICE_ROLE_KEY`
-     Value: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mzg4NDQ5MiwiZXhwIjoyMDc5NDYwNDkyfQ.m3xw006mSdP1DeunLo4CoNDonIIXkQSt353VL-ibb0c`
+     Value: `[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]`
    
    - Name: `STRIPE_WEBHOOK_SECRET`
      Value: Get from https://dashboard.stripe.com/webhooks (webhook ID: we_1SYe14HBw27Y92Ci0z5p0Wkl)
@@ -105,7 +105,7 @@ supabase secrets set STRIPE_WEBHOOK_SECRET=[PASTE_WEBHOOK_SECRET_HERE] --project
      ☑ Encrypt
    
    - Name: `VITE_SUPABASE_ANON_KEY`
-     Value: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg`
+     Value: `[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]`
      ☑ Encrypt
    
    - Name: `VITE_STRIPE_PUBLISHABLE_KEY`

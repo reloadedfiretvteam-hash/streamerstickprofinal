@@ -75,7 +75,7 @@
 3. If you see `STRIPE_SECRET_KEY` already → **SKIP TO STEP 7**
 4. If NOT → Click "Add new secret"
 5. Name: `STRIPE_SECRET_KEY`
-6. Value: `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`
+6. Value: `[REDACTED — Stripe Dashboard → Developers → API keys]`
 7. Click "Save" or "Add secret"
 
 ### Step 7: Add SUPABASE_URL
@@ -142,7 +142,7 @@
 1. If you see `VITE_SUPABASE_ANON_KEY` already → **SKIP TO STEP 14**
 2. If NOT → Click "Add variable"
 3. Variable name: `VITE_SUPABASE_ANON_KEY`
-4. Value: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg`
+4. Value: `[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]`
 5. Make sure "Production" is checked
 6. Check "Encrypt"
 7. Click "Save"

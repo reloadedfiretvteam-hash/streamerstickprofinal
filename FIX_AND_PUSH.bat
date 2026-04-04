@@ -19,7 +19,7 @@ echo Step 4: Pulling latest from GitHub...
 git pull origin clean-main --no-rebase
 
 echo Step 5: Pushing to GitHub...
-git push https://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@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git clean-main
+git push https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git clean-main
 
 echo.
 echo ============================================

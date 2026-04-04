@@ -2,14 +2,14 @@
 
 ## Token Used
 ```
-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
+[REDACTED — GitHub PAT; use gh auth login or SSH]
 ```
 
 ## Configuration Steps
 
 ### 1. Set Remote URL with Token
 ```bash
-git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamstickprofinal.git
+git remote set-url origin https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamstickprofinal.git
 ```
 
 ### 2. Stage All Changes
@@ -38,7 +38,7 @@ git push origin clean-main:main --force
 cd "C:\Users\rdela\Downloads\New folder\project-bolt-sb1-19o8d5ja\project\streamerstickprofinal"
 
 # Configure remote with token
-git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamstickprofinal.git
+git remote set-url origin https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamstickprofinal.git
 
 # Stage all changes
 git add -A
@@ -62,7 +62,7 @@ git log --oneline -3
 cd "C:\Users\rdela\Downloads\New folder\project-bolt-sb1-19o8d5ja\project\streamerstickprofinal"
 
 # Configure remote with token
-git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamstickprofinal.git
+git remote set-url origin https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamstickprofinal.git
 
 # Stage all changes
 git add -A

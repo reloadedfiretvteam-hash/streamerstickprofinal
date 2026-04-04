@@ -4,7 +4,7 @@
 # This script helps create Stripe webhook via Stripe API
 
 param(
-    [string]$StripeSecretKey = "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"
+    [string]$StripeSecretKey = "[REDACTED — Stripe Dashboard → Developers → API keys]"
 )
 
 Write-Host "========================================" -ForegroundColor Cyan

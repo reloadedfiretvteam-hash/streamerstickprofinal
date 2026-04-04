@@ -63,10 +63,10 @@ node scripts/deploy-analytics-complete.mjs
 | Variable Name | Value | Type |
 |--------------|-------|------|
 | `VITE_SUPABASE_URL` | `https://emlqlmfzqsnqokrqvmcm.supabase.co` | Secret |
-| `VITE_SUPABASE_ANON_KEY` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg` | Secret |
+| `VITE_SUPABASE_ANON_KEY` | `[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]` | Secret |
 | `SUPABASE_SERVICE_ROLE_KEY` | (Your service role key from Step 3) | Secret |
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://emlqlmfzqsnqokrqvmcm.supabase.co` | Secret |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg` | Secret |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]` | Secret |
 
 4. Click **"Save"** for each variable
 5. Trigger a new deployment: **Deployments** → **Retry deployment**

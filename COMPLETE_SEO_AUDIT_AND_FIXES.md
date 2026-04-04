@@ -194,7 +194,7 @@ and experience 18,000+ live channels worldwide!
 ```powershell
 # Set environment variables (PowerShell)
 $env:DATABASE_URL="[GET FROM SUPABASE DASHBOARD]"
-$env:SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mzg4NDQ5MiwiZXhwIjoyMDc5NDYwNDkyfQ.m3xw006mSdP1DeunLo4CoNDonIIXkQSt353VL-ibb0c"
+$env:SUPABASE_SERVICE_KEY="[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]"
 
 # Run seeder
 npx tsx scripts/run-iptv-campaign-seed.ts

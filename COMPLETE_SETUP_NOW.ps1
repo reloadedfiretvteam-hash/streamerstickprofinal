@@ -12,8 +12,8 @@ Write-Host ""
 
 $projectRef = "emlqlmfzqsnqokrqvmcm"
 $supabaseUrl = "https://emlqlmfzqsnqokrqvmcm.supabase.co"
-$supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg"
-$stripeSecretKey = "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"
+$supabaseAnonKey = "[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]"
+$stripeSecretKey = "[REDACTED — Stripe Dashboard → Developers → API keys]"
 
 # Method 1: Try Supabase CLI
 Write-Host "METHOD 1: Supabase CLI" -ForegroundColor Yellow

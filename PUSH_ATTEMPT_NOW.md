@@ -23,7 +23,7 @@ git fetch origin
 git status
 git add -A
 git commit -m "COMPLETE FIX PACKAGE: AppRouter product route fix, MediaCarousel removed, credentials generator, 50% OFF text, Supabase images, admin 404 fix, complete audit - All fixes from comprehensive review"
-git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamstickprofinal.git
+git remote set-url origin https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamstickprofinal.git
 git push origin clean-main --force
 git push origin clean-main:main --force
 git log --oneline -1

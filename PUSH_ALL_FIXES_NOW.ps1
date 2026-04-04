@@ -29,7 +29,7 @@ git commit -m "COMPLETE FIX: All fixes consolidated from all AIs - ProductDetail
 
 # Configure remote with token
 Write-Host "`n6. Configuring remote..." -ForegroundColor Yellow
-git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamstickprofinal.git
+git remote set-url origin https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamstickprofinal.git
 
 # Push to clean-main
 Write-Host "`n7. Pushing to clean-main..." -ForegroundColor Yellow

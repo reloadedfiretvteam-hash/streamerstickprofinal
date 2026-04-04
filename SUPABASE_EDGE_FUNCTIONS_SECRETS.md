@@ -11,7 +11,7 @@ Add these secrets in Supabase Dashboard → Edge Functions → Settings → Secr
 ### 1. Stripe Configuration
 
 **Secret Name:** `STRIPE_SECRET_KEY`  
-**Value:** `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`  
+**Value:** `[REDACTED — Stripe Dashboard → Developers → API keys]`  
 **Description:** Stripe Live Secret Key for payment processing
 
 ---

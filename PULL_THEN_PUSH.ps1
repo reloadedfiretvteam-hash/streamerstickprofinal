@@ -12,7 +12,7 @@ Write-Host ""
 
 # Set remote
 Write-Host "2. Setting remote..." -ForegroundColor Yellow
-git remote set-url origin https://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@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
+git remote set-url origin https://[REDACTED — GitHub PAT; use gh auth login or SSH]@github.com/reloadedfiretvteam-hash/streamerstickprofinal.git
 Write-Host ""
 
 # Fetch latest

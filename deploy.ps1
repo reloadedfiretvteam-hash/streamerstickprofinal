@@ -2,7 +2,7 @@ Write-Host "DEPLOYING TO SUPABASE..." -ForegroundColor Cyan
 Write-Host ""
 
 $PROJECT_REF = "emlqlmfzqsnqokrqvmcm"
-$STRIPE_SECRET = "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"
+$STRIPE_SECRET = "[REDACTED — Stripe Dashboard → Developers → API keys]"
 $SUPABASE_URL = "https://emlqlmfzqsnqokrqvmcm.supabase.co"
 # ⚠️ SECURITY: Service key should come from environment variable, not hardcoded!
 # Get from: Supabase Dashboard → Settings → API → service_role key

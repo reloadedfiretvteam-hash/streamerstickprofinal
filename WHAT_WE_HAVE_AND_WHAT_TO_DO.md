@@ -84,7 +84,7 @@ https://emlqlmfzqsnqokrqvmcm.supabase.co
 
 **VITE_SUPABASE_ANON_KEY** should be:
 ```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg
+[REDACTED — use Supabase Dashboard → Settings → API → Project API keys]
 ```
 
 If they're wrong or missing, click "Edit" and paste the correct values above.

@@ -38,7 +38,7 @@ This will:
 ### 2. Secrets (5 min)
 - **Tab open**: Supabase Functions Settings
 - Copy from `AUTO_FILL_VALUES.txt`:
-  - `STRIPE_SECRET_KEY` = `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`
+  - `STRIPE_SECRET_KEY` = `[REDACTED — Stripe Dashboard → Developers → API keys]`
   - `SUPABASE_URL` = `https://emlqlmfzqsnqokrqvmcm.supabase.co`
   - `SUPABASE_SERVICE_ROLE_KEY` = (Get from API Settings tab)
   - `STRIPE_WEBHOOK_SECRET` = (Get from Stripe Webhooks tab)
