@@ -1,8 +1,13 @@
 import { Hono } from 'hono';
 import type { Env } from '../index';
 import { sendEmail } from '../email-providers';
+import {
+  createIptvPanelTrial,
+  iptvPanelTrialConfigured,
+  m3uPlusPlaylistUrl,
+} from '../lib/iptv-panel-trial';
 
-const IPTV_PORTAL_URL = 'http://ky-tv.cc';
+const IPTV_PORTAL_DEFAULT = 'http://ky-tv.cc';
 const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
 const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
 
@@ -70,6 +75,46 @@ export function createTrialRoutes() {
         password: isExistingUser ? '(using existing password)' : password.substring(0, 10),
       };
 
+      const portalUrl = (c.env.IPTV_PORTAL_URL || IPTV_PORTAL_DEFAULT).replace(/\/+$/, '');
+      let panelProvisioned = false;
+      let m3uPlaylistUrl: string | null = null;
+
+      if (!isExistingUser && iptvPanelTrialConfigured(c.env)) {
+        const panelResult = await createIptvPanelTrial(c.env, {
+          username: trialCredentials.username,
+          password: trialCredentials.password,
+        });
+        if (!panelResult.ok) {
+          console.error('[free-trial] panel trial failed:', panelResult.message);
+          return c.json(
+            {
+              error:
+                'We could not activate your trial right now. Please try again in a few minutes or contact support.',
+            },
+            502,
+          );
+        }
+        panelProvisioned = true;
+        m3uPlaylistUrl = m3uPlusPlaylistUrl(c.env, trialCredentials.username, trialCredentials.password);
+      }
+
+      const activationNoticeHtml = panelProvisioned
+        ? `<div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
+              <strong>Ready to use:</strong> Your trial was created on our service. You can sign in at the portal URL below right away using the username and password in this email.
+            </div>`
+        : `<div style="background: #fff7ed; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ea580c;">
+              <strong>⏳ Activation Time:</strong> Please allow <strong>1–3 hours</strong> for your subscription to be fully active. During business hours (5 AM – 11 PM EST), activation is usually completed within <strong>15 minutes</strong>.
+            </div>`;
+
+      const m3uBlockHtml =
+        m3uPlaylistUrl && !isExistingUser
+          ? `<div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0 0 10px 0;"><strong>M3U Plus (one-line playlist):</strong></p>
+              <p style="margin: 0; word-break: break-all; font-family: monospace; font-size: 12px;"><a href="${m3uPlaylistUrl}" style="color: #15803d;">${m3uPlaylistUrl}</a></p>
+              <p style="margin: 10px 0 0 0; font-size: 14px;">Paste this into compatible players, or use server URL plus username and password above.</p>
+            </div>`
+          : '';
+
       // Customer email (REQUIRED). Use unified sender (Resend → MailChannels fallback).
       const customerSubject = 'Your FREE 36-Hour IPTV Trial Credentials - StreamStickPro';
       const customerHtml = `
@@ -88,15 +133,15 @@ export function createTrialRoutes() {
               </div>
             </div>
             
-            <div style="background: #fff7ed; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ea580c;">
-              <strong>⏳ Activation Time:</strong> Please allow <strong>1–3 hours</strong> for your subscription to be fully active. During business hours (5 AM – 11 PM EST), activation is usually completed within <strong>15 minutes</strong>.
-            </div>
+            ${activationNoticeHtml}
 
             <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
               <p style="margin: 0 0 10px 0;"><strong>Service Portal URL:</strong></p>
-              <p style="margin: 0;"><a href="${IPTV_PORTAL_URL}" style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 18px;" target="_blank">${IPTV_PORTAL_URL}</a></p>
+              <p style="margin: 0;"><a href="${portalUrl}" style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 18px;" target="_blank">${portalUrl}</a></p>
               <p style="margin: 10px 0 0 0; font-size: 14px;">Use the credentials above to log in to your service portal.</p>
             </div>
+
+            ${m3uBlockHtml}
 
             <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
               <p style="margin: 0 0 10px 0;"><strong>📺 Setup Tutorial Video:</strong></p>
@@ -108,7 +153,7 @@ export function createTrialRoutes() {
               <h3 style="color: #7c3aed; margin-top: 0;">Quick Setup Steps:</h3>
               <ol style="color: #4c1d95;">
                 <li>Download IPTV Smarters or TiviMate app on your device</li>
-                <li>Enter the portal URL: ${IPTV_PORTAL_URL}</li>
+                <li>Enter the portal URL: ${portalUrl}</li>
                 <li>Enter your username and password above</li>
                 <li>Enjoy 18,000+ live channels for FREE!</li>
               </ol>
@@ -204,9 +249,11 @@ export function createTrialRoutes() {
             
             <div style="background: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
               <h2 style="margin-top: 0; color: #15803d;">Trial Credentials Sent</h2>
+              ${panelProvisioned ? '<p><strong>Panel:</strong> Trial user was created via API (live line).</p>' : ''}
               <p><strong>Username:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${trialCredentials.username}</code></p>
               ${!isExistingUser ? `<p><strong>Password:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${trialCredentials.password}</code></p>` : '<p>(Using existing password)</p>'}
-              <p><strong>Service Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #15803d;">${IPTV_PORTAL_URL}</a></p>
+              ${m3uPlaylistUrl && !isExistingUser ? `<p><strong>M3U Plus:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px; word-break: break-all;">${m3uPlaylistUrl}</code></p>` : ''}
+              <p><strong>Service Portal URL:</strong> <a href="${portalUrl}" style="color: #15803d;">${portalUrl}</a></p>
               <p><strong>Setup Video:</strong> <a href="${SETUP_VIDEO_URL}" style="color: #15803d;">${SETUP_VIDEO_URL}</a></p>
               <p><strong>Expires:</strong> 36 hours from signup</p>
             </div>

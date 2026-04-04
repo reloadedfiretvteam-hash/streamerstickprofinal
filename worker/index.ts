@@ -40,6 +40,17 @@ export interface Env {
   CLOUDFLARE_ACCOUNT_ID?: string;
   NODE_ENV?: string;
   ASSETS: { fetch: (request: Request) => Promise<Response> };
+  /** Xtream-style panel API directory, e.g. http://host:port/WDXTMHmn (appends /api.php if needed) */
+  IPTV_PANEL_API_BASE?: string;
+  IPTV_PANEL_API_KEY?: string;
+  /** Package code from panel (action=info / package_name), e.g. trial36h */
+  IPTV_PANEL_TRIAL_PACKAGE?: string;
+  /** Trial length in days as accepted by panel (e.g. 1.5 for ~36h) */
+  IPTV_PANEL_TRIAL_EXP_DAYS?: string;
+  /** Shown in trial emails; falls back to http://ky-tv.cc in route if unset */
+  IPTV_PORTAL_URL?: string;
+  /** Optional full URL to get.php (no query) or with ? — overrides default origin/get.php */
+  IPTV_PANEL_M3U_BASE?: string;
 }
 
 const app = new Hono<{ Bindings: Env }>();
