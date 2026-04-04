@@ -1,8 +1,14 @@
-# 🤖 AI Assistant - Full System Access Implemented
+# AI assistant integrations (env-based)
 
-## ✅ YES - Your AI Assistant Now Has Complete System Access!
+**Important:** Nothing in Cursor or this doc automatically receives GitHub, Cloudflare, or Supabase tokens from chat history. Those credentials must exist only in **your** environment: Cloudflare Pages/Workers env, GitHub Actions secrets, or local shell env / `wrangler login`. Never commit real JWTs or API tokens to the repo.
 
-Your AI assistant is now **fully connected** and can control your entire infrastructure.
+The sections below describe what your **deployed worker** could do **if** you configure the listed env vars (e.g. optional `GITHUB_TOKEN`, `CLOUDFLARE_API_TOKEN`). They are not a guarantee that a Chat session has access.
+
+---
+
+## Prior heading (marketing / aspirational — configure env yourself)
+
+Your automation can **interact with APIs you configure** using the keys below.
 
 ## 🎯 What It Can Do Now
 

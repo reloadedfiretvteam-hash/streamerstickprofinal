@@ -116,13 +116,15 @@ function renderMarkdownLite(raw: string): { html: string; toc: { id: string; tex
 }
 
 async function fetchBlogPosts(): Promise<BlogPost[]> {
-  // Build-time Supabase config for prerendering.
-  // Prefer env vars; fall back to the public anon key (safe, but env looks cleaner in repo).
-  const supabaseUrl = process.env.VITE_SUPABASE_URL || "https://emlqlmfzqsnqokrqvmcm.supabase.co";
-  const supabaseKey =
-    process.env.VITE_SUPABASE_ANON_KEY ||
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg";
-  
+  const supabaseUrl = process.env.VITE_SUPABASE_URL?.trim();
+  const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY?.trim();
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn(
+      "   Blog prerender: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (e.g. GitHub Actions / local env); skipping fetch.",
+    );
+    return [];
+  }
+
   console.log(`   Using Supabase URL: ${supabaseUrl.substring(0, 40)}...`);
 
   const supabase = createClient(supabaseUrl, supabaseKey);

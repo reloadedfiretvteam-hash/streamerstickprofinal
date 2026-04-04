@@ -4,8 +4,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { readFile } from 'fs/promises';
 
-const SUPABASE_URL = 'https://emlqlmfzqsnqokrqvmcm.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbHFsbWZ6cXNucW9rcnF2bWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4ODQ0OTIsImV4cCI6MjA3OTQ2MDQ5Mn0.gD54kCrRiqLCpP_p6cEO4-r9GSIAJSuN4PKWx5Dnyeg';
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 
 const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID;
@@ -14,7 +14,12 @@ const CLOUDFLARE_PROJECT_NAME = process.env.CLOUDFLARE_PROJECT_NAME || 'streamer
 
 async function checkSupabaseTables() {
   console.log('🔍 Checking Supabase analytics tables...\n');
-  
+
+  if (!SUPABASE_URL?.trim()) {
+    console.log('⚠️  Set VITE_SUPABASE_URL or SUPABASE_URL\n');
+    return false;
+  }
+
   if (!SUPABASE_SERVICE_KEY) {
     console.log('⚠️  SUPABASE_SERVICE_ROLE_KEY not found in environment\n');
     console.log('   To get it:');
@@ -63,6 +68,11 @@ async function setupCloudflareEnv() {
   if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) {
     console.log('⚠️  Cloudflare credentials not found');
     console.log('   Set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN\n');
+    return false;
+  }
+
+  if (!SUPABASE_ANON_KEY?.trim()) {
+    console.log('⚠️  VITE_SUPABASE_ANON_KEY required to sync Supabase vars to Cloudflare\n');
     return false;
   }
 
