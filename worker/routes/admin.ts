@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { getStorage } from '../helpers';
 import { sendCredentialsEmail, sendOrderConfirmation } from '../email';
 import { sendEmail } from '../email-providers';
-import { createCustomerSchema, updateCustomerSchema } from '../../shared/schema';
+import { createCustomerSchema, updateCustomerSchema, effectiveRealProductChargeCents } from '../../shared/schema';
 import type { Env } from '../index';
 
 const WEBSITE_REMINDER_HTML = (name: string) => `
@@ -81,6 +81,34 @@ function chunkArray<T>(list: T[], size = 500): T[][] {
     chunks.push(list.slice(i, i + size));
   }
   return chunks;
+}
+
+function getCampaignRecipients(row: any): string[] {
+  const recipientsRaw = row?.segment?.recipients;
+  if (!Array.isArray(recipientsRaw)) return [];
+  return recipientsRaw
+    .map((value: unknown) => normalizeEmail(value))
+    .filter((value: string) => Boolean(value));
+}
+
+function isLikelyTestCampaign(row: any): boolean {
+  const name = String(row?.name || '').trim().toLowerCase();
+  const subject = String(row?.subject || '').trim().toLowerCase();
+  const recipients = getCampaignRecipients(row);
+
+  const hasTestLabel =
+    TEST_LOCAL_MARKER_REGEX.test(name) ||
+    TEST_LOCAL_MARKER_REGEX.test(subject) ||
+    name.includes('system check') ||
+    subject.includes('system check') ||
+    name.includes('send test') ||
+    subject.includes('send test') ||
+    name.includes('test email') ||
+    subject.includes('test email');
+
+  if (hasTestLabel) return true;
+  if (recipients.length === 0) return false;
+  return recipients.every((email) => isLikelyTestEmail(email));
 }
 
 type MarketingAudience = 'all' | 'free_trial' | 'purchase';
@@ -675,7 +703,7 @@ export function createAdminRoutes() {
     try {
       const storage = getStorage(c.env);
       const body = await c.req.json();
-      const { name, description, price, imageUrl, category, shadowProductId, shadowPriceId, shadowName } = body;
+      const { name, description, price, imageUrl, category, shadowProductId, shadowPriceId, shadowName, sale_price, card_promo_label } = body;
 
       const existingProduct = await storage.getRealProduct(c.req.param('id'));
       if (!existingProduct) {
@@ -683,14 +711,41 @@ export function createAdminRoutes() {
       }
 
       const parsedPrice = Number(price);
-      const hasPriceUpdate = Number.isFinite(parsedPrice) && parsedPrice > 0;
+      const hasPriceUpdate = price !== undefined && Number.isFinite(parsedPrice) && parsedPrice > 0;
       const normalizedPrice = hasPriceUpdate ? Math.round(parsedPrice) : existingProduct.price;
+
+      let nextSale: number | null = existingProduct.salePrice ?? null;
+      if (Object.prototype.hasOwnProperty.call(body, 'sale_price')) {
+        if (sale_price === null || sale_price === '' || sale_price === undefined) {
+          nextSale = null;
+        } else {
+          const s = Math.round(Number(sale_price));
+          if (!Number.isFinite(s) || s <= 0) {
+            return c.json({ error: "sale_price must be a positive number of cents, or null to clear" }, 400);
+          }
+          if (s >= normalizedPrice) {
+            return c.json({ error: "sale_price must be less than regular price (both in cents)" }, 400);
+          }
+          nextSale = s;
+        }
+      }
+
+      const nextCardLabel =
+        card_promo_label !== undefined
+          ? (String(card_promo_label).trim() === '' ? null : String(card_promo_label).trim())
+          : existingProduct.cardPromoLabel ?? null;
 
       let nextShadowProductId = shadowProductId ?? existingProduct.shadowProductId ?? null;
       let nextShadowPriceId = shadowPriceId ?? existingProduct.shadowPriceId ?? null;
 
-      // Keep Stripe charge amount aligned with admin price edits.
-      if (hasPriceUpdate) {
+      const effectiveCents = effectiveRealProductChargeCents({ price: normalizedPrice, salePrice: nextSale });
+      const saleInBody = Object.prototype.hasOwnProperty.call(body, 'sale_price');
+      const shouldSyncStripe =
+        hasPriceUpdate ||
+        saleInBody ||
+        body.force_stripe_resync === true;
+
+      if (shouldSyncStripe) {
         const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
         if (!nextShadowProductId) {
           const stripeProduct = await stripe.products.create({
@@ -702,9 +757,12 @@ export function createAdminRoutes() {
         }
         const stripePrice = await stripe.prices.create({
           product: nextShadowProductId,
-          unit_amount: normalizedPrice,
+          unit_amount: effectiveCents,
           currency: 'usd',
-          metadata: { realProductId: existingProduct.id },
+          metadata: {
+            realProductId: existingProduct.id,
+            ...(nextSale != null ? { pricingMode: 'sale' } : { pricingMode: 'regular' }),
+          },
         });
         nextShadowPriceId = stripePrice.id;
       }
@@ -717,6 +775,8 @@ export function createAdminRoutes() {
         category,
         shadowProductId: nextShadowProductId,
         shadowPriceId: nextShadowPriceId,
+        salePrice: nextSale,
+        cardPromoLabel: nextCardLabel,
       });
 
       return c.json({ data: product });
@@ -744,6 +804,110 @@ export function createAdminRoutes() {
     } catch (error: any) {
       console.error("Error deleting product:", error);
       return c.json({ error: "Failed to delete product" }, 500);
+    }
+  });
+
+  app.get('/site-promotion', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const row = await storage.getSitePromotionRow({ strict: true });
+      return c.json({ data: row });
+    } catch (error: any) {
+      console.error("Error fetching site promotion:", error);
+      return c.json({ error: error?.message || "Failed to load promotion" }, 500);
+    }
+  });
+
+  app.put('/site-promotion', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const body = await c.req.json();
+      const is_active = Boolean(body.is_active);
+      const headline = String(body.headline ?? '');
+      const subheadline = body.subheadline != null && body.subheadline !== '' ? String(body.subheadline) : null;
+      const cta_label = body.cta_label != null && String(body.cta_label).trim() !== '' ? String(body.cta_label) : 'Claim offer';
+      const real_product_id = String(body.real_product_id ?? '').trim();
+      const promo_shadow_price_id = String(body.promo_shadow_price_id ?? '').trim();
+      const promo_amount_cents = Math.round(Number(body.promo_amount_cents) || 0);
+      const shadow_headline =
+        body.shadow_headline != null && String(body.shadow_headline).trim() !== '' ? String(body.shadow_headline) : null;
+      const shadow_subheadline =
+        body.shadow_subheadline != null && String(body.shadow_subheadline).trim() !== ''
+          ? String(body.shadow_subheadline)
+          : null;
+      const ends_at =
+        body.ends_at != null && String(body.ends_at).trim() !== '' ? String(body.ends_at) : null;
+
+      if (is_active) {
+        if (!real_product_id || !promo_shadow_price_id || promo_amount_cents <= 0) {
+          return c.json(
+            {
+              error:
+                "Active promotion requires real_product_id, promo_shadow_price_id, and promo_amount_cents (> 0). Use “Create Stripe promo price” or paste a Price ID from Stripe.",
+            },
+            400
+          );
+        }
+        const p = await storage.getRealProduct(real_product_id);
+        if (!p) return c.json({ error: "real_product_id not found in catalog" }, 400);
+      }
+
+      const existing = await storage.getSitePromotionRow({ strict: true });
+      const data = await storage.upsertSitePromotionRow({
+        is_active,
+        headline,
+        subheadline,
+        cta_label,
+        real_product_id: real_product_id || existing?.real_product_id || '',
+        promo_shadow_price_id: promo_shadow_price_id || existing?.promo_shadow_price_id || '',
+        promo_amount_cents: promo_amount_cents || Number(existing?.promo_amount_cents) || 0,
+        shadow_headline: shadow_headline ?? (existing?.shadow_headline ?? null),
+        shadow_subheadline: shadow_subheadline ?? (existing?.shadow_subheadline ?? null),
+        ends_at,
+      });
+      return c.json({ data });
+    } catch (error: any) {
+      console.error("Error saving site promotion:", error);
+      return c.json({ error: error.message || "Failed to save promotion" }, 500);
+    }
+  });
+
+  /** Create a new Stripe Price on the product’s shadow product (promotional amount). Returns price id for promo_shadow_price_id. */
+  app.post('/site-promotion/create-stripe-price', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const body = await c.req.json().catch(() => ({}));
+      const unitAmountCents = Math.round(
+        Number(body.unit_amount_cents) || Number(body.price_cents) || Number(body.price) * 100 || 0
+      );
+      if (!unitAmountCents || unitAmountCents <= 0) {
+        return c.json({ error: "Provide unit_amount_cents or price (dollars) > 0" }, 400);
+      }
+      const existing = await storage.getSitePromotionRow({ strict: true });
+      const real_product_id = String(body.real_product_id || existing?.real_product_id || "").trim();
+      if (!real_product_id) return c.json({ error: "Set real_product_id on promotion or in request body" }, 400);
+      const product = await storage.getRealProduct(real_product_id);
+      if (!product?.shadowProductId) return c.json({ error: "Product has no shadowProductId — link Stripe first" }, 400);
+
+      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
+      const stripePrice = await stripe.prices.create({
+        product: product.shadowProductId,
+        unit_amount: unitAmountCents,
+        currency: "usd",
+        metadata: {
+          realProductId: real_product_id,
+          sitePromotion: "true",
+        },
+      });
+      return c.json({
+        data: {
+          promo_shadow_price_id: stripePrice.id,
+          promo_amount_cents: unitAmountCents,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error creating promo Stripe price:", error);
+      return c.json({ error: error.message || "Failed to create Stripe price" }, 500);
     }
   });
 
@@ -793,6 +957,7 @@ export function createAdminRoutes() {
         price: priceInCents,
         shadowProductId,
         shadowPriceId: stripePrice.id,
+        salePrice: null,
       });
 
       return c.json({ 
@@ -810,7 +975,7 @@ export function createAdminRoutes() {
     try {
       const storage = getStorage(c.env);
       const body = await c.req.json();
-      const { id, name, description, price, imageUrl, category, shadowName } = body;
+      const { id, name, description, price, imageUrl, category, shadowName, sale_price, card_promo_label } = body;
 
       if (!id || !name || !price) {
         return c.json({ error: "ID, name, and price are required" }, 400);
@@ -833,12 +998,27 @@ export function createAdminRoutes() {
       }
       const priceInCents = Math.round(parsedPrice);
 
+      let nextSale: number | null = null;
+      if (sale_price != null && sale_price !== '') {
+        const s = Math.round(Number(sale_price));
+        if (!Number.isFinite(s) || s <= 0 || s >= priceInCents) {
+          return c.json({ error: "sale_price must be less than regular price (cents)" }, 400);
+        }
+        nextSale = s;
+      }
+      const cardLabel =
+        card_promo_label != null && String(card_promo_label).trim() !== ''
+          ? String(card_promo_label).trim()
+          : null;
+      const effectiveCents = effectiveRealProductChargeCents({ price: priceInCents, salePrice: nextSale });
+
       const stripePrice = await stripe.prices.create({
         product: stripeProduct.id,
-        unit_amount: priceInCents,
+        unit_amount: effectiveCents,
         currency: 'usd',
         metadata: {
           realProductId: id,
+          ...(nextSale != null ? { pricingMode: 'sale' } : { pricingMode: 'regular' }),
         },
       });
 
@@ -851,6 +1031,8 @@ export function createAdminRoutes() {
         category: category || null,
         shadowProductId: stripeProduct.id,
         shadowPriceId: stripePrice.id,
+        salePrice: nextSale,
+        cardPromoLabel: cardLabel,
       });
 
       return c.json({ 
@@ -1462,12 +1644,23 @@ export function createAdminRoutes() {
         if (isLikelyTestEmail((row as any).email)) testEmails.add(normalizeEmail((row as any).email));
       }
 
+      const { data: allCampaigns } = await supabase
+        .from('email_campaigns')
+        .select('id,name,subject,segment');
+
+      const testCampaignIds = (allCampaigns || [])
+        .filter((row: any) => isLikelyTestCampaign(row))
+        .map((row: any) => String(row.id || '').trim())
+        .filter(Boolean);
+
       const testEmailList = Array.from(testEmails);
 
       let deletedEvents = 0;
       let deletedSends = 0;
       let deletedContacts = 0;
       let deletedCampaigns = 0;
+      let deletedCampaignSends = 0;
+      let deletedCampaignEvents = 0;
       let deletedOrders = 0;
       let deletedCustomers = 0;
 
@@ -1493,6 +1686,19 @@ export function createAdminRoutes() {
         if (ids.length === 0) continue;
         const customersDelete = await supabase.from('customers').delete().in('id', ids).select('id');
         if (!customersDelete.error) deletedCustomers += customersDelete.data?.length || 0;
+      }
+
+      for (const ids of chunkArray(testCampaignIds, 200)) {
+        if (ids.length === 0) continue;
+
+        const eventsDelete = await supabase.from('email_events').delete().in('campaign_id', ids).select('id');
+        if (!eventsDelete.error) deletedCampaignEvents += eventsDelete.data?.length || 0;
+
+        const sendsDelete = await supabase.from('email_sends').delete().in('campaign_id', ids).select('id');
+        if (!sendsDelete.error) deletedCampaignSends += sendsDelete.data?.length || 0;
+
+        const campaignsDelete = await supabase.from('email_campaigns').delete().in('id', ids).select('id');
+        if (!campaignsDelete.error) deletedCampaigns += campaignsDelete.data?.length || 0;
       }
 
       for (const emails of chunkArray(testEmailList, 200)) {
@@ -1522,6 +1728,8 @@ export function createAdminRoutes() {
           contacts: deletedContacts,
           emailSends: deletedSends,
           emailEvents: deletedEvents,
+          campaignEmailSends: deletedCampaignSends,
+          campaignEmailEvents: deletedCampaignEvents,
           emailCampaigns: deletedCampaigns,
           orders: deletedOrders,
           customers: deletedCustomers,
@@ -1755,17 +1963,18 @@ export function createAdminRoutes() {
       }
       const supabase = createClient(supabaseUrl, supabaseKey);
 
-      const { data: campaigns, error } = await supabase
+      const { data: campaignsRaw, error } = await supabase
         .from('email_campaigns')
-        .select('id,name,subject,status,created_at,sent_at')
+        .select('id,name,subject,status,created_at,sent_at,segment')
         .order('created_at', { ascending: false })
-        .limit(25);
+        .limit(100);
 
       if (error) {
         return c.json({ error: 'Failed to load campaigns', details: error.message }, 500);
       }
 
-      const campaignIds = (campaigns || []).map((c: any) => c.id).filter(Boolean);
+      const campaigns = (campaignsRaw || []).filter((campaign: any) => !isLikelyTestCampaign(campaign)).slice(0, 25);
+      const campaignIds = campaigns.map((c: any) => c.id).filter(Boolean);
       let sendsByCampaign = new Map<string, any[]>();
       let openCountsByCampaign = new Map<string, number>();
       let clickCountsByCampaign = new Map<string, number>();

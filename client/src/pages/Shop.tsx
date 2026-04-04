@@ -12,7 +12,7 @@ import { DemoVideo } from "@/components/DemoVideo";
 import { FreeTrial } from "@/components/FreeTrial";
 import { QuickViewButton } from "@/components/QuickViewButton";
 import { ComparisonTable } from "@/components/ComparisonTable";
-import { setPageMeta } from "@/lib/seo";
+import { setPageMeta, shopProductUrl } from "@/lib/seo";
 import { SEOSchema, ItemListSchema } from "@/components/SEOSchema";
 
 const ProductQuickView = lazy(() => import("@/components/ProductQuickView").then((module) => ({ default: module.ProductQuickView })));
@@ -284,9 +284,27 @@ export default function Shop() {
       title: "Reloaded Fire TV Subscription Plans 2026 | Fire Stick & Devices | StreamStick Pro",
       description: "Shop Reloaded Fire TV plans from $11/mo and Fire Stick device options. 18K+ channels, 4K, and 99.9% uptime. Start a 36-hour subscription trial or buy now with StreamStick Pro.",
       path: "/shop",
+      keywords:
+        "Reloaded Fire TV, IPTV subscription, Fire Stick 4K, Fire Stick Max, ONN Google TV, shop IPTV, StreamStickPro",
     });
     loadProducts();
   }, []);
+
+  useEffect(() => {
+    const raw = window.location.hash.replace(/^#/, "");
+    if (!raw) return;
+    const id = decodeURIComponent(raw);
+    let cancelled = false;
+    const run = () => {
+      if (cancelled) return;
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    const t = window.setTimeout(run, 120);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [products.length]);
 
   const loadProducts = async () => {
     try {
@@ -473,7 +491,7 @@ export default function Shop() {
         items={products.map(p => ({
           name: p.name,
           description: p.description,
-          url: `https://streamstickpro.com/shop#${p.id}`,
+          url: shopProductUrl(p.id),
           image: p.image,
           price: p.price,
         }))}
@@ -882,8 +900,9 @@ export default function Shop() {
                 
                 return (
                 <div
+                  id={product.id}
                   key={product.id}
-                  className={`relative rounded-2xl overflow-hidden transform transition-all duration-500 hover:scale-105 group ${
+                  className={`scroll-mt-28 relative rounded-2xl overflow-hidden transform transition-all duration-500 hover:scale-105 group ${
                     product.popular 
                       ? 'ring-4 ring-orange-500 scale-105 shadow-2xl shadow-orange-500/50' 
                       : recommendedDevice

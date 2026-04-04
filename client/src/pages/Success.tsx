@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { trackConversion } from "@/components/RetargetingPixels";
 import { setPageMeta } from "@/lib/seo";
+import { useCart } from "@/lib/store";
 
 interface OrderDetails {
   order: {
@@ -19,6 +20,7 @@ interface OrderDetails {
 export default function Success() {
   const [, setLocation] = useLocation();
   const search = useSearch();
+  const clearCart = useCart((s) => s.clearCart);
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,7 +47,11 @@ export default function Success() {
         .then(data => {
           if (data.order) {
             setOrderDetails(data);
-            
+
+            if (data.paymentStatus === "paid") {
+              clearCart();
+            }
+
             // Track purchase conversion for retargeting
             if (data.paymentStatus === 'paid' && data.order.amount) {
               const purchaseAmount = data.order.amount / 100; // Convert from cents to dollars

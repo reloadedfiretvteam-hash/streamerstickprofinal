@@ -131,18 +131,18 @@ async function runMigration() {
     console.log(`   abandoned_carts: ${counts[0].carts} rows`);
     console.log(`   orders: ${counts[0].orders} rows`);
 
-    // SEO + Visitor tracking: run all 202602* migrations in order
+    // SQL fragments under supabase/migrations (same batches previously limited to 202602*).
+    // Include 202603* / 202604* so newer tables (e.g. site_promotion) apply when this job runs.
     const migrationsDir = path.join(process.cwd(), 'supabase', 'migrations');
     let migrationFiles: string[] = [];
+    const runThesePrefixes = /^(202602|202603|202604)/;
     try {
       const all = await readdir(migrationsDir);
-      migrationFiles = all
-        .filter((f) => f.startsWith('202602') && f.endsWith('.sql'))
-        .sort();
+      migrationFiles = all.filter((f) => f.endsWith('.sql') && runThesePrefixes.test(f)).sort();
     } catch (e) {
       // no migrations dir or readdir failed
     }
-    console.log('\n📦 SEO + visitor + blog + seo_ads migrations (202602*):');
+    console.log('\n📦 supabase/migrations (202602* / 202603* / 202604*):');
     for (const file of migrationFiles) {
       const filePath = path.join(migrationsDir, file);
       try {

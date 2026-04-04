@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { apiCall } from "@/lib/api";
 import { motion } from "framer-motion";
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { SitePromotionBanner, type PublicPromotion } from "@/components/SitePromotionBanner";
 
 const SUPABASE_URL = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/shadow-store";
 const heroBg = `${SUPABASE_URL}/modern_abstract_digi_3506c264.jpg`;
@@ -31,6 +32,29 @@ interface ShadowProduct {
   category: 'design' | 'seo';
   period?: string;
   image?: string;
+}
+
+type ApiRealProduct = {
+  id: string;
+  price: number;
+  salePrice?: number | null;
+  cardPromoLabel?: string | null;
+};
+
+function effectiveDollarsFromApi(api: ApiRealProduct | undefined, fallbackDollars: number): {
+  effective: number;
+  list?: number;
+  promo?: string | null;
+} {
+  if (!api) return { effective: fallbackDollars };
+  const reg = api.price / 100;
+  const sale = api.salePrice != null ? api.salePrice / 100 : null;
+  const onSale = sale != null && sale > 0 && sale < reg;
+  return {
+    effective: onSale ? sale : reg,
+    list: onSale ? reg : undefined,
+    promo: api.cardPromoLabel ?? null,
+  };
 }
 
 interface SEOPricingTier {
@@ -211,6 +235,21 @@ export default function ShadowStore() {
     "6mo": "starter",
     "1yr": "starter",
   });
+  /** Direct checkout from homepage-style promo (real_product_id + Stripe promo price). */
+  const [promoCheckout, setPromoCheckout] = useState<PublicPromotion | null>(null);
+  const [apiProducts, setApiProducts] = useState<ApiRealProduct[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await apiCall("/api/products");
+        const json = await res.json();
+        if (Array.isArray(json.data)) setApiProducts(json.data);
+      } catch {
+        /* keep static fallbacks */
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.remove("dark");
@@ -224,13 +263,14 @@ export default function ShadowStore() {
   }, []);
 
   const handleSelectPlan = (product: ShadowProduct) => {
+    setPromoCheckout(null);
     setSelectedProduct(product);
     setShowCheckout(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCheckout = async () => {
-    const productId = selectedProduct?.id || selectedSEOProduct?.productId;
+    const productId = promoCheckout?.realProductId || selectedProduct?.id || selectedSEOProduct?.productId;
     if (!productId || !email || !name) {
       toast({
         title: "Missing Information",
@@ -240,13 +280,15 @@ export default function ShadowStore() {
       return;
     }
 
+    const applySitePromotion = Boolean(promoCheckout);
+
     setIsProcessing(true);
     try {
       const response = await apiCall('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: [{ productId, quantity: 1 }],
+          items: [{ productId, quantity: 1, ...(applySitePromotion ? { applySitePromotion: true } : {}) }],
           customerEmail: email,
           customerName: name
         })
@@ -270,6 +312,7 @@ export default function ShadowStore() {
   };
 
   const handleSelectSEOPlan = (plan: SEOPricingTier) => {
+    setPromoCheckout(null);
     const tier = selectedTiers[plan.duration];
     const priceInfo = plan.prices.find(p => p.tier === tier) || plan.prices[0];
     setSelectedSEOProduct({
@@ -284,18 +327,38 @@ export default function ShadowStore() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const designProducts = shadowProducts.filter(p => p.category === 'design');
+  const designProductsLive = useMemo(() => {
+    const designProducts = shadowProducts.filter((p) => p.category === "design");
+    return designProducts.map((p) => {
+      const api = apiProducts.find((x) => x.id === p.id);
+      const { effective, list, promo } = effectiveDollarsFromApi(api, p.price);
+      return { base: { ...p, price: effective }, list, promo };
+    });
+  }, [apiProducts]);
 
-  if (showCheckout && (selectedProduct || selectedSEOProduct)) {
-    const productName = selectedProduct?.name || selectedSEOProduct?.name || "";
-    const productSubtitle = selectedProduct?.shadowName || `${selectedSEOProduct?.tier} tier - ${selectedSEOProduct?.duration}`;
-    const productPrice = selectedProduct?.price || selectedSEOProduct?.price || 0;
+  const seoPricingLive = useMemo(() => {
+    return seoPricingMatrix.map((plan) => ({
+      ...plan,
+      prices: plan.prices.map((tier) => {
+        const api = apiProducts.find((x) => x.id === tier.productId);
+        const { effective, list } = effectiveDollarsFromApi(api, tier.price);
+        return { ...tier, price: effective, listPrice: list };
+      }),
+    }));
+  }, [apiProducts]);
+
+  if (showCheckout && (promoCheckout || selectedProduct || selectedSEOProduct)) {
+    const productName = promoCheckout?.productName || promoCheckout?.shadowHeadline || selectedProduct?.name || selectedSEOProduct?.name || "";
+    const productSubtitle = promoCheckout
+      ? "Limited promotion — secure checkout"
+      : selectedProduct?.shadowName || `${selectedSEOProduct?.tier} tier - ${selectedSEOProduct?.duration}`;
+    const productPrice = promoCheckout?.displayPriceDollars ?? selectedProduct?.price ?? selectedSEOProduct?.price ?? 0;
 
     return (
       <div className="min-h-screen bg-background text-foreground font-sans">
         <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold text-xl text-primary cursor-pointer" onClick={() => { setShowCheckout(false); setSelectedProduct(null); setSelectedSEOProduct(null); }}>
+            <div className="flex items-center gap-2 font-semibold text-xl text-primary cursor-pointer" onClick={() => { setShowCheckout(false); setSelectedProduct(null); setSelectedSEOProduct(null); setPromoCheckout(null); }}>
               <LayoutGrid className="w-6 h-6" />
               <span>WebFlow Design</span>
             </div>
@@ -560,7 +623,7 @@ export default function ShadowStore() {
 
           <h3 className="text-xl font-semibold mb-6 text-center">Web Design Packages</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
-            {designProducts.map((product) => (
+            {designProductsLive.map(({ base: product, list, promo }) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -571,6 +634,11 @@ export default function ShadowStore() {
                 onClick={() => handleSelectPlan(product)}
                 data-testid={`card-product-${product.id}`}
               >
+                {promo ? (
+                  <div className="absolute top-2 left-2 z-10 max-w-[200px] bg-amber-500 text-black text-xs font-bold px-2 py-1 rounded-md shadow-md leading-tight">
+                    {promo}
+                  </div>
+                ) : null}
                 {product.popular && (
                   <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-2xl">
                     MOST POPULAR
@@ -582,9 +650,16 @@ export default function ShadowStore() {
                   </div>
                 )}
                 <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
-                <div className="text-4xl font-bold mb-2">
-                  ${product.price}
-                  <span className="text-base font-normal text-muted-foreground">{product.period}</span>
+                <div className="text-4xl font-bold mb-2 flex flex-wrap items-baseline gap-2">
+                  {list != null ? (
+                    <span className="text-xl text-muted-foreground line-through decoration-muted-foreground">
+                      ${list.toFixed(2)}
+                    </span>
+                  ) : null}
+                  <span>
+                    ${product.price.toFixed(2)}
+                    <span className="text-base font-normal text-muted-foreground">{product.period}</span>
+                  </span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-6">{product.description}</p>
                 <Button 
@@ -611,9 +686,11 @@ export default function ShadowStore() {
             Choose your package duration and tier. Higher tiers include more keywords, pages, and dedicated support.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {seoPricingMatrix.map((plan) => {
+            {seoPricingLive.map((plan) => {
               const currentTier = selectedTiers[plan.duration];
-              const currentPrice = plan.prices.find(p => p.tier === currentTier)?.price || plan.prices[0].price;
+              const tierRow = plan.prices.find(p => p.tier === currentTier) || plan.prices[0];
+              const currentPrice = tierRow.price;
+              const listStrike = tierRow.listPrice;
               
               return (
                 <motion.div
@@ -634,9 +711,16 @@ export default function ShadowStore() {
                   <p className="text-sm text-muted-foreground mb-4">{plan.description}</p>
                   
                   <div className="mb-4">
-                    <div className="text-3xl font-bold mb-2">
-                      ${currentPrice}
-                      <span className="text-sm font-normal text-muted-foreground">/{plan.duration === "1mo" ? "mo" : plan.duration}</span>
+                    <div className="text-3xl font-bold mb-2 flex flex-wrap items-baseline gap-2">
+                      {listStrike != null ? (
+                        <span className="text-lg text-muted-foreground line-through">
+                          ${listStrike.toFixed(2)}
+                        </span>
+                      ) : null}
+                      <span>
+                        ${currentPrice.toFixed(2)}
+                        <span className="text-sm font-normal text-muted-foreground">/{plan.duration === "1mo" ? "mo" : plan.duration}</span>
+                      </span>
                     </div>
                   </div>
                   
@@ -825,6 +909,17 @@ export default function ShadowStore() {
           </div>
         </div>
       </footer>
+
+      <SitePromotionBanner
+        variant="shadow"
+        onClaim={(promo) => {
+          setPromoCheckout(promo);
+          setSelectedProduct(null);
+          setSelectedSEOProduct(null);
+          setShowCheckout(true);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+      />
     </div>
   );
 }

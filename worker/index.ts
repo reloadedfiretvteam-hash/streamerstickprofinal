@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
 import { serveStatic } from 'hono/cloudflare-workers';
 import { createProductRoutes } from './routes/products';
@@ -39,8 +39,6 @@ export interface Env {
   CLOUDFLARE_API_TOKEN?: string;
   CLOUDFLARE_ACCOUNT_ID?: string;
   NODE_ENV?: string;
-  /** Surfshark affiliate landing (order/credentials emails). Optional; defaults to surfshark.com */
-  SURFSHARK_AFFILIATE_URL?: string;
   ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
 
@@ -193,6 +191,46 @@ app.use('*', cors({
 
 app.route('/api/auth', createAuthRoutes());
 app.route('/api/products', createProductRoutes());
+
+/** Public homepage / shadow-store promotion (no Stripe secrets). */
+const sitePromotionPublicHandler = async (c: Context<{ Bindings: Env }>) => {
+  try {
+    const storage = getStorage(c.env);
+    const row = await storage.getSitePromotionRow();
+    if (!row?.is_active) return c.json({ promotion: null });
+    if (row.ends_at && new Date(row.ends_at).getTime() < Date.now()) return c.json({ promotion: null });
+    if (!row.real_product_id || !row.promo_shadow_price_id || row.promo_amount_cents == null) {
+      return c.json({ promotion: null });
+    }
+    const cents = Number(row.promo_amount_cents);
+    if (!Number.isFinite(cents) || cents <= 0) return c.json({ promotion: null });
+    const p = await storage.getRealProduct(row.real_product_id);
+    const version =
+      String(row.updated_at || row.real_product_id || '') +
+      String(cents) +
+      String(row.headline || '').slice(0, 48);
+    return c.json({
+      promotion: {
+        headline: row.headline,
+        subheadline: row.subheadline,
+        ctaLabel: row.cta_label || 'Claim offer',
+        realProductId: row.real_product_id,
+        productName: p?.name || null,
+        imageUrl: p?.imageUrl || null,
+        displayPriceDollars: cents / 100,
+        shadowHeadline: row.shadow_headline || row.headline,
+        shadowSubheadline: row.shadow_subheadline || row.subheadline,
+        version,
+      },
+    });
+  } catch (err: any) {
+    console.error('[site-promotion-public]', err?.message || err);
+    return c.json({ promotion: null });
+  }
+};
+app.get('/api/promotion', sitePromotionPublicHandler);
+app.get('/api/site-promotion-public', sitePromotionPublicHandler);
+
 app.route('/api/checkout', createCheckoutRoutes());
 app.route('/api/orders', createOrderRoutes());
 
@@ -386,8 +424,9 @@ app.post('/api/track-outbound-click', async (c) => {
     const body = await c.req.json().catch(() => ({} as any));
     const target = typeof body?.target === 'string' ? body.target : '';
     const source = typeof body?.source === 'string' ? body.source : null;
+    const placement = typeof body?.placement === 'string' ? body.placement : null;
 
-    if (target !== 'vpn_affiliate') {
+    if (target !== 'vpn_affiliate' && target !== 'vpn_interest') {
       return c.json({ ok: true });
     }
 
@@ -406,6 +445,7 @@ app.post('/api/track-outbound-click', async (c) => {
     const cfData = (c.req.raw as any).cf || {};
     const storage = getStorage(c.env);
 
+    const page = target === 'vpn_affiliate' ? '/outbound/vpn' : '/click/vpn-interest';
     await storage.trackVisitByHash({
       ip_hash,
       state: cfData.region ?? null,
@@ -413,8 +453,10 @@ app.post('/api/track-outbound-click', async (c) => {
       country: cfData.country ?? null,
       user_agent: ua || null,
       session_id: null,
-      page: '/outbound/vpn',
-      page_url: source ? `https://streamstickpro.com${source}` : null,
+      page,
+      page_url: source
+        ? `https://streamstickpro.com${source}${placement ? `?placement=${encodeURIComponent(placement)}` : ''}`
+        : null,
       referrer: c.req.header('referer') || null,
       is_bot: isBotUA(ua),
     });
@@ -1388,6 +1430,11 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
     description:
       'Stop ISP throttling on IPTV with Surfshark VPN. Firestick and ONN setup, unlimited devices, camouflage mode. StreamStickPro guide and special offer.',
   },
+  '/vpn-protection': {
+    title: 'VPN Protection for Streaming | Privacy & ISP Tips | StreamStickPro',
+    description:
+      'What a VPN does for streaming: privacy, traffic encryption, and reducing ISP throttling. StreamStickPro educational guide before you choose a VPN.',
+  },
   '/onn': {
     title: 'ONN Google TV Devices | IPTV Ready | StreamStick Pro',
     description:
@@ -1452,6 +1499,7 @@ function trimToWordBoundary(input: string, max: number): string {
 /** Legacy URL paths that should emit canonical hrefs pointing at preferred URLs (matches SEO_REDIRECTS_STATIC where applicable). */
 const LEGACY_CANONICAL_MAP: Record<string, string> = {
   '/homepage': '/',
+  '/faq': '/',
   '/iptv-services': '/iptv',
   '/firestick-devices': '/devices',
   '/live-tv': '/iptv',

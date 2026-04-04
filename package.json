@@ -9,6 +9,8 @@
     "build": "tsx script/build.ts",
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
+    "audit:promotion": "tsx scripts/audit-site-promotion.ts",
+    "smoke:flows": "tsx scripts/smoke-flows.ts",
     "db:push": "drizzle-kit push",
     "seo:audit": "tsx scripts/seo-audit.ts",
     "seo:submit": "tsx scripts/submit-to-search-engines.ts",

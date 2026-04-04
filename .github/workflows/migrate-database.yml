@@ -9,6 +9,7 @@ on:
       - 'scripts/run-supabase-migration.ts'
       - 'scripts/supabase-customer-auth-migration.sql'
       - 'shared/schema.ts'
+      - 'supabase/migrations/**'
 
 jobs:
   migrate:

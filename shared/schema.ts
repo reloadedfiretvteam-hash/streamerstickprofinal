@@ -157,6 +157,10 @@ export const realProducts = pgTable("real_products", {
   setupVideoUrl: text("setup_video_url"), // YouTube tutorial URL for product setup
   shadowProductId: text("shadow_product_id"),
   shadowPriceId: text("shadow_price_id"),
+  /** Sale price in cents; when set and < price, customer pays this; Stripe price must match (admin sync). */
+  salePrice: integer("sale_price"),
+  /** Shown on product cards (live site + shadow) e.g. "Limited time". */
+  cardPromoLabel: text("card_promo_label"),
 }, (table) => [
   uniqueIndex("real_products_shadow_product_idx").on(table.shadowProductId),
   uniqueIndex("real_products_shadow_price_idx").on(table.shadowPriceId),
@@ -168,9 +172,19 @@ export const insertRealProductSchema = createInsertSchema(realProducts);
 export type InsertRealProduct = z.infer<typeof insertRealProductSchema>;
 export type RealProduct = typeof realProducts.$inferSelect;
 
+/** Charge amount in cents for Stripe + orders (sale when valid, otherwise list price). */
+export function effectiveRealProductChargeCents(product: { price: number; salePrice?: number | null }): number {
+  const regular = Math.round(Number(product.price) || 0);
+  const sale = product.salePrice == null ? null : Math.round(Number(product.salePrice));
+  if (sale != null && Number.isFinite(sale) && sale > 0 && sale < regular) return sale;
+  return regular;
+}
+
 export const checkoutItemSchema = z.object({
   productId: z.string().min(1, "Product ID is required"),
   quantity: z.number().int().positive("Quantity must be a positive integer"),
+  /** When true, server uses site_promotion.promo_shadow_price_id if promotion is active and matches productId. */
+  applySitePromotion: z.boolean().optional(),
 });
 
 export const checkoutRequestSchema = z.object({

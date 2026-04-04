@@ -3,16 +3,11 @@ import type { Order } from '../shared/schema';
 import type { Storage } from './storage';
 import type { Env } from './index';
 import { sendEmail } from './email-providers';
+import { SURFSHARK_AFFILIATE_URL } from '../shared/surfshark-affiliate';
 
 const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
 const IPTV_PORTAL_URL = 'http://ky-tv.cc';
 const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
-
-function surfsharkAffiliateUrl(env: Env): string {
-  const u = (env.SURFSHARK_AFFILIATE_URL || '').trim();
-  if (u && /^https?:\/\//i.test(u)) return u;
-  return 'https://surfshark.com/';
-}
 
 export async function sendOrderConfirmation(order: Order, env: Env): Promise<void> {
   if (!order.customerEmail) {
@@ -23,7 +18,7 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
   
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
   const priceFormatted = (order.amount / 100).toFixed(2);
-  const surf = surfsharkAffiliateUrl(env);
+  const surf = SURFSHARK_AFFILIATE_URL;
 
   const emailHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -107,7 +102,7 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
   const hasIPTV = productIds.some(id => id.trim().startsWith('iptv-'));
   const hasFireStick = productIds.some(id => id.trim().startsWith('firestick-'));
   const hasAnyDigitalProduct = hasIPTV || hasFireStick;
-  const surf = surfsharkAffiliateUrl(env);
+  const surf = SURFSHARK_AFFILIATE_URL;
   const vpnCredentialsNote = hasIPTV
     ? `
     <div style="background: #ecfeff; border-left: 4px solid #0dd9d2; padding: 16px; margin: 20px 0; border-radius: 8px;">

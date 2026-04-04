@@ -106,7 +106,11 @@ export function FreeTrial() {
         </div>
         <p className="text-2xl font-bold text-green-400 mb-2">Trial Activated!</p>
         <p className="text-gray-300 mb-4">
-          Check your email for your 36-hour trial credentials. Your login details have been sent to <span className="text-green-400 font-semibold">{submittedEmail || "your email"}</span>.
+          Check your email for your 36-hour trial credentials. Your login details have been sent to{" "}
+          <span className="text-green-400 font-semibold">{submittedEmail || "your email"}</span>.
+        </p>
+        <p className="text-sm text-gray-400 mb-4 max-w-lg mx-auto leading-relaxed">
+          Credentials arrive immediately; your line may take <strong className="text-gray-300">15 minutes to 3 hours</strong> to fully activate (usually under 15 minutes during business hours, 5 AM–11 PM EST).
         </p>
         {(emailProvider || emailProviderId) && (
           <p className="text-xs text-gray-400 mb-3">

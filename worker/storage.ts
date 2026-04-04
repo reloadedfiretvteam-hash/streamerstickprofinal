@@ -279,6 +279,8 @@ export function createStorage(config: StorageConfig) {
         image_url: product.imageUrl,
         shadow_product_id: product.shadowProductId,
         shadow_price_id: product.shadowPriceId,
+        sale_price: product.salePrice ?? null,
+        card_promo_label: product.cardPromoLabel ?? null,
       };
       const { data, error } = await supabase.from('real_products').insert(dbProduct).select().single();
       if (error) throw error;
@@ -294,7 +296,9 @@ export function createStorage(config: StorageConfig) {
       if (updates.imageUrl !== undefined) dbUpdates.image_url = updates.imageUrl;
       if (updates.shadowProductId !== undefined) dbUpdates.shadow_product_id = updates.shadowProductId;
       if (updates.shadowPriceId !== undefined) dbUpdates.shadow_price_id = updates.shadowPriceId;
-      
+      if (updates.salePrice !== undefined) dbUpdates.sale_price = updates.salePrice;
+      if (updates.cardPromoLabel !== undefined) dbUpdates.card_promo_label = updates.cardPromoLabel;
+
       const { data } = await supabase.from('real_products').update(dbUpdates).eq('id', id).select().single();
       return data ? this.mapProductFromDb(data) : undefined;
     },
@@ -559,8 +563,8 @@ export function createStorage(config: StorageConfig) {
             simpleQ(q => q.gte('created_at', weekAgoISO)),
             simpleQ(q => q.gte('created_at', monthAgoISO)),
             simpleQ(q => q.gte('created_at', fiveMinutesAgoISO)),
-            supabase.from('visitors').select('*', { count: 'exact', head: true }).eq('page', '/outbound/vpn').gte('created_at', todayISO),
-            supabase.from('visitors').select('*', { count: 'exact', head: true }).eq('page', '/outbound/vpn').gte('created_at', weekAgoISO),
+            supabase.from('visitors').select('*', { count: 'exact', head: true }).in('page', ['/outbound/vpn', '/click/vpn-interest']).gte('created_at', todayISO),
+            supabase.from('visitors').select('*', { count: 'exact', head: true }).in('page', ['/outbound/vpn', '/click/vpn-interest']).gte('created_at', weekAgoISO),
           ]);
         }
 
@@ -752,6 +756,8 @@ export function createStorage(config: StorageConfig) {
         imageUrl: data.image_url,
         shadowProductId: data.shadow_product_id,
         shadowPriceId: data.shadow_price_id,
+        salePrice: data.sale_price ?? null,
+        cardPromoLabel: data.card_promo_label ?? null,
       };
     },
 
@@ -1101,6 +1107,83 @@ export function createStorage(config: StorageConfig) {
       } catch {
         return [];
       }
+    },
+
+    /** Internal row for admin (may be inactive or incomplete). Pass strict: true to surface DB/migration errors in admin API. */
+    async getSitePromotionRow(options?: { strict?: boolean }): Promise<any | null> {
+      const strict = options?.strict === true;
+      try {
+        const { data, error } = await supabase.from('site_promotion').select('*').eq('id', 'default').maybeSingle();
+        if (error) {
+          console.error('[site_promotion]', error.code || '', error.message || error);
+          if (strict) {
+            const hint =
+              /relation|does not exist|schema cache|not find the table/i.test(String(error.message || ''))
+                ? ' Run the SQL migration `supabase/migrations/20260404120000_site_promotion.sql` (and grants file) on your Supabase project, or trigger your “Run Database Migration” GitHub Action.'
+                : '';
+            throw new Error(`${error.message || 'site_promotion query failed'}.${hint}`);
+          }
+          return null;
+        }
+        return data;
+      } catch (e: any) {
+        if (strict) throw e;
+        console.error('[site_promotion]', e?.message || e);
+        return null;
+      }
+    },
+
+    async getActiveSitePromotion(): Promise<{
+      realProductId: string;
+      promoShadowPriceId: string;
+      promoAmountCents: number;
+    } | null> {
+      try {
+        const { data, error } = await supabase.from('site_promotion').select('*').eq('id', 'default').maybeSingle();
+        if (error || !data || !data.is_active) return null;
+        if (data.ends_at && new Date(data.ends_at).getTime() < Date.now()) return null;
+        if (!data.real_product_id || !data.promo_shadow_price_id || data.promo_amount_cents == null) return null;
+        const cents = Number(data.promo_amount_cents);
+        if (!Number.isFinite(cents) || cents <= 0) return null;
+        return {
+          realProductId: String(data.real_product_id),
+          promoShadowPriceId: String(data.promo_shadow_price_id),
+          promoAmountCents: cents,
+        };
+      } catch {
+        return null;
+      }
+    },
+
+    async upsertSitePromotionRow(row: {
+      is_active: boolean;
+      headline: string;
+      subheadline?: string | null;
+      cta_label?: string | null;
+      real_product_id: string;
+      promo_shadow_price_id: string;
+      promo_amount_cents: number;
+      shadow_headline?: string | null;
+      shadow_subheadline?: string | null;
+      ends_at?: string | null;
+    }): Promise<any> {
+      const payload = {
+        id: 'default',
+        is_active: row.is_active,
+        headline: row.headline || '',
+        subheadline: row.subheadline ?? null,
+        cta_label: row.cta_label || 'Claim offer',
+        real_product_id: row.real_product_id,
+        promo_shadow_price_id: row.promo_shadow_price_id,
+        promo_amount_cents: Math.round(row.promo_amount_cents),
+        shadow_headline: row.shadow_headline ?? null,
+        shadow_subheadline: row.shadow_subheadline ?? null,
+        ends_at: row.ends_at || null,
+        updated_at: new Date().toISOString(),
+      };
+      const { data, error } = await supabase.from('site_promotion').upsert(payload, { onConflict: 'id' }).select().single();
+      if (error) throw error;
+      return data;
     },
   };
 }

@@ -5,6 +5,13 @@
 
 export const SITE_URL = 'https://streamstickpro.com';
 
+/** Product offer / ItemList URLs — always point at shop + fragment (matches live PDP cards). */
+export function shopProductUrl(productId: string): string {
+  const id = String(productId || '').trim();
+  if (!id) return `${SITE_URL}/shop`;
+  return `${SITE_URL}/shop#${encodeURIComponent(id)}`;
+}
+
 const META_DESC_MAX = 160;
 const META_DESC_MIN = 50;
 const TITLE_MAX = 60;
@@ -80,11 +87,14 @@ export function setPageMeta(options: {
   setMeta('og:url', url, true);
   setMeta('og:type', type, true);
   setMeta('og:site_name', 'StreamStickPro', true);
-  setMeta('og:image', ogImage || `${SITE_URL}/opengraph.jpg`, true);
+  const ogImg = ogImage || `${SITE_URL}/opengraph.jpg`;
+  setMeta('og:image', ogImg, true);
+  setMeta('og:image:alt', 'StreamStickPro — Reloaded Fire TV, Fire Stick, 18K+ channels', true);
   setMeta('twitter:card', 'summary_large_image');
   setMeta('twitter:title', fullTitle);
   setMeta('twitter:description', safeDesc);
-  setMeta('twitter:image', ogImage || `${SITE_URL}/opengraph.jpg`);
+  setMeta('twitter:image', ogImg);
+  setMeta('twitter:image:alt', 'StreamStickPro — Reloaded Fire TV, Fire Stick, 18K+ channels');
   if (publishedTime) setMeta('article:published_time', publishedTime, true);
   if (modifiedTime) setMeta('article:modified_time', modifiedTime, true);
   let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement;

@@ -3,24 +3,15 @@ import { Link } from "wouter";
 import { ShieldCheck, Wifi, Lock, Gauge } from "lucide-react";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { setPageMeta } from "@/lib/seo";
-import { trackCustomEvent } from "@/components/RetargetingPixels";
+import { SURFSHARK_AFFILIATE_URL } from "@shared/surfshark-affiliate";
+import { trackVpnClick } from "@/lib/vpn-tracking";
 
-const VPN_URL = "https://get.surfshark.net/aff_c?offer_id=926&aff_id=44830";
+const VPN_URL = SURFSHARK_AFFILIATE_URL;
 
 const breadcrumbs = [
   { label: "Home", href: "/" },
   { label: "VPN Protection", href: "/vpn-protection" },
 ];
-
-function trackVpnOutbound(source: string) {
-  trackCustomEvent("vpn_affiliate_click", { placement: "vpn_page" });
-  void fetch("/api/track-outbound-click", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ target: "vpn_affiliate", source }),
-    keepalive: true,
-  }).catch(() => {});
-}
 
 export default function VpnProtection() {
   useEffect(() => {
@@ -81,7 +72,13 @@ export default function VpnProtection() {
               href={VPN_URL}
               target="_blank"
               rel="noopener noreferrer sponsored"
-              onClick={() => trackVpnOutbound("/vpn-protection")}
+              onClick={() =>
+                trackVpnClick({
+                  source: "/vpn-protection",
+                  placement: "vpn_protection_cta",
+                  target: "vpn_affiliate",
+                })
+              }
               className="inline-flex min-h-[52px] items-center justify-center rounded-xl bg-[#00D4FF] px-6 py-3 font-semibold text-[#0A0A0F] hover:bg-[#10F7BE] transition-colors"
             >
               Get VPN Protection

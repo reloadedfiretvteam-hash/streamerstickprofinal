@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useLocation, Link } from "wouter";
 import { apiCall } from "@/lib/api";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
@@ -24,7 +24,7 @@ import { IPTVMediaPlayersSection } from "@/components/IPTVMediaPlayersSection";
 import { SavingsCalculator } from "@/components/SavingsCalculator";
 import { StickyMobileCTA, ScrollToTopButton } from "@/components/StickyMobileCTA";
 import { SEOSchema, ServiceSchema, ItemListSchema } from "@/components/SEOSchema";
-import { setPageMeta } from "@/lib/seo";
+import { setPageMeta, shopProductUrl } from "@/lib/seo";
 import { ProductQuickView } from "@/components/ProductQuickView";
 import { QuickViewButton } from "@/components/QuickViewButton";
 import { MobileNav } from "@/components/MobileNav";
@@ -32,6 +32,9 @@ import { ComparisonTable } from "@/components/ComparisonTable";
 import { FloatingCTA } from "@/components/FloatingCTA";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import SupportMessageBox from "@/components/SupportMessageBox";
+import { trackVpnClick } from "@/lib/vpn-tracking";
+import { SitePromotionBanner } from "@/components/SitePromotionBanner";
+import type { Product as StoreCartProduct } from "@/lib/store";
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
 const firestickHdImg = `${SUPABASE_BASE}/OIP_(11)99_1764978938773.jpg`;
@@ -55,7 +58,12 @@ const productBenefitList = [
 interface Product {
   id: string;
   name: string;
+  /** What the customer pays (USD), after sale if active. */
   price: number;
+  /** List price when on sale (USD), for strikethrough in UI. */
+  regularListPrice?: number;
+  /** Admin-set ribbon (per-product promo); separate from site-wide popup. */
+  cardPromoLabel?: string | null;
   description: string;
   features: string[];
   image: string;
@@ -341,13 +349,25 @@ export default function MainStore() {
           const defaultPeriod = defaultProducts.find(dp => dp.id === p.id)?.period;
           const defaultDescription = defaultProducts.find(dp => dp.id === p.id)?.description || '';
 
-          const priceInCents = parseInt(p.price?.toString() || '0', 10);
-          const priceInDollars = priceInCents / 100;
+          const regularCents = parseInt(p.price?.toString() || '0', 10);
+          const saleRaw = p.salePrice ?? p.sale_price;
+          const saleCents =
+            saleRaw != null && saleRaw !== ''
+              ? parseInt(String(saleRaw), 10)
+              : NaN;
+          const onSale =
+            Number.isFinite(saleCents) &&
+            saleCents > 0 &&
+            saleCents < regularCents;
+          const effectiveCents = onSale ? saleCents : regularCents;
+          const priceInDollars = effectiveCents / 100;
 
           return {
             id: p.id,
             name: p.name,
             price: priceInDollars,
+            regularListPrice: onSale ? regularCents / 100 : undefined,
+            cardPromoLabel: p.cardPromoLabel ?? p.card_promo_label ?? null,
             description: p.description || defaultDescription,
             features: defaultFeatures,
             image: productImage,
@@ -408,34 +428,6 @@ export default function MainStore() {
       return `Premium Live TV plan: ${product.name}. 18,000+ live channels, 100,000+ movies and series, sports and PPV. Multi-device options. StreamStickPro.`;
     }
     return `${product.name} with 1 year Live TV included, plus setup guidance and support. 18,000+ channels, 100,000+ movies and series. StreamStickPro.`;
-  };
-
-  const productListData = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "StreamStickPro Products",
-    "itemListElement": products.map((product, index) => ({
-      "@type": "ListItem",
-      "position": index + 1,
-      "item": {
-        "@type": "Product",
-        "name": product.name,
-        "description": getSchemaDescription(product),
-        "image": product.image,
-        "offers": {
-          "@type": "Offer",
-          "url": `https://streamstickpro.com/#${product.id}`,
-          "price": product.price,
-          "priceCurrency": "USD",
-          "availability": "https://schema.org/InStock",
-          "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          "seller": {
-            "@type": "Organization",
-            "name": "StreamStickPro"
-          }
-        }
-      }
-    }))
   };
 
   const eliteHomeFaqLd = {
@@ -517,9 +509,8 @@ export default function MainStore() {
 
       {/* Content Layer */}
       <div className="relative z-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productListData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(eliteHomeFaqLd) }} />
-      {/* WebSite, Organization, FAQPage: index.html only. ItemList + ServiceSchema here for product/shop signal. */}
+      {/* Organization/WebSite/Store: index.html. One ItemList via ItemListSchema below (shop URLs). */}
 
       {/* Service Schema for IPTV Service Offerings */}
       <ServiceSchema 
@@ -536,7 +527,7 @@ export default function MainStore() {
         items={products.slice(0, 6).map(p => ({
           name: p.name,
           description: getSchemaDescription(p),
-          url: `https://streamstickpro.com/#${p.id}`,
+          url: shopProductUrl(p.id),
           image: p.image,
           price: p.price
         }))}
@@ -574,7 +565,14 @@ export default function MainStore() {
           
           <div className="flex items-center gap-2">
             <Link href="/iptv-services"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-[#00D4FF] hover:bg-white/5 rounded font-medium">IPTV</span></Link>
-            <Link href="/vpn"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#0DD9D2] hover:text-white hover:bg-white/5 rounded font-medium">VPN</span></Link>
+            <Link href="/vpn">
+              <span
+                className="hidden lg:inline px-2 py-1.5 text-sm text-[#0DD9D2] hover:text-white hover:bg-white/5 rounded font-medium"
+                onClick={() => trackVpnClick({ source: "/", placement: "header_vpn_link" })}
+              >
+                VPN
+              </span>
+            </Link>
             <Link href="/iptv-firestick"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Firestick</span></Link>
             <Link href="/firestick-devices"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Devices</span></Link>
             <Link href="/iptv-media-players"><span className="hidden xl:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Media</span></Link>
@@ -681,7 +679,10 @@ export default function MainStore() {
                 </span>
               </Link>
               <Link href="/vpn">
-                <span className="flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-[#0A0A0F] bg-[#0DD9D2] ring-2 ring-[#0DD9D2] ring-offset-2 ring-offset-[#0A0A0F] hover:bg-[#2ee8e0] shadow-[0_20px_60px_rgba(13,217,210,0.25)] cursor-pointer transition-transform hover:scale-[1.02]">
+                <span
+                  className="flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-[#0A0A0F] bg-[#0DD9D2] ring-2 ring-[#0DD9D2] ring-offset-2 ring-offset-[#0A0A0F] hover:bg-[#2ee8e0] shadow-[0_20px_60px_rgba(13,217,210,0.25)] cursor-pointer transition-transform hover:scale-[1.02]"
+                  onClick={() => trackVpnClick({ source: "/", placement: "hero_vpn_cta" })}
+                >
                   GET SURFSHARK VPN
                 </span>
               </Link>
@@ -783,7 +784,10 @@ export default function MainStore() {
                 ))}
               </ul>
               <Link href="/vpn">
-                <span className="inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#0DD9D2] text-[#0A0A0F] font-black hover:bg-[#2ee8e0] cursor-pointer">
+                <span
+                  className="inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#0DD9D2] text-[#0A0A0F] font-black hover:bg-[#2ee8e0] cursor-pointer"
+                  onClick={() => trackVpnClick({ source: "/", placement: "product_grid_vpn_cta" })}
+                >
                   GET SURFSHARK VPN
                 </span>
               </Link>
@@ -925,6 +929,10 @@ export default function MainStore() {
               {iptvPricingMatrix.map((plan, index) => {
                 const deviceCount = selectedDevices[plan.duration];
                 const selectedPrice = plan.prices.find(p => p.devices === deviceCount) || plan.prices[0];
+                const iptvDb = products.find((pp) => pp.id === selectedPrice.productId);
+                const linePriceDollars = iptvDb?.price ?? selectedPrice.price;
+                const iptvRegular = iptvDb?.regularListPrice;
+                const iptvPromo = iptvDb?.cardPromoLabel;
                 const cardGradients = [
                   'from-slate-800 via-slate-900 to-gray-900',
                   'from-blue-950/50 via-slate-900 to-gray-900',
@@ -987,8 +995,13 @@ export default function MainStore() {
                         }`}>
                           {plan.badge}
                         </div>
+                        {iptvPromo ? (
+                          <div className="absolute top-4 left-4 z-20 max-w-[min(180px,70%)] bg-amber-500 text-black px-2 py-1 rounded-full font-bold text-xs shadow-lg leading-tight">
+                            {iptvPromo}
+                          </div>
+                        ) : null}
                         {(plan.duration === "6mo" || plan.duration === "1yr") && (
-                          <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs shadow-lg">
+                          <div className={`absolute ${iptvPromo ? 'top-14' : 'top-4'} left-4 z-20 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs shadow-lg`}>
                             SAVE 10%
                           </div>
                         )}
@@ -1021,9 +1034,14 @@ export default function MainStore() {
                         </div>
 
                         <div className="mb-4">
-                          <div className="flex items-baseline gap-2">
+                          <div className="flex items-baseline gap-2 flex-wrap">
+                            {iptvRegular != null ? (
+                              <span className="text-lg text-gray-500 line-through decoration-gray-500">
+                                ${iptvRegular.toFixed(2)}
+                              </span>
+                            ) : null}
                             <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400" data-testid={`text-price-iptv-${plan.duration}`}>
-                              ${selectedPrice.price}
+                              ${linePriceDollars.toFixed(2)}
                             </span>
                             <span className="text-gray-200 text-sm">
                               / {plan.durationLabel.toLowerCase()}
@@ -1047,7 +1065,7 @@ export default function MainStore() {
                           onClick={() => addItem({
                             id: selectedPrice.productId,
                             name: `Live TV ${plan.durationLabel} - ${deviceCount} Device${deviceCount > 1 ? 's' : ''}`,
-                            price: selectedPrice.price,
+                            price: linePriceDollars,
                             image: iptvImg,
                             description: plan.description,
                             features: plan.features,
@@ -1298,8 +1316,13 @@ export default function MainStore() {
                       }`}>
                         {product.badge}
                       </div>
+                      {product.cardPromoLabel ? (
+                        <div className="absolute top-4 left-4 z-20 max-w-[min(200px,55%)] bg-amber-500 text-black px-3 py-1 rounded-full font-bold text-xs shadow-lg leading-tight">
+                          {product.cardPromoLabel}
+                        </div>
+                      ) : null}
                       {product.id === 'fs-4k' && (
-                        <div className="absolute top-4 left-4 z-20 bg-green-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-lg">
+                        <div className={`absolute ${product.cardPromoLabel ? 'top-14' : 'top-4'} left-4 z-20 bg-green-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-lg`}>
                           1 YEAR INCLUDED
                         </div>
                       )}
@@ -1364,7 +1387,12 @@ export default function MainStore() {
                           const discountInfo = getFirestickDiscount(qty);
                           return (
                             <>
-                              <div className="flex items-baseline gap-2">
+                              <div className="flex items-baseline gap-2 flex-wrap">
+                                {product.regularListPrice != null ? (
+                                  <span className="text-xl text-gray-500 line-through decoration-gray-500">
+                                    ${(product.regularListPrice * qty).toFixed(2)}
+                                  </span>
+                                ) : null}
                                 <span className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400" data-testid={`text-price-${product.id}`}>
                                   ${totalPrice.toFixed(2)}
                                 </span>
@@ -2120,7 +2148,16 @@ export default function MainStore() {
                 <li><a href="#shop" className="hover:text-orange-400 transition-colors cursor-pointer">Shop All Products</a></li>
                 <li><Link href="/blog"><span className="hover:text-orange-400 transition-colors cursor-pointer">Blog & Guides</span></Link></li>
                 <li><Link href="/resources"><span className="hover:text-orange-400 transition-colors cursor-pointer">Resources & Channel Directory</span></Link></li>
-                <li><Link href="/vpn"><span className="hover:text-[#0DD9D2] transition-colors cursor-pointer">Surfshark VPN</span></Link></li>
+                <li>
+                  <Link href="/vpn">
+                    <span
+                      className="hover:text-[#0DD9D2] transition-colors cursor-pointer"
+                      onClick={() => trackVpnClick({ source: "/", placement: "footer_vpn_link" })}
+                    >
+                      Surfshark VPN
+                    </span>
+                  </Link>
+                </li>
                 <li><a href="#about" className="hover:text-orange-400 transition-colors cursor-pointer">About Us</a></li>
               </ul>
             </div>
@@ -2194,6 +2231,24 @@ export default function MainStore() {
         </div>
       </footer>
       </main>
+
+      <SitePromotionBanner
+        variant="live"
+        catalogProducts={products.map(
+          (p): StoreCartProduct => ({
+            id: p.id,
+            name: p.name,
+            price: p.price,
+            image: p.image,
+            category: p.category,
+            description: p.description,
+          })
+        )}
+        onClaim={(promo, p) => {
+          addItemWithQuantity(p, 1, promo.displayPriceDollars, { sitePromotion: true });
+          openCart();
+        }}
+      />
 
       {/* Exit Intent Popup */}
       <ExitPopup />

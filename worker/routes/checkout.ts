@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import Stripe from 'stripe';
 import { getStorage } from '../helpers';
-import { checkoutRequestSchema } from '../../shared/schema';
+import { checkoutRequestSchema, effectiveRealProductChargeCents } from '../../shared/schema';
 import type { Env } from '../index';
 
 const isProduction = (env: Env) => (env.NODE_ENV || '').toLowerCase() === 'production';
@@ -61,8 +61,10 @@ export function createCheckoutRoutes() {
         }
       }
 
-      const productsWithQuantity: Array<{ product: any; quantity: number }> = [];
-      
+      const activePromo = await storage.getActiveSitePromotion();
+      type ResolvedLine = { product: any; quantity: number; stripePriceId: string; unitAmountCents: number };
+      const productsWithQuantity: ResolvedLine[] = [];
+
       for (const item of items) {
         debugLog("Checkout: Looking up product:", item.productId);
         const product = await storage.getRealProduct(item.productId);
@@ -70,21 +72,44 @@ export function createCheckoutRoutes() {
           debugLog("Checkout: Product not found:", item.productId);
           return c.json({ error: `Product not found: ${item.productId}` }, 404);
         }
-        if (!product.shadowPriceId) {
+
+        const wantsPromo = item.applySitePromotion === true;
+        let stripePriceId = product.shadowPriceId;
+        let unitAmountCents = effectiveRealProductChargeCents({
+          price: product.price,
+          salePrice: product.salePrice ?? null,
+        });
+
+        if (wantsPromo) {
+          if (!activePromo || activePromo.realProductId !== item.productId) {
+            return c.json({
+              error: "This promotion is not active or does not apply to this product. Remove the promotional item or refresh the page.",
+            }, 400);
+          }
+          stripePriceId = activePromo.promoShadowPriceId;
+          unitAmountCents = activePromo.promoAmountCents;
+        }
+
+        if (!stripePriceId) {
           debugLog("Checkout: Product not configured:", item.productId);
           return c.json({ error: `Product not configured for checkout: ${item.productId}` }, 400);
         }
-        debugLog("Checkout: Found product:", product.name, "shadowPriceId:", product.shadowPriceId);
-        productsWithQuantity.push({ product, quantity: item.quantity });
+
+        debugLog("Checkout: Resolved line:", product.name, "priceId:", stripePriceId, "promo:", wantsPromo && !!activePromo);
+        productsWithQuantity.push({ product, quantity: item.quantity, stripePriceId, unitAmountCents });
       }
+
+      const sitePromotionApplied = productsWithQuantity.some(
+        (p, idx) => items[idx]?.applySitePromotion === true && activePromo && p.product.id === activePromo.realProductId
+      );
 
       debugLog("Checkout: Creating Stripe session");
       const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
 
       const baseUrl = new URL(c.req.url).origin;
 
-      const lineItems = productsWithQuantity.map(({ product, quantity }) => ({
-        price: product.shadowPriceId,
+      const lineItems = productsWithQuantity.map(({ stripePriceId, quantity }) => ({
+        price: stripePriceId,
         quantity,
       }));
 
@@ -113,6 +138,7 @@ export function createCheckoutRoutes() {
           isRenewal: isRenewal ? 'true' : 'false',
           existingUsername: existingUsername || '',
           existingCustomerId: existingCustomer?.id || '',
+          sitePromotionApplied: sitePromotionApplied ? 'true' : 'false',
         },
       };
 
@@ -138,7 +164,7 @@ export function createCheckoutRoutes() {
       debugLog("Checkout: Stripe session created:", session.id);
 
       const totalAmount = productsWithQuantity.reduce(
-        (sum, { product, quantity }) => sum + product.price * quantity, 
+        (sum, { unitAmountCents, quantity }) => sum + unitAmountCents * quantity,
         0
       );
 
@@ -148,7 +174,7 @@ export function createCheckoutRoutes() {
         customerName: customerName || null,
         stripeCheckoutSessionId: session.id,
         shadowProductId: shadowProductIds,
-        shadowPriceId: productsWithQuantity.map(p => p.product.shadowPriceId).join(','),
+        shadowPriceId: productsWithQuantity.map(p => p.stripePriceId).join(','),
         realProductId: realProductIds,
         realProductName: realProductNames,
         amount: totalAmount,

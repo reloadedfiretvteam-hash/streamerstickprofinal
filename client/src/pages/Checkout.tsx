@@ -11,18 +11,75 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, ArrowLeft, CreditCard, Lock, ShieldCheck, Zap, CheckCircle, Loader2, Globe, MessageSquare, Phone, Shield, ChevronRight, Sparkles, Truck } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { setPageMeta } from "@/lib/seo";
+import { trackVpnClick } from "@/lib/vpn-tracking";
 
-const PAYMENT_METHODS = [
-  { name: "Visa", icon: "💳" },
-  { name: "Mastercard", icon: "💳" },
-  { name: "Amex", icon: "💳" },
-  { name: "Discover", icon: "💳" },
-  { name: "Apple Pay", icon: "🍎" },
-  { name: "Google Pay", icon: "📱" },
-  { name: "Cash App", icon: "💵" },
-  { name: "Affirm", icon: "🅰️" },
-  { name: "Klarna", icon: "🟡" },
-  { name: "Link", icon: "⚡" },
+/** Stripe-hosted checkout may show a subset; chips signal trust + brand polish. */
+const PAYMENT_METHOD_CHIPS: {
+  name: string;
+  abbr: string;
+  pill: string;
+  dot: string;
+}[] = [
+  {
+    name: "Visa",
+    abbr: "V",
+    pill: "border-blue-500/35 bg-gradient-to-br from-blue-600/25 via-blue-950/30 to-slate-950/50 text-blue-50 shadow-sm shadow-blue-500/10",
+    dot: "bg-[#1434CB] ring-2 ring-blue-400/25",
+  },
+  {
+    name: "Mastercard",
+    abbr: "MC",
+    pill: "border-orange-500/35 bg-gradient-to-br from-orange-600/20 via-red-950/25 to-slate-950/50 text-orange-50 shadow-sm shadow-orange-500/10",
+    dot: "bg-gradient-to-br from-[#EB001B] to-[#F79E1B] ring-2 ring-orange-400/20",
+  },
+  {
+    name: "Amex",
+    abbr: "AX",
+    pill: "border-cyan-500/35 bg-gradient-to-br from-cyan-600/20 via-sky-950/30 to-slate-950/50 text-cyan-50 shadow-sm shadow-cyan-500/10",
+    dot: "bg-[#2E77BC] ring-2 ring-cyan-400/20",
+  },
+  {
+    name: "Discover",
+    abbr: "D",
+    pill: "border-amber-500/35 bg-gradient-to-br from-amber-600/20 to-orange-950/40 text-amber-50 shadow-sm shadow-amber-500/10",
+    dot: "bg-[#FF6000] ring-2 ring-amber-400/20",
+  },
+  {
+    name: "Apple Pay",
+    abbr: "",
+    pill: "border-violet-500/30 bg-gradient-to-br from-violet-600/15 via-slate-900/50 to-slate-950/60 text-violet-100 shadow-sm shadow-violet-500/10",
+    dot: "bg-gradient-to-br from-violet-500 to-fuchsia-600 ring-2 ring-violet-400/20",
+  },
+  {
+    name: "Google Pay",
+    abbr: "",
+    pill: "border-emerald-500/30 bg-gradient-to-br from-emerald-600/18 via-teal-950/25 to-slate-950/50 text-emerald-50 shadow-sm shadow-emerald-500/10",
+    dot: "bg-gradient-to-br from-emerald-500 to-cyan-500 ring-2 ring-emerald-400/15",
+  },
+  {
+    name: "Cash App",
+    abbr: "$",
+    pill: "border-green-500/35 bg-gradient-to-br from-green-600/22 to-emerald-950/40 text-green-50 shadow-sm shadow-green-500/10",
+    dot: "bg-[#00D632] ring-2 ring-green-400/25",
+  },
+  {
+    name: "Affirm",
+    abbr: "A",
+    pill: "border-indigo-500/30 bg-gradient-to-br from-indigo-600/20 to-slate-950/55 text-indigo-100 shadow-sm shadow-indigo-500/10",
+    dot: "bg-indigo-500 ring-2 ring-indigo-400/25",
+  },
+  {
+    name: "Klarna",
+    abbr: "K",
+    pill: "border-rose-500/25 bg-gradient-to-br from-rose-600/15 via-pink-950/20 to-slate-950/55 text-rose-100 shadow-sm shadow-rose-500/10",
+    dot: "bg-gradient-to-br from-pink-500 to-rose-600 ring-2 ring-rose-400/15",
+  },
+  {
+    name: "Link",
+    abbr: "",
+    pill: "border-[#FAD02C]/40 bg-gradient-to-br from-[#FAD02C]/15 via-orange-950/25 to-slate-950/50 text-[#FAD02C] shadow-sm shadow-[#FAD02C]/15",
+    dot: "bg-gradient-to-r from-orange-400 to-[#FAD02C] ring-2 ring-[#FAD02C]/30",
+  },
 ];
 
 function ProgressBar({ step }: { step: number }) {
@@ -133,21 +190,25 @@ function CheckoutTrustReassuranceSection({
 
 function TrustBanner() {
   return (
-    <div className="bg-gradient-to-r from-emerald-900/40 via-emerald-800/30 to-emerald-900/40 border border-emerald-500/20 rounded-2xl p-4 mb-6 backdrop-blur">
+    <div className="relative overflow-hidden rounded-2xl border border-orange-500/20 bg-gradient-to-r from-gray-950/90 via-emerald-950/35 to-gray-950/90 p-4 mb-6 backdrop-blur shadow-lg shadow-orange-500/5">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-orange-500/70 to-transparent"
+        aria-hidden
+      />
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
         <div className="flex items-center gap-2">
-          <Lock className="w-4 h-4 text-emerald-400" />
-          <span className="text-sm font-semibold text-emerald-200">SSL Encrypted</span>
+          <Lock className="w-4 h-4 text-cyan-400" />
+          <span className="text-sm font-semibold text-white/95">SSL Encrypted</span>
         </div>
-        <div className="hidden sm:block w-px h-4 bg-emerald-500/30" />
+        <div className="hidden sm:block w-px h-4 bg-gradient-to-b from-orange-500/40 to-cyan-500/40" />
         <div className="flex items-center gap-2">
-          <Shield className="w-4 h-4 text-emerald-400" />
-          <span className="text-sm font-semibold text-emerald-200">Powered by Stripe</span>
+          <Shield className="w-4 h-4 text-orange-400" />
+          <span className="text-sm font-semibold text-orange-100/95">Powered by Stripe</span>
         </div>
-        <div className="hidden sm:block w-px h-4 bg-emerald-500/30" />
+        <div className="hidden sm:block w-px h-4 bg-gradient-to-b from-orange-500/40 to-cyan-500/40" />
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span className="text-sm font-semibold text-emerald-200">PCI Compliant</span>
+          <span className="text-sm font-semibold text-emerald-100/95">PCI Compliant</span>
         </div>
       </div>
     </div>
@@ -182,7 +243,7 @@ const productIdMap: Record<string, string> = {
 
 export default function Checkout() {
   const [, setLocation] = useLocation();
-  const { items, total, removeItem, updateQuantity, clearCart } = useCart();
+  const { items, total, removeItem, updateQuantity } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [countryOptions, setCountryOptions] = useState({
@@ -259,7 +320,7 @@ export default function Checkout() {
           email: formData.email,
           customerName: `${formData.firstName} ${formData.lastName}`.trim() || null,
           cartItems: items.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity })),
-          totalAmount: total,
+          totalAmount: total(),
         }),
       });
     } catch (err) {
@@ -312,10 +373,14 @@ export default function Checkout() {
     setError(null);
 
     try {
-      const checkoutItems = items.map(item => ({
-        productId: productIdMap[item.id] || item.id,
-        quantity: item.quantity,
-      }));
+      const checkoutItems = items.map((item) => {
+        const base: { productId: string; quantity: number; applySitePromotion?: boolean } = {
+          productId: productIdMap[item.id] || item.id,
+          quantity: item.quantity,
+        };
+        if (item.applySitePromotion) base.applySitePromotion = true;
+        return base;
+      });
 
       const checkoutPayload: any = {
         items: checkoutItems,
@@ -369,8 +434,9 @@ export default function Checkout() {
       }
 
       if (data.url) {
-        clearCart();
-        window.location.href = data.url;
+        // Clear cart only after paid checkout on /success — clearing here empties the cart if
+        // Stripe navigation is blocked, gated, or the user cancels, which feels like a "refresh".
+        window.location.assign(data.url);
       } else {
         throw new Error("No checkout URL returned");
       }
@@ -433,10 +499,18 @@ export default function Checkout() {
         <p className="text-center text-sm text-gray-300 mb-3">
           Typical checkout time: under 2 minutes. Secure Stripe checkout. One-time payment, no auto-renew subscription.
         </p>
-        <div className="mb-6 flex flex-wrap items-center justify-center gap-2 text-xs text-gray-300">
-          {["Stripe secured", "Cards + Link", "Klarna/Affirm when eligible", "Coupon codes accepted"].map((item) => (
-            <span key={item} className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
-              {item}
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-2 text-xs">
+          {[
+            { label: "Stripe secured", className: "border-orange-500/30 bg-orange-500/10 text-orange-100" },
+            { label: "Cards + Link", className: "border-cyan-500/30 bg-cyan-500/10 text-cyan-100" },
+            { label: "Klarna / Affirm when eligible", className: "border-violet-500/25 bg-violet-500/10 text-violet-100" },
+            { label: "Coupon codes accepted", className: "border-[#FAD02C]/35 bg-[#FAD02C]/10 text-[#F5E6A3]" },
+          ].map((item) => (
+            <span
+              key={item.label}
+              className={`rounded-full border px-3 py-1.5 font-medium shadow-sm backdrop-blur ${item.className}`}
+            >
+              {item.label}
             </span>
           ))}
         </div>
@@ -447,7 +521,13 @@ export default function Checkout() {
           hasFreeTrial={hasFreeTrial}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <form
+          className="grid grid-cols-1 lg:grid-cols-5 gap-8"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void handlePayment();
+          }}
+        >
           <div className="lg:col-span-3 space-y-6">
             <Card className="border-white/10 bg-card/50 backdrop-blur">
               <CardHeader className="pb-4">
@@ -475,14 +555,16 @@ export default function Checkout() {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center border border-white/20 rounded-lg overflow-hidden">
-                        <button 
+                        <button
+                          type="button"
                           className="px-3 py-2 hover:bg-white/10 transition-colors"
                           onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                           data-testid={`button-decrease-${item.id}`}
                           aria-label={`Decrease quantity of ${item.name}`}
                         >-</button>
                         <span className="px-3 py-2 bg-white/5 min-w-[40px] text-center">{item.quantity}</span>
-                        <button 
+                        <button
+                          type="button"
                           className="px-3 py-2 hover:bg-white/10 transition-colors"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           data-testid={`button-increase-${item.id}`}
@@ -490,6 +572,7 @@ export default function Checkout() {
                         >+</button>
                       </div>
                       <Button 
+                        type="button"
                         variant="ghost" 
                         size="icon" 
                         onClick={() => removeItem(item.id)} 
@@ -514,7 +597,12 @@ export default function Checkout() {
                 <CardDescription className="text-muted-foreground">
                   Reduce ISP throttling and buffering. We&apos;ll note your interest on this order.{" "}
                   <Link href="/vpn">
-                    <span className="text-[#0DD9D2] hover:underline font-medium cursor-pointer">Learn more on our VPN page</span>
+                    <span
+                      className="text-[#0DD9D2] hover:underline font-medium cursor-pointer"
+                      onClick={() => trackVpnClick({ source: "/checkout", placement: "checkout_vpn_link" })}
+                    >
+                      Learn more on our VPN page
+                    </span>
                   </Link>
                   .
                 </CardDescription>
@@ -853,9 +941,9 @@ export default function Checkout() {
                 )}
 
                 <div className="space-y-4 pt-1">
-                  <Button 
+                  <Button
+                    type="submit"
                     className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 h-14 text-lg font-bold shadow-lg shadow-orange-500/25 transition-all hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.01]"
-                    onClick={handlePayment}
                     disabled={isProcessing}
                     data-testid="button-pay"
                   >
@@ -880,12 +968,12 @@ export default function Checkout() {
                     <span>256-bit SSL encryption by Stripe</span>
                   </div>
 
-                  <div className="bg-blue-500/8 border border-blue-500/15 p-3 rounded-xl">
+                  <div className="rounded-xl border border-cyan-500/25 bg-gradient-to-br from-cyan-500/10 via-slate-900/40 to-orange-500/5 p-3 shadow-sm shadow-cyan-500/5">
                     <div className="flex items-start gap-2.5">
-                      <ShieldCheck className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
-                      <div className="text-xs text-blue-200">
-                        <p className="font-medium">Discrete Billing</p>
-                        <p className="text-blue-300/70 mt-0.5">Your statement will show "Digital Services" for privacy.</p>
+                      <ShieldCheck className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
+                      <div className="text-xs text-cyan-100/90">
+                        <p className="font-semibold text-white">Discrete billing</p>
+                        <p className="text-cyan-200/75 mt-0.5">Your statement will show &quot;Digital Services&quot; for privacy.</p>
                       </div>
                     </div>
                   </div>
@@ -921,18 +1009,31 @@ export default function Checkout() {
                     </div>
                   </div>
                   
-                  <Separator className="bg-white/5" />
+                  <Separator className="bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
-                  <div className="space-y-3">
-                    <p className="text-xs text-gray-500 text-center font-medium uppercase tracking-wider">We accept</p>
-                    <div className="flex flex-wrap justify-center gap-1.5">
-                      {PAYMENT_METHODS.map((method) => (
+                  <div className="rounded-2xl border border-orange-500/20 bg-gradient-to-b from-orange-500/[0.07] via-slate-950/40 to-cyan-500/[0.06] p-4 shadow-inner shadow-black/20">
+                    <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-[#FAD02C] to-cyan-300 mb-1">
+                      Accepted payment methods
+                    </p>
+                    <p className="text-center text-[10px] text-gray-400 mb-3.5">
+                      Final options depend on your device &amp; region on Stripe&apos;s page
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {PAYMENT_METHOD_CHIPS.map((m) => (
                         <span
-                          key={method.name}
-                          className="px-2 py-1 rounded-md border border-white/10 bg-white/5 text-[10px] font-semibold text-gray-300 flex items-center gap-1"
+                          key={m.name}
+                          title={m.name}
+                          className={`inline-flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-[10px] font-bold tracking-wide transition-transform hover:scale-[1.02] ${m.pill}`}
                         >
-                          <span className="text-xs">{method.icon}</span>
-                          {method.name}
+                          <span
+                            className={`flex h-5 min-w-[1.25rem] shrink-0 items-center justify-center rounded-md ${m.dot}`}
+                            aria-hidden
+                          >
+                            {m.abbr ? (
+                              <span className="text-[9px] font-black text-white drop-shadow-sm">{m.abbr}</span>
+                            ) : null}
+                          </span>
+                          <span className="truncate max-w-[5.5rem] sm:max-w-none">{m.name}</span>
                         </span>
                       ))}
                     </div>
@@ -946,9 +1047,9 @@ export default function Checkout() {
                   </p>
                 </div>
               </CardContent>
-            </Card>
+             </Card>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

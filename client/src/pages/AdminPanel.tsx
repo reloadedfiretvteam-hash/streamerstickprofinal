@@ -242,6 +242,8 @@ interface Product {
   short_description?: string;
   price: number;
   sale_price: number | null;
+  /** Shown on live + shadow product cards */
+  card_promo_label?: string | null;
   sku: string;
   stock_quantity: number;
   stock_status: string;
@@ -387,6 +389,25 @@ export default function AdminPanel() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  /** Homepage + secure store banner; checkout uses promo_shadow_price_id when applySitePromotion is set. */
+  const [sitePromotionDraft, setSitePromotionDraft] = useState({
+    is_active: false,
+    headline: "",
+    subheadline: "",
+    cta_label: "Claim offer",
+    real_product_id: "",
+    promo_shadow_price_id: "",
+    promo_amount_cents: 0,
+    shadow_headline: "",
+    shadow_subheadline: "",
+    ends_at: "",
+  });
+  const [loadingSitePromotion, setLoadingSitePromotion] = useState(false);
+  const [savingSitePromotion, setSavingSitePromotion] = useState(false);
+  const [promoPriceDollarsInput, setPromoPriceDollarsInput] = useState("");
+  const [promoAmenOpen, setPromoAmenOpen] = useState(false);
+  const [promoConfirmCorrect, setPromoConfirmCorrect] = useState(false);
 
   const [pageEdits, setPageEdits] = useState<PageEdit[]>([]);
   const [loadingEdits, setLoadingEdits] = useState(true);
@@ -674,6 +695,7 @@ export default function AdminPanel() {
     loadOrderStats();
     loadPaymentHealth();
     loadProducts();
+    loadSitePromotion();
     loadPageEdits();
     loadFulfillmentOrders();
     loadCustomers();
@@ -880,7 +902,11 @@ export default function AdminPanel() {
           slug: p.id,
           description: p.description || '',
           price: p.price,
-          sale_price: null,
+          sale_price:
+            p.salePrice != null && p.salePrice !== undefined
+              ? Math.round(Number(p.salePrice))
+              : null,
+          card_promo_label: p.cardPromoLabel ?? null,
           sku: p.id,
           stock_quantity: 100,
           stock_status: 'instock',
@@ -896,6 +922,149 @@ export default function AdminPanel() {
       console.error('Error loading products:', error);
     }
     setLoadingProducts(false);
+  };
+
+  const loadSitePromotion = async () => {
+    setLoadingSitePromotion(true);
+    try {
+      const response = await authFetch("/api/admin/site-promotion");
+      const result = await response.json();
+      if (!response.ok || result.error) {
+        showToast(
+          typeof result.error === "string"
+            ? result.error
+            : "Could not load site promotion (check Supabase: run site_promotion migration and use service role key on the worker).",
+          "error"
+        );
+        return;
+      }
+      const row = result.data;
+      if (row) {
+        setSitePromotionDraft({
+          is_active: Boolean(row.is_active),
+          headline: String(row.headline ?? ""),
+          subheadline: row.subheadline != null ? String(row.subheadline) : "",
+          cta_label: String(row.cta_label ?? "Claim offer"),
+          real_product_id: String(row.real_product_id ?? ""),
+          promo_shadow_price_id: String(row.promo_shadow_price_id ?? ""),
+          promo_amount_cents: Math.round(Number(row.promo_amount_cents) || 0),
+          shadow_headline: row.shadow_headline != null ? String(row.shadow_headline) : "",
+          shadow_subheadline: row.shadow_subheadline != null ? String(row.shadow_subheadline) : "",
+          ends_at: row.ends_at ? new Date(row.ends_at).toISOString().slice(0, 16) : "",
+        });
+        const cents = Math.round(Number(row.promo_amount_cents) || 0);
+        setPromoPriceDollarsInput(cents > 0 ? (cents / 100).toFixed(2) : "");
+      }
+    } catch (e) {
+      console.error("loadSitePromotion", e);
+    } finally {
+      setLoadingSitePromotion(false);
+    }
+  };
+
+  const buildSitePromotionPayload = (patch?: Partial<{ is_active: boolean }>) => {
+    const fromDollars = Math.round(parseFloat(promoPriceDollarsInput || "0") * 100);
+    const cents = fromDollars > 0 ? fromDollars : sitePromotionDraft.promo_amount_cents;
+    return {
+      ...sitePromotionDraft,
+      ...patch,
+      subheadline: sitePromotionDraft.subheadline || null,
+      shadow_headline: sitePromotionDraft.shadow_headline || null,
+      shadow_subheadline: sitePromotionDraft.shadow_subheadline || null,
+      promo_amount_cents: cents,
+      ends_at: sitePromotionDraft.ends_at ? new Date(sitePromotionDraft.ends_at).toISOString() : null,
+    };
+  };
+
+  const saveSitePromotion = async () => {
+    setSavingSitePromotion(true);
+    try {
+      const response = await authFetch("/api/admin/site-promotion", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildSitePromotionPayload()),
+      });
+      const json = await response.json();
+      if (json.error) throw new Error(json.error);
+      showToast("Site promotion saved", "success");
+      await loadSitePromotion();
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : "Save failed", "error");
+    } finally {
+      setSavingSitePromotion(false);
+    }
+  };
+
+  const unpublishSitePromotion = async () => {
+    setSavingSitePromotion(true);
+    try {
+      const response = await authFetch("/api/admin/site-promotion", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildSitePromotionPayload({ is_active: false })),
+      });
+      const json = await response.json();
+      if (json.error) throw new Error(json.error);
+      setSitePromotionDraft((d) => ({ ...d, is_active: false }));
+      showToast("Promotion off — popup hidden on real + shadow sites. Stripe uses normal prices unless buyer still has a promo line in cart.", "success");
+      await loadSitePromotion();
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : "Failed to turn off promotion", "error");
+    } finally {
+      setSavingSitePromotion(false);
+    }
+  };
+
+  const confirmPublishSitePromotionAmen = async () => {
+    if (!promoConfirmCorrect) return;
+    setSavingSitePromotion(true);
+    try {
+      const response = await authFetch("/api/admin/site-promotion", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildSitePromotionPayload({ is_active: true })),
+      });
+      const json = await response.json();
+      if (json.error) throw new Error(json.error);
+      setSitePromotionDraft((d) => ({ ...d, is_active: true }));
+      setPromoAmenOpen(false);
+      setPromoConfirmCorrect(false);
+      showToast("Promotion live — popup shows on real + shadow; checkout uses promo Stripe price when they claim the offer.", "success");
+      await loadSitePromotion();
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : "Publish failed", "error");
+    } finally {
+      setSavingSitePromotion(false);
+    }
+  };
+
+  const createPromoStripePrice = async () => {
+    const dollars = parseFloat(promoPriceDollarsInput || "0");
+    if (!Number.isFinite(dollars) || dollars <= 0) {
+      showToast("Enter a valid promo price in dollars", "error");
+      return;
+    }
+    try {
+      const response = await authFetch("/api/admin/site-promotion/create-stripe-price", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          price: dollars,
+          real_product_id: sitePromotionDraft.real_product_id || undefined,
+        }),
+      });
+      const json = await response.json();
+      if (json.error) throw new Error(json.error);
+      setSitePromotionDraft((d) => ({
+        ...d,
+        promo_shadow_price_id: json.data.promo_shadow_price_id,
+        promo_amount_cents: json.data.promo_amount_cents,
+      }));
+      setPromoPriceDollarsInput((json.data.promo_amount_cents / 100).toFixed(2));
+      showToast("Promo Stripe price created. Save promotion below to persist.", "success");
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : "Stripe error", "error");
+    }
   };
 
   const loadBlogPosts = async () => {
@@ -1241,13 +1410,14 @@ export default function AdminPanel() {
   };
 
   const cleanupMarketingTestData = async () => {
+    if (!confirm('Remove obvious test contacts, test campaigns, and their send history from marketing? This cannot be undone.')) return;
     setCleaningMarketingTests(true);
     try {
       const response = await authFetch('/api/admin/marketing/cleanup-test-data', { method: 'POST' });
       const result = await response.json();
       if (!response.ok) throw new Error(result?.error || 'Cleanup failed');
       showToast(
-        `Removed test data: contacts ${result?.deleted?.contacts || 0}, sends ${result?.deleted?.emailSends || 0}, events ${result?.deleted?.emailEvents || 0}`,
+        `Removed test data: contacts ${result?.deleted?.contacts || 0}, campaigns ${result?.deleted?.emailCampaigns || 0}, sends ${(result?.deleted?.emailSends || 0) + (result?.deleted?.campaignEmailSends || 0)}, events ${(result?.deleted?.emailEvents || 0) + (result?.deleted?.campaignEmailEvents || 0)}`,
         'success'
       );
       await Promise.all([loadMarketingContacts(), loadMarketingCampaigns()]);
@@ -1557,6 +1727,23 @@ export default function AdminPanel() {
     );
   });
 
+  const filteredContactEmails = filteredMarketingContacts.map((c) => c.email);
+  const selectedFilteredCount = filteredContactEmails.filter((email) => selectedEmails.has(email)).length;
+  const allFilteredSelected = filteredContactEmails.length > 0 && selectedFilteredCount === filteredContactEmails.length;
+  const someFilteredSelected = selectedFilteredCount > 0 && !allFilteredSelected;
+
+  const toggleSelectAllFilteredMarketingContacts = () => {
+    setSelectedEmails((prev) => {
+      const next = new Set(prev);
+      if (allFilteredSelected) {
+        filteredContactEmails.forEach((email) => next.delete(email));
+      } else {
+        filteredContactEmails.forEach((email) => next.add(email));
+      }
+      return next;
+    });
+  };
+
   useEffect(() => {
     const allowedEmails = new Set(contactsForAudience.map((c) => c.email));
     setSelectedEmails((prev) => {
@@ -1688,6 +1875,14 @@ export default function AdminPanel() {
       showToast('Valid price is required', 'error');
       return;
     }
+    if (
+      editingProduct.sale_price != null &&
+      editingProduct.sale_price > 0 &&
+      editingProduct.sale_price >= editingProduct.price
+    ) {
+      showToast('Sale price must be less than regular price (both are stored in cents).', 'error');
+      return;
+    }
 
     setSaving(true);
 
@@ -1704,6 +1899,8 @@ export default function AdminPanel() {
       name: editingProduct.name,
       description: editingProduct.description,
       price: editingProduct.price,
+      sale_price: editingProduct.sale_price,
+      card_promo_label: editingProduct.card_promo_label ?? null,
       imageUrl: editingProduct.main_image || null,
       category: editingProduct.category === 'devices' ? 'firestick' : 'subscription',
       shadowName: editingProduct.cloaked_name || undefined,
@@ -1771,6 +1968,7 @@ export default function AdminPanel() {
         name: shadowName,
         price: product.price,
         sale_price: product.sale_price,
+        card_promo_label: product.card_promo_label ?? null,
         real_product_id: product.id,
         real_product_name: product.name,
         category: product.category === 'devices' ? 'web-design' : 'seo',
@@ -2028,6 +2226,21 @@ export default function AdminPanel() {
             data-testid="nav-products"
           >
             <Package className="w-4 h-4 mr-3" /> Products
+          </Button>
+          <Button 
+            variant={activeSection === "site-promotion" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => {
+              setActiveSection("site-promotion");
+              loadSitePromotion();
+              if (!products.length) loadProducts();
+            }}
+            data-testid="nav-site-promotion"
+          >
+            <Zap className="w-4 h-4 mr-3" /> Live page promotion
+            {sitePromotionDraft.is_active ? (
+              <Badge className="ml-auto bg-amber-500 text-white text-xs">On</Badge>
+            ) : null}
           </Button>
           <Button 
             variant={activeSection === "visitors" ? "secondary" : "ghost"} 
@@ -2435,6 +2648,18 @@ export default function AdminPanel() {
                       onClick={() => setActiveSection("products")}
                     >
                       <Plus className="w-4 h-4 mr-2" /> Add New Product
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full border-amber-600/50 text-amber-200 hover:bg-amber-950/40"
+                      onClick={() => {
+                        setActiveSection("site-promotion");
+                        loadSitePromotion();
+                        if (!products.length) loadProducts();
+                      }}
+                      data-testid="dashboard-live-promotion"
+                    >
+                      <Zap className="w-4 h-4 mr-2" /> Live homepage offer (popup)
                     </Button>
                     <Button 
                       variant="outline" 
@@ -3072,8 +3297,259 @@ export default function AdminPanel() {
             </div>
           )}
 
-          {activeSection === "products" && (
+          {(activeSection === "products" || activeSection === "site-promotion") && (
             <div className="space-y-6">
+              {activeSection === "site-promotion" ? (
+                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400">
+                  <span>Dedicated screen for the popup on streamstickpro.com (and shadow store).</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-600 text-gray-200"
+                    onClick={() => setActiveSection("products")}
+                  >
+                    <Package className="w-4 h-4 mr-2" /> Full products manager
+                  </Button>
+                </div>
+              ) : null}
+              <Card className="bg-gray-800/90 border-amber-500/30" data-testid="card-promotion-settings">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-amber-400" />
+                    Homepage &amp; shadow store promotion
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Banner on streamstickpro.com and secure storefront. Stripe charges the <strong className="text-gray-200">promo price ID</strong> only when
+                    the customer uses the banner (cart flag). Regular catalog prices are unchanged. Setup: select a catalog product that has a linked Stripe
+                    shadow product, enter promo dollars → <strong className="text-gray-200">Create Stripe price</strong> → <strong className="text-gray-200">Save promotion</strong> → turn on and confirm with Amen.
+                    The amount shown at checkout must match the Stripe price you created; the worker stores both the Price ID and cents in Supabase.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 text-gray-200">
+                  {loadingSitePromotion ? (
+                    <p className="text-sm text-gray-500">Loading promotion…</p>
+                  ) : (
+                    <>
+                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={sitePromotionDraft.is_active}
+                          disabled={savingSitePromotion}
+                          onChange={async (e) => {
+                            if (!e.target.checked) {
+                              await unpublishSitePromotion();
+                              return;
+                            }
+                            const fromDollars = Math.round(parseFloat(promoPriceDollarsInput || "0") * 100);
+                            const cents =
+                              fromDollars > 0 ? fromDollars : sitePromotionDraft.promo_amount_cents;
+                            if (
+                              !sitePromotionDraft.real_product_id ||
+                              !sitePromotionDraft.promo_shadow_price_id ||
+                              !Number.isFinite(cents) ||
+                              cents <= 0
+                            ) {
+                              showToast(
+                                "Set catalog product, Stripe Price ID, and promo amount before turning on.",
+                                "error"
+                              );
+                              return;
+                            }
+                            setPromoConfirmCorrect(false);
+                            setPromoAmenOpen(true);
+                          }}
+                          className="rounded border-gray-600"
+                        />
+                        <span>Show promotion popup on real site + shadow store (confirm with Amen)</span>
+                      </label>
+
+                      {promoAmenOpen ? (
+                        <div
+                          className="fixed inset-0 z-[400] flex items-center justify-center bg-black/75 px-4"
+                          role="dialog"
+                          aria-modal="true"
+                          aria-labelledby="promo-amen-title"
+                        >
+                          <div className="bg-gray-900 border border-amber-500/50 rounded-xl p-6 max-w-md w-full shadow-2xl space-y-4">
+                            <h3 id="promo-amen-title" className="text-lg font-semibold text-white">
+                              Publish this promotion?
+                            </h3>
+                            <p className="text-sm text-gray-400">
+                              The offer popup will appear on your homepage and secure storefront with the price from
+                              your admin. Checkout charges the{" "}
+                              <strong className="text-gray-200">promo Stripe Price ID</strong> when the customer uses
+                              this offer (not the regular catalog price).
+                            </p>
+                            <label className="flex items-start gap-3 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={promoConfirmCorrect}
+                                onChange={(e) => setPromoConfirmCorrect(e.target.checked)}
+                                className="mt-1 rounded border-gray-600"
+                              />
+                              <span className="text-sm text-gray-300">
+                                I confirm the product, promo amount, and Stripe Price ID are correct.
+                              </span>
+                            </label>
+                            <div className="flex flex-wrap gap-2 justify-end pt-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="border-gray-600 text-gray-200"
+                                onClick={() => {
+                                  setPromoAmenOpen(false);
+                                  setPromoConfirmCorrect(false);
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                type="button"
+                                className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 min-w-[7rem]"
+                                disabled={!promoConfirmCorrect || savingSitePromotion}
+                                onClick={confirmPublishSitePromotionAmen}
+                              >
+                                {savingSitePromotion ? "Publishing…" : "Amen"}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Real product (catalog id)</p>
+                          <select
+                            className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-sm"
+                            value={sitePromotionDraft.real_product_id}
+                            onChange={(e) =>
+                              setSitePromotionDraft((d) => ({ ...d, real_product_id: e.target.value }))
+                            }
+                          >
+                            <option value="">Select product…</option>
+                            {products.map((p) => (
+                              <option key={p.id} value={p.id}>
+                                {p.name} ({p.id})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Promo price (USD)</p>
+                          <div className="flex gap-2">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="e.g. 9.99"
+                              value={promoPriceDollarsInput}
+                              onChange={(e) => setPromoPriceDollarsInput(e.target.value)}
+                              className="bg-gray-900 border-gray-600"
+                            />
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              className="shrink-0"
+                              onClick={createPromoStripePrice}
+                              disabled={!sitePromotionDraft.real_product_id}
+                            >
+                              Create Stripe price
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Stripe Price ID (price_…)</p>
+                        <Input
+                          value={sitePromotionDraft.promo_shadow_price_id}
+                          onChange={(e) =>
+                            setSitePromotionDraft((d) => ({
+                              ...d,
+                              promo_shadow_price_id: e.target.value,
+                            }))
+                          }
+                          placeholder="Filled automatically after “Create Stripe price” or paste from Stripe"
+                          className="bg-gray-900 border-gray-600 font-mono text-sm"
+                        />
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Live site headline</p>
+                          <Input
+                            value={sitePromotionDraft.headline}
+                            onChange={(e) =>
+                              setSitePromotionDraft((d) => ({ ...d, headline: e.target.value }))
+                            }
+                            className="bg-gray-900 border-gray-600"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Button label</p>
+                          <Input
+                            value={sitePromotionDraft.cta_label}
+                            onChange={(e) =>
+                              setSitePromotionDraft((d) => ({ ...d, cta_label: e.target.value }))
+                            }
+                            className="bg-gray-900 border-gray-600"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <p className="text-xs text-gray-500 mb-1">Live subheadline (optional)</p>
+                          <Input
+                            value={sitePromotionDraft.subheadline}
+                            onChange={(e) =>
+                              setSitePromotionDraft((d) => ({ ...d, subheadline: e.target.value }))
+                            }
+                            className="bg-gray-900 border-gray-600"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Shadow headline (optional)</p>
+                          <Input
+                            value={sitePromotionDraft.shadow_headline}
+                            onChange={(e) =>
+                              setSitePromotionDraft((d) => ({ ...d, shadow_headline: e.target.value }))
+                            }
+                            className="bg-gray-900 border-gray-600"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Shadow subheadline (optional)</p>
+                          <Input
+                            value={sitePromotionDraft.shadow_subheadline}
+                            onChange={(e) =>
+                              setSitePromotionDraft((d) => ({ ...d, shadow_subheadline: e.target.value }))
+                            }
+                            className="bg-gray-900 border-gray-600"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">End date (optional, local)</p>
+                          <Input
+                            type="datetime-local"
+                            value={sitePromotionDraft.ends_at}
+                            onChange={(e) =>
+                              setSitePromotionDraft((d) => ({ ...d, ends_at: e.target.value }))
+                            }
+                            className="bg-gray-900 border-gray-600"
+                          />
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500"
+                        onClick={saveSitePromotion}
+                        disabled={savingSitePromotion}
+                      >
+                        {savingSitePromotion ? "Saving…" : "Save promotion"}
+                      </Button>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              {activeSection === "products" ? (
+              <>
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-3xl font-bold flex items-center gap-3">
@@ -3091,6 +3567,7 @@ export default function AdminPanel() {
                     description: '',
                     price: 0,
                     sale_price: null,
+                    card_promo_label: null,
                     sku: '',
                     stock_quantity: 100,
                     stock_status: 'instock',
@@ -3131,6 +3608,7 @@ export default function AdminPanel() {
                               description: '',
                               price: 0,
                               sale_price: null,
+                              card_promo_label: null,
                               sku: '',
                               stock_quantity: 100,
                               stock_status: 'instock',
@@ -3280,6 +3758,8 @@ export default function AdminPanel() {
                   </Card>
                 </TabsContent>
               </Tabs>
+              </>
+              ) : null}
             </div>
           )}
 
@@ -4048,11 +4528,11 @@ export default function AdminPanel() {
                     variant="outline"
                     size="sm"
                     className="border-gray-600 text-gray-200"
-                    onClick={() => setSelectedEmails(new Set(filteredMarketingContacts.map((c) => c.email)))}
+                    onClick={toggleSelectAllFilteredMarketingContacts}
                     disabled={filteredMarketingContacts.length === 0}
                   >
                     <CheckSquare className="w-4 h-4 mr-2" />
-                    Select all ({filteredMarketingContacts.length})
+                    {allFilteredSelected ? `Uncheck all (${filteredMarketingContacts.length})` : `Check everyone (${filteredMarketingContacts.length})`}
                   </Button>
                   <Button
                     variant="ghost"
@@ -4074,6 +4554,10 @@ export default function AdminPanel() {
                         {contactsForAudience.length} contacts in current segment • {selectedEmails.size} selected
                         {excludedTestContacts > 0 ? ` • ${excludedTestContacts} test contacts excluded` : ''}
                       </CardDescription>
+                      <p className="mt-2 text-xs text-gray-500">
+                        Visible rows: {filteredMarketingContacts.length} • Checked on screen: {selectedFilteredCount}
+                        {someFilteredSelected ? ' • partial selection active' : ''}
+                      </p>
                       <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-gray-300">
                         <label className="inline-flex items-center gap-2 cursor-pointer">
                           <input
@@ -4130,7 +4614,18 @@ export default function AdminPanel() {
                         <table className="min-w-full text-sm text-left">
                           <thead className="bg-gray-900 text-gray-300 uppercase text-xs">
                             <tr>
-                              <th className="px-4 py-3 w-10"></th>
+                              <th className="px-4 py-3 w-10">
+                                <input
+                                  type="checkbox"
+                                  aria-label={allFilteredSelected ? 'Uncheck all visible recipients' : 'Check all visible recipients'}
+                                  checked={allFilteredSelected}
+                                  ref={(el) => {
+                                    if (el) el.indeterminate = someFilteredSelected;
+                                  }}
+                                  onChange={toggleSelectAllFilteredMarketingContacts}
+                                  className="h-4 w-4"
+                                />
+                              </th>
                               <th className="px-4 py-3">Email</th>
                               <th className="px-4 py-3">Username</th>
                               <th className="px-4 py-3">Name</th>
@@ -5970,6 +6465,7 @@ export default function AdminPanel() {
                       value={editingProduct.sale_price ? centsToDollars(editingProduct.sale_price) : ''}
                       onChange={(e) => setEditingProduct({ ...editingProduct, sale_price: e.target.value ? dollarsToCents(parseFloat(e.target.value)) : null })}
                       className="bg-gray-700 border-gray-600 text-white"
+                      placeholder="Leave empty for no sale"
                     />
                   </div>
                   <div>
@@ -5981,6 +6477,22 @@ export default function AdminPanel() {
                       className="bg-gray-700 border-gray-600 text-white"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">Product card promo ribbon (optional)</label>
+                  <Input
+                    value={editingProduct.card_promo_label ?? ''}
+                    onChange={(e) =>
+                      setEditingProduct({ ...editingProduct, card_promo_label: e.target.value.trim() || null })
+                    }
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder='e.g. "Limited time" — shows on homepage and secure storefront cards'
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Saving creates a matching Stripe price for the amount customers pay (sale if set, otherwise regular).
+                    Clear sale price to return to list price and sync Stripe again.
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">

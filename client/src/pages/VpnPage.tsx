@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { setPageMeta } from "@/lib/seo";
 import { getSurfsharkAffiliateUrl } from "@/lib/surfshark";
 import { Button } from "@/components/ui/button";
+import { trackVpnClick } from "@/lib/vpn-tracking";
 import { ArrowLeft, Check } from "lucide-react";
 
 export default function VpnPage() {
@@ -177,7 +178,18 @@ export default function VpnPage() {
         </section>
 
         <div className="flex flex-col items-stretch gap-4 mb-12">
-          <a href={surfUrl} target="_blank" rel="noopener noreferrer sponsored">
+          <a
+            href={surfUrl}
+            target="_blank"
+            rel="noopener noreferrer sponsored"
+            onClick={() =>
+              trackVpnClick({
+                source: "/vpn",
+                placement: "vpn_page_cta",
+                target: "vpn_affiliate",
+              })
+            }
+          >
             <Button
               className="w-full min-h-[72px] text-lg font-black rounded-2xl bg-[#0DD9D2] text-[#0A0A0F] hover:bg-[#0DD9D2]/90 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
               size="lg"

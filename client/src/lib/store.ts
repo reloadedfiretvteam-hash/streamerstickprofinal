@@ -23,13 +23,22 @@ export interface Product {
 interface CartItem extends Product {
   quantity: number;
   basePrice?: number;
+  /** Snapshot of list price (cents/ dollars as stored on Product.price) for reverting if promo is cleared. */
+  regularUnitPrice?: number;
+  /** When true, checkout sends applySitePromotion and uses site_promotion Stripe price server-side. */
+  applySitePromotion?: boolean;
 }
 
 interface CartState {
   items: CartItem[];
   isOpen: boolean;
   addItem: (product: Product) => void;
-  addItemWithQuantity: (product: Product, quantity: number, discountedPrice?: number) => void;
+  addItemWithQuantity: (
+    product: Product,
+    quantity: number,
+    discountedPrice?: number,
+    opts?: { sitePromotion?: boolean }
+  ) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   toggleCart: () => void;
@@ -68,23 +77,58 @@ export const useCart = create<CartState>()(
         }
         return { items: [...state.items, { ...product, quantity: 1 }], isOpen: true };
       }),
-      addItemWithQuantity: (product, quantity, discountedPrice) => set((state) => {
+      addItemWithQuantity: (product, quantity, discountedPrice, opts) => set((state) => {
+        const sitePromo = opts?.sitePromotion === true;
         const priceToUse = discountedPrice ?? product.price;
         const isFirestick = isFirestickProduct(product.id);
-        const productToAdd = isFirestick 
-          ? { ...product, price: priceToUse, basePrice: product.price }
-          : { ...product, price: priceToUse };
+        const regularSnap = product.price;
+        const productToAdd: CartItem = isFirestick
+          ? {
+              ...product,
+              price: priceToUse,
+              basePrice: product.price,
+              regularUnitPrice: regularSnap,
+              applySitePromotion: sitePromo,
+            }
+          : {
+              ...product,
+              price: priceToUse,
+              regularUnitPrice: regularSnap,
+              applySitePromotion: sitePromo,
+            };
         const existing = state.items.find(i => i.id === product.id);
         if (existing) {
           const newQuantity = existing.quantity + quantity;
-          const recalculatedPrice = isFirestick && existing.basePrice
-            ? calculateFirestickDiscount(existing.basePrice, newQuantity)
-            : priceToUse;
+          const newApplySitePromotion =
+            sitePromo === false ? false : Boolean(existing.applySitePromotion);
+          const reg =
+            existing.regularUnitPrice ??
+            existing.basePrice ??
+            product.price;
+          let recalculatedPrice: number;
+          if (isFirestick && existing.basePrice) {
+            recalculatedPrice = calculateFirestickDiscount(existing.basePrice, newQuantity);
+          } else if (newApplySitePromotion && discountedPrice != null) {
+            recalculatedPrice = discountedPrice;
+          } else {
+            recalculatedPrice = reg;
+          }
+          if (isFirestick && existing.basePrice && !newApplySitePromotion) {
+            recalculatedPrice = calculateFirestickDiscount(existing.basePrice, newQuantity);
+          }
           return {
-            items: state.items.map(i => 
-              i.id === product.id ? { ...i, quantity: newQuantity, price: recalculatedPrice } : i
+            items: state.items.map((i) =>
+              i.id === product.id
+                ? {
+                    ...i,
+                    quantity: newQuantity,
+                    price: recalculatedPrice,
+                    applySitePromotion: newApplySitePromotion,
+                    regularUnitPrice: i.regularUnitPrice ?? reg,
+                  }
+                : i
             ),
-            isOpen: true
+            isOpen: true,
           };
         }
         return { items: [...state.items, { ...productToAdd, quantity }], isOpen: true };
@@ -98,7 +142,7 @@ export const useCart = create<CartState>()(
       updateQuantity: (id, quantity) => set((state) => ({
         items: state.items.map(i => {
           if (i.id === id) {
-            if (isFirestickProduct(i.id) && i.basePrice) {
+            if (isFirestickProduct(i.id) && i.basePrice && !i.applySitePromotion) {
               const newPrice = calculateFirestickDiscount(i.basePrice, quantity);
               return { ...i, quantity, price: newPrice };
             }

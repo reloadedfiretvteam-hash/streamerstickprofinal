@@ -18,6 +18,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/lib/store";
+import { trackVpnClick } from "@/lib/vpn-tracking";
 
 interface MobileNavProps {
   scrollToShop: () => void;
@@ -50,7 +51,14 @@ export function MobileNav({ scrollToShop, scrollToFaq, scrollToAbout, onSupportC
     { label: "Reloaded Fire TV", icon: Wifi, action: () => { setLocation("/iptv"); } },
     { label: "Devices", icon: Tv, action: () => { setLocation("/devices"); } },
     { label: "Bundles", icon: Package, action: () => { setLocation("/bundles"); } },
-    { label: "Surfshark VPN", icon: Shield, action: () => { setLocation("/vpn"); } },
+    {
+      label: "Surfshark VPN",
+      icon: Shield,
+      action: () => {
+        trackVpnClick({ source: location || "/", placement: "mobile_nav_vpn" });
+        setLocation("/vpn");
+      }
+    },
     { label: "Shop", icon: ShoppingCart, action: () => navigateToSection("shop") },
     ...(scrollToAbout
       ? [{ label: "How It Works", icon: ChevronRight, action: () => navigateToSection("about") }]

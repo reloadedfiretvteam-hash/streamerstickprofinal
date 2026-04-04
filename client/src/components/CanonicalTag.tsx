@@ -1,32 +1,16 @@
 import { useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { absoluteCanonicalUrl } from '@/lib/canonical-path';
 
 /**
- * CanonicalTag Component
- * Properly sets canonical URLs for all pages
- * Fixes Google Search Console "Alternative page with proper canonical tag" issues
+ * CanonicalTag — aligns with worker-injected meta (blog trailing slash, legacy path → preferred URL).
  */
 export default function CanonicalTag() {
   const [location] = useLocation();
 
   useEffect(() => {
-    // Normalize the URL - remove query params and fragments for canonical
-    const getCanonicalUrl = () => {
-      const baseUrl = 'https://streamstickpro.com';
-      let path = location.split('?')[0].split('#')[0]; // Remove query params and hash
-      
-      // Normalize path - remove trailing slashes for cleaner URLs
-      // Exception: root path stays as '/'
-      path = path.replace(/\/+$/, '') || '/';
-      
-      // For blog posts, ensure no trailing slash
-      // For other pages, also no trailing slash (cleaner URLs)
-      // Root stays as '/'
-      
-      return path === '/' ? `${baseUrl}/` : `${baseUrl}${path}`;
-    };
-
-    const canonicalUrl = getCanonicalUrl();
+    const pathOnly = location.split('?')[0].split('#')[0] || '/';
+    const canonicalUrl = absoluteCanonicalUrl(pathOnly);
 
     // Remove any existing canonical tags first
     const existingCanonicals = document.querySelectorAll('link[rel="canonical"]');
