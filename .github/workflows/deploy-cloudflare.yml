@@ -56,3 +56,24 @@ jobs:
           echo "${{ secrets.SUPABASE_SERVICE_KEY }}" | npx wrangler pages secret put SUPABASE_SERVICE_KEY --project-name=streamerstickpro-live
           echo "${{ secrets.RESEND_API_KEY }}" | npx wrangler pages secret put RESEND_API_KEY --project-name=streamerstickpro-live
           echo "${{ secrets.SESSION_SECRET }}" | npx wrangler pages secret put SESSION_SECRET --project-name=streamerstickpro-live
+          # IPTV panel (automatic free trials): add these in GitHub → Settings → Secrets and variables → Actions.
+          # Only runs when a secret is non-empty so existing deploys are unchanged until you add them.
+          # Never commit real API keys; rotate any key that was pasted into chat or issues.
+          if [ -n "${{ secrets.IPTV_PANEL_API_BASE }}" ]; then
+            echo "${{ secrets.IPTV_PANEL_API_BASE }}" | npx wrangler pages secret put IPTV_PANEL_API_BASE --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.IPTV_PANEL_API_KEY }}" ]; then
+            echo "${{ secrets.IPTV_PANEL_API_KEY }}" | npx wrangler pages secret put IPTV_PANEL_API_KEY --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.IPTV_PANEL_TRIAL_PACKAGE }}" ]; then
+            echo "${{ secrets.IPTV_PANEL_TRIAL_PACKAGE }}" | npx wrangler pages secret put IPTV_PANEL_TRIAL_PACKAGE --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.IPTV_PANEL_TRIAL_EXP_DAYS }}" ]; then
+            echo "${{ secrets.IPTV_PANEL_TRIAL_EXP_DAYS }}" | npx wrangler pages secret put IPTV_PANEL_TRIAL_EXP_DAYS --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.IPTV_PORTAL_URL }}" ]; then
+            echo "${{ secrets.IPTV_PORTAL_URL }}" | npx wrangler pages secret put IPTV_PORTAL_URL --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.IPTV_PANEL_M3U_BASE }}" ]; then
+            echo "${{ secrets.IPTV_PANEL_M3U_BASE }}" | npx wrangler pages secret put IPTV_PANEL_M3U_BASE --project-name=streamerstickpro-live
+          fi
