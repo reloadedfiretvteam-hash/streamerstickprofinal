@@ -215,32 +215,6 @@ function TrustBanner() {
   );
 }
 
-const productIdMap: Record<string, string> = {
-  "fs-hd": "firestick-hd",
-  "fs-4k": "firestick-4k",
-  "fs-max": "firestick-4k-max",
-  "iptv-1mo-1d": "iptv-1mo-1d",
-  "iptv-1mo-2d": "iptv-1mo-2d",
-  "iptv-1mo-3d": "iptv-1mo-3d",
-  "iptv-1mo-4d": "iptv-1mo-4d",
-  "iptv-1mo-5d": "iptv-1mo-5d",
-  "iptv-3mo-1d": "iptv-3mo-1d",
-  "iptv-3mo-2d": "iptv-3mo-2d",
-  "iptv-3mo-3d": "iptv-3mo-3d",
-  "iptv-3mo-4d": "iptv-3mo-4d",
-  "iptv-3mo-5d": "iptv-3mo-5d",
-  "iptv-6mo-1d": "iptv-6mo-1d",
-  "iptv-6mo-2d": "iptv-6mo-2d",
-  "iptv-6mo-3d": "iptv-6mo-3d",
-  "iptv-6mo-4d": "iptv-6mo-4d",
-  "iptv-6mo-5d": "iptv-6mo-5d",
-  "iptv-1yr-1d": "iptv-1yr-1d",
-  "iptv-1yr-2d": "iptv-1yr-2d",
-  "iptv-1yr-3d": "iptv-1yr-3d",
-  "iptv-1yr-4d": "iptv-1yr-4d",
-  "iptv-1yr-5d": "iptv-1yr-5d",
-};
-
 export default function Checkout() {
   const [, setLocation] = useLocation();
   const { items, total, removeItem, updateQuantity } = useCart();
@@ -375,7 +349,7 @@ export default function Checkout() {
     try {
       const checkoutItems = items.map((item) => {
         const base: { productId: string; quantity: number; applySitePromotion?: boolean } = {
-          productId: productIdMap[item.id] || item.id,
+          productId: item.id,
           quantity: item.quantity,
         };
         if (item.applySitePromotion) base.applySitePromotion = true;

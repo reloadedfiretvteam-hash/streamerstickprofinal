@@ -13,6 +13,7 @@ import type {
   Customer,
   InsertCustomer,
 } from "../shared/schema";
+import { variantsForRealProductId } from "../shared/real-product-id";
 
 export interface StorageConfig {
   supabaseUrl: string;
@@ -260,8 +261,12 @@ export function createStorage(config: StorageConfig) {
     },
 
     async getRealProduct(id: string): Promise<RealProduct | undefined> {
-      const { data } = await supabase.from('real_products').select('*').eq('id', id).single();
-      return data ? this.mapProductFromDb(data) : undefined;
+      const variants = variantsForRealProductId(id);
+      const { data, error } = await supabase.from('real_products').select('*').in('id', variants);
+      if (error || !data?.length) return undefined;
+      const trimmed = id.trim();
+      const row = data.find((d: any) => d.id === trimmed) ?? data[0];
+      return this.mapProductFromDb(row);
     },
 
     async getRealProductByShadowId(shadowProductId: string): Promise<RealProduct | undefined> {

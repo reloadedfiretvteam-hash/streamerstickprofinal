@@ -81,7 +81,7 @@ export function createCheckoutRoutes() {
         });
 
         if (wantsPromo) {
-          if (!activePromo || activePromo.realProductId !== item.productId) {
+          if (!activePromo || activePromo.realProductId !== product.id) {
             return c.json({
               error: "This promotion is not active or does not apply to this product. Remove the promotional item or refresh the page.",
             }, 400);

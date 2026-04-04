@@ -1,5 +1,10 @@
 /// <reference types="vite/client" />
 
+/** Google Tag / gtag.js */
+interface Window {
+  dataLayer?: unknown[];
+}
+
 declare module "*.mp4" {
   const src: string;
   export default src;

@@ -79,7 +79,7 @@ export default function Tutorials() {
 
   return (
     <>
-      <SEOSchema faqItems={FAQ_ITEMS} />
+      <SEOSchema faq={FAQ_ITEMS} />
       <PillarLayout title={TITLE} description={DESC} breadcrumbs={breadcrumbs}>
         <div className="mb-8">
           <Link href="/">

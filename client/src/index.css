@@ -129,3 +129,15 @@ html {
 html {
   scroll-behavior: smooth;
 }
+
+/* Sticky header (~4rem) — anchor links land readable on mobile */
+main#main-content section[id],
+main#main-content [id="faq"] {
+  scroll-margin-top: 5rem;
+}
+@media (min-width: 768px) {
+  main#main-content section[id],
+  main#main-content [id="faq"] {
+    scroll-margin-top: 5.5rem;
+  }
+}

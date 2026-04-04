@@ -12,28 +12,34 @@ export default function RetargetingPixels() {
     // Meta Pixel (Facebook Pixel) - Primary retargeting pixel
     const metaPixelId = import.meta.env.VITE_META_PIXEL_ID || import.meta.env.VITE_FACEBOOK_PIXEL_ID;
     if (metaPixelId) {
-      // Meta Pixel Base Code (v2.0)
-      !(function (f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
-        if (f.fbq) return;
-        n = f.fbq = function () {
-          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+      // Meta Pixel Base Code (v2.0) — void IIFE (no leading `!` on void return)
+      void (function loadMetaPixel(
+        f: Window & typeof globalThis,
+        b: Document,
+        e: string,
+        v: string
+      ) {
+        const fw = f as Window & { fbq?: unknown; _fbq?: unknown };
+        if (fw.fbq) return;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Meta fbq stub (expects `arguments`)
+        const n: any = function (this: unknown) {
+          // eslint-disable-next-line prefer-rest-params, @typescript-eslint/no-explicit-any
+          (n as any).callMethod
+            ? (n as any).callMethod.apply(n, arguments as any)
+            : n.queue.push(arguments);
         };
-        if (!f._fbq) f._fbq = n;
+        fw.fbq = n;
+        if (!fw._fbq) fw._fbq = n;
         n.push = n;
         n.loaded = !0;
         n.version = '2.0';
         n.queue = [];
-        t = b.createElement(e);
-        t.async = !0;
-        t.src = v;
-        s = b.getElementsByTagName(e)[0];
-        s.parentNode?.insertBefore(t, s);
-      })(
-        window,
-        document,
-        'script',
-        'https://connect.facebook.net/en_US/fbevents.js'
-      );
+        const t = b.createElement(e);
+        (t as HTMLScriptElement).async = !0;
+        (t as HTMLScriptElement).src = v;
+        const s = b.getElementsByTagName(e)[0];
+        s?.parentNode?.insertBefore(t, s);
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
       // Initialize Meta Pixel
       (window as any).fbq('init', metaPixelId, {
@@ -59,11 +65,13 @@ export default function RetargetingPixels() {
     const googleAdsId = import.meta.env.VITE_GOOGLE_ADS_ID;
     if (googleAdsId) {
       // Reuse existing global gtag from index.html to avoid duplicate tags.
-      window.dataLayer = window.dataLayer || [];
-      function gtag(...args: any[]) {
-        window.dataLayer.push(args);
-      }
-      (window as any).gtag = (window as any).gtag || gtag;
+      const w = window as Window & { dataLayer: unknown[] };
+      w.dataLayer = w.dataLayer ?? [];
+      const gtag = (...args: unknown[]) => {
+        w.dataLayer.push(args);
+      };
+      (window as unknown as { gtag?: typeof gtag }).gtag =
+        (window as unknown as { gtag?: typeof gtag }).gtag || gtag;
 
       const scriptSelector = `script[src*="googletagmanager.com/gtag/js?id=${googleAdsId}"]`;
       const hasGoogleTagScript = !!document.querySelector(scriptSelector);
@@ -115,12 +123,13 @@ export default function RetargetingPixels() {
     let isOverridden = false;
     
     // Only override if not already overridden
-    if (!(history.pushState as any).__isOverridden) {
-      const wrappedPushState = function (...args: any[]) {
-        originalPushState(...args);
+    if (!(history.pushState as { __isOverridden?: boolean }).__isOverridden) {
+      const wrappedPushState: History["pushState"] = function (data, unused, url) {
+        originalPushState(data, unused, url);
         setTimeout(handleRouteChange, 100);
       };
-      wrappedPushState.__isOverridden = true;
+      (wrappedPushState as History["pushState"] & { __isOverridden?: boolean }).__isOverridden =
+        true;
       history.pushState = wrappedPushState;
       isOverridden = true;
     }
@@ -128,9 +137,9 @@ export default function RetargetingPixels() {
     return () => {
       window.removeEventListener('popstate', handleRouteChange);
       // Only restore if we were the ones who overrode it
-      if (isOverridden && (history.pushState as any).__isOverridden) {
+      if (isOverridden && (history.pushState as { __isOverridden?: boolean }).__isOverridden) {
         history.pushState = originalPushState;
-        delete (history.pushState as any).__isOverridden;
+        delete (history.pushState as { __isOverridden?: boolean }).__isOverridden;
       }
     };
   }, []);

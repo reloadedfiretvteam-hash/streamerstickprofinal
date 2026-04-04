@@ -64,8 +64,7 @@ export function CartDrawer() {
             <p className="text-gray-300 text-sm mb-6">
               Add some amazing products to get started!
             </p>
-            <Button
-              type="button"
+            <Button 
               onClick={closeCart}
               className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
               data-testid="button-continue-shopping"
@@ -207,7 +206,6 @@ export function CartDrawer() {
 
               <SheetFooter className="flex-col gap-2 sm:flex-col">
                 <Button
-                  type="button"
                   onClick={handleCheckout}
                   className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-6 text-lg shadow-lg shadow-orange-500/30"
                   data-testid="button-checkout"
@@ -231,7 +229,6 @@ export function CartDrawer() {
                 </div>
 
                 <Button
-                  type="button"
                   variant="outline"
                   onClick={closeCart}
                   className="w-full border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"

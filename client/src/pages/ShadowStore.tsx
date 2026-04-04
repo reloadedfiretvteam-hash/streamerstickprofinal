@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { SitePromotionBanner, type PublicPromotion } from "@/components/SitePromotionBanner";
+import { iptvRealProductId } from "@/lib/iptv-sku";
 
 const SUPABASE_URL = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/shadow-store";
 const heroBg = `${SUPABASE_URL}/modern_abstract_digi_3506c264.jpg`;
@@ -73,11 +74,11 @@ const seoPricingMatrix: SEOPricingTier[] = [
     description: "Monthly SEO maintenance package with keyword tracking and optimization.",
     features: ["Keyword Tracking", "Monthly Report", "Basic Optimization", "Analytics Setup"],
     prices: [
-      { tier: "starter", tierLabel: "Starter", price: 11, productId: "iptv-1mo-1d" },
-      { tier: "duo", tierLabel: "Duo", price: 25, productId: "iptv-1mo-2d" },
-      { tier: "team", tierLabel: "Team", price: 35, productId: "iptv-1mo-3d" },
-      { tier: "business", tierLabel: "Business", price: 40, productId: "iptv-1mo-4d" },
-      { tier: "enterprise", tierLabel: "Enterprise", price: 45, productId: "iptv-1mo-5d" },
+      { tier: "starter", tierLabel: "Starter", price: 11, productId: iptvRealProductId("1mo", 1) },
+      { tier: "duo", tierLabel: "Duo", price: 25, productId: iptvRealProductId("1mo", 2) },
+      { tier: "team", tierLabel: "Team", price: 35, productId: iptvRealProductId("1mo", 3) },
+      { tier: "business", tierLabel: "Business", price: 40, productId: iptvRealProductId("1mo", 4) },
+      { tier: "enterprise", tierLabel: "Enterprise", price: 45, productId: iptvRealProductId("1mo", 5) },
     ],
   },
   {
@@ -87,11 +88,11 @@ const seoPricingMatrix: SEOPricingTier[] = [
     features: ["Extended Tracking", "Competitor Analysis", "Content Strategy", "Strategy Calls"],
     popular: true,
     prices: [
-      { tier: "starter", tierLabel: "Starter", price: 25, productId: "iptv-3mo-1d" },
-      { tier: "duo", tierLabel: "Duo", price: 40, productId: "iptv-3mo-2d" },
-      { tier: "team", tierLabel: "Team", price: 55, productId: "iptv-3mo-3d" },
-      { tier: "business", tierLabel: "Business", price: 65, productId: "iptv-3mo-4d" },
-      { tier: "enterprise", tierLabel: "Enterprise", price: 75, productId: "iptv-3mo-5d" },
+      { tier: "starter", tierLabel: "Starter", price: 25, productId: iptvRealProductId("3mo", 1) },
+      { tier: "duo", tierLabel: "Duo", price: 40, productId: iptvRealProductId("3mo", 2) },
+      { tier: "team", tierLabel: "Team", price: 55, productId: iptvRealProductId("3mo", 3) },
+      { tier: "business", tierLabel: "Business", price: 65, productId: iptvRealProductId("3mo", 4) },
+      { tier: "enterprise", tierLabel: "Enterprise", price: 75, productId: iptvRealProductId("3mo", 5) },
     ],
   },
   {
@@ -100,11 +101,11 @@ const seoPricingMatrix: SEOPricingTier[] = [
     description: "6-month content marketing program with strategy and link building.",
     features: ["Content Marketing", "Link Building", "Technical Audit", "Bi-Monthly Calls"],
     prices: [
-      { tier: "starter", tierLabel: "Starter", price: 40, productId: "iptv-6mo-1d" },
-      { tier: "duo", tierLabel: "Duo", price: 65, productId: "iptv-6mo-2d" },
-      { tier: "team", tierLabel: "Team", price: 85, productId: "iptv-6mo-3d" },
-      { tier: "business", tierLabel: "Business", price: 100, productId: "iptv-6mo-4d" },
-      { tier: "enterprise", tierLabel: "Enterprise", price: 125, productId: "iptv-6mo-5d" },
+      { tier: "starter", tierLabel: "Starter", price: 40, productId: iptvRealProductId("6mo", 1) },
+      { tier: "duo", tierLabel: "Duo", price: 65, productId: iptvRealProductId("6mo", 2) },
+      { tier: "team", tierLabel: "Team", price: 85, productId: iptvRealProductId("6mo", 3) },
+      { tier: "business", tierLabel: "Business", price: 100, productId: iptvRealProductId("6mo", 4) },
+      { tier: "enterprise", tierLabel: "Enterprise", price: 125, productId: iptvRealProductId("6mo", 5) },
     ],
   },
   {
@@ -113,11 +114,11 @@ const seoPricingMatrix: SEOPricingTier[] = [
     description: "Full-year digital marketing partnership with dedicated account manager.",
     features: ["Comprehensive Strategy", "Dedicated Manager", "Full Audit", "Priority Support"],
     prices: [
-      { tier: "starter", tierLabel: "Starter", price: 65, productId: "iptv-1yr-1d" },
-      { tier: "duo", tierLabel: "Duo", price: 100, productId: "iptv-1yr-2d" },
-      { tier: "team", tierLabel: "Team", price: 140, productId: "iptv-1yr-3d" },
-      { tier: "business", tierLabel: "Business", price: 190, productId: "iptv-1yr-4d" },
-      { tier: "enterprise", tierLabel: "Enterprise", price: 220, productId: "iptv-1yr-5d" },
+      { tier: "starter", tierLabel: "Starter", price: 65, productId: iptvRealProductId("1yr", 1) },
+      { tier: "duo", tierLabel: "Duo", price: 100, productId: iptvRealProductId("1yr", 2) },
+      { tier: "team", tierLabel: "Team", price: 140, productId: iptvRealProductId("1yr", 3) },
+      { tier: "business", tierLabel: "Business", price: 190, productId: iptvRealProductId("1yr", 4) },
+      { tier: "enterprise", tierLabel: "Enterprise", price: 220, productId: iptvRealProductId("1yr", 5) },
     ],
   },
 ];

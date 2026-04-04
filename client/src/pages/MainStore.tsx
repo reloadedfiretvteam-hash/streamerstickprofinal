@@ -35,6 +35,7 @@ import SupportMessageBox from "@/components/SupportMessageBox";
 import { trackVpnClick } from "@/lib/vpn-tracking";
 import { SitePromotionBanner } from "@/components/SitePromotionBanner";
 import type { Product as StoreCartProduct } from "@/lib/store";
+import { iptvRealProductId } from "@/lib/iptv-sku";
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
 const firestickHdImg = `${SUPABASE_BASE}/OIP_(11)99_1764978938773.jpg`;
@@ -91,11 +92,11 @@ const iptvPricingMatrix: IPTVPricing[] = [
     description: "Premium Live TV streaming plan with 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
     features: productBenefitList,
     prices: [
-      { devices: 1, price: 11, productId: "iptv-1mo-1d" },
-      { devices: 2, price: 25, productId: "iptv-1mo-2d" },
-      { devices: 3, price: 35, productId: "iptv-1mo-3d" },
-      { devices: 4, price: 40, productId: "iptv-1mo-4d" },
-      { devices: 5, price: 45, productId: "iptv-1mo-5d" },
+      { devices: 1, price: 11, productId: iptvRealProductId("1mo", 1) },
+      { devices: 2, price: 25, productId: iptvRealProductId("1mo", 2) },
+      { devices: 3, price: 35, productId: iptvRealProductId("1mo", 3) },
+      { devices: 4, price: 40, productId: iptvRealProductId("1mo", 4) },
+      { devices: 5, price: 45, productId: iptvRealProductId("1mo", 5) },
     ],
   },
   {
@@ -106,11 +107,11 @@ const iptvPricingMatrix: IPTVPricing[] = [
     description: "Save more with 3 months! Premium Live TV plan with 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
     features: productBenefitList,
     prices: [
-      { devices: 1, price: 25, productId: "iptv-3mo-1d" },
-      { devices: 2, price: 40, productId: "iptv-3mo-2d" },
-      { devices: 3, price: 55, productId: "iptv-3mo-3d" },
-      { devices: 4, price: 65, productId: "iptv-3mo-4d" },
-      { devices: 5, price: 75, productId: "iptv-3mo-5d" },
+      { devices: 1, price: 25, productId: iptvRealProductId("3mo", 1) },
+      { devices: 2, price: 40, productId: iptvRealProductId("3mo", 2) },
+      { devices: 3, price: 55, productId: iptvRealProductId("3mo", 3) },
+      { devices: 4, price: 65, productId: iptvRealProductId("3mo", 4) },
+      { devices: 5, price: 75, productId: iptvRealProductId("3mo", 5) },
     ],
   },
   {
@@ -120,11 +121,11 @@ const iptvPricingMatrix: IPTVPricing[] = [
     description: "10% OFF! 6-month premium Live TV streaming plan with 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
     features: productBenefitList,
     prices: [
-      { devices: 1, price: 40, productId: "iptv-6mo-1d" },
-      { devices: 2, price: 65, productId: "iptv-6mo-2d" },
-      { devices: 3, price: 85, productId: "iptv-6mo-3d" },
-      { devices: 4, price: 100, productId: "iptv-6mo-4d" },
-      { devices: 5, price: 125, productId: "iptv-6mo-5d" },
+      { devices: 1, price: 40, productId: iptvRealProductId("6mo", 1) },
+      { devices: 2, price: 65, productId: iptvRealProductId("6mo", 2) },
+      { devices: 3, price: 85, productId: iptvRealProductId("6mo", 3) },
+      { devices: 4, price: 100, productId: iptvRealProductId("6mo", 4) },
+      { devices: 5, price: 125, productId: iptvRealProductId("6mo", 5) },
     ],
   },
   {
@@ -134,11 +135,11 @@ const iptvPricingMatrix: IPTVPricing[] = [
     description: "Best deal - Full year premium Live TV plan with extensive content library, thousands of movies & shows, and comprehensive sports coverage!",
     features: productBenefitList,
     prices: [
-      { devices: 1, price: 65, productId: "iptv-1yr-1d" },
-      { devices: 2, price: 100, productId: "iptv-1yr-2d" },
-      { devices: 3, price: 140, productId: "iptv-1yr-3d" },
-      { devices: 4, price: 190, productId: "iptv-1yr-4d" },
-      { devices: 5, price: 220, productId: "iptv-1yr-5d" },
+      { devices: 1, price: 65, productId: iptvRealProductId("1yr", 1) },
+      { devices: 2, price: 100, productId: iptvRealProductId("1yr", 2) },
+      { devices: 3, price: 140, productId: iptvRealProductId("1yr", 3) },
+      { devices: 4, price: 190, productId: iptvRealProductId("1yr", 4) },
+      { devices: 5, price: 220, productId: iptvRealProductId("1yr", 5) },
     ],
   },
 ];
@@ -208,13 +209,8 @@ export default function MainStore() {
     "6mo": 1,
     "1yr": 1,
   });
-  const [firestickQuantities, setFirestickQuantities] = useState<Record<string, number>>({
-    "firestick-hd": 1,
-    "firestick-4k": 1,
-    "firestick-4k-max": 1,
-    "android-onn-4k": 1,
-    "android-onn-pro": 1,
-  });
+  /** Keys must match `product.id` from /api/products (e.g. fs-4k). Old firestick-* keys broke qty UI after API load. */
+  const [firestickQuantities, setFirestickQuantities] = useState<Record<string, number>>({});
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
@@ -224,6 +220,28 @@ export default function MainStore() {
   const shopRef = useRef<HTMLDivElement>(null);
   const isAboutInView = useInView(aboutRef, { once: true, margin: "-100px" });
   const isShopInView = useInView(shopRef, { once: true, margin: "-100px" });
+
+  const firestickProductIdKey = useMemo(
+    () =>
+      products
+        .filter((p) => p.category === "firestick")
+        .map((p) => p.id)
+        .sort()
+        .join("\0"),
+    [products]
+  );
+
+  useEffect(() => {
+    setFirestickQuantities((prev) => {
+      const ids = products.filter((p) => p.category === "firestick").map((p) => p.id);
+      if (ids.length === 0) return prev;
+      const next: Record<string, number> = {};
+      for (const id of ids) {
+        next[id] = prev[id] ?? 1;
+      }
+      return next;
+    });
+  }, [firestickProductIdKey]);
   
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -314,7 +332,7 @@ export default function MainStore() {
     setPageMeta({
       title: "IPTV Subscriptions Loaded Firesticks Onn VPN | StreamStickPro",
       description:
-        "StreamStickPro: IPTV subscriptions, loaded Firesticks, ONN Google TV, and Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, McAfee Secure, 99.9% uptime.",
+        "StreamStickPro: IPTV subscriptions, loaded Firesticks, ONN Google TV, and Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, SSL-secured checkout, 24/7 support.",
       path: "/",
       keywords:
         "IPTV subscription, loaded Firestick, Onn device, Surfshark VPN IPTV, ISP throttling VPN",
@@ -487,22 +505,13 @@ export default function MainStore() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0A0A0F] via-[#12121a] to-[#1A1A22] text-white font-sans selection:bg-[#00D4FF] selection:text-[#0A0A0F] pb-32 md:pb-20 relative overflow-x-hidden">
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div
-          className="absolute inset-0 opacity-[0.12]"
-          style={{
-            backgroundImage: `url(${heroImg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            backgroundAttachment: "fixed",
-          }}
-        />
+      {/* Page backdrop: gradient only. Hero photo lives in the hero section so it stays visible on mobile (fixed attachment + low opacity hid it). */}
+      <div className="fixed inset-0 z-0 pointer-events-none" aria-hidden>
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 120% 80% at 50% -20%, rgba(0,212,255,0.18) 0%, transparent 55%), linear-gradient(to bottom, #0A0A0F 0%, #1A1A22 100%)",
+              "radial-gradient(ellipse 120% 80% at 50% -20%, rgba(0,212,255,0.16) 0%, transparent 55%), linear-gradient(to bottom, #0A0A0F 0%, #1A1A22 100%)",
           }}
         />
       </div>
@@ -559,7 +568,7 @@ export default function MainStore() {
               >
                 <Flame className="w-7 h-7 text-orange-500" />
               </motion.div>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Stream Stick Pro</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#FAD02C]">Stream Stick Pro</span>
             </div>
           </div>
           
@@ -623,45 +632,62 @@ export default function MainStore() {
 
       {/* Main Content */}
       <main id="main-content" role="main">
-      {/* Elite hero — full viewport, vision copy */}
+      {/* Elite hero — full viewport + photography (reliable on mobile; no fixed-attachment image) */}
       <section
         ref={heroRef}
-        className="relative text-white overflow-hidden min-h-[100svh] flex flex-col justify-center z-10 py-16 md:py-24 lg:py-32"
+        className="relative text-white overflow-hidden min-h-[100svh] flex flex-col justify-center z-10 py-14 sm:py-16 md:py-24 lg:py-32"
       >
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDgpIi8+PC9nPjwvc3ZnPg==')] opacity-30 pointer-events-none" aria-hidden />
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden>
+          <img
+            src={heroImg}
+            alt=""
+            width={1920}
+            height={1080}
+            decoding="async"
+            fetchPriority="high"
+            className="absolute inset-0 h-full w-full object-cover object-[center_30%] sm:object-center scale-[1.06] sm:scale-100 opacity-[0.44] sm:opacity-[0.40] md:opacity-[0.36]"
+            onError={(e) => {
+              const el = e.currentTarget;
+              if (el.src !== fallbackHeroImg) el.src = fallbackHeroImg;
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0F]/90 via-[#0A0A0F]/72 to-[#0A0A0F]/88" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0F]/78 via-transparent to-[#0A0A0F]/78" />
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDgpIi8+PC9nPjwvc3ZnPg==')] opacity-30" />
+        </div>
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container mx-auto px-4 sm:px-5 relative z-10 max-w-[100vw]">
           <div className="max-w-5xl mx-auto text-center">
             <motion.h1
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-[1.08] tracking-tight text-white mb-6"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-black leading-[1.12] sm:leading-[1.08] tracking-tight text-white mb-4 sm:mb-6 drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)]"
             >
-              StreamStickPro IPTV Subscriptions &amp; Loaded Devices
+              Premium IPTV &amp; preconfigured streaming devices
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.05 }}
-              className="text-lg sm:text-xl md:text-2xl text-[#B0B3B8] font-semibold mb-4"
+              className="text-base sm:text-lg md:text-xl text-[#E4E6EB] font-semibold mb-3 sm:mb-4 max-w-3xl mx-auto leading-relaxed px-1"
             >
-              36 Hour Free Trial - 18K+ Channels Live Now
+              36-hour trial · 18K+ live channels · guided setup in minutes
             </motion.p>
             <motion.p
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.1 }}
-              className="text-sm sm:text-base text-[#FAD02C]/90 font-medium mb-10 md:mb-12"
+              className="text-sm sm:text-base text-[#FAD02C]/95 font-medium mb-9 md:mb-11 leading-relaxed"
             >
-              247K Users • 99.9% Uptime • McAfee Secure
+              2,700+ customers · 99.9% uptime · SSL-secured checkout
             </motion.p>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.12 }}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto mb-10"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-3xl mx-auto mb-10"
             >
               <Link href="/36hr-trial">
                 <span className="flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-[#0A0A0F] bg-[#00D4FF] hover:bg-[#33ddff] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-[#00D4FF]/50 cursor-pointer transition-transform hover:scale-[1.02]">
@@ -712,8 +738,8 @@ export default function MainStore() {
             {/* Card 1 IPTV — cyan */}
             <div className="rounded-2xl p-8 border border-[#00D4FF]/35 bg-gradient-to-br from-[#00D4FF]/10 to-transparent shadow-[0_20px_60px_rgba(0,0,0,0.5)] flex flex-col">
               <h2 className="text-2xl font-black text-[#00D4FF] mb-3">IPTV Subscriptions</h2>
-              <p className="text-[#B0B3B8] leading-relaxed mb-6 flex-1">
-                Get premium IPTV streaming service with 18K+ live channels, 60K+ movies, 15K+ series instantly.
+              <p className="text-[#B0B3B8] leading-relaxed mb-6 flex-1 text-[15px] sm:text-base">
+                Get premium IPTV streaming with 18K+ live channels, 100K+ movies &amp; series—on your schedule.
               </p>
               <ul className="space-y-2 text-[#FFFFFF] text-sm mb-8">
                 {["All-in-one app login", "Multi-device support", "36hr risk-free trial"].map((t) => (
@@ -802,10 +828,10 @@ export default function MainStore() {
           <h2 className="text-2xl md:text-4xl font-black text-white mb-8">Clear Advantages</h2>
           <ul className="text-left max-w-2xl mx-auto space-y-4 text-[#B0B3B8]">
             {[
-              "Beats IPTVStronger: 36hr trial (vs 24hr)",
-              "Beats TroyPoint: Full Onn/Roku support",
-              "Devices include 1-year service",
-              "VPN prevents ISP buffering issues",
+              "36-hour full-access trial—no card required to start",
+              "Device bundles ship with 1 year of Reloaded Fire TV",
+              "Fire TV, ONN Google TV, Roku & smart TV friendly workflows",
+              "Optional VPN path for ISP throttling & privacy on busy networks",
             ].map((line) => (
               <li key={line} className="flex gap-3 items-start text-base md:text-lg">
                 <Check className="w-6 h-6 text-[#00D4FF] shrink-0" aria-hidden />
@@ -819,74 +845,8 @@ export default function MainStore() {
       {/* Trust bar */}
       <section className="py-8 md:py-10 bg-[#1A1A22]/80 border-b border-white/5">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-sm md:text-base text-[#FAD02C]/85 font-medium tracking-wide">
-            247K users • 99.9% uptime • McAfee Secure • 18K+ channels live now
-          </p>
-        </div>
-      </section>
-
-      {/* Essential FAQ */}
-      <section id="faq" className="py-16 md:py-24 lg:py-32 bg-[#0A0A0F]/40">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <h2 className="text-3xl md:text-4xl font-black text-center text-white mb-10">Essential FAQ</h2>
-          <Accordion type="single" collapsible className="w-full space-y-3">
-            <AccordionItem value="e1" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
-              <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-white hover:text-[#00D4FF]">
-                IPTV subscription vs loaded device?
-              </AccordionTrigger>
-              <AccordionContent className="text-[#B0B3B8] pb-4">
-                IPTV = streaming service only. Device = hardware WITH 1-year Reloaded Fire TV included.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="e2" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
-              <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-white hover:text-[#00D4FF]">
-                Firestick/Onn include subscription?
-              </AccordionTrigger>
-              <AccordionContent className="text-[#B0B3B8] pb-4">
-                Yes. Every device ships with 1-year Reloaded Fire TV subscription.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="e3" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
-              <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-white hover:text-[#00D4FF]">
-                Why Surfshark VPN?
-              </AccordionTrigger>
-              <AccordionContent className="text-[#B0B3B8] pb-4">
-                Your ISP detects IPTV streaming and throttles speed (buffering). VPN encrypts traffic so ISP can&apos;t throttle. Privacy bonus.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="e4" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
-              <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-white hover:text-[#00D4FF]">
-                36hr trial details?
-              </AccordionTrigger>
-              <AccordionContent className="text-[#B0B3B8] pb-4">
-                Full IPTV access. No card upfront. Cancel anytime.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="e5" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
-              <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-white hover:text-[#00D4FF]">
-                Setup process?
-              </AccordionTrigger>
-              <AccordionContent className="text-[#B0B3B8] pb-4">
-                IPTV: 60 seconds login. Devices: plug &amp; play. VPN: 2-minute app install.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="e6" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
-              <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-white hover:text-[#00D4FF]">
-                Buffering common?
-              </AccordionTrigger>
-              <AccordionContent className="text-[#B0B3B8] pb-4">
-                ISP throttling causes 90% of buffering. Surfshark VPN fixes it.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
-      </section>
-
-      {/* Responsible disclaimer */}
-      <section className="py-10 md:py-12 px-4 border-t border-white/5 bg-[#0A0A0F]">
-        <div className="container mx-auto max-w-4xl">
-          <p className="text-sm md:text-base text-[#B0B3B8]/90 leading-relaxed text-center">
-            Optimal performance requires 25Mbps+ internet. ISP throttling common (VPN recommended). Devices include 1-year service only. Users responsible for local laws/platform compliance. Support available 24/7.
+          <p className="text-sm md:text-base text-[#FAD02C]/90 font-medium tracking-wide leading-relaxed px-2">
+            2,700+ customers · 99.9% uptime · SSL-secured checkout · 18K+ channels
           </p>
         </div>
       </section>
@@ -900,15 +860,15 @@ export default function MainStore() {
             animate={isShopInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full px-6 py-2 mb-6">
-              <Flame className="w-5 h-5 text-orange-400 animate-pulse" />
-              <span className="text-sm font-medium text-orange-300">SHOP ALL PRODUCTS</span>
+            <div className="inline-flex items-center gap-2 bg-[#00D4FF]/15 backdrop-blur-sm border border-[#00D4FF]/35 rounded-full px-5 sm:px-6 py-2 mb-6">
+              <Flame className="w-5 h-5 text-[#FAD02C] shrink-0" />
+              <span className="text-xs sm:text-sm font-semibold text-[#00D4FF] tracking-wide">SHOP ALL PRODUCTS</span>
             </div>
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Fire Stick Device Options & IPTV Plans</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 sm:mb-6 leading-tight px-1">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] via-white to-[#FAD02C]">Fire Stick kits &amp; IPTV plans</span>
             </h2>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Trusted by 2,700+ customers. 18,000+ channels, 100,000+ movies and series, and clear setup guidance for Fire Stick, ONN, and Android TV.
+            <p className="text-base sm:text-lg md:text-xl text-[#E8EAED] max-w-3xl mx-auto leading-relaxed px-1">
+              Same lineup thousands of customers use daily: 18K+ channels, 100K+ movies &amp; series, and step-by-step guidance for Fire TV, ONN, and Android TV.
             </p>
           </motion.div>
 
@@ -927,10 +887,12 @@ export default function MainStore() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {iptvPricingMatrix.map((plan, index) => {
-                const deviceCount = selectedDevices[plan.duration];
+                const deviceCount = selectedDevices[plan.duration] ?? 1;
                 const selectedPrice = plan.prices.find(p => p.devices === deviceCount) || plan.prices[0];
                 const iptvDb = products.find((pp) => pp.id === selectedPrice.productId);
-                const linePriceDollars = iptvDb?.price ?? selectedPrice.price;
+                const dbDollars =
+                  iptvDb != null && Number.isFinite(iptvDb.price) ? iptvDb.price : null;
+                const linePriceDollars = dbDollars ?? selectedPrice.price;
                 const iptvRegular = iptvDb?.regularListPrice;
                 const iptvPromo = iptvDb?.cardPromoLabel;
                 const cardGradients = [
@@ -1563,13 +1525,76 @@ export default function MainStore() {
         </div>
       </section>
 
+      {/* FAQ & disclaimer after shop so buyers see products first; anchor #faq unchanged for nav/footer */}
+      <section id="faq" className="py-14 md:py-20 lg:py-24 bg-[#0A0A0F]/50 border-t border-white/10">
+        <div className="container mx-auto px-4 sm:px-5 max-w-3xl">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-center text-white mb-8 md:mb-10 leading-tight">Essential FAQ</h2>
+          <Accordion type="single" collapsible className="w-full space-y-3">
+            <AccordionItem value="e1" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
+              <AccordionTrigger className="text-left text-[15px] sm:text-base md:text-lg font-semibold text-white hover:text-[#00D4FF] py-5 [&[data-state=open]]:text-[#00D4FF]">
+                IPTV subscription vs loaded device?
+              </AccordionTrigger>
+              <AccordionContent className="text-[#B0B3B8] pb-4 text-[15px] sm:text-base leading-relaxed">
+                IPTV = streaming service only. Device = hardware WITH 1-year Reloaded Fire TV included.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="e2" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
+              <AccordionTrigger className="text-left text-[15px] sm:text-base md:text-lg font-semibold text-white hover:text-[#00D4FF] py-5 [&[data-state=open]]:text-[#00D4FF]">
+                Firestick/Onn include subscription?
+              </AccordionTrigger>
+              <AccordionContent className="text-[#B0B3B8] pb-4 text-[15px] sm:text-base leading-relaxed">
+                Yes. Every device ships with 1-year Reloaded Fire TV subscription.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="e3" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
+              <AccordionTrigger className="text-left text-[15px] sm:text-base md:text-lg font-semibold text-white hover:text-[#00D4FF] py-5 [&[data-state=open]]:text-[#00D4FF]">
+                Why Surfshark VPN?
+              </AccordionTrigger>
+              <AccordionContent className="text-[#B0B3B8] pb-4 text-[15px] sm:text-base leading-relaxed">
+                Your ISP detects IPTV streaming and throttles speed (buffering). VPN encrypts traffic so ISP can&apos;t throttle. Privacy bonus.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="e4" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
+              <AccordionTrigger className="text-left text-[15px] sm:text-base md:text-lg font-semibold text-white hover:text-[#00D4FF] py-5 [&[data-state=open]]:text-[#00D4FF]">
+                36hr trial details?
+              </AccordionTrigger>
+              <AccordionContent className="text-[#B0B3B8] pb-4 text-[15px] sm:text-base leading-relaxed">
+                Full IPTV access. No card upfront. Cancel anytime.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="e5" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
+              <AccordionTrigger className="text-left text-[15px] sm:text-base md:text-lg font-semibold text-white hover:text-[#00D4FF] py-5 [&[data-state=open]]:text-[#00D4FF]">
+                Setup process?
+              </AccordionTrigger>
+              <AccordionContent className="text-[#B0B3B8] pb-4 text-[15px] sm:text-base leading-relaxed">
+                IPTV: 60 seconds login. Devices: plug &amp; play. VPN: 2-minute app install.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="e6" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
+              <AccordionTrigger className="text-left text-[15px] sm:text-base md:text-lg font-semibold text-white hover:text-[#00D4FF] py-5 [&[data-state=open]]:text-[#00D4FF]">
+                Buffering common?
+              </AccordionTrigger>
+              <AccordionContent className="text-[#B0B3B8] pb-4 text-[15px] sm:text-base leading-relaxed">
+                ISP throttling causes 90% of buffering. Surfshark VPN fixes it.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </section>
 
+      <section className="py-8 md:py-10 px-4 sm:px-5 border-t border-white/5 bg-[#0A0A0F]" aria-label="Disclaimer">
+        <div className="container mx-auto max-w-4xl">
+          <p className="text-sm sm:text-base text-[#B0B3B8]/95 leading-relaxed text-center">
+            Optimal performance requires 25Mbps+ internet. ISP throttling is common (VPN recommended). Device bundles include 1-year service where stated. Users are responsible for local laws and platform terms. Support is available 24/7.
+          </p>
+        </div>
+      </section>
 
-      {/* Section 2: Competitor Domination */}
-      <section className="relative z-10 py-12 md:py-16 bg-gradient-to-b from-gray-900/80 to-gray-900 border-y border-white/10" aria-labelledby="competitor-domination">
-        <div className="container mx-auto px-4">
-          <h2 id="competitor-domination" className="text-2xl md:text-3xl font-bold text-center text-white mb-8">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Competitor Domination</span>
+      {/* Why StreamStick Pro — named comparisons */}
+      <section className="relative z-10 py-12 md:py-16 bg-gradient-to-b from-gray-900/80 to-gray-900 border-y border-white/10" aria-labelledby="why-streamstick-pro">
+        <div className="container mx-auto px-4 sm:px-5">
+          <h2 id="why-streamstick-pro" className="text-2xl sm:text-3xl font-bold text-center text-white mb-8 leading-tight px-1">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#FAD02C]">Why StreamStick Pro</span>
           </h2>
           <div className="max-w-3xl mx-auto space-y-4 text-lg text-gray-200">
             <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> Beats IPTVStronger — 36hr vs 24hr trial</p>
@@ -1577,9 +1602,9 @@ export default function MainStore() {
             <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> More channels than ANY competitor — 18K+ live</p>
           </div>
           <p className="text-center mt-6">
-            <Link href="/vs-iptvstronger"><span className="text-orange-400 hover:text-orange-300 font-semibold">Compare vs IPTVStronger →</span></Link>
+            <Link href="/vs-iptvstronger"><span className="text-[#00D4FF] hover:text-[#33ddff] font-semibold">Compare vs IPTVStronger →</span></Link>
             {" · "}
-            <Link href="/vs-troypoint"><span className="text-orange-400 hover:text-orange-300 font-semibold">Compare vs TroyPoint →</span></Link>
+            <Link href="/vs-troypoint"><span className="text-[#00D4FF] hover:text-[#33ddff] font-semibold">Compare vs TroyPoint →</span></Link>
           </p>
         </div>
       </section>
@@ -1657,7 +1682,7 @@ export default function MainStore() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">The Stream Stick Pro Difference</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] via-white/95 to-[#FAD02C]">The Stream Stick Pro Difference</span>
             </h2>
             <p className="text-gray-200 text-lg">See why customers choose us over the competition</p>
           </div>
@@ -2195,7 +2220,7 @@ export default function MainStore() {
                 ))}
               </div>
               <p className="text-xs text-gray-400 mt-3 flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-orange-400" />
+                <CreditCard className="w-4 h-4 text-[#00D4FF]" />
                 Secure checkout powered by Stripe.
               </p>
             </div>
@@ -2218,13 +2243,13 @@ export default function MainStore() {
               <p className="text-gray-200">
                 © {new Date().getFullYear()} StreamStickPro. All rights reserved.
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-                <span className="text-green-400 font-semibold">🔒 Secure Payment</span>
-                <span className="text-orange-400 font-semibold">24/7 Support</span>
-                <span className="text-blue-400 font-semibold">Money-Back Guarantee</span>
-                <span className="text-gray-300 font-medium">250K+ users served</span>
-                <span className="text-gray-300 font-medium">99.999% uptime</span>
-                <span className="text-gray-300 font-medium">Privacy compliant</span>
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 md:gap-6 text-center">
+                <span className="text-[#22C55E] font-semibold">SSL-secured checkout</span>
+                <span className="text-[#FAD02C] font-semibold">24/7 support</span>
+                <span className="text-[#00D4FF] font-semibold">Money-back guarantee</span>
+                <span className="text-gray-300 font-medium">2,700+ customers served</span>
+                <span className="text-gray-300 font-medium">99.9% uptime</span>
+                <span className="text-gray-300 font-medium">Privacy-conscious</span>
               </div>
             </div>
           </div>

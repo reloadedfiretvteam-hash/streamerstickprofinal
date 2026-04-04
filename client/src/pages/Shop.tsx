@@ -1,6 +1,6 @@
 // Build timestamp: 2026-01-13T02:19:49.886Z
 import { useEffect, useMemo, useState, lazy, Suspense } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { apiCall } from "@/lib/api";
 import { motion } from "framer-motion";
 import { ShoppingCart, Flame, Check, Star, Zap, Gift, DollarSign, Heart, X } from "lucide-react";
@@ -14,6 +14,7 @@ import { QuickViewButton } from "@/components/QuickViewButton";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { setPageMeta, shopProductUrl } from "@/lib/seo";
 import { SEOSchema, ItemListSchema } from "@/components/SEOSchema";
+import { iptvRealProductId } from "@/lib/iptv-sku";
 
 const ProductQuickView = lazy(() => import("@/components/ProductQuickView").then((module) => ({ default: module.ProductQuickView })));
 
@@ -57,11 +58,11 @@ const iptvPricingMatrix: IPTVPricing[] = [
     description: "Premium Live TV streaming with curated, working links—no dead Kodi lists, no endless broken app hunts.",
     features: ["18,000+ Live TV Channels", "100,000+ Movies & Series", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support (real humans)"],
     prices: [
-      { devices: 1, price: 11, productId: "iptv-1mo-1d" },
-      { devices: 2, price: 25, productId: "iptv-1mo-2d" },
-      { devices: 3, price: 35, productId: "iptv-1mo-3d" },
-      { devices: 4, price: 40, productId: "iptv-1mo-4d" },
-      { devices: 5, price: 45, productId: "iptv-1mo-5d" },
+      { devices: 1, price: 11, productId: iptvRealProductId("1mo", 1) },
+      { devices: 2, price: 25, productId: iptvRealProductId("1mo", 2) },
+      { devices: 3, price: 35, productId: iptvRealProductId("1mo", 3) },
+      { devices: 4, price: 40, productId: iptvRealProductId("1mo", 4) },
+      { devices: 5, price: 45, productId: iptvRealProductId("1mo", 5) },
     ],
   },
   {
@@ -72,11 +73,11 @@ const iptvPricingMatrix: IPTVPricing[] = [
     description: "Save more with 3 months. All-in-one Reloaded Fire TV—no dead-end apps, no Kodi maintenance, just working streams and faster ticket response.",
     features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support (24/7)"],
     prices: [
-      { devices: 1, price: 25, productId: "iptv-3mo-1d" },
-      { devices: 2, price: 40, productId: "iptv-3mo-2d" },
-      { devices: 3, price: 55, productId: "iptv-3mo-3d" },
-      { devices: 4, price: 65, productId: "iptv-3mo-4d" },
-      { devices: 5, price: 75, productId: "iptv-3mo-5d" },
+      { devices: 1, price: 25, productId: iptvRealProductId("3mo", 1) },
+      { devices: 2, price: 40, productId: iptvRealProductId("3mo", 2) },
+      { devices: 3, price: 55, productId: iptvRealProductId("3mo", 3) },
+      { devices: 4, price: 65, productId: iptvRealProductId("3mo", 4) },
+      { devices: 5, price: 75, productId: iptvRealProductId("3mo", 5) },
     ],
   },
   {
@@ -86,11 +87,11 @@ const iptvPricingMatrix: IPTVPricing[] = [
     description: "Best value 6-month Reloaded Fire TV with stable links and an all-in-one app flow—no random app installs or failing Kodi builds.",
     features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support", "10% Savings"],
     prices: [
-      { devices: 1, price: 45, productId: "iptv-6mo-1d" },
-      { devices: 2, price: 75, productId: "iptv-6mo-2d" },
-      { devices: 3, price: 105, productId: "iptv-6mo-3d" },
-      { devices: 4, price: 125, productId: "iptv-6mo-4d" },
-      { devices: 5, price: 145, productId: "iptv-6mo-5d" },
+      { devices: 1, price: 45, productId: iptvRealProductId("6mo", 1) },
+      { devices: 2, price: 75, productId: iptvRealProductId("6mo", 2) },
+      { devices: 3, price: 105, productId: iptvRealProductId("6mo", 3) },
+      { devices: 4, price: 125, productId: iptvRealProductId("6mo", 4) },
+      { devices: 5, price: 145, productId: iptvRealProductId("6mo", 5) },
     ],
   },
   {
@@ -100,11 +101,11 @@ const iptvPricingMatrix: IPTVPricing[] = [
     description: "Ultimate value. One year of premium Reloaded Fire TV with curated, working streams—no dead Kodi builds, no broken apps, no scavenger hunts.",
     features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support (24/7)", "Maximum Savings"],
     prices: [
-      { devices: 1, price: 65, productId: "iptv-1yr-1d" },
-      { devices: 2, price: 145, productId: "iptv-1yr-2d" },
-      { devices: 3, price: 205, productId: "iptv-1yr-3d" },
-      { devices: 4, price: 245, productId: "iptv-1yr-4d" },
-      { devices: 5, price: 285, productId: "iptv-1yr-5d" },
+      { devices: 1, price: 65, productId: iptvRealProductId("1yr", 1) },
+      { devices: 2, price: 145, productId: iptvRealProductId("1yr", 2) },
+      { devices: 3, price: 205, productId: iptvRealProductId("1yr", 3) },
+      { devices: 4, price: 245, productId: iptvRealProductId("1yr", 4) },
+      { devices: 5, price: 285, productId: iptvRealProductId("1yr", 5) },
     ],
   },
 ];

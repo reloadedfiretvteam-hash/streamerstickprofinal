@@ -13,6 +13,9 @@ import {
   BookOpen,
   HelpCircle,
   Mail,
+  Gift,
+  PlayCircle,
+  Smartphone,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -48,8 +51,11 @@ export function MobileNav({ scrollToShop, scrollToFaq, scrollToAbout, onSupportC
 
   const menuItems: { label: string; icon: typeof Home; action: () => void }[] = [
     { label: "Home", icon: Home, action: () => { setLocation("/"); } },
+    { label: "36-Hour Trial", icon: Gift, action: () => { setLocation("/36hr-trial"); } },
+    { label: "Shop plans & devices", icon: ShoppingCart, action: () => navigateToSection("shop") },
+    { label: "Loaded devices", icon: Tv, action: () => { setLocation("/devices"); } },
+    { label: "ONN Google TV", icon: Smartphone, action: () => { setLocation("/onn"); } },
     { label: "Reloaded Fire TV", icon: Wifi, action: () => { setLocation("/iptv"); } },
-    { label: "Devices", icon: Tv, action: () => { setLocation("/devices"); } },
     { label: "Bundles", icon: Package, action: () => { setLocation("/bundles"); } },
     {
       label: "Surfshark VPN",
@@ -59,11 +65,11 @@ export function MobileNav({ scrollToShop, scrollToFaq, scrollToAbout, onSupportC
         setLocation("/vpn");
       }
     },
-    { label: "Shop", icon: ShoppingCart, action: () => navigateToSection("shop") },
     ...(scrollToAbout
       ? [{ label: "How It Works", icon: ChevronRight, action: () => navigateToSection("about") }]
       : []),
     { label: "FAQ", icon: HelpCircle, action: () => navigateToSection("faq") },
+    { label: "Tutorials", icon: PlayCircle, action: () => { setLocation("/tutorials"); } },
     { label: "Blog", icon: BookOpen, action: () => { setLocation("/blog"); } },
     { label: "Locations", icon: ChevronRight, action: () => { setLocation("/locations"); } },
     {
@@ -93,11 +99,11 @@ export function MobileNav({ scrollToShop, scrollToFaq, scrollToAbout, onSupportC
           <span className="sr-only">Open menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[300px] bg-[#0A0A0F] border-r border-[#2A2A33] p-0">
+      <SheetContent side="left" className="w-[min(100vw-2rem,340px)] sm:w-[340px] bg-[#0A0A0F] border-r border-[#2A2A33] p-0">
         <SheetHeader className="p-6 border-b border-white/10">
           <SheetTitle className="flex items-center gap-2 text-white">
             <Flame className="w-6 h-6 text-[#00D4FF]" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#7C3AED] font-bold">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#FAD02C] font-bold">
               Stream Stick Pro
             </span>
           </SheetTitle>
@@ -110,11 +116,11 @@ export function MobileNav({ scrollToShop, scrollToFaq, scrollToAbout, onSupportC
                 <button
                   type="button"
                   onClick={() => handleNavClick(item.action)}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3.5 min-h-[52px] text-[15px] text-gray-200 hover:text-white hover:bg-white/10 rounded-xl transition-colors text-left active:bg-white/15"
                   data-testid={`mobile-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
                 >
-                  <item.icon className="w-5 h-5 text-[#00D4FF]" />
-                  <span className="font-medium">{item.label}</span>
+                  <item.icon className="w-5 h-5 text-[#00D4FF] shrink-0" aria-hidden />
+                  <span className="font-semibold leading-snug">{item.label}</span>
                 </button>
               </li>
             ))}

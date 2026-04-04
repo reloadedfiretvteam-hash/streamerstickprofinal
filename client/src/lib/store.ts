@@ -85,6 +85,7 @@ export const useCart = create<CartState>()(
         const productToAdd: CartItem = isFirestick
           ? {
               ...product,
+              quantity,
               price: priceToUse,
               basePrice: product.price,
               regularUnitPrice: regularSnap,
@@ -92,6 +93,7 @@ export const useCart = create<CartState>()(
             }
           : {
               ...product,
+              quantity,
               price: priceToUse,
               regularUnitPrice: regularSnap,
               applySitePromotion: sitePromo,
@@ -131,7 +133,7 @@ export const useCart = create<CartState>()(
             isOpen: true,
           };
         }
-        return { items: [...state.items, { ...productToAdd, quantity }], isOpen: true };
+        return { items: [...state.items, productToAdd], isOpen: true };
       }),
       removeItem: (id) => {
         set((state) => {
