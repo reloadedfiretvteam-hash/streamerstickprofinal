@@ -36,6 +36,14 @@ const WEBSITE_REMINDER_HTML = (name: string) => `
 
 const SUPABASE_URL_FALLBACK = 'https://emlqlmfzqsnqokrqvmcm.supabase.co';
 
+function normalizeRealProductCategory(category: unknown): string | null {
+  const value = String(category ?? '').trim().toLowerCase();
+  if (!value) return null;
+  if (value === 'devices' || value === 'device' || value === 'firestick') return 'firestick';
+  if (value === 'subscriptions' || value === 'subscription' || value === 'iptv') return 'iptv';
+  return value;
+}
+
 const TEST_EMAIL_DOMAIN_MARKERS = [
   '@example.com',
   '@example.org',
@@ -687,7 +695,7 @@ export function createAdminRoutes() {
         description: description || null,
         price,
         imageUrl: imageUrl || null,
-        category: category || null,
+        category: normalizeRealProductCategory(category),
         shadowProductId: shadowProductId || null,
         shadowPriceId: shadowPriceId || null,
       });
@@ -713,6 +721,8 @@ export function createAdminRoutes() {
       const parsedPrice = Number(price);
       const hasPriceUpdate = price !== undefined && Number.isFinite(parsedPrice) && parsedPrice > 0;
       const normalizedPrice = hasPriceUpdate ? Math.round(parsedPrice) : existingProduct.price;
+      const normalizedCategory =
+        category !== undefined ? normalizeRealProductCategory(category) : existingProduct.category ?? null;
 
       let nextSale: number | null = existingProduct.salePrice ?? null;
       if (Object.prototype.hasOwnProperty.call(body, 'sale_price')) {
@@ -772,7 +782,7 @@ export function createAdminRoutes() {
         description,
         price: normalizedPrice,
         imageUrl,
-        category,
+        category: normalizedCategory,
         shadowProductId: nextShadowProductId,
         shadowPriceId: nextShadowPriceId,
         salePrice: nextSale,
@@ -839,28 +849,47 @@ export function createAdminRoutes() {
         body.ends_at != null && String(body.ends_at).trim() !== '' ? String(body.ends_at) : null;
 
       if (is_active) {
-        if (!real_product_id || !promo_shadow_price_id || promo_amount_cents <= 0) {
+        if (!real_product_id) {
           return c.json(
             {
-              error:
-                "Active promotion requires real_product_id, promo_shadow_price_id, and promo_amount_cents (> 0). Use “Create Stripe promo price” or paste a Price ID from Stripe.",
+              error: "Active promotion requires a catalog product.",
             },
             400
           );
         }
         const p = await storage.getRealProduct(real_product_id);
         if (!p) return c.json({ error: "real_product_id not found in catalog" }, 400);
+        if (!p.shadowPriceId && !promo_shadow_price_id) {
+          return c.json(
+            {
+              error:
+                "This product is not configured for checkout yet. Save the product first so it has a Stripe shadow price, or create a promo Stripe price.",
+            },
+            400
+          );
+        }
       }
 
       const existing = await storage.getSitePromotionRow({ strict: true });
+      const promoProduct =
+        real_product_id ? await storage.getRealProduct(real_product_id) : existing?.real_product_id ? await storage.getRealProduct(existing.real_product_id) : null;
+      const fallbackPromoAmount =
+        promoProduct
+          ? effectiveRealProductChargeCents({
+              price: promoProduct.price,
+              salePrice: promoProduct.salePrice ?? null,
+            })
+          : 0;
       const data = await storage.upsertSitePromotionRow({
         is_active,
         headline,
         subheadline,
         cta_label,
         real_product_id: real_product_id || existing?.real_product_id || '',
-        promo_shadow_price_id: promo_shadow_price_id || existing?.promo_shadow_price_id || '',
-        promo_amount_cents: promo_amount_cents || Number(existing?.promo_amount_cents) || 0,
+        promo_shadow_price_id:
+          promo_shadow_price_id || existing?.promo_shadow_price_id || promoProduct?.shadowPriceId || '',
+        promo_amount_cents:
+          promo_amount_cents || Number(existing?.promo_amount_cents) || fallbackPromoAmount || 0,
         shadow_headline: shadow_headline ?? (existing?.shadow_headline ?? null),
         shadow_subheadline: shadow_subheadline ?? (existing?.shadow_subheadline ?? null),
         ends_at,
@@ -1028,7 +1057,7 @@ export function createAdminRoutes() {
         description: description || null,
         price: priceInCents,
         imageUrl: imageUrl || null,
-        category: category || null,
+        category: normalizeRealProductCategory(category),
         shadowProductId: stripeProduct.id,
         shadowPriceId: stripePrice.id,
         salePrice: nextSale,

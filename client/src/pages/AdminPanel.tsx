@@ -1902,7 +1902,7 @@ export default function AdminPanel() {
       sale_price: editingProduct.sale_price,
       card_promo_label: editingProduct.card_promo_label ?? null,
       imageUrl: editingProduct.main_image || null,
-      category: editingProduct.category === 'devices' ? 'firestick' : 'subscription',
+      category: editingProduct.category === 'devices' ? 'firestick' : 'iptv',
       shadowName: editingProduct.cloaked_name || undefined,
       updated_at: new Date().toISOString()
     };
@@ -3341,17 +3341,9 @@ export default function AdminPanel() {
                               await unpublishSitePromotion();
                               return;
                             }
-                            const fromDollars = Math.round(parseFloat(promoPriceDollarsInput || "0") * 100);
-                            const cents =
-                              fromDollars > 0 ? fromDollars : sitePromotionDraft.promo_amount_cents;
-                            if (
-                              !sitePromotionDraft.real_product_id ||
-                              !sitePromotionDraft.promo_shadow_price_id ||
-                              !Number.isFinite(cents) ||
-                              cents <= 0
-                            ) {
+                            if (!sitePromotionDraft.real_product_id) {
                               showToast(
-                                "Set catalog product, Stripe Price ID, and promo amount before turning on.",
+                                "Choose a catalog product before turning on the promotion.",
                                 "error"
                               );
                               return;

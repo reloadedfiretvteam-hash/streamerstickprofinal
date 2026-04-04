@@ -14,6 +14,7 @@ import type {
   InsertCustomer,
 } from "../shared/schema";
 import { variantsForRealProductId } from "../shared/real-product-id";
+import { effectiveRealProductChargeCents } from "../shared/schema";
 
 export interface StorageConfig {
   supabaseUrl: string;
@@ -1153,13 +1154,21 @@ export function createStorage(config: StorageConfig) {
         const { data, error } = await supabase.from('site_promotion').select('*').eq('id', 'default').maybeSingle();
         if (error || !data || !data.is_active) return null;
         if (data.ends_at && new Date(data.ends_at).getTime() < Date.now()) return null;
-        if (!data.real_product_id || !data.promo_shadow_price_id || data.promo_amount_cents == null) return null;
+        if (!data.real_product_id) return null;
+        const product = await this.getRealProduct(String(data.real_product_id));
+        if (!product?.shadowPriceId) return null;
         const cents = Number(data.promo_amount_cents);
-        if (!Number.isFinite(cents) || cents <= 0) return null;
+        const promoAmountCents =
+          Number.isFinite(cents) && cents > 0
+            ? cents
+            : effectiveRealProductChargeCents({
+                price: product.price,
+                salePrice: product.salePrice ?? null,
+              });
         return {
           realProductId: String(data.real_product_id),
-          promoShadowPriceId: String(data.promo_shadow_price_id),
-          promoAmountCents: cents,
+          promoShadowPriceId: String(data.promo_shadow_price_id || product.shadowPriceId),
+          promoAmountCents,
         };
       } catch {
         return null;
