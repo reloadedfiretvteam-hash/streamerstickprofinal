@@ -37,10 +37,12 @@ jobs:
         run: |
           echo "## Migration Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Database tables have been created/updated in Supabase." >> $GITHUB_STEP_SUMMARY
+          echo "Requires GitHub secret \`SUPABASE_DATABASE_URL\` (Supabase → Settings → Database → URI)." >> $GITHUB_STEP_SUMMARY
+          echo "Runs \`scripts/run-supabase-migration.ts\` plus \`supabase/migrations\` (202602*–202604*), then requests a **PostgREST schema reload** so \`sale_price\` and \`site_promotion\` are visible to the API." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Tables:" >> $GITHUB_STEP_SUMMARY
-          echo "- customers" >> $GITHUB_STEP_SUMMARY
-          echo "- password_reset_tokens" >> $GITHUB_STEP_SUMMARY
-          echo "- abandoned_carts" >> $GITHUB_STEP_SUMMARY
+          echo "If sale prices or promo banner still look wrong in the app, open **Supabase → Settings → API** and reload the schema cache." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Core tables:" >> $GITHUB_STEP_SUMMARY
+          echo "- customers, password_reset_tokens, abandoned_carts" >> $GITHUB_STEP_SUMMARY
           echo "- orders (updated columns)" >> $GITHUB_STEP_SUMMARY
+          echo "- site_promotion, real_products sale/card columns (from 202604* migrations)" >> $GITHUB_STEP_SUMMARY

@@ -143,6 +143,7 @@ async function runMigration() {
       // no migrations dir or readdir failed
     }
     console.log('\n📦 supabase/migrations (202602* / 202603* / 202604*):');
+    const migrationErrors: string[] = [];
     for (const file of migrationFiles) {
       const filePath = path.join(migrationsDir, file);
       try {
@@ -150,9 +151,23 @@ async function runMigration() {
         await sql.unsafe(content);
         console.log(`   ✓ ${file}`);
       } catch (err: any) {
-        console.error(`   ✗ ${file}:`, err.message);
-        // continue so deploy still succeeds if tables already exist / duplicate key etc.
+        const msg = err?.message || String(err);
+        console.error(`   ✗ ${file}:`, msg);
+        migrationErrors.push(`${file}: ${msg}`);
       }
+    }
+
+    try {
+      await sql.unsafe(`SELECT pg_notify('pgrst', 'reload schema')`);
+      console.log('\n✓ PostgREST schema reload requested (pg_notify pgrst)');
+    } catch (e: any) {
+      console.warn('\n⚠ pg_notify skipped:', e?.message || e);
+      console.warn('   In Supabase Dashboard: Project Settings → Data API → Reload schema.');
+    }
+
+    if (migrationErrors.length > 0) {
+      console.error('\n⚠ Some migration files failed (check logs). Sale price / site promo need a clean run.');
+      migrationErrors.forEach((line) => console.error('   -', line));
     }
 
     await sql.end();

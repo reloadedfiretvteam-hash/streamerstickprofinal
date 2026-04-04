@@ -25,9 +25,19 @@ on conflict (id) do nothing;
 
 alter table public.site_promotion enable row level security;
 
--- 2) API roles (worker should use service_role key in Cloudflare)
-grant select, insert, update, delete on table public.site_promotion to postgres;
-grant select, insert, update, delete on table public.site_promotion to service_role;
+-- 2) API roles (non-fatal if GRANT is rejected)
+do $$
+begin
+  grant select, insert, update, delete on table public.site_promotion to postgres;
+exception when others then
+  raise notice 'GRANT postgres skipped: %', sqlerrm;
+end $$;
+do $$
+begin
+  grant select, insert, update, delete on table public.site_promotion to service_role;
+exception when others then
+  raise notice 'GRANT service_role skipped: %', sqlerrm;
+end $$;
 
 -- 3) Optional: shadow_products promo label (admin sync); skip if table missing
 do $$
@@ -39,3 +49,5 @@ begin
     alter table public.shadow_products add column if not exists card_promo_label text;
   end if;
 end $$;
+
+select pg_notify('pgrst', 'reload schema');

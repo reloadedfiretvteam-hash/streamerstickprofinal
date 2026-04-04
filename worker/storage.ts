@@ -304,7 +304,13 @@ export function createStorage(config: StorageConfig) {
       if (updates.salePrice !== undefined) dbUpdates.sale_price = updates.salePrice;
       if (updates.cardPromoLabel !== undefined) dbUpdates.card_promo_label = updates.cardPromoLabel;
 
-      const { data } = await supabase.from('real_products').update(dbUpdates).eq('id', id).select().single();
+      const { data, error } = await supabase.from('real_products').update(dbUpdates).eq('id', id).select().single();
+      if (error) {
+        console.error('[updateRealProduct]', error.code || '', error.message || error);
+        throw new Error(
+          `${error.message || 'Failed to update product'}. If you just added sale_price, reload the API schema cache in Supabase (Settings → API).`,
+        );
+      }
       return data ? this.mapProductFromDb(data) : undefined;
     },
 

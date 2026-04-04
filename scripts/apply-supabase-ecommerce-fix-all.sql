@@ -38,9 +38,19 @@ on conflict (id) do nothing;
 
 alter table public.site_promotion enable row level security;
 
--- Table-level rights (worker uses service_role; service_role bypasses RLS)
-grant select, insert, update, delete on table public.site_promotion to postgres;
-grant select, insert, update, delete on table public.site_promotion to service_role;
+do $$
+begin
+  grant select, insert, update, delete on table public.site_promotion to postgres;
+exception when others then
+  raise notice 'GRANT to postgres skipped: %', sqlerrm;
+end $$;
+
+do $$
+begin
+  grant select, insert, update, delete on table public.site_promotion to service_role;
+exception when others then
+  raise notice 'GRANT to service_role skipped: %', sqlerrm;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- 2) Per-product sale price + card ribbon (real_products + optional shadow_products)
@@ -65,20 +75,8 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------------------
--- 3) Optional: shadow_products ribbon only (if block above skipped table)
--- ---------------------------------------------------------------------------
-do $$
-begin
-  if exists (
-    select 1 from information_schema.tables
-    where table_schema = 'public' and table_name = 'shadow_products'
-  ) then
-    alter table public.shadow_products add column if not exists card_promo_label text;
-  end if;
-end $$;
-
--- ---------------------------------------------------------------------------
--- 4) Nudge PostgREST to reload schema cache (new table/columns)
+-- 3) Nudge PostgREST to reload schema cache (new table/columns)
+--     If this errors, use Dashboard: Project Settings → Data API → Reload schema.
 -- ---------------------------------------------------------------------------
 select pg_notify('pgrst', 'reload schema');
 
