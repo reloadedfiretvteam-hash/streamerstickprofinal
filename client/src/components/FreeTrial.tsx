@@ -110,7 +110,7 @@ export function FreeTrial() {
           <span className="text-green-400 font-semibold">{submittedEmail || "your email"}</span>.
         </p>
         <p className="text-sm text-gray-400 mb-4 max-w-lg mx-auto leading-relaxed">
-          Credentials arrive immediately; your line may take <strong className="text-gray-300">15 minutes to 3 hours</strong> to fully activate (usually under 15 minutes during business hours, 5 AM–11 PM EST).
+          Your free trial account was created for Xtream Codes style login. Open your IPTV app, choose the Xtream Codes / Xtream login option, then use the server URL, username, and password from the email.
         </p>
         {(emailProvider || emailProviderId) && (
           <p className="text-xs text-gray-400 mb-3">

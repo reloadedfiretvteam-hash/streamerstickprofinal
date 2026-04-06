@@ -1,9 +1,12 @@
 import { Hono } from 'hono';
 import { getStorage } from '../helpers';
 import type { Env } from '../index';
+import { authMiddleware } from './auth';
 
 export function createCustomerRoutes() {
   const app = new Hono<{ Bindings: Env }>();
+
+  app.use('*', authMiddleware);
 
   app.get('/lookup/:username', async (c) => {
     try {

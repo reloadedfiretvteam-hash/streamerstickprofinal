@@ -211,7 +211,7 @@
           "name": "How does the setup work?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "After purchase, you instantly receive your login credentials and an easy setup video. Plug in your Fire Stick, enter your credentials, and follow the quick tutorial to start watching live TV, movies, and sports."
+            "text": "After purchase, you receive payment confirmation first. Your account email follows after provisioning is confirmed, along with setup guidance and support information."
           }
         },
         {
@@ -219,7 +219,7 @@
           "name": "How much can I save with StreamStickPro?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Cable TV costs $120-225/month. With StreamStickPro, you pay $130-150 one-time for the device with 1 year of Live TV included. Annual savings compared to cable: $1,200-$2,500+."
+            "text": "Cable TV often costs far more per year than streaming alternatives. StreamStickPro offers device bundles and live TV plans with pricing shown in the live shop, plus setup guidance and support."
           }
         },
         {
@@ -252,44 +252,16 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Product",
-      "@id": "https://streamstickpro.com/#product-iptv",
-      "name": "StreamStickPro IPTV Subscription",
-      "description": "Premium IPTV with 18,000+ live TV channels, 100,000+ movies and series. Works on Fire Stick, Android, Smart TV, ONN Google TV. Multi-device plans from 1 month to 1 year.",
-      "brand": { "@type": "Brand", "name": "StreamStickPro" },
-      "category": "IPTV Subscription",
-      "image": "https://streamstickpro.com/opengraph.jpg",
-      "offers": {
-        "@type": "AggregateOffer",
-        "url": "https://streamstickpro.com/shop",
-        "priceCurrency": "USD",
-        "lowPrice": "15",
-        "highPrice": "125",
-        "offerCount": "4",
-        "availability": "https://schema.org/InStock",
-        "seller": { "@id": "https://streamstickpro.com/#organization" }
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "bestRating": "5",
-        "worstRating": "1",
-        "ratingCount": "2847",
-        "reviewCount": "1923"
-      },
-      "review": [
-        {
-          "@type": "Review",
-          "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
-          "author": { "@type": "Person", "name": "Mike R." },
-          "reviewBody": "Best IPTV I've used. 18K channels and consistently smooth playback. Setup took 10 minutes on my Fire Stick."
-        },
-        {
-          "@type": "Review",
-          "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
-          "author": { "@type": "Person", "name": "Sarah T." },
-          "reviewBody": "Cancelled cable and saved $150/month. StreamStickPro has every channel I need plus way more."
-        }
+      "@type": "Service",
+      "@id": "https://streamstickpro.com/#service-live-tv",
+      "name": "StreamStickPro Live TV Plans",
+      "description": "Live TV plans and setup support for compatible streaming devices, with final pricing and availability shown in the live shop.",
+      "provider": { "@id": "https://streamstickpro.com/#organization" },
+      "url": "https://streamstickpro.com/shop",
+      "areaServed": [
+        { "@type": "Country", "name": "United States" },
+        { "@type": "Country", "name": "Canada" },
+        { "@type": "Country", "name": "United Kingdom" }
       ]
     }
     </script>
@@ -299,7 +271,7 @@
       "@type": "WebPage",
       "@id": "https://streamstickpro.com/#webpage",
       "name": "StreamStickPro – IPTV + Jailbroken Fire Sticks 2026",
-      "description": "StreamStickPro: IPTV subscriptions (18,000+ channels), jailbroken Fire Sticks, ONN Google TV streaming for USA, Canada, UK. Free 36-hour trial, setup guides, 24/7 support.",
+      "description": "StreamStickPro: live TV plans, device bundles, setup guides, and support for customers in the USA, Canada, and UK. Separate 36-hour trial request available for subscription plans.",
       "url": "https://streamstickpro.com/",
       "isPartOf": { "@id": "https://streamstickpro.com/#website" },
       "about": { "@id": "https://streamstickpro.com/#organization" },
@@ -321,61 +293,7 @@
     <link rel="preconnect" href="https://js.stripe.com">
     <link rel="preconnect" href="https://connect.facebook.net">
     
-    <!-- Visitor tracking: dedupe by session, geo via ipapi.co, hashed IP for privacy -->
-    <script>
-    (function(){
-      if (sessionStorage.getItem('ssp_visited')) return;
-      sessionStorage.setItem('ssp_visited', 'true');
-      function hashForPrivacy(s) {
-        if (typeof s !== 'string') return '';
-        try {
-          if (typeof crypto !== 'undefined' && crypto.subtle && crypto.subtle.digest) {
-            return 'x'; /* hash done async below */
-          }
-        } catch(e) {}
-        return btoa(unescape(encodeURIComponent(s.substring(0, 64))));
-      }
-      function sendVisit(ipHash, state, city, country, sessionId, page) {
-        var payload = {
-          ip_hash: ipHash,
-          user_agent: navigator.userAgent,
-          state: state || null,
-          city: city || null,
-          country: country || null,
-          session_id: sessionId,
-          page: page || location.pathname || '/'
-        };
-        fetch('/api/track-visit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        }).catch(function() {});
-      }
-      var sessionId = btoa(navigator.userAgent + location.pathname + Date.now()).replace(/[^a-zA-Z0-9]/g, '').slice(0, 32);
-      fetch('https://ipapi.co/json/').then(function(r) { return r.json(); }).then(function(data) {
-        var state = data.region || null;
-        var city = data.city || null;
-        var country = data.country_name || data.country || null;
-        var ip = (data && data.ip) ? String(data.ip) : '';
-        var ipHash;
-        if (ip && typeof crypto !== 'undefined' && crypto.subtle && crypto.subtle.digest) {
-          crypto.subtle.digest('SHA-256', new TextEncoder().encode(ip)).then(function(buf) {
-            var arr = new Uint8Array(buf);
-            var hex = '';
-            for (var i = 0; i < arr.length; i++) hex += ('0' + arr[i].toString(16)).slice(-2);
-            sendVisit(hex.slice(0, 64), state, city, country, sessionId, location.pathname || '/');
-          }).catch(function() {
-            sendVisit(btoa(unescape(encodeURIComponent(ip))).slice(0, 64), state, city, country, sessionId, location.pathname || '/');
-          });
-        } else {
-          ipHash = ip ? btoa(unescape(encodeURIComponent(ip))).slice(0, 64) : sessionId;
-          sendVisit(ipHash, state, city, country, sessionId, location.pathname || '/');
-        }
-      }).catch(function() {
-        sendVisit(sessionId, null, null, null, sessionId, location.pathname || '/');
-      });
-    })();
-    </script>
+    <!-- Visitor tracking runs from the React app via /api/track-visit using a stable server cookie. -->
     <!-- Skip link: elite a11y – hidden until focus, strong focus-visible, main has scroll-margin for sticky nav -->
     <style>#skip-link{position:absolute;left:-9999px;z-index:9999;padding:.6rem 1.2rem;background:#ea580c;color:#fff;border-radius:6px;font-weight:600;text-decoration:none}#skip-link:focus{left:1rem;top:1rem;outline:3px solid #f97316;outline-offset:2px}#skip-link:focus:not(:focus-visible){outline:none}#skip-link:focus-visible{left:1rem;top:1rem;outline:3px solid #f97316;outline-offset:2px}#main-content{scroll-margin-top:5rem}</style>
     <!-- Optimized Google Fonts - Defer loading with display=swap -->

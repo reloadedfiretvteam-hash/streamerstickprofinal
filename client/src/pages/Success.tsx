@@ -12,7 +12,6 @@ interface OrderDetails {
     id: string;
     realProductName: string;
     amount: number;
-    customerEmail: string;
   };
   paymentStatus: string;
 }
@@ -61,18 +60,6 @@ export default function Success() {
               });
             }
             
-            // Primary path: Stripe webhook sends emails server-side.
-            // Fallback path: success page requests send-emails once payment is confirmed.
-            // Backend route is idempotent and skips duplicates when already sent.
-            if (data.paymentStatus === 'paid') {
-              fetch(`/api/checkout/send-emails`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId }),
-              }).catch(() => {
-                // Silent fallback; webhook remains primary source of truth.
-              });
-            }
           }
           setLoading(false);
         })
@@ -117,10 +104,6 @@ export default function Success() {
                 <span className="text-muted-foreground">Amount</span>
                 <span className="font-bold text-primary">${(orderDetails.order.amount / 100).toFixed(2)}</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Email</span>
-                <span className="text-sm">{orderDetails.order.customerEmail}</span>
-              </div>
             </div>
           ) : null}
 
@@ -140,7 +123,7 @@ export default function Success() {
               <div>
                 <h4 className="font-semibold text-purple-200">Credentials Coming Soon</h4>
                 <p className="text-sm text-purple-300/80 mt-1">
-                  Your login credentials will be sent within 5 minutes. Check your spam folder!
+                  Your account email will follow after payment is confirmed and provisioning is complete. Check your spam folder if you do not see it shortly.
                 </p>
               </div>
             </div>

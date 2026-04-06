@@ -118,7 +118,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     duration: "6mo",
     durationLabel: "6 Months",
     badge: "GREAT VALUE",
-    description: "10% OFF! 6-month premium Live TV streaming plan with 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
+    description: "Longer-term value with a 6-month premium Live TV streaming plan including 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
     features: productBenefitList,
     prices: [
       { devices: 1, price: 40, productId: iptvRealProductId("6mo", 1) },
@@ -143,6 +143,8 @@ const iptvPricingMatrix: IPTVPricing[] = [
     ],
   },
 ];
+
+const firestickCatalogNote = "Same listed price per device at checkout";
 
 const defaultProducts: Product[] = [
   {
@@ -403,8 +405,7 @@ export default function MainStore() {
   };
 
   const getFirestickDiscount = (quantity: number): { discount: number; label: string } => {
-    if (quantity >= 3) return { discount: 0.15, label: "15% OFF" };
-    if (quantity >= 2) return { discount: 0.10, label: "10% OFF" };
+    void quantity;
     return { discount: 0, label: "" };
   };
 
@@ -432,7 +433,7 @@ export default function MainStore() {
   const scrollToHome = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  const scrollToFreeTrial = () => navigateToSection('shop');
+  const scrollToFreeTrial = () => navigateToSection('free-trial');
 
   const firestickProducts = products.filter(p => p.category === 'firestick');
   const iptvProducts = products.filter(p => p.category === 'iptv');
@@ -883,7 +884,9 @@ export default function MainStore() {
             </p>
             
             {/* Free Trial Box */}
-            <FreeTrial />
+            <div id="free-trial">
+              <FreeTrial />
+            </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {iptvPricingMatrix.map((plan, index) => {
@@ -964,7 +967,7 @@ export default function MainStore() {
                         ) : null}
                         {(plan.duration === "6mo" || plan.duration === "1yr") && (
                           <div className={`absolute ${iptvPromo ? 'top-14' : 'top-4'} left-4 z-20 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs shadow-lg`}>
-                            SAVE 10%
+                            LONGER TERM VALUE
                           </div>
                         )}
                       </div>
@@ -1150,33 +1153,32 @@ export default function MainStore() {
                 </tbody>
               </table>
             </div>
-            {/* Quantity Discount Tiers */}
+                  {/* Device bundle note */}
             <div className="mt-8 max-w-2xl mx-auto">
               <div className="bg-gradient-to-r from-green-900/50 to-emerald-900/50 rounded-2xl p-6 border border-green-500/30" data-testid="discount-tiers">
                 <h4 className="text-xl font-bold text-center mb-4 text-green-400 flex items-center justify-center gap-2">
                   <Gift className="w-6 h-6" />
-                  Multi-Buy Discount Tiers
+                        Device Bundle Pricing
                 </h4>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                    <div className="text-2xl font-bold text-white">1</div>
-                    <div className="text-gray-200 text-sm">Fire Stick</div>
-                    <div className="text-orange-400 font-semibold mt-2">Regular Price</div>
-                  </div>
-                  <div className="bg-green-500/10 rounded-xl p-4 border border-green-500/30 transform hover:scale-105 transition-transform">
-                    <div className="text-2xl font-bold text-white">2+</div>
-                    <div className="text-gray-200 text-sm">Fire Sticks</div>
-                    <div className="text-green-400 font-bold mt-2">SAVE 10%</div>
-                  </div>
-                  <div className="bg-green-500/20 rounded-xl p-4 border border-green-500/50 ring-2 ring-green-500/30 transform hover:scale-105 transition-transform">
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold hidden md:block">BEST DEAL</div>
-                    <div className="text-2xl font-bold text-white">3+</div>
-                    <div className="text-gray-200 text-sm">Fire Sticks</div>
-                    <div className="text-green-400 font-bold mt-2">SAVE 15%</div>
-                  </div>
-                </div>
+                      <div className="grid gap-4 text-center md:grid-cols-3">
+                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                          <div className="text-2xl font-bold text-white">1</div>
+                          <div className="text-gray-200 text-sm">Device</div>
+                          <div className="text-orange-400 font-semibold mt-2">Catalog price</div>
+                        </div>
+                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                          <div className="text-2xl font-bold text-white">2+</div>
+                          <div className="text-gray-200 text-sm">Devices</div>
+                          <div className="text-green-400 font-bold mt-2">Same per-device catalog price</div>
+                        </div>
+                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                          <div className="text-2xl font-bold text-white">Checkout</div>
+                          <div className="text-gray-200 text-sm">Stripe hosted</div>
+                          <div className="text-cyan-300 font-bold mt-2">Matches listed device pricing</div>
+                        </div>
+                      </div>
                 <p className="text-center text-green-300 mt-4 text-sm">
-                  Perfect for families! Get Fire Sticks for multiple TVs and save big.
+                        ${firestickCatalogNote}
                 </p>
               </div>
             </div>
@@ -1308,10 +1310,9 @@ export default function MainStore() {
 
                       {/* Quantity Selector */}
                       <div className="mb-4">
-                        <label className="text-sm text-gray-200 mb-2 block">Quantity (Buy More & Save!):</label>
+                        <label className="text-sm text-gray-200 mb-2 block">Quantity</label>
                         <div className="flex gap-2 mb-2">
                           {[1, 2, 3, 4, 5].map((qty) => {
-                            const discountInfo = getFirestickDiscount(qty);
                             return (
                               <button
                                 key={qty}
@@ -1326,18 +1327,13 @@ export default function MainStore() {
                                 aria-pressed={firestickQuantities[product.id] === qty}
                               >
                                 {qty}
-                                {discountInfo.label && (
-                                  <span className="absolute -top-2 -right-1 bg-green-500 text-white text-[8px] px-1 rounded">
-                                    {discountInfo.label}
-                                  </span>
-                                )}
                               </button>
                             );
                           })}
                         </div>
                         <p className="text-xs text-green-400 flex items-center gap-1">
                           <Gift className="w-3 h-3" />
-                          Buy 2+ save 10% • Buy 3+ save 15%
+                          {firestickCatalogNote}
                         </p>
                       </div>
 
@@ -1345,8 +1341,7 @@ export default function MainStore() {
                       <div className="mb-6">
                         {(() => {
                           const qty = firestickQuantities[product.id] || 1;
-                          const { unitPrice, totalPrice, savings } = calculateFirestickPrice(product.price, qty);
-                          const discountInfo = getFirestickDiscount(qty);
+                          const { unitPrice, totalPrice } = calculateFirestickPrice(product.price, qty);
                           return (
                             <>
                               <div className="flex items-baseline gap-2 flex-wrap">
@@ -1364,12 +1359,10 @@ export default function MainStore() {
                                   </span>
                                 )}
                               </div>
-                              {savings > 0 && (
-                                <p className="text-green-400 text-sm mt-1 font-semibold flex items-center gap-1">
-                                  <DollarSign className="w-4 h-4" />
-                                  You save ${savings.toFixed(2)} with {discountInfo.label}!
-                                </p>
-                              )}
+                              <p className="text-green-400 text-sm mt-1 font-semibold flex items-center gap-1">
+                                <DollarSign className="w-4 h-4" />
+                                {firestickCatalogNote}
+                              </p>
                               <p className="text-blue-200 text-sm mt-2 flex items-center gap-2">
                                 <Gift className="w-4 h-4 text-green-400" />
                                 Each includes 1 Year Live TV Plan

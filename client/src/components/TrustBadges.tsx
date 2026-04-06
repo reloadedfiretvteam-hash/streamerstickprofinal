@@ -9,7 +9,7 @@ export function TrustBadges({ variant = "horizontal", className = "" }: TrustBad
   const badges = [
     {
       icon: Users,
-      label: "247K Users",
+      label: "2,700+ Customers",
       sublabel: "Trust StreamStickPro",
       color: "text-cyan-400"
     },

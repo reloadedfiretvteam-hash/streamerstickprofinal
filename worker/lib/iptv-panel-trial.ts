@@ -19,6 +19,10 @@ export type PanelTrialResult =
   | { ok: true }
   | { ok: false; message: string };
 
+export type TrialVerificationResult =
+  | { ok: true; username: string; status?: string | null; expDate?: string | null; raw: string }
+  | { ok: false; message: string; raw?: string | null };
+
 export async function createIptvPanelTrial(
   env: Env,
   params: { username: string; password: string },
@@ -58,6 +62,56 @@ export async function createIptvPanelTrial(
   }
 }
 
+export async function verifyIptvTrialCredentials(
+  env: Env,
+  params: { username: string; password: string },
+): Promise<TrialVerificationResult> {
+  const apiBase = (env.IPTV_PANEL_API_BASE || '').trim();
+  if (!apiBase) {
+    return { ok: false, message: 'Panel API base is missing' };
+  }
+
+  let playerUrl: URL;
+  try {
+    const apiUrl = new URL(apiPhpUrl(apiBase));
+    playerUrl = new URL('/player_api.php', `${apiUrl.origin}/`);
+  } catch {
+    return { ok: false, message: 'Panel API base is invalid' };
+  }
+
+  playerUrl.searchParams.set('username', params.username);
+  playerUrl.searchParams.set('password', params.password);
+
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(), FETCH_MS);
+  try {
+    const res = await fetch(playerUrl.toString(), {
+      method: 'GET',
+      signal: ac.signal,
+      headers: { Accept: 'application/json, text/plain, */*' },
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      return { ok: false, message: `Player API HTTP ${res.status}`, raw: text };
+    }
+
+    const parsed = interpretTrialVerificationResponse(text, params.username);
+    return parsed;
+  } catch (e: unknown) {
+    const name = e && typeof e === 'object' && 'name' in e ? String((e as { name?: string }).name) : '';
+    const msg = name === 'AbortError' ? 'Player API request timed out' : 'Player API unreachable';
+    return { ok: false, message: msg };
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+export function isLikelyPanelUsernameConflict(message: string): boolean {
+  const text = (message || '').trim().toLowerCase();
+  if (!text) return false;
+  return /exist|duplicate|taken|used|username|login already|already exists/.test(text);
+}
+
 function interpretPanelTrialResponse(text: string): PanelTrialResult {
   const t = text.trim();
   if (!t) return { ok: false, message: 'Empty panel response' };
@@ -95,6 +149,44 @@ function interpretPanelTrialResponse(text: string): PanelTrialResult {
   }
 
   return { ok: false, message: 'Unable to confirm trial creation' };
+}
+
+function interpretTrialVerificationResponse(text: string, expectedUsername: string): TrialVerificationResult {
+  const raw = text.trim();
+  if (!raw) {
+    return { ok: false, message: 'Empty player API response', raw };
+  }
+
+  try {
+    const json = JSON.parse(raw) as Record<string, any>;
+    const userInfo = (json.user_info && typeof json.user_info === 'object') ? json.user_info as Record<string, any> : null;
+    if (!userInfo) {
+      return { ok: false, message: 'Missing user_info in player API response', raw };
+    }
+
+    const auth = String(userInfo.auth ?? '').trim();
+    const username = String(userInfo.username ?? '').trim();
+    const status = String(userInfo.status ?? '').trim();
+    const expDate = userInfo.exp_date == null ? null : String(userInfo.exp_date).trim();
+
+    if (auth === '1' && username && username.toLowerCase() === expectedUsername.toLowerCase()) {
+      return {
+        ok: true,
+        username,
+        status: status || null,
+        expDate,
+        raw,
+      };
+    }
+
+    return {
+      ok: false,
+      message: status || 'Player API did not confirm the created user',
+      raw,
+    };
+  } catch {
+    return { ok: false, message: 'Invalid player API response', raw };
+  }
 }
 
 /** M3U Plus playlist URL for apps that use a single line (optional in emails). */

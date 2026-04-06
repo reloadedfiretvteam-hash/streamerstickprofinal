@@ -23,7 +23,7 @@ export function ExitPopup() {
 
   const scrollToFreeTrial = () => {
     setOpen(false)
-    const trialSection = document.querySelector('[data-section="free-trial"]')
+    const trialSection = document.getElementById('free-trial') || document.querySelector('[data-section="free-trial"]')
     if (trialSection) {
       trialSection.scrollIntoView({ behavior: 'smooth' })
     } else {

@@ -14,7 +14,8 @@ import { createBlogRoutes } from './routes/blog';
 import { createSeoAdRoutes } from './routes/seo-ads';
 import { createAIAssistantRoutes } from './routes/ai-assistant';
 import { createEmailCampaignRoutes } from './routes/email-campaigns';
-import { getStorage } from './helpers';
+import { createProvisioningRoutes } from './routes/provisioning';
+import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from './helpers';
 
 export interface Env {
   /** Only used in CI by run-supabase-migration.ts; not required by worker at runtime */
@@ -51,6 +52,18 @@ export interface Env {
   IPTV_PORTAL_URL?: string;
   /** Optional full URL to get.php (no query) or with ? — overrides default origin/get.php */
   IPTV_PANEL_M3U_BASE?: string;
+  /** Admin API base origin, e.g. https://panel.example.com:9000 */
+  IPTV_PANEL_ADMIN_BASE?: string;
+  /** Admin API access code path segment */
+  IPTV_PANEL_ADMIN_ACCESS_CODE?: string;
+  /** Admin API key for access-code based endpoints */
+  IPTV_PANEL_ADMIN_API_KEY?: string;
+  /** Optional JSON map for products to paid panel settings */
+  IPTV_PANEL_PRODUCT_MAP_JSON?: string;
+  /** Optional JSON map for country preferences to bouquet ids */
+  IPTV_PANEL_BOUQUET_MAP_JSON?: string;
+  /** Shared secret for internal scheduled job endpoints */
+  INTERNAL_CRON_SECRET?: string;
 }
 
 const app = new Hono<{ Bindings: Env }>();
@@ -72,8 +85,6 @@ type LocationPagesIndex = {
 let LOCATION_CACHE: LocationPagesIndex | null = null;
 let LOCATION_CACHE_PROMISE: Promise<LocationPagesIndex | null> | null = null;
 const LOCATION_CACHE_TTL_MS = 10 * 60 * 1000;
-const SUPABASE_URL_FALLBACK = 'https://emlqlmfzqsnqokrqvmcm.supabase.co';
-
 function parseCookies(cookieHeader: string | null): Record<string, string> {
   const out: Record<string, string> = {};
   if (!cookieHeader) return out;
@@ -246,6 +257,7 @@ app.get('/api/site-promotion-public', sitePromotionPublicHandler);
 
 app.route('/api/checkout', createCheckoutRoutes());
 app.route('/api/orders', createOrderRoutes());
+app.route('/api/provisioning', createProvisioningRoutes());
 
 // Public email-open tracking pixel (1x1 gif), used by admin marketing campaigns.
 app.get('/api/marketing/open.gif', async (c) => {
@@ -261,8 +273,8 @@ app.get('/api/marketing/open.gif', async (c) => {
     if (campaignId && contactId) {
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(
-        c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
-        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
+        getSupabaseUrl(c.env),
+        getSupabaseServiceKey(c.env),
       );
       const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0] || 'unknown';
       const ua = c.req.header('user-agent') || '';
@@ -318,8 +330,8 @@ app.get('/api/marketing/click', async (c) => {
     if (campaignId && contactId) {
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(
-        c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
-        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
+        getSupabaseUrl(c.env),
+        getSupabaseServiceKey(c.env),
       );
       const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0] || 'unknown';
       const ua = c.req.header('user-agent') || '';
@@ -712,10 +724,15 @@ app.get('/cron/email-campaigns', async (c) => {
   try {
     // Call the email campaign processing endpoint internally
     const baseUrl = new URL(c.req.url).origin;
+    const internalCronSecret = (c.env.INTERNAL_CRON_SECRET || '').trim();
+    if (!internalCronSecret) {
+      return c.json({ error: 'INTERNAL_CRON_SECRET is not configured' }, 503);
+    }
     const response = await fetch(`${baseUrl}/api/email-campaigns/process-scheduled`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'x-internal-cron-secret': internalCronSecret,
       },
     });
 
@@ -723,6 +740,29 @@ app.get('/cron/email-campaigns', async (c) => {
     return c.json(result);
   } catch (error: any) {
     console.error('Cron job error:', error);
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+app.get('/cron/provisioning', async (c) => {
+  try {
+    const baseUrl = new URL(c.req.url).origin;
+    const internalCronSecret = (c.env.INTERNAL_CRON_SECRET || '').trim();
+    if (!internalCronSecret) {
+      return c.json({ error: 'INTERNAL_CRON_SECRET is not configured' }, 503);
+    }
+    const response = await fetch(`${baseUrl}/api/provisioning/process-scheduled`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-cron-secret': internalCronSecret,
+      },
+    });
+
+    const result = await response.json();
+    return c.json(result);
+  } catch (error: any) {
+    console.error('Provisioning cron job error:', error);
     return c.json({ error: error.message }, 500);
   }
 });

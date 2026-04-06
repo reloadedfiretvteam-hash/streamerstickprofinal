@@ -1,9 +1,13 @@
 import { Hono } from 'hono';
 import type { Env } from '../index';
-import { getStorage } from '../helpers';
+import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from '../helpers';
+import { authMiddleware } from './auth';
 
 export function createAIAssistantRoutes() {
   const router = new Hono<{ Bindings: Env }>();
+
+  // This route family can read/write code and use privileged tokens.
+  router.use('*', authMiddleware);
 
   // Main AI assistant endpoint - processes natural language commands
   router.post('/execute', async (c) => {
@@ -1765,7 +1769,7 @@ async function executeDatabaseAction(action: any, env: Env): Promise<any> {
         }
         if (action.table === 'customers' || action.table === 'customer') {
           const { createClient } = await import('@supabase/supabase-js');
-          const supabase = createClient(env.VITE_SUPABASE_URL, env.SUPABASE_SERVICE_KEY || env.VITE_SUPABASE_ANON_KEY);
+          const supabase = createClient(getSupabaseUrl(env), getSupabaseServiceKey(env));
           const { data, error } = await supabase.from('customers').select('*').limit(100);
           if (error) throw error;
           return {
@@ -1797,7 +1801,7 @@ async function executeDatabaseAction(action: any, env: Env): Promise<any> {
           const orders = await storage.getAllOrders();
           const products = await storage.getRealProducts();
           const { createClient } = await import('@supabase/supabase-js');
-          const supabase = createClient(env.VITE_SUPABASE_URL, env.SUPABASE_SERVICE_KEY || env.VITE_SUPABASE_ANON_KEY);
+          const supabase = createClient(getSupabaseUrl(env), getSupabaseServiceKey(env));
           const { data: customers } = await supabase.from('customers').select('id').limit(1);
           
           const paidOrders = orders.filter(o => o.status === 'paid');

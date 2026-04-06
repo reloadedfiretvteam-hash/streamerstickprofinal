@@ -25,10 +25,19 @@ export default function ExitIntentPopup({ onClose, onAction }: ExitIntentPopupPr
       return; // Don't show if already shown today
     }
 
+    // Skip on checkout/success/admin screens to avoid interrupting critical flows.
+    const currentPath = window.location.pathname || '/';
+    const skipPaths = ['/checkout', '/success', '/admin', '/customer-login', '/my-account'];
+    if (skipPaths.some((path) => currentPath.startsWith(path))) return;
+
+    // Wait until users have been on page long enough before showing any exit overlay.
+    const startedAt = Date.now();
+    const minEngagementMs = 12000;
+
     // Track mouse movement to detect exit intent
     const handleMouseLeave = (e: MouseEvent) => {
       // Only trigger if mouse is moving upward (toward address bar/bookmarks)
-      if (e.clientY <= 0) {
+      if (e.clientY <= 0 && Date.now() - startedAt >= minEngagementMs) {
         setIsVisible(true);
         localStorage.setItem('exit_intent_shown', today);
         
@@ -48,20 +57,10 @@ export default function ExitIntentPopup({ onClose, onAction }: ExitIntentPopupPr
       }
     };
 
-    // Also detect when user tries to close tab/window
-    const handleBeforeUnload = () => {
-      if (!isVisible) {
-        setIsVisible(true);
-        localStorage.setItem('exit_intent_shown', today);
-      }
-    };
-
     document.addEventListener('mouseleave', handleMouseLeave);
-    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
       document.removeEventListener('mouseleave', handleMouseLeave);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [isVisible]);
 

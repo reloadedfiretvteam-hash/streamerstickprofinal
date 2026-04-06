@@ -4,6 +4,8 @@ import type {
   InsertUser,
   Order,
   InsertOrder,
+  ProvisioningJob,
+  InsertProvisioningJob,
   RealProduct,
   InsertRealProduct,
   Visitor,
@@ -158,9 +160,13 @@ export function createStorage(config: StorageConfig) {
         amazon_order_id: order.amazonOrderId,
         is_renewal: order.isRenewal,
         existing_username: order.existingUsername,
+        expired_more_than_one_week: order.expiredMoreThanOneWeek,
+        provisioning_branch: order.provisioningBranch,
         generated_username: order.generatedUsername,
         generated_password: order.generatedPassword,
         country_preference: order.countryPreference,
+        customer_message: order.customerMessage,
+        customer_phone: order.customerPhone,
       };
       
       const { data, error } = await supabase.from('orders').insert(dbOrder).select().single();
@@ -209,9 +215,13 @@ export function createStorage(config: StorageConfig) {
       if (updates.amazonOrderId !== undefined) dbUpdates.amazon_order_id = updates.amazonOrderId;
       if (updates.isRenewal !== undefined) dbUpdates.is_renewal = updates.isRenewal;
       if (updates.existingUsername !== undefined) dbUpdates.existing_username = updates.existingUsername;
+      if (updates.expiredMoreThanOneWeek !== undefined) dbUpdates.expired_more_than_one_week = updates.expiredMoreThanOneWeek;
+      if (updates.provisioningBranch !== undefined) dbUpdates.provisioning_branch = updates.provisioningBranch;
       if (updates.generatedUsername !== undefined) dbUpdates.generated_username = updates.generatedUsername;
       if (updates.generatedPassword !== undefined) dbUpdates.generated_password = updates.generatedPassword;
       if (updates.countryPreference !== undefined) dbUpdates.country_preference = updates.countryPreference;
+      if (updates.customerMessage !== undefined) dbUpdates.customer_message = updates.customerMessage;
+      if (updates.customerPhone !== undefined) dbUpdates.customer_phone = updates.customerPhone;
       
       const { data } = await supabase.from('orders').update(dbUpdates).eq('id', id).select().single();
       return data ? this.mapOrderFromDb(data) : undefined;
@@ -225,6 +235,73 @@ export function createStorage(config: StorageConfig) {
     async getAllOrders(): Promise<Order[]> {
       const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
       return (data || []).map((d: any) => this.mapOrderFromDb(d));
+    },
+
+    async createProvisioningJob(job: InsertProvisioningJob): Promise<ProvisioningJob> {
+      const dbJob: Record<string, any> = {
+        order_id: job.orderId,
+        job_type: job.jobType,
+        status: job.status,
+        provider: job.provider,
+        payload: job.payload,
+        result: job.result,
+        last_error: job.lastError,
+        next_run_at: job.nextRunAt ? new Date(job.nextRunAt).toISOString() : new Date().toISOString(),
+        locked_at: job.lockedAt ? new Date(job.lockedAt).toISOString() : null,
+        completed_at: job.completedAt ? new Date(job.completedAt).toISOString() : null,
+      };
+      const { data, error } = await supabase.from('provisioning_jobs').insert(dbJob).select().single();
+      if (error) throw error;
+      return this.mapProvisioningJobFromDb(data);
+    },
+
+    async getProvisioningJob(id: string): Promise<ProvisioningJob | undefined> {
+      const { data } = await supabase.from('provisioning_jobs').select('*').eq('id', id).single();
+      return data ? this.mapProvisioningJobFromDb(data) : undefined;
+    },
+
+    async getProvisioningJobByOrderId(orderId: string): Promise<ProvisioningJob | undefined> {
+      const { data } = await supabase.from('provisioning_jobs').select('*').eq('order_id', orderId).single();
+      return data ? this.mapProvisioningJobFromDb(data) : undefined;
+    },
+
+    async updateProvisioningJob(id: string, updates: Partial<InsertProvisioningJob> & {
+      attemptCount?: number;
+      completedAt?: Date | string | null;
+      updatedAt?: Date | string | null;
+    }): Promise<ProvisioningJob | undefined> {
+      const dbUpdates: Record<string, any> = {};
+      if (updates.orderId !== undefined) dbUpdates.order_id = updates.orderId;
+      if (updates.jobType !== undefined) dbUpdates.job_type = updates.jobType;
+      if (updates.status !== undefined) dbUpdates.status = updates.status;
+      if (updates.provider !== undefined) dbUpdates.provider = updates.provider;
+      if (updates.payload !== undefined) dbUpdates.payload = updates.payload;
+      if (updates.result !== undefined) dbUpdates.result = updates.result;
+      if (updates.lastError !== undefined) dbUpdates.last_error = updates.lastError;
+      if (updates.attemptCount !== undefined) dbUpdates.attempt_count = updates.attemptCount;
+      if (updates.nextRunAt !== undefined) {
+        dbUpdates.next_run_at = updates.nextRunAt ? new Date(updates.nextRunAt).toISOString() : null;
+      }
+      if (updates.lockedAt !== undefined) {
+        dbUpdates.locked_at = updates.lockedAt ? new Date(updates.lockedAt).toISOString() : null;
+      }
+      if (updates.completedAt !== undefined) {
+        dbUpdates.completed_at = updates.completedAt ? new Date(updates.completedAt).toISOString() : null;
+      }
+      dbUpdates.updated_at = updates.updatedAt ? new Date(updates.updatedAt).toISOString() : new Date().toISOString();
+
+      const { data } = await supabase.from('provisioning_jobs').update(dbUpdates).eq('id', id).select().single();
+      return data ? this.mapProvisioningJobFromDb(data) : undefined;
+    },
+
+    async listProvisioningJobsByStatus(statuses: string[], limit = 20): Promise<ProvisioningJob[]> {
+      if (!statuses.length) return [];
+      const { data } = await supabase.from('provisioning_jobs')
+        .select('*')
+        .in('status', statuses)
+        .order('next_run_at', { ascending: true })
+        .limit(limit);
+      return (data || []).map((d: any) => this.mapProvisioningJobFromDb(d));
     },
 
     async getFireStickOrdersForFulfillment(): Promise<Order[]> {
@@ -749,12 +826,33 @@ export function createStorage(config: StorageConfig) {
         amazonOrderId: data.amazon_order_id,
         isRenewal: data.is_renewal,
         existingUsername: data.existing_username,
+        expiredMoreThanOneWeek: data.expired_more_than_one_week,
+        provisioningBranch: data.provisioning_branch,
         generatedUsername: data.generated_username,
         generatedPassword: data.generated_password,
         countryPreference: data.country_preference,
-        customerMessage: null,
-        customerPhone: null,
+        customerMessage: data.customer_message,
+        customerPhone: data.customer_phone,
         createdAt: data.created_at ? new Date(data.created_at) : null,
+      };
+    },
+
+    mapProvisioningJobFromDb(data: any): ProvisioningJob {
+      return {
+        id: data.id,
+        orderId: data.order_id,
+        jobType: data.job_type,
+        status: data.status,
+        provider: data.provider,
+        payload: data.payload,
+        result: data.result,
+        lastError: data.last_error,
+        attemptCount: data.attempt_count,
+        nextRunAt: data.next_run_at ? new Date(data.next_run_at) : null,
+        lockedAt: data.locked_at ? new Date(data.locked_at) : null,
+        completedAt: data.completed_at ? new Date(data.completed_at) : null,
+        createdAt: data.created_at ? new Date(data.created_at) : null,
+        updatedAt: data.updated_at ? new Date(data.updated_at) : null,
       };
     },
 

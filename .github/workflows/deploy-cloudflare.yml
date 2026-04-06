@@ -38,13 +38,6 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_SERVICE_ROLL_KEY: ${{ secrets.SUPABASE_SERVICE_ROLL_KEY }}
 
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=streamerstickpro-live --branch=clean-main
-
       - name: Sync secrets to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -77,3 +70,33 @@ jobs:
           if [ -n "${{ secrets.IPTV_PANEL_M3U_BASE }}" ]; then
             echo "${{ secrets.IPTV_PANEL_M3U_BASE }}" | npx wrangler pages secret put IPTV_PANEL_M3U_BASE --project-name=streamerstickpro-live
           fi
+          if [ -n "${{ secrets.IPTV_PANEL_ADMIN_BASE }}" ]; then
+            echo "${{ secrets.IPTV_PANEL_ADMIN_BASE }}" | npx wrangler pages secret put IPTV_PANEL_ADMIN_BASE --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.IPTV_PANEL_ADMIN_ACCESS_CODE }}" ]; then
+            echo "${{ secrets.IPTV_PANEL_ADMIN_ACCESS_CODE }}" | npx wrangler pages secret put IPTV_PANEL_ADMIN_ACCESS_CODE --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.IPTV_PANEL_ADMIN_API_KEY }}" ]; then
+            echo "${{ secrets.IPTV_PANEL_ADMIN_API_KEY }}" | npx wrangler pages secret put IPTV_PANEL_ADMIN_API_KEY --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.IPTV_PANEL_PRODUCT_MAP_JSON }}" ]; then
+            echo "${{ secrets.IPTV_PANEL_PRODUCT_MAP_JSON }}" | npx wrangler pages secret put IPTV_PANEL_PRODUCT_MAP_JSON --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.IPTV_PANEL_BOUQUET_MAP_JSON }}" ]; then
+            echo "${{ secrets.IPTV_PANEL_BOUQUET_MAP_JSON }}" | npx wrangler pages secret put IPTV_PANEL_BOUQUET_MAP_JSON --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.INTERNAL_CRON_SECRET }}" ]; then
+            echo "${{ secrets.INTERNAL_CRON_SECRET }}" | npx wrangler pages secret put INTERNAL_CRON_SECRET --project-name=streamerstickpro-live
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=streamerstickpro-live --branch=clean-main
+
+      - name: Post-deploy live smoke test
+        run: npm run smoke:live
+        env:
+          SMOKE_LIVE_BASE: https://streamstickpro.com

@@ -84,14 +84,14 @@ const iptvPricingMatrix: IPTVPricing[] = [
     duration: "6mo",
     durationLabel: "6 Months",
     badge: "VALUE",
-    description: "Best value 6-month Reloaded Fire TV with stable links and an all-in-one app flow—no random app installs or failing Kodi builds.",
-    features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support", "10% Savings"],
+    description: "Longer-term value with a 6-month premium Live TV streaming plan including 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage.",
+    features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support"],
     prices: [
-      { devices: 1, price: 45, productId: iptvRealProductId("6mo", 1) },
-      { devices: 2, price: 75, productId: iptvRealProductId("6mo", 2) },
-      { devices: 3, price: 105, productId: iptvRealProductId("6mo", 3) },
-      { devices: 4, price: 125, productId: iptvRealProductId("6mo", 4) },
-      { devices: 5, price: 145, productId: iptvRealProductId("6mo", 5) },
+      { devices: 1, price: 40, productId: iptvRealProductId("6mo", 1) },
+      { devices: 2, price: 65, productId: iptvRealProductId("6mo", 2) },
+      { devices: 3, price: 85, productId: iptvRealProductId("6mo", 3) },
+      { devices: 4, price: 100, productId: iptvRealProductId("6mo", 4) },
+      { devices: 5, price: 125, productId: iptvRealProductId("6mo", 5) },
     ],
   },
   {
@@ -102,10 +102,10 @@ const iptvPricingMatrix: IPTVPricing[] = [
     features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support (24/7)", "Maximum Savings"],
     prices: [
       { devices: 1, price: 65, productId: iptvRealProductId("1yr", 1) },
-      { devices: 2, price: 145, productId: iptvRealProductId("1yr", 2) },
-      { devices: 3, price: 205, productId: iptvRealProductId("1yr", 3) },
-      { devices: 4, price: 245, productId: iptvRealProductId("1yr", 4) },
-      { devices: 5, price: 285, productId: iptvRealProductId("1yr", 5) },
+      { devices: 2, price: 100, productId: iptvRealProductId("1yr", 2) },
+      { devices: 3, price: 140, productId: iptvRealProductId("1yr", 3) },
+      { devices: 4, price: 190, productId: iptvRealProductId("1yr", 4) },
+      { devices: 5, price: 220, productId: iptvRealProductId("1yr", 5) },
     ],
   },
 ];
@@ -114,7 +114,7 @@ const defaultProducts: Product[] = [
   {
     id: 'fs-hd',
     name: 'Fire Stick HD',
-    price: 125,
+    price: 115,
     description: 'Entry-level Stream Stick Pro device bundle with Reloaded Fire TV all-in-one setup flow, educational tutorials, and a 1-year access plan.',
     features: ['1080p Full HD', 'Reloaded Fire TV All-in-One Access', 'Educational Setup Tutorial Included', '1 Year Included Access', '18,000+ Live TV Channels', '24/7 Customer Support'],
     image: firestickHdImg,
@@ -124,7 +124,7 @@ const defaultProducts: Product[] = [
   {
     id: 'fs-4k',
     name: 'Fire Stick 4K',
-    price: 135,
+    price: 125,
     description: 'Most popular Stream Stick Pro Fire Stick bundle with Reloaded Fire TV all-in-one access, guided setup, and a 1-year access plan.',
     features: ['4K Ultra HD', 'HDR Support', 'Dolby Vision & Atmos', 'Reloaded Fire TV All-in-One Access', 'Educational Setup Tutorial Included', '1 Year Included Access', '24/7 Customer Support'],
     image: firestick4kImg,
@@ -135,7 +135,7 @@ const defaultProducts: Product[] = [
   {
     id: 'fs-max',
     name: 'Fire Stick 4K Max',
-    price: 145,
+    price: 135,
     description: 'Performance-first Stream Stick Pro Fire Stick Max bundle with Reloaded Fire TV all-in-one access, educational setup, and a 1-year access plan.',
     features: ['4K Ultra HD', 'Wi-Fi 6E (Fastest)', 'HDR Support', 'Dolby Vision & Atmos', 'Reloaded Fire TV All-in-One Access', 'Educational Setup Tutorial Included', '1 Year Included Access', '24/7 Customer Support'],
     image: firestick4kMaxImg,
@@ -333,12 +333,17 @@ export default function Shop() {
           const defaultBadge = defaultProducts.find(dp => dp.id === p.id)?.badge || 'POPULAR';
           const defaultDescription = defaultProducts.find(dp => dp.id === p.id)?.description || '';
 
-          const priceInCents = parseInt(p.price?.toString() || '0', 10);
-          let priceInDollars = priceInCents / 100;
-          // Temporary guard: ensure 1-year / 1-device reflects correct 65 price even if backend lags.
-          if (p.id === 'iptv-1yr-1d') {
-            priceInDollars = 65;
-          }
+          const regularCents = parseInt(p.price?.toString() || '0', 10);
+          const saleRaw = p.salePrice ?? p.sale_price;
+          const saleCents =
+            saleRaw != null && saleRaw !== ''
+              ? parseInt(String(saleRaw), 10)
+              : NaN;
+          const onSale =
+            Number.isFinite(saleCents) &&
+            saleCents > 0 &&
+            saleCents < regularCents;
+          const priceInDollars = (onSale ? saleCents : regularCents) / 100;
 
           return {
             id: p.id,
@@ -360,8 +365,7 @@ export default function Shop() {
   };
 
   const getFirestickDiscount = (quantity: number): { discount: number; label: string } => {
-    if (quantity >= 3) return { discount: 0.15, label: "15% OFF" };
-    if (quantity >= 2) return { discount: 0.10, label: "10% OFF" };
+    void quantity;
     return { discount: 0, label: "" };
   };
 
@@ -482,8 +486,8 @@ export default function Shop() {
       <SEOSchema faq={[
         { question: "How much does StreamStickPro Reloaded Fire TV cost?", answer: "Reloaded Fire TV plans start at $11/month for 1 device. Multi-device plans and 3-month, 6-month, and 1-year options offer deeper savings — the 1-year plan is $65 per device." },
         { question: "What devices work with StreamStickPro Reloaded Fire TV?", answer: "StreamStickPro works on Amazon Fire Stick (HD, 4K, 4K Max), ONN Google TV (4K, 4K Pro), Android phones/tablets, iOS via Smarters, Smart TVs, and TiviMate on any Android-based device." },
-        { question: "Is there a free trial before I buy?", answer: "Yes — every Reloaded Fire TV subscription plan includes a free 36-hour trial so you can test channel quality, speed, and the setup process before committing." },
-        { question: "How do I get my Reloaded Fire TV credentials after purchase?", answer: "Credentials are delivered instantly to your email after checkout. You also receive a step-by-step setup tutorial video and have access to 24/7 human support if you need help." },
+        { question: "Is there a free trial before I buy?", answer: "Yes — StreamStickPro offers a separate free 36-hour trial request for subscription customers so you can test channel quality, speed, and setup before buying a paid plan." },
+        { question: "How do I get my Reloaded Fire TV credentials after purchase?", answer: "After successful payment, you first receive payment confirmation. Your account email follows after provisioning is confirmed, along with a setup tutorial video and support details." },
         { question: "What payment methods do you accept?", answer: "We accept Visa, Mastercard, Amex, Discover, Apple Pay, Google Pay, Cash App, Affirm (buy now pay later), Klarna, and Stripe Link for one-click checkout." },
       ]} />
       <ItemListSchema
@@ -536,13 +540,13 @@ export default function Shop() {
                 <div className="flex items-center gap-2 text-blue-200 font-semibold text-sm mb-1">
                   <DollarSign className="w-4 h-4" /> Best value
                 </div>
-                <p className="text-gray-200 text-xs sm:text-sm">Monthly starts at $11; yearly plan is $65 for strongest long-term value.</p>
+                <p className="text-gray-200 text-xs sm:text-sm">Displayed catalog pricing stays aligned with checkout so the page price matches what Stripe charges.</p>
               </div>
               <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 p-3">
                 <div className="flex items-center gap-2 text-emerald-200 font-semibold text-sm mb-1">
                   <Check className="w-4 h-4" /> Risk reduction
                 </div>
-                <p className="text-gray-200 text-xs sm:text-sm">Instant credentials, setup tutorial, and 24/7 support included after checkout.</p>
+                <p className="text-gray-200 text-xs sm:text-sm">Payment confirmation first, then your account email after provisioning is confirmed, plus tutorial and 24/7 support.</p>
               </div>
             </div>
             <div className="mt-3 flex flex-wrap gap-2 text-[11px] sm:text-xs">
@@ -559,11 +563,11 @@ export default function Shop() {
               Premium Live TV Subscriptions
             </h3>
             <p className="text-center text-gray-200 mb-8 max-w-2xl mx-auto">
-              Choose your subscription length and number of devices. Curated, working Reloaded Fire TV with an all-in-one app path, no Kodi rebuilds, and no dead-end app lists. Instant login credentials + tutorial video + 24/7 support. 36-hour trial applies to Reloaded Fire TV plans. Multi-device plans stream on multiple TVs, phones, or tablets at once.
+              Choose your subscription length and number of devices. Curated, working Reloaded Fire TV with an all-in-one app path, no Kodi rebuilds, and no dead-end app lists. Payment confirmation is sent first, then your account email follows after provisioning is confirmed. 36-hour trial requests are available for Reloaded Fire TV plans. Multi-device plans stream on multiple TVs, phones, or tablets at once.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 max-w-4xl mx-auto text-left">
               {[
-                "Instant credentials via email",
+                "Account email after provisioning",
                 "Tutorial video included",
                 "24/7 human support",
                 "No dead apps / no Kodi rebuilds",
@@ -610,6 +614,8 @@ export default function Shop() {
               {iptvPricingMatrix.map((plan, index) => {
                 const deviceCount = selectedDevices[plan.duration];
                 const selectedPrice = plan.prices.find(p => p.devices === deviceCount) || plan.prices[0];
+                const iptvDb = products.find((pp) => pp.id === selectedPrice.productId);
+                const linePriceDollars = iptvDb?.price ?? selectedPrice.price;
                 const recommendedPlan = BUYER_PROFILE_CONFIG[buyerProfile].planDuration === plan.duration;
                 const durationKey = plan.duration as keyof typeof iptvViewCounts;
                 const cardGradients = [
@@ -679,7 +685,7 @@ export default function Shop() {
                         </div>
                         {(plan.duration === "6mo" || plan.duration === "1yr") && (
                           <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs shadow-lg">
-                            SAVE 10%
+                            LONGER TERM VALUE
                           </div>
                         )}
                       </div>
@@ -723,7 +729,7 @@ export default function Shop() {
                         <div className="mb-4">
                           <div className="flex items-baseline gap-2">
                             <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400" data-testid={`text-price-iptv-${plan.duration}`}>
-                              ${selectedPrice.price}
+                              ${linePriceDollars.toFixed(2)}
                             </span>
                             <span className="text-gray-300 text-sm">
                               / {plan.durationLabel.toLowerCase()}
@@ -751,7 +757,7 @@ export default function Shop() {
                           onClick={() => addItem({
                             id: selectedPrice.productId,
                             name: `Live TV ${plan.durationLabel} - ${deviceCount} Device${deviceCount > 1 ? 's' : ''}`,
-                            price: selectedPrice.price,
+                            price: linePriceDollars,
                             image: iptvImg,
                             description: plan.description,
                             features: plan.features,
@@ -865,7 +871,7 @@ export default function Shop() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 max-w-4xl mx-auto text-left">
               {[
                 "Reloaded Fire TV all-in-one flow",
-                "Instant credentials + tutorial",
+                "Account email + tutorial",
                 "1-year access included",
                 "24/7 support if you get stuck",
               ].map((item, idx) => (
@@ -998,10 +1004,9 @@ export default function Shop() {
                       </div>
 
                       <div className="mb-4">
-                        <label className="text-sm text-gray-300 mb-2 block">Quantity (Buy More & Save!):</label>
+                        <label className="text-sm text-gray-300 mb-2 block">Quantity</label>
                         <div className="flex gap-2 mb-2">
                           {[1, 2, 3, 4, 5].map((qty) => {
-                            const discountInfo = getFirestickDiscount(qty);
                             return (
                               <button
                                 key={qty}
@@ -1016,26 +1021,20 @@ export default function Shop() {
                                 aria-pressed={firestickQuantities[product.id] === qty}
                               >
                                 {qty}
-                                {discountInfo.label && (
-                                  <span className="absolute -top-2 -right-1 bg-green-500 text-white text-[8px] px-1 rounded">
-                                    {discountInfo.label}
-                                  </span>
-                                )}
                               </button>
                             );
                           })}
                         </div>
                         <p className="text-xs text-green-400 flex items-center gap-1">
                           <Gift className="w-3 h-3" />
-                          Buy 2+ save 10% • Buy 3+ save 15%
+                          Same listed price per device at checkout
                         </p>
                       </div>
 
                       <div className="mb-6">
                         {(() => {
                           const qty = firestickQuantities[product.id] || 1;
-                          const { unitPrice, totalPrice, savings } = calculateFirestickPrice(product.price, qty);
-                          const discountInfo = getFirestickDiscount(qty);
+                          const { unitPrice, totalPrice } = calculateFirestickPrice(product.price, qty);
                           return (
                             <>
                               <div className="flex items-baseline gap-2">
@@ -1048,12 +1047,10 @@ export default function Shop() {
                                   </span>
                                 )}
                               </div>
-                              {savings > 0 && (
-                                <p className="text-green-400 text-sm mt-1 font-semibold flex items-center gap-1">
-                                  <DollarSign className="w-4 h-4" />
-                                  You save ${savings.toFixed(2)} with {discountInfo.label}!
-                                </p>
-                              )}
+                              <p className="text-green-400 text-sm mt-1 font-semibold flex items-center gap-1">
+                                <DollarSign className="w-4 h-4" />
+                                Same price shown here is used when you continue to checkout.
+                              </p>
                               <p className="text-blue-200 text-sm mt-2 flex items-center gap-2">
                                 <Gift className="w-4 h-4 text-green-400" />
                                 Each includes 1 Year Live TV Plan

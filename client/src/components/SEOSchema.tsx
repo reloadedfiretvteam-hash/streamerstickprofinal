@@ -451,25 +451,22 @@ export function ItemListSchema({
           "description": item.description,
           ...(item.url && { "url": item.url }),
           ...(item.image && { "image": item.image }),
-          "offers": {
-            "@type": "Offer",
-            "url": item.url || "https://streamstickpro.com",
-            "priceCurrency": "USD",
-            "price": item.price || 0,
-            "availability": "https://schema.org/InStock",
-            "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            "seller": {
-              "@type": "Organization",
-              "name": "StreamStickPro"
-            }
-          },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "reviewCount": "2847",
-            "bestRating": "5",
-            "worstRating": "1"
-          }
+          ...(item.price != null
+            ? {
+                "offers": {
+                  "@type": "Offer",
+                  "url": item.url || "https://streamstickpro.com",
+                  "priceCurrency": "USD",
+                  "price": item.price,
+                  "availability": "https://schema.org/InStock",
+                  "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                  "seller": {
+                    "@type": "Organization",
+                    "name": "StreamStickPro"
+                  }
+                }
+              }
+            : {})
         }
       }))
     };

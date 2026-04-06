@@ -50,6 +50,7 @@ interface Order {
   generatedPassword?: string;
   existingUsername?: string;
   countryPreference?: string;
+  provisioningBranch?: string;
 }
 
 const PRODUCT_DURATION_DAYS: Record<string, number> = {
@@ -77,6 +78,23 @@ function getSubscriptionStatus(order: Order): { status: 'active' | 'expiring_soo
   if (daysLeft < 0) return { status: 'expired', expiryDate, daysLeft: 0 };
   if (daysLeft <= 7) return { status: 'expiring_soon', expiryDate, daysLeft };
   return { status: 'active', expiryDate, daysLeft };
+}
+
+function getProvisioningMessage(order: Order): { tone: 'success' | 'warning' | 'info'; text: string } | null {
+  switch (order.provisioningBranch) {
+    case 'existing_customer_local_match':
+      return { tone: 'success', text: 'Your existing username was verified and remains active for this order.' };
+    case 'existing_not_found_fallback_new':
+      return { tone: 'info', text: 'Your previous username could not be confirmed, so a new account was created for this purchase.' };
+    case 'existing_not_found_manual_review':
+      return { tone: 'warning', text: 'This order is waiting on manual review before account details can be confirmed.' };
+    case 'existing_customer_pending_verification':
+    case 'existing_not_found_fallback_pending':
+    case 'new_customer_pending':
+      return { tone: 'info', text: 'This order is still being verified before final account details are confirmed.' };
+    default:
+      return null;
+  }
 }
 
 export default function CustomerPortal() {
@@ -302,7 +320,9 @@ export default function CustomerPortal() {
   }
 
   const paidOrders = orders.filter((o) => o.status === "paid");
-  const iptvCredentials = paidOrders.filter((o) => o.generatedUsername || o.existingUsername);
+  const iptvCredentials = paidOrders.filter((o) =>
+    o.generatedUsername || o.existingUsername || o.provisioningBranch === "existing_not_found_manual_review"
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black p-4">
@@ -384,6 +404,7 @@ export default function CustomerPortal() {
                   <div className="space-y-4">
                     {iptvCredentials.map((order) => {
                       const subStatus = getSubscriptionStatus(order);
+                      const provisioningMessage = getProvisioningMessage(order);
                       return (
                       <div key={order.id} className="bg-gray-700/50 rounded-lg p-4 space-y-3">
                         <div className="flex items-center justify-between flex-wrap gap-2">
@@ -429,6 +450,7 @@ export default function CustomerPortal() {
                                 onClick={() => copyToClipboard(order.existingUsername || order.generatedUsername || "", `user-${order.id}`)}
                                 className="text-gray-400 hover:text-white"
                                 data-testid={`button-copy-username-${order.id}`}
+                                disabled={!(order.existingUsername || order.generatedUsername)}
                               >
                                 {copiedField === `user-${order.id}` ? (
                                   <Check className="h-4 w-4 text-green-500" />
@@ -476,6 +498,20 @@ export default function CustomerPortal() {
                             </div>
                           )}
                         </div>
+
+                        {provisioningMessage && (
+                          <div
+                            className={
+                              provisioningMessage.tone === 'success'
+                                ? 'text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-md p-3'
+                                : provisioningMessage.tone === 'warning'
+                                  ? 'text-xs text-amber-200 bg-amber-500/10 border border-amber-500/20 rounded-md p-3'
+                                  : 'text-xs text-sky-200 bg-sky-500/10 border border-sky-500/20 rounded-md p-3'
+                            }
+                          >
+                            {provisioningMessage.text}
+                          </div>
+                        )}
 
                         {order.countryPreference && (
                           <div className="text-xs text-gray-500">Country: {order.countryPreference}</div>

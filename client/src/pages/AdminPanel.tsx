@@ -92,13 +92,15 @@ interface VisitorStats {
   vpnClicksWeek?: number;
   topCountries: Array<{ country: string; count: number }>;
   topStates?: Array<{ state: string; country: string; count: number }>;
-  deviceBreakdown: { desktop: number; mobile: number; tablet: number };
+  deviceBreakdown: { desktop: number; mobile: number; tablet: number; bot?: number };
   recentVisitors: Array<{
     id: string;
     page_url: string;
     referrer: string | null;
     user_agent: string;
     created_at: string;
+    last_visit?: string;
+    pages_viewed?: string[];
     country?: string;
     region?: string;
     city?: string;
@@ -203,6 +205,7 @@ interface PaymentHealth {
     status: string;
     credentialsSent: boolean;
     generatedUsername?: string | null;
+    provisioningBranch?: string | null;
   }>;
   recentFailures: Array<{
     id: string;
@@ -229,6 +232,7 @@ interface PaymentHealth {
     amount: number;
     credentialsSent: boolean;
     fulfillmentStatus: string | null;
+    provisioningBranch?: string | null;
     createdAt: string | null;
     source: string;
   }>;
@@ -381,6 +385,7 @@ export default function AdminPanel() {
   const [loadingStats, setLoadingStats] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [liveByLocation, setLiveByLocation] = useState<Array<{ state: string; city: string; daily_visits: number; yesterday_visits: number; weekly_visits: number; monthly_visits: number; unique_ips: number }>>([]);
+  const [visitorSearch, setVisitorSearch] = useState("");
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -552,6 +557,35 @@ export default function AdminPanel() {
     }
     return apiCall(url, { ...options, headers });
   }, [authToken]);
+
+  const getProvisioningBranchLabel = useCallback((branch?: string | null) => {
+    switch (branch) {
+      case 'existing_customer_pending_verification':
+        return 'Existing pending verify';
+      case 'existing_customer_panel_extended':
+        return 'Existing extended in panel';
+      case 'existing_customer_local_match':
+        return 'Existing verified';
+      case 'existing_not_found_fallback_pending':
+        return 'Fallback pending';
+      case 'existing_not_found_fallback_panel_new':
+        return 'Fallback new in panel';
+      case 'existing_not_found_fallback_new':
+        return 'Fallback new account';
+      case 'existing_not_found_manual_review':
+        return 'Manual review';
+      case 'new_customer_pending':
+        return 'New pending';
+      case 'new_customer_panel_created':
+        return 'New created in panel';
+      case 'new_customer_manual_review':
+        return 'New manual review';
+      case 'new_customer_created':
+        return 'New account created';
+      default:
+        return null;
+    }
+  }, []);
 
   const checkAuth = useCallback(async () => {
     const token = getStoredToken();
@@ -816,19 +850,25 @@ export default function AdminPanel() {
       const result = await response.json();
       const data = result.data || result;
 
-      // Note: Historical stats (yesterday, lastWeek, lastMonth) require full visitor data
-      // The API only returns recentVisitors (last 50), so we can't accurately calculate
-      // historical stats from limited data. These will be 0 unless API provides full dataset.
-      // For accurate historical stats, the API endpoint should calculate these server-side.
-      const yesterdayVisitors = 0; // API doesn't provide full historical data
-      const lastWeekVisitors = 0; // API doesn't provide full historical data
-      const lastMonthVisitors = 0; // API doesn't provide full historical data
+      const yesterdayVisitors = data.yesterdayVisitors || 0;
+      const lastWeekVisitors = data.lastWeekVisitors || 0;
+      const lastMonthVisitors = data.lastMonthVisitors || 0;
 
       // Map country breakdown format
       const topCountries = (data.countryBreakdown || data.topCountries || []).map((c: any) => ({
         country: c.name || c.country || 'Unknown',
         count: c.count || 0
       }));
+
+      const topStates = (liveByLocation.length > 0 ? liveByLocation : [])
+        .map((row: any) => ({
+          state: row.state || row.region || 'Unknown',
+          country: row.country || 'Unknown',
+          count: Number(row.today_visitors || row.todayVisitors || row.unique_ips || row.uniqueIps || 0),
+        }))
+        .filter((row: any) => row.state && row.state !== 'Unknown' && row.count > 0)
+        .sort((a: any, b: any) => b.count - a.count)
+        .slice(0, 10);
 
       // Map recent visitors format
       const mappedRecentVisitors = (data.recentVisitors || data.liveVisitors || []).map((v: any) => ({
@@ -837,6 +877,8 @@ export default function AdminPanel() {
         referrer: v.referrer || null,
         user_agent: v.userAgent || v.user_agent || 'Unknown',
         created_at: v.createdAt || v.created_at || new Date().toISOString(),
+        last_visit: v.lastVisit || v.last_visit || v.createdAt || v.created_at || new Date().toISOString(),
+        pages_viewed: Array.isArray(v.pagesViewed) ? v.pagesViewed : (Array.isArray(v.pages_viewed) ? v.pages_viewed : []),
         country: v.country || null,
         region: v.region || null,
         city: v.city || null,
@@ -854,8 +896,8 @@ export default function AdminPanel() {
         vpnClicksToday: data.vpnClicksToday || 0,
         vpnClicksWeek: data.vpnClicksWeek || 0,
         topCountries,
-        topStates: [], // API doesn't provide this yet
-        deviceBreakdown: data.deviceBreakdown || { desktop: 0, mobile: 0, tablet: 0 },
+        topStates,
+        deviceBreakdown: data.deviceBreakdown || { desktop: 0, mobile: 0, tablet: 0, bot: 0 },
         recentVisitors: mappedRecentVisitors
       });
       setLastUpdate(new Date());
@@ -863,7 +905,21 @@ export default function AdminPanel() {
       try {
         const liveRes = await authFetch('/api/admin/visitors/live');
         const liveJson = await liveRes.json();
-        if (liveJson.data && Array.isArray(liveJson.data)) setLiveByLocation(liveJson.data);
+        if (liveJson.data && Array.isArray(liveJson.data)) {
+          setLiveByLocation(liveJson.data);
+          setVisitorStats((prev) => prev ? ({
+            ...prev,
+            topStates: liveJson.data
+              .map((row: any) => ({
+                state: row.state || row.region || 'Unknown',
+                country: row.country || 'Unknown',
+                count: Number(row.today_visitors || row.todayVisitors || row.unique_ips || row.uniqueIps || 0),
+              }))
+              .filter((row: any) => row.state && row.state !== 'Unknown' && row.count > 0)
+              .sort((a: any, b: any) => b.count - a.count)
+              .slice(0, 10),
+          }) : prev);
+        }
       } catch (_) { /* ignore */ }
     } catch (error: any) {
       console.error('Error loading visitor statistics:', error);
@@ -2087,6 +2143,15 @@ export default function AdminPanel() {
     return `${days}d ago`;
   };
 
+  const getReferrerHost = (referrer?: string | null) => {
+    if (!referrer) return 'Direct';
+    try {
+      return new URL(referrer).hostname.replace(/^www\./, '');
+    } catch {
+      return referrer.replace(/^https?:\/\//i, '').split('/')[0] || referrer;
+    }
+  };
+
   const getDeviceIcon = (userAgent: string) => {
     const ua = userAgent.toLowerCase();
     if (ua.includes('mobile')) return <Smartphone className="w-4 h-4" />;
@@ -2098,6 +2163,56 @@ export default function AdminPanel() {
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.sku?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const orderedRecentVisitors = [...visitorStats.recentVisitors].sort((a, b) => {
+    const aTime = new Date(a.last_visit || a.created_at).getTime();
+    const bTime = new Date(b.last_visit || b.created_at).getTime();
+    return bTime - aTime;
+  });
+
+  const visitorSearchNeedle = visitorSearch.trim().toLowerCase();
+  const filteredRecentVisitors = orderedRecentVisitors.filter((visitor) => {
+    if (!visitorSearchNeedle) return true;
+    const haystack = [
+      visitor.page_url,
+      visitor.referrer || '',
+      visitor.country || '',
+      visitor.region || '',
+      visitor.city || '',
+      visitor.user_agent || '',
+      ...(visitor.pages_viewed || []),
+    ]
+      .join(' ')
+      .toLowerCase();
+    return haystack.includes(visitorSearchNeedle);
+  });
+
+  const topVisitedPages = (() => {
+    const pageCounts = new Map<string, number>();
+    for (const visitor of filteredRecentVisitors) {
+      const pages = visitor.pages_viewed && visitor.pages_viewed.length > 0 ? visitor.pages_viewed : [visitor.page_url];
+      for (const page of pages) {
+        const key = (page || '/').trim() || '/';
+        pageCounts.set(key, (pageCounts.get(key) || 0) + 1);
+      }
+    }
+    return [...pageCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([page, count]) => ({ page, count }));
+  })();
+
+  const topReferrers = (() => {
+    const refCounts = new Map<string, number>();
+    for (const visitor of filteredRecentVisitors) {
+      const key = getReferrerHost(visitor.referrer);
+      refCounts.set(key, (refCounts.get(key) || 0) + 1);
+    }
+    return [...refCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([referrer, count]) => ({ referrer, count }));
+  })();
 
   const getShadowName = (productName: string) => {
     for (const [key, value] of Object.entries(shadowProductMap)) {
@@ -2753,9 +2868,16 @@ export default function AdminPanel() {
                                 <p className="text-xs text-gray-500 mt-1">
                                   {order.productName || 'Unknown product'} • ${order.amount.toFixed(2)} • {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'No date'}
                                 </p>
+                                {getProvisioningBranchLabel(order.provisioningBranch) && (
+                                  <p className="text-xs text-amber-300 mt-1">
+                                    Branch: {getProvisioningBranchLabel(order.provisioningBranch)}
+                                  </p>
+                                )}
                               </div>
                               <div className="flex items-center gap-3">
-                                <Badge className="bg-amber-500/20 text-amber-300">Needs attention</Badge>
+                                <Badge className="bg-amber-500/20 text-amber-300">
+                                  {getProvisioningBranchLabel(order.provisioningBranch) || 'Needs attention'}
+                                </Badge>
                                 <Button
                                   size="sm"
                                   className="bg-cyan-500 hover:bg-cyan-600 text-white"
@@ -2865,6 +2987,7 @@ export default function AdminPanel() {
                             <TableHead className="text-gray-400">Product</TableHead>
                             <TableHead className="text-gray-400">Status</TableHead>
                             <TableHead className="text-gray-400 text-center">Creds sent</TableHead>
+                              <TableHead className="text-gray-400">Provisioning</TableHead>
                             <TableHead className="text-gray-400">Fulfillment</TableHead>
                             <TableHead className="text-gray-400 text-right">Amt</TableHead>
                           </TableRow>
@@ -2920,6 +3043,9 @@ export default function AdminPanel() {
                                     <span className="text-gray-500 text-xs">No</span>
                                   )}
                                 </TableCell>
+                                <TableCell className="text-gray-300 text-xs whitespace-nowrap">
+                                  {getProvisioningBranchLabel(row.provisioningBranch) || "—"}
+                                </TableCell>
                                 <TableCell className="text-gray-400 text-xs whitespace-nowrap">
                                   {row.fulfillmentStatus || "—"}
                                 </TableCell>
@@ -2930,7 +3056,7 @@ export default function AdminPanel() {
                             ))
                           ) : (
                             <TableRow>
-                              <TableCell colSpan={9} className="py-10 text-center text-gray-400 text-sm">
+                              <TableCell colSpan={10} className="py-10 text-center text-gray-400 text-sm">
                                 {loadingPaymentHealth ? "Loading…" : "No order rows returned yet."}
                               </TableCell>
                             </TableRow>
@@ -3235,8 +3361,54 @@ export default function AdminPanel() {
                     <Users className="w-5 h-5 text-orange-500" />
                     Recent Visitors
                   </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Ordered by latest activity. Use search to filter pages, locations, or referrers.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <div className="mb-4">
+                    <Input
+                      placeholder="Filter visitors by page, referrer, country, city, or user agent"
+                      value={visitorSearch}
+                      onChange={(e) => setVisitorSearch(e.target.value)}
+                      className="bg-gray-900 border-gray-700 text-gray-100"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                    <div className="rounded-lg border border-gray-700 bg-gray-900/40 p-4">
+                      <h4 className="text-sm font-semibold text-white mb-3">Top Pages (ordered)</h4>
+                      <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                        {topVisitedPages.length > 0 ? topVisitedPages.map((row, idx) => (
+                          <div key={row.page + idx} className="flex items-center justify-between text-sm">
+                            <span className="text-gray-300 truncate pr-3">{row.page}</span>
+                            <Badge variant="outline" className="border-gray-600 text-gray-200">
+                              {row.count}
+                            </Badge>
+                          </div>
+                        )) : (
+                          <p className="text-xs text-gray-500">No page data yet for current filter.</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-gray-700 bg-gray-900/40 p-4">
+                      <h4 className="text-sm font-semibold text-white mb-3">Top Referrers (ordered)</h4>
+                      <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                        {topReferrers.length > 0 ? topReferrers.map((row, idx) => (
+                          <div key={row.referrer + idx} className="flex items-center justify-between text-sm">
+                            <span className="text-gray-300 truncate pr-3">{row.referrer}</span>
+                            <Badge variant="outline" className="border-gray-600 text-gray-200">
+                              {row.count}
+                            </Badge>
+                          </div>
+                        )) : (
+                          <p className="text-xs text-gray-500">No referrer data yet for current filter.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
@@ -3244,13 +3416,14 @@ export default function AdminPanel() {
                           <TableHead className="text-gray-400">Device</TableHead>
                           <TableHead className="text-gray-400">Location</TableHead>
                           <TableHead className="text-gray-400">Page</TableHead>
+                          <TableHead className="text-gray-400">Pages Seen</TableHead>
                           <TableHead className="text-gray-400">Referrer</TableHead>
                           <TableHead className="text-gray-400">Time</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {visitorStats.recentVisitors.length > 0 ? (
-                          visitorStats.recentVisitors.map((visitor, idx) => (
+                        {filteredRecentVisitors.length > 0 ? (
+                          filteredRecentVisitors.map((visitor, idx) => (
                             <TableRow key={idx} className="border-gray-700 hover:bg-gray-700/50">
                               <TableCell className="text-gray-300">
                                 <div className="flex items-center gap-2 text-gray-300">
@@ -3274,18 +3447,28 @@ export default function AdminPanel() {
                                 )}
                               </TableCell>
                               <TableCell className="text-gray-300">{visitor.page_url.substring(0, 40)}</TableCell>
+                              <TableCell className="text-gray-300">
+                                <div className="text-sm">
+                                  <span className="font-medium">{visitor.pages_viewed?.length || 1}</span>
+                                  {visitor.pages_viewed && visitor.pages_viewed.length > 1 ? (
+                                    <div className="text-xs text-gray-500 mt-0.5 truncate max-w-[180px]">
+                                      {visitor.pages_viewed.slice(0, 3).join(" | ")}
+                                    </div>
+                                  ) : null}
+                                </div>
+                              </TableCell>
                               <TableCell className="text-gray-400">
                                 <span className="text-sm">
                                   {visitor.referrer ? visitor.referrer.substring(0, 30) : 'Direct'}
                                 </span>
                               </TableCell>
-                              <TableCell className="text-gray-400 whitespace-nowrap">{formatTime(visitor.created_at)}</TableCell>
+                              <TableCell className="text-gray-400 whitespace-nowrap">{formatTime(visitor.last_visit || visitor.created_at)}</TableCell>
                             </TableRow>
                           ))
                         ) : (
                           <TableRow>
-                            <TableCell colSpan={5} className="py-8 text-center text-gray-400">
-                              No visitors tracked yet. Visitors will appear here as they browse your site.
+                            <TableCell colSpan={6} className="py-8 text-center text-gray-400">
+                              No visitors matched this filter yet.
                             </TableCell>
                           </TableRow>
                         )}

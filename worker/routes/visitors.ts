@@ -1,6 +1,8 @@
 import { Hono } from 'hono';
 import { getStorage } from '../helpers';
+import { getSupabaseServiceKey, getSupabaseUrl } from '../helpers';
 import type { Env } from '../index';
+import { authMiddleware } from './auth';
 
 function parseCookies(cookieHeader: string | null): Record<string, string> {
   const out: Record<string, string> = {};
@@ -38,12 +40,12 @@ export function createVisitorRoutes() {
   });
 
   // Test endpoint - manually insert a visitor to verify database works
+  app.use('/test', authMiddleware);
   app.post('/test', async (c) => {
     try {
       // Use service key explicitly to bypass RLS
-      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY;
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
+      const supabase = createClient(getSupabaseUrl(c.env), getSupabaseServiceKey(c.env));
       
       const testVisitorData = {
         session_id: 'test-' + Date.now(),
@@ -180,6 +182,7 @@ export function createVisitorRoutes() {
   });
 
   // Live visitors by state/city (deduplicated); requires admin auth when under /api/admin/visitors
+  app.use('/live', authMiddleware);
   app.get('/live', async (c) => {
     try {
       const storage = getStorage(c.env);
@@ -191,6 +194,7 @@ export function createVisitorRoutes() {
     }
   });
 
+  app.use('/stats', authMiddleware);
   app.get('/stats', async (c) => {
     try {
       if (!c.env.VITE_SUPABASE_URL) {
@@ -206,7 +210,9 @@ export function createVisitorRoutes() {
           todayVisitors: stats.todayVisitors,
           yesterdayVisitors: stats.yesterdayVisitors,
           weekVisitors: stats.weekVisitors,
+          lastWeekVisitors: 0,
           monthVisitors: stats.monthVisitors,
+          lastMonthVisitors: 0,
           onlineNow: stats.onlineNow,
           vpnClicksToday: stats.vpnClicksToday,
           vpnClicksWeek: stats.vpnClicksWeek,

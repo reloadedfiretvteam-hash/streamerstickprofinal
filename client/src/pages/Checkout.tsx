@@ -82,6 +82,15 @@ const PAYMENT_METHOD_CHIPS: {
   },
 ];
 
+const POPULAR_CHANNEL_PICK_OPTIONS = [
+  { id: "usaSports", label: "USA Sports", description: "NFL, NBA, MLB, UFC and major US sports coverage" },
+  { id: "ukSports", label: "UK Sports", description: "Premier League and UK sports-heavy picks" },
+  { id: "canadaLocal", label: "Canada Local", description: "Canadian local and regional channels" },
+  { id: "latinoSpanish", label: "Latino / Spanish", description: "Spanish-language and Latin channels" },
+  { id: "kidsFamily", label: "Kids & Family", description: "Family-friendly channels and cartoons" },
+  { id: "adults18", label: "Adults 18+", description: "Adult channels only if available on your package" },
+] as const;
+
 function ProgressBar({ step }: { step: number }) {
   const steps = [
     { label: "Cart", num: 1 },
@@ -151,8 +160,8 @@ function CheckoutTrustReassuranceSection({
           <li className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-3.5 text-sm text-gray-200">
             <Zap className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <span>
-              <span className="font-semibold text-white">Instant credentials</span>
-              <span className="text-gray-400"> — For live TV / service plans, login details are emailed right after successful payment (check spam).</span>
+              <span className="font-semibold text-white">Account email after verification</span>
+              <span className="text-gray-400"> — For live TV / service plans, payment confirmation is sent first and final account details follow after provisioning is confirmed (check spam).</span>
             </span>
           </li>
         )}
@@ -226,7 +235,18 @@ export default function Checkout() {
     allCountries: true,
   });
   const [customCountries, setCustomCountries] = useState("");
+  const [popularChannelPicks, setPopularChannelPicks] = useState<Record<(typeof POPULAR_CHANNEL_PICK_OPTIONS)[number]["id"], boolean>>({
+    usaSports: false,
+    ukSports: false,
+    canadaLocal: false,
+    latinoSpanish: false,
+    kidsFamily: false,
+    adults18: false,
+  });
   const [vpnUpsellInterest, setVpnUpsellInterest] = useState(false);
+  const [existingCustomer, setExistingCustomer] = useState(false);
+  const [existingUsername, setExistingUsername] = useState("");
+  const [expiredMoreThanOneWeek, setExpiredMoreThanOneWeek] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -252,9 +272,12 @@ export default function Checkout() {
     };
   }, []);
 
-  const hasIPTVProduct = items.some(item => 
-    item.id.includes('iptv') || item.name?.toLowerCase().includes('iptv') ||
-    item.name?.toLowerCase().includes('subscription') || item.name?.toLowerCase().includes('month')
+  const hasIPTVProduct = items.some(item =>
+    item.category === 'iptv' ||
+    item.id.includes('iptv') ||
+    item.name?.toLowerCase().includes('iptv') ||
+    item.name?.toLowerCase().includes('subscription') ||
+    item.name?.toLowerCase().includes('month')
   );
 
   const hasFireStickProduct = items.some(item => 
@@ -274,6 +297,7 @@ export default function Checkout() {
   );
 
   const showCountryOptions = hasIPTVProduct || hasFireStickProduct || hasFreeTrial;
+  const showExistingCustomerOptions = hasIPTVProduct;
   const orderTotal = Number(total() || 0);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -313,12 +337,25 @@ export default function Checkout() {
     if (countryOptions.usaOnly) preferences.push("USA Only");
     if (countryOptions.usaCanadaUk) preferences.push("USA, Canada, UK");
     if (countryOptions.allCountries) preferences.push("All Countries");
+    const selectedPopularPicks = POPULAR_CHANNEL_PICK_OPTIONS
+      .filter((option) => popularChannelPicks[option.id])
+      .map((option) => option.label);
+    if (selectedPopularPicks.length > 0) {
+      preferences.push(`Popular Picks: ${selectedPopularPicks.join(", ")}`);
+    }
     if (customCountries.trim()) preferences.push(`Custom: ${customCountries.trim()}`);
-    return preferences.join("; ") || "All Countries";
+    return preferences.join(", ") || "All Countries";
   };
 
   const handleCountryOptionChange = (option: keyof typeof countryOptions, checked: boolean) => {
     setCountryOptions(prev => ({ ...prev, [option]: checked }));
+  };
+
+  const handlePopularChannelPickChange = (
+    option: (typeof POPULAR_CHANNEL_PICK_OPTIONS)[number]["id"],
+    checked: boolean,
+  ) => {
+    setPopularChannelPicks((prev) => ({ ...prev, [option]: checked }));
   };
 
   const handlePayment = async () => {
@@ -329,6 +366,11 @@ export default function Checkout() {
 
     if (items.length === 0) {
       setError("Your cart is empty");
+      return;
+    }
+
+    if (showExistingCustomerOptions && existingCustomer && !existingUsername.trim()) {
+      setError("Please enter your current username for the existing customer flow");
       return;
     }
 
@@ -364,6 +406,12 @@ export default function Checkout() {
 
       if (showCountryOptions) {
         checkoutPayload.countryPreference = buildCountryPreference();
+      }
+
+      if (showExistingCustomerOptions && existingCustomer) {
+        checkoutPayload.isRenewal = true;
+        checkoutPayload.existingUsername = existingUsername.trim();
+        checkoutPayload.expiredMoreThanOneWeek = expiredMoreThanOneWeek;
       }
 
       if (formData.phone.trim()) {
@@ -596,26 +644,67 @@ export default function Checkout() {
               </CardContent>
             </Card>
 
-            {hasIPTVProduct && (
+            {showExistingCustomerOptions && (
               <Card className="border-white/10 bg-card/50 backdrop-blur">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-xl flex items-center gap-2">
                     <MessageSquare className="w-5 h-5 text-primary" />
-                    Returning Customer Note
+                    Existing Customer
                   </CardTitle>
                   <CardDescription>
-                    If you are a returning customer, please message us your username. Thank you.
+                    Already have a StreamStickPro line? Enter your current username so we can try to update the existing account instead of creating a new one.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Textarea
-                    id="returning-user-message"
-                    placeholder="If you are a returning customer, please message us your username. Thank you."
-                    value={formData.message}
-                    onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
-                    className="bg-background/50 border-white/20 min-h-[90px] resize-none"
-                    data-testid="input-returning-customer-message"
-                  />
+                  <div
+                    className={`flex items-center space-x-3 p-4 rounded-lg border transition-all ${
+                      existingCustomer ? "border-primary bg-primary/10" : "border-white/10"
+                    }`}
+                    data-testid="checkbox-existing-customer"
+                  >
+                    <Checkbox checked={existingCustomer} onCheckedChange={(checked) => setExistingCustomer(!!checked)} id="existing-customer" />
+                    <div className="flex-1">
+                      <Label htmlFor="existing-customer" className="font-semibold cursor-pointer">I am an existing customer</Label>
+                      <p className="text-sm text-muted-foreground">We will verify your username against the service panel before sending final account details.</p>
+                    </div>
+                  </div>
+
+                  {existingCustomer && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="existing-username">Current Username *</Label>
+                        <Input
+                          id="existing-username"
+                          placeholder="Enter your current username"
+                          value={existingUsername}
+                          onChange={(e) => setExistingUsername(e.target.value)}
+                          className="bg-background/50 border-white/20 h-12"
+                          data-testid="input-existing-username"
+                        />
+                      </div>
+
+                      <div
+                        className={`flex items-center space-x-3 p-4 rounded-lg border transition-all ${
+                          expiredMoreThanOneWeek ? "border-primary bg-primary/10" : "border-white/10"
+                        }`}
+                        data-testid="checkbox-expired-more-than-one-week"
+                      >
+                        <Checkbox
+                          checked={expiredMoreThanOneWeek}
+                          onCheckedChange={(checked) => setExpiredMoreThanOneWeek(!!checked)}
+                          id="expired-more-than-one-week"
+                        />
+                        <div className="flex-1">
+                          <Label htmlFor="expired-more-than-one-week" className="font-semibold cursor-pointer">
+                            My account has been expired for more than 1 week
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            If we cannot find your old username and this is checked, we may need to issue a brand-new username and password.
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -625,9 +714,9 @@ export default function Checkout() {
                 <CardHeader className="pb-4">
                   <CardTitle className="text-xl flex items-center gap-2">
                     <Globe className="w-5 h-5 text-primary" />
-                    Channel Preferences
+                    Channel Regions & Bouquet Picks
                   </CardTitle>
-                  <CardDescription>Which regions/countries would you like channels from?</CardDescription>
+                  <CardDescription>Choose your main region mix first, then add the most common channel picks you want prioritized.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
@@ -705,6 +794,45 @@ export default function Checkout() {
                     <p className="text-xs text-muted-foreground">
                       Tell us any specific countries or language channels you'd like
                     </p>
+                  </div>
+
+                  <div className="space-y-3 pt-3">
+                    <div>
+                      <Label className="text-base font-semibold">Most Common Picks</Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        These help us understand the bouquet mix you want most.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {POPULAR_CHANNEL_PICK_OPTIONS.map((option) => (
+                        <div
+                          key={option.id}
+                          className={`flex items-start space-x-3 p-4 rounded-lg border transition-all cursor-pointer ${
+                            popularChannelPicks[option.id]
+                              ? "border-primary bg-primary/10"
+                              : "border-white/10 hover:border-white/20"
+                          }`}
+                          onClick={() => handlePopularChannelPickChange(option.id, !popularChannelPicks[option.id])}
+                        >
+                          <Checkbox
+                            checked={popularChannelPicks[option.id]}
+                            onCheckedChange={(checked) => handlePopularChannelPickChange(option.id, !!checked)}
+                            id={`popular-pick-${option.id}`}
+                          />
+                          <div className="flex-1">
+                            <Label htmlFor={`popular-pick-${option.id}`} className="font-semibold cursor-pointer">
+                              {option.label}
+                            </Label>
+                            <p className="text-sm text-muted-foreground">{option.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3 text-xs text-muted-foreground">
+                    Saved with your order:
+                    <span className="ml-1 text-white">{buildCountryPreference()}</span>
                   </div>
                 </CardContent>
               </Card>

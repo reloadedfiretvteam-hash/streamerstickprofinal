@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
 import Stripe from 'stripe';
 import { getStorage } from '../helpers';
-import { sendOrderConfirmation, sendCredentialsEmail, sendOwnerOrderNotification, generateCredentials, generateUniqueCredentials } from '../email';
+import { sendOrderConfirmation, sendOwnerOrderNotification } from '../email';
+import { ensureProvisioningJob, orderNeedsProvisioning, processProvisioningJobByOrderId } from '../lib/provisioning';
 import type { Env } from '../index';
 
 type Storage = ReturnType<typeof getStorage>;
@@ -132,6 +133,10 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
     stripeCustomerId: session.customer,
   };
 
+  if (typeof session.amount_total === 'number' && Number.isFinite(session.amount_total) && session.amount_total >= 0) {
+    updateData.amount = Math.round(session.amount_total);
+  }
+
   if (session.shipping_details) {
     const shipping = session.shipping_details;
     updateData.shippingName = shipping.name || null;
@@ -148,57 +153,6 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
     }
     
     console.log(`Shipping address captured for order ${order.id}`);
-  }
-
-  const productIds = order.realProductId?.split(',') || [];
-  const hasIPTV = productIds.some(id => id.trim().startsWith('iptv-')) || 
-                  productIds.some(id => id.trim().startsWith('firestick-'));
-
-  if (hasIPTV) {
-    if (order.isRenewal && order.existingUsername) {
-      console.log(`Processing renewal for existing username: ${order.existingUsername}`);
-      
-      const existingCustomer = await storage.getCustomerByUsername(order.existingUsername);
-      if (existingCustomer) {
-        updateData.generatedUsername = existingCustomer.username;
-        updateData.generatedPassword = existingCustomer.password;
-        
-        if (!order.customerId) {
-          updateData.customerId = existingCustomer.id;
-        }
-        
-        await storage.incrementCustomerOrders(existingCustomer.id);
-        console.log(`Renewal processed for customer ${existingCustomer.id}, order count incremented`);
-      } else {
-        console.log(`WARNING: Could not find customer with username ${order.existingUsername}`);
-      }
-    } else {
-      console.log(`Processing new customer order, generating credentials`);
-      
-      const credentials = await generateUniqueCredentials(order, storage);
-      updateData.generatedUsername = credentials.username;
-      updateData.generatedPassword = credentials.password;
-      
-      const customerPhone = session.customer_details?.phone || order.shippingPhone || updateData.shippingPhone || undefined;
-      const customerName = order.customerName || session.customer_details?.name || undefined;
-      
-      try {
-        const newCustomer = await storage.createCustomer({
-          username: credentials.username,
-          password: credentials.password,
-          email: order.customerEmail,
-          fullName: customerName,
-          phone: customerPhone,
-        });
-        
-        updateData.customerId = newCustomer.id;
-        console.log(`Created new customer ${newCustomer.id} with username ${credentials.username}`);
-        
-        await storage.incrementCustomerOrders(newCustomer.id);
-      } catch (error) {
-        console.error('Error creating customer record:', error);
-      }
-    }
   }
 
   // Ensure we have customer email - use session email as fallback before updating
@@ -250,8 +204,6 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
     console.error(`[EMAIL] Error stack: ${error.stack}`);
   }
 
-  // Customer emails are sent from webhook to avoid relying on success-page JS execution.
-  // Idempotency: credentialsSent marks that customer email bundle already ran.
   if (!updatedOrder.credentialsSent) {
     try {
       await sendOrderConfirmation(updatedOrder, env);
@@ -259,15 +211,19 @@ async function handleCheckoutComplete(session: any, storage: Storage, env: Env) 
     } catch (error: any) {
       console.error(`[EMAIL] ❌ Failed webhook order confirmation: ${error.message}`);
     }
+  }
 
+  if (orderNeedsProvisioning(updatedOrder)) {
     try {
-      await sendCredentialsEmail(updatedOrder, env, storage);
-      console.log(`[EMAIL] ✅ Credentials sent from webhook`);
+      await ensureProvisioningJob(storage, updatedOrder, {
+        source: 'checkout.session.completed',
+        sessionId: session.id,
+      });
+      await processProvisioningJobByOrderId(env, updatedOrder.id);
+      console.log(`[PROVISIONING] Queued and attempted provisioning for ${updatedOrder.id}`);
     } catch (error: any) {
-      console.error(`[EMAIL] ❌ Failed webhook credentials email: ${error.message}`);
+      console.error(`[PROVISIONING] Failed to queue/process provisioning for ${updatedOrder.id}: ${error.message}`);
     }
-  } else {
-    console.log(`[EMAIL] Skipping customer emails for ${order.id} (already sent)`);
   }
   
   console.log(`[CHECKOUT] Completed processing order ${order.id}`);

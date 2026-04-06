@@ -3,6 +3,8 @@ import Stripe from 'stripe';
 import { getStorage } from '../helpers';
 import { checkoutRequestSchema, effectiveRealProductChargeCents } from '../../shared/schema';
 import type { Env } from '../index';
+import { authMiddleware } from './auth';
+import { ensureProvisioningJob, orderNeedsProvisioning, processProvisioningJobByOrderId } from '../lib/provisioning';
 
 const isProduction = (env: Env) => (env.NODE_ENV || '').toLowerCase() === 'production';
 
@@ -48,17 +50,24 @@ export function createCheckoutRoutes() {
         return c.json({ error: parseResult.error.message }, 400);
       }
       
-      const { items, customerEmail, customerName, customerPhone, customerMessage, isRenewal, existingUsername, countryPreference } = parseResult.data;
+      const {
+        items,
+        customerEmail,
+        customerName,
+        customerPhone,
+        customerMessage,
+        isRenewal,
+        existingUsername,
+        expiredMoreThanOneWeek,
+        countryPreference,
+      } = parseResult.data;
       debugLog("Checkout: Parsed data - items:", items.length, "email:", maskEmail(customerEmail));
 
+      // Local customer lookup is convenience metadata only.
+      // Provisioning must verify the username against the real panel later.
       let existingCustomer: Awaited<ReturnType<typeof storage.getCustomerByUsername>> | null = null;
       if (isRenewal && existingUsername) {
         existingCustomer = await storage.getCustomerByUsername(existingUsername) ?? null;
-        if (!existingCustomer) {
-          return c.json({ 
-            error: "Username not found. Please check your username or select 'New Account' instead." 
-          }, 404);
-        }
       }
 
       const activePromo = await storage.getActiveSitePromotion();
@@ -124,7 +133,7 @@ export function createCheckoutRoutes() {
         cancel_url: `${baseUrl}/checkout`,
         customer_email: customerEmail,
         payment_method_types: [...DEFAULT_PAYMENT_METHODS],
-        allow_promotion_codes: true,
+        allow_promotion_codes: false,
         shipping_address_collection: {
           allowed_countries: ['US', 'CA'],
         },
@@ -137,8 +146,10 @@ export function createCheckoutRoutes() {
           shadowProductIds,
           isRenewal: isRenewal ? 'true' : 'false',
           existingUsername: existingUsername || '',
+          expiredMoreThanOneWeek: expiredMoreThanOneWeek ? 'true' : 'false',
           existingCustomerId: existingCustomer?.id || '',
           sitePromotionApplied: sitePromotionApplied ? 'true' : 'false',
+          countryPreference: countryPreference || '',
         },
       };
 
@@ -182,8 +193,16 @@ export function createCheckoutRoutes() {
         credentialsSent: false,
         isRenewal: isRenewal || false,
         existingUsername: existingUsername || null,
+        expiredMoreThanOneWeek: expiredMoreThanOneWeek || false,
+        provisioningBranch: isRenewal
+          ? (existingCustomer
+              ? 'existing_customer_pending_verification'
+              : (expiredMoreThanOneWeek ? 'existing_not_found_fallback_pending' : 'existing_not_found_manual_review'))
+          : 'new_customer_pending',
         customerId: existingCustomer?.id || null,
         countryPreference: countryPreference || null,
+        customerMessage: customerMessage || null,
+        customerPhone: customerPhone || null,
       });
       debugLog("Checkout: Order created:", order.id);
 
@@ -210,10 +229,13 @@ export function createCheckoutRoutes() {
       const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
       const session = await stripe.checkout.sessions.retrieve(c.req.param('sessionId'));
       
-      return c.json({ 
-        order,
+      return c.json({
+        order: {
+          id: order.id,
+          realProductName: order.realProductName,
+          amount: session.amount_total ?? order.amount,
+        },
         paymentStatus: session.payment_status,
-        customerEmail: session.customer_details?.email,
       });
     } catch (error: any) {
       console.error("Error fetching checkout session:", error);
@@ -222,6 +244,7 @@ export function createCheckoutRoutes() {
   });
 
   // Direct email endpoint - separate from webhooks (like free trials)
+  app.use('/send-emails', authMiddleware);
   app.post('/send-emails', async (c) => {
     try {
       const debugLog = (...args: unknown[]) => {
@@ -356,17 +379,34 @@ export function createCheckoutRoutes() {
         console.error(`[EMAIL] Error stack:`, error.stack);
       }
 
-      // Send credentials if not already sent
+      // Paid IPTV now goes through the provisioning queue.
       if (!order.credentialsSent) {
-        try {
-          debugLog(`[EMAIL] Attempting to send credentials for order ${order.id}`);
-          await sendCredentialsEmail(order, c.env, storage);
-          results.credentials = true;
-          debugLog(`[EMAIL] ✅ Credentials sent to ${maskEmail(order.customerEmail)}`);
-        } catch (error: any) {
-          results.errors.push(`Credentials: ${error.message}`);
-          console.error(`[EMAIL] ❌ Failed to send credentials:`, error);
-          console.error(`[EMAIL] Error stack:`, error.stack);
+        if (orderNeedsProvisioning(order)) {
+          try {
+            debugLog(`[PROVISIONING] Queueing fallback processing for order ${order.id}`);
+            await ensureProvisioningJob(storage, order, {
+              source: 'checkout.send-emails',
+              sessionId: sessionId || null,
+            });
+            await processProvisioningJobByOrderId(c.env, order.id);
+            const refreshedOrder = await storage.getOrder(order.id);
+            results.credentials = !!refreshedOrder?.credentialsSent;
+            debugLog(`[PROVISIONING] Queue processed for ${order.id}, sent=${results.credentials}`);
+          } catch (error: any) {
+            results.errors.push(`Provisioning: ${error.message}`);
+            console.error(`[PROVISIONING] ❌ Failed to queue/process order ${order.id}:`, error);
+          }
+        } else {
+          try {
+            debugLog(`[EMAIL] Attempting to send credentials for order ${order.id}`);
+            await sendCredentialsEmail(order, c.env, storage);
+            results.credentials = true;
+            debugLog(`[EMAIL] ✅ Credentials sent to ${maskEmail(order.customerEmail)}`);
+          } catch (error: any) {
+            results.errors.push(`Credentials: ${error.message}`);
+            console.error(`[EMAIL] ❌ Failed to send credentials:`, error);
+            console.error(`[EMAIL] Error stack:`, error.stack);
+          }
         }
       } else {
         results.credentials = true; // Already sent

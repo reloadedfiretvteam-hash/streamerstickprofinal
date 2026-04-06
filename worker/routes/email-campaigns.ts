@@ -1,7 +1,15 @@
 import { Hono } from 'hono';
 import { getStorage } from '../helpers';
+import { getSupabaseServiceKey, getSupabaseUrl } from '../helpers';
 import { sendEmail } from '../email-providers';
 import type { Env } from '../index';
+
+function hasValidInternalCronSecret(c: { env: Env; req: { header: (name: string) => string | undefined } }): boolean {
+  const expected = (c.env.INTERNAL_CRON_SECRET || '').trim();
+  if (!expected) return false;
+  const provided = (c.req.header('x-internal-cron-secret') || '').trim();
+  return provided === expected;
+}
 
 export function createEmailCampaignRoutes() {
   const app = new Hono<{ Bindings: Env }>();
@@ -32,9 +40,8 @@ export function createEmailCampaignRoutes() {
         return c.json({ error: 'Invalid campaign type. Must be "purchase" or "free_trial"' }, 400);
       }
 
-      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY;
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
+      const supabase = createClient(getSupabaseUrl(c.env), getSupabaseServiceKey(c.env));
 
       // Check if active campaign already exists
       const { data: existing } = await supabase
@@ -135,10 +142,12 @@ export function createEmailCampaignRoutes() {
 
   // Process scheduled emails (called by cron job)
   app.post('/process-scheduled', async (c) => {
+    if (!hasValidInternalCronSecret(c)) {
+      return c.json({ success: false, error: 'Unauthorized' }, 401);
+    }
     try {
-      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY;
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
+      const supabase = createClient(getSupabaseUrl(c.env), getSupabaseServiceKey(c.env));
 
       const now = new Date();
       
@@ -260,9 +269,8 @@ export function createEmailCampaignRoutes() {
   app.get('/status/:email', async (c) => {
     try {
       const email = c.req.param('email');
-      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY;
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, serviceKey);
+      const supabase = createClient(getSupabaseUrl(c.env), getSupabaseServiceKey(c.env));
 
       const { data: campaigns, error } = await supabase
         .from('email_campaigns')

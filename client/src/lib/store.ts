@@ -6,8 +6,7 @@ const isFirestickProduct = (id: string): boolean => {
 };
 
 const calculateFirestickDiscount = (basePrice: number, quantity: number): number => {
-  if (quantity >= 3) return basePrice * 0.85;
-  if (quantity >= 2) return basePrice * 0.90;
+  void quantity;
   return basePrice;
 };
 

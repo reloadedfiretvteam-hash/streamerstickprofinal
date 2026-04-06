@@ -41,7 +41,7 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
         <p style="margin: 0; font-size: 14px; line-height: 1.5;">ISP throttling causes most IPTV buffering. A VPN encrypts your traffic so your ISP can&apos;t throttle streams as easily. Read the full guide at <a href="https://streamstickpro.com/vpn" style="color: #0891b2;">streamstickpro.com/vpn</a> — special offer: <a href="${surf}" style="color: #0891b2; font-weight: bold;">Get Surfshark VPN</a>.</p>
       </div>
       
-      <p>You will receive your login credentials in a separate email within the next 5 minutes.</p>
+      <p>You will receive a separate account email after payment is confirmed and provisioning is completed.</p>
       
       <p>If you have any questions, please don't hesitate to reach out.</p>
       
@@ -71,8 +71,20 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
 }
 
 export async function sendCredentialsEmail(order: Order, env: Env, storage: Storage): Promise<void> {
-  if (order.isRenewal) {
+  if (order.provisioningBranch === 'existing_not_found_manual_review') {
+    console.log(`[EMAIL] Skipping credentials email for ${order.id}; manual review required`);
+    return;
+  }
+
+  const shouldSendRenewalVerificationEmail =
+    order.isRenewal &&
+    !!order.existingUsername &&
+    !!order.provisioningBranch &&
+    order.provisioningBranch.startsWith('existing_customer_');
+
+  if (shouldSendRenewalVerificationEmail) {
     await sendRenewalConfirmationEmail(order, env);
+    await storage.updateOrder(order.id, { credentialsSent: true });
     return;
   }
 
@@ -190,35 +202,40 @@ export async function sendRenewalConfirmationEmail(order: Order, env: Env): Prom
   const fromEmail = env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
   const priceFormatted = (order.amount / 100).toFixed(2);
   const existingUsername = order.existingUsername || 'your current username';
+  const confirmedPassword = order.generatedPassword || null;
+  const passwordLine = confirmedPassword
+    ? `<p><strong>Password:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${confirmedPassword}</span></p>`
+    : `<p><strong>Password:</strong> Continue using your current password unless support tells you otherwise.</p>`;
 
   const emailHtml = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h1 style="color: #1a1a1a;">🎉 Your Subscription Has Been Extended!</h1>
+      <h1 style="color: #1a1a1a;">Your Existing Account Was Verified</h1>
       
       <p>Hi ${order.customerName || 'Valued Customer'},</p>
       
-      <p>Great news! Your IPTV subscription has been successfully renewed.</p>
+      <p>Your payment for ${order.realProductName} was confirmed and your existing account details have been verified for continued use.</p>
       
       <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 25px; border-radius: 12px; margin: 20px 0; color: white;">
-        <h2 style="margin-top: 0; color: white;">Renewal Confirmed</h2>
+        <h2 style="margin-top: 0; color: white;">Verified Existing Account</h2>
         <p style="font-size: 16px;"><strong>Product:</strong> ${order.realProductName}</p>
         <p style="font-size: 16px;"><strong>Amount Paid:</strong> $${priceFormatted}</p>
-        <p style="font-size: 16px;"><strong>Your Username:</strong> ${existingUsername}</p>
+        <p style="font-size: 16px;"><strong>Username:</strong> ${existingUsername}</p>
       </div>
       
-      <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0284c7;">
-        <h3 style="margin-top: 0; color: #0369a1;">Your Existing Credentials Still Work!</h3>
-        <p>You can continue using your current login credentials. No changes needed!</p>
-        <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #0369a1;">${IPTV_PORTAL_URL}</a></p>
-        <p><strong>Username:</strong> ${existingUsername}</p>
-        <p><strong>Password:</strong> (same as before)</p>
+      <div style="background: #f9fafb; border: 2px solid #f97316; border-radius: 8px; padding: 20px; margin: 20px 0;">
+        <h2 style="margin-top: 0; color: #f97316;">Your Account Details</h2>
+        <div style="margin: 15px 0;">
+          <p><strong>Portal URL:</strong> <a href="${IPTV_PORTAL_URL}" style="color: #2563eb; text-decoration: none; font-weight: bold;">${IPTV_PORTAL_URL}</a></p>
+          <p><strong>Username:</strong> <span style="font-family: monospace; font-size: 16px; color: #f97316; font-weight: bold;">${existingUsername}</span></p>
+          ${passwordLine}
+        </div>
       </div>
       
-      <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
-        <strong>✅ What's Next:</strong> Your subscription is now extended. Just keep streaming - no action required!
+      <div style="background: #ecfeff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0; border-radius: 8px;">
+        <strong>Important:</strong> This follow-up confirms the account result for your paid order. Keep using the verified username above when logging into your IPTV apps.
       </div>
       
-      <p>Thank you for being a loyal customer! If you have any questions, please don't hesitate to reach out.</p>
+      <p>Thank you for your order. If you have any questions, please don't hesitate to reach out.</p>
       
       <p>Best regards,<br>StreamStickPro Team</p>
     </div>
@@ -229,7 +246,7 @@ export async function sendRenewalConfirmationEmail(order: Order, env: Env): Prom
     result = await sendEmail({
       to: order.customerEmail,
       from: fromEmail,
-      subject: `Subscription Renewed! - ${order.realProductName}`,
+      subject: `Your Account Details - ${order.realProductName}`,
       html: emailHtml,
     }, env);
   } catch (error: any) {

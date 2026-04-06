@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { getStorage } from '../helpers';
+import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from '../helpers';
 import { sendEmail } from '../email-providers';
 import type { Env } from '../index';
 
@@ -19,7 +19,7 @@ export function createReminderRoutes() {
     try {
       const storage = getStorage(c.env);
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.VITE_SUPABASE_ANON_KEY);
+      const supabase = createClient(getSupabaseUrl(c.env), getSupabaseServiceKey(c.env));
       
       const now = new Date();
       const results = {

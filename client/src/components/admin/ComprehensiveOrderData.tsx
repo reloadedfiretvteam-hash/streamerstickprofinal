@@ -38,7 +38,10 @@ interface OrderData {
   status: string;
   createdAt: string;
   credentialsSent: boolean;
+  existingUsername?: string | null;
   generatedUsername: string | null;
+  provisioningBranch?: string | null;
+  countryPreference?: string | null;
   isRenewal: boolean;
   expiresAt?: string | null;
 }
@@ -128,6 +131,35 @@ export default function ComprehensiveOrderData() {
       style: 'currency',
       currency: 'USD',
     }).format(amount);
+  };
+
+  const getProvisioningLabel = (branch?: string | null) => {
+    switch (branch) {
+      case 'existing_customer_pending_verification':
+        return 'Existing user pending verification';
+      case 'existing_customer_panel_extended':
+        return 'Existing user extended in panel';
+      case 'existing_customer_local_match':
+        return 'Existing user verified';
+      case 'existing_not_found_fallback_pending':
+        return 'Fallback new account pending';
+      case 'existing_not_found_fallback_panel_new':
+        return 'Fallback new account created in panel';
+      case 'existing_not_found_fallback_new':
+        return 'Fallback new account created';
+      case 'existing_not_found_manual_review':
+        return 'Manual review required';
+      case 'new_customer_pending':
+        return 'New customer pending';
+      case 'new_customer_panel_created':
+        return 'New customer created in panel';
+      case 'new_customer_manual_review':
+        return 'New customer manual review';
+      case 'new_customer_created':
+        return 'New customer created';
+      default:
+        return null;
+    }
   };
 
   if (loading) {
@@ -320,6 +352,21 @@ export default function ComprehensiveOrderData() {
                           {order.generatedUsername && (
                             <div className="text-xs text-muted-foreground mt-1">
                               User: {order.generatedUsername}
+                            </div>
+                          )}
+                          {!order.generatedUsername && order.existingUsername && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Existing user: {order.existingUsername}
+                            </div>
+                          )}
+                          {getProvisioningLabel(order.provisioningBranch) && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Branch: {getProvisioningLabel(order.provisioningBranch)}
+                            </div>
+                          )}
+                          {order.countryPreference && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Countries: {order.countryPreference}
                             </div>
                           )}
                         </div>

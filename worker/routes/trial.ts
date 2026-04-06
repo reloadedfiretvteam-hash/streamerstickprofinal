@@ -1,15 +1,13 @@
 import { Hono } from 'hono';
 import type { Env } from '../index';
 import { sendEmail } from '../email-providers';
-import {
-  createIptvPanelTrial,
-  iptvPanelTrialConfigured,
-  m3uPlusPlaylistUrl,
-} from '../lib/iptv-panel-trial';
+import { isLikelyPanelUsernameConflict, verifyIptvTrialCredentials } from '../lib/iptv-panel-trial';
+import { getPanelAdapter } from '../lib/panel-adapter';
 
 const IPTV_PORTAL_DEFAULT = 'http://ky-tv.cc';
 const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
 const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
+const PANEL_TRIAL_ATTEMPTS = 4;
 
 export function createTrialRoutes() {
   const app = new Hono<{ Bindings: Env }>();
@@ -36,12 +34,24 @@ export function createTrialRoutes() {
         return c.json({ error: "Please enter a valid email address" }, 400);
       }
 
-      if (isExistingUser && !existingUsername) {
-        return c.json({ error: "Please enter your existing username" }, 400);
+      if (isExistingUser) {
+        if (!existingUsername) {
+          return c.json({ error: "Please enter your existing username" }, 400);
+        }
+        return c.json({
+          error: "Existing-user trial extensions are not enabled yet. Please request a new trial or contact support.",
+        }, 409);
       }
 
       const fromEmail = c.env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
       const from = fromEmail.includes('<') ? fromEmail : `StreamStickPro <${fromEmail}>`;
+      const panelAdapter = getPanelAdapter(c.env);
+
+      if (!isExistingUser && !panelAdapter.isTrialConfigured()) {
+        return c.json({
+          error: 'Free trial setup is temporarily unavailable. Please contact support.',
+        }, 503);
+      }
 
       const letters = 'abcdefghkmnpqrstuvwxyz';
       const upperLetters = 'ABCDEFGHJKMNPQRSTUVWXYZ';
@@ -54,12 +64,18 @@ export function createTrialRoutes() {
         return charset[(charCode + index) % charset.length];
       };
       
-      const nameClean = name.replace(/[^a-zA-Z]/g, '').toLowerCase().substring(0, 3);
-      let username = nameClean.length >= 2 ? nameClean : 'usr';
-      for (let i = 0; username.length < 8; i++) {
-        username += generateChar(i, numbers + letters);
-      }
-      username = username.substring(0, 10);
+      const buildUsername = (attempt: number): string => {
+        const nameClean = name.replace(/[^a-zA-Z]/g, '').toLowerCase().substring(0, 3);
+        let value = nameClean.length >= 2 ? nameClean : 'usr';
+        const attemptSalt = attempt === 0 ? '' : String((attempt + 7) % 10);
+        if (attemptSalt) value += attemptSalt;
+        for (let i = 0; value.length < 8; i++) {
+          value += generateChar(i + attempt * 3, numbers + letters);
+        }
+        return value.substring(0, 10);
+      };
+
+      let username = buildUsername(0);
       
       let password = '';
       password += generateChar(0, upperLetters);
@@ -77,43 +93,59 @@ export function createTrialRoutes() {
 
       const portalUrl = (c.env.IPTV_PORTAL_URL || IPTV_PORTAL_DEFAULT).replace(/\/+$/, '');
       let panelProvisioned = false;
-      let m3uPlaylistUrl: string | null = null;
+      let panelVerified = false;
+      let panelVerificationStatus = '';
 
-      if (!isExistingUser && iptvPanelTrialConfigured(c.env)) {
-        const panelResult = await createIptvPanelTrial(c.env, {
-          username: trialCredentials.username,
-          password: trialCredentials.password,
-        });
-        if (!panelResult.ok) {
-          console.error('[free-trial] panel trial failed:', panelResult.message);
+      if (!isExistingUser) {
+        let lastPanelError = 'Unable to confirm trial creation';
+        for (let attempt = 0; attempt < PANEL_TRIAL_ATTEMPTS; attempt++) {
+          trialCredentials.username = buildUsername(attempt);
+          const panelResult = await panelAdapter.createTrial({
+            username: trialCredentials.username,
+            password: trialCredentials.password,
+          });
+          if (panelResult.ok) {
+            const verification = await verifyIptvTrialCredentials(c.env, {
+              username: trialCredentials.username,
+              password: trialCredentials.password,
+            });
+            if (verification.ok) {
+              panelProvisioned = true;
+              panelVerified = true;
+              panelVerificationStatus = verification.status || '';
+              break;
+            }
+            lastPanelError = verification.message;
+            if (!isLikelyPanelUsernameConflict(verification.message)) {
+              break;
+            }
+            continue;
+          }
+          lastPanelError = panelResult.message;
+          if (!isLikelyPanelUsernameConflict(panelResult.message)) {
+            break;
+          }
+        }
+        if (!panelProvisioned) {
+          console.error('[free-trial] panel trial failed:', lastPanelError);
           return c.json(
             {
               error:
-                'We could not activate your trial right now. Please try again in a few minutes or contact support.',
+                'We could not activate your free trial right now. Please try again in a few minutes or contact support.',
             },
             502,
           );
         }
-        panelProvisioned = true;
-        m3uPlaylistUrl = m3uPlusPlaylistUrl(c.env, trialCredentials.username, trialCredentials.password);
       }
 
-      const activationNoticeHtml = panelProvisioned
-        ? `<div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
-              <strong>Ready to use:</strong> Your trial was created on our service. You can sign in at the portal URL below right away using the username and password in this email.
+      const activationNoticeHtml = isExistingUser
+        ? `<div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
+              <strong>Next step:</strong> Use your existing account details in your IPTV app. If you need help confirming that your account was updated, contact support before trying multiple logins.
             </div>`
-        : `<div style="background: #fff7ed; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ea580c;">
-              <strong>⏳ Activation Time:</strong> Please allow <strong>1–3 hours</strong> for your subscription to be fully active. During business hours (5 AM – 11 PM EST), activation is usually completed within <strong>15 minutes</strong>.
+        : `<div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
+              <strong>Ready to use:</strong> Your trial was created and verified on our service. Use the Xtream Codes style login details below in IPTV Smarters, TiviMate, or a compatible app.
+              ${panelVerificationStatus ? `<div style="margin-top:8px;font-size:13px;color:#166534;"><strong>Panel status:</strong> ${panelVerificationStatus}</div>` : ''}
             </div>`;
-
-      const m3uBlockHtml =
-        m3uPlaylistUrl && !isExistingUser
-          ? `<div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 15px; margin: 20px 0;">
-              <p style="margin: 0 0 10px 0;"><strong>M3U Plus (one-line playlist):</strong></p>
-              <p style="margin: 0; word-break: break-all; font-family: monospace; font-size: 12px;"><a href="${m3uPlaylistUrl}" style="color: #15803d;">${m3uPlaylistUrl}</a></p>
-              <p style="margin: 10px 0 0 0; font-size: 14px;">Paste this into compatible players, or use server URL plus username and password above.</p>
-            </div>`
-          : '';
 
       // Customer email (REQUIRED). Use unified sender (Resend → MailChannels fallback).
       const customerSubject = 'Your FREE 36-Hour IPTV Trial Credentials - StreamStickPro';
@@ -123,7 +155,7 @@ export function createTrialRoutes() {
             
             <p>Hi ${name},</p>
             
-            <p>Thank you for trying StreamStickPro! ${isExistingUser ? 'Your existing account has been extended for a 36-hour trial.' : 'Here are your <strong>36-hour free trial</strong> credentials:'}</p>
+            <p>Thank you for trying StreamStickPro! ${isExistingUser ? 'We received your existing username and emailed the login details we have on file for your setup flow.' : 'Here are your <strong>36-hour free trial</strong> credentials:'}</p>
             
             <div style="background: #f9fafb; border: 2px solid #9333ea; border-radius: 8px; padding: 20px; margin: 20px 0;">
               <h2 style="margin-top: 0; color: #9333ea;">Your Trial Credentials</h2>
@@ -138,10 +170,8 @@ export function createTrialRoutes() {
             <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
               <p style="margin: 0 0 10px 0;"><strong>Service Portal URL:</strong></p>
               <p style="margin: 0;"><a href="${portalUrl}" style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 18px;" target="_blank">${portalUrl}</a></p>
-              <p style="margin: 10px 0 0 0; font-size: 14px;">Use the credentials above to log in to your service portal.</p>
+              <p style="margin: 10px 0 0 0; font-size: 14px;">Use this as your server/portal URL when the app asks for Xtream Codes or Xtream login details.</p>
             </div>
-
-            ${m3uBlockHtml}
 
             <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
               <p style="margin: 0 0 10px 0;"><strong>📺 Setup Tutorial Video:</strong></p>
@@ -152,10 +182,11 @@ export function createTrialRoutes() {
             <div style="background: #f3e8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="color: #7c3aed; margin-top: 0;">Quick Setup Steps:</h3>
               <ol style="color: #4c1d95;">
-                <li>Download IPTV Smarters or TiviMate app on your device</li>
-                <li>Enter the portal URL: ${portalUrl}</li>
-                <li>Enter your username and password above</li>
-                <li>Enjoy 18,000+ live channels for FREE!</li>
+                <li>Open IPTV Smarters, TiviMate, or another Xtream Codes compatible app</li>
+                <li>Choose the login option for Xtream Codes API / Xtream login</li>
+                <li>Server URL: ${portalUrl}</li>
+                <li>Username: ${trialCredentials.username}</li>
+                <li>Password: ${!isExistingUser ? trialCredentials.password : 'your existing password'}</li>
               </ol>
             </div>
             
@@ -252,7 +283,6 @@ export function createTrialRoutes() {
               ${panelProvisioned ? '<p><strong>Panel:</strong> Trial user was created via API (live line).</p>' : ''}
               <p><strong>Username:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${trialCredentials.username}</code></p>
               ${!isExistingUser ? `<p><strong>Password:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${trialCredentials.password}</code></p>` : '<p>(Using existing password)</p>'}
-              ${m3uPlaylistUrl && !isExistingUser ? `<p><strong>M3U Plus:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px; word-break: break-all;">${m3uPlaylistUrl}</code></p>` : ''}
               <p><strong>Service Portal URL:</strong> <a href="${portalUrl}" style="color: #15803d;">${portalUrl}</a></p>
               <p><strong>Setup Video:</strong> <a href="${SETUP_VIDEO_URL}" style="color: #15803d;">${SETUP_VIDEO_URL}</a></p>
               <p><strong>Expires:</strong> 36 hours from signup</p>
@@ -298,7 +328,13 @@ export function createTrialRoutes() {
         // Don't fail the request if campaign creation fails
       }
 
-      return c.json({ success: true, message: "Trial credentials sent", provider: customerResult.provider, providerId: customerResult.providerId });
+      return c.json({
+        success: true,
+        message: "Trial credentials sent",
+        provider: customerResult.provider,
+        providerId: customerResult.providerId,
+        panelProvisioned,
+      });
     } catch (error: any) {
       console.error("Error processing free trial:", error?.message || error);
       return c.json({ error: "Failed to process trial request. Please try again.", details: error?.message }, 500);

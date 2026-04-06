@@ -1,10 +1,11 @@
 import { Hono } from 'hono';
 import Stripe from 'stripe';
-import { getStorage } from '../helpers';
+import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from '../helpers';
 import { sendCredentialsEmail, sendOrderConfirmation } from '../email';
 import { sendEmail } from '../email-providers';
 import { createCustomerSchema, updateCustomerSchema, effectiveRealProductChargeCents } from '../../shared/schema';
 import type { Env } from '../index';
+import { ensureProvisioningJob, orderNeedsProvisioning, processProvisioningJobByOrderId } from '../lib/provisioning';
 
 const WEBSITE_REMINDER_HTML = (name: string) => `
 <!DOCTYPE html>
@@ -33,8 +34,6 @@ const WEBSITE_REMINDER_HTML = (name: string) => `
   <p style="text-align: center; margin-top: 16px; color: #999; font-size: 12px;">You received this because you're a customer or signed up for a trial at StreamStickPro.</p>
 </body>
 </html>`;
-
-const SUPABASE_URL_FALLBACK = 'https://emlqlmfzqsnqokrqvmcm.supabase.co';
 
 function normalizeRealProductCategory(category: unknown): string | null {
   const value = String(category ?? '').trim().toLowerCase();
@@ -223,12 +222,7 @@ function classifyOrderTypeForEmailLog(o: {
 async function buildMarketingContacts(env: Env, includeTestData: boolean): Promise<{ contacts: MarketingContact[]; excludedTestCount: number }> {
   const storage = getStorage(env);
   const { createClient } = await import('@supabase/supabase-js');
-  const supabaseUrl = env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK;
-  const supabaseKey = env.SUPABASE_SERVICE_KEY || env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLL_KEY || env.VITE_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Marketing unavailable: missing Supabase configuration');
-  }
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  const supabase = createClient(getSupabaseUrl(env), getSupabaseServiceKey(env));
 
   const contactMap = new Map<string, MarketingAccumulator>();
   let excludedTestCount = 0;
@@ -594,7 +588,12 @@ export function createAdminRoutes() {
         return c.json({ error: "Order not found" }, 404);
       }
 
-      await sendCredentialsEmail(order, c.env, storage);
+      if (orderNeedsProvisioning(order)) {
+        await ensureProvisioningJob(storage, order, { source: 'admin.resend-credentials' });
+        await processProvisioningJobByOrderId(c.env, order.id);
+      } else {
+        await sendCredentialsEmail(order, c.env, storage);
+      }
 
       return c.json({ success: true, message: "Credentials email sent" });
     } catch (error: any) {
@@ -621,7 +620,12 @@ export function createAdminRoutes() {
       }
 
       await sendOrderConfirmation(order, c.env);
-      await sendCredentialsEmail(order, c.env, storage);
+      if (orderNeedsProvisioning(order)) {
+        await ensureProvisioningJob(storage, order, { source: 'admin.resend-email' });
+        await processProvisioningJobByOrderId(c.env, order.id);
+      } else {
+        await sendCredentialsEmail(order, c.env, storage);
+      }
 
       return c.json({ success: true, message: "Confirmation email resent successfully" });
     } catch (error: any) {
@@ -1246,8 +1250,8 @@ export function createAdminRoutes() {
       const { createClient } = await import('@supabase/supabase-js');
       const includeTestData = c.req.query('includeTestData') === 'true';
       const supabase = createClient(
-        c.env.VITE_SUPABASE_URL || SUPABASE_URL_FALLBACK,
-        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY
+        getSupabaseUrl(c.env),
+        getSupabaseServiceKey(c.env)
       );
       
       // Get all paid orders
@@ -1273,7 +1277,10 @@ export function createAdminRoutes() {
         status: order.status,
         createdAt: order.createdAt,
         credentialsSent: order.credentialsSent,
+        existingUsername: order.existingUsername,
         generatedUsername: order.generatedUsername,
+        provisioningBranch: order.provisioningBranch,
+        countryPreference: order.countryPreference,
         isRenewal: order.isRenewal,
       }));
       
@@ -1287,8 +1294,11 @@ export function createAdminRoutes() {
         status: order.payment_status === 'completed' ? 'completed' : 'pending',
         createdAt: order.created_at,
         credentialsSent: !!order.iptv_credentials,
+        existingUsername: null,
         generatedUsername: order.iptv_credentials?.username || null,
         expiresAt: order.iptv_credentials?.expires_at || null,
+        provisioningBranch: null,
+        countryPreference: null,
         isRenewal: false,
       }));
 
@@ -1312,8 +1322,11 @@ export function createAdminRoutes() {
           status: 'completed',
           createdAt: row.created_at,
           credentialsSent: false,
+          existingUsername: null,
           generatedUsername: null,
           expiresAt: null,
+          provisioningBranch: null,
+          countryPreference: null,
           isRenewal: false,
         }));
 
@@ -2369,7 +2382,12 @@ export function createAdminRoutes() {
       const latestOrder = orders.length > 0 ? orders[orders.length - 1] : null;
 
       if (latestOrder) {
-        await sendCredentialsEmail(latestOrder, c.env, storage);
+        if (orderNeedsProvisioning(latestOrder)) {
+          await ensureProvisioningJob(storage, latestOrder, { source: 'admin.resend-welcome' });
+          await processProvisioningJobByOrderId(c.env, latestOrder.id);
+        } else {
+          await sendCredentialsEmail(latestOrder, c.env, storage);
+        }
       } else {
         const syntheticOrder = {
           id: `welcome-${customer.id}`,
@@ -2449,6 +2467,7 @@ export function createAdminRoutes() {
         amount: (o.amount || 0) / 100,
         credentialsSent: !!o.credentialsSent,
         fulfillmentStatus: o.fulfillmentStatus ?? null,
+        provisioningBranch: o.provisioningBranch ?? null,
         createdAt: o.createdAt ? new Date(o.createdAt as Date | string).toISOString() : null,
         source: 'order' as const,
       }));
@@ -2477,6 +2496,7 @@ export function createAdminRoutes() {
             status: o.status,
             credentialsSent: o.credentialsSent,
             generatedUsername: o.generatedUsername,
+            provisioningBranch: o.provisioningBranch ?? null,
           })),
           // Recent failed orders
           recentFailures: failedOrders.slice(0, 10).map(o => ({
@@ -2545,7 +2565,12 @@ export function createAdminRoutes() {
       
       for (const order of paidOrders) {
         try {
-          await sendCredentialsEmail(order, c.env, storage);
+          if (orderNeedsProvisioning(order)) {
+            await ensureProvisioningJob(storage, order, { source: 'admin.fix-missing-credentials' });
+            await processProvisioningJobByOrderId(c.env, order.id);
+          } else {
+            await sendCredentialsEmail(order, c.env, storage);
+          }
           results.push({ orderId: order.id, email: order.customerEmail, success: true });
         } catch (error: any) {
           results.push({ orderId: order.id, email: order.customerEmail, success: false, error: error.message });

@@ -123,6 +123,8 @@ export const orders = pgTable("orders", {
   customerId: text("customer_id"),
   isRenewal: boolean("is_renewal").default(false),
   existingUsername: text("existing_username"),
+  expiredMoreThanOneWeek: boolean("expired_more_than_one_week").default(false),
+  provisioningBranch: text("provisioning_branch"),
   generatedUsername: text("generated_username"),
   generatedPassword: text("generated_password"),
   countryPreference: text("country_preference"),
@@ -144,6 +146,37 @@ export const insertOrderSchema = createInsertSchema(orders).omit({
 
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof orders.$inferSelect;
+
+export const provisioningJobs = pgTable("provisioning_jobs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderId: text("order_id").notNull(),
+  jobType: text("job_type").notNull().default("iptv_order"),
+  status: text("status").notNull().default("pending"),
+  provider: text("provider"),
+  payload: text("payload"),
+  result: text("result"),
+  lastError: text("last_error"),
+  attemptCount: integer("attempt_count").notNull().default(0),
+  nextRunAt: timestamp("next_run_at").defaultNow(),
+  lockedAt: timestamp("locked_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  uniqueIndex("provisioning_jobs_order_idx").on(table.orderId),
+  index("provisioning_jobs_status_idx").on(table.status),
+  index("provisioning_jobs_next_run_idx").on(table.nextRunAt),
+]);
+
+export const insertProvisioningJobSchema = createInsertSchema(provisioningJobs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  attemptCount: true,
+});
+
+export type InsertProvisioningJob = z.infer<typeof insertProvisioningJobSchema>;
+export type ProvisioningJob = typeof provisioningJobs.$inferSelect;
 
 export const realProducts = pgTable("real_products", {
   id: varchar("id").primaryKey(),
@@ -195,6 +228,7 @@ export const checkoutRequestSchema = z.object({
   customerMessage: z.string().optional(),
   isRenewal: z.boolean().optional(),
   existingUsername: z.string().optional(),
+  expiredMoreThanOneWeek: z.boolean().optional(),
   countryPreference: z.string().optional(),
 });
 
@@ -266,9 +300,13 @@ export const updateOrderRequestSchema = z.object({
   customerId: z.string().nullable().optional(),
   isRenewal: z.boolean().optional(),
   existingUsername: z.string().nullable().optional(),
+  expiredMoreThanOneWeek: z.boolean().optional(),
+  provisioningBranch: z.string().nullable().optional(),
   generatedUsername: z.string().nullable().optional(),
   generatedPassword: z.string().nullable().optional(),
   countryPreference: z.string().nullable().optional(),
+  customerMessage: z.string().nullable().optional(),
+  customerPhone: z.string().nullable().optional(),
 });
 
 export type UpdateOrderRequest = z.infer<typeof updateOrderRequestSchema>;
