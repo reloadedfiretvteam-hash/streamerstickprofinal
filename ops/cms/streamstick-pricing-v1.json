@@ -1,0 +1,15 @@
+{
+  "prices": {
+    "shadow": {},
+    "live": {}
+  },
+  "notes": {
+    "purpose": "WordPress-managed Stripe Price ID overrides for checkout.",
+    "instructions": [
+      "Populate only verified Stripe Price IDs in the form price_...",
+      "Use real product IDs as keys.",
+      "Leave maps empty until the corresponding Stripe prices are confirmed.",
+      "The Worker will safely fall back to database-backed shadowPriceId values when these maps are empty."
+    ]
+  }
+}

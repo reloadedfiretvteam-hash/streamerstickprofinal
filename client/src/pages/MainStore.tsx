@@ -200,6 +200,133 @@ const defaultProducts: Product[] = [
   }
 ];
 
+type CmsAccent = "cyan" | "gold" | "violet" | "teal";
+
+interface CmsHeroCta {
+  label?: string;
+  href?: string;
+  accent?: CmsAccent;
+  trackVpn?: boolean;
+}
+
+interface CmsFeatureCard {
+  title?: string;
+  description?: string;
+  bullets?: string[];
+  ctaLabel?: string;
+  ctaHref?: string;
+  accent?: CmsAccent;
+  trackVpn?: boolean;
+}
+
+interface CmsHomePayload {
+  meta?: {
+    title?: string;
+    description?: string;
+    path?: string;
+    keywords?: string;
+  };
+  hero?: {
+    title?: string;
+    subtitle?: string;
+    proofline?: string;
+    backgroundImageUrl?: string;
+    ctas?: CmsHeroCta[];
+  };
+  productCards?: CmsFeatureCard[];
+  advantages?: string[];
+  trustBar?: string;
+}
+
+const defaultHeroCtas: Required<CmsHeroCta>[] = [
+  { label: "START 36HR IPTV TRIAL", href: "/36hr-trial", accent: "cyan", trackVpn: false },
+  { label: "SHOP LOADED FIRESTICKS", href: "/devices", accent: "gold", trackVpn: false },
+  { label: "ONN GOOGLE TV DEVICES", href: "/onn", accent: "violet", trackVpn: false },
+  { label: "GET SURFSHARK VPN", href: "/vpn", accent: "teal", trackVpn: true },
+];
+
+const defaultFeatureCards: Required<CmsFeatureCard>[] = [
+  {
+    title: "IPTV Subscriptions",
+    description: "Get premium IPTV streaming with 18K+ live channels, 100K+ movies & series-on your schedule.",
+    bullets: ["All-in-one app login", "Multi-device support", "36hr risk-free trial"],
+    ctaLabel: "START 36HR IPTV TRIAL",
+    ctaHref: "/36hr-trial",
+    accent: "cyan",
+    trackVpn: false,
+  },
+  {
+    title: "Loaded Firesticks",
+    description: "Firestick 4K ships fully loaded and ready-to-use with 1-year Reloaded Fire TV subscription included.",
+    bullets: ["Pre-installed apps", "Zero setup required", "Perfect for beginners"],
+    ctaLabel: "SHOP LOADED FIRESTICKS",
+    ctaHref: "/devices",
+    accent: "gold",
+    trackVpn: false,
+  },
+  {
+    title: "Onn Google TV Devices",
+    description: "Onn Google TV devices pre-configured for streaming. 1-year Reloaded Fire TV service included.",
+    bullets: ["Walmart Onn 4K ready", "Easy plug & play", "Budget streaming power"],
+    ctaLabel: "ONN GOOGLE TV DEVICES",
+    ctaHref: "/onn",
+    accent: "violet",
+    trackVpn: false,
+  },
+  {
+    title: "Surfshark VPN Protection",
+    description: "Essential VPN companion stops ISP throttling, fixes buffering, protects privacy.",
+    bullets: ["Hides IPTV from ISP", "Unthrottles 4K streams", "Encrypts all traffic", "Surfshark: Unlimited devices"],
+    ctaLabel: "GET SURFSHARK VPN",
+    ctaHref: "/vpn",
+    accent: "teal",
+    trackVpn: true,
+  },
+];
+
+const defaultAdvantages = [
+  "36-hour full-access trial-no card required to start",
+  "Device bundles ship with 1 year of Reloaded Fire TV",
+  "Fire TV, ONN Google TV, Roku & smart TV friendly workflows",
+  "Optional VPN path for ISP throttling & privacy on busy networks",
+];
+
+const defaultTrustBar = "2,700+ customers · 99.9% uptime · SSL-secured checkout · 18K+ channels";
+
+const heroCtaClasses: Record<CmsAccent, string> = {
+  cyan: "flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-[#0A0A0F] bg-[#00D4FF] hover:bg-[#33ddff] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-[#00D4FF]/50 cursor-pointer transition-transform hover:scale-[1.02]",
+  gold: "flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-[#0A0A0F] bg-[#FAD02C] hover:bg-[#fce35c] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-[#FAD02C]/40 cursor-pointer transition-transform hover:scale-[1.02]",
+  violet: "flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-white bg-[#7C3AED] hover:bg-[#8b4ff5] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-[#7C3AED]/50 cursor-pointer transition-transform hover:scale-[1.02]",
+  teal: "flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-[#0A0A0F] bg-[#0DD9D2] ring-2 ring-[#0DD9D2] ring-offset-2 ring-offset-[#0A0A0F] hover:bg-[#2ee8e0] shadow-[0_20px_60px_rgba(13,217,210,0.25)] cursor-pointer transition-transform hover:scale-[1.02]",
+};
+
+const featureCardThemes: Record<CmsAccent, { wrapper: string; title: string; check: string; button: string }> = {
+  cyan: {
+    wrapper: "rounded-2xl p-8 border border-[#00D4FF]/35 bg-gradient-to-br from-[#00D4FF]/10 to-transparent shadow-[0_20px_60px_rgba(0,0,0,0.5)] flex flex-col",
+    title: "text-2xl font-black text-[#00D4FF] mb-3",
+    check: "w-4 h-4 text-[#00D4FF] shrink-0 mt-0.5",
+    button: "inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#00D4FF] text-[#0A0A0F] font-black hover:bg-[#33ddff] cursor-pointer",
+  },
+  gold: {
+    wrapper: "rounded-2xl p-8 border border-[#FAD02C]/35 bg-gradient-to-br from-[#FAD02C]/10 to-transparent shadow-[0_20px_60px_rgba(0,0,0,0.5)] flex flex-col",
+    title: "text-2xl font-black text-[#FAD02C] mb-3",
+    check: "w-4 h-4 text-[#FAD02C] shrink-0 mt-0.5",
+    button: "inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#FAD02C] text-[#0A0A0F] font-black hover:bg-[#fce35c] cursor-pointer",
+  },
+  violet: {
+    wrapper: "rounded-2xl p-8 border border-[#7C3AED]/35 bg-gradient-to-br from-[#7C3AED]/12 to-transparent shadow-[0_20px_60px_rgba(0,0,0,0.5)] flex flex-col",
+    title: "text-2xl font-black text-[#7C3AED] mb-3",
+    check: "w-4 h-4 text-[#7C3AED] shrink-0 mt-0.5",
+    button: "inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#7C3AED] text-white font-black hover:bg-[#8b4ff5] cursor-pointer",
+  },
+  teal: {
+    wrapper: "rounded-2xl p-8 border-2 border-[#0DD9D2]/50 bg-gradient-to-br from-[#0DD9D2]/12 to-transparent shadow-[0_20px_60px_rgba(13,217,210,0.12)] flex flex-col ring-1 ring-[#0DD9D2]/20",
+    title: "text-2xl font-black text-[#0DD9D2] mb-3",
+    check: "w-4 h-4 text-[#0DD9D2] shrink-0 mt-0.5",
+    button: "inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#0DD9D2] text-[#0A0A0F] font-black hover:bg-[#2ee8e0] cursor-pointer",
+  },
+};
+
 export default function MainStore() {
   const [, setLocation] = useLocation();
   const { addItem, addItemWithQuantity, items, openCart } = useCart();
@@ -216,12 +343,26 @@ export default function MainStore() {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [cmsHome, setCmsHome] = useState<CmsHomePayload | null>(null);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
   const shopRef = useRef<HTMLDivElement>(null);
   const isAboutInView = useInView(aboutRef, { once: true, margin: "-100px" });
   const isShopInView = useInView(shopRef, { once: true, margin: "-100px" });
+  const heroContent = cmsHome?.hero;
+  const heroTitle = heroContent?.title || "Premium IPTV & preconfigured streaming devices";
+  const heroSubtitle = heroContent?.subtitle || "36-hour trial · 18K+ live channels · guided setup in minutes";
+  const heroProofline = heroContent?.proofline || "2,700+ customers · 99.9% uptime · SSL-secured checkout";
+  const heroBackgroundImage = heroContent?.backgroundImageUrl || heroImg;
+  const heroCtas = ((heroContent?.ctas?.filter((cta) => cta?.label && cta?.href).length || 0) > 0
+    ? heroContent?.ctas?.filter((cta) => cta?.label && cta?.href)
+    : defaultHeroCtas) as CmsHeroCta[];
+  const featureCards = ((cmsHome?.productCards?.filter((card) => card?.title && card?.ctaLabel && card?.ctaHref).length || 0) > 0
+    ? cmsHome?.productCards?.filter((card) => card?.title && card?.ctaLabel && card?.ctaHref)
+    : defaultFeatureCards) as CmsFeatureCard[];
+  const advantageLines = (cmsHome?.advantages?.filter(Boolean).length || 0) > 0 ? cmsHome!.advantages!.filter(Boolean) : defaultAdvantages;
+  const trustBarText = cmsHome?.trustBar || defaultTrustBar;
 
   const firestickProductIdKey = useMemo(
     () =>
@@ -339,8 +480,34 @@ export default function MainStore() {
       keywords:
         "IPTV subscription, loaded Firestick, Onn device, Surfshark VPN IPTV, ISP throttling VPN",
     });
+    loadCmsHome();
     loadProducts();
   }, []);
+
+  const loadCmsHome = async () => {
+    try {
+      const response = await apiCall('/api/cms/home');
+      if (!response.ok) return;
+      const result = await response.json();
+      const data = result?.data;
+      if (!data || typeof data !== 'object') return;
+      setCmsHome(data as CmsHomePayload);
+      if (data.meta) {
+        setPageMeta({
+          title: data.meta.title || "IPTV Subscriptions Loaded Firesticks Onn VPN | StreamStickPro",
+          description:
+            data.meta.description ||
+            "StreamStickPro: IPTV subscriptions, loaded Firesticks, ONN Google TV, and Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, SSL-secured checkout, 24/7 support.",
+          path: data.meta.path || "/",
+          keywords:
+            data.meta.keywords ||
+            "IPTV subscription, loaded Firestick, Onn device, Surfshark VPN IPTV, ISP throttling VPN",
+        });
+      }
+    } catch (error) {
+      console.warn('Using default homepage CMS content:', error);
+    }
+  };
 
   const loadProducts = async () => {
     try {
@@ -640,7 +807,7 @@ export default function MainStore() {
       >
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden>
           <img
-            src={heroImg}
+            src={heroBackgroundImage}
             alt=""
             width={1920}
             height={1080}
@@ -665,7 +832,7 @@ export default function MainStore() {
               transition={{ duration: 0.5 }}
               className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-black leading-[1.12] sm:leading-[1.08] tracking-tight text-white mb-4 sm:mb-6 drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)]"
             >
-              Premium IPTV &amp; preconfigured streaming devices
+              {heroTitle}
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 12 }}
@@ -673,7 +840,7 @@ export default function MainStore() {
               transition={{ duration: 0.45, delay: 0.05 }}
               className="text-base sm:text-lg md:text-xl text-[#E4E6EB] font-semibold mb-3 sm:mb-4 max-w-3xl mx-auto leading-relaxed px-1"
             >
-              36-hour trial · 18K+ live channels · guided setup in minutes
+              {heroSubtitle}
             </motion.p>
             <motion.p
               initial={{ opacity: 0, y: 12 }}
@@ -681,7 +848,7 @@ export default function MainStore() {
               transition={{ duration: 0.45, delay: 0.1 }}
               className="text-sm sm:text-base text-[#FAD02C]/95 font-medium mb-9 md:mb-11 leading-relaxed"
             >
-              2,700+ customers · 99.9% uptime · SSL-secured checkout
+              {heroProofline}
             </motion.p>
 
             <motion.div
@@ -690,29 +857,22 @@ export default function MainStore() {
               transition={{ duration: 0.5, delay: 0.12 }}
               className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-3xl mx-auto mb-10"
             >
-              <Link href="/36hr-trial">
-                <span className="flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-[#0A0A0F] bg-[#00D4FF] hover:bg-[#33ddff] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-[#00D4FF]/50 cursor-pointer transition-transform hover:scale-[1.02]">
-                  START 36HR IPTV TRIAL
-                </span>
-              </Link>
-              <Link href="/devices">
-                <span className="flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-[#0A0A0F] bg-[#FAD02C] hover:bg-[#fce35c] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-[#FAD02C]/40 cursor-pointer transition-transform hover:scale-[1.02]">
-                  SHOP LOADED FIRESTICKS
-                </span>
-              </Link>
-              <Link href="/onn">
-                <span className="flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-white bg-[#7C3AED] hover:bg-[#8b4ff5] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-[#7C3AED]/50 cursor-pointer transition-transform hover:scale-[1.02]">
-                  ONN GOOGLE TV DEVICES
-                </span>
-              </Link>
-              <Link href="/vpn">
-                <span
-                  className="flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-[#0A0A0F] bg-[#0DD9D2] ring-2 ring-[#0DD9D2] ring-offset-2 ring-offset-[#0A0A0F] hover:bg-[#2ee8e0] shadow-[0_20px_60px_rgba(13,217,210,0.25)] cursor-pointer transition-transform hover:scale-[1.02]"
-                  onClick={() => trackVpnClick({ source: "/", placement: "hero_vpn_cta" })}
-                >
-                  GET SURFSHARK VPN
-                </span>
-              </Link>
+              {heroCtas.map((cta, index) => {
+                const accent = cta.accent || defaultHeroCtas[index]?.accent || "cyan";
+                const placement = cta.trackVpn ? "hero_vpn_cta" : undefined;
+                return (
+                  <Link key={`${cta.label}-${cta.href}-${index}`} href={cta.href || "/"}>
+                    <span
+                      className={heroCtaClasses[accent]}
+                      onClick={() => {
+                        if (cta.trackVpn) trackVpnClick({ source: "/", placement: placement || "hero_vpn_cta" });
+                      }}
+                    >
+                      {cta.label}
+                    </span>
+                  </Link>
+                );
+              })}
             </motion.div>
 
             <motion.div
@@ -736,89 +896,37 @@ export default function MainStore() {
       <section className="py-16 md:py-24 lg:py-32 border-t border-white/5 bg-[#0A0A0F]/60">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="grid md:grid-cols-2 gap-8 md:gap-10">
-            {/* Card 1 IPTV — cyan */}
-            <div className="rounded-2xl p-8 border border-[#00D4FF]/35 bg-gradient-to-br from-[#00D4FF]/10 to-transparent shadow-[0_20px_60px_rgba(0,0,0,0.5)] flex flex-col">
-              <h2 className="text-2xl font-black text-[#00D4FF] mb-3">IPTV Subscriptions</h2>
-              <p className="text-[#B0B3B8] leading-relaxed mb-6 flex-1 text-[15px] sm:text-base">
-                Get premium IPTV streaming with 18K+ live channels, 100K+ movies &amp; series—on your schedule.
-              </p>
-              <ul className="space-y-2 text-[#FFFFFF] text-sm mb-8">
-                {["All-in-one app login", "Multi-device support", "36hr risk-free trial"].map((t) => (
-                  <li key={t} className="flex gap-2 items-start">
-                    <Check className="w-4 h-4 text-[#00D4FF] shrink-0 mt-0.5" aria-hidden />
-                    <span>{t}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/36hr-trial">
-                <span className="inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#00D4FF] text-[#0A0A0F] font-black hover:bg-[#33ddff] cursor-pointer">
-                  START 36HR IPTV TRIAL
-                </span>
-              </Link>
-            </div>
-            {/* Card 2 Firesticks — gold */}
-            <div className="rounded-2xl p-8 border border-[#FAD02C]/35 bg-gradient-to-br from-[#FAD02C]/10 to-transparent shadow-[0_20px_60px_rgba(0,0,0,0.5)] flex flex-col">
-              <h2 className="text-2xl font-black text-[#FAD02C] mb-3">Loaded Firesticks</h2>
-              <p className="text-[#B0B3B8] leading-relaxed mb-6 flex-1">
-                Firestick 4K ships fully loaded and ready-to-use with 1-year Reloaded Fire TV subscription included.
-              </p>
-              <ul className="space-y-2 text-[#FFFFFF] text-sm mb-8">
-                {["Pre-installed apps", "Zero setup required", "Perfect for beginners"].map((t) => (
-                  <li key={t} className="flex gap-2 items-start">
-                    <Check className="w-4 h-4 text-[#FAD02C] shrink-0 mt-0.5" aria-hidden />
-                    <span>{t}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/devices">
-                <span className="inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#FAD02C] text-[#0A0A0F] font-black hover:bg-[#fce35c] cursor-pointer">
-                  SHOP LOADED FIRESTICKS
-                </span>
-              </Link>
-            </div>
-            {/* Card 3 ONN — violet */}
-            <div className="rounded-2xl p-8 border border-[#7C3AED]/35 bg-gradient-to-br from-[#7C3AED]/12 to-transparent shadow-[0_20px_60px_rgba(0,0,0,0.5)] flex flex-col">
-              <h2 className="text-2xl font-black text-[#7C3AED] mb-3">Onn Google TV Devices</h2>
-              <p className="text-[#B0B3B8] leading-relaxed mb-6 flex-1">
-                Onn Google TV devices pre-configured for streaming. 1-year Reloaded Fire TV service included.
-              </p>
-              <ul className="space-y-2 text-[#FFFFFF] text-sm mb-8">
-                {["Walmart Onn 4K ready", "Easy plug & play", "Budget streaming power"].map((t) => (
-                  <li key={t} className="flex gap-2 items-start">
-                    <Check className="w-4 h-4 text-[#7C3AED] shrink-0 mt-0.5" aria-hidden />
-                    <span>{t}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/onn">
-                <span className="inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#7C3AED] text-white font-black hover:bg-[#8b4ff5] cursor-pointer">
-                  ONN GOOGLE TV DEVICES
-                </span>
-              </Link>
-            </div>
-            {/* Card 4 VPN — teal */}
-            <div className="rounded-2xl p-8 border-2 border-[#0DD9D2]/50 bg-gradient-to-br from-[#0DD9D2]/12 to-transparent shadow-[0_20px_60px_rgba(13,217,210,0.12)] flex flex-col ring-1 ring-[#0DD9D2]/20">
-              <h2 className="text-2xl font-black text-[#0DD9D2] mb-3">Surfshark VPN Protection</h2>
-              <p className="text-[#B0B3B8] leading-relaxed mb-6 flex-1">
-                Essential VPN companion stops ISP throttling, fixes buffering, protects privacy.
-              </p>
-              <ul className="space-y-2 text-[#FFFFFF] text-sm mb-8">
-                {["Hides IPTV from ISP", "Unthrottles 4K streams", "Encrypts all traffic", "Surfshark: Unlimited devices"].map((t) => (
-                  <li key={t} className="flex gap-2 items-start">
-                    <Check className="w-4 h-4 text-[#0DD9D2] shrink-0 mt-0.5" aria-hidden />
-                    <span>{t}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/vpn">
-                <span
-                  className="inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#0DD9D2] text-[#0A0A0F] font-black hover:bg-[#2ee8e0] cursor-pointer"
-                  onClick={() => trackVpnClick({ source: "/", placement: "product_grid_vpn_cta" })}
-                >
-                  GET SURFSHARK VPN
-                </span>
-              </Link>
-            </div>
+            {featureCards.map((card, index) => {
+              const accent = card.accent || defaultFeatureCards[index]?.accent || "cyan";
+              const theme = featureCardThemes[accent];
+              const bullets = card.bullets?.length ? card.bullets : defaultFeatureCards[index]?.bullets || [];
+              return (
+                <div key={`${card.title}-${index}`} className={theme.wrapper}>
+                  <h2 className={theme.title}>{card.title}</h2>
+                  <p className="text-[#B0B3B8] leading-relaxed mb-6 flex-1 text-[15px] sm:text-base">
+                    {card.description}
+                  </p>
+                  <ul className="space-y-2 text-[#FFFFFF] text-sm mb-8">
+                    {bullets.map((t) => (
+                      <li key={t} className="flex gap-2 items-start">
+                        <Check className={theme.check} aria-hidden />
+                        <span>{t}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href={card.ctaHref || "/"}>
+                    <span
+                      className={theme.button}
+                      onClick={() => {
+                        if (card.trackVpn) trackVpnClick({ source: "/", placement: "product_grid_vpn_cta" });
+                      }}
+                    >
+                      {card.ctaLabel}
+                    </span>
+                  </Link>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -828,12 +936,7 @@ export default function MainStore() {
         <div className="container mx-auto px-4 max-w-4xl text-center">
           <h2 className="text-2xl md:text-4xl font-black text-white mb-8">Clear Advantages</h2>
           <ul className="text-left max-w-2xl mx-auto space-y-4 text-[#B0B3B8]">
-            {[
-              "36-hour full-access trial—no card required to start",
-              "Device bundles ship with 1 year of Reloaded Fire TV",
-              "Fire TV, ONN Google TV, Roku & smart TV friendly workflows",
-              "Optional VPN path for ISP throttling & privacy on busy networks",
-            ].map((line) => (
+            {advantageLines.map((line) => (
               <li key={line} className="flex gap-3 items-start text-base md:text-lg">
                 <Check className="w-6 h-6 text-[#00D4FF] shrink-0" aria-hidden />
                 <span className="text-white">{line}</span>
@@ -847,7 +950,7 @@ export default function MainStore() {
       <section className="py-8 md:py-10 bg-[#1A1A22]/80 border-b border-white/5">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm md:text-base text-[#FAD02C]/90 font-medium tracking-wide leading-relaxed px-2">
-            2,700+ customers · 99.9% uptime · SSL-secured checkout · 18K+ channels
+            {trustBarText}
           </p>
         </div>
       </section>

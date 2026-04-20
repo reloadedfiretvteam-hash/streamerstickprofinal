@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "title": "IPTV Subscriptions Loaded Firesticks Onn VPN | StreamStickPro",
+    "description": "StreamStickPro: IPTV subscriptions, loaded Firesticks, ONN Google TV, and Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, SSL-secured checkout, 24/7 support.",
+    "path": "/",
+    "keywords": "IPTV subscription, loaded Firestick, Onn device, Surfshark VPN IPTV, ISP throttling VPN"
+  },
+  "hero": {
+    "title": "Premium IPTV & preconfigured streaming devices",
+    "subtitle": "36-hour trial · 18K+ live channels · guided setup in minutes",
+    "proofline": "2,700+ customers · 99.9% uptime · SSL-secured checkout",
+    "ctas": [
+      {
+        "label": "START 36HR IPTV TRIAL",
+        "href": "/36hr-trial",
+        "accent": "cyan"
+      },
+      {
+        "label": "SHOP LOADED FIRESTICKS",
+        "href": "/devices",
+        "accent": "gold"
+      },
+      {
+        "label": "ONN GOOGLE TV DEVICES",
+        "href": "/onn",
+        "accent": "violet"
+      },
+      {
+        "label": "GET SURFSHARK VPN",
+        "href": "/vpn",
+        "accent": "teal",
+        "trackVpn": true
+      }
+    ]
+  },
+  "productCards": [
+    {
+      "title": "IPTV Subscriptions",
+      "description": "Get premium IPTV streaming with 18K+ live channels, 100K+ movies & series-on your schedule.",
+      "bullets": [
+        "All-in-one app login",
+        "Multi-device support",
+        "36hr risk-free trial"
+      ],
+      "ctaLabel": "START 36HR IPTV TRIAL",
+      "ctaHref": "/36hr-trial",
+      "accent": "cyan"
+    },
+    {
+      "title": "Loaded Firesticks",
+      "description": "Firestick 4K ships fully loaded and ready-to-use with 1-year Reloaded Fire TV subscription included.",
+      "bullets": [
+        "Pre-installed apps",
+        "Zero setup required",
+        "Perfect for beginners"
+      ],
+      "ctaLabel": "SHOP LOADED FIRESTICKS",
+      "ctaHref": "/devices",
+      "accent": "gold"
+    },
+    {
+      "title": "Onn Google TV Devices",
+      "description": "Onn Google TV devices pre-configured for streaming. 1-year Reloaded Fire TV service included.",
+      "bullets": [
+        "Walmart Onn 4K ready",
+        "Easy plug & play",
+        "Budget streaming power"
+      ],
+      "ctaLabel": "ONN GOOGLE TV DEVICES",
+      "ctaHref": "/onn",
+      "accent": "violet"
+    },
+    {
+      "title": "Surfshark VPN Protection",
+      "description": "Essential VPN companion stops ISP throttling, fixes buffering, protects privacy.",
+      "bullets": [
+        "Hides IPTV from ISP",
+        "Unthrottles 4K streams",
+        "Encrypts all traffic",
+        "Surfshark: Unlimited devices"
+      ],
+      "ctaLabel": "GET SURFSHARK VPN",
+      "ctaHref": "/vpn",
+      "accent": "teal",
+      "trackVpn": true
+    }
+  ],
+  "advantages": [
+    "36-hour full-access trial-no card required to start",
+    "Device bundles ship with 1 year of Reloaded Fire TV",
+    "Fire TV, ONN Google TV, Roku & smart TV friendly workflows",
+    "Optional VPN path for ISP throttling & privacy on busy networks"
+  ],
+  "trustBar": "2,700+ customers · 99.9% uptime · SSL-secured checkout · 18K+ channels"
+}

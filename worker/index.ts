@@ -15,6 +15,7 @@ import { createSeoAdRoutes } from './routes/seo-ads';
 import { createAIAssistantRoutes } from './routes/ai-assistant';
 import { createEmailCampaignRoutes } from './routes/email-campaigns';
 import { createProvisioningRoutes } from './routes/provisioning';
+import { createCmsRoutes } from './routes/cms';
 import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from './helpers';
 
 export interface Env {
@@ -40,6 +41,17 @@ export interface Env {
   CLOUDFLARE_API_TOKEN?: string;
   CLOUDFLARE_ACCOUNT_ID?: string;
   NODE_ENV?: string;
+  WP_ORIGIN?: string;
+  WORDPRESS_URL?: string;
+  WP_HOME_PAGE_SLUG?: string;
+  WP_PRICING_PAGE_SLUG?: string;
+  WP_APPLICATION_USER?: string;
+  WP_APPLICATION_PASSWORD?: string;
+  WORDPRESS_APPLICATION_USER?: string;
+  WORDPRESS_APPLICATION_PASSWORD?: string;
+  WP_REST_BASIC_AUTH?: string;
+  SHADOW_HOSTS?: string;
+  VITE_SECURE_HOSTS?: string;
   ASSETS: { fetch: (request: Request) => Promise<Response> };
   /** Xtream-style panel API directory, e.g. http://host:port/WDXTMHmn (appends /api.php if needed) */
   IPTV_PANEL_API_BASE?: string;
@@ -213,6 +225,7 @@ app.use('*', cors({
 
 app.route('/api/auth', createAuthRoutes());
 app.route('/api/products', createProductRoutes());
+app.route('/api/cms', createCmsRoutes());
 
 /** Public homepage / shadow-store promotion (no Stripe secrets). */
 const sitePromotionPublicHandler = async (c: Context<{ Bindings: Env }>) => {

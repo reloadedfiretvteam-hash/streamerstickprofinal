@@ -24,11 +24,36 @@ const DEFAULT_PAYMENT_METHODS: Stripe.Checkout.SessionCreateParams.PaymentMethod
   'affirm',
 ];
 
+type CmsPricingResponse = {
+  data?: {
+    selectedPrices?: Record<string, string>;
+  };
+};
+
 function extractInvalidPaymentMethod(error: unknown): string | null {
   const message = String((error as any)?.message || '').toLowerCase();
   if (!message.includes('payment method type') || !message.includes('invalid')) return null;
   const match = message.match(/provided:\s*([a-z0-9_]+)/i);
   return match?.[1]?.toLowerCase() || null;
+}
+
+async function getCmsPriceOverrides(requestUrl: string): Promise<Record<string, string>> {
+  try {
+    const base = new URL(requestUrl).origin;
+    const response = await fetch(`${base}/api/cms/pricing`);
+    if (!response.ok) return {};
+    const payload = (await response.json()) as CmsPricingResponse;
+    const selected = payload?.data?.selectedPrices;
+    if (!selected || typeof selected !== 'object') return {};
+    const out: Record<string, string> = {};
+    for (const [key, value] of Object.entries(selected)) {
+      const priceId = String(value || '').trim();
+      if (key && /^price_/i.test(priceId)) out[key.trim()] = priceId;
+    }
+    return out;
+  } catch {
+    return {};
+  }
 }
 
 export function createCheckoutRoutes() {
@@ -71,6 +96,7 @@ export function createCheckoutRoutes() {
       }
 
       const activePromo = await storage.getActiveSitePromotion();
+      const cmsPriceOverrides = await getCmsPriceOverrides(c.req.url);
       type ResolvedLine = { product: any; quantity: number; stripePriceId: string; unitAmountCents: number };
       const productsWithQuantity: ResolvedLine[] = [];
 
@@ -83,7 +109,10 @@ export function createCheckoutRoutes() {
         }
 
         const wantsPromo = item.applySitePromotion === true;
-        let stripePriceId = product.shadowPriceId;
+        let stripePriceId =
+          cmsPriceOverrides[item.productId] ||
+          cmsPriceOverrides[product.id] ||
+          product.shadowPriceId;
         let unitAmountCents = effectiveRealProductChargeCents({
           price: product.price,
           salePrice: product.salePrice ?? null,

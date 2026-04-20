@@ -2196,7 +2196,7 @@ export default function AdminPanel() {
         pageCounts.set(key, (pageCounts.get(key) || 0) + 1);
       }
     }
-    return [...pageCounts.entries()]
+    return Array.from(pageCounts.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
       .map(([page, count]) => ({ page, count }));
@@ -2208,7 +2208,7 @@ export default function AdminPanel() {
       const key = getReferrerHost(visitor.referrer);
       refCounts.set(key, (refCounts.get(key) || 0) + 1);
     }
-    return [...refCounts.entries()]
+    return Array.from(refCounts.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
       .map(([referrer, count]) => ({ referrer, count }));
