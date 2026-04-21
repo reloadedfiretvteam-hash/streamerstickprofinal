@@ -22,18 +22,19 @@ export function GoogleAdsTag() {
       return;
     }
 
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
-    script.setAttribute(attr, '1');
-    document.head.appendChild(script);
-
+    // Google’s order: define dataLayer + gtag stub first, then load gtag.js async (commands queue until loaded)
     window.dataLayer = window.dataLayer || [];
     window.gtag = function gtag(...args: unknown[]) {
       window.dataLayer!.push(args);
     };
     window.gtag('js', new Date());
     window.gtag('config', id);
+
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
+    script.setAttribute(attr, '1');
+    document.head.appendChild(script);
   }, []);
 
   return null;
