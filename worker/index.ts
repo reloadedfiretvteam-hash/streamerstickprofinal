@@ -1086,30 +1086,69 @@ app.get('*', async (c, next) => {
 
 // ── Block crawlers on secure domain (shadow store should NEVER appear in search engines) ──
 const SECURE_HOSTS = new Set(['secure.streamstickpro.com']);
-app.get('/robots.txt', async (c) => {
+app.get('/robots.txt', (c) => {
   const hostname = new URL(c.req.url).hostname;
   if (SECURE_HOSTS.has(hostname)) {
     return c.text('User-agent: *\nDisallow: /\n', 200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=86400' });
   }
-  const res = await c.env.ASSETS.fetch(c.req.raw);
-  const headers = new Headers(res.headers);
-  headers.set('Cache-Control', 'public, max-age=21600, s-maxage=21600');
-  headers.set('Content-Type', 'text/plain; charset=utf-8');
-  let body = await res.text();
 
-  const requiredSnippets = [
-    'Allow: /llms.txt',
-    'Allow: /ai.txt',
-    'User-agent: ChatGPT-User',
-    'User-agent: OAI-SearchBot',
-    'User-agent: ClaudeBot',
-    'User-agent: PerplexityBot',
-  ];
-  for (const snippet of requiredSnippets) {
-    if (!body.includes(snippet)) body += `\n${snippet}\nAllow: /`;
-  }
+  // Serve robots.txt directly (bypasses Cloudflare's managed content which overrides ASSETS.fetch)
+  const body = `# StreamStickPro - robots.txt
+# Allow search engines; block AI training crawlers per Cloudflare managed content
 
-  return new Response(body, { status: 200, headers });
+User-agent: *
+Allow: /
+Allow: /feed.xml
+Allow: /opensearch.xml
+Allow: /llms.txt
+Allow: /ai.txt
+Disallow: /api/
+Disallow: /admin
+Disallow: /admin/
+Disallow: /shadow-services
+Disallow: /checkout
+Disallow: /success
+Disallow: /cancel
+Disallow: /customer-login
+Disallow: /my-account
+Disallow: /forgot-password
+Disallow: /reset-password
+
+# Explicit allow for search/assistant crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+# Sitemaps
+Sitemap: https://streamstickpro.com/sitemap-index.xml
+Sitemap: https://streamstickpro.com/sitemap.xml
+`;
+
+  return c.text(body, 200, {
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Cache-Control': 'public, max-age=21600, s-maxage=21600',
+    'X-Robots-Tag': 'noindex',
+  });
 });
 
 // ── RSS/Atom Feed (content freshness signal + aggregator traffic) ──
