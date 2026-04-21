@@ -2601,7 +2601,7 @@ export function createAdminRoutes() {
       const supabase = createClient(c.env.VITE_SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY);
       const { data, error } = await supabase.from('blog_posts')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('published_at', { ascending: false, nullsFirst: false });
       
       if (error) throw error;
       
@@ -2617,7 +2617,7 @@ export function createAdminRoutes() {
         keywords: d.keywords,
         metaDescription: d.meta_description,
         publishedAt: d.published_at,
-        createdAt: d.created_at,
+        createdAt: d.published_at,
       }));
       
       return c.json({ data: posts });
