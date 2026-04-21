@@ -3374,5 +3374,128 @@ export function createAdminRoutes() {
     }
   });
 
+  // ✅ One-time schema migration: add missing columns to orders table
+  app.post('/run-schema-migration', async (c) => {
+    try {
+      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+      const supabaseUrl = c.env.VITE_SUPABASE_URL;
+
+      if (!serviceKey || !supabaseUrl) {
+        return c.json({ error: 'Supabase not configured' }, 500);
+      }
+
+      const migrations = [
+        { name: 'orders.customer_message', sql: "ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_message TEXT" },
+        { name: 'orders.customer_phone', sql: "ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_phone TEXT" },
+        { name: 'orders.purchase_code', sql: "ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS purchase_code TEXT" },
+        { name: 'orders.service_url', sql: "ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS service_url TEXT DEFAULT 'http://ky-tv.cc'" },
+        { name: 'orders.purchase_code_index', sql: "CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_purchase_code ON public.orders(purchase_code) WHERE purchase_code IS NOT NULL" },
+        { name: 'provisioning_jobs table', sql: `CREATE TABLE IF NOT EXISTS public.provisioning_jobs (
+          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          order_id text NOT NULL,
+          job_type text NOT NULL DEFAULT 'iptv_order',
+          status text NOT NULL DEFAULT 'pending',
+          provider text,
+          payload text,
+          result text,
+          last_error text,
+          attempt_count integer NOT NULL DEFAULT 0,
+          next_run_at timestamptz DEFAULT now(),
+          locked_at timestamptz,
+          completed_at timestamptz,
+          created_at timestamptz DEFAULT now(),
+          updated_at timestamptz DEFAULT now()
+        )` },
+        { name: 'provisioning_jobs.order_id_index', sql: "CREATE UNIQUE INDEX IF NOT EXISTS idx_provisioning_jobs_order_id ON public.provisioning_jobs(order_id)" },
+        { name: 'provisioning_jobs.status_index', sql: "CREATE INDEX IF NOT EXISTS idx_provisioning_jobs_status ON public.provisioning_jobs(status)" },
+      ];
+
+      const results: Array<{ name: string; status: string; error?: string }> = [];
+
+      for (const migration of migrations) {
+        try {
+          // Try via exec_sql RPC if available
+          const rpcResp = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
+            method: 'POST',
+            headers: {
+              'apikey': serviceKey,
+              'Authorization': `Bearer ${serviceKey}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal',
+            },
+            body: JSON.stringify({ query: migration.sql }),
+          });
+
+          if (rpcResp.ok) {
+            results.push({ name: migration.name, status: 'applied' });
+          } else {
+            const errText = await rpcResp.text();
+            if (errText.includes('already exists') || errText.includes('already exists')) {
+              results.push({ name: migration.name, status: 'already_exists' });
+            } else if (rpcResp.status === 404 && errText.includes('exec_sql')) {
+              // exec_sql function doesn't exist - try Management API
+              results.push({ name: migration.name, status: 'exec_sql_not_found', error: 'exec_sql RPC not available' });
+            } else {
+              results.push({ name: migration.name, status: 'failed', error: errText.substring(0, 200) });
+            }
+          }
+        } catch (err: any) {
+          results.push({ name: migration.name, status: 'error', error: err.message });
+        }
+      }
+
+      // Check current columns via information_schema
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(supabaseUrl, serviceKey);
+      const { data: columns } = await supabase
+        .from('information_schema.columns' as any)
+        .select('column_name')
+        .eq('table_schema', 'public')
+        .eq('table_name', 'orders');
+
+      const existingColumns = (columns || []).map((c: any) => c.column_name);
+      const targetColumns = ['customer_message', 'customer_phone', 'purchase_code', 'service_url'];
+      const missingColumns = targetColumns.filter(col => !existingColumns.includes(col));
+
+      return c.json({
+        success: true,
+        migrations: results,
+        currentOrderColumns: existingColumns,
+        missingColumns,
+        note: missingColumns.length === 0
+          ? 'All required columns exist'
+          : 'Some columns are still missing — exec_sql RPC may not be enabled. Apply migration via Supabase Dashboard → SQL Editor.',
+      });
+    } catch (error: any) {
+      console.error('Schema migration error:', error);
+      return c.json({ error: error.message || 'Migration failed' }, 500);
+    }
+  });
+
+  // Schema status check (GET)
+  app.get('/schema-status', async (c) => {
+    try {
+      const serviceKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY;
+      const supabaseUrl = c.env.VITE_SUPABASE_URL;
+      if (!serviceKey || !supabaseUrl) return c.json({ error: 'Supabase not configured' }, 500);
+
+      const resp = await fetch(
+        `${supabaseUrl}/rest/v1/information_schema.columns?select=column_name&table_schema=eq.public&table_name=eq.orders`,
+        { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } },
+      );
+      const cols: any[] = resp.ok ? await resp.json() : [];
+      const existing = cols.map((c: any) => c.column_name);
+      const required = ['customer_message', 'customer_phone', 'purchase_code', 'service_url'];
+      return c.json({
+        existingColumns: existing,
+        requiredColumns: required,
+        missingColumns: required.filter(c => !existing.includes(c)),
+        allPresent: required.every(c => existing.includes(c)),
+      });
+    } catch (error: any) {
+      return c.json({ error: error.message }, 500);
+    }
+  });
+
   return app;
 }

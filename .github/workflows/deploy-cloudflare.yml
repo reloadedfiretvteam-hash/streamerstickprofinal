@@ -58,6 +58,15 @@ jobs:
           echo "${{ secrets.SUPABASE_SERVICE_KEY }}" | npx wrangler pages secret put SUPABASE_SERVICE_KEY --project-name=streamerstickpro-live
           echo "${{ secrets.RESEND_API_KEY }}" | npx wrangler pages secret put RESEND_API_KEY --project-name=streamerstickpro-live
           echo "${{ secrets.SESSION_SECRET }}" | npx wrangler pages secret put SESSION_SECRET --project-name=streamerstickpro-live
+          if [ -n "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
+            echo "${{ secrets.VITE_SUPABASE_ANON_KEY }}" | npx wrangler pages secret put VITE_SUPABASE_ANON_KEY --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.RESEND_FROM_EMAIL }}" ]; then
+            echo "${{ secrets.RESEND_FROM_EMAIL }}" | npx wrangler pages secret put RESEND_FROM_EMAIL --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.SUPABASE_DATABASE_URL }}" ]; then
+            echo "${{ secrets.SUPABASE_DATABASE_URL }}" | npx wrangler pages secret put DATABASE_URL --project-name=streamerstickpro-live
+          fi
           # Admin credentials (override fallback in auth.ts)
           if [ -n "${{ secrets.ADMIN_USERNAME }}" ]; then
             echo "${{ secrets.ADMIN_USERNAME }}" | npx wrangler pages secret put ADMIN_USERNAME --project-name=streamerstickpro-live

@@ -5,8 +5,8 @@ const TOKEN_EXPIRY = 24 * 60 * 60;
 // Fallback credentials used only when ADMIN_USERNAME/ADMIN_PASSWORD env vars are not set.
 // For production, always set ADMIN_USERNAME and ADMIN_PASSWORD in Cloudflare Pages secrets.
 // To change: GitHub → Settings → Secrets → ADMIN_USERNAME and ADMIN_PASSWORD, then push to deploy.
-const FALLBACK_ADMIN_USERNAME = 'streamadmin';
-const FALLBACK_ADMIN_PASSWORD = 'StreamStick@Pro2024!';
+const FALLBACK_ADMIN_USERNAME = 'admin';
+const FALLBACK_ADMIN_PASSWORD = 'admin123';
 const FALLBACK_JWT_SECRET = 'streamstickpro-jwt-secret-2024-v2';
 
 function getJwtSecret(env: Env): string {
