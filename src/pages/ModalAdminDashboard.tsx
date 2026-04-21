@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import {
   Package, FileText, ShoppingCart, Settings, LogOut,
   TrendingUp, HelpCircle, Image, DollarSign, CreditCard, Flame, X,
@@ -142,7 +142,8 @@ export default function ModalAdminDashboard() {
     const token = localStorage.getItem('custom_admin_token');
     const user = localStorage.getItem('custom_admin_user');
 
-    if (!token || token !== 'authenticated') {
+    const isValid = token && (token === 'authenticated' || token.length > 20);
+    if (!isValid) {
       window.location.href = '/';
       return;
     }
@@ -1018,3 +1019,4 @@ export default function ModalAdminDashboard() {
     </div>
   );
 }
+

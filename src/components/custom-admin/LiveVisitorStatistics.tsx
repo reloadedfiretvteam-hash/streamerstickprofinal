@@ -48,7 +48,10 @@ export default function LiveVisitorStatistics() {
     try {
       setLoading(true);
       
-      const response = await fetch('/api/admin/visitors/stats');
+      const token = localStorage.getItem('custom_admin_token');
+      const response = await fetch('/api/admin/visitors/stats', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       
       if (!response.ok) {
         const errorText = await response.text();

@@ -30,7 +30,9 @@ export default function RealAdminDashboard() {
     const token = localStorage.getItem('custom_admin_token');
     const user = localStorage.getItem('custom_admin_user');
 
-    if (!token || token !== 'authenticated') {
+    // Accept JWT token (long string) or legacy 'authenticated' value
+    const isValid = token && (token === 'authenticated' || token.length > 20);
+    if (!isValid) {
       window.location.href = '/custom-admin';
       return;
     }

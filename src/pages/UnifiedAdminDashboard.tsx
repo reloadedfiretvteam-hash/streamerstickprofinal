@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import {
   Package, FileText, ShoppingCart, Settings, LogOut, TrendingUp, HelpCircle, Image,
   DollarSign, CreditCard, Flame, X, Grid, Users, Video, Eye, Edit3, Mail, Tag,
@@ -113,7 +113,8 @@ export default function UnifiedAdminDashboard() {
     const token = localStorage.getItem('custom_admin_token');
     const user = localStorage.getItem('custom_admin_user');
 
-    if (!token || token !== 'authenticated') {
+    const isValid = token && (token === 'authenticated' || token.length > 20);
+    if (!isValid) {
       window.location.href = '/admin';
       return;
     }
@@ -450,7 +451,7 @@ export default function UnifiedAdminDashboard() {
         {/* Featured Tools */}
         {selectedCategory === 'all' && !searchQuery && (
           <div className="mb-8">
-            <h3 className="text-2xl font-bold text-white mb-4">⭐ Featured Tools</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">â­ Featured Tools</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {allTools.filter(t => t.featured).map((tool) => {
                 const stat = getStatForTool(tool.id);
@@ -523,4 +524,5 @@ export default function UnifiedAdminDashboard() {
     </div>
   );
 }
+
 

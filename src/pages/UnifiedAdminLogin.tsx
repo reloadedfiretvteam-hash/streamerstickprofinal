@@ -1,12 +1,5 @@
 import { useState } from 'react';
 import { Lock, User, Flame, Shield } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-
-// Admin credentials from environment variables for local/dev testing only
-// In production, use Supabase admin_credentials table
-const ADMIN_DEFAULT_USER = import.meta.env.VITE_ADMIN_DEFAULT_USER || 'admin';
-const ADMIN_DEFAULT_PASSWORD = import.meta.env.VITE_ADMIN_DEFAULT_PASSWORD || 'admin123';
-const ADMIN_DEFAULT_EMAIL = import.meta.env.VITE_ADMIN_DEFAULT_EMAIL || 'reloadedfirestvteam@gmail.com';
 
 export default function UnifiedAdminLogin() {
   const [username, setUsername] = useState('');
@@ -20,86 +13,29 @@ export default function UnifiedAdminLogin() {
     setLoading(true);
 
     try {
-      // Hardcoded fallback credentials for immediate use
-      const FALLBACK_USER = 'admin';
-      const FALLBACK_PASSWORD = 'admin123';
-      
-      // First check environment-based admin credentials for local/dev testing
-      // Also check hardcoded fallback if env vars aren't loaded
-      if ((username === ADMIN_DEFAULT_USER && password === ADMIN_DEFAULT_PASSWORD) ||
-          (username === FALLBACK_USER && password === FALLBACK_PASSWORD)) {
-        localStorage.setItem('custom_admin_token', 'authenticated');
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json() as { success?: boolean; token?: string; error?: string };
+
+      if (response.ok && data.success && data.token) {
+        localStorage.setItem('custom_admin_token', data.token);
         localStorage.setItem('custom_admin_user', JSON.stringify({
-          id: 'admin-env',
-          email: ADMIN_DEFAULT_EMAIL,
+          id: 'admin',
+          email: 'admin@streamstickpro.com',
           role: 'super_admin',
-          username: ADMIN_DEFAULT_USER
+          username,
         }));
         window.location.href = '/admin/dashboard';
         return;
       }
 
-      // Fallback to database check
-      const { data: admin, error: dbError } = await supabase
-        .from('admin_credentials')
-        .select('*')
-        .or(`username.eq.${username},email.eq.${username}`)
-        .eq('password_hash', password)
-        .maybeSingle();
-
-      if (dbError) {
-        console.error('Database error:', dbError);
-        // If database fails, still allow env-based credentials for local/dev testing
-        if (ADMIN_DEFAULT_USER && ADMIN_DEFAULT_PASSWORD && 
-            username === ADMIN_DEFAULT_USER && password === ADMIN_DEFAULT_PASSWORD) {
-          localStorage.setItem('custom_admin_token', 'authenticated');
-          localStorage.setItem('custom_admin_user', JSON.stringify({
-            id: 'admin-env',
-            email: ADMIN_DEFAULT_EMAIL,
-            role: 'super_admin',
-            username: ADMIN_DEFAULT_USER
-          }));
-          window.location.href = '/admin/dashboard';
-          return;
-        }
-      }
-
-      if (!admin) {
-        setError('Invalid credentials. Access denied.');
-        setLoading(false);
-        return;
-      }
-
-      await supabase
-        .from('admin_credentials')
-        .update({ last_login: new Date().toISOString() })
-        .eq('id', admin.id);
-
-      localStorage.setItem('custom_admin_token', 'authenticated');
-      localStorage.setItem('custom_admin_user', JSON.stringify({
-        id: admin.id,
-        email: admin.email,
-        role: admin.role
-      }));
-
-      window.location.href = '/admin/dashboard';
-    } catch (error: unknown) {
-      // Even on error, allow env-based credentials for local/dev testing
-      if (ADMIN_DEFAULT_USER && ADMIN_DEFAULT_PASSWORD && 
-          username === ADMIN_DEFAULT_USER && password === ADMIN_DEFAULT_PASSWORD) {
-        localStorage.setItem('custom_admin_token', 'authenticated');
-        localStorage.setItem('custom_admin_user', JSON.stringify({
-          id: 'admin-env',
-          email: ADMIN_DEFAULT_EMAIL,
-          role: 'super_admin',
-          username: ADMIN_DEFAULT_USER
-        }));
-        window.location.href = '/admin/dashboard';
-        return;
-      }
-      
-      setError('Login failed. Please try again.');
-      console.error('Login error:', error);
+      setError(data.error || 'Invalid credentials. Access denied.');
+    } catch {
+      setError('Network error. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -113,7 +49,7 @@ export default function UnifiedAdminLogin() {
             <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-full mb-4 shadow-lg">
               <Flame className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Inferno TV</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">StreamStick Pro</h1>
             <p className="text-gray-300 text-sm">Admin Dashboard Access</p>
             <div className="flex items-center justify-center gap-2 mt-2">
               <Shield className="w-4 h-4 text-green-400" />

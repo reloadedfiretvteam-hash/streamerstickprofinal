@@ -33,7 +33,8 @@ export default function AppRouter() {
     };
 
     const token = localStorage.getItem('custom_admin_token');
-    setIsAuthenticated(token === 'authenticated');
+    // Accept JWT token (long string) or legacy 'authenticated' value
+    setIsAuthenticated(!!token && (token === 'authenticated' || token.length > 20));
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
