@@ -46,12 +46,9 @@ export function createTrialRoutes() {
       const fromEmail = c.env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
       const from = fromEmail.includes('<') ? fromEmail : `StreamStickPro <${fromEmail}>`;
       const panelAdapter = getPanelAdapter(c.env);
-
-      if (!isExistingUser && !panelAdapter.isTrialConfigured()) {
-        return c.json({
-          error: 'Free trial setup is temporarily unavailable. Please contact support.',
-        }, 503);
-      }
+      const panelConfigured = !isExistingUser && panelAdapter.isTrialConfigured();
+      // If panel is not configured, we fall back to manual provisioning mode:
+      // owner gets an email, customer gets a "will be activated within 1 hour" message.
 
       const letters = 'abcdefghkmnpqrstuvwxyz';
       const upperLetters = 'ABCDEFGHJKMNPQRSTUVWXYZ';
@@ -97,44 +94,50 @@ export function createTrialRoutes() {
       let panelVerificationStatus = '';
 
       if (!isExistingUser) {
-        let lastPanelError = 'Unable to confirm trial creation';
-        for (let attempt = 0; attempt < PANEL_TRIAL_ATTEMPTS; attempt++) {
-          trialCredentials.username = buildUsername(attempt);
-          const panelResult = await panelAdapter.createTrial({
-            username: trialCredentials.username,
-            password: trialCredentials.password,
-          });
-          if (panelResult.ok) {
-            const verification = await verifyIptvTrialCredentials(c.env, {
+        if (panelConfigured) {
+          let lastPanelError = 'Unable to confirm trial creation';
+          for (let attempt = 0; attempt < PANEL_TRIAL_ATTEMPTS; attempt++) {
+            trialCredentials.username = buildUsername(attempt);
+            const panelResult = await panelAdapter.createTrial({
               username: trialCredentials.username,
               password: trialCredentials.password,
             });
-            if (verification.ok) {
-              panelProvisioned = true;
-              panelVerified = true;
-              panelVerificationStatus = verification.status || '';
+            if (panelResult.ok) {
+              const verification = await verifyIptvTrialCredentials(c.env, {
+                username: trialCredentials.username,
+                password: trialCredentials.password,
+              });
+              if (verification.ok) {
+                panelProvisioned = true;
+                panelVerified = true;
+                panelVerificationStatus = verification.status || '';
+                break;
+              }
+              lastPanelError = verification.message;
+              if (!isLikelyPanelUsernameConflict(verification.message)) {
+                break;
+              }
+              continue;
+            }
+            lastPanelError = panelResult.message;
+            if (!isLikelyPanelUsernameConflict(panelResult.message)) {
               break;
             }
-            lastPanelError = verification.message;
-            if (!isLikelyPanelUsernameConflict(verification.message)) {
-              break;
-            }
-            continue;
           }
-          lastPanelError = panelResult.message;
-          if (!isLikelyPanelUsernameConflict(panelResult.message)) {
-            break;
+          if (!panelProvisioned) {
+            console.error('[free-trial] panel trial failed:', lastPanelError);
+            return c.json(
+              {
+                error:
+                  'We could not activate your free trial right now. Please try again in a few minutes or contact support.',
+              },
+              502,
+            );
           }
-        }
-        if (!panelProvisioned) {
-          console.error('[free-trial] panel trial failed:', lastPanelError);
-          return c.json(
-            {
-              error:
-                'We could not activate your free trial right now. Please try again in a few minutes or contact support.',
-            },
-            502,
-          );
+        } else {
+          // Panel API not configured: fall back to manual provisioning mode.
+          // Owner will be notified and will set up the trial manually.
+          console.warn('[free-trial] Panel not configured - falling back to manual provisioning for:', email);
         }
       }
 
@@ -142,9 +145,14 @@ export function createTrialRoutes() {
         ? `<div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
               <strong>Next step:</strong> Use your existing account details in your IPTV app. If you need help confirming that your account was updated, contact support before trying multiple logins.
             </div>`
-        : `<div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
+        : panelProvisioned
+        ? `<div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
               <strong>Ready to use:</strong> Your trial was created and verified on our service. Use the Xtream Codes style login details below in IPTV Smarters, TiviMate, or a compatible app.
               ${panelVerificationStatus ? `<div style="margin-top:8px;font-size:13px;color:#166534;"><strong>Panel status:</strong> ${panelVerificationStatus}</div>` : ''}
+            </div>`
+        : `<div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+              <strong>⏳ Activating your trial:</strong> Our team will set up your 36-hour free trial within <strong>1 business hour</strong>. We'll send your confirmed login credentials to <strong>${email}</strong> once your account is ready.
+              <div style="margin-top:8px;font-size:13px;color:#92400e;">Business hours: 5 AM – 11 PM EST. Requests submitted outside hours will be processed first thing the next morning.</div>
             </div>`;
 
       // Customer email (REQUIRED). Use unified sender (Resend → MailChannels fallback).
@@ -248,7 +256,9 @@ export function createTrialRoutes() {
 
       // Owner notification (NON-FATAL). If this fails, customer still gets credentials.
       try {
-        const ownerSubject = `🆕 New Free Trial Signup - ${name}`;
+        const ownerSubject = panelProvisioned
+          ? `🆕 New Free Trial Signup - ${name}`
+          : `🚨 MANUAL SETUP NEEDED - Free Trial Request from ${name}`;
         const ownerHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #9333ea;">New Free Trial Request</h1>
@@ -278,9 +288,14 @@ export function createTrialRoutes() {
             </div>
             ` : ''}
             
+            ${!panelProvisioned ? `<div style="background: #fee2e2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
+              <h2 style="margin-top: 0; color: #b91c1c;">⚠️ ACTION REQUIRED: Manual Provisioning Needed</h2>
+              <p>The IPTV panel API is not configured. Please manually create a 36-hour trial for this customer and reply to their email with credentials.</p>
+              <p><strong>Reply to:</strong> ${email}</p>
+            </div>` : ''}
             <div style="background: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
-              <h2 style="margin-top: 0; color: #15803d;">Trial Credentials Sent</h2>
-              ${panelProvisioned ? '<p><strong>Panel:</strong> Trial user was created via API (live line).</p>' : ''}
+              <h2 style="margin-top: 0; color: #15803d;">Trial Credentials ${panelProvisioned ? 'Sent' : '(Pending Manual Setup)'}</h2>
+              ${panelProvisioned ? '<p><strong>Panel:</strong> Trial user was created via API (live line).</p>' : '<p><em>Credentials not yet sent — manual setup required.</em></p>'}
               <p><strong>Username:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${trialCredentials.username}</code></p>
               ${!isExistingUser ? `<p><strong>Password:</strong> <code style="background: #f0fdf4; padding: 2px 6px; border-radius: 4px;">${trialCredentials.password}</code></p>` : '<p>(Using existing password)</p>'}
               <p><strong>Service Portal URL:</strong> <a href="${portalUrl}" style="color: #15803d;">${portalUrl}</a></p>
@@ -330,10 +345,13 @@ export function createTrialRoutes() {
 
       return c.json({
         success: true,
-        message: "Trial credentials sent",
+        message: panelProvisioned
+          ? "Trial credentials sent"
+          : "Trial request received. Your credentials will be sent within 1 business hour.",
         provider: customerResult.provider,
         providerId: customerResult.providerId,
         panelProvisioned,
+        manualProvisioning: !panelProvisioned && !isExistingUser,
       });
     } catch (error: any) {
       console.error("Error processing free trial:", error?.message || error);
