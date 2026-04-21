@@ -1,379 +1,235 @@
 import { useState } from 'react';
-import { Search, Package, CheckCircle, Clock, Truck, Mail, X, ArrowLeft, Zap } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { Search, Package, CheckCircle, Clock, Mail, ArrowLeft, AlertCircle, Zap, ExternalLink } from 'lucide-react';
 import Footer from '../components/Footer';
 
-interface Order {
+interface OrderData {
   id: string;
-  order_number: string;
-  customer_email: string;
-  payment_method: string;
-  payment_status: string;
-  order_status: string;
-  total: number;
-  items: any[];
-  created_at: string;
-  notes?: string;
+  purchaseCode?: string;
+  status: string;
+  productName: string;
+  amount: number;
+  customerEmail: string;
+  createdAt: string;
+  generatedUsername?: string;
+  generatedPassword?: string;
+  serviceUrl?: string;
+  setupVideoUrl?: string;
 }
 
 export default function OrderTracking() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const searchOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchTerm.trim()) return;
+    const q = searchTerm.trim();
+    if (!q) return;
 
     setLoading(true);
     setError('');
     setOrder(null);
 
     try {
-      // Sanitize search term - remove special characters that could interfere with queries
-      const sanitizedTerm = searchTerm.trim().replace(/[%_\\]/g, '');
-      
-      if (!sanitizedTerm) {
-        setError('Please enter a valid order number or email address.');
-        setLoading(false);
-        return;
-      }
+      const response = await fetch(`/api/orders/track?q=${encodeURIComponent(q)}`);
+      const result = await response.json() as { data?: OrderData; error?: string };
 
-      // First try orders table - search by email or order number
-      const { data: customerOrder } = await supabase
-        .from('orders')
-        .select('*')
-        .or(`order_number.ilike.%${sanitizedTerm}%,customer_email.ilike.%${sanitizedTerm}%`)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (customerOrder) {
-        setOrder(customerOrder);
-        return;
-      }
-
-      // If not found, try bitcoin_orders
-      const { data: bitcoinOrder } = await supabase
-        .from('bitcoin_orders')
-        .select('*')
-        .or(`order_code.ilike.%${sanitizedTerm}%,customer_email.ilike.%${sanitizedTerm}%`)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (bitcoinOrder) {
-        // Convert bitcoin order to match order format
-        setOrder({
-          ...bitcoinOrder,
-          order_number: bitcoinOrder.order_code,
-          order_status: bitcoinOrder.payment_status || 'pending'
-        });
+      if (response.ok && result.data) {
+        setOrder(result.data);
       } else {
-        setError('Order not found. Please check your order number/code or email address.');
+        setError(result.error || 'Order not found. Check your purchase code or email address.');
       }
-    } catch (err: any) {
-      setError('Error searching for order: ' + err.message);
+    } catch {
+      setError('Unable to connect. Please try again in a moment.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Determine if order contains Fire Stick products
-  const isFirestickOrder = order?.items?.some((item: any) => {
-    const name = (item.product_name || item.name || '').toLowerCase();
-    return name.includes('fire stick') || name.includes('firestick') || name.includes('fire tv');
-  });
-
-  // Calculate expected delivery based on product type
-  const getExpectedDelivery = () => {
-    if (!order) return null;
-    
-    const orderDate = new Date(order.created_at);
-    
-    if (isFirestickOrder) {
-      // Fire Stick: 4-6 business days
-      const minDate = new Date(orderDate);
-      const maxDate = new Date(orderDate);
-      minDate.setDate(minDate.getDate() + 4);
-      maxDate.setDate(maxDate.getDate() + 6);
-      return {
-        type: 'Fire Stick',
-        estimate: '4-6 Business Days',
-        minDate: minDate.toLocaleDateString(),
-        maxDate: maxDate.toLocaleDateString()
-      };
-    } else {
-      // IPTV Subscription: 1-24 hours
-      const deliveryDate = new Date(orderDate);
-      deliveryDate.setHours(deliveryDate.getHours() + 24);
-      return {
-        type: 'IPTV Subscription',
-        estimate: '1-24 Hours',
-        expectedBy: deliveryDate.toLocaleString()
-      };
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Clock className="w-6 h-6 text-yellow-400" />;
-      case 'processing':
-        return <Package className="w-6 h-6 text-blue-400" />;
-      case 'shipped':
-        return <Truck className="w-6 h-6 text-purple-400" />;
-      case 'delivered':
-        return <CheckCircle className="w-6 h-6 text-green-400" />;
-      default:
-        return <Package className="w-6 h-6 text-gray-400" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
-      case 'processing':
-        return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
-      case 'shipped':
-        return 'bg-purple-500/20 text-purple-400 border-purple-500/50';
-      case 'delivered':
-        return 'bg-green-500/20 text-green-400 border-green-500/50';
-      default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/50';
-    }
-  };
-
-  const getPaymentStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-500/20 text-yellow-400';
+  const getStatusConfig = (status: string) => {
+    switch (status?.toLowerCase()) {
       case 'paid':
-        return 'bg-green-500/20 text-green-400';
-      case 'failed':
-        return 'bg-red-500/20 text-red-400';
+      case 'completed':
+        return { icon: <CheckCircle className="w-6 h-6" />, label: 'Payment Confirmed', color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' };
+      case 'processing':
+        return { icon: <Zap className="w-6 h-6" />, label: 'Processing', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' };
+      case 'pending':
+        return { icon: <Clock className="w-6 h-6" />, label: 'Pending', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' };
       default:
-        return 'bg-gray-500/20 text-gray-400';
+        return { icon: <Package className="w-6 h-6" />, label: status || 'Unknown', color: 'text-gray-400', bg: 'bg-gray-500/10 border-gray-500/20' };
     }
   };
 
-  const handleReset = () => {
-    setOrder(null);
-    setError('');
-    setSearchTerm('');
-  };
-
-  const deliveryInfo = getExpectedDelivery();
+  const isIPTVOrder = !order?.productName?.toLowerCase().includes('fire') && !order?.productName?.toLowerCase().includes('stick');
 
   return (
-    <div className="min-h-screen bg-gray-900 py-20">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <div className="flex items-center justify-between mb-8">
-          <a
-            href="/"
-            className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-all font-semibold border border-gray-700"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Home
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-950 to-gray-900">
+      {/* Header */}
+      <div className="bg-black/40 border-b border-white/10 p-4">
+        <div className="max-w-4xl mx-auto flex items-center gap-4">
+          <a href="/" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm">Home</span>
           </a>
-          {order && (
-            <button
-              onClick={handleReset}
-              className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all font-semibold border border-red-500/50"
-            >
-              <X className="w-5 h-5" />
-              Clear Results
-            </button>
-          )}
+          <span className="text-white font-semibold text-lg">Order Tracking</span>
         </div>
+      </div>
 
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Track Your Order</h1>
-          <p className="text-gray-400 text-lg">
-            Enter your order number or email to check your order status
-          </p>
-        </div>
+      <div className="max-w-2xl mx-auto p-6">
+        {/* Search Form */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6">
+          <h1 className="text-2xl font-bold text-white mb-2">Track Your Order</h1>
+          <p className="text-gray-400 text-sm mb-4">Enter your purchase code (PC-XXXXX) or email address</p>
 
-        <form onSubmit={searchOrder} className="mb-12">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Enter order number (e.g., ORD-...) or email"
-                className="w-full pl-12 pr-4 py-4 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-orange-500 focus:outline-none transition-all"
-              />
-            </div>
+          <form onSubmit={searchOrder} className="flex gap-3">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Purchase code or email..."
+              className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400/50"
+              required
+            />
             <button
               type="submit"
               disabled={loading}
-              className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:opacity-50 text-white font-bold rounded-xl transition-all transform hover:scale-105 shadow-lg disabled:hover:scale-100"
+              className="bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold px-6 py-3 rounded-xl hover:from-orange-600 hover:to-red-700 transition-all disabled:opacity-50 flex items-center gap-2"
             >
-              {loading ? 'Searching...' : 'Search'}
+              {loading ? (
+                <span className="animate-spin inline-block w-5 h-5 border-2 border-white/20 border-t-white rounded-full" />
+              ) : (
+                <Search className="w-5 h-5" />
+              )}
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
 
+        {/* Error State */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-6 mb-8">
-            <p className="text-red-400 text-center">{error}</p>
-          </div>
-        )}
-
-        {order && (
-          <div className="space-y-6">
-            <div className="bg-gray-800 rounded-xl p-8 border border-gray-700">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-1">
-                    Order #{order.order_number}
-                  </h2>
-                  <p className="text-gray-400">
-                    Placed on {new Date(order.created_at).toLocaleDateString()} at {new Date(order.created_at).toLocaleTimeString()}
-                  </p>
-                </div>
-                <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${getStatusColor(order.order_status)}`}>
-                  {getStatusIcon(order.order_status)}
-                  <span className="font-semibold capitalize">{order.order_status}</span>
-                </div>
-              </div>
-
-              {/* Expected Delivery Section */}
-              {deliveryInfo && (
-                <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-xl p-6 mb-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    {isFirestickOrder ? (
-                      <Truck className="w-8 h-8 text-purple-400" />
-                    ) : (
-                      <Zap className="w-8 h-8 text-blue-400" />
-                    )}
-                    <div>
-                      <h3 className="text-xl font-bold text-white">Expected Delivery</h3>
-                      <p className="text-gray-400">{deliveryInfo.type}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-white/5 rounded-lg p-4">
-                      <p className="text-sm text-gray-400 mb-1">Delivery Estimate</p>
-                      <p className="text-2xl font-bold text-white">{deliveryInfo.estimate}</p>
-                    </div>
-                    {isFirestickOrder ? (
-                      <div className="bg-white/5 rounded-lg p-4">
-                        <p className="text-sm text-gray-400 mb-1">Expected Between</p>
-                        <p className="text-lg font-semibold text-white">
-                          {deliveryInfo.minDate} - {deliveryInfo.maxDate}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="bg-white/5 rounded-lg p-4">
-                        <p className="text-sm text-gray-400 mb-1">Credentials Expected By</p>
-                        <p className="text-lg font-semibold text-white">{deliveryInfo.expectedBy}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {isFirestickOrder && (
-                    <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                      <p className="text-yellow-300 text-sm">
-                        📦 <strong>Physical Shipment:</strong> Your Fire Stick will be shipped to your address. 
-                        You'll receive tracking information once shipped.
-                      </p>
-                    </div>
-                  )}
-                  {!isFirestickOrder && (
-                    <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
-                      <p className="text-green-300 text-sm">
-                        ⚡ <strong>Digital Delivery:</strong> Your IPTV subscription credentials will be sent 
-                        to your email address within 1-24 hours of payment confirmation.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <div>
-                  <h3 className="text-sm text-gray-400 mb-2">Customer Email</h3>
-                  <p className="text-white flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    {order.customer_email}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm text-gray-400 mb-2">Payment Method</h3>
-                  <p className="text-white capitalize">{order.payment_method}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm text-gray-400 mb-2">Payment Status</h3>
-                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${getPaymentStatusColor(order.payment_status)}`}>
-                    {order.payment_status?.toUpperCase() || 'PENDING'}
-                  </span>
-                </div>
-                <div>
-                  <h3 className="text-sm text-gray-400 mb-2">Total Amount</h3>
-                  <p className="text-2xl font-bold text-orange-400">${(order.total || 0).toFixed(2)}</p>
-                </div>
-              </div>
-
-              {order.notes && (
-                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
-                  <h3 className="text-blue-400 font-semibold mb-1">Order Notes</h3>
-                  <p className="text-gray-300 text-sm">{order.notes}</p>
-                </div>
-              )}
-
-              <div className="border-t border-gray-700 pt-6">
-                <h3 className="text-lg font-bold text-white mb-4">Order Items</h3>
-                <div className="space-y-3">
-                  {order.items?.map((item: any, index: number) => (
-                    <div key={index} className="flex justify-between items-center bg-gray-900 rounded-lg p-4">
-                      <div>
-                        <p className="text-white font-semibold">{item.product_name || item.name}</p>
-                        <p className="text-gray-400 text-sm">Quantity: {item.quantity}</p>
-                      </div>
-                      <p className="text-orange-400 font-bold">
-                        ${(item.total_price || item.price || 0).toFixed(2)}
-                      </p>
-                    </div>
-                  )) || (
-                    <p className="text-gray-400">No items found</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/30 rounded-xl p-6">
-              <h3 className="text-white font-bold mb-3">Need Help?</h3>
-              <p className="text-gray-300 mb-4">
-                If you have any questions about your order or need assistance, please contact us:
+          <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-5 mb-6 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-red-300 font-medium">{error}</p>
+              <p className="text-red-400/70 text-sm mt-1">
+                Need help? Email <a href="mailto:support@streamstickpro.com" className="underline">support@streamstickpro.com</a>
               </p>
-              <a
-                href="mailto:reloadedfiretvteam@gmail.com"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors"
-              >
-                <Mail className="w-5 h-5" />
-                Contact Support
-              </a>
             </div>
           </div>
         )}
 
+        {/* Order Found */}
+        {order && (() => {
+          const statusConfig = getStatusConfig(order.status);
+          return (
+            <div className="space-y-4">
+              {/* Status Card */}
+              <div className={`border rounded-2xl p-5 ${statusConfig.bg}`}>
+                <div className="flex items-center gap-3 mb-3">
+                  <span className={statusConfig.color}>{statusConfig.icon}</span>
+                  <div>
+                    <p className={`font-semibold ${statusConfig.color}`}>{statusConfig.label}</p>
+                    {order.purchaseCode && <p className="text-gray-400 text-xs">Code: {order.purchaseCode}</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Details */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
+                  <Package className="w-5 h-5 text-orange-400" />
+                  Order Details
+                </h2>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Product</span>
+                    <span className="text-white font-medium">{order.productName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Amount</span>
+                    <span className="text-white">${(order.amount / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Email</span>
+                    <span className="text-white">{order.customerEmail}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Ordered</span>
+                    <span className="text-white">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Credentials (if completed) */}
+              {order.generatedUsername && (
+                <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-5">
+                  <h2 className="text-green-400 font-semibold mb-3 flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5" />
+                    Your IPTV Credentials
+                  </h2>
+                  <div className="space-y-2 font-mono text-sm">
+                    <div className="flex justify-between bg-black/30 rounded-lg px-3 py-2">
+                      <span className="text-gray-400">Username</span>
+                      <span className="text-green-300 select-all">{order.generatedUsername}</span>
+                    </div>
+                    {order.generatedPassword && (
+                      <div className="flex justify-between bg-black/30 rounded-lg px-3 py-2">
+                        <span className="text-gray-400">Password</span>
+                        <span className="text-green-300 select-all">{order.generatedPassword}</span>
+                      </div>
+                    )}
+                    {order.serviceUrl && (
+                      <div className="flex justify-between bg-black/30 rounded-lg px-3 py-2">
+                        <span className="text-gray-400">Server</span>
+                        <span className="text-green-300 select-all">{order.serviceUrl}</span>
+                      </div>
+                    )}
+                  </div>
+                  {order.setupVideoUrl && (
+                    <a
+                      href={order.setupVideoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 flex items-center gap-2 text-orange-400 hover:text-orange-300 text-sm transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Watch Setup Video
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* Pending order message */}
+              {(order.status === 'pending' || order.status === 'processing') && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-5">
+                  <h3 className="text-yellow-400 font-semibold mb-2 flex items-center gap-2">
+                    <Clock className="w-5 h-5" />
+                    {isIPTVOrder ? 'Account Setup In Progress' : 'Order Processing'}
+                  </h3>
+                  <p className="text-gray-300 text-sm">
+                    {isIPTVOrder
+                      ? 'Your IPTV account is being set up. You\'ll receive your login credentials via email within 1 business hour (5 AM – 11 PM EST).'
+                      : 'Your order is being processed. You\'ll receive updates via email shortly.'}
+                  </p>
+                  <div className="mt-3 flex items-center gap-2 text-sm text-gray-400">
+                    <Mail className="w-4 h-4" />
+                    <span>Need help? <a href="mailto:support@streamstickpro.com" className="text-orange-400 hover:text-orange-300 transition-colors">support@streamstickpro.com</a></span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* Default state */}
         {!order && !error && !loading && (
-          <div className="text-center py-20">
-            <Package className="w-20 h-20 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 text-lg">
-              Enter your order details above to track your order
-            </p>
+          <div className="text-center py-12 text-gray-500">
+            <Package className="w-16 h-16 mx-auto mb-4 opacity-30" />
+            <p>Enter your purchase code or email to track your order</p>
           </div>
         )}
       </div>
 
-      {/* Unified Footer */}
       <Footer />
     </div>
   );
