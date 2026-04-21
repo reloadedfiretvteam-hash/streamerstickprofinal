@@ -1,15 +1,10 @@
 import { Hono } from 'hono';
-import { sign, verify } from 'hono/jwt';
 import type { Env } from '../index';
 
 const TOKEN_EXPIRY = 24 * 60 * 60;
 const FALLBACK_ADMIN_USERNAME = 'admin';
 const FALLBACK_ADMIN_PASSWORD = 'admin123';
-const FALLBACK_JWT_SECRET = 'streamstickpro';
-
-function isProduction(env: Env): boolean {
-  return (env.NODE_ENV || '').toLowerCase() === 'production';
-}
+const FALLBACK_JWT_SECRET = 'streamstickpro-jwt-secret-2024';
 
 function getJwtSecret(env: Env): string {
   return env.JWT_SECRET?.trim() || FALLBACK_JWT_SECRET;
@@ -20,6 +15,44 @@ function getAdminCredentials(env: Env) {
     username: env.ADMIN_USERNAME?.trim() || FALLBACK_ADMIN_USERNAME,
     password: env.ADMIN_PASSWORD?.trim() || FALLBACK_ADMIN_PASSWORD,
   };
+}
+
+// Native Web Crypto JWT — works in all Cloudflare Workers runtimes
+async function jwtSign(payload: Record<string, unknown>, secret: string): Promise<string> {
+  const header = { alg: 'HS256', typ: 'JWT' };
+  const enc = (obj: unknown) =>
+    btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  const unsigned = `${enc(header)}.${enc(payload)}`;
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(unsigned));
+  const b64 = btoa(String.fromCharCode(...new Uint8Array(sig)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  return `${unsigned}.${b64}`;
+}
+
+async function jwtVerify(token: string, secret: string): Promise<Record<string, unknown>> {
+  const parts = token.split('.');
+  if (parts.length !== 3) throw new Error('Invalid token format');
+  const unsigned = `${parts[0]}.${parts[1]}`;
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['verify'],
+  );
+  const sig = Uint8Array.from(atob(parts[2].replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+  const valid = await crypto.subtle.verify('HMAC', key, sig, new TextEncoder().encode(unsigned));
+  if (!valid) throw new Error('Invalid token signature');
+  const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+  if (payload.exp && Math.floor(Date.now() / 1000) > payload.exp) throw new Error('Token expired');
+  return payload;
 }
 
 async function hashPassword(password: string, secret: string): Promise<string> {
@@ -51,13 +84,14 @@ export function createAuthRoutes() {
       const { username: adminUsername, password: adminPassword } = getAdminCredentials(c.env);
 
       if (username === adminUsername && password === adminPassword) {
-        const token = await sign(
+        const token = await jwtSign(
           { 
             sub: username, 
             role: 'admin',
-            exp: Math.floor(Date.now() / 1000) + TOKEN_EXPIRY 
-          }, 
-          jwtSecret
+            exp: Math.floor(Date.now() / 1000) + TOKEN_EXPIRY,
+            iat: Math.floor(Date.now() / 1000),
+          },
+          jwtSecret,
         );
         
         return c.json({ success: true, token });
@@ -65,8 +99,8 @@ export function createAuthRoutes() {
 
       return c.json({ error: 'Invalid username or password' }, 401);
     } catch (error: any) {
-      console.error('Login error:', error);
-      return c.json({ error: 'Login failed' }, 500);
+      console.error('Login error:', error?.message ?? error);
+      return c.json({ error: 'Login failed', detail: error?.message ?? 'unknown' }, 500);
     }
   });
 
@@ -82,7 +116,7 @@ export function createAuthRoutes() {
       const jwtSecret = getJwtSecret(c.env);
       
       try {
-        const payload = await verify(token, jwtSecret);
+        const payload = await jwtVerify(token, jwtSecret);
         return c.json({ valid: true, user: payload.sub, role: payload.role });
       } catch {
         return c.json({ valid: false, error: 'Invalid or expired token' }, 401);
@@ -136,7 +170,7 @@ export async function authMiddleware(c: any, next: () => Promise<void>) {
   const jwtSecret = getJwtSecret(c.env);
   
   try {
-    const payload = await verify(token, jwtSecret);
+    const payload = await jwtVerify(token, jwtSecret);
     c.set('user', payload);
     await next();
   } catch {
