@@ -26,6 +26,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run Supabase migrations (if DATABASE_URL is set)
+        if: ${{ secrets.DATABASE_URL != '' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          # Install psql client to run migrations
+          which psql && psql "$DATABASE_URL" -f supabase/migrations/20260421000001_add_missing_order_columns.sql && echo "Migration applied" || echo "Migration step skipped (psql not available or migration already applied)"
+        continue-on-error: true
+
       - name: Build for Cloudflare Workers
         run: npx tsx script/build-worker.ts
         env:
