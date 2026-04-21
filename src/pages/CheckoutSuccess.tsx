@@ -12,20 +12,19 @@ export default function CheckoutSuccess() {
     document.title = 'Order Confirmed! | StreamStick Pro';
     window.scrollTo(0, 0);
 
-    // Google Ads conversion — fires every time a customer lands on this page after purchase.
-    // SETUP: Replace REPLACE_WITH_AW_ID/REPLACE_WITH_LABEL with values from:
-    //   Google Ads → Tools → Measurement → Conversions → your Purchase conversion → Tag setup
-    try {
-      const w = window as any;
-      if (typeof w.gtag === 'function') {
-        w.gtag('event', 'conversion', {
-          send_to: 'REPLACE_WITH_AW_ID/REPLACE_WITH_LABEL',
-          value: 9.99,          // Update to actual order amount if available
+    // Google Ads purchase conversion (set VITE_GOOGLE_ADS_ID + VITE_GOOGLE_ADS_CONVERSION_LABEL in build env)
+    const aw = (import.meta.env.VITE_GOOGLE_ADS_ID || '').trim();
+    const label = (import.meta.env.VITE_GOOGLE_ADS_CONVERSION_LABEL || '').trim();
+    if (aw && label && aw.startsWith('AW-') && typeof window.gtag === 'function') {
+      try {
+        window.gtag('event', 'conversion', {
+          send_to: `${aw}/${label}`,
+          value: 9.99,
           currency: 'USD',
-          transaction_id: sid,  // Stripe session ID as transaction ID (deduplicates)
+          transaction_id: sid || `success-${Date.now()}`,
         });
-      }
-    } catch { /* non-fatal */ }
+      } catch { /* non-fatal */ }
+    }
   }, []);
 
   return (

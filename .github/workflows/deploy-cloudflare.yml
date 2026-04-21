@@ -40,6 +40,8 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_GOOGLE_ADS_ID: ${{ secrets.VITE_GOOGLE_ADS_ID }}
+          VITE_GOOGLE_ADS_CONVERSION_LABEL: ${{ secrets.VITE_GOOGLE_ADS_CONVERSION_LABEL }}
           VITE_SECURE_HOSTS: secure.streamstickpro.com
           VITE_STORAGE_BUCKET_NAME: imiges
           NODE_ENV: production
