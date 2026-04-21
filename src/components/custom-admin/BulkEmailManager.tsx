@@ -129,7 +129,7 @@ export default function BulkEmailManager() {
         type: 'campaign'
       }));
 
-      await supabase.from('email_logs').insert(emailLogs);
+      // Email log saved server-side by the send-email API
 
       alert(`Campaign sent to ${recipientEmails.length} recipients!`);
 
