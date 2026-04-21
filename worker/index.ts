@@ -1827,7 +1827,7 @@ app.get('*', async (c) => {
   const staticKnownRoutes = new Set([
     '/', '/shop', '/shadow-services', '/admin', '/checkout', '/success', '/blog',
     '/customer-login', '/my-account', '/forgot-password', '/reset-password',
-    '/terms', '/privacy', '/refund', '/iptv', '/iptv-firestick', '/iptv-services',
+    '/terms', '/privacy', '/refund',     '/iptv', '/iptv-firestick', '/iptv-services', '/fire-sticks',
     '/jailbroken-fire-sticks', '/devices', '/firestick-devices', '/bundles', '/best-iptv-firestick',
     '/iptv-media-players', '/resources', '/36hr-trial', '/pricing',
     '/onn-google-tv', '/onn', '/iptv-smarters-pro', '/tivimate', '/ultimate-iptv-catalog-2026',
