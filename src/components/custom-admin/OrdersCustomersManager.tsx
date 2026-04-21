@@ -1,29 +1,38 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Users, Search, Eye, CheckCircle, XCircle, Clock } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { ShoppingCart, Users, Search, Eye, CheckCircle, XCircle, Clock, RefreshCw } from 'lucide-react';
 
 interface Order {
   id: string;
-  user_email: string;
-  product_id: string;
+  customerEmail: string;
+  customerName: string;
+  realProductName: string;
   amount: number;
   status: string;
-  created_at: string;
+  fulfillmentStatus: string;
+  createdAt: string;
+  stripeCheckoutSessionId?: string;
 }
 
 interface Customer {
   id: string;
   email: string;
-  name: string;
-  total_orders: number;
-  total_spent: number;
-  created_at: string;
+  fullName?: string;
+  username?: string;
+  status: string;
+  totalOrders?: number;
+  createdAt: string;
+}
+
+function getAuthHeader(): Record<string, string> {
+  const token = localStorage.getItem('custom_admin_token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 export default function OrdersCustomersManager() {
   const [activeTab, setActiveTab] = useState<'orders' | 'customers'>('orders');
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [orderStats, setOrderStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -38,14 +47,19 @@ export default function OrdersCustomersManager() {
   const loadOrders = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
+      const [ordersRes, statsRes] = await Promise.all([
+        fetch('/api/admin/orders?limit=100', { headers: getAuthHeader() }),
+        fetch('/api/admin/orders/stats', { headers: getAuthHeader() }),
+      ]);
 
-      if (error) throw error;
-      setOrders(data || []);
+      if (ordersRes.ok) {
+        const data = await ordersRes.json() as { data?: Order[] };
+        setOrders(data.data || []);
+      }
+      if (statsRes.ok) {
+        const statsData = await statsRes.json() as { data?: any };
+        setOrderStats(statsData.data);
+      }
     } catch (error) {
       console.error('Error loading orders:', error);
     } finally {
@@ -56,14 +70,11 @@ export default function OrdersCustomersManager() {
   const loadCustomers = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('customers')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-      setCustomers(data || []);
+      const res = await fetch('/api/admin/customers?limit=100', { headers: getAuthHeader() });
+      if (res.ok) {
+        const data = await res.json() as { data?: Customer[] };
+        setCustomers(data.data || []);
+      }
     } catch (error) {
       console.error('Error loading customers:', error);
     } finally {
@@ -102,19 +113,32 @@ export default function OrdersCustomersManager() {
   };
 
   const filteredOrders = orders.filter(order =>
-    order.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.product_id?.toLowerCase().includes(searchTerm.toLowerCase())
+    order.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.realProductName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredCustomers = customers.filter(customer =>
-    customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.username?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalRevenue = orderStats?.totalRevenue ?? orders.reduce((sum, o) => sum + (o.amount || 0), 0);
+  const paidOrders = orders.filter(o => o.status === 'paid' || o.status === 'completed');
+  const pendingOrders = orders.filter(o => o.status === 'pending');
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-white">Orders & Customers</h2>
+        <button
+          onClick={() => activeTab === 'orders' ? loadOrders() : loadCustomers()}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Refresh
+        </button>
       </div>
 
       {/* Tabs */}
@@ -128,7 +152,7 @@ export default function OrdersCustomersManager() {
           }`}
         >
           <ShoppingCart className="w-5 h-5" />
-          Orders
+          Orders {orderStats ? `(${orderStats.totalOrders})` : `(${orders.length})`}
         </button>
         <button
           onClick={() => setActiveTab('customers')}
@@ -159,27 +183,23 @@ export default function OrdersCustomersManager() {
       {activeTab === 'orders' && (
         <div className="space-y-4">
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-gray-700 rounded-lg p-4">
               <div className="text-sm text-gray-400 mb-1">Total Orders</div>
-              <div className="text-2xl font-bold text-white">{orders.length}</div>
+              <div className="text-2xl font-bold text-white">{orderStats?.totalOrders ?? orders.length}</div>
             </div>
             <div className="bg-gray-700 rounded-lg p-4">
-              <div className="text-sm text-gray-400 mb-1">Completed</div>
-              <div className="text-2xl font-bold text-green-400">
-                {orders.filter(o => o.status === 'completed').length}
-              </div>
+              <div className="text-sm text-gray-400 mb-1">Paid</div>
+              <div className="text-2xl font-bold text-green-400">{paidOrders.length}</div>
             </div>
             <div className="bg-gray-700 rounded-lg p-4">
               <div className="text-sm text-gray-400 mb-1">Pending</div>
-              <div className="text-2xl font-bold text-yellow-400">
-                {orders.filter(o => o.status === 'pending').length}
-              </div>
+              <div className="text-2xl font-bold text-yellow-400">{pendingOrders.length}</div>
             </div>
             <div className="bg-gray-700 rounded-lg p-4">
               <div className="text-sm text-gray-400 mb-1">Total Revenue</div>
               <div className="text-2xl font-bold text-green-400">
-                ${orders.reduce((sum, o) => sum + (o.amount || 0), 0).toFixed(2)}
+                ${((totalRevenue || 0) / 100).toFixed(2)}
               </div>
             </div>
           </div>
@@ -197,27 +217,29 @@ export default function OrdersCustomersManager() {
               {filteredOrders.map((order) => (
                 <div key={order.id} className="p-4 hover:bg-gray-600 transition">
                   <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-white font-semibold">{order.user_email}</span>
-                        <span className={`px-2 py-1 rounded text-xs flex items-center gap-1 ${getStatusColor(order.status)} text-white`}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1 flex-wrap">
+                        <span className="text-white font-semibold truncate">{order.customerEmail}</span>
+                        <span className={`px-2 py-0.5 rounded text-xs flex items-center gap-1 ${getStatusColor(order.status)} text-white shrink-0`}>
                           {getStatusIcon(order.status)}
                           {order.status}
                         </span>
+                        {order.fulfillmentStatus && order.fulfillmentStatus !== order.status && (
+                          <span className="px-2 py-0.5 rounded text-xs bg-blue-700 text-white shrink-0">
+                            {order.fulfillmentStatus}
+                          </span>
+                        )}
                       </div>
-                      <div className="text-sm text-gray-400">Product: {order.product_id}</div>
+                      <div className="text-sm text-gray-300">{order.customerName}</div>
+                      <div className="text-sm text-gray-400">Product: {order.realProductName}</div>
                       <div className="text-xs text-gray-500 mt-1">
-                        {new Date(order.created_at).toLocaleString()}
+                        {order.createdAt ? new Date(order.createdAt).toLocaleString() : ''}
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right ml-4 shrink-0">
                       <div className="text-xl font-bold text-white">
-                        ${order.amount?.toFixed(2) || '0.00'}
+                        ${((order.amount || 0) / 100).toFixed(2)}
                       </div>
-                      <button className="mt-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm flex items-center gap-1">
-                        <Eye className="w-3 h-3" />
-                        View
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -230,60 +252,48 @@ export default function OrdersCustomersManager() {
       {/* Customers Tab */}
       {activeTab === 'customers' && (
         <div className="space-y-4">
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-gray-700 rounded-lg p-4">
               <div className="text-sm text-gray-400 mb-1">Total Customers</div>
               <div className="text-2xl font-bold text-white">{customers.length}</div>
             </div>
             <div className="bg-gray-700 rounded-lg p-4">
-              <div className="text-sm text-gray-400 mb-1">Avg Orders/Customer</div>
-              <div className="text-2xl font-bold text-blue-400">
-                {customers.length > 0
-                  ? (customers.reduce((sum, c) => sum + (c.total_orders || 0), 0) / customers.length).toFixed(1)
-                  : '0'}
-              </div>
-            </div>
-            <div className="bg-gray-700 rounded-lg p-4">
-              <div className="text-sm text-gray-400 mb-1">Total CLV</div>
+              <div className="text-sm text-gray-400 mb-1">Active Customers</div>
               <div className="text-2xl font-bold text-green-400">
-                ${customers.reduce((sum, c) => sum + (c.total_spent || 0), 0).toFixed(2)}
+                {customers.filter(c => c.status === 'active').length}
               </div>
             </div>
           </div>
 
-          {/* Customers List */}
           {loading ? (
             <div className="text-center py-8 text-gray-400">Loading customers...</div>
           ) : filteredCustomers.length === 0 ? (
             <div className="bg-gray-700 rounded-lg p-8 text-center">
               <Users className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-              <p className="text-gray-400">No customers found</p>
+              <p className="text-gray-400">No customer accounts yet.</p>
+              <p className="text-gray-500 text-sm mt-2">Customers appear here after they register via the customer portal.</p>
             </div>
           ) : (
             <div className="bg-gray-700 rounded-lg divide-y divide-gray-600">
               {filteredCustomers.map((customer) => (
                 <div key={customer.id} className="p-4 hover:bg-gray-600 transition">
                   <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="text-white font-semibold mb-1">{customer.name}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-white font-semibold">{customer.fullName || customer.username || 'Unknown'}</div>
                       <div className="text-sm text-gray-400">{customer.email}</div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`px-2 py-0.5 rounded text-xs ${customer.status === 'active' ? 'bg-green-700' : 'bg-gray-600'} text-white`}>
+                          {customer.status}
+                        </span>
+                        {customer.totalOrders !== undefined && (
+                          <span className="text-xs text-gray-400">{customer.totalOrders} orders</span>
+                        )}
+                      </div>
                       <div className="text-xs text-gray-500 mt-1">
-                        Member since {new Date(customer.created_at).toLocaleDateString()}
+                        Since {customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : 'N/A'}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm text-gray-400 mb-1">
-                        {customer.total_orders || 0} orders
-                      </div>
-                      <div className="text-lg font-bold text-white">
-                        ${customer.total_spent?.toFixed(2) || '0.00'}
-                      </div>
-                      <button className="mt-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm flex items-center gap-1">
-                        <Eye className="w-3 h-3" />
-                        View
-                      </button>
-                    </div>
+                    <Eye className="w-5 h-5 text-gray-500" />
                   </div>
                 </div>
               ))}

@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, DollarSign, Users, ShoppingCart, Eye, Activity, Calendar } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { TrendingUp, DollarSign, Users, ShoppingCart, Eye, Activity, Calendar, RefreshCw } from 'lucide-react';
+
+function getAuthHeader(): Record<string, string> {
+  const token = localStorage.getItem('custom_admin_token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export default function AdvancedAnalytics() {
   const [stats, setStats] = useState({
@@ -15,59 +19,62 @@ export default function AdvancedAnalytics() {
     monthVisitors: 0,
     conversionRate: 0,
     avgOrderValue: 0,
-    topProducts: []
+    topProducts: [] as any[]
   });
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState('today');
 
   useEffect(() => {
     loadAnalytics();
-    const interval = setInterval(loadAnalytics, 30000);
+    const interval = setInterval(loadAnalytics, 60000);
     return () => clearInterval(interval);
   }, []);
 
   const loadAnalytics = async () => {
     try {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-      const [ordersData, visitorsData] = await Promise.all([
-        supabase.from('orders').select('*'),
-        supabase.from('website_visitors').select('*')
+      const [statsRes, visitorsRes] = await Promise.all([
+        fetch('/api/admin/orders/stats', { headers: getAuthHeader() }),
+        fetch('/api/admin/visitors/stats', { headers: getAuthHeader() }),
       ]);
 
-      const orders = ordersData.data || [];
-      const visitors = visitorsData.data || [];
+      let orderData: any = {};
+      let visitorData: any = {};
 
-      const todayOrders = orders.filter(o => new Date(o.created_at) >= today);
-      const weekOrders = orders.filter(o => new Date(o.created_at) >= weekAgo);
-      const monthOrders = orders.filter(o => new Date(o.created_at) >= monthAgo);
+      if (statsRes.ok) {
+        const d = await statsRes.json() as { data?: any };
+        orderData = d.data || {};
+      }
+      if (visitorsRes.ok) {
+        const d = await visitorsRes.json() as { data?: any; stats?: any };
+        visitorData = d.data || d.stats || {};
+      }
 
-      const todayRevenue = todayOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
-      const weekRevenue = weekOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
-      const monthRevenue = monthOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+      const todayOrders = orderData.ordersToday ?? 0;
+      const weekOrders = orderData.ordersThisWeek ?? 0;
+      const monthOrders = orderData.ordersThisMonth ?? 0;
+      const todayRevenue = orderData.revenueToday ?? 0;
+      const weekRevenue = orderData.revenueThisWeek ?? 0;
+      const monthRevenue = orderData.revenueThisMonth ?? 0;
 
-      const todayVisitors = visitors.filter(v => new Date(v.visit_date) >= today).length;
-      const weekVisitors = visitors.filter(v => new Date(v.visit_date) >= weekAgo).length;
-      const monthVisitors = visitors.filter(v => new Date(v.visit_date) >= monthAgo).length;
+      const todayVisitors = visitorData.today ?? 0;
+      const weekVisitors = visitorData.week ?? 0;
+      const monthVisitors = visitorData.month ?? 0;
 
-      const conversionRate = weekVisitors > 0 ? ((weekOrders.length / weekVisitors) * 100).toFixed(2) : 0;
-      const avgOrderValue = weekOrders.length > 0 ? (weekRevenue / weekOrders.length).toFixed(2) : 0;
+      const avgOrderValue = weekOrders > 0 ? weekRevenue / weekOrders : 0;
+      const conversionRate = weekVisitors > 0 ? (weekOrders / weekVisitors) * 100 : 0;
 
       setStats({
         todayRevenue,
         weekRevenue,
         monthRevenue,
-        todayOrders: todayOrders.length,
-        weekOrders: weekOrders.length,
-        monthOrders: monthOrders.length,
+        todayOrders,
+        weekOrders,
+        monthOrders,
         todayVisitors,
         weekVisitors,
         monthVisitors,
-        conversionRate: parseFloat(String(conversionRate || 0)),
-        avgOrderValue: parseFloat(String(avgOrderValue || 0)),
+        conversionRate: parseFloat(conversionRate.toFixed(2)),
+        avgOrderValue: parseFloat((avgOrderValue / 100).toFixed(2)),
         topProducts: []
       });
     } catch (error) {

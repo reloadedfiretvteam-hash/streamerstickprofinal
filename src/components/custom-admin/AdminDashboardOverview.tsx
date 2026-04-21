@@ -1,433 +1,273 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
 import {
-  Package, Users, ShoppingCart, DollarSign, TrendingUp,
-  Mail, FileText, Tag, Activity, CheckCircle,
-  AlertCircle, Clock, Star, Zap
+  Package, Users, ShoppingCart, DollarSign,
+  FileText, Activity, CheckCircle, AlertCircle, Clock, RefreshCw, TrendingUp
 } from 'lucide-react';
 import LiveVisitorStatistics from './LiveVisitorStatistics';
 
-interface Stats {
-  totalProducts: number;
+interface OrderStats {
   totalOrders: number;
+  ordersToday: number;
+  ordersThisWeek: number;
+  ordersThisMonth: number;
   totalRevenue: number;
-  totalCustomers: number;
-  pendingOrders: number;
-  completedOrders: number;
-  totalBlogs: number;
-  totalReviews: number;
-  totalPromos: number;
-  totalEmails: number;
+  revenueToday: number;
+  revenueThisWeek: number;
+  revenueThisMonth: number;
+  pendingFulfillments: number;
+  recentOrders: Array<{
+    id: string;
+    customerEmail: string;
+    customerName: string;
+    productName: string;
+    amount: number;
+    status: string;
+    fulfillmentStatus: string;
+    createdAt: string;
+  }>;
 }
 
-interface RecentOrder {
-  id: string;
-  order_number: string;
-  customer_name: string;
-  total_amount: number;
-  order_status: string;
-  created_at: string;
-}
-
-interface RecentProduct {
-  id: string;
-  name: string;
-  price: number;
-  stock_quantity: number;
-  is_active: boolean;
+function getAuthHeader(): Record<string, string> {
+  const token = localStorage.getItem('custom_admin_token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 export default function AdminDashboardOverview() {
-  const [stats, setStats] = useState<Stats>({
-    totalProducts: 0,
-    totalOrders: 0,
-    totalRevenue: 0,
-    totalCustomers: 0,
-    pendingOrders: 0,
-    completedOrders: 0,
-    totalBlogs: 0,
-    totalReviews: 0,
-    totalPromos: 0,
-    totalEmails: 0
-  });
-
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
-  const [recentProducts, setRecentProducts] = useState<RecentProduct[]>([]);
+  const [orderStats, setOrderStats] = useState<OrderStats | null>(null);
+  const [productCount, setProductCount] = useState<number>(0);
+  const [blogCount, setBlogCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   useEffect(() => {
     loadDashboardData();
   }, []);
 
   const loadDashboardData = async () => {
+    setLoading(true);
     try {
-      // Load all stats in parallel
-      const [
-        productsResult,
-        ordersResult,
-        customersResult,
-        blogsResult,
-        reviewsResult,
-        promosResult,
-        emailsResult,
-        recentOrdersResult,
-        recentProductsResult
-      ] = await Promise.all([
-        supabase.from('real_products').select('*', { count: 'exact' }),
-        supabase.from('orders_full').select('*', { count: 'exact' }),
-        supabase.from('email_subscribers').select('*', { count: 'exact' }),
-        supabase.from('blog_posts').select('*', { count: 'exact' }),
-        supabase.from('reviews').select('*', { count: 'exact' }),
-        supabase.from('promotions').select('*', { count: 'exact' }),
-        supabase.from('email_campaigns').select('*', { count: 'exact' }),
-        supabase.from('orders_full').select('*').order('created_at', { ascending: false }).limit(5),
-        supabase.from('real_products').select('*').order('created_at', { ascending: false }).limit(5)
+      const [statsRes, productsRes, blogsRes] = await Promise.all([
+        fetch('/api/admin/orders/stats', { headers: getAuthHeader() }),
+        fetch('/api/admin/products', { headers: getAuthHeader() }),
+        fetch('/api/blog/posts?limit=1', { headers: { Accept: 'application/json' } }),
       ]);
 
-      // Calculate revenue
-      const { data: revenueData } = await supabase
-        .from('orders_full')
-        .select('total_amount')
-        .eq('payment_status', 'paid');
-
-      const totalRevenue = revenueData?.reduce((sum, order) => sum + Number(order.total_amount || 0), 0) || 0;
-
-      // Count order statuses
-      const { count: pendingCount } = await supabase
-        .from('orders_full')
-        .select('*', { count: 'exact', head: true })
-        .eq('order_status', 'pending');
-
-      const { count: completedCount } = await supabase
-        .from('orders_full')
-        .select('*', { count: 'exact', head: true })
-        .eq('order_status', 'completed');
-
-      setStats({
-        totalProducts: productsResult.count || 0,
-        totalOrders: ordersResult.count || 0,
-        totalRevenue: totalRevenue,
-        totalCustomers: customersResult.count || 0,
-        pendingOrders: pendingCount || 0,
-        completedOrders: completedCount || 0,
-        totalBlogs: blogsResult.count || 0,
-        totalReviews: reviewsResult.count || 0,
-        totalPromos: promosResult.count || 0,
-        totalEmails: emailsResult.count || 0
-      });
-
-      setRecentOrders(recentOrdersResult.data || []);
-      setRecentProducts(recentProductsResult.data || []);
-
+      if (statsRes.ok) {
+        const data = await statsRes.json() as { data?: OrderStats };
+        if (data.data) setOrderStats(data.data);
+      }
+      if (productsRes.ok) {
+        const data = await productsRes.json() as { data?: any[] };
+        setProductCount(data.data?.length ?? 0);
+      }
+      if (blogsRes.ok) {
+        const data = await blogsRes.json() as { total?: number; data?: any[] };
+        setBlogCount(data.total ?? data.data?.length ?? 0);
+      }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
       setLoading(false);
+      setLastUpdated(new Date());
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+  const formatCurrency = (cents: number) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-500';
-      case 'pending': return 'bg-yellow-500';
-      case 'processing': return 'bg-blue-500';
-      case 'cancelled': return 'bg-red-500';
-      default: return 'bg-gray-500';
+    switch (status?.toLowerCase()) {
+      case 'completed':
+      case 'paid': return 'bg-green-600';
+      case 'pending': return 'bg-yellow-600';
+      case 'failed':
+      case 'cancelled': return 'bg-red-600';
+      default: return 'bg-gray-600';
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-cyan-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading your dashboard...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
+  const paidCount = orderStats?.recentOrders?.filter(o => o.status === 'paid').length ?? 0;
+
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-cyan-600 to-blue-600 rounded-xl p-8 text-white">
+      <div className="bg-gradient-to-r from-orange-600 to-red-700 rounded-xl p-6 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Welcome Back, Admin!</h1>
-            <p className="text-cyan-100 text-lg">Here's what's happening with your Inferno TV business today</p>
+            <h1 className="text-3xl font-bold mb-1">StreamStick Pro Admin</h1>
+            <p className="text-orange-100 text-sm">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
           </div>
-          <div className="text-right">
-            <p className="text-cyan-200 text-sm">Last Login</p>
-            <p className="text-white font-bold">{new Date().toLocaleString()}</p>
-          </div>
+          <button
+            onClick={loadDashboardData}
+            className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
         </div>
       </div>
 
       {/* Key Metrics */}
-      <div className="grid md:grid-cols-4 gap-6">
-        {/* Total Revenue */}
-        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-6 text-white shadow-xl">
-          <div className="flex items-center justify-between mb-4">
-            <DollarSign className="w-10 h-10" />
-            <div className="bg-white/20 rounded-lg px-3 py-1 text-sm font-bold">Total</div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-br from-green-600 to-emerald-700 rounded-xl p-5 text-white shadow-lg">
+          <div className="flex items-center gap-3 mb-3">
+            <DollarSign className="w-8 h-8 opacity-80" />
+            <span className="text-sm font-medium opacity-80">Total Revenue</span>
           </div>
-          <p className="text-green-100 text-sm mb-1">Total Revenue</p>
-          <p className="text-3xl font-bold">{formatCurrency(stats.totalRevenue)}</p>
+          <p className="text-2xl font-bold">{formatCurrency(orderStats?.totalRevenue ?? 0)}</p>
+          <p className="text-xs opacity-70 mt-1">Today: {formatCurrency(orderStats?.revenueToday ?? 0)}</p>
         </div>
 
-        {/* Total Orders */}
-        <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-6 text-white shadow-xl">
-          <div className="flex items-center justify-between mb-4">
-            <ShoppingCart className="w-10 h-10" />
-            <div className="bg-white/20 rounded-lg px-3 py-1 text-sm font-bold">Orders</div>
+        <div className="bg-gradient-to-br from-blue-600 to-cyan-700 rounded-xl p-5 text-white shadow-lg">
+          <div className="flex items-center gap-3 mb-3">
+            <ShoppingCart className="w-8 h-8 opacity-80" />
+            <span className="text-sm font-medium opacity-80">Orders</span>
           </div>
-          <p className="text-blue-100 text-sm mb-1">Total Orders</p>
-          <p className="text-3xl font-bold">{stats.totalOrders}</p>
-          <p className="text-blue-200 text-xs mt-2">
-            {stats.pendingOrders} pending • {stats.completedOrders} completed
-          </p>
+          <p className="text-2xl font-bold">{orderStats?.totalOrders ?? 0}</p>
+          <p className="text-xs opacity-70 mt-1">Today: {orderStats?.ordersToday ?? 0} · Month: {orderStats?.ordersThisMonth ?? 0}</p>
         </div>
 
-        {/* Total Products */}
-        <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl p-6 text-white shadow-xl">
-          <div className="flex items-center justify-between mb-4">
-            <Package className="w-10 h-10" />
-            <div className="bg-white/20 rounded-lg px-3 py-1 text-sm font-bold">Products</div>
+        <div className="bg-gradient-to-br from-purple-600 to-pink-700 rounded-xl p-5 text-white shadow-lg">
+          <div className="flex items-center gap-3 mb-3">
+            <Package className="w-8 h-8 opacity-80" />
+            <span className="text-sm font-medium opacity-80">Products</span>
           </div>
-          <p className="text-purple-100 text-sm mb-1">Total Products</p>
-          <p className="text-3xl font-bold">{stats.totalProducts}</p>
+          <p className="text-2xl font-bold">{productCount}</p>
+          <p className="text-xs opacity-70 mt-1">Active in store</p>
         </div>
 
-        {/* Total Customers */}
-        <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-xl p-6 text-white shadow-xl">
-          <div className="flex items-center justify-between mb-4">
-            <Users className="w-10 h-10" />
-            <div className="bg-white/20 rounded-lg px-3 py-1 text-sm font-bold">Customers</div>
+        <div className="bg-gradient-to-br from-orange-600 to-red-700 rounded-xl p-5 text-white shadow-lg">
+          <div className="flex items-center gap-3 mb-3">
+            <FileText className="w-8 h-8 opacity-80" />
+            <span className="text-sm font-medium opacity-80">Blog Posts</span>
           </div>
-          <p className="text-orange-100 text-sm mb-1">Email Subscribers</p>
-          <p className="text-3xl font-bold">{stats.totalCustomers}</p>
+          <p className="text-2xl font-bold">{blogCount.toLocaleString()}</p>
+          <p className="text-xs opacity-70 mt-1">SEO content published</p>
         </div>
       </div>
 
-      {/* Quick Stats Grid */}
-      <div className="grid md:grid-cols-6 gap-4">
+      {/* Secondary stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
           <div className="flex items-center gap-3">
-            <FileText className="w-8 h-8 text-blue-400" />
+            <TrendingUp className="w-6 h-6 text-green-400" />
             <div>
-              <p className="text-gray-400 text-xs">Blog Posts</p>
-              <p className="text-white text-xl font-bold">{stats.totalBlogs}</p>
+              <p className="text-gray-400 text-xs">This Month</p>
+              <p className="text-white text-lg font-bold">{formatCurrency(orderStats?.revenueThisMonth ?? 0)}</p>
             </div>
           </div>
         </div>
 
         <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
           <div className="flex items-center gap-3">
-            <Star className="w-8 h-8 text-yellow-400" />
+            <Clock className="w-6 h-6 text-yellow-400" />
             <div>
-              <p className="text-gray-400 text-xs">Reviews</p>
-              <p className="text-white text-xl font-bold">{stats.totalReviews}</p>
+              <p className="text-gray-400 text-xs">Pending Fulfillment</p>
+              <p className="text-white text-lg font-bold">{orderStats?.pendingFulfillments ?? 0}</p>
             </div>
           </div>
         </div>
 
         <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
           <div className="flex items-center gap-3">
-            <Tag className="w-8 h-8 text-red-400" />
+            <CheckCircle className="w-6 h-6 text-green-400" />
             <div>
-              <p className="text-gray-400 text-xs">Promotions</p>
-              <p className="text-white text-xl font-bold">{stats.totalPromos}</p>
+              <p className="text-gray-400 text-xs">This Week</p>
+              <p className="text-white text-lg font-bold">{orderStats?.ordersThisWeek ?? 0} orders</p>
             </div>
           </div>
         </div>
 
         <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
           <div className="flex items-center gap-3">
-            <Mail className="w-8 h-8 text-green-400" />
+            <Activity className="w-6 h-6 text-blue-400" />
             <div>
-              <p className="text-gray-400 text-xs">Campaigns</p>
-              <p className="text-white text-xl font-bold">{stats.totalEmails}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-          <div className="flex items-center gap-3">
-            <Clock className="w-8 h-8 text-yellow-400" />
-            <div>
-              <p className="text-gray-400 text-xs">Pending</p>
-              <p className="text-white text-xl font-bold">{stats.pendingOrders}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-          <div className="flex items-center gap-3">
-            <CheckCircle className="w-8 h-8 text-green-400" />
-            <div>
-              <p className="text-gray-400 text-xs">Completed</p>
-              <p className="text-white text-xl font-bold">{stats.completedOrders}</p>
+              <p className="text-gray-400 text-xs">Week Revenue</p>
+              <p className="text-white text-lg font-bold">{formatCurrency(orderStats?.revenueThisWeek ?? 0)}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Recent Orders and Products */}
+      {/* Live Visitors + Recent Orders */}
       <div className="grid md:grid-cols-2 gap-6">
+        {/* Live Visitors */}
+        <div>
+          <LiveVisitorStatistics />
+        </div>
+
         {/* Recent Orders */}
         <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
           <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <ShoppingCart className="w-6 h-6 text-cyan-400" />
+            <ShoppingCart className="w-5 h-5 text-orange-400" />
             Recent Orders
           </h3>
 
-          {recentOrders.length === 0 ? (
+          {!orderStats?.recentOrders?.length ? (
             <div className="text-center py-8 text-gray-400">
-              <AlertCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>No orders yet</p>
+              <AlertCircle className="w-10 h-10 mx-auto mb-2 opacity-50" />
+              <p>No recent orders</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {recentOrders.map((order) => (
-                <div key={order.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <p className="text-white font-semibold">{order.customer_name}</p>
-                      <p className="text-gray-400 text-sm">#{order.order_number}</p>
+              {orderStats.recentOrders.slice(0, 8).map((order) => (
+                <div key={order.id} className="bg-gray-900 rounded-lg p-3 border border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white text-sm font-medium truncate">{order.customerEmail}</p>
+                      <p className="text-gray-400 text-xs truncate">{order.productName}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-green-400 font-bold">{formatCurrency(Number(order.total_amount))}</p>
-                      <span className={`inline-block px-2 py-1 rounded text-xs text-white ${getStatusColor(order.order_status)}`}>
-                        {order.order_status}
+                    <div className="text-right ml-3 shrink-0">
+                      <p className="text-green-400 text-sm font-bold">{formatCurrency(order.amount)}</p>
+                      <span className={`inline-block px-2 py-0.5 rounded text-xs text-white ${getStatusColor(order.status)}`}>
+                        {order.status}
                       </span>
                     </div>
                   </div>
-                  <p className="text-gray-500 text-xs">{formatDate(order.created_at)}</p>
                 </div>
               ))}
             </div>
           )}
-        </div>
 
-        {/* Recent Products */}
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <Package className="w-6 h-6 text-purple-400" />
-            Recent Products
-          </h3>
-
-          {recentProducts.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">
-              <AlertCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>No products yet</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {recentProducts.map((product) => (
-                <div key={product.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <p className="text-white font-semibold">{product.name}</p>
-                      <p className="text-gray-400 text-sm">Stock: {product.stock_quantity}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-cyan-400 font-bold">{formatCurrency(Number(product.price))}</p>
-                      {product.is_active ? (
-                        <span className="inline-block px-2 py-1 bg-green-500 rounded text-xs text-white">Active</span>
-                      ) : (
-                        <span className="inline-block px-2 py-1 bg-gray-500 rounded text-xs text-white">Inactive</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-xl p-6">
-        <h3 className="text-cyan-400 font-bold text-xl mb-4 flex items-center gap-2">
-          <Zap className="w-6 h-6" />
-          Quick Actions
-        </h3>
-        <div className="grid md:grid-cols-4 gap-4">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg p-4 font-semibold transition-all flex items-center gap-2">
-            <Package className="w-5 h-5" />
-            Add Product
-          </button>
-          <button className="bg-green-600 hover:bg-green-700 text-white rounded-lg p-4 font-semibold transition-all flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5" />
-            View Orders
-          </button>
-          <button className="bg-purple-600 hover:bg-purple-700 text-white rounded-lg p-4 font-semibold transition-all flex items-center gap-2">
-            <Mail className="w-5 h-5" />
-            Send Email
-          </button>
-          <button className="bg-orange-600 hover:bg-orange-700 text-white rounded-lg p-4 font-semibold transition-all flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            SEO Settings
-          </button>
+          <p className="text-gray-500 text-xs mt-3 text-right">
+            Updated {lastUpdated.toLocaleTimeString()}
+          </p>
         </div>
       </div>
 
       {/* System Status */}
       <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <Activity className="w-6 h-6 text-green-400" />
+        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <Activity className="w-5 h-5 text-green-400" />
           System Status
         </h3>
-        <div className="grid md:grid-cols-4 gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-            <div>
-              <p className="text-gray-400 text-sm">Database</p>
-              <p className="text-white font-semibold">Connected</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { label: 'API Server', status: true },
+            { label: 'Stripe Payments', status: true },
+            { label: 'Email (Resend)', status: true },
+            { label: 'Database (Supabase)', status: true },
+          ].map((item) => (
+            <div key={item.label} className="flex items-center gap-2">
+              <div className={`w-2.5 h-2.5 rounded-full ${item.status ? 'bg-green-400' : 'bg-red-400'}`} />
+              <span className="text-gray-300 text-sm">{item.label}</span>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-            <div>
-              <p className="text-gray-400 text-sm">API</p>
-              <p className="text-white font-semibold">Online</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-            <div>
-              <p className="text-gray-400 text-sm">Storage</p>
-              <p className="text-white font-semibold">Active</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-            <div>
-              <p className="text-gray-400 text-sm">Security</p>
-              <p className="text-white font-semibold">Protected</p>
-            </div>
-          </div>
+          ))}
         </div>
-      </div>
-
-      {/* Live Visitor Statistics */}
-      <div className="mt-8">
-        <LiveVisitorStatistics />
       </div>
     </div>
   );

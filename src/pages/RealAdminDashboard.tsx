@@ -107,7 +107,7 @@ export default function RealAdminDashboard() {
         {/* Logo */}
         <div className="p-6 border-b border-gray-700">
           <h1 className="text-2xl font-bold">Admin Panel</h1>
-          <p className="text-sm text-gray-400 mt-1">Inferno TV</p>
+          <p className="text-sm text-gray-400 mt-1">StreamStick Pro</p>
         </div>
 
         {/* User Info */}
@@ -189,23 +189,38 @@ function DashboardOverview({ setActiveView }: { setActiveView: (view: string) =>
   }, []);
 
   const loadStats = async () => {
-    // Load real stats from database
-    const { supabase } = await import('../lib/supabase');
+    try {
+      const token = localStorage.getItem('custom_admin_token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    const [productsRes, ordersRes] = await Promise.all([
-      supabase.from('real_products').select('id', { count: 'exact' }),
-      supabase.from('customer_orders').select('total', { count: 'exact' })
-    ]);
+      const [statsRes, productsRes] = await Promise.all([
+        fetch('/api/admin/orders/stats', { headers }),
+        fetch('/api/admin/products', { headers }),
+      ]);
 
-    const revenue = ordersRes.data?.reduce((sum, order) =>
-      sum + parseFloat(order.total || '0'), 0) || 0;
+      let totalOrders = 0;
+      let totalRevenue = 0;
+      if (statsRes.ok) {
+        const data = await statsRes.json() as { data?: any };
+        totalOrders = data.data?.totalOrders ?? 0;
+        totalRevenue = (data.data?.totalRevenue ?? 0) / 100;
+      }
 
-    setStats({
-      products: productsRes.count || 0,
-      orders: ordersRes.count || 0,
-      customers: ordersRes.count || 0, // Approximate
-      revenue: revenue
-    });
+      let totalProducts = 0;
+      if (productsRes.ok) {
+        const data = await productsRes.json() as { data?: any[] };
+        totalProducts = data.data?.length ?? 0;
+      }
+
+      setStats({
+        products: totalProducts,
+        orders: totalOrders,
+        customers: totalOrders,
+        revenue: totalRevenue,
+      });
+    } catch (err) {
+      console.error('Error loading stats:', err);
+    }
   };
 
   const quickActions = [
