@@ -160,13 +160,11 @@ export function createStorage(config: StorageConfig) {
         amazon_order_id: order.amazonOrderId,
         is_renewal: order.isRenewal,
         existing_username: order.existingUsername,
-        expired_more_than_one_week: order.expiredMoreThanOneWeek,
-        provisioning_branch: order.provisioningBranch,
         generated_username: order.generatedUsername,
         generated_password: order.generatedPassword,
         country_preference: order.countryPreference,
-        customer_message: order.customerMessage,
-        customer_phone: order.customerPhone,
+        // Columns below require schema migration before they can be inserted:
+        // customer_message, customer_phone, expired_more_than_one_week, provisioning_branch
       };
       
       const { data, error } = await supabase.from('orders').insert(dbOrder).select().single();
@@ -215,13 +213,10 @@ export function createStorage(config: StorageConfig) {
       if (updates.amazonOrderId !== undefined) dbUpdates.amazon_order_id = updates.amazonOrderId;
       if (updates.isRenewal !== undefined) dbUpdates.is_renewal = updates.isRenewal;
       if (updates.existingUsername !== undefined) dbUpdates.existing_username = updates.existingUsername;
-      if (updates.expiredMoreThanOneWeek !== undefined) dbUpdates.expired_more_than_one_week = updates.expiredMoreThanOneWeek;
-      if (updates.provisioningBranch !== undefined) dbUpdates.provisioning_branch = updates.provisioningBranch;
       if (updates.generatedUsername !== undefined) dbUpdates.generated_username = updates.generatedUsername;
       if (updates.generatedPassword !== undefined) dbUpdates.generated_password = updates.generatedPassword;
       if (updates.countryPreference !== undefined) dbUpdates.country_preference = updates.countryPreference;
-      if (updates.customerMessage !== undefined) dbUpdates.customer_message = updates.customerMessage;
-      if (updates.customerPhone !== undefined) dbUpdates.customer_phone = updates.customerPhone;
+      // Columns below require schema migration: expiredMoreThanOneWeek, provisioningBranch, customerMessage, customerPhone
       
       const { data } = await supabase.from('orders').update(dbUpdates).eq('id', id).select().single();
       return data ? this.mapOrderFromDb(data) : undefined;
