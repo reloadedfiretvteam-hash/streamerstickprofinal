@@ -1825,7 +1825,7 @@ app.get('*', async (c) => {
   // Known SPA routes that should always return 200 (even without a static asset).
   // Blog slugs are only considered known if metadata resolves (post exists).
   const staticKnownRoutes = new Set([
-    '/', '/shop', '/shadow-services', '/admin', '/checkout', '/success', '/blog',
+    '/', '/shop', '/shadow-services', '/admin', '/checkout', '/success', '/cancel', '/blog',
     '/customer-login', '/my-account', '/forgot-password', '/reset-password',
     '/terms', '/privacy', '/refund',     '/iptv', '/iptv-firestick', '/iptv-services', '/fire-sticks',
     '/jailbroken-fire-sticks', '/devices', '/firestick-devices', '/bundles', '/best-iptv-firestick',
