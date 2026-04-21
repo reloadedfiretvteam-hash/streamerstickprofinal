@@ -485,6 +485,112 @@ app.post('/api/track-event', async (c) => {
   }
 });
 
+// Manual order creation for legacy Bitcoin/CashApp payment flows
+app.post('/api/orders/manual', async (c) => {
+  try {
+    const body = await c.req.json().catch(() => ({} as any));
+    const {
+      customerName, customerEmail, customerPhone, customerAddress,
+      username, paymentMethod, items, total, purchaseCode, orderNumber,
+    } = body;
+
+    if (!customerEmail || !items || !purchaseCode) {
+      return c.json({ error: 'customerEmail, items, and purchaseCode are required' }, 400);
+    }
+
+    const storage = getStorage(c.env);
+
+    // Map items to product names for order record
+    const productNames = Array.isArray(items)
+      ? items.map((i: any) => `${i.product_name || i.name} x${i.quantity || 1}`).join(', ')
+      : '';
+
+    // Create order using the storage layer's compatible columns
+    const orderData: any = {
+      customerEmail: customerEmail.toLowerCase().trim(),
+      customerName: customerName || null,
+      customerId: null,
+      stripeCheckoutSessionId: null,
+      stripePaymentIntentId: `manual_${purchaseCode}`,
+      stripeCustomerId: null,
+      shadowProductId: null,
+      shadowPriceId: null,
+      realProductId: `manual-${paymentMethod}`,
+      realProductName: productNames,
+      amount: Math.round((total || 0) * 100), // Convert to cents
+      status: 'pending_payment',
+      credentialsSent: false,
+      shippingName: customerName || null,
+      shippingPhone: customerPhone || null,
+      shippingStreet: customerAddress || null,
+      shippingCity: null,
+      shippingState: null,
+      shippingZip: null,
+      shippingCountry: null,
+      fulfillmentStatus: 'pending',
+      amazonOrderId: null,
+      isRenewal: false,
+      existingUsername: username || null,
+      generatedUsername: username || null,
+      generatedPassword: null,
+      countryPreference: null,
+    };
+
+    let orderId: string | null = null;
+    try {
+      const order = await storage.createOrder(orderData);
+      orderId = order.id;
+    } catch (dbErr: any) {
+      console.error('[orders/manual] DB write failed (non-fatal):', dbErr?.message);
+    }
+
+    // Subscribe email to contacts list
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const svcKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.VITE_SUPABASE_ANON_KEY || '';
+      const supabase = createClient(c.env.VITE_SUPABASE_URL, svcKey);
+      await supabase.from('contacts').upsert(
+        { email: customerEmail.toLowerCase().trim(), source: 'checkout_manual', is_subscribed: true },
+        { onConflict: 'email', ignoreDuplicates: false }
+      );
+    } catch { /* non-fatal */ }
+
+    // Send confirmation email via Resend
+    const { sendEmail } = await import('./email-providers');
+    const itemsList = Array.isArray(items)
+      ? items.map((i: any) => `• ${i.product_name || i.name} × ${i.quantity || 1} — $${(i.total_price || (i.unit_price || 0) * (i.quantity || 1)).toFixed(2)}`).join('\n')
+      : '';
+
+    const payInstructions = paymentMethod === 'cashapp'
+      ? `Send $${(total || 0).toFixed(2)} to <strong>$streamstickpro</strong> on CashApp with order # in note`
+      : `Send exactly the BTC amount to the wallet address provided. Include order # in memo.`;
+
+    await sendEmail(c.env, {
+      to: customerEmail,
+      subject: `Order Confirmation — ${orderNumber} — Code: ${purchaseCode}`,
+      html: `<h2>Order Confirmed!</h2><p>Hi ${customerName || 'Customer'},</p>
+<p>Thank you for your order from <strong>StreamStick Pro</strong>!</p>
+<p><strong>Purchase Code:</strong> ${purchaseCode}<br><strong>Order #:</strong> ${orderNumber}</p>
+<h3>Items:</h3><pre style="background:#f5f5f5;padding:12px;border-radius:6px">${itemsList}</pre>
+<p><strong>Total:</strong> $${(total || 0).toFixed(2)}</p>
+<h3>Payment Instructions:</h3><p>${payInstructions}</p>
+<p>Once we receive your payment, we'll email your streaming credentials within 1 hour.</p>
+<p>Questions? Email: <a href="mailto:support@streamerstickpro.com">support@streamerstickpro.com</a></p>`,
+    }).catch((err: any) => console.warn('[orders/manual] email send failed:', err?.message));
+
+    return c.json({
+      success: true,
+      orderId,
+      purchaseCode,
+      orderNumber,
+      message: 'Order created successfully',
+    });
+  } catch (err: any) {
+    console.error('[orders/manual]', err?.message || err);
+    return c.json({ error: 'Failed to create order', details: err?.message }, 500);
+  }
+});
+
 app.post('/api/track-cart', async (c) => {
   try {
     const { getStorage } = await import('./helpers');

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { X, Plus, Minus, Copy, Check, DollarSign, Wallet, ShoppingBag, CreditCard, AlertCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 import OrderConfirmation from './OrderConfirmation';
 import LegalDisclaimer from './LegalDisclaimer';
 import ValidatedImage from './ValidatedImage';
@@ -30,7 +29,7 @@ export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity,
   const [btcPrice, setBtcPrice] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [copiedField, setCopiedField] = useState('');
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
+
   const [creatingPaymentIntent, setCreatingPaymentIntent] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
@@ -86,16 +85,9 @@ export default function CheckoutCart({ isOpen, onClose, items, onUpdateQuantity,
   };
 
   const generatePurchaseCode = async (): Promise<string> => {
-    try {
-      const { data, error } = await supabase.rpc('generate_purchase_code');
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error generating purchase code:', error);
-      const timestamp = Date.now().toString(36).toUpperCase();
-      const random = Math.random().toString(36).substring(2, 7).toUpperCase();
-      return `PC-${timestamp}-${random}`;
-    }
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const random = Math.random().toString(36).substring(2, 7).toUpperCase();
+    return `PC-${timestamp}-${random}`;
   };
 
   // Generate 8–9 character username/password using customer name + random letters/numbers
@@ -192,14 +184,7 @@ We'll process your order as soon as we receive your payment confirmation.
 Need Support? Email: ${SHOP_OWNER_EMAIL}
 `;
 
-    await supabase.from('email_logs').insert({
-      recipient: customerEmail,
-      template_key: 'order_confirmation',
-      subject: `Order Confirmation - ${orderNumber} - Purchase Code: ${purchaseCode}`,
-      body: emailBody,
-      status: 'pending'
-    });
-
+    // Email is sent server-side by /api/orders/manual
     return emailBody;
   };
 
@@ -248,13 +233,7 @@ ${paymentMethod === 'cashapp' ?
 Customer has been sent complete payment instructions including their unique purchase code.
 `;
 
-    await supabase.from('email_logs').insert({
-      recipient: SHOP_OWNER_EMAIL,
-      template_key: 'shop_notification',
-      subject: `🛒 NEW ORDER: ${orderNumber} - Code: ${purchaseCode}`,
-      body: emailBody,
-      status: 'pending'
-    });
+    // Email notification handled server-side by /api/orders/manual
   };
 
   // Log portal + credentials emails for customer and shop owner
@@ -299,23 +278,9 @@ Customer has been sent complete payment instructions including their unique purc
       `Use these credentials to configure their access on ${SERVICE_PORTAL_URL}.`
     ].join('\n');
 
-    // Customer credentials email
-    await supabase.from('email_logs').insert({
-      recipient: customerEmail,
-      template_key: 'service_credentials',
-      subject: `Your Streaming Portal Access - Order ${orderNumber}`,
-      body: customerBody,
-      status: 'pending'
-    });
-
-    // Shop owner copy
-    await supabase.from('email_logs').insert({
-      recipient: SHOP_OWNER_EMAIL,
-      template_key: 'service_credentials_owner_copy',
-      subject: `NEW PORTAL CREDENTIALS - ${orderNumber}`,
-      body: ownerBody,
-      status: 'pending'
-    });
+    // Credentials emails are handled server-side after payment verification
+    void customerBody;
+    void ownerBody;
   };
 
   const validateField = (field: string, value: string) => {
@@ -379,7 +344,6 @@ Customer has been sent complete payment instructions including their unique purc
     setProcessing(true);
 
     try {
-      // Generate unique purchase code
       const purchaseCode = await generatePurchaseCode();
       const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
@@ -388,63 +352,31 @@ Customer has been sent complete payment instructions including their unique purc
         product_name: item.name,
         quantity: item.quantity,
         unit_price: item.price,
-        total_price: item.price * item.quantity
+        total_price: item.price * item.quantity,
       }));
 
-      const isFirestickOrder = items.some(item =>
-        item.name.toLowerCase().includes('fire stick') ||
-        item.name.toLowerCase().includes('firestick') ||
-        item.name.toLowerCase().includes('fire tv')
-      );
-
-      // Create order in database with purchase code
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          order_number: orderNumber,
-          purchase_code: purchaseCode,
-          customer_name: customerName,
-          username: username,
-          customer_email: customerEmail,
-          customer_phone: customerPhone,
-          shipping_address: customerAddress,
-          payment_method: paymentMethod,
-          payment_status: 'pending',
-          order_status: 'pending',
-          subtotal: total,
-          tax: 0,
-          total: total,
+      const res = await fetch('/api/orders/manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName,
+          customerEmail,
+          customerPhone,
+          customerAddress,
+          username,
+          paymentMethod,
           items: orderItems,
-          notes: `Payment method: ${paymentMethod}, Purchase Code: ${purchaseCode}`
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Create purchase code record
-      await supabase.from('purchase_codes').insert({
-        code: purchaseCode,
-        order_id: order.id,
-        used: false
+          total,
+          purchaseCode,
+          orderNumber,
+        }),
       });
 
-      // Send customer order confirmation email
-      await sendCustomerEmail(purchaseCode, orderNumber, orderItems);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ error: 'Server error' })) as { error?: string };
+        throw new Error(errData.error || `Order failed (${res.status})`);
+      }
 
-      // Send shop owner order notification email
-      await sendShopOwnerEmail(purchaseCode, orderNumber, orderItems);
-
-      // Log streaming portal credentials emails for both customer and owner
-      await logCredentialsEmails(orderNumber, isFirestickOrder);
-
-      // Capture customer email
-      await supabase.from('email_captures').upsert({
-        email: customerEmail,
-        source: 'checkout'
-      }, { onConflict: 'email' });
-
-      // Set order data for confirmation
       setOrderData({
         orderNumber,
         purchaseCode,
@@ -454,11 +386,10 @@ Customer has been sent complete payment instructions including their unique purc
         customerEmail,
         btcAmount: paymentMethod === 'bitcoin' ? btcAmount : null,
         btcAddress: paymentMethod === 'bitcoin' ? BITCOIN_ADDRESS : null,
-        cashAppTag: paymentMethod === 'cashapp' ? CASH_APP_TAG : null
+        cashAppTag: paymentMethod === 'cashapp' ? CASH_APP_TAG : null,
       });
 
       setShowConfirmation(true);
-      console.log('Order created successfully with purchase code:', purchaseCode);
     } catch (error: any) {
       console.error('Error creating order:', error);
       alert(`Error: ${error.message || 'Unable to process order. Please try again or contact support.'}`);
@@ -593,63 +524,48 @@ Customer has been sent complete payment instructions including their unique purc
                       </div>
                     )}
                     
-                    {!clientSecret ? (
-                      <button
-                        onClick={async () => {
-                          if (!customerEmail || !customerName) {
-                            setPaymentError('Please fill in your name and email above');
-                            return;
-                          }
-                          setCreatingPaymentIntent(true);
-                          setPaymentError(null);
-                          try {
-                            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-                            const productId = items.length > 0 ? items[0].productId : 'cart-checkout';
-                            const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({
-                                productId: productId,
-                                customerEmail: customerEmail,
-                                customerName: customerName,
-                              }),
-                            });
-                            const data = await response.json();
-                            if (!response.ok) throw new Error(data.error || 'Failed to create payment intent');
-                            setClientSecret(data.clientSecret);
-                          } catch (error: unknown) {
-                            const errorMsg = error instanceof Error ? error.message : 'Payment initialization failed';
-                            setPaymentError(errorMsg);
-                          } finally {
-                            setCreatingPaymentIntent(false);
-                          }
-                        }}
-                        disabled={creatingPaymentIntent}
-                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                      >
-                        {creatingPaymentIntent ? (
-                          <>
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            Initializing...
-                          </>
-                        ) : (
-                          'Continue to Card Payment'
-                        )}
-                      </button>
-                    ) : (
-                      <StripePaymentForm 
-                        amount={total}
-                        clientSecret={clientSecret}
-                        onSuccess={async (paymentIntentId: string) => {
-                          await handleCompleteOrder();
-                          // Store payment intent ID if needed
-                          console.log('Payment successful:', paymentIntentId);
-                        }}
-                        onError={(error) => {
-                          setPaymentError(error);
-                        }}
-                      />
-                    )}
+                    <button
+                      onClick={async () => {
+                        if (!customerEmail || !customerName) {
+                          setPaymentError('Please fill in your name and email above');
+                          return;
+                        }
+                        setCreatingPaymentIntent(true);
+                        setPaymentError(null);
+                        try {
+                          const response = await fetch('/api/checkout', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              items: items.map(item => ({ productId: item.productId, quantity: item.quantity })),
+                              customerEmail,
+                              customerName,
+                              customerPhone: customerPhone || undefined,
+                            }),
+                          });
+                          const data = await response.json() as { url?: string; error?: string };
+                          if (!response.ok) throw new Error(data.error || 'Checkout failed');
+                          if (!data.url) throw new Error('No checkout URL returned');
+                          window.location.href = data.url;
+                        } catch (error: unknown) {
+                          const errorMsg = error instanceof Error ? error.message : 'Payment initialization failed';
+                          setPaymentError(errorMsg);
+                        } finally {
+                          setCreatingPaymentIntent(false);
+                        }
+                      }}
+                      disabled={creatingPaymentIntent}
+                      className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {creatingPaymentIntent ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          Redirecting to Checkout...
+                        </>
+                      ) : (
+                        'Continue to Secure Payment'
+                      )}
+                    </button>
                   </div>
                 )}
 
