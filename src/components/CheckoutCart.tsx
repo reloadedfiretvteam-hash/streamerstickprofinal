@@ -186,7 +186,7 @@ TOTAL: $${total.toFixed(2)}
 ${paymentInstructions}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Thank you for choosing Inferno TV!
+Thank you for choosing StreamStick Pro!
 We'll process your order as soon as we receive your payment confirmation.
 
 Need Support? Email: ${SHOP_OWNER_EMAIL}
@@ -279,7 +279,7 @@ Customer has been sent complete payment instructions including their unique purc
       : [];
 
     const customerBody = [
-      `Thank you for your purchase from Inferno TV!`,
+      `Thank you for your purchase from StreamStick Pro!`,
       ``,
       `Here is your permanent streaming portal access:`,
       ...baseLines,

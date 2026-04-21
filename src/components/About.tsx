@@ -11,13 +11,13 @@ export default function About() {
               <span className="text-sm font-medium">ABOUT INFERNO TV</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Inferno TV?</span>
+              Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">StreamStick Pro?</span>
             </h2>
           </div>
 
           <div className="prose prose-lg prose-invert max-w-none mb-12">
             <p className="text-xl text-blue-100 leading-relaxed mb-6">
-              Inferno TV is your premier destination for premium IPTV subscriptions and fully jailbroken Fire Stick devices. We specialize in delivering the ultimate streaming experience with access to over 18,000 live channels and 60,000+ movies and TV shows.
+              StreamStick Pro is your premier destination for premium IPTV subscriptions and fully jailbroken Fire Stick devices. We specialize in delivering the ultimate streaming experience with access to over 18,000 live channels and 60,000+ movies and TV shows.
             </p>
 
             <p className="text-lg text-blue-200 leading-relaxed mb-6">

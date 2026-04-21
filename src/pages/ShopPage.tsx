@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, getStorageUrl } from '../lib/supabase';
+import { getStorageUrl } from '../lib/supabase';
 import { ShoppingCart, Search, Filter, Star, CreditCard } from 'lucide-react';
 import Footer from '../components/Footer';
 import CustomerReviewsSection from '../components/CustomerReviewsSection';
@@ -51,20 +51,27 @@ export default function ShopPage() {
 
   const loadProducts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('real_products')
-        .select('*')
-        .in('status', ['active', 'publish', 'published'])
-        .order('sort_order', { ascending: true })
-        .order('created_at', { ascending: false });
+      const res = await fetch('/api/products');
+      if (!res.ok) throw new Error(`Failed to load products: ${res.status}`);
+      const json = await res.json() as { data?: any[] };
+      const rawData = (json.data || []).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        description: p.description || '',
+        // Convert cents to dollar string to preserve existing display logic
+        price: (p.price / 100).toFixed(2),
+        sale_price: p.salePrice != null ? (p.salePrice / 100).toFixed(2) : null,
+        main_image: p.imageUrl || '',
+        image_url: p.imageUrl || '',
+        category: p.category || 'other',
+        stock_quantity: 100,
+        rating: 4.9,
+        featured: true,
+        stripe_payment_link: null,
+      }));
 
-      if (error) {
-        console.error('Error loading products:', error);
-        throw error;
-      }
-      
-      // Ensure images are properly formatted from Supabase Storage
-      const productsWithImages = (data || []).map((product: Product) => {
+      // Ensure images are properly formatted
+      const productsWithImages = rawData.map((product: Product) => {
         let imageUrl = product.main_image || product.image_url || '';
         
         // Check if image is broken/invalid
@@ -73,7 +80,6 @@ export default function ShopPage() {
           imageUrl.includes('20 bytes') ||
           imageUrl.length < 10 ||
           imageUrl.includes('placeholder') ||
-          imageUrl.includes('pexels') ||
           imageUrl.trim() === ''
         );
         

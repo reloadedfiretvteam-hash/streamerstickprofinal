@@ -15,7 +15,7 @@ export default function Footer({ onContactClick }: FooterProps) {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <Flame className="w-8 h-8 text-orange-500" />
-              <span className="text-xl font-bold text-white">Inferno TV</span>
+              <span className="text-xl font-bold text-white">StreamStick Pro</span>
             </div>
             <p className="text-sm text-gray-400 mb-4">
               Premium IPTV streaming with 18,000+ channels and 60,000+ movies & series. Jailbroken Fire Sticks available.
@@ -87,7 +87,7 @@ export default function Footer({ onContactClick }: FooterProps) {
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
             <p className="text-gray-400">
-              © {currentYear} Inferno TV. All rights reserved.
+              © {currentYear} StreamStick Pro. All rights reserved.
             </p>
             <div className="flex items-center gap-6">
               <span className="text-green-400 font-semibold">🔒 Secure Payment</span>

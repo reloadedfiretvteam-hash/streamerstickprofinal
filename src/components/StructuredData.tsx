@@ -5,7 +5,7 @@ export default function StructuredData() {
     const organizationSchema = {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "Inferno TV",
+      "name": "StreamStick Pro",
       "alternateName": "Stream Unlimited",
       "url": "https://streamunlimited.com",
       "logo": "https://streamunlimited.com/logo.png",
@@ -31,7 +31,7 @@ export default function StructuredData() {
     const localBusinessSchema = {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
-      "name": "Inferno TV",
+      "name": "StreamStick Pro",
       "image": "https://streamunlimited.com/logo.png",
       "priceRange": "$$$",
       "telephone": "+1-XXX-XXX-XXXX",
@@ -72,7 +72,7 @@ export default function StructuredData() {
     const websiteSchema = {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "Inferno TV",
+      "name": "StreamStick Pro",
       "url": "https://streamunlimited.com",
       "potentialAction": {
         "@type": "SearchAction",
@@ -88,7 +88,7 @@ export default function StructuredData() {
       "description": "Access 20,000+ live TV channels, movies, sports, and PPV events with our premium IPTV service. No contracts, no hidden fees.",
       "brand": {
         "@type": "Brand",
-        "name": "Inferno TV"
+        "name": "StreamStick Pro"
       },
       "offers": {
         "@type": "AggregateOffer",
@@ -99,7 +99,7 @@ export default function StructuredData() {
         "priceValidUntil": "2025-12-31",
         "seller": {
           "@type": "Organization",
-          "name": "Inferno TV"
+          "name": "StreamStick Pro"
         }
       },
       "aggregateRating": {
@@ -210,7 +210,7 @@ export default function StructuredData() {
       "validThrough": "2025-12-31",
       "seller": {
         "@type": "Organization",
-        "name": "Inferno TV"
+        "name": "StreamStick Pro"
       }
     };
 
