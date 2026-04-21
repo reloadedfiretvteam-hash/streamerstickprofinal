@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Settings, Save, Globe, Mail } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+
+function getAuthHeader(): Record<string, string> {
+  const token = localStorage.getItem('custom_admin_token');
+  return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+}
 
 /* interface SiteSetting {
   setting_key: string;
@@ -11,22 +15,22 @@ import { supabase } from '../../lib/supabase';
 
 export default function SiteSettingsManager() {
   const [settings, setSettings] = useState<Record<string, string>>({
-    site_name: 'FireStreamPlus',
-    site_domain: 'FireStreamPlus.com',
-    company_name: 'FireStreamPlus',
-    company_email: 'support@firestreamplus.com',
+    site_name: 'StreamStick Pro',
+    site_domain: 'streamerstickpro.com',
+    company_name: 'StreamStick Pro',
+    company_email: 'support@streamerstickpro.com',
     company_phone: '',
     company_address: '',
-    support_email: 'support@firestreamplus.com',
-    sales_email: 'sales@firestreamplus.com',
-    contact_email: 'contact@firestreamplus.com',
+    support_email: 'support@streamerstickpro.com',
+    sales_email: 'sales@streamerstickpro.com',
+    contact_email: 'contact@streamerstickpro.com',
     facebook_url: '',
     twitter_url: '',
     instagram_url: '',
     youtube_url: '',
-    meta_title_suffix: ' | FireStreamPlus',
+    meta_title_suffix: ' | StreamStick Pro',
     meta_description_default: 'Premium IPTV streaming with 22,000+ channels and Fire Stick devices',
-    copyright_text: '© 2025 FireStreamPlus. All rights reserved.'
+    copyright_text: '© 2025 StreamStick Pro. All rights reserved.',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -37,18 +41,13 @@ export default function SiteSettingsManager() {
 
   const loadSettings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('site_settings')
-        .select('setting_key, setting_value');
-
-      if (error) throw error;
-
-      const settingsObj: Record<string, string> = {};
-      data?.forEach(item => {
-        settingsObj[item.setting_key] = item.setting_value;
-      });
-
-      setSettings(prev => ({...prev, ...settingsObj}));
+      const res = await fetch('/api/admin/site-settings', { headers: getAuthHeader() });
+      if (res.ok) {
+        const json = await res.json() as { data?: Record<string, string> };
+        if (json.data) {
+          setSettings(prev => ({ ...prev, ...json.data }));
+        }
+      }
     } catch (error) {
       console.error('Error loading settings:', error);
     } finally {
@@ -59,26 +58,18 @@ export default function SiteSettingsManager() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      for (const [key, value] of Object.entries(settings)) {
-        const { error } = await supabase
-          .from('site_settings')
-          .upsert({
-            setting_key: key,
-            setting_value: value,
-            setting_type: 'text',
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'setting_key'
-          });
-
-        if (error) throw error;
-      }
-
+      const res = await fetch('/api/admin/site-settings', {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify(settings),
+      });
+      const json = await res.json() as { error?: string };
+      if (!res.ok) throw new Error(json.error || 'Save failed');
       alert('Settings saved successfully!');
       loadSettings();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving settings:', error);
-      alert('Error saving settings');
+      alert('Error saving settings: ' + error.message);
     } finally {
       setSaving(false);
     }

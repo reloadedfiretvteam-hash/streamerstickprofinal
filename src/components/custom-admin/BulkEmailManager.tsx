@@ -1,77 +1,47 @@
 import { useState, useEffect } from 'react';
 import { Mail, Send, Users, TrendingUp, Clock, CheckCircle } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+
+function getAuthHeader(): Record<string, string> {
+  const token = localStorage.getItem('custom_admin_token');
+  return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+}
 
 export default function BulkEmailManager() {
-  const [emails, setEmails] = useState<string[]>([]);
+  const [contactCount, setContactCount] = useState(0);
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [campaignName, setCampaignName] = useState('');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
-  const [recipientType, setRecipientType] = useState<'all' | 'customers' | 'abandonment'>('all');
+  const [audience, setAudience] = useState<'all' | 'customers' | 'trials'>('all');
 
   useEffect(() => {
-    loadEmails();
+    loadContacts();
     loadCampaigns();
   }, []);
 
-  const loadEmails = async () => {
+  const loadContacts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('email_captures')
-        .select('email')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setEmails(data.map(item => item.email));
-    } catch (error) {
-      console.error('Error loading emails:', error);
+      const res = await fetch('/api/admin/marketing/contacts?limit=1', { headers: getAuthHeader() });
+      if (res.ok) {
+        const data = await res.json() as { contacts?: any[]; total?: number };
+        setContactCount(data.total ?? data.contacts?.length ?? 0);
+      }
+    } catch (err) {
+      console.error('Error loading contacts:', err);
     }
   };
 
   const loadCampaigns = async () => {
     try {
-      const { data, error } = await supabase
-        .from('email_campaigns')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setCampaigns(data || []);
-    } catch (error) {
-      console.error('Error loading campaigns:', error);
-    }
-  };
-
-  const getRecipientEmails = async () => {
-    let recipientEmails: string[] = [];
-
-    switch (recipientType) {
-      case 'all':
-        recipientEmails = emails;
-        break;
-
-      case 'customers': {
-        const { data: orderEmails } = await supabase
-          .from('orders')
-          .select('customer_email')
-          .eq('payment_status', 'paid');
-        recipientEmails = [...new Set(orderEmails?.map(o => o.customer_email) || [])];
-        break;
+      const res = await fetch('/api/admin/marketing/campaigns', { headers: getAuthHeader() });
+      if (res.ok) {
+        const data = await res.json() as { data?: any[] };
+        setCampaigns(data.data || []);
       }
-
-      case 'abandonment': {
-        const { data: abandonedEmails } = await supabase
-          .from('cart_abandonments')
-          .select('customer_email')
-          .is('recovered_at', null);
-        recipientEmails = [...new Set(abandonedEmails?.map(a => a.customer_email) || [])];
-        break;
-      }
+    } catch (err) {
+      console.error('Error loading campaigns:', err);
     }
-
-    return recipientEmails;
   };
 
   const sendCampaign = async () => {
@@ -83,61 +53,29 @@ export default function BulkEmailManager() {
     setLoading(true);
 
     try {
-      const recipientEmails = await getRecipientEmails();
-
-      if (recipientEmails.length === 0) {
-        alert('No recipients found');
-        setLoading(false);
-        return;
-      }
-
-      // Create campaign
-      const { data: campaign, error: campaignError } = await supabase
-        .from('email_campaigns')
-        .insert({
+      const res = await fetch('/api/admin/marketing/send', {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify({
           name: campaignName,
           subject,
           body,
-          status: 'sent',
-          sent_at: new Date().toISOString(),
-          total_recipients: recipientEmails.length
-        })
-        .select()
-        .single();
+          audience,
+          testMode: false,
+        }),
+      });
 
-      if (campaignError) throw campaignError;
+      const result = await res.json() as { success?: boolean; sent?: number; error?: string; message?: string };
 
-      // Log each send
-      const sends = recipientEmails.map(email => ({
-        campaign_id: campaign.id,
-        recipient_email: email,
-        status: 'sent'
-      }));
+      if (!res.ok) {
+        throw new Error(result.error || result.message || 'Failed to send campaign');
+      }
 
-      const { error: sendsError } = await supabase
-        .from('campaign_sends')
-        .insert(sends);
+      alert(`Campaign sent to ${result.sent ?? 0} recipients!`);
 
-      if (sendsError) throw sendsError;
-
-      // Log to email_logs for actual sending
-      const emailLogs = recipientEmails.map(email => ({
-        recipient: email,
-        subject,
-        body,
-        status: 'pending',
-        type: 'campaign'
-      }));
-
-      // Email log saved server-side by the send-email API
-
-      alert(`Campaign sent to ${recipientEmails.length} recipients!`);
-
-      // Reset form
       setCampaignName('');
       setSubject('');
       setBody('');
-
       loadCampaigns();
     } catch (error: any) {
       console.error('Error sending campaign:', error);
@@ -154,8 +92,8 @@ export default function BulkEmailManager() {
         <div className="bg-white rounded-lg p-4 shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Emails</p>
-              <p className="text-2xl font-bold text-gray-900">{emails.length}</p>
+              <p className="text-sm text-gray-600">Total Contacts</p>
+              <p className="text-2xl font-bold text-gray-900">{contactCount}</p>
             </div>
             <Users className="w-8 h-8 text-blue-500" />
           </div>
@@ -176,7 +114,7 @@ export default function BulkEmailManager() {
             <div>
               <p className="text-sm text-gray-600">Total Sent</p>
               <p className="text-2xl font-bold text-gray-900">
-                {campaigns.reduce((sum, c) => sum + (c.total_recipients || 0), 0)}
+                {campaigns.reduce((sum, c) => sum + (c.total_recipients || c.totalRecipients || 0), 0)}
               </p>
             </div>
             <TrendingUp className="w-8 h-8 text-purple-500" />
@@ -207,16 +145,16 @@ export default function BulkEmailManager() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Recipients
+              Audience
             </label>
             <select
-              value={recipientType}
-              onChange={(e) => setRecipientType(e.target.value as any)}
+              value={audience}
+              onChange={(e) => setAudience(e.target.value as any)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">All Email Subscribers ({emails.length})</option>
+              <option value="all">All Contacts ({contactCount})</option>
               <option value="customers">Paying Customers Only</option>
-              <option value="abandonment">Cart Abandonment (Not Recovered)</option>
+              <option value="trials">Free Trial Users</option>
             </select>
           </div>
 
@@ -240,7 +178,7 @@ export default function BulkEmailManager() {
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              placeholder={`Hi there!\n\nWe have an amazing deal for you...\n\nUse code SAVE20 for 20% off your order!\n\nShop now: https://yoursite.com\n\nBest regards,\nYour Team`}
+              placeholder={`Hi there!\n\nWe have an amazing deal for you...\n\nUse code SAVE20 for 20% off your order!\n\nShop now: https://streamerstickpro.com\n\nBest regards,\nStreamStick Pro Team`}
               rows={8}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             />
@@ -283,11 +221,11 @@ export default function BulkEmailManager() {
                     <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                       <span className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
-                        {campaign.total_recipients} recipients
+                        {campaign.total_recipients ?? campaign.totalRecipients ?? 0} recipients
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
-                        {new Date(campaign.sent_at || campaign.created_at).toLocaleDateString()}
+                        {new Date(campaign.sent_at || campaign.sentAt || campaign.created_at || campaign.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>

@@ -3497,5 +3497,116 @@ export function createAdminRoutes() {
     }
   });
 
+  // ─── Site Settings ──────────────────────────────────────────────────────────
+  app.get('/site-settings', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        c.env.VITE_SUPABASE_URL,
+        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY,
+      );
+      const { data, error } = await supabase.from('site_settings').select('setting_key, setting_value, setting_type, description');
+      if (error) return c.json({ error: error.message }, 500);
+      const settingsMap: Record<string, string> = {};
+      for (const row of data || []) settingsMap[row.setting_key] = row.setting_value;
+      return c.json({ data: settingsMap, rows: data || [] });
+    } catch (err: any) {
+      return c.json({ error: err.message }, 500);
+    }
+  });
+
+  app.post('/site-settings', async (c) => {
+    try {
+      const body = await c.req.json() as Record<string, string>;
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        c.env.VITE_SUPABASE_URL,
+        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY,
+      );
+      const upserts = Object.entries(body).map(([key, value]) => ({
+        setting_key: key,
+        setting_value: String(value),
+        setting_type: 'text',
+        updated_at: new Date().toISOString(),
+      }));
+      const { error } = await supabase.from('site_settings').upsert(upserts, { onConflict: 'setting_key' });
+      if (error) return c.json({ error: error.message }, 500);
+      return c.json({ success: true, updated: upserts.length });
+    } catch (err: any) {
+      return c.json({ error: err.message }, 500);
+    }
+  });
+
+  // ─── Categories ─────────────────────────────────────────────────────────────
+  app.get('/categories', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        c.env.VITE_SUPABASE_URL,
+        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY,
+      );
+      const { data, error } = await supabase.from('categories').select('*').order('display_order');
+      if (error) {
+        // Table may not exist yet — return empty list gracefully
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          return c.json({ data: [] });
+        }
+        return c.json({ error: error.message }, 500);
+      }
+      return c.json({ data: data || [] });
+    } catch (err: any) {
+      return c.json({ error: err.message }, 500);
+    }
+  });
+
+  app.post('/categories', async (c) => {
+    try {
+      const body = await c.req.json();
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        c.env.VITE_SUPABASE_URL,
+        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY,
+      );
+      const { data, error } = await supabase.from('categories').insert([body]).select().single();
+      if (error) return c.json({ error: error.message }, 500);
+      return c.json({ data });
+    } catch (err: any) {
+      return c.json({ error: err.message }, 500);
+    }
+  });
+
+  app.put('/categories/:id', async (c) => {
+    try {
+      const id = c.req.param('id');
+      const body = await c.req.json();
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        c.env.VITE_SUPABASE_URL,
+        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY,
+      );
+      const { data, error } = await supabase.from('categories').update(body).eq('id', id).select().single();
+      if (error) return c.json({ error: error.message }, 500);
+      return c.json({ data });
+    } catch (err: any) {
+      return c.json({ error: err.message }, 500);
+    }
+  });
+
+  app.delete('/categories/:id', async (c) => {
+    try {
+      const id = c.req.param('id');
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        c.env.VITE_SUPABASE_URL,
+        c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || c.env.VITE_SUPABASE_ANON_KEY,
+      );
+      const { error } = await supabase.from('categories').delete().eq('id', id);
+      if (error) return c.json({ error: error.message }, 500);
+      return c.json({ success: true });
+    } catch (err: any) {
+      return c.json({ error: err.message }, 500);
+    }
+  });
+
   return app;
 }

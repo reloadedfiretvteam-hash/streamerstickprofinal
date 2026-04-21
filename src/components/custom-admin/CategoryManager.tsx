@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Tag, Plus, Edit, Trash2, Save, X, MoveUp, MoveDown } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+
+function getAuthHeader(): Record<string, string> {
+  const token = localStorage.getItem('custom_admin_token');
+  return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+}
 
 interface Category {
   id: string;
@@ -24,12 +28,15 @@ export default function CategoryManager() {
   }, []);
 
   const loadCategories = async () => {
-    const { data } = await supabase
-      .from('categories')
-      .select('*')
-      .order('display_order');
-
-    if (data) setCategories(data);
+    try {
+      const res = await fetch('/api/admin/categories', { headers: getAuthHeader() });
+      if (res.ok) {
+        const json = await res.json() as { data?: Category[] };
+        setCategories(json.data || []);
+      }
+    } catch (err) {
+      console.error('Error loading categories:', err);
+    }
     setLoading(false);
   };
 
@@ -61,27 +68,27 @@ export default function CategoryManager() {
     const dataToSave = {
       ...formData,
       slug,
-      display_order: formData.display_order || categories.length
+      display_order: formData.display_order ?? categories.length,
     };
 
     try {
+      let res: Response;
       if (editing) {
-        const { error } = await supabase
-          .from('categories')
-          .update(dataToSave)
-          .eq('id', editing);
-
-        if (error) throw error;
-        alert('Category updated!');
+        res = await fetch(`/api/admin/categories/${editing}`, {
+          method: 'PUT',
+          headers: getAuthHeader(),
+          body: JSON.stringify(dataToSave),
+        });
       } else {
-        const { error } = await supabase
-          .from('categories')
-          .insert([dataToSave]);
-
-        if (error) throw error;
-        alert('Category created!');
+        res = await fetch('/api/admin/categories', {
+          method: 'POST',
+          headers: getAuthHeader(),
+          body: JSON.stringify(dataToSave),
+        });
       }
-
+      const json = await res.json() as { error?: string };
+      if (!res.ok) throw new Error(json.error || 'Save failed');
+      alert(editing ? 'Category updated!' : 'Category created!');
       cancelEdit();
       loadCategories();
     } catch (error: any) {
@@ -93,7 +100,12 @@ export default function CategoryManager() {
     if (!confirm('Delete this category?')) return;
 
     try {
-      await supabase.from('categories').delete().eq('id', id);
+      const res = await fetch(`/api/admin/categories/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeader(),
+      });
+      const json = await res.json() as { error?: string };
+      if (!res.ok) throw new Error(json.error || 'Delete failed');
       alert('Category deleted!');
       loadCategories();
     } catch (error: any) {
@@ -109,15 +121,16 @@ export default function CategoryManager() {
 
     const updates = [
       { id: category.id, display_order: newIndex },
-      { id: categories[newIndex].id, display_order: currentIndex }
+      { id: categories[newIndex].id, display_order: currentIndex },
     ];
 
     try {
       for (const update of updates) {
-        await supabase
-          .from('categories')
-          .update({ display_order: update.display_order })
-          .eq('id', update.id);
+        await fetch(`/api/admin/categories/${update.id}`, {
+          method: 'PUT',
+          headers: getAuthHeader(),
+          body: JSON.stringify({ display_order: update.display_order }),
+        });
       }
       loadCategories();
     } catch (error: any) {
