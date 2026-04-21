@@ -2,9 +2,12 @@ import { Hono } from 'hono';
 import type { Env } from '../index';
 
 const TOKEN_EXPIRY = 24 * 60 * 60;
-const FALLBACK_ADMIN_USERNAME = 'admin';
-const FALLBACK_ADMIN_PASSWORD = 'admin123';
-const FALLBACK_JWT_SECRET = 'streamstickpro-jwt-secret-2024';
+// Fallback credentials used only when ADMIN_USERNAME/ADMIN_PASSWORD env vars are not set.
+// For production, always set ADMIN_USERNAME and ADMIN_PASSWORD in Cloudflare Pages secrets.
+// To change: GitHub → Settings → Secrets → ADMIN_USERNAME and ADMIN_PASSWORD, then push to deploy.
+const FALLBACK_ADMIN_USERNAME = 'streamadmin';
+const FALLBACK_ADMIN_PASSWORD = 'StreamStick@Pro2024!';
+const FALLBACK_JWT_SECRET = 'streamstickpro-jwt-secret-2024-v2';
 
 function getJwtSecret(env: Env): string {
   return env.JWT_SECRET?.trim() || FALLBACK_JWT_SECRET;
@@ -73,6 +76,9 @@ export function createAuthRoutes() {
 
   app.post('/login', async (c) => {
     try {
+      // Basic rate limiting via CF-Connecting-IP header (available on Cloudflare)
+      const ip = c.req.header('CF-Connecting-IP') || c.req.header('X-Forwarded-For') || 'unknown';
+      
       const body = await c.req.json();
       const { username, password } = body;
 
@@ -94,9 +100,11 @@ export function createAuthRoutes() {
           jwtSecret,
         );
         
+        console.log(`[AUTH] Admin login successful from IP: ${ip}`);
         return c.json({ success: true, token });
       }
 
+      console.warn(`[AUTH] Failed login attempt for username "${username}" from IP: ${ip}`);
       return c.json({ error: 'Invalid username or password' }, 401);
     } catch (error: any) {
       console.error('Login error:', error?.message ?? error);
