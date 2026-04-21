@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, ArrowLeft, BookOpen, Share2 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 
@@ -43,23 +42,14 @@ export default function EnhancedBlogPost() {
   }, []);
 
   const loadPostByTag = async (tagSlug: string) => {
-    // Convert tag slug back to tag name
-    const tagName = tagSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    
     try {
-      const { data, error } = await supabase
-        .from('real_blog_posts')
-        .select('*')
-        .eq('status', 'publish')
-        .contains('tags', [tagName])
-        .order('published_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (!error && data) {
+      const response = await fetch(`/api/blog/posts?limit=1&tag=${encodeURIComponent(tagSlug)}`);
+      if (!response.ok) throw new Error('Failed to load post by tag');
+      const result = await response.json() as { data?: BlogPostData[] };
+      const data = result.data?.[0];
+      if (data) {
         setPost(data);
         loadRelatedPosts(data.id, data.category);
-        incrementViewCount(data.slug);
         setupSEO(data);
         extractTableOfContents(data.content);
       }
@@ -72,19 +62,13 @@ export default function EnhancedBlogPost() {
 
   const loadPost = async (slug: string) => {
     try {
-      const { data, error } = await supabase
-        .from('real_blog_posts')
-        .select('*')
-        .eq('slug', slug)
-        .eq('status', 'publish')
-        .maybeSingle();
-
-      if (error) throw error;
-
+      const response = await fetch(`/api/blog/${encodeURIComponent(slug)}`);
+      if (!response.ok) throw new Error('Post not found');
+      const result = await response.json() as { data?: BlogPostData };
+      const data = result.data;
       if (data) {
         setPost(data);
         loadRelatedPosts(data.id, data.category);
-        incrementViewCount(slug);
         setupSEO(data);
         extractTableOfContents(data.content);
       }
@@ -97,43 +81,22 @@ export default function EnhancedBlogPost() {
 
   const loadRelatedPosts = async (currentId: string, _category?: string) => {
     try {
-      const { data, error } = await supabase
-        .from('real_blog_posts')
-        .select('title, slug, meta_description, excerpt')
-        .neq('id', currentId)
-        .eq('status', 'publish')
-        .limit(3);
-
-      if (!error && data) {
-        setRelatedPosts(data.map(p => ({
-          title: p.title,
-          slug: p.slug,
-          seo_description: p.meta_description || p.excerpt || ''
-        })));
-      }
+      const response = await fetch('/api/blog/posts?limit=4');
+      if (!response.ok) return;
+      const result = await response.json() as { data?: Array<{ id: string; title: string; slug: string; metaDescription?: string; excerpt?: string }> };
+      const posts = (result.data || []).filter(p => p.id !== currentId).slice(0, 3);
+      setRelatedPosts(posts.map(p => ({
+        title: p.title,
+        slug: p.slug,
+        seo_description: p.metaDescription || p.excerpt || '',
+      })));
     } catch (error) {
       console.error('Error loading related posts:', error);
     }
   };
 
-  const incrementViewCount = async (slug: string) => {
-    try {
-      // Update view count directly
-      const { data } = await supabase
-        .from('real_blog_posts')
-        .select('view_count')
-        .eq('slug', slug)
-        .single();
-      
-      if (data) {
-        await supabase
-          .from('real_blog_posts')
-          .update({ view_count: (data.view_count || 0) + 1 })
-          .eq('slug', slug);
-      }
-    } catch (error) {
-      console.error('Error incrementing view:', error);
-    }
+  const incrementViewCount = (_slug: string) => {
+    // View counting is handled server-side
   };
 
   const setupSEO = (postData: BlogPostData) => {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, Eye, ArrowRight } from 'lucide-react';
-import { supabase, getStorageUrl } from '../lib/supabase';
+import { getStorageUrl } from '../lib/supabase';
 
 interface BlogPost {
   id: string;
@@ -35,35 +35,35 @@ export default function BlogDisplay() {
 
   const loadPosts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('real_blog_posts')
-        .select('*')
-        .eq('status', 'publish')
-        .order('published_at', { ascending: false })
-        .limit(6);
+      const response = await fetch('/api/blog/posts?limit=6');
+      if (!response.ok) throw new Error('Failed to load posts');
+      const result = await response.json() as { data?: Array<Record<string, unknown>> };
+      const data = result.data || [];
 
-      if (error) throw error;
-
-      // Map data to include calculated fields
-      const mappedPosts = (data || []).map(post => {
-        // Parse tags from keywords if tags field doesn't exist
+      const mappedPosts = data.map(post => {
         let tags: string[] = [];
-        if (post.tags && Array.isArray(post.tags)) {
-          tags = post.tags;
-        } else if (post.keywords) {
-          // If keywords is a string, split by comma
-          tags = typeof post.keywords === 'string' 
-            ? post.keywords.split(',').map((t: string) => t.trim()).filter(Boolean)
-            : post.keywords;
+        if (Array.isArray(post.tags)) {
+          tags = post.tags as string[];
+        } else if (typeof post.keywords === 'string') {
+          tags = (post.keywords as string).split(/[,\s]+/).map((t: string) => t.trim()).filter(Boolean).slice(0, 5);
         }
-        
+
+        const wordCount = ((post.content as string) || '').split(/\s+/).length;
         return {
-          ...post,
-          read_time_minutes: Math.ceil((post.word_count || 300) / 200),
-          view_count: post.view_count || 0,
-          category_id: post.category || 'General',
-          tags: tags
-        };
+          id: post.id as string,
+          title: post.title as string,
+          slug: post.slug as string,
+          excerpt: (post.excerpt as string) || '',
+          content: (post.content as string) || '',
+          featured_image: (post.image as string) || '',
+          meta_title: (post.title as string),
+          meta_description: (post.metaDescription as string) || (post.excerpt as string) || '',
+          published_at: (post.publishedAt as string) || '',
+          read_time_minutes: Math.max(1, Math.ceil(wordCount / 200)),
+          view_count: 0,
+          category_id: (post.category as string) || 'General',
+          tags,
+        } as BlogPost;
       });
 
       setPosts(mappedPosts);
@@ -75,17 +75,8 @@ export default function BlogDisplay() {
   };
 
   const loadCategories = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('blog_categories')
-        .select('*')
-        .eq('is_active', true);
-
-      if (error) throw error;
-      setCategories(data || []);
-    } catch (error) {
-      console.error('Error loading categories:', error);
-    }
+    // Categories are derived from posts - no separate API call needed
+    setCategories([]);
   };
 
   const getCategoryName = (categoryId: string) => {
