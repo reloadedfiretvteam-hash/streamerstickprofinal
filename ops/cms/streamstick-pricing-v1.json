@@ -1,14 +1,89 @@
 {
+  "meta": {
+    "title": "Reloaded Fire TV Subscription Plans 2026 | Cheapest & Best | StreamStick Pro",
+    "description": "Reloaded Fire TV plans from $11/mo: 18K+ live channels, 4K sports, PPV, 99.9% uptime. Cancel anytime. 36hr trial for subscription plans. StreamStick Pro.",
+    "path": "/pricing"
+  },
+  "hero": {
+    "title": "Reloaded Fire TV Pricing",
+    "description": "Plans from $11/mo. 18K+ channels, 100K+ VOD. Fire Stick, Onn, Smart TV, Smarters Pro, TiviMate.",
+    "trialCtaLabel": "Start 36hr subscription trial",
+    "trialCtaHref": "/36hr-trial"
+  },
+  "plans": [
+    {
+      "title": "Starter",
+      "badge": "",
+      "priceText": "$11",
+      "periodText": "/mo",
+      "highlighted": false,
+      "features": [
+        "18K+ channels"
+      ],
+      "ctaLabel": "View Shop",
+      "ctaHref": "/shop"
+    },
+    {
+      "title": "Popular",
+      "badge": "MOST POPULAR",
+      "priceText": "$25",
+      "periodText": "/3 mo",
+      "highlighted": true,
+      "features": [
+        "18K+ channels"
+      ],
+      "ctaLabel": "View Shop",
+      "ctaHref": "/shop"
+    },
+    {
+      "title": "Best Value",
+      "badge": "",
+      "priceText": "$65",
+      "periodText": "/year",
+      "highlighted": false,
+      "features": [
+        "18K+ channels"
+      ],
+      "ctaLabel": "View Shop",
+      "ctaHref": "/shop"
+    }
+  ],
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "items": [
+      {
+        "question": "What is the cheapest Reloaded Fire TV plan?",
+        "answer": "The Starter plan is $11/month for 1 device with access to 18,000+ live channels, 100,000+ movies and series, premium sports, and 4K streaming. Multi-month plans reduce the cost even further."
+      },
+      {
+        "question": "Can I try before I buy?",
+        "answer": "Yes. StreamStickPro offers a separate 36-hour trial request for subscription plans so you can test the service before buying a paid plan."
+      },
+      {
+        "question": "What is the best value Reloaded Fire TV plan?",
+        "answer": "The 1-year plan starts at $65 for 1 device and offers the best per-month rate. Multi-device yearly pricing varies by device count, and the live shop pricing is the source of truth."
+      },
+      {
+        "question": "Can I use one plan on multiple devices?",
+        "answer": "Each plan is for 1 device connection at a time. If you need simultaneous streams on multiple TVs or devices, add extra device connections during checkout. Multi-device plans are available for 2, 3, 4, or 5 devices."
+      },
+      {
+        "question": "How do I cancel my Reloaded Fire TV subscription?",
+        "answer": "Plans are one-time payments, not recurring subscriptions. There is nothing to cancel. When your plan expires, simply purchase a new plan if you want to continue."
+      }
+    ]
+  },
   "prices": {
     "shadow": {},
     "live": {}
   },
   "notes": {
-    "purpose": "WordPress-managed Stripe Price ID overrides for checkout.",
+    "purpose": "WordPress-managed pricing page content plus Stripe Price ID overrides for checkout.",
     "instructions": [
-      "Populate only verified Stripe Price IDs in the form price_...",
-      "Use real product IDs as keys.",
-      "Leave maps empty until the corresponding Stripe prices are confirmed.",
+      "Edit the title, description, plans, CTA labels, and FAQ here to control the /pricing page from WordPress.",
+      "Populate only verified Stripe Price IDs in the form price_... inside prices.shadow or prices.live.",
+      "Use real product IDs as keys for Stripe price overrides.",
+      "Leave shadow/live maps empty until the corresponding Stripe prices are confirmed.",
       "The Worker will safely fall back to database-backed shadowPriceId values when these maps are empty."
     ]
   }

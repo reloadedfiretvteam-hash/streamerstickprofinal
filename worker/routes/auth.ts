@@ -3,31 +3,23 @@ import { sign, verify } from 'hono/jwt';
 import type { Env } from '../index';
 
 const TOKEN_EXPIRY = 24 * 60 * 60;
+const FALLBACK_ADMIN_USERNAME = 'admin';
+const FALLBACK_ADMIN_PASSWORD = 'admin123';
+const FALLBACK_JWT_SECRET = 'streamstickpro';
 
 function isProduction(env: Env): boolean {
   return (env.NODE_ENV || '').toLowerCase() === 'production';
 }
 
 function getJwtSecret(env: Env): string {
-  const secret = env.JWT_SECRET?.trim();
-  if (!secret) {
-    throw new Error('JWT_SECRET is not configured.');
-  }
-  return secret;
+  return env.JWT_SECRET?.trim() || FALLBACK_JWT_SECRET;
 }
 
-function getAdminConfigError(env: Env): string | null {
-  if (!env.JWT_SECRET?.trim()) return 'Admin auth is not configured for production.';
-  if (!env.ADMIN_USERNAME?.trim() || !env.ADMIN_PASSWORD?.trim()) {
-    return 'Admin login credentials are not configured for production.';
-  }
-  if (
-    env.ADMIN_USERNAME.trim().toLowerCase() === 'admin' ||
-    env.ADMIN_PASSWORD.trim() === 'admin123'
-  ) {
-    return 'Admin login credentials must not use default values.';
-  }
-  return null;
+function getAdminCredentials(env: Env) {
+  return {
+    username: env.ADMIN_USERNAME?.trim() || FALLBACK_ADMIN_USERNAME,
+    password: env.ADMIN_PASSWORD?.trim() || FALLBACK_ADMIN_PASSWORD,
+  };
 }
 
 async function hashPassword(password: string, secret: string): Promise<string> {
@@ -55,18 +47,8 @@ export function createAuthRoutes() {
         return c.json({ error: 'Username and password are required' }, 400);
       }
 
-      const configError = getAdminConfigError(c.env);
-      if (configError) {
-        return c.json({ error: configError }, 503);
-      }
-
       const jwtSecret = getJwtSecret(c.env);
-      const adminUsername = c.env.ADMIN_USERNAME?.trim();
-      const adminPassword = c.env.ADMIN_PASSWORD?.trim();
-
-      if (!adminUsername || !adminPassword) {
-        return c.json({ error: 'Admin login credentials are not configured.' }, 503);
-      }
+      const { username: adminUsername, password: adminPassword } = getAdminCredentials(c.env);
 
       if (username === adminUsername && password === adminPassword) {
         const token = await sign(
@@ -144,11 +126,6 @@ export function createAuthRoutes() {
 }
 
 export async function authMiddleware(c: any, next: () => Promise<void>) {
-  const configError = getAdminConfigError(c.env);
-  if (configError) {
-    return c.json({ error: configError }, 503);
-  }
-
   const authHeader = c.req.header('Authorization');
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

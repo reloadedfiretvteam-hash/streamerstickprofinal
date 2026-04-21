@@ -236,6 +236,59 @@ interface CmsHomePayload {
   productCards?: CmsFeatureCard[];
   advantages?: string[];
   trustBar?: string;
+  faq?: {
+    title?: string;
+    items?: Array<{
+      question?: string;
+      answer?: string;
+    }>;
+  };
+  disclaimer?: string;
+  whyChoose?: {
+    title?: string;
+    bullets?: string[];
+    links?: Array<{
+      label?: string;
+      href?: string;
+    }>;
+  };
+  deviceSupport?: {
+    title?: string;
+    items?: string[];
+    appLinks?: Array<{
+      label?: string;
+      href?: string;
+    }>;
+  };
+  visualBenefits?: {
+    title?: string;
+    subtitle?: string;
+    cards?: Array<{
+      title?: string;
+      description?: string;
+      visual?: string;
+      image?: string;
+      color?: string;
+      border?: string;
+    }>;
+  };
+  trustSignals?: {
+    title?: string;
+    body?: string;
+    pills?: string[];
+    paymentTitle?: string;
+    paymentBody?: string;
+    speedTitle?: string;
+    speedBody?: string;
+    contactTitle?: string;
+    contactBody?: string;
+  };
+  support?: {
+    email?: string;
+    availability?: string;
+    whatsappUrl?: string;
+    whatsappLabel?: string;
+  };
 }
 
 const defaultHeroCtas: Required<CmsHeroCta>[] = [
@@ -292,6 +345,103 @@ const defaultAdvantages = [
 ];
 
 const defaultTrustBar = "2,700+ customers · 99.9% uptime · SSL-secured checkout · 18K+ channels";
+
+const defaultFaqTitle = "Essential FAQ";
+const defaultFaqItems = [
+  {
+    question: "IPTV subscription vs loaded device?",
+    answer: "IPTV = streaming service only. Device = hardware WITH 1-year Reloaded Fire TV included.",
+  },
+  {
+    question: "Firestick/Onn include subscription?",
+    answer: "Yes. Every device ships with 1-year Reloaded Fire TV subscription.",
+  },
+  {
+    question: "Why Surfshark VPN?",
+    answer: "Your ISP detects IPTV streaming and throttles speed (buffering). VPN encrypts traffic so ISP can't throttle. Privacy bonus.",
+  },
+  {
+    question: "36hr trial details?",
+    answer: "Full IPTV access. No card upfront. Cancel anytime.",
+  },
+  {
+    question: "Setup process?",
+    answer: "IPTV: 60 seconds login. Devices: plug & play. VPN: 2-minute app install.",
+  },
+  {
+    question: "Buffering common?",
+    answer: "ISP throttling causes 90% of buffering. Surfshark VPN fixes it.",
+  },
+];
+
+const defaultDisclaimer =
+  "Optimal performance requires 25Mbps+ internet. ISP throttling is common (VPN recommended). Device bundles include 1-year service where stated. Users are responsible for local laws and platform terms. Support is available 24/7.";
+
+const defaultWhyChooseTitle = "Why StreamStick Pro";
+const defaultWhyChooseBullets = [
+  "Beats IPTVStronger — 36hr vs 24hr trial",
+  "Beats TroyPoint — Onn/Roku native support",
+  "More channels than ANY competitor — 18K+ live",
+];
+const defaultWhyChooseLinks = [
+  { label: "Compare vs IPTVStronger →", href: "/vs-iptvstronger" },
+  { label: "Compare vs TroyPoint →", href: "/vs-troypoint" },
+];
+
+const defaultDeviceSupportTitle = "Device Support";
+const defaultDeviceSupportItems = ["Onn Google TV", "Roku TVs", "Smart TVs", "Fire Stick"];
+const defaultDeviceSupportApps = [
+  { label: "IPTV Smarters Pro", href: "/iptv-smarters-pro" },
+  { label: "TiviMate", href: "/tivimate" },
+];
+
+const defaultVisualBenefitsTitle = "Why StreamStickPro?";
+const defaultVisualBenefitsSubtitle = "The most comprehensive streaming solution available";
+const defaultVisualBenefitsCards = [
+  {
+    title: "No Tech Skills Required",
+    description: "Clear setup guidance with no guesswork. Start quickly with step-by-step support.",
+    visual: "💻",
+    image: "no-tech-skills.jpg",
+    color: "from-green-500/15 to-emerald-500/5",
+    border: "border-green-400/30",
+  },
+  {
+    title: "Instant Access",
+    description: "Your credentials arrive instantly via email. Start streaming in minutes, not days.",
+    visual: "⚡",
+    image: "instant-access.jpg",
+    color: "from-yellow-500/15 to-orange-500/5",
+    border: "border-yellow-400/30",
+  },
+  {
+    title: "All Premium Content",
+    description: "18,000+ channels, 100,000+ movies, all sports including NFL, NBA, UFC PPV.",
+    visual: "🎯",
+    image: "premium-content.jpg",
+    color: "from-purple-500/15 to-pink-500/5",
+    border: "border-purple-400/30",
+  },
+];
+
+const defaultTrustSignals = {
+  title: "Secure, indexed, ready to buy",
+  body: "We keep search engines happy and customers protected: clean redirects, fast pages, XML sitemaps, robots.txt, and Stripe-secured checkout with 24/7 support.",
+  pills: ["Stripe secure checkout", "Robots + XML sitemaps", "Canonical + 301s", "99.9% uptime", "24/7 support"],
+  paymentTitle: "Payments & Wallets",
+  paymentBody: "Visa, Mastercard, Amex, Discover, Apple Pay, Google Pay, Link",
+  speedTitle: "Fast crawl & serve",
+  speedBody: "Optimized metadata, canonical headers, and prebuilt sitemaps.",
+  contactTitle: "Always reachable",
+  contactBody: "24/7 human support at reloadedfiretvteam@gmail.com.",
+};
+
+const defaultSupport = {
+  email: "reloadedfiretvteam@gmail.com",
+  availability: "24/7 Support Available",
+  whatsappUrl: "https://wa.me/15853037381",
+  whatsappLabel: "Chat with us!",
+};
 
 const heroCtaClasses: Record<CmsAccent, string> = {
   cyan: "flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-[#0A0A0F] bg-[#00D4FF] hover:bg-[#33ddff] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-[#00D4FF]/50 cursor-pointer transition-transform hover:scale-[1.02]",
@@ -363,6 +513,54 @@ export default function MainStore() {
     : defaultFeatureCards) as CmsFeatureCard[];
   const advantageLines = (cmsHome?.advantages?.filter(Boolean).length || 0) > 0 ? cmsHome!.advantages!.filter(Boolean) : defaultAdvantages;
   const trustBarText = cmsHome?.trustBar || defaultTrustBar;
+  const faqTitle = cmsHome?.faq?.title || defaultFaqTitle;
+  const faqItems =
+    (cmsHome?.faq?.items?.filter((item) => item?.question && item?.answer).length || 0) > 0
+      ? cmsHome!.faq!.items!.filter((item) => item?.question && item?.answer)
+      : defaultFaqItems;
+  const disclaimerText = cmsHome?.disclaimer || defaultDisclaimer;
+  const whyChooseTitle = cmsHome?.whyChoose?.title || defaultWhyChooseTitle;
+  const whyChooseBullets =
+    (cmsHome?.whyChoose?.bullets?.filter(Boolean).length || 0) > 0
+      ? cmsHome!.whyChoose!.bullets!.filter(Boolean)
+      : defaultWhyChooseBullets;
+  const whyChooseLinks =
+    (cmsHome?.whyChoose?.links?.filter((item) => item?.label && item?.href).length || 0) > 0
+      ? cmsHome!.whyChoose!.links!.filter((item) => item?.label && item?.href)
+      : defaultWhyChooseLinks;
+  const deviceSupportTitle = cmsHome?.deviceSupport?.title || defaultDeviceSupportTitle;
+  const deviceSupportItems =
+    (cmsHome?.deviceSupport?.items?.filter(Boolean).length || 0) > 0
+      ? cmsHome!.deviceSupport!.items!.filter(Boolean)
+      : defaultDeviceSupportItems;
+  const deviceSupportApps =
+    (cmsHome?.deviceSupport?.appLinks?.filter((item) => item?.label && item?.href).length || 0) > 0
+      ? cmsHome!.deviceSupport!.appLinks!.filter((item) => item?.label && item?.href)
+      : defaultDeviceSupportApps;
+  const visualBenefitsTitle = cmsHome?.visualBenefits?.title || defaultVisualBenefitsTitle;
+  const visualBenefitsSubtitle = cmsHome?.visualBenefits?.subtitle || defaultVisualBenefitsSubtitle;
+  const visualBenefitCards =
+    (cmsHome?.visualBenefits?.cards?.filter((item) => item?.title && item?.description).length || 0) > 0
+      ? cmsHome!.visualBenefits!.cards!.filter((item) => item?.title && item?.description)
+      : defaultVisualBenefitsCards;
+  const trustSignals = {
+    title: cmsHome?.trustSignals?.title || defaultTrustSignals.title,
+    body: cmsHome?.trustSignals?.body || defaultTrustSignals.body,
+    pills:
+      (cmsHome?.trustSignals?.pills?.filter(Boolean).length || 0) > 0
+        ? cmsHome!.trustSignals!.pills!.filter(Boolean)
+        : defaultTrustSignals.pills,
+    paymentTitle: cmsHome?.trustSignals?.paymentTitle || defaultTrustSignals.paymentTitle,
+    paymentBody: cmsHome?.trustSignals?.paymentBody || defaultTrustSignals.paymentBody,
+    speedTitle: cmsHome?.trustSignals?.speedTitle || defaultTrustSignals.speedTitle,
+    speedBody: cmsHome?.trustSignals?.speedBody || defaultTrustSignals.speedBody,
+    contactTitle: cmsHome?.trustSignals?.contactTitle || defaultTrustSignals.contactTitle,
+    contactBody: cmsHome?.trustSignals?.contactBody || defaultTrustSignals.contactBody,
+  };
+  const supportEmail = cmsHome?.support?.email || defaultSupport.email;
+  const supportAvailability = cmsHome?.support?.availability || defaultSupport.availability;
+  const supportWhatsappUrl = cmsHome?.support?.whatsappUrl || defaultSupport.whatsappUrl;
+  const supportWhatsappLabel = cmsHome?.support?.whatsappLabel || defaultSupport.whatsappLabel;
 
   const firestickProductIdKey = useMemo(
     () =>
@@ -1624,56 +1822,18 @@ export default function MainStore() {
       {/* FAQ & disclaimer after shop so buyers see products first; anchor #faq unchanged for nav/footer */}
       <section id="faq" className="py-14 md:py-20 lg:py-24 bg-[#0A0A0F]/50 border-t border-white/10">
         <div className="container mx-auto px-4 sm:px-5 max-w-3xl">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-center text-white mb-8 md:mb-10 leading-tight">Essential FAQ</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-center text-white mb-8 md:mb-10 leading-tight">{faqTitle}</h2>
           <Accordion type="single" collapsible className="w-full space-y-3">
-            <AccordionItem value="e1" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
-              <AccordionTrigger className="text-left text-[15px] sm:text-base md:text-lg font-semibold text-white hover:text-[#00D4FF] py-5 [&[data-state=open]]:text-[#00D4FF]">
-                IPTV subscription vs loaded device?
-              </AccordionTrigger>
-              <AccordionContent className="text-[#B0B3B8] pb-4 text-[15px] sm:text-base leading-relaxed">
-                IPTV = streaming service only. Device = hardware WITH 1-year Reloaded Fire TV included.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="e2" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
-              <AccordionTrigger className="text-left text-[15px] sm:text-base md:text-lg font-semibold text-white hover:text-[#00D4FF] py-5 [&[data-state=open]]:text-[#00D4FF]">
-                Firestick/Onn include subscription?
-              </AccordionTrigger>
-              <AccordionContent className="text-[#B0B3B8] pb-4 text-[15px] sm:text-base leading-relaxed">
-                Yes. Every device ships with 1-year Reloaded Fire TV subscription.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="e3" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
-              <AccordionTrigger className="text-left text-[15px] sm:text-base md:text-lg font-semibold text-white hover:text-[#00D4FF] py-5 [&[data-state=open]]:text-[#00D4FF]">
-                Why Surfshark VPN?
-              </AccordionTrigger>
-              <AccordionContent className="text-[#B0B3B8] pb-4 text-[15px] sm:text-base leading-relaxed">
-                Your ISP detects IPTV streaming and throttles speed (buffering). VPN encrypts traffic so ISP can&apos;t throttle. Privacy bonus.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="e4" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
-              <AccordionTrigger className="text-left text-[15px] sm:text-base md:text-lg font-semibold text-white hover:text-[#00D4FF] py-5 [&[data-state=open]]:text-[#00D4FF]">
-                36hr trial details?
-              </AccordionTrigger>
-              <AccordionContent className="text-[#B0B3B8] pb-4 text-[15px] sm:text-base leading-relaxed">
-                Full IPTV access. No card upfront. Cancel anytime.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="e5" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
-              <AccordionTrigger className="text-left text-[15px] sm:text-base md:text-lg font-semibold text-white hover:text-[#00D4FF] py-5 [&[data-state=open]]:text-[#00D4FF]">
-                Setup process?
-              </AccordionTrigger>
-              <AccordionContent className="text-[#B0B3B8] pb-4 text-[15px] sm:text-base leading-relaxed">
-                IPTV: 60 seconds login. Devices: plug &amp; play. VPN: 2-minute app install.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="e6" className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
-              <AccordionTrigger className="text-left text-[15px] sm:text-base md:text-lg font-semibold text-white hover:text-[#00D4FF] py-5 [&[data-state=open]]:text-[#00D4FF]">
-                Buffering common?
-              </AccordionTrigger>
-              <AccordionContent className="text-[#B0B3B8] pb-4 text-[15px] sm:text-base leading-relaxed">
-                ISP throttling causes 90% of buffering. Surfshark VPN fixes it.
-              </AccordionContent>
-            </AccordionItem>
+            {faqItems.map((item, index) => (
+              <AccordionItem key={`${item.question}-${index}`} value={`e${index + 1}`} className="border border-white/10 rounded-2xl px-4 md:px-6 bg-[#1A1A22]/50">
+                <AccordionTrigger className="text-left text-[15px] sm:text-base md:text-lg font-semibold text-white hover:text-[#00D4FF] py-5 [&[data-state=open]]:text-[#00D4FF]">
+                  {item.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-[#B0B3B8] pb-4 text-[15px] sm:text-base leading-relaxed">
+                  {item.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
           </Accordion>
         </div>
       </section>
@@ -1681,7 +1841,7 @@ export default function MainStore() {
       <section className="py-8 md:py-10 px-4 sm:px-5 border-t border-white/5 bg-[#0A0A0F]" aria-label="Disclaimer">
         <div className="container mx-auto max-w-4xl">
           <p className="text-sm sm:text-base text-[#B0B3B8]/95 leading-relaxed text-center">
-            Optimal performance requires 25Mbps+ internet. ISP throttling is common (VPN recommended). Device bundles include 1-year service where stated. Users are responsible for local laws and platform terms. Support is available 24/7.
+            {disclaimerText}
           </p>
         </div>
       </section>
@@ -1690,18 +1850,23 @@ export default function MainStore() {
       <section className="relative z-10 py-12 md:py-16 bg-gradient-to-b from-gray-900/80 to-gray-900 border-y border-white/10" aria-labelledby="why-streamstick-pro">
         <div className="container mx-auto px-4 sm:px-5">
           <h2 id="why-streamstick-pro" className="text-2xl sm:text-3xl font-bold text-center text-white mb-8 leading-tight px-1">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#FAD02C]">Why StreamStick Pro</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#FAD02C]">{whyChooseTitle}</span>
           </h2>
           <div className="max-w-3xl mx-auto space-y-4 text-lg text-gray-200">
-            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> Beats IPTVStronger — 36hr vs 24hr trial</p>
-            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> Beats TroyPoint — Onn/Roku native support</p>
-            <p className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> More channels than ANY competitor — 18K+ live</p>
+            {whyChooseBullets.map((bullet, index) => (
+              <p key={`${bullet}-${index}`} className="flex items-center gap-2"><Check className="w-6 h-6 text-green-400 shrink-0" /> {bullet}</p>
+            ))}
           </div>
-          <p className="text-center mt-6">
-            <Link href="/vs-iptvstronger"><span className="text-[#00D4FF] hover:text-[#33ddff] font-semibold">Compare vs IPTVStronger →</span></Link>
-            {" · "}
-            <Link href="/vs-troypoint"><span className="text-[#00D4FF] hover:text-[#33ddff] font-semibold">Compare vs TroyPoint →</span></Link>
-          </p>
+          {whyChooseLinks.length > 0 ? (
+            <p className="text-center mt-6">
+              {whyChooseLinks.map((item, index) => (
+                <span key={`${item.href}-${index}`}>
+                  {index > 0 ? " · " : null}
+                  <Link href={item.href!}><span className="text-[#00D4FF] hover:text-[#33ddff] font-semibold">{item.label}</span></Link>
+                </span>
+              ))}
+            </p>
+          ) : null}
         </div>
       </section>
 
@@ -1709,15 +1874,15 @@ export default function MainStore() {
       <section className="relative z-10 py-12 md:py-16 bg-gray-900/60 border-b border-white/10" aria-labelledby="device-support">
         <div className="container mx-auto px-4">
           <h2 id="device-support" className="text-2xl md:text-3xl font-bold text-center text-white mb-8">
-            Device Support
+            {deviceSupportTitle}
           </h2>
           <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Onn Google TV</span>
-            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Roku TVs</span>
-            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Smart TVs</span>
-            <span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> Fire Stick</span>
-            <Link href="/iptv-smarters-pro"><span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/20 border border-orange-400/40 text-orange-200 font-medium hover:bg-orange-500/30">IPTV Smarters Pro</span></Link>
-            <Link href="/tivimate"><span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/20 border border-orange-400/40 text-orange-200 font-medium hover:bg-orange-500/30">TiviMate</span></Link>
+            {deviceSupportItems.map((item, index) => (
+              <span key={`${item}-${index}`} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> {item}</span>
+            ))}
+            {deviceSupportApps.map((item, index) => (
+              <Link key={`${item.href}-${index}`} href={item.href!}><span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/20 border border-orange-400/40 text-orange-200 font-medium hover:bg-orange-500/30">{item.label}</span></Link>
+            ))}
           </div>
         </div>
       </section>
@@ -2087,61 +2252,36 @@ export default function MainStore() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-6xl font-black mb-6">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Why StreamStickPro?</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">{visualBenefitsTitle}</span>
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              The most comprehensive streaming solution available
+              {visualBenefitsSubtitle}
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {[
-              {
-                title: "No Tech Skills Required",
-                description: "Clear setup guidance with no guesswork. Start quickly with step-by-step support.",
-                visual: "💻",
-                image: "no-tech-skills.jpg",
-                color: "from-green-500/15 to-emerald-500/5",
-                border: "border-green-400/30"
-              },
-              {
-                title: "Instant Access",
-                description: "Your credentials arrive instantly via email. Start streaming in minutes, not days.",
-                visual: "⚡",
-                image: "instant-access.jpg",
-                color: "from-yellow-500/15 to-orange-500/5",
-                border: "border-yellow-400/30"
-              },
-              {
-                title: "All Premium Content",
-                description: "18,000+ channels, 100,000+ movies, all sports including NFL, NBA, UFC PPV.",
-                visual: "🎯",
-                image: "premium-content.jpg",
-                color: "from-purple-500/15 to-pink-500/5",
-                border: "border-purple-400/30"
-              }
-            ].map((item, index) => (
+            {visualBenefitCards.map((item, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.5, delay: index * 0.15 }}
-                className={`bg-gradient-to-br ${item.color} backdrop-blur-2xl rounded-3xl p-8 border-2 ${item.border} shadow-2xl hover:scale-105 transition-all`}
+                className={`bg-gradient-to-br ${item.color || "from-blue-500/10 to-transparent"} backdrop-blur-2xl rounded-3xl p-8 border-2 ${item.border || "border-white/20"} shadow-2xl hover:scale-105 transition-all`}
               >
-                <div className="text-7xl mb-6">{item.visual}</div>
+                <div className="text-7xl mb-6">{item.visual || "✨"}</div>
                 <h3 className="text-2xl font-black text-white mb-4">{item.title}</h3>
                 <p className="text-gray-200 text-lg leading-relaxed mb-6">{item.description}</p>
                 {/* Image loads from Supabase when uploaded */}
                 <div className="h-40 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl flex items-center justify-center border border-gray-600/30 overflow-hidden">
                   <img 
-                    src={getStorageUrl('images', item.image)} 
+                    src={getStorageUrl('images', item.image || '')} 
                     alt={item.title}
                     className="w-full h-full object-cover opacity-50 hover:opacity-100 transition-opacity"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
-                      target.parentElement!.innerHTML = `<span class="text-gray-400 text-xs text-center px-4">Upload image: ${item.image}</span>`;
+                      target.parentElement!.innerHTML = `<span class="text-gray-400 text-xs text-center px-4">Upload image: ${item.image || 'cms-image.jpg'}</span>`;
                     }}
                   />
                 </div>
@@ -2156,18 +2296,12 @@ export default function MainStore() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
-              <h3 className="text-3xl font-bold text-white mb-3">Secure, indexed, ready to buy</h3>
+              <h3 className="text-3xl font-bold text-white mb-3">{trustSignals.title}</h3>
               <p className="text-gray-300 text-base md:text-lg">
-                We keep search engines happy and customers protected: clean redirects, fast pages, XML sitemaps, robots.txt, and Stripe-secured checkout with 24/7 support.
+                {trustSignals.body}
               </p>
               <div className="mt-4 flex flex-wrap gap-2 text-sm text-gray-200">
-                {[
-                  "Stripe secure checkout",
-                  "Robots + XML sitemaps",
-                  "Canonical + 301s",
-                  "99.9% uptime",
-                  "24/7 support",
-                ].map((item) => (
+                {trustSignals.pills.map((item) => (
                   <span key={item} className="px-3 py-1 rounded-full border border-white/10 bg-white/5">
                     {item}
                   </span>
@@ -2178,22 +2312,22 @@ export default function MainStore() {
               <div className="flex items-center gap-3">
                 <ShieldCheck className="w-8 h-8 text-green-400" />
                 <div>
-                  <p className="text-white font-semibold">Payments & Wallets</p>
-                  <p className="text-gray-400 text-sm">Visa, Mastercard, Amex, Discover, Apple Pay, Google Pay, Link</p>
+                  <p className="text-white font-semibold">{trustSignals.paymentTitle}</p>
+                  <p className="text-gray-400 text-sm">{trustSignals.paymentBody}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Zap className="w-8 h-8 text-orange-400" />
                 <div>
-                  <p className="text-white font-semibold">Fast crawl & serve</p>
-                  <p className="text-gray-400 text-sm">Optimized metadata, canonical headers, and prebuilt sitemaps.</p>
+                  <p className="text-white font-semibold">{trustSignals.speedTitle}</p>
+                  <p className="text-gray-400 text-sm">{trustSignals.speedBody}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="w-8 h-8 text-blue-400" />
                 <div>
-                  <p className="text-white font-semibold">Always reachable</p>
-                  <p className="text-gray-400 text-sm">24/7 human support at reloadedfiretvteam@gmail.com.</p>
+                  <p className="text-white font-semibold">{trustSignals.contactTitle}</p>
+                  <p className="text-gray-400 text-sm">{trustSignals.contactBody}</p>
                 </div>
               </div>
             </div>
@@ -2212,15 +2346,15 @@ export default function MainStore() {
             data-testid="link-support-email"
             aria-label="Open contact support message box"
           >
-            reloadedfiretvteam@gmail.com
+            {supportEmail}
           </button>
-          <span className="hidden md:inline text-base font-medium">• 24/7 Support Available</span>
+          <span className="hidden md:inline text-base font-medium">• {supportAvailability}</span>
         </div>
       </div>
 
       {/* WhatsApp Chat Widget - More Prominent */}
       <a 
-        href="https://wa.me/15853037381" 
+        href={supportWhatsappUrl}
         target="_blank" 
         rel="noopener noreferrer"
         className="fixed bottom-20 md:bottom-24 right-6 z-[100] group"
@@ -2234,7 +2368,7 @@ export default function MainStore() {
         </Button>
         </div>
         <div className="absolute right-20 top-1/2 -translate-y-1/2 bg-white text-gray-900 px-4 py-2 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-sm font-semibold pointer-events-none">
-          Chat with us!
+          {supportWhatsappLabel}
         </div>
       </a>
 

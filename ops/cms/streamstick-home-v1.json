@@ -91,5 +91,125 @@
     "Fire TV, ONN Google TV, Roku & smart TV friendly workflows",
     "Optional VPN path for ISP throttling & privacy on busy networks"
   ],
-  "trustBar": "2,700+ customers · 99.9% uptime · SSL-secured checkout · 18K+ channels"
+  "trustBar": "2,700+ customers · 99.9% uptime · SSL-secured checkout · 18K+ channels",
+  "faq": {
+    "title": "Essential FAQ",
+    "items": [
+      {
+        "question": "IPTV subscription vs loaded device?",
+        "answer": "IPTV = streaming service only. Device = hardware WITH 1-year Reloaded Fire TV included."
+      },
+      {
+        "question": "Firestick/Onn include subscription?",
+        "answer": "Yes. Every device ships with 1-year Reloaded Fire TV subscription."
+      },
+      {
+        "question": "Why Surfshark VPN?",
+        "answer": "Your ISP detects IPTV streaming and throttles speed (buffering). VPN encrypts traffic so ISP can't throttle. Privacy bonus."
+      },
+      {
+        "question": "36hr trial details?",
+        "answer": "Full IPTV access. No card upfront. Cancel anytime."
+      },
+      {
+        "question": "Setup process?",
+        "answer": "IPTV: 60 seconds login. Devices: plug & play. VPN: 2-minute app install."
+      },
+      {
+        "question": "Buffering common?",
+        "answer": "ISP throttling causes 90% of buffering. Surfshark VPN fixes it."
+      }
+    ]
+  },
+  "disclaimer": "Optimal performance requires 25Mbps+ internet. ISP throttling is common (VPN recommended). Device bundles include 1-year service where stated. Users are responsible for local laws and platform terms. Support is available 24/7.",
+  "whyChoose": {
+    "title": "Why StreamStick Pro",
+    "bullets": [
+      "Beats IPTVStronger — 36hr vs 24hr trial",
+      "Beats TroyPoint — Onn/Roku native support",
+      "More channels than ANY competitor — 18K+ live"
+    ],
+    "links": [
+      {
+        "label": "Compare vs IPTVStronger →",
+        "href": "/vs-iptvstronger"
+      },
+      {
+        "label": "Compare vs TroyPoint →",
+        "href": "/vs-troypoint"
+      }
+    ]
+  },
+  "deviceSupport": {
+    "title": "Device Support",
+    "items": [
+      "Onn Google TV",
+      "Roku TVs",
+      "Smart TVs",
+      "Fire Stick"
+    ],
+    "appLinks": [
+      {
+        "label": "IPTV Smarters Pro",
+        "href": "/iptv-smarters-pro"
+      },
+      {
+        "label": "TiviMate",
+        "href": "/tivimate"
+      }
+    ]
+  },
+  "visualBenefits": {
+    "title": "Why StreamStickPro?",
+    "subtitle": "The most comprehensive streaming solution available",
+    "cards": [
+      {
+        "title": "No Tech Skills Required",
+        "description": "Clear setup guidance with no guesswork. Start quickly with step-by-step support.",
+        "visual": "💻",
+        "image": "no-tech-skills.jpg",
+        "color": "from-green-500/15 to-emerald-500/5",
+        "border": "border-green-400/30"
+      },
+      {
+        "title": "Instant Access",
+        "description": "Your credentials arrive instantly via email. Start streaming in minutes, not days.",
+        "visual": "⚡",
+        "image": "instant-access.jpg",
+        "color": "from-yellow-500/15 to-orange-500/5",
+        "border": "border-yellow-400/30"
+      },
+      {
+        "title": "All Premium Content",
+        "description": "18,000+ channels, 100,000+ movies, all sports including NFL, NBA, UFC PPV.",
+        "visual": "🎯",
+        "image": "premium-content.jpg",
+        "color": "from-purple-500/15 to-pink-500/5",
+        "border": "border-purple-400/30"
+      }
+    ]
+  },
+  "trustSignals": {
+    "title": "Secure, indexed, ready to buy",
+    "body": "We keep search engines happy and customers protected: clean redirects, fast pages, XML sitemaps, robots.txt, and Stripe-secured checkout with 24/7 support.",
+    "pills": [
+      "Stripe secure checkout",
+      "Robots + XML sitemaps",
+      "Canonical + 301s",
+      "99.9% uptime",
+      "24/7 support"
+    ],
+    "paymentTitle": "Payments & Wallets",
+    "paymentBody": "Visa, Mastercard, Amex, Discover, Apple Pay, Google Pay, Link",
+    "speedTitle": "Fast crawl & serve",
+    "speedBody": "Optimized metadata, canonical headers, and prebuilt sitemaps.",
+    "contactTitle": "Always reachable",
+    "contactBody": "24/7 human support at reloadedfiretvteam@gmail.com."
+  },
+  "support": {
+    "email": "reloadedfiretvteam@gmail.com",
+    "availability": "24/7 Support Available",
+    "whatsappUrl": "https://wa.me/15853037381",
+    "whatsappLabel": "Chat with us!"
+  }
 }

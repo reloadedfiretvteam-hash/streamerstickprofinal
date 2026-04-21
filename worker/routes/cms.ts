@@ -78,6 +78,32 @@ function decodeHtml(value: string): string {
     .trim();
 }
 
+function repairMojibake(value: string): string {
+  return value
+    .replace(/Â·/g, '·')
+    .replace(/â€”|â€“/g, '-')
+    .replace(/â€˜|â€™/g, "'")
+    .replace(/â€œ|â€/g, '"')
+    .replace(/â€¦/g, '...')
+    .replace(/Â(?![A-Za-z0-9])/g, '')
+    .trim();
+}
+
+function normalizeCmsValue<T>(value: T): T {
+  if (typeof value === 'string') {
+    return repairMojibake(value) as T;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeCmsValue(item)) as T;
+  }
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, normalizeCmsValue(entry)]),
+    ) as T;
+  }
+  return value;
+}
+
 function stripTags(value: string): string {
   return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 }
@@ -115,7 +141,7 @@ function extractJsonFromContent(content: string): any | null {
 
   for (const candidate of candidates) {
     const parsed = tryParseJson(candidate);
-    if (parsed && typeof parsed === 'object') return parsed;
+    if (parsed && typeof parsed === 'object') return normalizeCmsValue(parsed);
   }
 
   return null;
@@ -154,6 +180,10 @@ function normalizePricingPayload(payload: any, isShadow: boolean) {
   const livePrices = toValidMap(live);
 
   return {
+    meta: source.meta && typeof source.meta === 'object' ? source.meta : undefined,
+    hero: source.hero && typeof source.hero === 'object' ? source.hero : undefined,
+    plans: Array.isArray(source.plans) ? source.plans : [],
+    faq: source.faq && typeof source.faq === 'object' ? source.faq : undefined,
     shadow: shadowPrices,
     live: livePrices,
     selectedMode: isShadow ? 'shadow' : 'live',
