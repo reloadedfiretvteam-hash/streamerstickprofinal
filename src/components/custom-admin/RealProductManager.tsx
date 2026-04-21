@@ -13,7 +13,12 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
-import { supabase, getStorageUrl } from '../../lib/supabase';
+import { getStorageUrl } from '../../lib/supabase';
+
+function getAuthHeader(): Record<string, string> {
+  const token = localStorage.getItem('custom_admin_token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export default function RealProductManager() {
   const [products, setProducts] = useState<any[]>([]);
@@ -28,24 +33,16 @@ export default function RealProductManager() {
 
   const loadProducts = async () => {
     setLoading(true);
-    // Load ALL products regardless of status so admin can see everything
-    const { data, error } = await supabase
-      .from('real_products')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error loading products:', error);
-      alert('Error loading products: ' + error.message);
-    }
-
-    if (data) {
-      setProducts(data);
-      if (data.length === 0) {
-        console.log('No products found in database. Products table may be empty.');
+    try {
+      const res = await fetch('/api/admin/products', { headers: getAuthHeader() });
+      if (res.ok) {
+        const data = await res.json() as { data?: any[] };
+        setProducts(data.data || []);
+      } else {
+        console.error('Error loading products');
       }
-    } else {
-      console.log('No products data returned from database.');
+    } catch (err) {
+      console.error('Error loading products:', err);
     }
     setLoading(false);
   };
@@ -55,38 +52,38 @@ export default function RealProductManager() {
 
     setSaving(true);
 
-    const productData = {
-      ...editingProduct,
-      updated_at: new Date().toISOString()
-    };
-
-    if (editingProduct.id) {
-      // Update existing
-      const { error } = await supabase
-        .from('real_products')
-        .update(productData)
-        .eq('id', editingProduct.id);
-
-      if (!error) {
-        alert('Product updated successfully!');
-        loadProducts();
-        setEditingProduct(null);
+    try {
+      if (editingProduct.id && !editingProduct._isNew) {
+        const res = await fetch(`/api/admin/products/${editingProduct.id}`, {
+          method: 'PUT',
+          headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+          body: JSON.stringify(editingProduct),
+        });
+        if (res.ok) {
+          alert('Product updated successfully!');
+          loadProducts();
+          setEditingProduct(null);
+        } else {
+          const err = await res.json() as { error?: string };
+          alert('Error updating product: ' + (err.error || 'Unknown error'));
+        }
       } else {
-        alert('Error updating product: ' + error.message);
+        const res = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+          body: JSON.stringify(editingProduct),
+        });
+        if (res.ok) {
+          alert('Product created successfully!');
+          loadProducts();
+          setEditingProduct(null);
+        } else {
+          const err = await res.json() as { error?: string };
+          alert('Error creating product: ' + (err.error || 'Unknown error'));
+        }
       }
-    } else {
-      // Create new
-      const { error } = await supabase
-        .from('real_products')
-        .insert([productData]);
-
-      if (!error) {
-        alert('Product created successfully!');
-        loadProducts();
-        setEditingProduct(null);
-      } else {
-        alert('Error creating product: ' + error.message);
-      }
+    } catch (err: any) {
+      alert('Error saving product: ' + err.message);
     }
 
     setSaving(false);
@@ -95,17 +92,20 @@ export default function RealProductManager() {
   const deleteProduct = async (id: string) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
-    const { error } = await supabase
-      .from('real_products')
-      .delete()
-      .eq('id', id);
-
-    if (!error) {
-      alert('Product deleted successfully!');
-      loadProducts();
-    } else {
-      alert('Error deleting product: ' + error.message);
+    try {
+      const res = await fetch(`/api/admin/products/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeader(),
+      });
+      if (res.ok) {
+        alert('Product deleted successfully!');
+      } else {
+        alert('Delete may have failed - refreshing list');
+      }
+    } catch (err: any) {
+      alert('Error deleting product: ' + err.message);
     }
+    loadProducts();
   };
 
   const filteredProducts = products.filter(p =>

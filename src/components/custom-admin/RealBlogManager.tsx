@@ -16,7 +16,10 @@ import {
   AlertCircle,
   XCircle
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+function getAuthHeader(): Record<string, string> {
+  const token = localStorage.getItem('custom_admin_token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export default function RealBlogManager() {
   const [posts, setPosts] = useState<any[]>([]);
@@ -31,13 +34,14 @@ export default function RealBlogManager() {
 
   const loadPosts = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('real_blog_posts')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (data) {
-      setPosts(data);
+    try {
+      const res = await fetch('/api/admin/blog/posts?limit=100', { headers: getAuthHeader() });
+      if (res.ok) {
+        const data = await res.json() as { data?: any[] };
+        setPosts(data.data || []);
+      }
+    } catch (err) {
+      console.error('Error loading blog posts:', err);
     }
     setLoading(false);
   };
@@ -99,31 +103,38 @@ export default function RealBlogManager() {
       updated_at: new Date().toISOString()
     };
 
-    if (editingPost.id) {
-      const { error } = await supabase
-        .from('real_blog_posts')
-        .update(postData)
-        .eq('id', editingPost.id);
-
-      if (!error) {
-        alert('Blog post updated successfully!');
-        loadPosts();
-        setEditingPost(null);
+    try {
+      if (editingPost.id) {
+        const res = await fetch(`/api/admin/blog/posts/${editingPost.id}`, {
+          method: 'PUT',
+          headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+          body: JSON.stringify(postData),
+        });
+        if (res.ok) {
+          alert('Blog post updated successfully!');
+          loadPosts();
+          setEditingPost(null);
+        } else {
+          const err = await res.json() as { error?: string };
+          alert('Error: ' + (err.error || 'Update failed'));
+        }
       } else {
-        alert('Error: ' + error.message);
+        const res = await fetch('/api/admin/blog/posts', {
+          method: 'POST',
+          headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+          body: JSON.stringify(postData),
+        });
+        if (res.ok) {
+          alert('Blog post created successfully!');
+          loadPosts();
+          setEditingPost(null);
+        } else {
+          const err = await res.json() as { error?: string };
+          alert('Error: ' + (err.error || 'Create failed'));
+        }
       }
-    } else {
-      const { error } = await supabase
-        .from('real_blog_posts')
-        .insert([postData]);
-
-      if (!error) {
-        alert('Blog post created successfully!');
-        loadPosts();
-        setEditingPost(null);
-      } else {
-        alert('Error: ' + error.message);
-      }
+    } catch (err: any) {
+      alert('Error: ' + err.message);
     }
 
     setSaving(false);
@@ -132,12 +143,19 @@ export default function RealBlogManager() {
   const deletePost = async (id: string) => {
     if (!confirm('Delete this blog post permanently?')) return;
 
-    await supabase
-      .from('real_blog_posts')
-      .delete()
-      .eq('id', id);
-
-    alert('Post deleted!');
+    try {
+      const res = await fetch(`/api/admin/blog/posts/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeader(),
+      });
+      if (res.ok) {
+        alert('Post deleted!');
+      } else {
+        alert('Delete may have failed - refreshing list');
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+    }
     loadPosts();
   };
 
