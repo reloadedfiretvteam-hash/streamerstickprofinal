@@ -1,6 +1,6 @@
 Row Type,Action,Status,Campaign,Ad Group,Keyword,Match Type,Final URL,Ad Type,Headline 1,Headline 2,Headline 3,Headline 4,Headline 5,Headline 6,Headline 7,Headline 8,Headline 9,Headline 10,Headline 11,Headline 12,Headline 13,Headline 14,Headline 15,Description 1,Description 2,Description 3,Description 4,Path 1,Path 2,Campaign Type,Campaign Subtype,Budget,Budget Type,Target Network,Languages,Location,Bid Strategy Type
-Campaign,Add,Enabled,StreamStick Pro - IPTV Subscriptions,,,,,,,,,,,,,,,,,,,,,,,,,,,Search,Standard,10,Daily,Google search,English,"United States,Canada",Maximize Conversions
-Campaign,Add,Enabled,StreamStick Pro - FireStick Sales,,,,,,,,,,,,,,,,,,,,,,,,,,,Search,Standard,10,Daily,Google search,English,"United States,Canada",Maximize Conversions
+Campaign,Add,Enabled,StreamStick Pro - IPTV Subscriptions,,,,,,,,,,,,,,,,,,,,,,,,,,,Search,Standard,15,Daily,Google search,English,"United States,Canada",Maximize clicks
+Campaign,Add,Enabled,StreamStick Pro - FireStick Sales,,,,,,,,,,,,,,,,,,,,,,,,,,,Search,Standard,15,Daily,Google search,English,"United States,Canada",Maximize clicks
 Ad Group,Add,Enabled,StreamStick Pro - IPTV Subscriptions,IPTV Direct - Buyer Intent,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 Ad Group,Add,Enabled,StreamStick Pro - IPTV Subscriptions,Jailbroken & Preloaded Devices,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 Ad Group,Add,Enabled,StreamStick Pro - IPTV Subscriptions,Cable Cutter Cord Cutter,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
