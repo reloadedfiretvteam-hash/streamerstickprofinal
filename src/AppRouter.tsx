@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import App from './App';
+import CheckoutSuccess from './pages/CheckoutSuccess';
 import UnifiedAdminLogin from './pages/UnifiedAdminLogin';
 import RealAdminDashboard from './pages/RealAdminDashboard';
 import OrderTracking from './pages/OrderTracking';
@@ -75,6 +76,33 @@ export default function AppRouter() {
       <>
         <VisitorTracker />
         <IPTVServicesPage />
+      </>
+    );
+  }
+
+  if (currentPath === '/success' || currentPath === '/success/') {
+    return (
+      <>
+        <VisitorTracker />
+        <CheckoutSuccess />
+      </>
+    );
+  }
+
+  if (currentPath === '/cancel' || currentPath === '/cancel/') {
+    return (
+      <>
+        <VisitorTracker />
+        <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+          <div className="max-w-md w-full text-center bg-white/5 rounded-2xl p-8 border border-white/10">
+            <h1 className="text-3xl font-bold text-white mb-4">Checkout Cancelled</h1>
+            <p className="text-gray-300 mb-6">No charges were made. Feel free to continue browsing.</p>
+            <div className="flex gap-4 justify-center">
+              <a href="/shop" className="bg-orange-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-orange-600 transition-colors">Back to Shop</a>
+              <a href="/" className="bg-white/10 text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/20 transition-colors border border-white/20">Home</a>
+            </div>
+          </div>
+        </div>
       </>
     );
   }
