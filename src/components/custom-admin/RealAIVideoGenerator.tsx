@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Video, Download, Sparkles, User, Settings, Film, Calendar, Zap, Youtube, Music } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+function getAuthHeader(): Record<string, string> {
+  const token = localStorage.getItem('custom_admin_token');
+  return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+}
 
 interface ScheduledPost {
   id: string;
@@ -75,14 +78,15 @@ export default function RealAIVideoGenerator() {
 
   const loadProducts = async () => {
     try {
-      const { data } = await supabase
-        .from('real_products')
-        .select('id, name, price, main_image')
-        .in('status', ['published', 'publish', 'active'])
-        .order('sort_order', { ascending: true });
-
-      if (data) {
-        setProducts(data);
+      const res = await fetch('/api/admin/products', { headers: getAuthHeader() });
+      if (res.ok) {
+        const json = await res.json() as { data?: any[] };
+        setProducts((json.data || []).map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          price: p.price,
+          main_image: p.imageUrl || p.main_image || '',
+        })));
       }
     } catch (error) {
       console.error('Error loading products:', error);
@@ -91,13 +95,13 @@ export default function RealAIVideoGenerator() {
 
   const loadScheduledPosts = async () => {
     try {
-      const { data } = await supabase
-        .from('scheduled_video_posts')
-        .select('*')
-        .order('scheduled_time', { ascending: true });
-
-      if (data) {
-        setScheduledPosts(data);
+      const res = await fetch('/api/admin/site-settings', { headers: getAuthHeader() });
+      if (res.ok) {
+        const json = await res.json() as { data?: Record<string, string> };
+        const raw = json.data?.scheduled_video_posts;
+        if (raw) {
+          try { setScheduledPosts(JSON.parse(raw)); } catch { /* ignore */ }
+        }
       }
     } catch (error) {
       console.error('Error loading scheduled posts:', error);
@@ -106,24 +110,12 @@ export default function RealAIVideoGenerator() {
 
   const checkAutoPostStatus = async () => {
     try {
-      const { data } = await supabase
-        .from('site_settings')
-        .select('value')
-        .eq('key', 'auto_post_videos_enabled')
-        .single();
-
-      if (data) {
-        setAutoPostEnabled(data.value === 'true');
-      }
-
-      const { data: postsData } = await supabase
-        .from('site_settings')
-        .select('value')
-        .eq('key', 'auto_posts_per_day')
-        .single();
-
-      if (postsData) {
-        setPostsPerDay(parseInt(postsData.value || '2'));
+      const res = await fetch('/api/admin/site-settings', { headers: getAuthHeader() });
+      if (res.ok) {
+        const json = await res.json() as { data?: Record<string, string> };
+        const d = json.data || {};
+        if (d.auto_post_videos_enabled) setAutoPostEnabled(d.auto_post_videos_enabled === 'true');
+        if (d.auto_posts_per_day) setPostsPerDay(parseInt(d.auto_posts_per_day || '2'));
       }
     } catch (error) {
       console.error('Error loading auto-post settings:', error);
@@ -200,28 +192,7 @@ I'll show you exactly what you get and why this is worth it. Let's dive in!`
       setPreviewUrl(preview);
       setGeneratedVideoUrl(preview);
 
-      // Step 4: Upload to Supabase Storage
-      const videoFileName = `video-${selectedProduct}-${Date.now()}.mp4`;
-      const { error: uploadError } = await supabase.storage
-        .from('videos')
-        .upload(videoFileName, videoBlob, {
-          contentType: 'video/mp4',
-          cacheControl: '3600'
-        });
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        // Continue even if upload fails
-      } else {
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from('videos')
-          .getPublicUrl(videoFileName);
-
-        if (urlData) {
-          setGeneratedVideoUrl(urlData.publicUrl);
-        }
-      }
+      // Step 4: Video stays as local blob URL (no remote storage in worker mode)
 
       // Step 5: Save to database for tracking
       await saveVideoToDatabase(videoBlob, product, script, preview);
@@ -485,14 +456,16 @@ I'll show you exactly what you get and why this is worth it. Let's dive in!`
 
   const saveVideoToDatabase = async (_videoBlob: Blob, product: any, script: string, videoUrl: string) => {
     try {
-      await supabase.from('ai_generated_videos').insert({
-        product_id: product.id,
-        product_name: product.name,
-        script: script,
-        ai_person: aiPerson,
-        video_style: videoStyle,
-        video_url: videoUrl,
-        created_at: new Date().toISOString()
+      // Log video generation via site settings as a best-effort record
+      await fetch('/api/admin/site-settings', {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify({
+          last_generated_video_product: product.name,
+          last_generated_video_url: videoUrl,
+          last_generated_video_script: script.substring(0, 500),
+          last_generated_video_at: new Date().toISOString(),
+        }),
       });
     } catch (error) {
       console.error('Error saving video:', error);
@@ -545,19 +518,18 @@ I'll show you exactly what you get and why this is worth it. Let's dive in!`
 
     // Save to database
     try {
-      const { error } = await supabase
-        .from('scheduled_video_posts')
-        .insert(posts);
-
-      if (error) throw error;
-
-      // Save auto-post settings
-      await supabase.from('site_settings').upsert([
-        { key: 'auto_post_videos_enabled', value: 'true' },
-        { key: 'auto_posts_per_day', value: postsPerDay.toString() },
-        { key: 'tiktok_auto_post_enabled', value: tiktokEnabled.toString() },
-        { key: 'youtube_auto_post_enabled', value: youtubeEnabled.toString() }
-      ]);
+      // Save auto-post settings via API
+      await fetch('/api/admin/site-settings', {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify({
+          auto_post_videos_enabled: 'true',
+          auto_posts_per_day: postsPerDay.toString(),
+          tiktok_auto_post_enabled: tiktokEnabled.toString(),
+          youtube_auto_post_enabled: youtubeEnabled.toString(),
+          scheduled_video_posts: JSON.stringify(posts),
+        }),
+      });
 
       await loadScheduledPosts();
       alert(`Scheduled ${posts.length} posts! Auto-posting is now enabled.`);

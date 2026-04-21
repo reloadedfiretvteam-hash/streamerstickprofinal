@@ -432,6 +432,59 @@ app.route('/api/seo-ads', createSeoAdRoutes());
 app.route('/api/ai-assistant', createAIAssistantRoutes());
 app.route('/api/email-campaigns', createEmailCampaignRoutes());
 
+// Public email subscribe endpoint — saves to contacts table
+app.post('/api/subscribe', async (c) => {
+  try {
+    const body = await c.req.json().catch(() => ({} as any));
+    const email = typeof body.email === 'string' ? body.email.toLowerCase().trim() : '';
+    const source = typeof body.source === 'string' ? body.source : 'website';
+    if (!email || !email.includes('@')) {
+      return c.json({ error: 'Valid email required' }, 400);
+    }
+    const { createClient } = await import('@supabase/supabase-js');
+    const svcKey = c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.VITE_SUPABASE_ANON_KEY || '';
+    const supabase = createClient(c.env.VITE_SUPABASE_URL, svcKey);
+    const { error } = await supabase.from('contacts').upsert(
+      { email, source, is_subscribed: true, metadata: body.metadata || {} },
+      { onConflict: 'email', ignoreDuplicates: false }
+    );
+    if (error) {
+      console.error('[subscribe]', error.message);
+    }
+    return c.json({ success: true });
+  } catch (err: any) {
+    console.error('[subscribe]', err?.message || err);
+    return c.json({ success: true }); // Never expose errors to client
+  }
+});
+
+// Generic event tracking endpoint — fails silently if tables don't exist
+app.post('/api/track-event', async (c) => {
+  try {
+    const body = await c.req.json().catch(() => ({} as any));
+    // Fire-and-forget: just acknowledge receipt, store in analytics if possible
+    const storage = getStorage(c.env);
+    const sessionId = typeof body.session_id === 'string' ? body.session_id : null;
+    const eventType = typeof body.event_type === 'string' ? body.event_type : 'event';
+    // If it's a page view type, delegate to trackVisitByHash
+    if ((eventType === 'page_view' || eventType === 'pageview') && sessionId) {
+      await storage.trackVisitByHash({
+        ip_hash: 'event-' + (sessionId || Date.now()),
+        session_id: sessionId,
+        page: typeof body.page === 'string' ? body.page : (new URL(body.page_url || '/', 'https://streamstickpro.com').pathname),
+        page_url: body.page_url || null,
+        referrer: body.referrer || null,
+        user_agent: body.user_agent || null,
+        is_bot: false,
+        state: null, city: null, country: null,
+      }).catch(() => {});
+    }
+    return c.json({ ok: true });
+  } catch {
+    return c.json({ ok: true });
+  }
+});
+
 app.post('/api/track-cart', async (c) => {
   try {
     const { getStorage } = await import('./helpers');

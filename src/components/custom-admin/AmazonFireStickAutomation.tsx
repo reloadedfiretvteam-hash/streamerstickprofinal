@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { ShoppingCart, Package, Send, ExternalLink, User, MapPin, Phone, Mail, CreditCard, AlertCircle, Zap } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+function getAuthHeader(): Record<string, string> {
+  const token = localStorage.getItem('custom_admin_token');
+  return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+}
 import AmazonAIAssistant from './AmazonAIAssistant';
 
 interface FireStickOrder {
@@ -350,10 +353,11 @@ Country: ${order.shipping_country}`;
             <div className="flex items-end">
               <button
                 onClick={() => {
-                  // Save affiliate ID
-                  supabase.from('site_settings').upsert({
-                    key: 'amazon_affiliate_id',
-                    value: amazonAffiliateId
+                  // Save affiliate ID via API
+                  fetch('/api/admin/site-settings', {
+                    method: 'POST',
+                    headers: getAuthHeader(),
+                    body: JSON.stringify({ amazon_affiliate_id: amazonAffiliateId }),
                   }).then(() => {
                     generateAffiliateLinks();
                     alert('Affiliate ID saved!');
