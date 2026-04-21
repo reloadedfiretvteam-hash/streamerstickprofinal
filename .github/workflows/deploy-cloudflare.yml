@@ -58,6 +58,16 @@ jobs:
           echo "${{ secrets.SUPABASE_SERVICE_KEY }}" | npx wrangler pages secret put SUPABASE_SERVICE_KEY --project-name=streamerstickpro-live
           echo "${{ secrets.RESEND_API_KEY }}" | npx wrangler pages secret put RESEND_API_KEY --project-name=streamerstickpro-live
           echo "${{ secrets.SESSION_SECRET }}" | npx wrangler pages secret put SESSION_SECRET --project-name=streamerstickpro-live
+          # Admin credentials (override fallback in auth.ts)
+          if [ -n "${{ secrets.ADMIN_USERNAME }}" ]; then
+            echo "${{ secrets.ADMIN_USERNAME }}" | npx wrangler pages secret put ADMIN_USERNAME --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.ADMIN_PASSWORD }}" ]; then
+            echo "${{ secrets.ADMIN_PASSWORD }}" | npx wrangler pages secret put ADMIN_PASSWORD --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.JWT_SECRET }}" ]; then
+            echo "${{ secrets.JWT_SECRET }}" | npx wrangler pages secret put JWT_SECRET --project-name=streamerstickpro-live
+          fi
           # IPTV panel (automatic free trials): add these in GitHub → Settings → Secrets and variables → Actions.
           # Only runs when a secret is non-empty so existing deploys are unchanged until you add them.
           # Never commit real API keys; rotate any key that was pasted into chat or issues.
