@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Lock, Bitcoin, CreditCard, Smartphone, Wallet, Mail, User, CheckCircle, ArrowRight, Shield, AlertCircle, Package, X } from 'lucide-react';
-import { supabase, getStorageUrl } from '../lib/supabase';
-import StripePaymentForm from '../components/StripePaymentForm';
+import { ShoppingCart, Lock, Bitcoin, CreditCard, Smartphone, Wallet, Mail, User, ArrowRight, Shield, AlertCircle, Package, X } from 'lucide-react';
 import BitcoinPaymentFlow from '../components/BitcoinPaymentFlow';
 import CashAppPaymentFlow from '../components/CashAppPaymentFlow';
 
@@ -16,11 +14,13 @@ interface Product {
   id: string;
   name: string;
   description: string;
+  /** price in cents from the API */
   price: number;
-  sale_price: number | null;
-  main_image: string;
+  /** salePrice in cents from the API, or null */
+  salePrice: number | null;
+  imageUrl: string;
   category: string;
-  stripe_payment_link?: string | null;
+  shadowPriceId?: string | null;
 }
 
 interface CartItem {
@@ -34,7 +34,6 @@ export default function CompleteCheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'bitcoin' | 'cashapp' | ''>('');
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderCode, setOrderCode] = useState('');
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [creatingPaymentIntent, setCreatingPaymentIntent] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [loadingProducts, setLoadingProducts] = useState(false);
@@ -91,27 +90,19 @@ export default function CompleteCheckoutPage() {
   const loadProducts = async (): Promise<Product[]> => {
     setLoadingProducts(true);
     try {
-      const { data, error } = await supabase
-        .from('real_products')
-        .select('*')
-        .in('status', ['published', 'publish', 'active'])
-        .order('sort_order', { ascending: true });
-
-      if (error) throw error;
-
-      if (data) {
-        return data.map((p: any) => ({
-          id: p.id,
-          name: p.name,
-          description: p.description || '',
-          price: parseFloat(p.price || 0),
-          sale_price: p.sale_price ? parseFloat(p.sale_price) : null,
-          main_image: p.main_image || '',
-          category: p.category || '',
-          stripe_payment_link: p.stripe_payment_link || null
-        }));
-      }
-      return [];
+      const res = await fetch('/api/products');
+      if (!res.ok) throw new Error(`Failed to load products: ${res.status}`);
+      const json = await res.json() as { data?: any[] };
+      return (json.data || []).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        description: p.description || '',
+        price: Number(p.price || 0),
+        salePrice: p.salePrice != null ? Number(p.salePrice) : null,
+        imageUrl: p.imageUrl || '',
+        category: p.category || '',
+        shadowPriceId: p.shadowPriceId || null,
+      }));
     } catch (error) {
       console.error('Error loading products:', error);
       return [];
@@ -128,10 +119,11 @@ export default function CompleteCheckoutPage() {
     }
   };
 
+  /** Returns subtotal in dollars */
   const calculateSubtotal = () => {
     return cart.reduce((sum, item) => {
-      const price = item.product.sale_price || item.product.price;
-      return sum + (price * item.quantity);
+      const priceCents = item.product.salePrice ?? item.product.price;
+      return sum + ((priceCents / 100) * item.quantity);
     }, 0);
   };
 
@@ -157,19 +149,16 @@ export default function CompleteCheckoutPage() {
         setCurrentStep(2);
       }
     } else if (currentStep === 2 && paymentMethod) {
-      // If Stripe is selected, create payment intent before moving to step 3
       if (paymentMethod === 'stripe') {
-        await createPaymentIntent();
-        if (clientSecret) {
-          setCurrentStep(3);
-        }
+        await initiateStripeCheckout();
+        // Redirect happens inside initiateStripeCheckout on success
       } else {
         setCurrentStep(3);
       }
     }
   };
 
-  const createPaymentIntent = async () => {
+  const initiateStripeCheckout = async () => {
     if (!customerInfo.email || !customerInfo.name || cart.length === 0) {
       setPaymentError('Please fill in your information and add products to cart');
       return;
@@ -179,56 +168,32 @@ export default function CompleteCheckoutPage() {
     setPaymentError(null);
 
     try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      
-      if (!supabaseUrl) {
-        throw new Error('Payment service not configured');
-      }
-
-      // Calculate total from cart
-      const totalAmount = calculateTotal();
-      const productIds = cart.map(item => item.product.id);
-
-      // Call Supabase Edge Function with proper headers for Cloudflare
-      const response = await fetch(`${supabaseUrl}/functions/v1/stripe-payment-intent`, {
+      const response = await fetch('/api/checkout', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || '',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: Math.round(totalAmount * 100), // Convert to cents
-          currency: 'usd',
+          items: cart.map(item => ({ productId: item.product.id, quantity: item.quantity })),
           customerEmail: customerInfo.email,
           customerName: customerInfo.name,
-          productIds: productIds,
-          metadata: {
-            customerPhone: customerInfo.phone,
-            cartItems: JSON.stringify(cart.map(item => ({
-              productId: item.product.id,
-              productName: item.product.name,
-              quantity: item.quantity,
-              price: item.product.sale_price || item.product.price
-            })))
-          }
+          customerPhone: customerInfo.phone || undefined,
         }),
       });
 
+      const data = await response.json() as { url?: string; sessionId?: string; error?: string; details?: string };
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Network error' }));
-        throw new Error(errorData.error || `HTTP ${response.status}: Failed to create payment intent`);
+        throw new Error(data.error || data.details || `Checkout failed (${response.status})`);
       }
 
-      const data = await response.json();
-
-      if (!data.clientSecret) {
-        throw new Error('Invalid response from payment server');
+      if (!data.url) {
+        throw new Error('No checkout URL returned from server');
       }
 
-      setClientSecret(data.clientSecret);
+      // Clear cart and redirect to Stripe
+      localStorage.removeItem('cart');
+      window.location.href = data.url;
     } catch (error: unknown) {
-      console.error('Error creating payment intent:', error);
+      console.error('Error creating checkout session:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to initialize payment. Please try again.';
       setPaymentError(errorMessage);
     } finally {
@@ -236,42 +201,9 @@ export default function CompleteCheckoutPage() {
     }
   };
 
-  const handlePaymentSuccess = async (paymentIntentId?: string, orderCode?: string) => {
-    // Save order to database with REAL product names (what customer sees)
-    try {
-      const orderData = {
-        customer_name: customerInfo.name,
-        customer_email: customerInfo.email,
-        customer_phone: customerInfo.phone,
-        total_amount: calculateTotal(),
-        payment_method: paymentMethod,
-        payment_status: 'paid',
-        order_status: 'processing',
-        stripe_payment_intent_id: paymentIntentId || null,
-        order_code: orderCode || generateOrderCode(),
-        items: cart.map(item => ({
-          product_id: item.product.id,
-          product_name: item.product.name, // REAL name (customer sees this)
-          product_name_cloaked: item.product.cloaked_name || 'Digital Entertainment Service', // CLOAKED name (Stripe sees this)
-          quantity: item.quantity,
-          price: item.product.sale_price || item.product.price
-        }))
-      };
-
-      const { error } = await supabase
-        .from('orders_full')
-        .insert([orderData]);
-
-      if (error) {
-        console.error('Error saving order:', error);
-      }
-    } catch (error) {
-      console.error('Error saving order:', error);
-    }
-
+  const handlePaymentSuccess = (_paymentIntentId?: string, code?: string) => {
     setOrderComplete(true);
-    setOrderCode(orderCode || generateOrderCode());
-    // Clear cart
+    setOrderCode(code || generateOrderCode());
     localStorage.removeItem('cart');
   };
 
@@ -571,25 +503,7 @@ export default function CompleteCheckoutPage() {
               </div>
             )}
 
-            {/* Step 3: Payment Processing */}
-            {currentStep === 3 && paymentMethod === 'stripe' && clientSecret && (
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="mb-4">
-                  <button
-                    onClick={() => setCurrentStep(2)}
-                    className="text-blue-600 hover:text-blue-700 flex items-center gap-2 text-sm font-semibold"
-                  >
-                    ← Change Payment Method
-                  </button>
-                </div>
-                <StripePaymentForm
-                  amount={calculateTotal()}
-                  clientSecret={clientSecret}
-                  onSuccess={(paymentIntentId) => handlePaymentSuccess(paymentIntentId)}
-                  onError={(error) => setPaymentError(error)}
-                />
-              </div>
-            )}
+            {/* Stripe redirects directly - no step 3 needed for card payments */}
 
             {currentStep === 3 && paymentMethod === 'bitcoin' && (
               <div className="bg-white rounded-xl shadow-sm p-6">
@@ -606,10 +520,10 @@ export default function CompleteCheckoutPage() {
                   customerInfo={customerInfo}
                   products={cart.map(item => ({
                     name: item.product.name,
-                    price: item.product.sale_price || item.product.price,
+                    price: (item.product.salePrice ?? item.product.price) / 100,
                     quantity: item.quantity
                   }))}
-                  onOrderComplete={(orderCode) => handlePaymentSuccess(undefined, orderCode)}
+                  onOrderComplete={(code) => handlePaymentSuccess(undefined, code)}
                   onBack={() => setCurrentStep(2)}
                 />
               </div>
@@ -630,10 +544,10 @@ export default function CompleteCheckoutPage() {
                   customerInfo={customerInfo}
                   products={cart.map(item => ({
                     name: item.product.name,
-                    price: item.product.sale_price || item.product.price,
+                    price: (item.product.salePrice ?? item.product.price) / 100,
                     quantity: item.quantity
                   }))}
-                  onOrderComplete={(orderCode) => handlePaymentSuccess(undefined, orderCode)}
+                  onOrderComplete={(code) => handlePaymentSuccess(undefined, code)}
                   onBack={() => setCurrentStep(2)}
                 />
               </div>
@@ -648,10 +562,9 @@ export default function CompleteCheckoutPage() {
               {/* Cart Items */}
               <div className="space-y-4 mb-6">
                 {cart.map((item) => {
-                  const imageUrl = item.product.main_image && !item.product.main_image.startsWith('http')
-                    ? getStorageUrl('images', item.product.main_image)
-                    : item.product.main_image || '/placeholder-product.jpg';
-                  const price = item.product.sale_price || item.product.price;
+                  const imageUrl = item.product.imageUrl || '/placeholder-product.jpg';
+                  const priceCents = item.product.salePrice ?? item.product.price;
+                  const priceDisplay = (priceCents / 100).toFixed(2);
 
                   return (
                     <div key={item.product.id} className="flex gap-4 pb-4 border-b border-gray-200">
@@ -668,9 +581,9 @@ export default function CompleteCheckoutPage() {
                         <h3 className="font-semibold text-sm mb-1">{item.product.name}</h3>
                         <div className="flex items-center justify-between">
                           <div className="text-sm text-gray-600">
-                            <span className="font-semibold">${price.toFixed(2)}</span> × {item.quantity}
+                            <span className="font-semibold">${priceDisplay}</span> × {item.quantity}
                           </div>
-                          <div className="font-bold">${(price * item.quantity).toFixed(2)}</div>
+                          <div className="font-bold">${((priceCents / 100) * item.quantity).toFixed(2)}</div>
                         </div>
                       </div>
                       <button
