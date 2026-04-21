@@ -3231,5 +3231,148 @@ export function createAdminRoutes() {
     }
   });
 
+  // ── Customer password reset ──
+  app.post('/customers/:id/reset-password', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const customer = await storage.getCustomer(c.req.param('id'));
+      if (!customer) {
+        return c.json({ error: 'Customer not found' }, 404);
+      }
+
+      const email = customer.email;
+      if (!email) {
+        return c.json({ error: 'Customer has no email address' }, 400);
+      }
+
+      // Generate a new random password
+      const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghkmnpqrstuvwxyz23456789';
+      let newPassword = '';
+      for (let i = 0; i < 12; i++) newPassword += chars[Math.floor(Math.random() * chars.length)];
+
+      // Send the reset email
+      const fromEmail = c.env.RESEND_FROM_EMAIL || 'noreply@streamstickpro.com';
+      const from = fromEmail.includes('<') ? fromEmail : `StreamStickPro <${fromEmail}>`;
+
+      const resetHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%); padding: 28px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0;">StreamStickPro</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0;">Password Reset</p>
+          </div>
+          <div style="background: #f9fafb; padding: 28px; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #1a1a1a; margin-top: 0;">Hi ${customer.name || 'Customer'}!</h2>
+            <p>Your StreamStickPro account password has been reset by an administrator.</p>
+            <div style="background: #fff; border: 2px solid #ea580c; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+              <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">Your new temporary password:</p>
+              <p style="font-family: monospace; font-size: 24px; font-weight: bold; color: #ea580c; margin: 0;">${newPassword}</p>
+            </div>
+            <p>Please log in and change this password immediately. If you did not request this, contact us right away.</p>
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="https://streamstickpro.com/customer-login" style="background: #ea580c; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Log In Now →</a>
+            </div>
+            <p style="color: #666; font-size: 14px;"><strong>StreamStickPro Team</strong><br>reloadedfiretvteam@gmail.com</p>
+          </div>
+        </div>`;
+
+      const emailResult = await sendEmail({ from, to: email, subject: 'Your StreamStickPro Password Has Been Reset', html: resetHtml }, c.env);
+
+      if (!emailResult.success) {
+        return c.json({ error: 'Failed to send reset email: ' + emailResult.error }, 500);
+      }
+
+      console.log(`[admin] Password reset email sent to ${email}`);
+      return c.json({ success: true, message: `Password reset email sent to ${email}` });
+    } catch (error: any) {
+      console.error('Error resetting customer password:', error);
+      return c.json({ error: 'Failed to reset password: ' + error.message }, 500);
+    }
+  });
+
+  // ── Generate SEO campaign posts ──
+  app.post('/generate-seo-campaign', async (c) => {
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const serviceKey = getSupabaseServiceKey(c.env);
+      const supabase = createClient(getSupabaseUrl(c.env), serviceKey);
+
+      const campaignTopics = [
+        { title: 'Best IPTV for Fire Stick 2026: Top 10 Picks', slug: 'best-iptv-fire-stick-2026', keyword: 'best iptv for fire stick' },
+        { title: 'How to Jailbreak Fire Stick (Safe & Legal Method)', slug: 'how-to-jailbreak-fire-stick-2026', keyword: 'jailbreak fire stick' },
+        { title: 'IPTV vs Cable TV: Is It Worth Switching in 2026?', slug: 'iptv-vs-cable-tv-2026', keyword: 'iptv vs cable' },
+        { title: 'Top 10 IPTV Apps for Android TV Box 2026', slug: 'best-iptv-apps-android-tv-box-2026', keyword: 'iptv apps android tv box' },
+        { title: 'How to Watch NFL Games on Fire Stick Without Cable', slug: 'watch-nfl-fire-stick-no-cable', keyword: 'watch nfl fire stick' },
+        { title: 'Fire Stick 4K Max vs Lite: Which One Should You Buy?', slug: 'fire-stick-4k-max-vs-lite-comparison', keyword: 'fire stick 4k max vs lite' },
+        { title: 'How to Stream Local Channels on Fire Stick for Free', slug: 'local-channels-fire-stick-free', keyword: 'local channels fire stick' },
+        { title: 'Best VPN for IPTV on Fire Stick 2026', slug: 'best-vpn-iptv-fire-stick-2026', keyword: 'vpn for iptv fire stick' },
+        { title: 'How to Fix Buffering on IPTV: Complete Guide', slug: 'fix-iptv-buffering-complete-guide', keyword: 'fix iptv buffering' },
+        { title: 'ONN 4K vs Fire Stick 4K Max: Full Comparison 2026', slug: 'onn-4k-vs-fire-stick-4k-max-2026', keyword: 'onn 4k vs fire stick 4k max' },
+        { title: 'How to Watch NBA on IPTV: Best Options 2026', slug: 'watch-nba-iptv-2026', keyword: 'watch nba iptv' },
+        { title: 'Best IPTV for Roku: Top Channels & Apps 2026', slug: 'best-iptv-roku-2026', keyword: 'best iptv for roku' },
+        { title: 'How to Set Up IPTV Smarters Pro on Fire Stick', slug: 'setup-iptv-smarters-pro-fire-stick', keyword: 'iptv smarters pro fire stick' },
+        { title: 'Is IPTV Legal in the USA? What You Need to Know', slug: 'is-iptv-legal-usa-2026', keyword: 'is iptv legal usa' },
+        { title: 'Best IPTV for College Sports: NCAA & March Madness', slug: 'best-iptv-college-sports-ncaa', keyword: 'iptv college sports' },
+        { title: 'How to Use TiviMate IPTV Player: Complete Setup Guide', slug: 'tivimate-iptv-player-setup-guide', keyword: 'tivimate iptv player setup' },
+        { title: 'IPTV vs Streaming Services: Full Cost Breakdown 2026', slug: 'iptv-vs-streaming-services-cost-2026', keyword: 'iptv vs streaming services' },
+        { title: 'Best Channels to Watch on IPTV: 2026 Guide', slug: 'best-channels-iptv-2026', keyword: 'best channels iptv' },
+        { title: 'How to Watch PPV Events on IPTV: Boxing & UFC', slug: 'watch-ppv-iptv-boxing-ufc', keyword: 'watch ppv iptv' },
+        { title: 'Fire Stick Remote Not Working? Here\'s the Fix', slug: 'fire-stick-remote-not-working-fix', keyword: 'fire stick remote not working' },
+      ];
+
+      const now = new Date().toISOString();
+      let successCount = 0;
+      let skipped = 0;
+      const errors: string[] = [];
+
+      for (const topic of campaignTopics) {
+        const content = `<article>
+<h1>${topic.title}</h1>
+<p>Looking for the best way to enjoy streaming in 2026? This comprehensive guide covers everything you need to know about ${topic.keyword}.</p>
+<h2>Why This Matters</h2>
+<p>With thousands of channels and on-demand content available, choosing the right streaming solution has never been more important. Whether you're cutting the cord or upgrading your setup, we've got you covered.</p>
+<h2>Top Recommendations</h2>
+<p>Based on our extensive testing and user feedback, StreamStickPro recommends the following options for ${topic.keyword}:</p>
+<ul>
+<li><strong>IPTV Service</strong> - Access 18,000+ live channels, sports, movies, and international content</li>
+<li><strong>Pre-Configured Fire Stick</strong> - Ready to stream in minutes, everything set up for you</li>
+<li><strong>36-Hour Free Trial</strong> - Try before you buy with no commitments</li>
+</ul>
+<h2>Getting Started</h2>
+<p>Ready to upgrade your streaming? Visit <a href="https://streamstickpro.com/shop">StreamStickPro</a> to explore our plans starting from just $25/month. Our team is available 5 AM – 11 PM EST to help you get set up.</p>
+<h2>Final Thoughts</h2>
+<p>Whether you're new to streaming or looking to upgrade, the options available in 2026 make it easier than ever to enjoy world-class entertainment at home.</p>
+</article>`;
+
+        const { error: insertErr } = await supabase.from('blog_posts').upsert({
+          title: topic.title,
+          slug: topic.slug,
+          content,
+          excerpt: `Complete guide to ${topic.keyword} in 2026. Everything you need to know about streaming, IPTV, and Fire Stick.`,
+          meta_title: topic.title + ' | StreamStickPro',
+          meta_description: `The ultimate guide to ${topic.keyword}. Learn how to set up, optimize, and get the most out of your streaming device in 2026.`,
+          status: 'published',
+          published_at: now,
+          focus_keyword: topic.keyword,
+          category: 'guides',
+        }, { onConflict: 'slug', ignoreDuplicates: true });
+
+        if (insertErr) {
+          errors.push(`${topic.slug}: ${insertErr.message}`);
+        } else {
+          successCount++;
+        }
+      }
+
+      return c.json({
+        success: true,
+        data: { success: successCount, skipped, errors: errors.slice(0, 5) },
+        message: `Generated ${successCount} SEO campaign posts`,
+      });
+    } catch (error: any) {
+      console.error('Error generating SEO campaign:', error);
+      return c.json({ error: 'Failed to generate SEO campaign: ' + error.message }, 500);
+    }
+  });
+
   return app;
 }
