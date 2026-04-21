@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "respira-wordpress": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@respira/wordpress-mcp-server"
+      ],
+      "env": {
+        "RESPIRA_CONFIG_B64": "eyJzaXRlcyI6W3siaWQiOiJpbmRpZ28tbWVlcmthdC0yNTMyODQtaG9zdGluZ2Vyc2l0ZS1jb20iLCJuYW1lIjoiaW5kaWdvLW1lZXJrYXQtMjUzMjg0Lmhvc3RpbmdlcnNpdGUuY29tIiwidXJsIjoiaHR0cHM6Ly9pbmRpZ28tbWVlcmthdC0yNTMyODQuaG9zdGluZ2Vyc2l0ZS5jb20iLCJhcGlLZXkiOiJyZXNwaXJhX3NpdGVfY2Q4ZGZkZDNiYzBiOTU2OWEwMDkwMDZmIiwiZGVmYXVsdCI6dHJ1ZX1dLCJwcmVmZXJlbmNlcyI6eyJhdXRvRHVwbGljYXRlIjp0cnVlLCJzZWN1cml0eUNoZWNrcyI6dHJ1ZX0sIm1ldGFkYXRhIjp7ImdlbmVyYXRlZEF0IjoiMjAyNi0wNC0yMFQxNzo1MTowNS4yNDJaIiwic291cmNlIjoicmVzcGlyYS5wcmVzcy1kYXNoYm9hcmQiLCJ0b3RhbFNlYXRzIjoxLCJ1c2VkU2VhdHMiOjF9fQ=="
+      }
+    }
+  }
+}

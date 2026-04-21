@@ -1788,12 +1788,14 @@ app.get('*', async (c) => {
   const staticKnownRoutes = new Set([
     '/', '/shop', '/shadow-services', '/admin', '/checkout', '/success', '/blog',
     '/customer-login', '/my-account', '/forgot-password', '/reset-password',
-    '/terms', '/privacy', '/refund', '/iptv', '/iptv-firestick',
-    '/jailbroken-fire-sticks', '/devices', '/bundles', '/best-iptv-firestick',
+    '/terms', '/privacy', '/refund', '/iptv', '/iptv-firestick', '/iptv-services',
+    '/jailbroken-fire-sticks', '/devices', '/firestick-devices', '/bundles', '/best-iptv-firestick',
     '/iptv-media-players', '/resources', '/36hr-trial', '/pricing',
-    '/onn-google-tv', '/iptv-smarters-pro', '/tivimate', '/ultimate-iptv-catalog-2026',
-    '/tools/catalog', '/setup', '/tutorials', '/seo-ads', '/locations', '/trial', '/firestick',
-    '/vpn', '/onn', '/homepage', '/faq', '/vpn-protection',
+    '/onn-google-tv', '/onn', '/iptv-smarters-pro', '/tivimate', '/ultimate-iptv-catalog-2026',
+    '/tools/catalog', '/setup', '/setup-firestick', '/setup-onn', '/tutorials', '/seo-ads',
+    '/locations', '/trial', '/firestick',
+    '/vpn', '/homepage', '/faq', '/vpn-protection',
+    '/track-order', '/secure', '/checkout-secure', '/bundles',
   ]);
   const isKnownRoute =
     staticKnownRoutes.has(pathname) ||

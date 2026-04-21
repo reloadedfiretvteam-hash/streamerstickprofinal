@@ -48,6 +48,7 @@ const Bundles = lazy(() => import("@/pages/Bundles"));
 const VpnProtection = lazy(() => import("@/pages/VpnProtection"));
 const SeoAds = lazy(() => import("@/pages/SeoAds"));
 const VpnPage = lazy(() => import("@/pages/VpnPage"));
+const TrackOrder = lazy(() => import("@/pages/TrackOrder"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const CartDrawer = lazy(() => import("@/components/CartDrawer").then((module) => ({ default: module.CartDrawer })));
 const WishlistDrawer = lazy(() => import("@/components/WishlistDrawer").then((module) => ({ default: module.WishlistDrawer })));
@@ -136,6 +137,9 @@ function Router() {
         <Route path="/seo-ads/:slug" component={SeoAds} />
         <Route path="/l/:country/:pageType/:slug" component={LocationPage} />
         <Route path="/locations" component={LocationsHub} />
+        <Route path="/track-order" component={TrackOrder} />
+        <Route path="/secure" component={Checkout} />
+        <Route path="/checkout-secure" component={Checkout} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
