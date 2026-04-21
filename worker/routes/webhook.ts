@@ -17,7 +17,7 @@ export function createWebhookRoutes() {
       timestamp: new Date().toISOString(),
       url: c.req.url,
       method: c.req.method,
-      note: 'If Stripe webhooks are not working, verify Stripe Dashboard → Webhooks → URL is: https://secure.streamstickpro.com/api/stripe/webhook'
+        note: 'If Stripe webhooks are not working, verify Stripe Dashboard → Webhooks → URL is: https://streamstickpro.com/api/stripe/webhook'
     });
   });
 
