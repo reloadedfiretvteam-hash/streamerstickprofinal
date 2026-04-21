@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, ShoppingCart, Calendar, BarChart3, ArrowUp, ArrowDown } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
 
 interface RevenueData {
   today: number;
@@ -41,83 +40,59 @@ export default function RevenueDashboard() {
 
   const loadRevenueData = async () => {
     try {
-      const { data: orders, error } = await supabase
-        .from('orders')
-        .select('*, order_items(*)')
-        .order('created_at', { ascending: false });
+      const token = localStorage.getItem('custom_admin_token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      if (error) throw error;
+      const [statsRes, ordersRes] = await Promise.all([
+        fetch('/api/admin/orders/stats', { headers }),
+        fetch('/api/admin/orders?limit=200', { headers }),
+      ]);
 
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const yesterdayStart = new Date(todayStart);
-      yesterdayStart.setDate(yesterdayStart.getDate() - 1);
-      const weekStart = new Date(todayStart);
-      weekStart.setDate(weekStart.getDate() - 7);
-      const lastWeekStart = new Date(weekStart);
-      lastWeekStart.setDate(lastWeekStart.getDate() - 7);
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const lastMonthStart = new Date(monthStart);
-      lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
+      let statsData: any = {};
+      if (statsRes.ok) {
+        const d = await statsRes.json() as { data?: any };
+        statsData = d.data || {};
+      }
 
-      let today = 0, yesterday = 0, thisWeek = 0, lastWeek = 0;
-      let thisMonth = 0, lastMonth = 0, allTime = 0;
-      let ordersToday = 0, ordersThisWeek = 0, ordersThisMonth = 0;
+      let orders: any[] = [];
+      if (ordersRes.ok) {
+        const d = await ordersRes.json() as { data?: any[] };
+        orders = d.data || [];
+      }
+
       const productRevenue = new Map();
-
-      orders?.forEach((order: any) => {
-        const orderDate = new Date(order.created_at);
-        const amount = parseFloat(order.total_amount || 0);
-        allTime += amount;
-
-        if (orderDate >= todayStart) {
-          today += amount;
-          ordersToday++;
+      orders.forEach((order: any) => {
+        const productName = order.realProductName || 'Unknown';
+        if (!productRevenue.has(productName)) {
+          productRevenue.set(productName, { revenue: 0, orders: 0 });
         }
-        if (orderDate >= yesterdayStart && orderDate < todayStart) {
-          yesterday += amount;
-        }
-        if (orderDate >= weekStart) {
-          thisWeek += amount;
-          ordersThisWeek++;
-        }
-        if (orderDate >= lastWeekStart && orderDate < weekStart) {
-          lastWeek += amount;
-        }
-        if (orderDate >= monthStart) {
-          thisMonth += amount;
-          ordersThisMonth++;
-        }
-        if (orderDate >= lastMonthStart && orderDate < monthStart) {
-          lastMonth += amount;
-        }
-
-        // Track product revenue
-        order.order_items?.forEach((item: any) => {
-          const productName = item.product_name || 'Unknown';
-          if (!productRevenue.has(productName)) {
-            productRevenue.set(productName, { revenue: 0, orders: 0 });
-          }
-          const product = productRevenue.get(productName);
-          product.revenue += parseFloat(item.price || 0) * (item.quantity || 1);
-          product.orders++;
-        });
+        const p = productRevenue.get(productName);
+        p.revenue += (order.amount || 0) / 100;
+        if (order.status === 'paid' || order.status === 'completed') p.orders++;
       });
 
       const topProducts = Array.from(productRevenue.entries())
-        .map(([name, stats]) => ({ name, revenue: stats.revenue, orders: stats.orders }))
+        .map(([name, stats]: [string, any]) => ({ name, revenue: stats.revenue, orders: stats.orders }))
         .sort((a, b) => b.revenue - a.revenue)
         .slice(0, 5);
+
+      const today = (statsData.revenueToday || 0) / 100;
+      const thisWeek = (statsData.revenueThisWeek || 0) / 100;
+      const thisMonth = (statsData.revenueThisMonth || 0) / 100;
+      const allTime = (statsData.totalRevenue || 0) / 100;
+      const ordersToday = statsData.ordersToday || 0;
+      const ordersThisWeek = statsData.ordersThisWeek || 0;
+      const ordersThisMonth = statsData.ordersThisMonth || 0;
 
       const avgOrderValue = ordersToday > 0 ? today / ordersToday : 0;
 
       setData({
         today,
-        yesterday,
+        yesterday: 0,
         thisWeek,
-        lastWeek,
+        lastWeek: 0,
         thisMonth,
-        lastMonth,
+        lastMonth: 0,
         allTime,
         ordersToday,
         ordersThisWeek,
