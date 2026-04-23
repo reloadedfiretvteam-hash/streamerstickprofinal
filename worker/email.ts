@@ -4,10 +4,15 @@ import type { Storage } from './storage';
 import type { Env } from './index';
 import { sendEmail } from './email-providers';
 import { SURFSHARK_AFFILIATE_URL } from '../shared/surfshark-affiliate';
+import { variantsForRealProductId } from '../shared/real-product-id';
 
 const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
 const IPTV_PORTAL_URL = 'http://ky-tv.cc';
-const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
+const DEFAULT_OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
+
+export function getOwnerNotificationEmail(env: Env): string {
+  return String(env.ORDER_NOTIFICATION_EMAIL || env.OWNER_EMAIL || DEFAULT_OWNER_EMAIL).trim() || DEFAULT_OWNER_EMAIL;
+}
 
 export async function sendOrderConfirmation(order: Order, env: Env): Promise<void> {
   if (!order.customerEmail) {
@@ -339,9 +344,16 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
   const priceFormatted = (order.amount / 100).toFixed(2);
   const orderDate = new Date().toLocaleString();
   const productIds = order.realProductId?.split(',') || [];
-  const hasIPTV = productIds.some(id => id.trim().startsWith('iptv-'));
-  const hasFireStick = productIds.some(id => id.trim().startsWith('firestick-'));
-  
+  let hasIPTV = false;
+  let hasFireStick = false;
+  for (const raw of productIds) {
+    for (const id of variantsForRealProductId(String(raw || '').trim())) {
+      const x = id.toLowerCase();
+      if (x.startsWith('iptv-')) hasIPTV = true;
+      if (x.startsWith('firestick-')) hasFireStick = true;
+    }
+  }
+
   const isRenewal = order.isRenewal || false;
   const orderTypeEmoji = isRenewal ? '🔄' : '🆕';
   const orderTypeLabel = isRenewal ? 'RENEWAL' : 'NEW CUSTOMER';
@@ -456,10 +468,11 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
       </div>
   `;
 
+  const ownerInbox = getOwnerNotificationEmail(env);
   let result;
   try {
     result = await sendEmail({
-      to: OWNER_EMAIL,
+      to: ownerInbox,
       from: fromEmail,
       subject: `${emoji} ${orderTypeEmoji} ${orderTypeLabel} - $${priceFormatted} - ${order.realProductName}`,
       html: emailHtml,
@@ -470,9 +483,11 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
   }
 
   if (!result.success) {
-    console.error(`[EMAIL] Failed to send owner notification email for order ${order.id} via ${result.provider}: ${result.error}`);
+    console.error(
+      `[EMAIL] CRITICAL: Owner notification failed for order ${order.id} → ${ownerInbox} via ${result.provider}: ${result.error}`,
+    );
     throw new Error(`Failed to send owner notification email: ${result.error}`);
   }
 
-  console.log(`[EMAIL] ✅ Owner notification sent successfully for order ${order.id} to ${OWNER_EMAIL} via ${result.provider}`);
+  console.log(`[EMAIL] ✅ Owner notification sent successfully for order ${order.id} to ${ownerInbox} via ${result.provider}`);
 }

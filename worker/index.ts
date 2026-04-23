@@ -26,6 +26,9 @@ export interface Env {
   STRIPE_WEBHOOK_SECRET: string;
   RESEND_API_KEY: string;
   RESEND_FROM_EMAIL: string;
+  /** New order alerts; defaults to built-in owner inbox if unset */
+  ORDER_NOTIFICATION_EMAIL?: string;
+  OWNER_EMAIL?: string;
   VITE_SUPABASE_URL: string;
   VITE_SUPABASE_ANON_KEY: string;
   SUPABASE_SERVICE_KEY?: string;

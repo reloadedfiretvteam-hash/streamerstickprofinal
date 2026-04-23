@@ -2,6 +2,7 @@ import { generateUniqueCredentials, sendCredentialsEmail } from '../email';
 import { getStorage } from '../helpers';
 import type { Env } from '../index';
 import type { Order, ProvisioningJob } from '../../shared/schema';
+import { variantsForRealProductId } from '../../shared/real-product-id';
 import { getPanelAdapter } from './panel-adapter';
 
 type Storage = ReturnType<typeof getStorage>;
@@ -23,7 +24,13 @@ export function orderNeedsProvisioning(order: Order): boolean {
     .split(',')
     .map((id) => id.trim())
     .filter(Boolean);
-  return productIds.some((id) => id.startsWith('iptv-') || id.startsWith('firestick-'));
+  for (const raw of productIds) {
+    for (const id of variantsForRealProductId(raw)) {
+      const x = id.toLowerCase();
+      if (x.startsWith('iptv-') || x.startsWith('firestick-')) return true;
+    }
+  }
+  return false;
 }
 
 export async function ensureProvisioningJob(
