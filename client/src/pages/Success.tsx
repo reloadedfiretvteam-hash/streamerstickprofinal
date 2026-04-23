@@ -39,35 +39,47 @@ export default function Success() {
   useEffect(() => {
     const params = new URLSearchParams(search);
     const sessionId = params.get("session_id");
-    
-    if (sessionId) {
-      fetch(`/api/checkout/session/${sessionId}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.order) {
-            setOrderDetails(data);
 
-            if (data.paymentStatus === "paid") {
-              clearCart();
-            }
-
-            // Track purchase conversion for retargeting
-            if (data.paymentStatus === 'paid' && data.order.amount) {
-              const purchaseAmount = data.order.amount / 100; // Convert from cents to dollars
-              trackConversion('purchase', purchaseAmount, 'USD', {
-                order_id: data.order.id,
-                product_name: data.order.realProductName,
-              });
-            }
-            
-          }
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
-    } else {
+    if (!sessionId) {
       setLoading(false);
+      return;
     }
-  }, [search]);
+
+    const run = async () => {
+      try {
+        // Finalize from Stripe as soon as the customer lands here (covers delayed/missed webhooks).
+        await fetch("/api/checkout/confirm-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId }),
+        }).catch(() => null);
+
+        const res = await fetch(`/api/checkout/session/${sessionId}`);
+        const data = await res.json();
+        if (data.order) {
+          setOrderDetails(data);
+
+          if (data.paymentStatus === "paid") {
+            clearCart();
+          }
+
+          if (data.paymentStatus === "paid" && data.order.amount) {
+            const purchaseAmount = data.order.amount / 100;
+            trackConversion("purchase", purchaseAmount, "USD", {
+              order_id: data.order.id,
+              product_name: data.order.realProductName,
+            });
+          }
+        }
+      } catch {
+        /* ignore */
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    run();
+  }, [search, clearCart]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-black text-foreground flex flex-col items-center justify-center p-4">

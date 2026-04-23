@@ -5,6 +5,7 @@ import { checkoutRequestSchema, effectiveRealProductChargeCents } from '../../sh
 import type { Env } from '../index';
 import { authMiddleware } from './auth';
 import { ensureProvisioningJob, orderNeedsProvisioning, processProvisioningJobByOrderId } from '../lib/provisioning';
+import { processCheckoutSessionCompletion } from '../lib/stripe-order-finalize';
 
 const isProduction = (env: Env) => (env.NODE_ENV || '').toLowerCase() === 'production';
 
@@ -235,6 +236,17 @@ export function createCheckoutRoutes() {
       });
       debugLog("Checkout: Order created:", order.id);
 
+      try {
+        await stripe.checkout.sessions.update(session.id, {
+          metadata: {
+            ...sessionConfig.metadata,
+            internalOrderId: order.id,
+          },
+        });
+      } catch (metaErr: any) {
+        console.error(`[CHECKOUT] Could not attach internalOrderId to Stripe session ${session.id}: ${metaErr?.message || metaErr}`);
+      }
+
       return c.json({ 
         sessionId: session.id,
         url: session.url,
@@ -269,6 +281,33 @@ export function createCheckoutRoutes() {
     } catch (error: any) {
       console.error("Error fetching checkout session:", error);
       return c.json({ error: "Failed to fetch checkout session" }, 500);
+    }
+  });
+
+  /**
+   * Browser success-page recovery: if Stripe webhooks are delayed or misconfigured, the customer
+   * still lands on /success with session_id — we finalize from Stripe here (idempotent).
+   */
+  app.post('/confirm-session', async (c) => {
+    try {
+      const body = await c.req.json().catch(() => ({}));
+      const sessionId = String((body as any)?.sessionId || '').trim();
+      if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(sessionId)) {
+        return c.json({ error: 'Invalid session id' }, 400);
+      }
+      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      const storage = getStorage(c.env);
+      await processCheckoutSessionCompletion(session, storage, c.env, 'http.confirm-session');
+      const order = await storage.getOrderByCheckoutSession(sessionId);
+      return c.json({
+        ok: true,
+        paymentStatus: session.payment_status,
+        orderStatus: order?.status ?? null,
+      });
+    } catch (error: any) {
+      console.error('[CHECKOUT] confirm-session error:', error?.message || error);
+      return c.json({ error: error?.message || 'confirm-session failed' }, 500);
     }
   });
 

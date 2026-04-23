@@ -41,6 +41,48 @@ function getAuthHeader(env: Env): string | null {
   return `Basic ${btoa(`${user}:${pass}`)}`;
 }
 
+function hostsFromEnv(raw?: string | null): string[] {
+  return String(raw || '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+/** True if hostname equals or is a subdomain of an entry (e.g. preview.secure.example.com vs secure.example.com). */
+function hostnameInList(hostname: string, hosts: string[]): boolean {
+  const h = hostname.trim().toLowerCase();
+  for (const host of hosts) {
+    if (!host) continue;
+    if (h === host || h.endsWith(`.${host}`)) return true;
+  }
+  return false;
+}
+
+function isDefaultSecureStreamstickHost(hostname: string): boolean {
+  const h = hostname.trim().toLowerCase();
+  return h === 'secure.streamstickpro.com' || h.endsWith('.secure.streamstickpro.com');
+}
+
+/**
+ * Secure / shadow storefront hosts use `prices.shadow` from WordPress for checkout overrides;
+ * the main public site uses `prices.live`. Matches worker `isSecureDomain` and client `VITE_SECURE_HOSTS`.
+ */
+function useShadowPriceMap(hostname: string, env: Env): boolean {
+  if (isDefaultSecureStreamstickHost(hostname)) return true;
+  if (hostnameInList(hostname, hostsFromEnv(env.VITE_SECURE_HOSTS))) return true;
+  if (hostnameInList(hostname, hostsFromEnv(env.SHADOW_HOSTS))) return true;
+  return false;
+}
+
+/**
+ * Pages preview / extra shadow hostnames: with Application Password, prefer WordPress draft page content.
+ * See `ops/cloudflare/pages-cms-env-vars.md` (`SHADOW_HOSTS`).
+ */
+function preferWordPressDraft(hostname: string, env: Env, hasAuth: boolean): boolean {
+  if (!hasAuth) return false;
+  return hostnameInList(hostname, hostsFromEnv(env.SHADOW_HOSTS));
+}
+
 function decodeHtml(v: string): string {
   return v
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
@@ -165,7 +207,9 @@ export function createCmsRoutes() {
   app.get('/home', async (c) => {
     try {
       const slug = String(c.env.WP_HOME_PAGE_SLUG || HOME_SLUG).trim();
-      const preferDraft = false;
+      const auth = getAuthHeader(c.env);
+      const hostname = new URL(c.req.url).hostname;
+      const preferDraft = preferWordPressDraft(hostname, c.env, !!auth);
       const { page, source } = await fetchPage(c.env, slug, preferDraft);
       const raw = page?.content?.raw || page?.content?.rendered || '';
       const data = raw ? extractJson(raw) : null;
@@ -181,16 +225,36 @@ export function createCmsRoutes() {
   app.get('/pricing', async (c) => {
     try {
       const slug = String(c.env.WP_PRICING_PAGE_SLUG || PRICING_SLUG).trim();
-      const preferDraft = false;
+      const auth = getAuthHeader(c.env);
+      const hostname = new URL(c.req.url).hostname;
+      const preferDraft = preferWordPressDraft(hostname, c.env, !!auth);
+      const isShadowHost = useShadowPriceMap(hostname, c.env);
       const { page, source } = await fetchPage(c.env, slug, preferDraft);
       const raw = page?.content?.raw || page?.content?.rendered || '';
       const payload = raw ? extractJson(raw) : null;
-      const data = normalizePricing(payload, preferDraft);
-      return c.json({ data, meta: { slug, pageStatus: page?.status, updatedAt: page?.modified, source, preferDraft } }, 200, {
-        'Cache-Control': `public, max-age=${CACHE_SECONDS}`,
-      });
+      const data = normalizePricing(payload, isShadowHost);
+      return c.json(
+        {
+          data,
+          meta: {
+            slug,
+            pageStatus: page?.status,
+            updatedAt: page?.modified,
+            source,
+            preferDraft,
+            isShadowHost,
+          },
+        },
+        200,
+        {
+          'Cache-Control': `public, max-age=${CACHE_SECONDS}`,
+        },
+      );
     } catch (e: any) {
-      return c.json({ data: { shadow: {}, live: {}, selectedMode: 'live', selectedPrices: [] }, meta: { error: e?.message } });
+      return c.json({
+        data: { shadow: {}, live: {}, selectedMode: 'live', selectedPrices: {} },
+        meta: { error: e?.message },
+      });
     }
   });
 
