@@ -271,6 +271,45 @@ const sitePromotionPublicHandler = async (c: Context<{ Bindings: Env }>) => {
 app.get('/api/promotion', sitePromotionPublicHandler);
 app.get('/api/site-promotion-public', sitePromotionPublicHandler);
 
+// ── Public diagnostics (no secrets) ──────────────────────────────────────────
+// Helps debug incidents where Stripe succeeds but email/provisioning does not.
+// Safe: returns only booleans + non-sensitive identifiers.
+app.get('/api/diagnostics', async (c) => {
+  try {
+    const hostname = new URL(c.req.url).hostname;
+    const hasStripeSecret = !!String(c.env.STRIPE_SECRET_KEY || '').trim();
+    const hasStripeWebhookSecret = !!String(c.env.STRIPE_WEBHOOK_SECRET || '').trim();
+    const hasResend = !!String(c.env.RESEND_API_KEY || '').trim();
+    const fromEmail = String(c.env.RESEND_FROM_EMAIL || '').trim();
+    const ownerInbox = String(c.env.ORDER_NOTIFICATION_EMAIL || c.env.OWNER_EMAIL || '').trim();
+    const hasSupabaseUrl = !!String(c.env.VITE_SUPABASE_URL || '').trim();
+    const hasSupabaseServiceKey = !!String(
+      c.env.SUPABASE_SERVICE_KEY || c.env.SUPABASE_SERVICE_ROLE_KEY || c.env.SUPABASE_SERVICE_ROLL_KEY || '',
+    ).trim();
+
+    return c.json({
+      ok: true,
+      hostname,
+      stripe: {
+        secretConfigured: hasStripeSecret,
+        webhookSecretConfigured: hasStripeWebhookSecret,
+      },
+      email: {
+        resendConfigured: hasResend,
+        fromEmailConfigured: !!fromEmail,
+        fromEmailDomain: fromEmail.includes('@') ? fromEmail.split('@')[1] : null,
+        ownerInboxConfigured: !!ownerInbox,
+      },
+      supabase: {
+        urlConfigured: hasSupabaseUrl,
+        serviceKeyConfigured: hasSupabaseServiceKey,
+      },
+    });
+  } catch (e: any) {
+    return c.json({ ok: false, error: e?.message || 'diagnostics_failed' }, 500);
+  }
+});
+
 app.route('/api/checkout', createCheckoutRoutes());
 app.route('/api/orders', createOrderRoutes());
 app.route('/api/provisioning', createProvisioningRoutes());
