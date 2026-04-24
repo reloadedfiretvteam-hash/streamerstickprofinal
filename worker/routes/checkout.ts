@@ -6,6 +6,7 @@ import type { Env } from '../index';
 import { authMiddleware } from './auth';
 import { ensureProvisioningJob, orderNeedsProvisioning, processProvisioningJobByOrderId } from '../lib/provisioning';
 import { processCheckoutSessionCompletion } from '../lib/stripe-order-finalize';
+import { sendEmail } from '../email-providers';
 
 const isProduction = (env: Env) => (env.NODE_ENV || '').toLowerCase() === 'production';
 
@@ -509,6 +510,27 @@ export function createCheckoutRoutes() {
     } catch (error: any) {
       console.error("Error sending emails:", error);
       return c.json({ error: "Failed to send emails", details: error.message }, 500);
+    }
+  });
+
+  // Ops-only: send a test email to verify deliverability from production.
+  // Requires admin auth to avoid abuse.
+  app.use('/test-email', authMiddleware);
+  app.post('/test-email', async (c) => {
+    try {
+      const body = await c.req.json().catch(() => ({}));
+      const to = String((body as any)?.to || '').trim();
+      if (!to || !to.includes('@')) return c.json({ error: 'Valid to email required' }, 400);
+      const from = String(c.env.RESEND_FROM_EMAIL || '').trim() || 'noreply@streamstickpro.com';
+      const result = await sendEmail({
+        to,
+        from,
+        subject: `StreamStickPro test email (${new Date().toISOString()})`,
+        html: `<div style=\"font-family:Arial,sans-serif\"><h2>Test email OK</h2><p>If you received this, outbound email is working.</p></div>`,
+      }, c.env);
+      return c.json({ ok: result.success, provider: result.provider, error: result.error || null });
+    } catch (e: any) {
+      return c.json({ ok: false, error: e?.message || 'test_email_failed' }, 500);
     }
   });
 
