@@ -334,7 +334,12 @@ const shadowProductMap: Record<string, string> = {
   "1 Year IPTV": "SEO Enterprise"
 };
 
-const WORDPRESS_ORIGIN = "https://indigo-meerkat-253284.hostingersite.com";
+const WORDPRESS_ORIGIN_FALLBACK = "https://indigo-meerkat-253284.hostingersite.com";
+const WORDPRESS_ORIGIN = (
+  ((import.meta as any)?.env?.VITE_WP_ORIGIN as string | undefined) ||
+  ((import.meta as any)?.env?.VITE_WORDPRESS_URL as string | undefined) ||
+  WORDPRESS_ORIGIN_FALLBACK
+).replace(/\/+$/, "");
 const WORDPRESS_ADMIN_URL = `${WORDPRESS_ORIGIN}/wp-admin/`;
 
 type WordPressCmsStatus = {
@@ -747,7 +752,7 @@ export default function AdminPanel() {
         publicUrl: string,
         payload: any,
       ) => {
-        const wpPage = pageBySlug.get(slug) || {};
+        const wpPage: any = pageBySlug.get(slug) || {};
         const pageId = Number(payload?.id || wpPage.id || 0) || undefined;
         const data = payload?.data && typeof payload.data === 'object' ? payload.data : null;
         const meta = payload?.meta || {};
@@ -4336,6 +4341,30 @@ export default function AdminPanel() {
                     <RefreshCw className={`w-4 h-4 mr-2 ${loadingWordpressCms ? "animate-spin" : ""}`} />
                     Refresh Status
                   </Button>
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        const res = await fetch('/api/cms/health');
+                        const json = await res.json();
+                        if (json.ok) {
+                          showToast(`WordPress connection OK. home #${json.pages?.home?.id}, pricing #${json.pages?.pricing?.id}`, 'success');
+                        } else {
+                          const reasons: string[] = [];
+                          if (!json.authConfigured) reasons.push('App Password not configured');
+                          if (json.reachable === false) reasons.push('WordPress unreachable');
+                          if (!json.pages?.home?.found) reasons.push('home page missing');
+                          if (!json.pages?.pricing?.found) reasons.push('pricing page missing');
+                          showToast(`WordPress check failed: ${reasons.join(', ') || 'see /api/cms/health'}`, 'error');
+                        }
+                      } catch (e: any) {
+                        showToast(`Health check error: ${e?.message || e}`, 'error');
+                      }
+                    }}
+                    className="border-emerald-500/50 text-emerald-200 hover:bg-emerald-950/40"
+                  >
+                    Verify Connection
+                  </Button>
                 </div>
               </div>
 
@@ -4431,6 +4460,7 @@ export default function AdminPanel() {
                             <Input
                               value={wordpressHomeDraft?.hero?.proofline || ''}
                               onChange={(e) => updateWordpressHomeDraft((draft) => ({ ...draft, hero: { ...(draft.hero || {}), proofline: e.target.value } }))}
+                              data-testid="wp-hero-proofline"
                               className="bg-gray-700 border-gray-600 text-white"
                             />
                           </div>
@@ -4450,6 +4480,56 @@ export default function AdminPanel() {
                               className="bg-gray-700 border-gray-600 text-white"
                             />
                           </div>
+                        </div>
+
+                        <div>
+                          <h3 className="text-lg font-semibold text-white mb-3">Hero Image (WordPress Media Library)</h3>
+                          <div className="flex flex-col md:flex-row md:items-center gap-3">
+                            <Input
+                              value={wordpressHomeDraft?.hero?.imageUrl || ''}
+                              onChange={(e) => updateWordpressHomeDraft((draft) => ({ ...draft, hero: { ...(draft.hero || {}), imageUrl: e.target.value } }))}
+                              className="bg-gray-700 border-gray-600 text-white flex-1"
+                              placeholder="https://...wp-content/uploads/.../hero.jpg"
+                            />
+                            <input
+                              id="wp-hero-image-input"
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const form = new FormData();
+                                form.append('file', file);
+                                form.append('alt', 'StreamStickPro hero image');
+                                try {
+                                  const res = await authFetch('/api/cms/media', { method: 'POST', body: form });
+                                  const json = await res.json();
+                                  if (!res.ok || !json.url) throw new Error(json.error || 'Upload failed');
+                                  updateWordpressHomeDraft((draft) => ({ ...draft, hero: { ...(draft.hero || {}), imageUrl: json.url } }));
+                                  showToast('Hero image uploaded to WordPress Media Library', 'success');
+                                } catch (err: any) {
+                                  showToast(`Image upload failed: ${err?.message || err}`, 'error');
+                                } finally {
+                                  e.target.value = '';
+                                }
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              onClick={() => document.getElementById('wp-hero-image-input')?.click()}
+                              className="bg-emerald-600 hover:bg-emerald-700"
+                            >
+                              Upload Image
+                            </Button>
+                          </div>
+                          {wordpressHomeDraft?.hero?.imageUrl && (
+                            <img
+                              src={wordpressHomeDraft.hero.imageUrl}
+                              alt="Hero preview"
+                              className="mt-3 max-h-48 rounded border border-gray-700 object-cover"
+                            />
+                          )}
                         </div>
 
                         <div>

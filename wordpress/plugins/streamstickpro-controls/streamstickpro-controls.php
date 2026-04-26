@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: StreamStickPro Controls
- * Description: Friendly WordPress admin controls for StreamStickPro headless homepage and pricing JSON.
- * Version: 0.1.0
+ * Description: Friendly WordPress admin controls for StreamStickPro headless homepage and pricing JSON, plus REST diagnostics.
+ * Version: 0.2.0
  * Author: StreamStickPro
  */
 
@@ -17,6 +17,62 @@ final class StreamStickPro_Controls {
 
     public static function boot(): void {
         add_action('admin_menu', [__CLASS__, 'register_menu']);
+        add_action('rest_api_init', [__CLASS__, 'register_rest_routes']);
+    }
+
+    public static function register_rest_routes(): void {
+        register_rest_route('streamstickpro/v1', '/health', [
+            'methods'             => 'GET',
+            'permission_callback' => '__return_true',
+            'callback'            => [__CLASS__, 'rest_health'],
+        ]);
+
+        register_rest_route('streamstickpro/v1', '/ensure-pages', [
+            'methods'             => 'POST',
+            'permission_callback' => function () { return current_user_can('edit_pages'); },
+            'callback'            => [__CLASS__, 'rest_ensure_pages'],
+        ]);
+    }
+
+    public static function rest_health(): array {
+        $home = self::get_page_by_slug(self::HOME_SLUG);
+        $pricing = self::get_page_by_slug(self::PRICING_SLUG);
+
+        return [
+            'plugin'      => 'streamstickpro-controls',
+            'version'     => '0.2.0',
+            'wp_version'  => get_bloginfo('version'),
+            'site_url'    => home_url(),
+            'pages'       => [
+                'home'    => $home    ? ['id' => $home->ID,    'status' => $home->post_status,    'slug' => self::HOME_SLUG]    : null,
+                'pricing' => $pricing ? ['id' => $pricing->ID, 'status' => $pricing->post_status, 'slug' => self::PRICING_SLUG] : null,
+            ],
+            'ok'          => $home !== null && $pricing !== null,
+        ];
+    }
+
+    public static function rest_ensure_pages(): array {
+        $created = [];
+        foreach ([self::HOME_SLUG => 'StreamStickPro Home', self::PRICING_SLUG => 'StreamStickPro Pricing'] as $slug => $title) {
+            $existing = self::get_page_by_slug($slug);
+            if ($existing) {
+                $created[$slug] = ['id' => $existing->ID, 'status' => $existing->post_status, 'created' => false];
+                continue;
+            }
+            $page_id = wp_insert_post([
+                'post_type'    => 'page',
+                'post_title'   => $title,
+                'post_name'    => $slug,
+                'post_status'  => 'publish',
+                'post_content' => '<pre><code>{}</code></pre>',
+            ], true);
+            if (is_wp_error($page_id)) {
+                $created[$slug] = ['error' => $page_id->get_error_message(), 'created' => false];
+            } else {
+                $created[$slug] = ['id' => $page_id, 'status' => 'publish', 'created' => true];
+            }
+        }
+        return ['ok' => true, 'pages' => $created];
     }
 
     public static function register_menu(): void {

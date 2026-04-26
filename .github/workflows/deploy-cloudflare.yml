@@ -43,6 +43,8 @@ jobs:
           VITE_GOOGLE_ADS_CONVERSION_LABEL: ${{ secrets.VITE_GOOGLE_ADS_CONVERSION_LABEL }}
           VITE_SECURE_HOSTS: secure.streamstickpro.com
           VITE_STORAGE_BUCKET_NAME: imiges
+          VITE_WP_ORIGIN: ${{ secrets.WP_ORIGIN }}
+          VITE_WORDPRESS_URL: ${{ secrets.WORDPRESS_URL }}
           NODE_ENV: production
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -130,6 +132,33 @@ jobs:
           fi
           if [ -n "${{ secrets.INTERNAL_CRON_SECRET }}" ]; then
             echo "${{ secrets.INTERNAL_CRON_SECRET }}" | npx wrangler pages secret put INTERNAL_CRON_SECRET --project-name=streamerstickpro-live
+          fi
+          # ── WordPress (Hostinger headless CMS) ──────────────────────────────
+          # Configured in GitHub Actions secrets so deploys never lose the WP wiring.
+          # Use one of: WP_REST_BASIC_AUTH (full Basic header) OR WP_APPLICATION_USER + WP_APPLICATION_PASSWORD.
+          if [ -n "${{ secrets.WP_ORIGIN }}" ]; then
+            echo "${{ secrets.WP_ORIGIN }}" | npx wrangler pages secret put WP_ORIGIN --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.WORDPRESS_URL }}" ]; then
+            echo "${{ secrets.WORDPRESS_URL }}" | npx wrangler pages secret put WORDPRESS_URL --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.WP_HOME_PAGE_SLUG }}" ]; then
+            echo "${{ secrets.WP_HOME_PAGE_SLUG }}" | npx wrangler pages secret put WP_HOME_PAGE_SLUG --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.WP_PRICING_PAGE_SLUG }}" ]; then
+            echo "${{ secrets.WP_PRICING_PAGE_SLUG }}" | npx wrangler pages secret put WP_PRICING_PAGE_SLUG --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.WP_APPLICATION_USER }}" ]; then
+            echo "${{ secrets.WP_APPLICATION_USER }}" | npx wrangler pages secret put WP_APPLICATION_USER --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.WP_APPLICATION_PASSWORD }}" ]; then
+            echo "${{ secrets.WP_APPLICATION_PASSWORD }}" | npx wrangler pages secret put WP_APPLICATION_PASSWORD --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.WP_REST_BASIC_AUTH }}" ]; then
+            echo "${{ secrets.WP_REST_BASIC_AUTH }}" | npx wrangler pages secret put WP_REST_BASIC_AUTH --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.SHADOW_HOSTS }}" ]; then
+            echo "${{ secrets.SHADOW_HOSTS }}" | npx wrangler pages secret put SHADOW_HOSTS --project-name=streamerstickpro-live
           fi
 
       - name: Deploy to Cloudflare Pages

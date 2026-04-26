@@ -388,6 +388,117 @@ export function createCmsRoutes() {
     }
   });
 
+  /** /api/cms/health — diagnostic for the WordPress integration.
+   * Confirms WP origin, auth, and that the home + pricing pages exist with parseable JSON.
+   * Safe to call publicly — never echoes secrets, only booleans + page IDs. */
+  app.get('/health', async (c) => {
+    const origin = getWpOrigin(c.env);
+    const auth = getAuthHeader(c.env);
+    const homeSlug = String(c.env.WP_HOME_PAGE_SLUG || HOME_SLUG).trim();
+    const pricingSlug = String(c.env.WP_PRICING_PAGE_SLUG || PRICING_SLUG).trim();
+
+    const result: any = {
+      origin,
+      authConfigured: !!auth,
+      slugs: { home: homeSlug, pricing: pricingSlug },
+      pages: {} as Record<string, { found: boolean; id?: number; status?: string; jsonOk?: boolean; error?: string }>,
+      ok: false,
+    };
+
+    if (!origin) {
+      result.error = 'WP_ORIGIN / WORDPRESS_URL is not configured in Cloudflare Pages env';
+      return c.json(result, 503);
+    }
+
+    try {
+      const reach = await fetch(`${origin}/wp-json/`, { method: 'GET' });
+      result.reachable = reach.ok || reach.status < 500;
+      result.reachableStatus = reach.status;
+    } catch (e: any) {
+      result.reachable = false;
+      result.reachableError = e?.message || String(e);
+      return c.json(result, 502);
+    }
+
+    for (const [key, slug] of [['home', homeSlug], ['pricing', pricingSlug]] as const) {
+      try {
+        const { page } = await fetchPage(c.env, slug, false);
+        if (!page) {
+          result.pages[key] = { found: false, error: `Page with slug "${slug}" not found in WordPress` };
+          continue;
+        }
+        const raw = page.content?.raw || page.content?.rendered || '';
+        const parsed = raw ? extractJson(raw) : null;
+        result.pages[key] = {
+          found: true,
+          id: page.id,
+          status: page.status,
+          jsonOk: !!parsed,
+        };
+      } catch (e: any) {
+        result.pages[key] = { found: false, error: e?.message || String(e) };
+      }
+    }
+
+    result.ok = !!result.reachable
+      && result.pages.home?.found
+      && result.pages.pricing?.found;
+    return c.json(result, result.ok ? 200 : 502, { 'Cache-Control': 'no-store' });
+  });
+
+  /** /api/cms/media — authenticated proxy upload to WordPress media library.
+   * Sends multipart/form-data (file field "file") through to wp/v2/media.
+   * Requires the same admin JWT used for /page saves. WP must have an Application Password configured. */
+  app.post('/media', authMiddleware, async (c) => {
+    const origin = getWpOrigin(c.env);
+    const auth = getAuthHeader(c.env);
+    if (!origin) return c.json({ error: 'WordPress origin is not configured' }, 503);
+    if (!auth) return c.json({ error: 'WordPress Application Password is not configured' }, 503);
+
+    let form: FormData;
+    try {
+      form = await c.req.formData();
+    } catch (e: any) {
+      return c.json({ error: 'Expected multipart/form-data with a "file" field' }, 400);
+    }
+    const file = form.get('file');
+    if (!(file instanceof File)) return c.json({ error: 'Missing file' }, 400);
+
+    const titleRaw = form.get('title');
+    const altRaw = form.get('alt');
+    const title = typeof titleRaw === 'string' ? titleRaw : '';
+    const alt = typeof altRaw === 'string' ? altRaw : '';
+
+    const wpForm = new FormData();
+    wpForm.append('file', file, file.name || 'upload');
+    if (title) wpForm.append('title', title);
+    if (alt) wpForm.append('alt_text', alt);
+
+    const url = `${origin}/wp-json/wp/v2/media`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { Authorization: auth },
+      body: wpForm,
+    });
+    const detail = await res.text();
+    let parsed: any = null;
+    try { parsed = JSON.parse(detail); } catch { /* keep text */ }
+
+    if (!res.ok) {
+      return c.json({
+        error: `WordPress media upload returned ${res.status}`,
+        detail: parsed || detail.slice(0, 500),
+      }, 502);
+    }
+    return c.json({
+      ok: true,
+      id: parsed?.id,
+      url: parsed?.source_url,
+      mime: parsed?.mime_type,
+      title: parsed?.title?.rendered || title,
+    });
+  });
+
   /** /api/cms/posts — list WordPress blog posts (if you add blog posts to WP) */
   app.get('/posts', async (c) => {
     try {

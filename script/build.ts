@@ -3,6 +3,7 @@ import { build as viteBuild } from "vite";
 import { rm, readFile, writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { existsSync } from "fs";
+import { execFileSync } from "child_process";
 
 const isCloudflare = process.env.CF_PAGES === "1" || existsSync("wrangler.toml");
 
@@ -33,6 +34,21 @@ const allowlist = [
   "zod",
   "zod-validation-error",
 ];
+
+function resolveTsxCliPath() {
+  return path.resolve(process.cwd(), "node_modules", "tsx", "dist", "cli.mjs");
+}
+
+function runTsxScript(scriptPath: string, extraEnv: Record<string, string | undefined> = {}) {
+  execFileSync(process.execPath, [resolveTsxCliPath(), scriptPath], {
+    stdio: "inherit",
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      ...extraEnv,
+    },
+  });
+}
 
 async function buildCloudflare() {
   await rm("dist", { recursive: true, force: true });
@@ -98,15 +114,10 @@ async function buildCloudflare() {
   } else {
     console.log("Pre-rendering blog posts for SEO...");
     try {
-      const { execSync } = await import("child_process");
-      execSync("npx tsx scripts/prerender-blog.ts", { 
-        stdio: "inherit",
-        env: {
-          ...process.env,
-          SUPABASE_URL: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL,
-          SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY,
-          SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
-        }
+      runTsxScript("scripts/prerender-blog.ts", {
+        SUPABASE_URL: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL,
+        SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY,
+        SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
       });
       console.log("Blog pre-rendering complete!");
     } catch (err) {
@@ -116,8 +127,7 @@ async function buildCloudflare() {
 
   console.log("Running SEO audit...");
   try {
-    const { execSync } = await import("child_process");
-    execSync("npx tsx scripts/seo-audit.ts", { stdio: "inherit", cwd: process.cwd() });
+    runTsxScript("scripts/seo-audit.ts");
   } catch {
     console.warn("SEO audit had findings (see report above) or script skipped.");
   }
