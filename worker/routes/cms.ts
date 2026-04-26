@@ -6,6 +6,7 @@
  */
 import { Hono } from 'hono';
 import type { Env } from '../index';
+import { authMiddleware } from './auth';
 
 type WpPage = {
   id?: number;
@@ -111,6 +112,15 @@ function stripTags(v: string): string {
   return v.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+function escapeHtml(v: string): string {
+  return v
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 /** Try to parse JSON from page content — works for both plain JSON pages and
  *  Elementor/Gutenberg pages that embed JSON in <pre><code> or <script> blocks. */
 function extractJson(content: string): any | null {
@@ -171,6 +181,46 @@ async function fetchPage(env: Env, slug: string, preferDraft = false): Promise<{
     } catch { /* try next URL */ }
   }
   return { page: null, source: null };
+}
+
+async function savePageJson(env: Env, slug: string, data: unknown): Promise<{
+  ok: boolean;
+  page?: WpPage;
+  source?: string;
+  error?: string;
+}> {
+  const origin = getWpOrigin(env);
+  const auth = getAuthHeader(env);
+  if (!origin) return { ok: false, error: 'WordPress origin is not configured' };
+  if (!auth) return { ok: false, error: 'WordPress Application Password is not configured' };
+
+  const base = `${origin}/wp-json/wp/v2`;
+  const fields = 'id,slug,status,modified,content,title';
+  const lookupUrl = `${base}/pages?slug=${encodeURIComponent(slug)}&context=edit&status=any&_fields=${fields}`;
+  const lookup = await fetch(lookupUrl, { headers: { Authorization: auth } });
+  if (!lookup.ok) return { ok: false, error: `WordPress lookup returned ${lookup.status}` };
+
+  const rows = (await lookup.json()) as WpPage[];
+  const page = Array.isArray(rows) ? rows[0] : null;
+  if (!page?.id) return { ok: false, error: `WordPress page not found for slug "${slug}"` };
+
+  const content = `<pre><code>${escapeHtml(JSON.stringify(data, null, 2))}</code></pre>`;
+  const updateUrl = `${base}/pages/${page.id}`;
+  const update = await fetch(updateUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: auth,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ content }),
+  });
+  if (!update.ok) {
+    const detail = await update.text().catch(() => '');
+    return { ok: false, error: `WordPress update returned ${update.status}${detail ? `: ${detail.slice(0, 240)}` : ''}` };
+  }
+
+  const updated = (await update.json()) as WpPage;
+  return { ok: true, page: updated, source: updateUrl };
 }
 
 function normalizePricing(payload: any, isShadow: boolean) {
@@ -286,6 +336,38 @@ export function createCmsRoutes() {
       });
     } catch (e: any) {
       return c.json({ error: e?.message }, 500);
+    }
+  });
+
+  /** Authenticated JSON save endpoint used by the admin "WordPress Headless" editor.
+   * This keeps checkout separate: it only updates WordPress CMS page JSON.
+   */
+  app.put('/page/:slug', authMiddleware, async (c) => {
+    try {
+      const slug = c.req.param('slug');
+      const allowed = new Set([
+        String(c.env.WP_HOME_PAGE_SLUG || HOME_SLUG).trim(),
+        String(c.env.WP_PRICING_PAGE_SLUG || PRICING_SLUG).trim(),
+      ]);
+      if (!allowed.has(slug)) return c.json({ error: 'CMS page is not editable from this endpoint', slug }, 403);
+
+      const body = await c.req.json().catch(() => null);
+      const data = body?.data;
+      if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        return c.json({ error: 'Expected JSON body with object field "data"' }, 400);
+      }
+
+      const saved = await savePageJson(c.env, slug, data);
+      if (!saved.ok) return c.json({ error: saved.error || 'WordPress save failed' }, 502);
+
+      return c.json({
+        ok: true,
+        slug,
+        updatedAt: saved.page?.modified,
+        source: saved.source,
+      });
+    } catch (e: any) {
+      return c.json({ error: e?.message || 'WordPress save failed' }, 500);
     }
   });
 
