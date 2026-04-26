@@ -178,3 +178,11 @@ jobs:
         run: npm run smoke:live
         env:
           SMOKE_LIVE_BASE: https://streamstickpro-live.pages.dev
+
+      - name: Post-deploy WordPress integration smoke
+        continue-on-error: true
+        run: npm run smoke:wp
+        env:
+          WP_SMOKE_BASE: https://streamstickpro-live.pages.dev
+          WP_SMOKE_WP_ORIGIN: ${{ secrets.WP_ORIGIN }}
+          WP_SMOKE_SHADOW_BASE: ${{ secrets.SHADOW_SMOKE_BASE }}
