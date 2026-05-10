@@ -984,12 +984,16 @@ export default function Shop() {
                   )}
 
                   <div className="relative z-10">
-                    <div className="relative h-56 overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-60" />
+                    <div className="relative h-56 sm:h-[15.5rem] overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-50" />
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                        className={`w-full h-full object-cover transition-transform duration-700 ${
+                          product.id === "onn-google-hd" || product.id === "onn-google-4k"
+                            ? "object-[center_16%] scale-[1.14] sm:object-[center_14%] sm:scale-[1.12] group-hover:scale-[1.2] sm:group-hover:scale-[1.18]"
+                            : "object-center group-hover:scale-110"
+                        }`}
                         loading="lazy"
                         width={400}
                         height={224}
@@ -999,6 +1003,18 @@ export default function Shop() {
                           if (target.src !== fb) target.src = fb;
                         }}
                       />
+                      {(product.id === "onn-google-hd" || product.id === "onn-google-4k") && (
+                        <>
+                          <div className="absolute inset-x-0 bottom-0 z-[12] h-[46%] bg-gradient-to-t from-gray-950 from-35% via-gray-950/92 to-transparent pointer-events-none" aria-hidden />
+                          <div className="absolute inset-x-0 bottom-0 z-[13] h-[30%] bg-gray-950 pointer-events-none" aria-hidden />
+                          <div className="absolute bottom-2.5 left-0 right-0 z-[14] flex justify-center px-3 pointer-events-none">
+                            <span className="text-[11px] sm:text-xs font-bold text-white text-center leading-snug bg-black/80 border border-white/20 rounded-lg px-3 py-2 max-w-[96%] shadow-lg">
+                              {product.id === "onn-google-hd" ? "ONN Full HD Google TV kit" : "ONN 4K Google TV kit"}
+                              <span className="text-gray-300 font-semibold"> · 1 Year Live TV included</span>
+                            </span>
+                          </div>
+                        </>
+                      )}
                       <div className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-full font-bold text-sm shadow-lg ${
                         product.popular
                           ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
@@ -1014,7 +1030,11 @@ export default function Shop() {
                       <QuickViewButton onClick={() => openQuickView(product)} />
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleWishlistItem(product); }}
-                        className={`absolute bottom-4 left-4 z-20 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                        className={`absolute z-30 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 left-4 ${
+                          product.id === "onn-google-hd" || product.id === "onn-google-4k"
+                            ? "bottom-[5.25rem] sm:bottom-[5.5rem]"
+                            : "bottom-4"
+                        } ${
                           isInWishlist(product.id) 
                             ? 'bg-red-500 text-white shadow-lg shadow-red-500/50' 
                             : 'bg-white/90 text-gray-700 hover:bg-red-500 hover:text-white'

@@ -1183,14 +1183,58 @@ export default function MainStore() {
             </p>
           </motion.div>
 
+          {/* What you get — subscriptions vs ONN kits */}
+          <div className="max-w-5xl mx-auto mb-12 sm:mb-14 grid gap-5 md:grid-cols-2 px-1">
+            <div className="rounded-2xl border-2 border-[#00D4FF]/40 bg-[#0c1118]/95 p-5 sm:p-7 shadow-[0_0_28px_rgba(0,212,255,0.12)]">
+              <div className="flex items-center gap-2 mb-4">
+                <Zap className="w-7 h-7 text-[#00D4FF] shrink-0" aria-hidden />
+                <h3 className="text-lg sm:text-xl font-bold text-white leading-snug">What you get with a subscription</h3>
+              </div>
+              <ul className="space-y-3 text-[15px] sm:text-[17px] text-[#E8EAED] leading-relaxed">
+                <li className="flex gap-3">
+                  <Check className="w-5 h-5 text-green-400 shrink-0 mt-0.5" aria-hidden />
+                  <span>Live TV login for your apps—18,000+ channels, huge on-demand library, sports and news.</span>
+                </li>
+                <li className="flex gap-3">
+                  <Check className="w-5 h-5 text-green-400 shrink-0 mt-0.5" aria-hidden />
+                  <span>Pick plan length and how many screens stream at once (1–5 devices per term).</span>
+                </li>
+                <li className="flex gap-3">
+                  <Check className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" aria-hidden />
+                  <span><strong className="text-white">Free 36-hour trial below</strong>—try quality and channel lineup before you buy. No credit card.</span>
+                </li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border-2 border-orange-500/40 bg-[#0c1118]/95 p-5 sm:p-7 shadow-[0_0_28px_rgba(249,115,22,0.12)]">
+              <div className="flex items-center gap-2 mb-4">
+                <Flame className="w-7 h-7 text-orange-400 shrink-0" aria-hidden />
+                <h3 className="text-lg sm:text-xl font-bold text-white leading-snug">What you get with an ONN Google TV kit</h3>
+              </div>
+              <ul className="space-y-3 text-[15px] sm:text-[17px] text-[#E8EAED] leading-relaxed">
+                <li className="flex gap-3">
+                  <Check className="w-5 h-5 text-green-400 shrink-0 mt-0.5" aria-hidden />
+                  <span>onn. streaming device with Google TV (Full HD or 4K), voice remote, and guided setup.</span>
+                </li>
+                <li className="flex gap-3">
+                  <Check className="w-5 h-5 text-green-400 shrink-0 mt-0.5" aria-hidden />
+                  <span><strong className="text-white">1 Year Live TV plan included</strong> with each kit, plus tutorials and shipping.</span>
+                </li>
+                <li className="flex gap-3">
+                  <Check className="w-5 h-5 text-green-400 shrink-0 mt-0.5" aria-hidden />
+                  <span>Human support when you need it—no guessing which app or link to use.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
           {/* Live TV Plans */}
           <div className="mt-6 mb-16">
-            <h3 className="text-3xl font-bold mb-4 text-center flex items-center justify-center gap-3">
-              <Zap className="w-8 h-8 text-blue-500" />
-              Live TV Plans & Subscription Trial
+            <h3 className="text-2xl sm:text-3xl font-bold mb-3 text-center flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-2 leading-tight">
+              <Zap className="w-7 h-7 sm:w-8 sm:h-8 text-blue-500 shrink-0" />
+              <span>Live TV plans &amp; free trial</span>
             </h3>
-            <p className="text-center text-gray-200 mb-8 max-w-2xl mx-auto">
-              Choose your subscription length and number of devices. The 36-hour trial is for subscription plans only. Multi-device plans let you stream on multiple TVs, phones, or tablets at the same time.
+            <p className="text-center text-[15px] sm:text-lg text-gray-200 mb-8 max-w-2xl mx-auto leading-relaxed px-3">
+              Choose subscription length and screen count. Use the <strong className="text-white">bright trial box</strong> first if you want to test streams—then pick a paid plan. Multi-device plans work across TVs, phones, and tablets at the same time.
             </p>
             
             {/* Free Trial Box */}
@@ -1284,7 +1328,7 @@ export default function MainStore() {
 
                       <div className="p-5">
                         <h4 className="text-xl font-bold mb-2 text-white">{plan.durationLabel} Live TV</h4>
-                        <p className="text-gray-200 text-xs mb-4 line-clamp-2">{plan.description}</p>
+                        <p className="text-gray-200 text-sm sm:text-[15px] mb-4 line-clamp-3 leading-relaxed">{plan.description}</p>
 
                         <div className="mb-4">
                           <label className="text-sm text-gray-200 mb-2 block">Number of Devices:</label>
@@ -1327,11 +1371,11 @@ export default function MainStore() {
                           </p>
                         </div>
 
-                        <div className="space-y-1.5 mb-4">
+                        <div className="space-y-2 mb-4">
                           {productBenefitList.map((feature, idx) => (
-                            <div key={idx} className="flex items-start gap-2">
-                              <Check className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
-                              <span className="text-blue-100 text-xs">{feature}</span>
+                            <div key={idx} className="flex items-start gap-2.5">
+                              <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" aria-hidden />
+                              <span className="text-blue-100 text-[13px] sm:text-sm leading-snug">{feature}</span>
                             </div>
                           ))}
                         </div>
@@ -1378,87 +1422,63 @@ export default function MainStore() {
                 <Flame className="w-8 h-8 text-orange-500" />
                 Streaming Device Comparison
               </h3>
-              <p className="text-gray-200 max-w-2xl mx-auto">
-                Be streaming in about 10 minutes. Each Stream Stick Pro device bundle includes Reloaded Fire TV all-in-one access, educational setup tutorials, a 1-year included plan, 24/7 support, and shipping included.
+              <p className="text-[15px] sm:text-lg text-gray-200 max-w-2xl mx-auto leading-relaxed px-2">
+                Be streaming in about 10 minutes. Each ONN Google TV kit includes Reloaded Fire TV access, setup tutorials, a 1-year Live TV plan, shipping, and support—pick Full HD or 4K below.
               </p>
             </div>
-            <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl border border-slate-700/50 overflow-hidden" data-testid="tier-comparison-table">
-              <table className="w-full">
+            <div className="max-w-3xl mx-auto bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl border border-slate-700/50 overflow-x-auto" data-testid="tier-comparison-table">
+              <table className="w-full min-w-[320px]">
                 <thead>
                   <tr className="border-b border-slate-700/50">
-                    <th className="text-left p-4 text-gray-200 font-medium">Features</th>
-                    <th className="text-center p-4">
-                      <div className="text-lg font-bold text-white">Starter Kit</div>
-                      <div className="text-2xl font-bold text-orange-400">$115</div>
-                      <div className="text-xs text-gray-200">1080p Full HD</div>
+                    <th className="text-left p-3 sm:p-4 text-gray-200 font-medium text-sm sm:text-base">Features</th>
+                    <th className="text-center p-3 sm:p-4">
+                      <div className="text-base sm:text-lg font-bold text-white">ONN Full HD</div>
+                      <div className="text-xl sm:text-2xl font-bold text-orange-400">$150</div>
+                      <div className="text-xs text-gray-200">1080p Google TV</div>
                     </th>
-                    <th className="text-center p-4 bg-orange-500/10 relative">
-                      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-b">BEST VALUE</div>
-                      <div className="text-lg font-bold text-white pt-4">4K Kit</div>
-                      <div className="text-2xl font-bold text-orange-400">$125</div>
+                    <th className="text-center p-3 sm:p-4 bg-orange-500/10 relative">
+                      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-b">BEST VALUE</div>
+                      <div className="text-base sm:text-lg font-bold text-white pt-3 sm:pt-4">ONN 4K</div>
+                      <div className="text-xl sm:text-2xl font-bold text-orange-400">$160</div>
                       <div className="text-xs text-gray-200">4K Ultra HD</div>
-                    </th>
-                    <th className="text-center p-4">
-                      <div className="text-lg font-bold text-white">Max Kit</div>
-                      <div className="text-2xl font-bold text-orange-400">$135</div>
-                      <div className="text-xs text-gray-200">4K + Wi-Fi 6E</div>
                     </th>
                   </tr>
                 </thead>
-                <tbody className="text-sm">
+                <tbody className="text-sm sm:text-[15px]">
                   <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-200">Resolution</td>
-                    <td className="text-center p-4 text-white">1080p Full HD</td>
-                    <td className="text-center p-4 text-white bg-orange-500/5">4K Ultra HD</td>
-                    <td className="text-center p-4 text-white">4K Ultra HD</td>
+                    <td className="p-3 sm:p-4 text-gray-200">Resolution</td>
+                    <td className="text-center p-3 sm:p-4 text-white">1080p Full HD</td>
+                    <td className="text-center p-3 sm:p-4 text-white bg-orange-500/5">4K Ultra HD</td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-200">HDR Support</td>
-                    <td className="text-center p-4"><X className="w-5 h-5 text-gray-200 mx-auto" /></td>
-                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="p-3 sm:p-4 text-gray-200">HDR</td>
+                    <td className="text-center p-3 sm:p-4"><span className="text-gray-400">—</span></td>
+                    <td className="text-center p-3 sm:p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-200">Dolby Vision & Atmos</td>
-                    <td className="text-center p-4"><X className="w-5 h-5 text-gray-200 mx-auto" /></td>
-                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="p-3 sm:p-4 text-gray-200">Google TV + voice remote</td>
+                    <td className="text-center p-3 sm:p-4"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
+                    <td className="text-center p-3 sm:p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-200">Wi-Fi 6E (Fastest)</td>
-                    <td className="text-center p-4"><X className="w-5 h-5 text-gray-200 mx-auto" /></td>
-                    <td className="text-center p-4 bg-orange-500/5"><X className="w-5 h-5 text-gray-200 mx-auto" /></td>
-                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="p-3 sm:p-4 text-gray-200">1 Year Live TV included</td>
+                    <td className="text-center p-3 sm:p-4"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
+                    <td className="text-center p-3 sm:p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-200">1 Year Live TV Included</td>
-                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="p-3 sm:p-4 text-gray-200">18,000+ channels &amp; huge VOD</td>
+                    <td className="text-center p-3 sm:p-4"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
+                    <td className="text-center p-3 sm:p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-200">Extensive Live Content</td>
-                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                  </tr>
-                  <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-200">100,000+ Movies & Series</td>
-                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                  </tr>
-                  <tr className="border-b border-slate-700/30">
-                    <td className="p-4 text-gray-200">Comprehensive Sports Coverage</td>
-                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="p-3 sm:p-4 text-gray-200">Sports &amp; international</td>
+                    <td className="text-center p-3 sm:p-4"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
+                    <td className="text-center p-3 sm:p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
                   </tr>
                   <tr>
-                    <td className="p-4 text-gray-200">24/7 Customer Support</td>
-                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                    <td className="text-center p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
-                    <td className="text-center p-4"><Check className="w-5 h-5 text-green-400 mx-auto" /></td>
+                    <td className="p-3 sm:p-4 text-gray-200">Setup help &amp; support</td>
+                    <td className="text-center p-3 sm:p-4"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
+                    <td className="text-center p-3 sm:p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
                   </tr>
                 </tbody>
               </table>
@@ -1565,12 +1585,16 @@ export default function MainStore() {
                   )}
 
                   <div className="relative z-10">
-                    <div className="relative h-56 overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-60" />
+                    <div className="relative h-56 sm:h-[15.5rem] overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-50" />
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                        className={`w-full h-full object-cover transition-transform duration-700 ${
+                          product.id === "onn-google-hd" || product.id === "onn-google-4k"
+                            ? "object-[center_16%] scale-[1.14] sm:object-[center_14%] sm:scale-[1.12] group-hover:scale-[1.2] sm:group-hover:scale-[1.18]"
+                            : "object-center group-hover:scale-110"
+                        }`}
                         loading="lazy"
                         width={400}
                         height={224}
@@ -1580,6 +1604,23 @@ export default function MainStore() {
                           if (target.src !== fb) target.src = fb;
                         }}
                       />
+                      {(product.id === "onn-google-hd" || product.id === "onn-google-4k") && (
+                        <>
+                          <div
+                            className="absolute inset-x-0 bottom-0 z-[12] h-[46%] bg-gradient-to-t from-gray-950 from-35% via-gray-950/92 to-transparent pointer-events-none"
+                            aria-hidden
+                          />
+                          <div className="absolute inset-x-0 bottom-0 z-[13] h-[30%] bg-gray-950 pointer-events-none" aria-hidden />
+                          <div className="absolute bottom-2.5 left-0 right-0 z-[14] flex justify-center px-3 pointer-events-none">
+                            <span className="text-[11px] sm:text-xs font-bold text-white text-center leading-snug bg-black/80 border border-white/20 rounded-lg px-3 py-2 max-w-[96%] shadow-lg">
+                              {product.id === "onn-google-hd"
+                                ? "ONN Full HD Google TV kit"
+                                : "ONN 4K Google TV kit"}
+                              <span className="text-gray-300 font-semibold"> · 1 Year Live TV included</span>
+                            </span>
+                          </div>
+                        </>
+                      )}
                       <div className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-full font-bold text-sm shadow-lg ${
                         product.popular
                           ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
@@ -1600,7 +1641,11 @@ export default function MainStore() {
                       <QuickViewButton onClick={() => openQuickView(product)} />
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleWishlistItem(product); }}
-                        className={`absolute bottom-4 left-4 z-20 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                        className={`absolute z-30 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 left-4 ${
+                          product.id === "onn-google-hd" || product.id === "onn-google-4k"
+                            ? "bottom-[5.25rem] sm:bottom-[5.5rem]"
+                            : "bottom-4"
+                        } ${
                           isInWishlist(product.id) 
                             ? 'bg-red-500 text-white shadow-lg shadow-red-500/50' 
                             : 'bg-white/90 text-gray-700 hover:bg-red-500 hover:text-white'
@@ -1612,8 +1657,8 @@ export default function MainStore() {
                       </button>
                     </div>
 
-                    <div className="p-8 relative">
-                      <h4 className="text-2xl font-bold mb-4 text-white">{product.name}</h4>
+                    <div className="p-6 sm:p-8 relative">
+                      <h4 className="text-xl sm:text-2xl font-bold mb-4 text-white leading-snug">{product.name}</h4>
 
                       {/* Quantity Selector */}
                       <div className="mb-4">
@@ -1682,8 +1727,8 @@ export default function MainStore() {
                       <div className="space-y-3 mb-6">
                         {productBenefitList.map((feature, idx) => (
                           <div key={idx} className="flex items-start gap-3">
-                            <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                            <span className="text-blue-100 text-sm">{feature}</span>
+                            <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" aria-hidden />
+                            <span className="text-blue-100 text-[15px] sm:text-base leading-relaxed">{feature}</span>
                           </div>
                         ))}
                       </div>
@@ -2039,8 +2084,8 @@ export default function MainStore() {
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Break Free From Cable</span>
             </h2>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Premium streaming at a fraction of the cost. No contracts, no hidden fees.
+            <p className="text-lg sm:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed px-1">
+              Premium streaming at a fraction of cable. Cancel anytime—no long-term lock-in.
             </p>
           </motion.div>
 

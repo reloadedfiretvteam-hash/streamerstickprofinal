@@ -129,12 +129,20 @@ export function FreeTrial() {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto mb-12 bg-gradient-to-r from-[#7C3AED]/20 via-[#1A1A22] to-[#00D4FF]/15 border-2 border-[#7C3AED]/40 rounded-2xl overflow-hidden"
+      className="max-w-4xl mx-auto mb-12 rounded-2xl overflow-hidden ring-4 ring-amber-400/90 ring-offset-4 ring-offset-[#0A0A0F] shadow-[0_0_0_1px_rgba(251,191,36,0.5),0_12px_48px_rgba(0,212,255,0.18)] border-2 border-[#00D4FF]/50"
       data-testid="free-trial-box"
       onAnimationStart={() => {}}
     >
-      <div className="grid md:grid-cols-5 gap-0">
-        <div className="md:col-span-2 relative h-48 md:h-auto">
+      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 px-3 py-3 sm:py-3.5 text-center">
+        <p className="text-sm sm:text-base md:text-lg font-black text-black tracking-wide uppercase leading-snug">
+          Free 36-hour trial · Subscription plans · No credit card
+        </p>
+        <p className="text-xs sm:text-sm font-semibold text-black/90 mt-1">
+          Scroll here first—try channels before you pay for a plan below.
+        </p>
+      </div>
+      <div className="bg-gradient-to-r from-[#7C3AED]/25 via-[#1A1A22] to-[#00D4FF]/20 grid md:grid-cols-5 gap-0">
+        <div className="md:col-span-2 relative h-52 sm:h-56 md:h-auto min-h-[200px]">
           <img 
             src={iptvImg} 
             alt="4K Live TV - Free Trial" 
@@ -143,30 +151,35 @@ export function FreeTrial() {
             width={300}
             height={192}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-purple-900/80 md:bg-gradient-to-r md:from-transparent md:to-gray-900"></div>
-          <div className="absolute bottom-4 left-4 md:hidden">
-            <span className="bg-[#7C3AED] text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
-              FREE TRIAL
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-purple-900/80 md:bg-gradient-to-r md:from-transparent md:to-gray-900" />
+          <div className="absolute top-3 left-3 z-10">
+            <span className="bg-amber-400 text-black px-3 py-1.5 rounded-full text-xs sm:text-sm font-black uppercase shadow-lg animate-pulse border-2 border-black/20">
+              Free trial
+            </span>
+          </div>
+          <div className="absolute bottom-3 left-3 right-3 md:hidden z-10 flex justify-center">
+            <span className="bg-black/75 text-amber-300 px-4 py-2 rounded-xl text-xs font-bold border border-amber-400/50">
+              36 hours · Full channel test
             </span>
           </div>
         </div>
         
-        <div className="md:col-span-3 p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-[#7C3AED] to-[#00D4FF] rounded-full flex items-center justify-center animate-pulse">
-              <Gift className="w-6 h-6 text-white" />
+        <div className="md:col-span-3 p-5 sm:p-7 md:p-8">
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <div className="w-14 h-14 bg-gradient-to-r from-[#7C3AED] to-[#00D4FF] rounded-full flex items-center justify-center shrink-0 shadow-lg shadow-cyan-500/30">
+              <Gift className="w-7 h-7 text-white" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#7C3AED]">
-                FREE 36-Hour Trial
+            <div className="text-left min-w-0">
+              <p className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#C4B5FD] leading-tight">
+                FREE 36-hour trial
               </p>
-              <p className="text-gray-300 text-sm">No credit card required • Instant access</p>
+              <p className="text-gray-200 text-sm sm:text-base font-medium mt-1">No credit card · Credentials emailed · For subscription testing</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-gray-300 mb-6">
-            <Clock className="w-5 h-5 text-[#00D4FF]" />
-            <span>Test the Reloaded Fire TV subscription path first, check stream quality, and see if the service fits your setup before buying.</span>
+          <div className="flex gap-3 text-gray-100 mb-6 text-[15px] sm:text-base leading-relaxed rounded-xl bg-black/25 border border-white/10 p-4">
+            <Clock className="w-6 h-6 text-amber-400 shrink-0 mt-0.5" />
+            <span>Use this trial to judge stream quality and channel lineup. When you&apos;re ready, choose a paid Live TV plan in the cards below.</span>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
