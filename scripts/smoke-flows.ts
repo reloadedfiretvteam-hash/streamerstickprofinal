@@ -14,7 +14,7 @@ function main() {
   assert("effective: invalid sale (>= list) ignored", effectiveRealProductChargeCents({ price: 1000, salePrice: 1000 }) === 1000);
 
   const validCheckout = checkoutRequestSchema.safeParse({
-    items: [{ productId: "fs-4k", quantity: 1 }, { productId: "iptv-1mo-1d", quantity: 2, applySitePromotion: true }],
+    items: [{ productId: "onn-google-4k", quantity: 1 }, { productId: "iptv-1mo-1d", quantity: 2, applySitePromotion: true }],
     customerEmail: "buyer@example.com",
     customerName: "Test",
   });

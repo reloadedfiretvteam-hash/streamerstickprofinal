@@ -1,9 +1,9 @@
 {
   "meta": {
-    "title": "IPTV Subscriptions Loaded Firesticks Onn VPN | StreamStickPro",
-    "description": "StreamStickPro: IPTV subscriptions, loaded Firesticks, ONN Google TV, and Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, SSL-secured checkout, 24/7 support.",
+    "title": "IPTV Subscriptions ONN Google TV Kits VPN | StreamStickPro",
+    "description": "StreamStickPro: IPTV subscriptions, ONN Google TV kits ($150 Full HD, $160 4K), and Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, SSL-secured checkout, 24/7 support.",
     "path": "/",
-    "keywords": "IPTV subscription, loaded Firestick, Onn device, Surfshark VPN IPTV, ISP throttling VPN"
+    "keywords": "IPTV subscription, ONN Google TV, Onn 4K streaming kit, Surfshark VPN IPTV, ISP throttling VPN"
   },
   "hero": {
     "title": "Premium IPTV & preconfigured streaming devices",
@@ -16,12 +16,12 @@
         "accent": "cyan"
       },
       {
-        "label": "SHOP LOADED FIRESTICKS",
-        "href": "/devices",
+        "label": "SHOP ONN GOOGLE TV KITS",
+        "href": "/shop",
         "accent": "gold"
       },
       {
-        "label": "ONN GOOGLE TV DEVICES",
+        "label": "ONN SETUP GUIDE",
         "href": "/onn",
         "accent": "violet"
       },
@@ -47,24 +47,24 @@
       "accent": "cyan"
     },
     {
-      "title": "Loaded Firesticks",
-      "description": "Firestick 4K ships fully loaded and ready-to-use with 1-year Reloaded Fire TV subscription included.",
+      "title": "ONN Google TV Kits",
+      "description": "onn. Full HD and 4K devices with Google TV—hardware ships with 1-year Reloaded Fire TV and guided setup.",
       "bullets": [
-        "Pre-installed apps",
-        "Zero setup required",
-        "Perfect for beginners"
+        "$150 Full HD kit",
+        "$160 4K kit",
+        "Voice remote included"
       ],
-      "ctaLabel": "SHOP LOADED FIRESTICKS",
-      "ctaHref": "/devices",
+      "ctaLabel": "SHOP ONN KITS",
+      "ctaHref": "/shop",
       "accent": "gold"
     },
     {
-      "title": "Onn Google TV Devices",
-      "description": "Onn Google TV devices pre-configured for streaming. 1-year Reloaded Fire TV service included.",
+      "title": "Onn Google TV Setup",
+      "description": "Onn Full HD and 4K Google TV kits with 1-year Reloaded Fire TV included.",
       "bullets": [
-        "Walmart Onn 4K ready",
+        "1080p or 4K options",
         "Easy plug & play",
-        "Budget streaming power"
+        "Google TV + voice remote"
       ],
       "ctaLabel": "ONN GOOGLE TV DEVICES",
       "ctaHref": "/onn",
@@ -87,8 +87,8 @@
   ],
   "advantages": [
     "36-hour full-access trial-no card required to start",
-    "Device bundles ship with 1 year of Reloaded Fire TV",
-    "Fire TV, ONN Google TV, Roku & smart TV friendly workflows",
+    "ONN Google TV kits ship with 1 year of Reloaded Fire TV",
+    "Google TV, Roku & smart TV friendly workflows",
     "Optional VPN path for ISP throttling & privacy on busy networks"
   ],
   "trustBar": "2,700+ customers · 99.9% uptime · SSL-secured checkout · 18K+ channels",
@@ -100,8 +100,8 @@
         "answer": "IPTV = streaming service only. Device = hardware WITH 1-year Reloaded Fire TV included."
       },
       {
-        "question": "Firestick/Onn include subscription?",
-        "answer": "Yes. Every device ships with 1-year Reloaded Fire TV subscription."
+        "question": "Do ONN kits include subscription?",
+        "answer": "Yes. Every ONN kit ships with 1-year Reloaded Fire TV subscription."
       },
       {
         "question": "Why Surfshark VPN?",
@@ -146,7 +146,7 @@
       "Onn Google TV",
       "Roku TVs",
       "Smart TVs",
-      "Fire Stick"
+      "Android TV"
     ],
     "appLinks": [
       {

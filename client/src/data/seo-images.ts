@@ -56,10 +56,10 @@ export const IPTV_IMAGES: ImageDef[] = [
 
 /** Pool of Onn / Google TV images */
 export const ONN_IMAGES: ImageDef[] = [
+  { src: `${BASE}/onn-full-hd-google-tv.webp`, alt: "onn. Full HD Google TV streaming device kit – StreamStickPro" },
+  { src: `${BASE}/onn-4k-google-tv.jpg`, alt: "onn. 4K Ultra HD Google TV streaming device kit – StreamStickPro" },
   SEO_IMAGES.onnGoogleTvBox,
   SEO_IMAGES.onn4kUltraHd,
-  { src: `${SUPABASE}/onn-4k-streaming.webp`, alt: "Onn 4K Google TV streaming device – StreamStickPro" },
-  { src: `${SUPABASE}/onn-4k-ultra-hd.webp`, alt: "Onn 4K Pro Android TV – StreamStickPro" },
 ];
 
 /** Pool for IPTV Smarters / TiviMate app pages */

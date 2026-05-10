@@ -511,9 +511,18 @@ export function createAdminRoutes() {
         .reduce((sum, o) => sum + (o.amount || 0), 0);
       const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
       
-      const firestickOrders = allOrders.filter(o => 
-        o.realProductId?.includes('firestick') || o.realProductName?.toLowerCase().includes('fire stick')
-      );
+      const firestickOrders = allOrders.filter((o) => {
+        const ids = String(o.realProductId || '').toLowerCase();
+        const name = (o.realProductName || '').toLowerCase();
+        return (
+          ids.includes('firestick') ||
+          ids.includes('onn-google') ||
+          ids.includes('android-onn') ||
+          ids.includes('fs-') ||
+          name.includes('onn') ||
+          name.includes('fire stick')
+        );
+      });
       const pendingFulfillments = firestickOrders.filter(o => 
         o.status === 'paid' && (!o.fulfillmentStatus || o.fulfillmentStatus === 'pending')
       );

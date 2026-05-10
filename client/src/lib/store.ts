@@ -2,7 +2,13 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 const isFirestickProduct = (id: string): boolean => {
-  return id.startsWith('fs-') || id.includes('firestick');
+  const x = id.toLowerCase();
+  return (
+    x.startsWith('fs-') ||
+    x.includes('firestick') ||
+    x.startsWith('onn-google') ||
+    x.includes('android-onn')
+  );
 };
 
 const calculateFirestickDiscount = (basePrice: number, quantity: number): number => {

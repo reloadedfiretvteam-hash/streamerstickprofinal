@@ -38,14 +38,11 @@ import type { Product as StoreCartProduct } from "@/lib/store";
 import { iptvRealProductId } from "@/lib/iptv-sku";
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
-const firestickHdImg = `${SUPABASE_BASE}/OIP_(11)99_1764978938773.jpg`;
-const firestick4kImg = `${SUPABASE_BASE}/71+Pvh7WB6L._AC_SL1500__1764978938770.jpg`;
-const firestick4kMaxImg = `${SUPABASE_BASE}/71E1te69hZL._AC_SL1500__1764978938773.jpg`;
-const onn4kImg = `${SUPABASE_BASE}/s-l1600onnbok_1766008738774.webp`;
-const onn4kProImg = `${SUPABASE_BASE}/OIPonnbox4k_1766008832103.webp`;
+const onnHdImg = "/images/onn-full-hd-google-tv.webp";
+const onn4kImg = "/images/onn-4k-google-tv.jpg";
 const iptvImg = `${SUPABASE_BASE}/iptv-subscription.jpg`;
-const fallbackHeroImg = `${SUPABASE_BASE}/stock_images/amazon_fire_tv_stick_cc445778.jpg`;
-const heroImg = `${SUPABASE_BASE}/hero-firestick-breakout.jpg`;
+const fallbackHeroImg = onn4kImg;
+const heroImg = onnHdImg;
 const productBenefitList = [
   "18,000 live channels worldwide",
   "+24k VODs and Series",
@@ -144,60 +141,32 @@ const iptvPricingMatrix: IPTVPricing[] = [
   },
 ];
 
-const firestickCatalogNote = "Same listed price per device at checkout";
+const deviceCatalogNote = "Same listed price per device at checkout";
 
 const defaultProducts: Product[] = [
   {
-    id: "firestick-hd",
-    name: "StreamStick Starter Kit",
-    price: 115,
-    description: "Start in about 10 minutes. Plug in your Fire Stick, enter your credentials (sent instantly after purchase), and follow our quick setup video. You'll unlock 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage including NFL, NBA, UFC, and live events. Includes a 1 Year Live TV plan, 24/7 customer support, tutorial videos, and shipping included.",
+    id: "onn-google-hd",
+    name: "ONN Full HD (1080p) Google TV Kit",
+    price: 150,
+    description:
+      "onn. Full HD Streaming Device with Google TV and voice remote. Setup in about 10 minutes—plug in, enter your instant credentials, and stream 18,000+ live channels, 100,000+ movies & series, and sports. Includes a 1 Year Live TV plan, tutorials, shipping, and 24/7 support.",
     features: productBenefitList,
-    image: firestickHdImg,
+    image: onnHdImg,
     category: "firestick",
-    badge: "STARTER"
+    badge: "FULL HD",
   },
   {
-    id: "firestick-4k",
-    name: "StreamStick 4K Kit",
-    price: 125,
-    description: "Best-selling Fire Stick setup in about 10 minutes. Plug in, enter your instant credentials, follow our setup video, and you're streaming in 4K with Dolby Vision. Enjoy 18,000+ live TV channels, 100,000+ movies & series, and all major sports - NFL, NBA, UFC, and live events. Includes a 1 Year premium Live TV plan, 24/7 support, tutorial videos, and shipping included.",
-    features: productBenefitList,
-    image: firestick4kImg,
-    category: "firestick",
-    badge: "BEST VALUE",
-    popular: true
-  },
-  {
-    id: "firestick-4k-max",
-    name: "StreamStick Max Kit",
-    price: 135,
-    description: "Ultimate 4K Max with Wi-Fi 6E setup in about 10 minutes. Plug in, use your instant credentials, follow our quick setup video, and experience breathtaking 4K with Dolby Atmos sound. Access 18,000+ live TV channels, 100,000+ movies & series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, tutorial videos, and shipping included.",
-    features: productBenefitList,
-    image: firestick4kMaxImg,
-    category: "firestick",
-    badge: "PREMIUM"
-  },
-  {
-    id: "android-onn-4k",
-    name: "ONN 4K Streaming Device Kit",
-    price: 105,
-    description: "Upgrade from Fire Stick to Android. The ONN 4K Streaming Device with Google TV delivers the same great features you love, plus built-in storage for live DVR recording. Setup takes about 10 minutes - plug in, enter your instant credentials, and access 18,000+ live TV channels, 100,000+ movies & series, and comprehensive sports coverage. Includes a 1 Year Live TV plan, 24/7 support, tutorial videos, and shipping included.",
+    id: "onn-google-4k",
+    name: "ONN 4K Ultra HD Google TV Kit",
+    price: 160,
+    description:
+      "onn. 4K Streaming Device with Google TV, HDR, and Dolby Audio. Setup in about 10 minutes—plug in, enter your credentials, and enjoy 4K with 18,000+ channels, 100,000+ movies & series, and major sports. Includes a 1 Year Live TV plan, tutorials, shipping, and 24/7 support.",
     features: productBenefitList,
     image: onn4kImg,
     category: "firestick",
-    badge: "ANDROID"
+    badge: "4K ULTRA HD",
+    popular: true,
   },
-  {
-    id: "android-onn-pro",
-    name: "ONN 4K Ultra HD Pro Kit",
-    price: 115,
-    description: "The ultimate Android streaming upgrade. ONN 4K Ultra HD Pro features expanded storage for extensive DVR recording, Google TV interface, and premium performance. Setup takes about 10 minutes - plug in, use your instant credentials, and experience crystal-clear 4K with Dolby Audio. Access 18,000+ live TV channels, 100,000+ movies & series, and all major sports. Includes a 1 Year premium Live TV plan, priority 24/7 support, tutorial videos, and shipping included.",
-    features: productBenefitList,
-    image: onn4kProImg,
-    category: "firestick",
-    badge: "ANDROID PRO"
-  }
 ];
 
 type CmsAccent = "cyan" | "gold" | "violet" | "teal";
@@ -293,8 +262,8 @@ interface CmsHomePayload {
 
 const defaultHeroCtas: Required<CmsHeroCta>[] = [
   { label: "START 36HR IPTV TRIAL", href: "/36hr-trial", accent: "cyan", trackVpn: false },
-  { label: "SHOP LOADED FIRESTICKS", href: "/devices", accent: "gold", trackVpn: false },
-  { label: "ONN GOOGLE TV DEVICES", href: "/onn", accent: "violet", trackVpn: false },
+  { label: "SHOP ONN GOOGLE TV KITS", href: "/shop", accent: "gold", trackVpn: false },
+  { label: "ONN SETUP GUIDE", href: "/onn", accent: "violet", trackVpn: false },
   { label: "GET SURFSHARK VPN", href: "/vpn", accent: "teal", trackVpn: true },
 ];
 
@@ -309,18 +278,18 @@ const defaultFeatureCards: Required<CmsFeatureCard>[] = [
     trackVpn: false,
   },
   {
-    title: "Loaded Firesticks",
-    description: "Firestick 4K ships fully loaded and ready-to-use with 1-year Reloaded Fire TV subscription included.",
-    bullets: ["Pre-installed apps", "Zero setup required", "Perfect for beginners"],
-    ctaLabel: "SHOP LOADED FIRESTICKS",
-    ctaHref: "/devices",
+    title: "ONN Google TV Kits",
+    description: "onn. Full HD and 4K devices with Google TV—hardware ships with 1-year Reloaded Fire TV and guided setup.",
+    bullets: ["$150 Full HD kit", "$160 4K kit", "Voice remote included"],
+    ctaLabel: "SHOP ONN KITS",
+    ctaHref: "/shop",
     accent: "gold",
     trackVpn: false,
   },
   {
     title: "Onn Google TV Devices",
-    description: "Onn Google TV devices pre-configured for streaming. 1-year Reloaded Fire TV service included.",
-    bullets: ["Walmart Onn 4K ready", "Easy plug & play", "Budget streaming power"],
+    description: "Onn Full HD and 4K Google TV kits with 1-year Reloaded Fire TV included.",
+    bullets: ["1080p or 4K options", "Easy plug & play", "Google TV + voice remote"],
     ctaLabel: "ONN GOOGLE TV DEVICES",
     ctaHref: "/onn",
     accent: "violet",
@@ -339,8 +308,8 @@ const defaultFeatureCards: Required<CmsFeatureCard>[] = [
 
 const defaultAdvantages = [
   "36-hour full-access trial-no card required to start",
-  "Device bundles ship with 1 year of Reloaded Fire TV",
-  "Fire TV, ONN Google TV, Roku & smart TV friendly workflows",
+  "ONN Google TV kits ship with 1 year of Reloaded Fire TV",
+  "Google TV, Roku & smart TV friendly workflows",
   "Optional VPN path for ISP throttling & privacy on busy networks",
 ];
 
@@ -353,8 +322,8 @@ const defaultFaqItems = [
     answer: "IPTV = streaming service only. Device = hardware WITH 1-year Reloaded Fire TV included.",
   },
   {
-    question: "Firestick/Onn include subscription?",
-    answer: "Yes. Every device ships with 1-year Reloaded Fire TV subscription.",
+    question: "Do ONN kits include subscription?",
+    answer: "Yes. Every ONN kit ships with 1-year Reloaded Fire TV subscription.",
   },
   {
     question: "Why Surfshark VPN?",
@@ -389,7 +358,7 @@ const defaultWhyChooseLinks = [
 ];
 
 const defaultDeviceSupportTitle = "Device Support";
-const defaultDeviceSupportItems = ["Onn Google TV", "Roku TVs", "Smart TVs", "Fire Stick"];
+const defaultDeviceSupportItems = ["Onn Google TV", "Roku TVs", "Smart TVs", "Android TV"];
 const defaultDeviceSupportApps = [
   { label: "IPTV Smarters Pro", href: "/iptv-smarters-pro" },
   { label: "TiviMate", href: "/tivimate" },
@@ -671,12 +640,12 @@ export default function MainStore() {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
     setPageMeta({
-      title: "IPTV Subscriptions Loaded Firesticks Onn VPN | StreamStickPro",
+      title: "IPTV Subscriptions ONN Google TV Kits VPN | StreamStickPro",
       description:
-        "StreamStickPro: IPTV subscriptions, loaded Firesticks, ONN Google TV, and Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, SSL-secured checkout, 24/7 support.",
+        "StreamStickPro: IPTV subscriptions, ONN Google TV kits ($150 Full HD, $160 4K), and Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, SSL-secured checkout, 24/7 support.",
       path: "/",
       keywords:
-        "IPTV subscription, loaded Firestick, Onn device, Surfshark VPN IPTV, ISP throttling VPN",
+        "IPTV subscription, ONN Google TV, Onn 4K streaming kit, Surfshark VPN IPTV, ISP throttling VPN",
     });
     loadCmsHome();
     loadProducts();
@@ -692,14 +661,14 @@ export default function MainStore() {
       setCmsHome(data as CmsHomePayload);
       if (data.meta) {
         setPageMeta({
-          title: data.meta.title || "IPTV Subscriptions Loaded Firesticks Onn VPN | StreamStickPro",
+          title: data.meta.title || "IPTV Subscriptions ONN Google TV Kits VPN | StreamStickPro",
           description:
             data.meta.description ||
-            "StreamStickPro: IPTV subscriptions, loaded Firesticks, ONN Google TV, and Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, SSL-secured checkout, 24/7 support.",
+            "StreamStickPro: IPTV subscriptions, ONN Google TV kits ($150 Full HD, $160 4K), and Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, SSL-secured checkout, 24/7 support.",
           path: data.meta.path || "/",
           keywords:
             data.meta.keywords ||
-            "IPTV subscription, loaded Firestick, Onn device, Surfshark VPN IPTV, ISP throttling VPN",
+            "IPTV subscription, ONN Google TV, Onn 4K streaming kit, Surfshark VPN IPTV, ISP throttling VPN",
         });
       }
     } catch (error) {
@@ -714,18 +683,26 @@ export default function MainStore() {
       
       if (result.data && result.data.length > 0) {
         const mappedProducts: Product[] = result.data.map((p: any) => {
-          const isFirestick = p.name?.toLowerCase().includes('fire stick') || 
-                              p.name?.toLowerCase().includes('fire tv') ||
-                              p.category === 'firestick';
+          const cat = String(p.category || '').toLowerCase();
+          const isDeviceBundle =
+            cat === 'devices' ||
+            cat === 'firestick' ||
+            String(p.id || '').startsWith('onn-google');
           
           let productImage = p.imageUrl || '';
           if (productImage && !productImage.startsWith('http') && !productImage.startsWith('/')) {
             productImage = getStorageUrl('images', productImage);
           } else if (!productImage) {
-            if (p.id === 'fs-hd') productImage = firestickHdImg;
-            else if (p.id === 'fs-4k') productImage = firestick4kImg;
-            else if (p.id === 'fs-max') productImage = firestick4kMaxImg;
-            else productImage = isFirestick ? firestick4kImg : iptvImg;
+            if (p.id === 'onn-google-hd' || p.id === 'fs-hd' || p.id === 'firestick-hd') productImage = onnHdImg;
+            else if (
+              p.id === 'onn-google-4k' ||
+              p.id === 'fs-4k' ||
+              p.id === 'firestick-4k' ||
+              p.id === 'fs-max' ||
+              p.id === 'firestick-4k-max'
+            )
+              productImage = onn4kImg;
+            else productImage = isDeviceBundle ? onn4kImg : iptvImg;
           }
 
           const defaultFeatures = defaultProducts.find(dp => dp.id === p.id)?.features || 
@@ -756,10 +733,15 @@ export default function MainStore() {
             description: p.description || defaultDescription,
             features: defaultFeatures,
             image: productImage,
-            category: isFirestick ? 'firestick' : 'iptv',
+            category: isDeviceBundle ? 'firestick' : 'iptv',
             badge: defaultBadge,
-            popular: p.id === 'fs-4k' || p.id === 'iptv-3' || p.id === 'firestick-4k' || p.id === 'iptv-3mo',
-            period: isFirestick ? undefined : defaultPeriod
+            popular:
+              p.id === 'onn-google-4k' ||
+              p.id === 'fs-4k' ||
+              p.id === 'iptv-3' ||
+              p.id === 'firestick-4k' ||
+              p.id === 'iptv-3mo',
+            period: isDeviceBundle ? undefined : defaultPeriod
           };
         });
         setProducts(mappedProducts);
@@ -828,10 +810,10 @@ export default function MainStore() {
       },
       {
         "@type": "Question",
-        name: "Firestick/Onn include subscription?",
+        name: "Do ONN kits include subscription?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Yes. Every device ships with 1-year Reloaded Fire TV subscription.",
+          text: "Yes. Every ONN kit ships with 1-year Reloaded Fire TV subscription.",
         },
       },
       {
@@ -898,7 +880,7 @@ export default function MainStore() {
       {/* ItemList Schema for Product Listings */}
       <ItemListSchema 
         name="StreamStickPro Products"
-        description="Fire Stick device options and IPTV subscription plans"
+        description="ONN Google TV kits and IPTV subscription plans"
         items={products.slice(0, 6).map(p => ({
           name: p.name,
           description: getSchemaDescription(p),
@@ -948,8 +930,8 @@ export default function MainStore() {
                 VPN
               </span>
             </Link>
-            <Link href="/iptv-firestick"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Firestick</span></Link>
-            <Link href="/firestick-devices"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Devices</span></Link>
+            <Link href="/shop"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Shop</span></Link>
+            <Link href="/onn"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">ONN</span></Link>
             <Link href="/iptv-media-players"><span className="hidden xl:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Media</span></Link>
             <Link href="/tutorials"><span className="hidden xl:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Tutorials</span></Link>
             <Link href="/locations"><span className="hidden xl:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Locations</span></Link>
@@ -1167,10 +1149,10 @@ export default function MainStore() {
               <span className="text-xs sm:text-sm font-semibold text-[#00D4FF] tracking-wide">SHOP ALL PRODUCTS</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 sm:mb-6 leading-tight px-1">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] via-white to-[#FAD02C]">Fire Stick kits &amp; IPTV plans</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] via-white to-[#FAD02C]">ONN Google TV kits &amp; IPTV plans</span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-[#E8EAED] max-w-3xl mx-auto leading-relaxed px-1">
-              Same lineup thousands of customers use daily: 18K+ channels, 100K+ movies &amp; series, and step-by-step guidance for Fire TV, ONN, and Android TV.
+              Same lineup thousands of customers use daily: 18K+ channels, 100K+ movies &amp; series, and step-by-step guidance for ONN Google TV and Android TV.
             </p>
           </motion.div>
 
@@ -1356,7 +1338,7 @@ export default function MainStore() {
           {/* What You Get Video */}
           <DemoVideo />
 
-          {/* Fire Stick Tier Comparison Table */}
+          {/* Device comparison */}
           <motion.div 
             className="mb-12 overflow-x-auto"
             initial={{ opacity: 0, y: 40 }}
@@ -1367,7 +1349,7 @@ export default function MainStore() {
             <div className="text-center mb-8">
               <h3 className="text-3xl font-bold mb-4 flex items-center justify-center gap-3">
                 <Flame className="w-8 h-8 text-orange-500" />
-                Fire Stick Comparison
+                Streaming Device Comparison
               </h3>
               <p className="text-gray-200 max-w-2xl mx-auto">
                 Be streaming in about 10 minutes. Each Stream Stick Pro device bundle includes Reloaded Fire TV all-in-one access, educational setup tutorials, a 1-year included plan, 24/7 support, and shipping included.
@@ -1479,19 +1461,19 @@ export default function MainStore() {
                         </div>
                       </div>
                 <p className="text-center text-green-300 mt-4 text-sm">
-                        ${firestickCatalogNote}
+                        ${deviceCatalogNote}
                 </p>
               </div>
             </div>
           </motion.div>
 
-          {/* Fire Sticks */}
+          {/* ONN Google TV kits */}
           <div className="mb-16">
             <h3 className="text-3xl font-bold mb-8 text-center flex items-center justify-center gap-3">
               <Flame className="w-8 h-8 text-orange-500" />
-              Choose Your Fire Stick
+              Choose Your ONN Google TV Kit
             </h3>
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
               {firestickProducts.map((product, index) => {
                 const cardGradients = [
                   'from-slate-800 via-slate-900 to-gray-900',
@@ -1567,17 +1549,15 @@ export default function MainStore() {
                         height={224}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          if (target.src !== firestick4kImg) {
-                            target.src = firestick4kImg;
+                          if (target.src !== onn4kImg) {
+                            target.src = onn4kImg;
                           }
                         }}
                       />
                       <div className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-full font-bold text-sm shadow-lg ${
-                        product.id === 'fs-max' 
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' 
-                          : product.popular 
-                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
-                            : 'bg-blue-500 text-white'
+                        product.popular
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                          : 'bg-blue-500 text-white'
                       }`}>
                         {product.badge}
                       </div>
@@ -1586,7 +1566,7 @@ export default function MainStore() {
                           {product.cardPromoLabel}
                         </div>
                       ) : null}
-                      {product.id === 'fs-4k' && (
+                      {(product.id === 'onn-google-4k' || product.id === 'fs-4k') && (
                         <div className={`absolute ${product.cardPromoLabel ? 'top-14' : 'top-4'} left-4 z-20 bg-green-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-lg`}>
                           1 YEAR INCLUDED
                         </div>
@@ -1634,7 +1614,7 @@ export default function MainStore() {
                         </div>
                         <p className="text-xs text-green-400 flex items-center gap-1">
                           <Gift className="w-3 h-3" />
-                          {firestickCatalogNote}
+                          {deviceCatalogNote}
                         </p>
                       </div>
 
@@ -1662,7 +1642,7 @@ export default function MainStore() {
                               </div>
                               <p className="text-green-400 text-sm mt-1 font-semibold flex items-center gap-1">
                                 <DollarSign className="w-4 h-4" />
-                                {firestickCatalogNote}
+                                {deviceCatalogNote}
                               </p>
                               <p className="text-blue-200 text-sm mt-2 flex items-center gap-2">
                                 <Gift className="w-4 h-4 text-green-400" />
@@ -1709,22 +1689,22 @@ export default function MainStore() {
             </div>
           </div>
 
-          {/* Fire Stick Details */}
+          {/* Device bundle details */}
           <section className="py-10">
             <div className="max-w-5xl mx-auto">
               <div className="grid gap-6 lg:grid-cols-2">
                 <div className="rounded-2xl bg-slate-900/60 border border-white/10 p-6 md:p-8">
                   <h3 className="text-2xl md:text-3xl font-bold text-orange-400 mb-4">
-                    Stream Stick Pro Fire Stick & ONN Device Experience
+                    Stream Stick Pro ONN Google TV Experience
                   </h3>
                   <p className="text-gray-200 mb-4">
-                    Say goodbye to cable bills and hello to faster, simpler streaming. With Stream Stick Pro device bundles (Fire Stick and ONN options), you get Reloaded Fire TV all-in-one access plus guided setup made for real households.
+                    Say goodbye to cable bills and hello to faster, simpler streaming. With Stream Stick Pro ONN Google TV kits (Full HD or 4K), you get Reloaded Fire TV all-in-one access plus guided setup made for real households.
                   </p>
                   <p className="text-gray-200 mb-4">
                     You get extensive live channels, movies, series, sports, and events in one place without bouncing through dozens of broken app links. We focus on a clean, usable setup so customers spend time watching, not troubleshooting.
                   </p>
                   <p className="text-gray-200">
-                    Every Fire Stick and ONN order includes educational tutorial videos, an easy setup path, a 1-year included access plan, and responsive support whenever you need help.
+                    Every ONN kit order includes educational tutorial videos, an easy setup path, a 1-year included access plan, and responsive support whenever you need help.
                   </p>
                 </div>
                 <div className="rounded-2xl bg-slate-900/60 border border-white/10 p-6 md:p-8">
@@ -1732,7 +1712,7 @@ export default function MainStore() {
                     Why Reloaded Fire TV Stands Out
                   </h3>
                   <p className="text-gray-200 mb-6">
-                    Many so-called jailbroken Fire Stick sites send customers into huge app lists, dead links, and long tutorials that still do not work. Stream Stick Pro is different: Reloaded Fire TV is designed as an all-in-one app workflow with practical, beginner-friendly setup guidance.
+                    Many streaming bundle sites send customers into huge app lists, dead links, and long tutorials that still do not work. Stream Stick Pro is different: Reloaded Fire TV is designed as an all-in-one app workflow with practical, beginner-friendly setup guidance.
                   </p>
                   <h4 className="text-xl font-bold text-orange-400 mb-3">
                     Important Legal Notice
@@ -1753,7 +1733,7 @@ export default function MainStore() {
                   Reloaded Fire TV Device Bundles Built For Real Households
                 </h3>
                 <p className="text-gray-200 max-w-3xl mx-auto text-lg">
-                  Stream Stick Pro bundles are made for easy setup, stable daily use, and less guesswork. You get guided onboarding, educational tutorials, and a 1-year included access plan with Fire Stick or ONN device options.
+                  Stream Stick Pro bundles are made for easy setup, stable daily use, and less guesswork. You get guided onboarding, educational tutorials, and a 1-year included access plan with ONN Google TV kits.
                 </p>
               </div>
 
@@ -1762,7 +1742,7 @@ export default function MainStore() {
                   <h4 className="text-2xl font-bold text-orange-300 mb-4">What You Get With Every Device Order</h4>
                   <ul className="space-y-3 text-gray-100">
                     {[
-                      "Fire Stick or ONN device option ready for guided setup",
+                      "ONN Full HD or 4K Google TV kit ready for guided setup",
                       "Reloaded Fire TV all-in-one app workflow",
                       "Educational tutorial videos for first-time users",
                       "1-year included access plan on device bundles",
@@ -1897,17 +1877,16 @@ export default function MainStore() {
         </div>
       </div>
 
-      {/* Niche hub — IPTV, jailbroken Fire Sticks, media players, devices */}
+      {/* Niche hub — IPTV, ONN, media players */}
       <div className="py-6 bg-gray-900/60 border-y border-white/10">
         <div className="container mx-auto px-4">
           <p className="text-center text-gray-400 text-sm mb-4">Browse by topic</p>
           <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6">
             <Link href="/iptv-services"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV Services</span></Link>
-            <Link href="/iptv-firestick"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV for Firestick</span></Link>
+            <Link href="/shop"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Shop ONN kits</span></Link>
+            <Link href="/onn"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">ONN setup</span></Link>
             <Link href="/iptv-media-players"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV Media Players</span></Link>
-            <Link href="/firestick-devices"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Fire Stick Devices</span></Link>
-            <Link href="/jailbroken-fire-sticks"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Jailbroken Fire Sticks</span></Link>
-            <Link href="/best-iptv-firestick"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Best IPTV Firestick</span></Link>
+            <Link href="/bundles"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Bundles</span></Link>
           </div>
         </div>
       </div>
@@ -1923,7 +1902,7 @@ export default function MainStore() {
               Adding IPTV Media Players to Your Devices
             </h2>
             <p className="text-gray-300 text-lg max-w-2xl mx-auto mb-8">
-              Step-by-step video tutorials: install IPTV media player on Fire Stick and ONN Google TV.
+              Step-by-step video tutorials: install IPTV media player on ONN Google TV and Android TV.
             </p>
             <Link href="/tutorials">
               <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-4 text-lg gap-2">
@@ -1962,7 +1941,7 @@ export default function MainStore() {
                 <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
                   <X className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-red-400">Other Fire Stick Websites</h3>
+                <h3 className="text-2xl font-bold text-red-400">Other streaming bundle sites</h3>
               </div>
               <ul className="space-y-4">
                 {[
@@ -2001,7 +1980,7 @@ export default function MainStore() {
                 {[
                   "Reloaded Fire TV all-in-one app flow - easy to use",
                   "Educational tutorials included with every device order",
-                  "1-year included plan on Fire Stick and ONN bundles",
+                  "1-year included plan on ONN Google TV kits",
                   "No hunting through huge app lists to find working links",
                   "Fast setup path built for beginners and families",
                   "24/7 support when you need real help",
@@ -2186,7 +2165,7 @@ export default function MainStore() {
               { 
                 step: "1", 
                 title: "Choose Your Device", 
-                description: "Select from Fire Stick HD, 4K, or 4K Max. All device options include clear setup guidance.",
+                description: "Choose ONN Full HD ($150) or ONN 4K ($160). All kits include clear setup guidance.",
                 icon: "📱",
                 image: "firestick-device-selection.jpg"
               },
@@ -2382,7 +2361,7 @@ export default function MainStore() {
                 <span className="text-xl font-bold text-white">StreamStickPro</span>
               </div>
               <p className="text-sm text-gray-200 mb-4">
-                Premium Live TV streaming with 18,000+ channels and 100,000+ movies & series. Fire Stick and streaming device options available.
+                Premium Live TV streaming with 18,000+ channels and 100,000+ movies & series. ONN Google TV kits available.
               </p>
               <div className="flex gap-3">
                 <a href="mailto:reloadedfiretvteam@gmail.com" className="w-10 h-10 bg-gray-800 hover:bg-orange-600 rounded-lg flex items-center justify-center transition-colors" data-testid="link-email" aria-label="Email us">
@@ -2421,11 +2400,10 @@ export default function MainStore() {
               <h3 className="text-white font-semibold mb-4">Guides</h3>
               <ul className="space-y-2 text-sm">
                 <li><Link href="/iptv-services"><span className="hover:text-orange-400 transition-colors">IPTV Services</span></Link></li>
-                <li><Link href="/iptv-firestick"><span className="hover:text-orange-400 transition-colors">IPTV for Firestick</span></Link></li>
+                <li><Link href="/shop"><span className="hover:text-orange-400 transition-colors">Shop ONN kits</span></Link></li>
+                <li><Link href="/onn"><span className="hover:text-orange-400 transition-colors">ONN Google TV</span></Link></li>
                 <li><Link href="/iptv-media-players"><span className="hover:text-orange-400 transition-colors">IPTV Media Players</span></Link></li>
-                <li><Link href="/firestick-devices"><span className="hover:text-orange-400 transition-colors">Fire Stick Devices</span></Link></li>
-                <li><Link href="/jailbroken-fire-sticks"><span className="hover:text-orange-400 transition-colors">Jailbroken Fire Sticks</span></Link></li>
-                <li><Link href="/best-iptv-firestick"><span className="hover:text-orange-400 transition-colors">Best IPTV Firestick</span></Link></li>
+                <li><Link href="/bundles"><span className="hover:text-orange-400 transition-colors">Bundles</span></Link></li>
               </ul>
             </div>
 

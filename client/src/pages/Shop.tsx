@@ -19,9 +19,8 @@ import { iptvRealProductId } from "@/lib/iptv-sku";
 const ProductQuickView = lazy(() => import("@/components/ProductQuickView").then((module) => ({ default: module.ProductQuickView })));
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
-const firestickHdImg = `${SUPABASE_BASE}/firestick-original-jailbroken.jpg`;
-const firestick4kImg = `${SUPABASE_BASE}/firestick-4k-jailbroken.jpg`;
-const firestick4kMaxImg = `${SUPABASE_BASE}/firestick-4k-max-jailbroken.jpg`;
+const onnHdImg = "/images/onn-full-hd-google-tv.webp";
+const onn4kImg = "/images/onn-4k-google-tv.jpg";
 const iptvImg = `${SUPABASE_BASE}/iptv-subscription.jpg`;
 
 // Force new bundle - v2.0.$(date +%s)
@@ -112,35 +111,41 @@ const iptvPricingMatrix: IPTVPricing[] = [
 
 const defaultProducts: Product[] = [
   {
-    id: 'fs-hd',
-    name: 'Fire Stick HD',
-    price: 115,
-    description: 'Entry-level Stream Stick Pro device bundle with Reloaded Fire TV all-in-one setup flow, educational tutorials, and a 1-year access plan.',
-    features: ['1080p Full HD', 'Reloaded Fire TV All-in-One Access', 'Educational Setup Tutorial Included', '1 Year Included Access', '18,000+ Live TV Channels', '24/7 Customer Support'],
-    image: firestickHdImg,
-    category: 'firestick',
-    badge: 'STARTER'
+    id: "onn-google-hd",
+    name: "ONN Full HD (1080p) Google TV Kit",
+    price: 150,
+    description:
+      "onn. Full HD Streaming Device with Google TV, voice remote, and guided Reloaded Fire TV setup. Includes 1-year Reloaded Fire TV plan, tutorials, shipping, and 24/7 support.",
+    features: [
+      "1080p Full HD",
+      "Google TV + Voice Remote",
+      "Reloaded Fire TV guided setup",
+      "1 Year Included Access",
+      "18,000+ Live TV Channels",
+      "24/7 Customer Support",
+    ],
+    image: onnHdImg,
+    category: "firestick",
+    badge: "FULL HD",
   },
   {
-    id: 'fs-4k',
-    name: 'Fire Stick 4K',
-    price: 125,
-    description: 'Most popular Stream Stick Pro Fire Stick bundle with Reloaded Fire TV all-in-one access, guided setup, and a 1-year access plan.',
-    features: ['4K Ultra HD', 'HDR Support', 'Dolby Vision & Atmos', 'Reloaded Fire TV All-in-One Access', 'Educational Setup Tutorial Included', '1 Year Included Access', '24/7 Customer Support'],
-    image: firestick4kImg,
-    category: 'firestick',
-    badge: 'POPULAR',
-    popular: true
-  },
-  {
-    id: 'fs-max',
-    name: 'Fire Stick 4K Max',
-    price: 135,
-    description: 'Performance-first Stream Stick Pro Fire Stick Max bundle with Reloaded Fire TV all-in-one access, educational setup, and a 1-year access plan.',
-    features: ['4K Ultra HD', 'Wi-Fi 6E (Fastest)', 'HDR Support', 'Dolby Vision & Atmos', 'Reloaded Fire TV All-in-One Access', 'Educational Setup Tutorial Included', '1 Year Included Access', '24/7 Customer Support'],
-    image: firestick4kMaxImg,
-    category: 'firestick',
-    badge: 'PREMIUM'
+    id: "onn-google-4k",
+    name: "ONN 4K Ultra HD Google TV Kit",
+    price: 160,
+    description:
+      "onn. 4K Streaming Device with Google TV, HDR, Dolby Audio, voice remote, and guided Reloaded Fire TV setup. Includes 1-year Reloaded Fire TV plan, tutorials, shipping, and 24/7 support.",
+    features: [
+      "4K Ultra HD + HDR",
+      "Google TV + Voice Remote",
+      "Reloaded Fire TV guided setup",
+      "1 Year Included Access",
+      "18,000+ Live TV Channels",
+      "24/7 Customer Support",
+    ],
+    image: onn4kImg,
+    category: "firestick",
+    badge: "4K ULTRA HD",
+    popular: true,
   },
 ];
 
@@ -152,7 +157,7 @@ const BUYER_PROFILE_CONFIG: Record<
     label: string;
     planDuration: "1mo" | "3mo" | "6mo" | "1yr";
     streamCount: number;
-    deviceTier: "hd" | "4k" | "max";
+    deviceTier: "hd" | "4k";
     deviceQty: number;
     note: string;
   }
@@ -177,7 +182,7 @@ const BUYER_PROFILE_CONFIG: Record<
     label: "Power User",
     planDuration: "1yr",
     streamCount: 5,
-    deviceTier: "max",
+    deviceTier: "4k",
     deviceQty: 1,
     note: "Maximum performance and value",
   },
@@ -282,11 +287,12 @@ export default function Shop() {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
     setPageMeta({
-      title: "Reloaded Fire TV Subscription Plans 2026 | Fire Stick & Devices | StreamStick Pro",
-      description: "Shop Reloaded Fire TV plans from $11/mo and Fire Stick device options. 18K+ channels, 4K, and 99.9% uptime. Start a 36-hour subscription trial or buy now with StreamStick Pro.",
+      title: "Reloaded Fire TV Subscription Plans 2026 | ONN Google TV Kits | StreamStick Pro",
+      description:
+        "Shop Reloaded Fire TV plans from $11/mo and ONN Google TV device kits ($150 Full HD, $160 4K). 18K+ channels. Start a 36-hour subscription trial or buy now with StreamStick Pro.",
       path: "/shop",
       keywords:
-        "Reloaded Fire TV, IPTV subscription, Fire Stick 4K, Fire Stick Max, ONN Google TV, shop IPTV, StreamStickPro",
+        "Reloaded Fire TV, IPTV subscription, ONN Google TV, ONN 4K, Walmart Onn streaming, shop IPTV, StreamStickPro",
     });
     loadProducts();
   }, []);
@@ -314,18 +320,26 @@ export default function Shop() {
       
       if (result.data && result.data.length > 0) {
         const mappedProducts: Product[] = result.data.map((p: any) => {
-          const isFirestick = p.name?.toLowerCase().includes('fire stick') || 
-                              p.name?.toLowerCase().includes('fire tv') ||
-                              p.category === 'firestick';
+          const cat = String(p.category || '').toLowerCase();
+          const isDeviceBundle =
+            cat === 'devices' ||
+            cat === 'firestick' ||
+            String(p.id || '').startsWith('onn-google');
           
           let productImage = p.imageUrl || '';
           if (productImage && !productImage.startsWith('http') && !productImage.startsWith('/')) {
             productImage = getStorageUrl('images', productImage);
           } else if (!productImage) {
-            if (p.id === 'fs-hd') productImage = firestickHdImg;
-            else if (p.id === 'fs-4k') productImage = firestick4kImg;
-            else if (p.id === 'fs-max') productImage = firestick4kMaxImg;
-            else productImage = isFirestick ? firestick4kImg : iptvImg;
+            if (p.id === 'onn-google-hd' || p.id === 'fs-hd' || p.id === 'firestick-hd') productImage = onnHdImg;
+            else if (
+              p.id === 'onn-google-4k' ||
+              p.id === 'fs-4k' ||
+              p.id === 'firestick-4k' ||
+              p.id === 'fs-max' ||
+              p.id === 'firestick-4k-max'
+            )
+              productImage = onn4kImg;
+            else productImage = isDeviceBundle ? onn4kImg : iptvImg;
           }
 
           const defaultFeatures = defaultProducts.find(dp => dp.id === p.id)?.features || 
@@ -352,9 +366,14 @@ export default function Shop() {
             description: p.description || defaultDescription,
             features: defaultFeatures,
             image: productImage,
-            category: isFirestick ? 'firestick' : 'iptv',
+            category: isDeviceBundle ? 'firestick' : 'iptv',
             badge: defaultBadge,
-            popular: p.id === 'fs-4k' || p.id === 'iptv-3' || p.id === 'firestick-4k' || p.id === 'iptv-3mo',
+            popular:
+              p.id === 'onn-google-4k' ||
+              p.id === 'fs-4k' ||
+              p.id === 'iptv-3' ||
+              p.id === 'firestick-4k' ||
+              p.id === 'iptv-3mo',
           };
         });
         setProducts(mappedProducts);
@@ -404,25 +423,22 @@ export default function Shop() {
 
   const firestickProducts = products.filter(p => p.category === 'firestick');
 
-  const getDeviceTier = (id: string): "hd" | "4k" | "max" => {
+  const getDeviceTier = (id: string): "hd" | "4k" => {
     const k = id.toLowerCase();
-    if (k.includes("max")) return "max";
-    if (k.includes("4k")) return "4k";
-    return "hd";
+    if (k.includes("onn-google-hd") || k.endsWith("-hd") || k.includes("firestick-hd")) return "hd";
+    return "4k";
   };
 
   const getDeviceBestFor = (id: string): string => {
     const tier = getDeviceTier(id);
-    if (tier === "hd") return "budget-friendly streaming on 1080p TVs";
-    if (tier === "4k") return "most homes wanting 4K quality and best overall value";
-    return "power users wanting peak speed and premium performance";
+    if (tier === "hd") return "budget-friendly streaming on 1080p TVs with Google TV";
+    return "most homes wanting 4K HDR and best overall value on Google TV";
   };
 
-  const getRecommendedDeviceElement = (tier: "hd" | "4k" | "max"): HTMLElement | null => {
-    const idsByTier: Record<"hd" | "4k" | "max", string[]> = {
-      hd: ["firestick-hd", "fs-hd"],
-      "4k": ["firestick-4k", "fs-4k"],
-      max: ["firestick-4k-max", "fs-max"],
+  const getRecommendedDeviceElement = (tier: "hd" | "4k"): HTMLElement | null => {
+    const idsByTier: Record<"hd" | "4k", string[]> = {
+      hd: ["onn-google-hd", "firestick-hd", "fs-hd"],
+      "4k": ["onn-google-4k", "firestick-4k", "fs-4k", "firestick-4k-max", "fs-max"],
     };
     for (const id of idsByTier[tier]) {
       const el = document.querySelector(`[data-testid="card-product-${id}"]`) as HTMLElement | null;
@@ -471,12 +487,12 @@ export default function Shop() {
 
     setFirestickQuantities((prev) => ({
       ...prev,
+      "onn-google-hd": config.deviceTier === "hd" ? config.deviceQty : 1,
+      "onn-google-4k": config.deviceTier === "4k" ? config.deviceQty : 1,
       "firestick-hd": config.deviceTier === "hd" ? config.deviceQty : 1,
       "firestick-4k": config.deviceTier === "4k" ? config.deviceQty : 1,
-      "firestick-4k-max": config.deviceTier === "max" ? config.deviceQty : 1,
       "fs-hd": config.deviceTier === "hd" ? config.deviceQty : 1,
       "fs-4k": config.deviceTier === "4k" ? config.deviceQty : 1,
-      "fs-max": config.deviceTier === "max" ? config.deviceQty : 1,
     }));
     focusRecommendedCards(config);
   };
@@ -485,14 +501,14 @@ export default function Shop() {
     <div className="min-h-screen bg-gray-900">
       <SEOSchema faq={[
         { question: "How much does StreamStickPro Reloaded Fire TV cost?", answer: "Reloaded Fire TV plans start at $11/month for 1 device. Multi-device plans and 3-month, 6-month, and 1-year options offer deeper savings — the 1-year plan is $65 per device." },
-        { question: "What devices work with StreamStickPro Reloaded Fire TV?", answer: "StreamStickPro works on Amazon Fire Stick (HD, 4K, 4K Max), ONN Google TV (4K, 4K Pro), Android phones/tablets, iOS via Smarters, Smart TVs, and TiviMate on any Android-based device." },
+        { question: "What devices work with StreamStickPro Reloaded Fire TV?", answer: "StreamStickPro sells ONN Google TV kits (Full HD and 4K) and supports Android phones/tablets, iOS via Smarters, Smart TVs, and TiviMate on Android-based devices." },
         { question: "Is there a free trial before I buy?", answer: "Yes — StreamStickPro offers a separate free 36-hour trial request for subscription customers so you can test channel quality, speed, and setup before buying a paid plan." },
         { question: "How do I get my Reloaded Fire TV credentials after purchase?", answer: "After successful payment, you first receive payment confirmation. Your account email follows after provisioning is confirmed, along with a setup tutorial video and support details." },
         { question: "What payment methods do you accept?", answer: "We accept Visa, Mastercard, Amex, Discover, Apple Pay, Google Pay, Cash App, Affirm (buy now pay later), Klarna, and Stripe Link for one-click checkout." },
       ]} />
       <ItemListSchema
         name="StreamStickPro Reloaded Fire TV Plans & Devices"
-        description="Premium Reloaded Fire TV subscription plans and optional Fire Stick / ONN streaming device bundles"
+        description="Premium Reloaded Fire TV subscription plans and ONN Google TV streaming device kits"
         items={products.map(p => ({
           name: p.name,
           description: p.description,
@@ -512,17 +528,17 @@ export default function Shop() {
           >
             <div className="inline-flex items-center gap-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full px-6 py-2 mb-6">
               <Flame className="w-5 h-5 text-orange-400 animate-pulse" />
-              <span className="text-sm font-medium text-orange-300">ALL PLANS + FIRESTICK/ONN DEVICES</span>
+              <span className="text-sm font-medium text-orange-300">ALL PLANS + ONN GOOGLE TV KITS</span>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Reloaded Fire TV Plans + Device Options</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Reloaded Fire TV Plans + ONN Kits</span>
             </h1>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              This page includes all subscription plans and all Firestick/ONN device options in one place.
+              This page includes all subscription plans and ONN Google TV device kits ($150 Full HD, $160 4K) in one place.
             </p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm">
               <Link href="/iptv"><span className="cursor-pointer rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-gray-100 hover:text-white hover:border-orange-300">View service plans</span></Link>
-              <Link href="/devices"><span className="cursor-pointer rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-gray-100 hover:text-white hover:border-orange-300">View Firestick &amp; ONN details</span></Link>
+              <Link href="/onn"><span className="cursor-pointer rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-gray-100 hover:text-white hover:border-orange-300">ONN Google TV setup</span></Link>
               <Link href="/bundles"><span className="cursor-pointer rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-gray-100 hover:text-white hover:border-orange-300">View bundles</span></Link>
             </div>
           </motion.div>
@@ -826,20 +842,20 @@ export default function Shop() {
             <ComparisonTable />
           </div>
 
-          {/* Fire Stick device options - DISPLAYED SECOND */}
+          {/* ONN Google TV kits - DISPLAYED SECOND */}
           <div className="mb-16">
             <h3 className="text-3xl md:text-4xl font-bold mb-4 text-center flex items-center justify-center gap-3">
               <Flame className="w-8 h-8 text-orange-500" />
-              Firestick + ONN Device Options
+              ONN Google TV Device Kits
             </h3>
             <p className="text-center text-gray-300 mb-4 max-w-2xl mx-auto">
-              Each device includes 1 year of Live TV access, an educational tutorial video, and 24/7 setup help—no Kodi rebuilds, no dead-end app lists, no broken APK scavenger hunts.
+              Full HD ($150) and 4K Ultra HD ($160) onn. kits with Google TV. Each includes 1 year of Live TV access, tutorial video, and 24/7 setup help.
             </p>
             <div className="grid md:grid-cols-2 gap-4 mb-8 max-w-5xl mx-auto">
               <div className="rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-cyan-500/10 via-gray-950 to-gray-900 p-5">
                 <h4 className="text-white font-semibold mb-2">What ships in your order</h4>
                 <ul className="space-y-2 text-sm text-gray-100">
-                  <li>• 1x selected device (Fire Stick HD/4K/4K Max or ONN model).</li>
+                  <li>• 1x selected ONN Google TV kit (Full HD or 4K).</li>
                   <li>• Power cable + power adapter.</li>
                   <li>• Remote and standard in-box accessories.</li>
                   <li>• Quick-start setup instructions from StreamStickPro.</li>
@@ -881,7 +897,7 @@ export default function Shop() {
                 </div>
               ))}
             </div>
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
               {firestickProducts.map((product, index) => {
                 const recommendedDevice = getDeviceTier(product.id) === BUYER_PROFILE_CONFIG[buyerProfile].deviceTier;
                 const cardGradients = [
@@ -962,21 +978,19 @@ export default function Shop() {
                         height={224}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          if (target.src !== firestick4kImg) {
-                            target.src = firestick4kImg;
+                          if (target.src !== onn4kImg) {
+                            target.src = onn4kImg;
                           }
                         }}
                       />
                       <div className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-full font-bold text-sm shadow-lg ${
-                        product.id === 'fs-max' 
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' 
-                          : product.popular 
-                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
-                            : 'bg-blue-500 text-white'
+                        product.popular
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                          : 'bg-blue-500 text-white'
                       }`}>
                         {product.badge}
                       </div>
-                      {product.id === 'fs-4k' && (
+                      {(product.id === 'onn-google-4k' || product.id === 'fs-4k') && (
                         <div className="absolute top-4 left-4 z-20 bg-green-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-lg">
                           1 YEAR INCLUDED
                         </div>

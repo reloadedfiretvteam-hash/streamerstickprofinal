@@ -27,7 +27,14 @@ export function orderNeedsProvisioning(order: Order): boolean {
   for (const raw of productIds) {
     for (const id of variantsForRealProductId(raw)) {
       const x = id.toLowerCase();
-      if (x.startsWith('iptv-') || x.startsWith('firestick-')) return true;
+      if (
+        x.startsWith('iptv-') ||
+        x.startsWith('firestick-') ||
+        x.startsWith('onn-google') ||
+        x.startsWith('android-onn') ||
+        x.startsWith('fs-')
+      )
+        return true;
     }
   }
   return false;

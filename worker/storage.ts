@@ -309,7 +309,25 @@ export function createStorage(config: StorageConfig) {
         .map((d: any) => this.mapOrderFromDb(d))
         .filter((order: Order) => {
           const productName = (order.realProductName || '').toLowerCase();
-          return productName.includes('fire') || productName.includes('stick') || productName.includes('firestick');
+          const ids = String(order.realProductId || '')
+            .split(',')
+            .map((s) => s.trim().toLowerCase())
+            .filter(Boolean);
+          const idLooksDevice =
+            ids.some(
+              (id) =>
+                id.startsWith('firestick-') ||
+                id.startsWith('onn-google') ||
+                id.startsWith('android-onn') ||
+                id.startsWith('fs-'),
+            );
+          return (
+            idLooksDevice ||
+            productName.includes('onn') ||
+            productName.includes('fire') ||
+            productName.includes('stick') ||
+            productName.includes('firestick')
+          );
         });
     },
 

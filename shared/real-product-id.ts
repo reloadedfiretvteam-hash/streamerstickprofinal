@@ -1,10 +1,10 @@
 /**
- * real_products.id in Supabase may use short SKUs (fs-4k) or legacy slugs (firestick-4k).
+ * real_products.id in Supabase may use short SKUs or legacy slugs.
  * Checkout / cart may send either; storage resolves to whichever row exists.
  */
 const EQUIV_CLASSES: readonly (readonly string[])[] = [
-  ["fs-hd", "firestick-hd"],
-  ["fs-4k", "firestick-4k"],
+  ["onn-google-hd", "android-onn-hd", "fs-hd", "firestick-hd"],
+  ["onn-google-4k", "android-onn-4k", "android-onn-pro", "fs-4k", "firestick-4k"],
   ["fs-max", "firestick-4k-max"],
 ];
 

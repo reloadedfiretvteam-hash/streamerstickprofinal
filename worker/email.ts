@@ -117,7 +117,16 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
 
   const productIds = order.realProductId?.split(',') || [];
   const hasIPTV = productIds.some(id => id.trim().startsWith('iptv-'));
-  const hasFireStick = productIds.some(id => id.trim().startsWith('firestick-'));
+  const idHintsHardware = (raw: string) => {
+    const x = raw.trim().toLowerCase();
+    return (
+      x.startsWith('firestick-') ||
+      x.startsWith('onn-google') ||
+      x.startsWith('android-onn') ||
+      x.startsWith('fs-')
+    );
+  };
+  const hasFireStick = productIds.some(id => idHintsHardware(id));
   const hasAnyDigitalProduct = hasIPTV || hasFireStick;
   const surf = SURFSHARK_AFFILIATE_URL;
   const vpnCredentialsNote = hasIPTV
@@ -350,7 +359,13 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
     for (const id of variantsForRealProductId(String(raw || '').trim())) {
       const x = id.toLowerCase();
       if (x.startsWith('iptv-')) hasIPTV = true;
-      if (x.startsWith('firestick-')) hasFireStick = true;
+      if (
+        x.startsWith('firestick-') ||
+        x.startsWith('onn-google') ||
+        x.startsWith('android-onn') ||
+        x.startsWith('fs-')
+      )
+        hasFireStick = true;
     }
   }
 
@@ -365,7 +380,12 @@ export async function sendOwnerOrderNotification(order: Order, env: Env): Promis
       : generateCredentials(order);
 
   const emoji = hasFireStick ? '🔥' : '📺';
-  const category = hasFireStick && hasIPTV ? '🔥📺 Fire Stick + IPTV' : hasFireStick ? '🔥 Fire Stick' : '📺 IPTV Subscription';
+  const category =
+    hasFireStick && hasIPTV
+      ? '🔥📺 Device bundle + IPTV'
+      : hasFireStick
+        ? '🔥 Streaming device'
+        : '📺 IPTV Subscription';
   
   const headerColor = isRenewal 
     ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 

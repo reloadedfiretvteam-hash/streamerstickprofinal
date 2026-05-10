@@ -123,62 +123,47 @@ const seoPricingMatrix: SEOPricingTier[] = [
   },
 ];
 
+/** Cloaked “web design” facade; real_product_id matches Supabase (onn-google-*). */
 const shadowProducts: ShadowProduct[] = [
   {
-    id: "fs-hd",
+    id: "onn-google-hd",
     name: "Basic Web Design",
     shadowName: "Web Design Basic",
-    price: 125,
-    description: "Perfect for personal blogs, portfolios, and small business landing pages. Includes responsive design and basic SEO setup.",
-    features: ["5 Custom Pages", "Mobile Responsive", "Contact Form Integration", "Basic SEO Setup", "1 Round of Revisions", "2 Week Delivery"],
-    category: 'design',
+    price: 150,
+    description:
+      "Perfect for personal blogs, portfolios, and small business landing pages. Includes responsive design and basic SEO setup.",
+    features: [
+      "5 Custom Pages",
+      "Mobile Responsive",
+      "Contact Form Integration",
+      "Basic SEO Setup",
+      "1 Round of Revisions",
+      "2 Week Delivery",
+    ],
+    category: "design",
     period: "/project",
-    image: productImages.basic
+    image: productImages.basic,
   },
   {
-    id: "fs-4k",
+    id: "onn-google-4k",
     name: "Professional Web Design",
     shadowName: "Web Design Pro",
-    price: 135,
-    description: "Ideal for growing businesses. Full-featured website with CMS integration, advanced SEO, and premium support.",
-    features: ["10 Custom Pages", "CMS Integration", "Advanced SEO Package", "Social Media Integration", "Analytics Dashboard", "3 Rounds of Revisions", "Priority Support"],
-    category: 'design',
+    price: 160,
+    description:
+      "Ideal for growing businesses. Full-featured website with CMS integration, advanced SEO, and premium support.",
+    features: [
+      "10 Custom Pages",
+      "CMS Integration",
+      "Advanced SEO Package",
+      "Social Media Integration",
+      "Analytics Dashboard",
+      "3 Rounds of Revisions",
+      "Priority Support",
+    ],
+    category: "design",
     popular: true,
     period: "/project",
-    image: productImages.pro
-  },
-  {
-    id: "fs-max",
-    name: "Enterprise Web Application",
-    shadowName: "Web Design Enterprise",
-    price: 145,
-    description: "Full-scale custom web application for enterprises. Includes e-commerce capabilities, custom integrations, and dedicated support.",
-    features: ["Unlimited Pages", "E-commerce Ready", "Custom API Integration", "Database Design", "Cloud Architecture", "Ongoing Support", "Source Code Ownership"],
-    category: 'design',
-    period: "/project",
-    image: productImages.enterprise
-  },
-  {
-    id: "app-basic",
-    name: "Mobile App Development Basic",
-    shadowName: "Mobile App Development Basic",
-    price: 115,
-    description: "Custom mobile application development for iOS and Android. Perfect for startups and small businesses looking to establish a mobile presence.",
-    features: ["Cross-Platform App", "User Authentication", "Push Notifications", "Basic Analytics", "App Store Submission", "3 Months Support"],
-    category: 'design',
-    period: "/project",
-    image: productImages.dev
-  },
-  {
-    id: "app-pro",
-    name: "Mobile App Development Pro",
-    shadowName: "Mobile App Development Pro",
-    price: 125,
-    description: "Professional mobile application with advanced features, cloud storage integration, and premium performance optimization for demanding users.",
-    features: ["Native Performance", "Cloud Storage", "Offline Mode", "Advanced Analytics", "Payment Integration", "Priority Support", "1 Year Updates"],
-    category: 'design',
-    period: "/project",
-    image: productImages.dev
+    image: productImages.pro,
   },
 ];
 

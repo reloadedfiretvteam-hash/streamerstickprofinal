@@ -38,10 +38,10 @@ export default function OnnGoogleTv() {
         breadcrumbs={breadcrumbs}
       >
         <p className="text-sm text-gray-300 mb-5">
-          This page covers Onn 4K and Onn 4K Pro compatibility, setup steps, and what customers receive after checkout.
+          This page covers Onn Full HD (1080p) and Onn 4K Google TV compatibility, setup steps, and what customers receive after checkout.
         </p>
         <p className="text-gray-200 mb-6">
-          StreamStickPro supports Onn Google TV natively. Use your Onn 4K or Onn 4K Pro with Reloaded Fire TV, IPTV Smarters Pro, or TiviMate for a cleaner experience without dead-end app lists or Kodi rebuilds.
+          StreamStickPro supports Onn Google TV natively. Use your Onn Full HD or Onn 4K kit with Reloaded Fire TV, IPTV Smarters Pro, or TiviMate for a cleaner experience without dead-end app lists or Kodi rebuilds.
         </p>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
           <img src={getImageForSlot(ONN_IMAGES, 0).src} alt={getImageForSlot(ONN_IMAGES, 0).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
@@ -50,7 +50,7 @@ export default function OnnGoogleTv() {
         <ul className="list-disc list-inside text-gray-200 space-y-2 mb-6">
           <li>Google TV interface, often cheaper than Fire Stick</li>
           <li>Native app support - we support Onn out of the box with an all-in-one flow</li>
-          <li>DVR and storage on Onn Pro for recording</li>
+          <li>4K models include HDR and Dolby Audio for theater-like playback</li>
           <li>Instant credentials, tutorial video, and 24/7 help included</li>
         </ul>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
