@@ -1020,15 +1020,15 @@ export default function MainStore() {
             height={1080}
             decoding="async"
             fetchPriority="high"
-            className="absolute inset-0 h-full w-full object-cover object-[center_30%] sm:object-center scale-[1.06] sm:scale-100 opacity-[0.62] sm:opacity-[0.58] md:opacity-[0.54]"
+            className="absolute inset-0 h-full w-full object-cover object-[center_30%] sm:object-center scale-[1.06] sm:scale-100 opacity-[0.78] sm:opacity-[0.74] md:opacity-[0.70]"
             onError={(e) => {
               const el = e.currentTarget;
               if (el.src !== fallbackHeroImg) el.src = fallbackHeroImg;
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0F]/82 via-[#0A0A0F]/60 to-[#0A0A0F]/78" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0F]/62 via-transparent to-[#0A0A0F]/62" />
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDgpIi8+PC9nPjwvc3ZnPg==')] opacity-30" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0F]/68 via-[#0A0A0F]/42 to-[#0A0A0F]/62" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0F]/48 via-transparent to-[#0A0A0F]/48" />
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDgpIi8+PC9nPjwvc3ZnPg==')] opacity-20" />
         </div>
 
         <div className="container mx-auto px-4 sm:px-5 relative z-10 max-w-[100vw]">
