@@ -6,7 +6,7 @@
   },
   "hero": {
     "title": "Reloaded Fire TV Pricing",
-    "description": "Plans from $11/mo. 18K+ channels, 100K+ VOD. Fire Stick, Onn, Smart TV, Smarters Pro, TiviMate.",
+    "description": "Plans from $11/mo. ONN Google TV kits $150 Full HD / $160 4K. Smart TV, Smarters Pro, TiviMate.",
     "trialCtaLabel": "Start 36hr subscription trial",
     "trialCtaHref": "/36hr-trial"
   },
@@ -81,10 +81,10 @@
     "purpose": "WordPress-managed pricing page content plus Stripe Price ID overrides for checkout.",
     "instructions": [
       "Edit the title, description, plans, CTA labels, and FAQ here to control the /pricing page from WordPress.",
-      "Populate only verified Stripe Price IDs in the form price_... inside prices.shadow or prices.live.",
-      "Use real product IDs as keys for Stripe price overrides.",
-      "Leave shadow/live maps empty until the corresponding Stripe prices are confirmed.",
-      "The Worker will safely fall back to database-backed shadowPriceId values when these maps are empty."
+      "Populate only verified Stripe Price IDs (price_...) in prices.shadow (secure/cloaked host) or prices.live (public host).",
+      "Required keys for ONN hardware checkout: onn-google-hd ($150) and onn-google-4k ($160), unless you set Worker env STRIPE_PRICE_ONN_GOOGLE_HD / STRIPE_PRICE_ONN_GOOGLE_4K in Cloudflare (those override CMS + DB).",
+      "Legacy keys (fs-hd, fs-4k, etc.) only if you still accept old cart IDs.",
+      "The Worker falls back to Supabase shadow_price_id when maps and env overrides are empty."
     ]
   }
 }

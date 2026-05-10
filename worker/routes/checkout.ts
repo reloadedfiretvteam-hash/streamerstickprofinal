@@ -58,6 +58,49 @@ async function getCmsPriceOverrides(requestUrl: string): Promise<Record<string, 
   }
 }
 
+/**
+ * Dashboard/env Stripe Price IDs — highest priority for line items so $150 / $160 ONN kits charge correctly
+ * on streamstickpro.com and secure (cloaked) hosts without relying on WordPress JSON or DB alone.
+ */
+function getWorkerStripePriceOverrides(env: Env): Record<string, string> {
+  const out: Record<string, string> = {};
+  const put = (key: string, priceId: string) => {
+    const id = String(priceId || '').trim();
+    if (!key || !/^price_/i.test(id)) return;
+    out[key.trim()] = id;
+  };
+
+  const rawMap = String(env.STRIPE_PRICE_MAP_JSON || '').trim();
+  if (rawMap) {
+    try {
+      const j = JSON.parse(rawMap) as unknown;
+      if (j && typeof j === 'object') {
+        for (const [k, v] of Object.entries(j as Record<string, unknown>)) {
+          put(String(k), String(v ?? ''));
+        }
+      }
+    } catch {
+      /* ignore invalid JSON */
+    }
+  }
+
+  put('onn-google-hd', String(env.STRIPE_PRICE_ONN_GOOGLE_HD || ''));
+  put('onn-google-4k', String(env.STRIPE_PRICE_ONN_GOOGLE_4K || ''));
+
+  const hd = out['onn-google-hd'];
+  const k4 = out['onn-google-4k'];
+  if (hd) {
+    for (const alias of ['fs-hd', 'firestick-hd']) if (!out[alias]) out[alias] = hd;
+  }
+  if (k4) {
+    for (const alias of ['fs-4k', 'firestick-4k', 'android-onn-4k', 'android-onn-pro', 'fs-max', 'firestick-4k-max']) {
+      if (!out[alias]) out[alias] = k4;
+    }
+  }
+
+  return out;
+}
+
 export function createCheckoutRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
@@ -99,6 +142,7 @@ export function createCheckoutRoutes() {
 
       const activePromo = await storage.getActiveSitePromotion();
       const cmsPriceOverrides = await getCmsPriceOverrides(c.req.url);
+      const workerPriceOverrides = getWorkerStripePriceOverrides(c.env);
       type ResolvedLine = { product: any; quantity: number; stripePriceId: string; unitAmountCents: number };
       const productsWithQuantity: ResolvedLine[] = [];
 
@@ -112,6 +156,8 @@ export function createCheckoutRoutes() {
 
         const wantsPromo = item.applySitePromotion === true;
         let stripePriceId =
+          workerPriceOverrides[item.productId] ||
+          workerPriceOverrides[product.id] ||
           cmsPriceOverrides[item.productId] ||
           cmsPriceOverrides[product.id] ||
           product.shadowPriceId;
@@ -135,7 +181,15 @@ export function createCheckoutRoutes() {
           return c.json({ error: `Product not configured for checkout: ${item.productId}` }, 400);
         }
 
-        debugLog("Checkout: Resolved line:", product.name, "priceId:", stripePriceId, "promo:", wantsPromo && !!activePromo);
+        const priceSource =
+          wantsPromo && activePromo
+            ? 'site_promotion'
+            : workerPriceOverrides[item.productId] || workerPriceOverrides[product.id]
+              ? 'worker_env'
+              : cmsPriceOverrides[item.productId] || cmsPriceOverrides[product.id]
+                ? 'cms_pricing'
+                : 'database';
+        debugLog("Checkout: Resolved line:", product.name, "priceId:", stripePriceId, "source:", priceSource, "promo:", wantsPromo && !!activePromo);
         productsWithQuantity.push({ product, quantity: item.quantity, stripePriceId, unitAmountCents });
       }
 

@@ -24,6 +24,14 @@ export interface Env {
   STRIPE_SECRET_KEY: string;
   STRIPE_PUBLISHABLE_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
+  /**
+   * Optional: Stripe Price IDs for ONN hardware SKUs. When set, checkout uses these before
+   * WordPress CMS maps and before Supabase `shadow_price_id` — same behavior on main site and secure/cloaked host.
+   */
+  STRIPE_PRICE_ONN_GOOGLE_HD?: string;
+  STRIPE_PRICE_ONN_GOOGLE_4K?: string;
+  /** Optional JSON: `{ "real_product_id": "price_..." }` merged with the ONN vars above. */
+  STRIPE_PRICE_MAP_JSON?: string;
   RESEND_API_KEY: string;
   RESEND_FROM_EMAIL: string;
   /** New order alerts; defaults to built-in owner inbox if unset */

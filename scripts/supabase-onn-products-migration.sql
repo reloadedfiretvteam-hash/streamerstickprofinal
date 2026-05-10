@@ -27,9 +27,14 @@ ON CONFLICT (id) DO UPDATE SET
   category = EXCLUDED.category,
   image_url = EXCLUDED.image_url;
 
--- After Stripe prices exist:
+-- After Stripe prices exist ($15000 / $16000 USD one-time):
 -- UPDATE real_products SET shadow_price_id = 'price_XXXX150' WHERE id = 'onn-google-hd';
 -- UPDATE real_products SET shadow_price_id = 'price_XXXX160' WHERE id = 'onn-google-4k';
+--
+-- Recommended for instant correct checkout on BOTH main + cloaked (secure) domains: add Cloudflare Worker secrets:
+--   STRIPE_PRICE_ONN_GOOGLE_HD = price_...   (must be exactly $150.00 in Stripe)
+--   STRIPE_PRICE_ONN_GOOGLE_4K = price_...   (must be exactly $160.00 in Stripe)
+-- These override WordPress pricing JSON and Supabase shadow_price_id when set.
 
 -- Optional: stop selling Fire Stick SKUs (only when orders are fulfilled / migrated):
 -- DELETE FROM real_products WHERE id IN ('firestick-hd','firestick-4k','firestick-4k-max','fs-hd','fs-4k','fs-max','android-onn-4k','android-onn-pro');
