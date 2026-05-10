@@ -214,58 +214,6 @@ export default function Shop() {
     return hash;
   };
 
-  const socialProofSeed = useMemo(() => {
-    const timeBucket = Math.floor(Date.now() / (1000 * 60 * 20)); // refreshes every 20 min
-    let sessionSalt = 71;
-    if (typeof window !== "undefined") {
-      const key = "ssp-social-proof-salt";
-      const existing = window.sessionStorage.getItem(key);
-      if (existing) {
-        sessionSalt = Number(existing) || sessionSalt;
-      } else {
-        sessionSalt = 100 + Math.floor(Math.random() * 900);
-        window.sessionStorage.setItem(key, String(sessionSalt));
-      }
-    }
-    return timeBucket + sessionSalt;
-  }, []);
-
-  const countForKey = (key: string, base: number, spread: number) =>
-    base + (hashText(`${key}-${socialProofSeed}`) % spread);
-
-  // Stable for session bucket while still rotating realistically
-  const iptvViewCounts = useMemo(() => ({
-    "1mo": countForKey("iptv-1mo", 4, 8),
-    "3mo": countForKey("iptv-3mo", 5, 9),
-    "6mo": countForKey("iptv-6mo", 4, 10),
-    "1yr": countForKey("iptv-1yr", 6, 11),
-  }), [socialProofSeed]);
-
-  const firestickViewCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    defaultProducts.forEach((p, idx) => {
-      counts[p.id] = countForKey(`device-${p.id}-${idx}`, 3, 9);
-    });
-    return counts;
-  }, [socialProofSeed]);
-
-  const socialProofMessage = (type: "plan" | "device", key: string, count: number) => {
-    if (type === "plan") {
-      const options = [
-        `${count} people are checking this plan now`,
-        `${count} shoppers looked at this plan recently`,
-        `${count} people viewed this plan in the last hour`,
-      ];
-      return options[hashText(`plan-msg-${key}-${socialProofSeed}`) % options.length];
-    }
-    const options = [
-      `${count} people are viewing this right now`,
-      `${count} shoppers viewed this device recently`,
-      `${count} people checked this device in the last hour`,
-    ];
-    return options[hashText(`device-msg-${key}-${socialProofSeed}`) % options.length];
-  };
-
   const reviews = useMemo(() => [
     { name: "Marcus T.", text: "Setup was guided — no dead apps, streaming in minutes." },
     { name: "Elena R.", text: "Reloaded Fire TV saved me from the Kodi update grind." },
@@ -281,9 +229,8 @@ export default function Shop() {
     { name: "Carlos R.", text: "Got the ONN box for my bedroom TV. Same great experience as my Fire Stick." },
   ], []);
 
-  const reviewOffset = socialProofSeed % reviews.length;
   const pickReview = (key: string, fallbackIndex = 0) =>
-    reviews[(reviewOffset + fallbackIndex + (hashText(key) % reviews.length)) % reviews.length];
+    reviews[(fallbackIndex + hashText(key)) % reviews.length];
 
   useEffect(() => {
     document.documentElement.classList.remove("shadow-theme");
@@ -650,7 +597,6 @@ export default function Shop() {
                 const iptvDb = products.find((pp) => pp.id === selectedPrice.productId);
                 const linePriceDollars = iptvDb?.price ?? selectedPrice.price;
                 const recommendedPlan = BUYER_PROFILE_CONFIG[buyerProfile].planDuration === plan.duration;
-                const durationKey = plan.duration as keyof typeof iptvViewCounts;
                 const cardGradients = [
                   'from-slate-800 via-slate-900 to-gray-900',
                   'from-blue-950/50 via-slate-900 to-gray-900',
@@ -811,10 +757,6 @@ export default function Shop() {
                               <span className="text-blue-100 text-xs">{feature}</span>
                             </div>
                           ))}
-                          <div className="flex items-center gap-2 text-[11px] text-amber-200 font-semibold mt-2">
-                            <Star className="w-3 h-3" />
-                            {socialProofMessage("plan", durationKey, iptvViewCounts[durationKey])}
-                          </div>
                           <div className="text-[11px] text-gray-200 bg-white/5 border border-white/10 rounded-lg p-2 mt-2">
                             {(() => {
                               const r = pickReview(`iptv-${plan.duration}`, index);
@@ -1153,10 +1095,6 @@ export default function Shop() {
                             <span className="text-blue-100 text-sm">{feature}</span>
                           </div>
                         ))}
-                        <div className="flex items-center gap-2 text-xs text-amber-200 font-semibold">
-                          <Star className="w-4 h-4" />
-                          {socialProofMessage("device", product.id, firestickViewCounts[product.id] || countForKey(`device-fallback-${product.id}`, 3, 9))}
-                        </div>
                         <div className="text-xs text-gray-200 bg-white/5 border border-white/10 rounded-lg p-3">
                           {(() => {
                             const r = pickReview(`device-${product.id}`, index + 4);
