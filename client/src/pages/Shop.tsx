@@ -109,6 +109,8 @@ const iptvPricingMatrix: IPTVPricing[] = [
   },
 ];
 
+const ONN_GOOGLE_DEVICE_ORDER = ["onn-google-hd", "onn-google-4k"] as const;
+
 const defaultProducts: Product[] = [
   {
     id: "onn-google-hd",
@@ -376,7 +378,29 @@ export default function Shop() {
               p.id === 'iptv-3mo',
           };
         });
-        setProducts(mappedProducts);
+
+        const iptvOnly = mappedProducts.filter((p) => p.category === "iptv");
+        const onnMerged: Product[] = ONN_GOOGLE_DEVICE_ORDER.map((id) => {
+          const api = mappedProducts.find((p) => p.id === id);
+          const base = defaultProducts.find((p) => p.id === id)!;
+          const price = id === "onn-google-hd" ? 150 : 160;
+          return {
+            ...base,
+            ...(api
+              ? {
+                  name: api.name || base.name,
+                  description: api.description || base.description,
+                }
+              : {}),
+            image: id === "onn-google-hd" ? onnHdImg : onn4kImg,
+            price,
+            category: "firestick",
+            features: api?.features?.length ? api.features : base.features,
+            badge: api?.badge || base.badge,
+            popular: api?.popular ?? base.popular,
+          };
+        });
+        setProducts([...onnMerged, ...iptvOnly]);
       }
     } catch (error) {
       console.warn('Using default products:', error);
@@ -423,11 +447,8 @@ export default function Shop() {
 
   const firestickProducts = products.filter(p => p.category === 'firestick');
 
-  const getDeviceTier = (id: string): "hd" | "4k" => {
-    const k = id.toLowerCase();
-    if (k.includes("onn-google-hd") || k.endsWith("-hd") || k.includes("firestick-hd")) return "hd";
-    return "4k";
-  };
+  const getDeviceTier = (id: string): "hd" | "4k" =>
+    id === "onn-google-hd" ? "hd" : "4k";
 
   const getDeviceBestFor = (id: string): string => {
     const tier = getDeviceTier(id);
@@ -437,8 +458,8 @@ export default function Shop() {
 
   const getRecommendedDeviceElement = (tier: "hd" | "4k"): HTMLElement | null => {
     const idsByTier: Record<"hd" | "4k", string[]> = {
-      hd: ["onn-google-hd", "firestick-hd", "fs-hd"],
-      "4k": ["onn-google-4k", "firestick-4k", "fs-4k", "firestick-4k-max", "fs-max"],
+      hd: ["onn-google-hd"],
+      "4k": ["onn-google-4k"],
     };
     for (const id of idsByTier[tier]) {
       const el = document.querySelector(`[data-testid="card-product-${id}"]`) as HTMLElement | null;
@@ -489,10 +510,6 @@ export default function Shop() {
       ...prev,
       "onn-google-hd": config.deviceTier === "hd" ? config.deviceQty : 1,
       "onn-google-4k": config.deviceTier === "4k" ? config.deviceQty : 1,
-      "firestick-hd": config.deviceTier === "hd" ? config.deviceQty : 1,
-      "firestick-4k": config.deviceTier === "4k" ? config.deviceQty : 1,
-      "fs-hd": config.deviceTier === "hd" ? config.deviceQty : 1,
-      "fs-4k": config.deviceTier === "4k" ? config.deviceQty : 1,
     }));
     focusRecommendedCards(config);
   };
@@ -978,9 +995,8 @@ export default function Shop() {
                         height={224}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          if (target.src !== onn4kImg) {
-                            target.src = onn4kImg;
-                          }
+                          const fb = product.id === "onn-google-hd" ? onnHdImg : onn4kImg;
+                          if (target.src !== fb) target.src = fb;
                         }}
                       />
                       <div className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-full font-bold text-sm shadow-lg ${
@@ -990,7 +1006,7 @@ export default function Shop() {
                       }`}>
                         {product.badge}
                       </div>
-                      {(product.id === 'onn-google-4k' || product.id === 'fs-4k') && (
+                      {(product.id === "onn-google-hd" || product.id === "onn-google-4k") && (
                         <div className="absolute top-4 left-4 z-20 bg-green-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-lg">
                           1 YEAR INCLUDED
                         </div>

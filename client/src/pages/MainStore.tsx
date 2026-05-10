@@ -143,6 +143,9 @@ const iptvPricingMatrix: IPTVPricing[] = [
 
 const deviceCatalogNote = "Same listed price per device at checkout";
 
+/** Hardware rows shown on the homepage — ONN Google TV kits only (never legacy Fire TV SKUs from API). */
+const ONN_GOOGLE_DEVICE_ORDER = ["onn-google-hd", "onn-google-4k"] as const;
+
 const defaultProducts: Product[] = [
   {
     id: "onn-google-hd",
@@ -457,7 +460,7 @@ export default function MainStore() {
     "6mo": 1,
     "1yr": 1,
   });
-  /** Keys must match `product.id` from /api/products (e.g. fs-4k). Old firestick-* keys broke qty UI after API load. */
+  /** Quantity per ONN kit id (`onn-google-hd` / `onn-google-4k`). */
   const [firestickQuantities, setFirestickQuantities] = useState<Record<string, number>>({});
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -744,7 +747,31 @@ export default function MainStore() {
             period: isDeviceBundle ? undefined : defaultPeriod
           };
         });
-        setProducts(mappedProducts);
+
+        const iptvOnly = mappedProducts.filter((p) => p.category === "iptv");
+        const onnMerged: Product[] = ONN_GOOGLE_DEVICE_ORDER.map((id) => {
+          const api = mappedProducts.find((p) => p.id === id);
+          const base = defaultProducts.find((p) => p.id === id)!;
+          const price = id === "onn-google-hd" ? 150 : 160;
+          return {
+            ...base,
+            ...(api
+              ? {
+                  name: api.name || base.name,
+                  description: api.description || base.description,
+                  cardPromoLabel: api.cardPromoLabel,
+                }
+              : {}),
+            image: id === "onn-google-hd" ? onnHdImg : onn4kImg,
+            price,
+            regularListPrice: undefined,
+            category: "firestick",
+            features: api?.features?.length ? api.features : base.features,
+            badge: api?.badge || base.badge,
+            popular: api?.popular ?? base.popular,
+          };
+        });
+        setProducts([...onnMerged, ...iptvOnly]);
       }
     } catch (error) {
       console.warn('Using default products:', error);
@@ -993,14 +1020,14 @@ export default function MainStore() {
             height={1080}
             decoding="async"
             fetchPriority="high"
-            className="absolute inset-0 h-full w-full object-cover object-[center_30%] sm:object-center scale-[1.06] sm:scale-100 opacity-[0.44] sm:opacity-[0.40] md:opacity-[0.36]"
+            className="absolute inset-0 h-full w-full object-cover object-[center_30%] sm:object-center scale-[1.06] sm:scale-100 opacity-[0.62] sm:opacity-[0.58] md:opacity-[0.54]"
             onError={(e) => {
               const el = e.currentTarget;
               if (el.src !== fallbackHeroImg) el.src = fallbackHeroImg;
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0F]/90 via-[#0A0A0F]/72 to-[#0A0A0F]/88" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0F]/78 via-transparent to-[#0A0A0F]/78" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0F]/82 via-[#0A0A0F]/60 to-[#0A0A0F]/78" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0F]/62 via-transparent to-[#0A0A0F]/62" />
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDgpIi8+PC9nPjwvc3ZnPg==')] opacity-30" />
         </div>
 
@@ -1549,9 +1576,8 @@ export default function MainStore() {
                         height={224}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          if (target.src !== onn4kImg) {
-                            target.src = onn4kImg;
-                          }
+                          const fb = product.id === "onn-google-hd" ? onnHdImg : onn4kImg;
+                          if (target.src !== fb) target.src = fb;
                         }}
                       />
                       <div className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-full font-bold text-sm shadow-lg ${
@@ -1566,7 +1592,7 @@ export default function MainStore() {
                           {product.cardPromoLabel}
                         </div>
                       ) : null}
-                      {(product.id === 'onn-google-4k' || product.id === 'fs-4k') && (
+                      {(product.id === "onn-google-hd" || product.id === "onn-google-4k") && (
                         <div className={`absolute ${product.cardPromoLabel ? 'top-14' : 'top-4'} left-4 z-20 bg-green-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-lg`}>
                           1 YEAR INCLUDED
                         </div>
@@ -2167,7 +2193,7 @@ export default function MainStore() {
                 title: "Choose Your Device", 
                 description: "Choose ONN Full HD ($150) or ONN 4K ($160). All kits include clear setup guidance.",
                 icon: "📱",
-                image: "firestick-device-selection.jpg"
+                imageSrc: onnHdImg,
               },
               { 
                 step: "2", 
@@ -2205,17 +2231,25 @@ export default function MainStore() {
                 </div>
                 <h3 className="text-xl font-black text-white mb-3">{item.title}</h3>
                 <p className="text-gray-200 leading-relaxed">{item.description}</p>
-                {/* Image loads from Supabase when uploaded */}
+                {/* Step 1 uses local ONN kit art; other steps use Supabase bucket when present */}
                 <div className="mt-6 h-32 bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl flex items-center justify-center border border-gray-600/30 overflow-hidden">
                   <img 
-                    src={`https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/${item.image}`}
+                    src={
+                      "imageSrc" in item && typeof item.imageSrc === "string"
+                        ? item.imageSrc
+                        : `${SUPABASE_BASE}/${(item as { image: string }).image}`
+                    }
                     alt={item.title}
                     className="w-full h-full object-cover opacity-50 hover:opacity-100 transition-opacity"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
                       if (target.parentElement) {
-                        target.parentElement.innerHTML = `<span class="text-gray-400 text-xs text-center px-4">Upload image: ${item.image}</span>`;
+                        const hint =
+                          "imageSrc" in item && typeof item.imageSrc === "string"
+                            ? item.imageSrc
+                            : (item as { image: string }).image;
+                        target.parentElement.innerHTML = `<span class="text-gray-400 text-xs text-center px-4">Upload image: ${hint}</span>`;
                       }
                     }}
                   />
