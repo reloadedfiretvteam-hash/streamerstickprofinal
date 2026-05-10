@@ -1592,7 +1592,7 @@ export default function MainStore() {
                         alt={product.name}
                         className={`w-full h-full object-cover transition-transform duration-700 ${
                           product.id === "onn-google-hd" || product.id === "onn-google-4k"
-                            ? "object-[center_16%] scale-[1.14] sm:object-[center_14%] sm:scale-[1.12] group-hover:scale-[1.2] sm:group-hover:scale-[1.18]"
+                            ? "object-[center_58%] sm:object-[center_55%] group-hover:scale-[1.04]"
                             : "object-center group-hover:scale-110"
                         }`}
                         loading="lazy"
@@ -1606,17 +1606,19 @@ export default function MainStore() {
                       />
                       {(product.id === "onn-google-hd" || product.id === "onn-google-4k") && (
                         <>
+                          {/* Thin footer mask only—hides retail banner text (e.g. fee claims), keeps device visible */}
                           <div
-                            className="absolute inset-x-0 bottom-0 z-[12] h-[46%] bg-gradient-to-t from-gray-950 from-35% via-gray-950/92 to-transparent pointer-events-none"
+                            className="absolute inset-x-0 bottom-0 z-[12] h-[18%] max-h-[4.25rem] bg-gradient-to-t from-gray-950 via-gray-950/88 to-transparent pointer-events-none sm:h-[15%] sm:max-h-[3.75rem]"
                             aria-hidden
                           />
-                          <div className="absolute inset-x-0 bottom-0 z-[13] h-[30%] bg-gray-950 pointer-events-none" aria-hidden />
-                          <div className="absolute bottom-2.5 left-0 right-0 z-[14] flex justify-center px-3 pointer-events-none">
-                            <span className="text-[11px] sm:text-xs font-bold text-white text-center leading-snug bg-black/80 border border-white/20 rounded-lg px-3 py-2 max-w-[96%] shadow-lg">
-                              {product.id === "onn-google-hd"
-                                ? "ONN Full HD Google TV kit"
-                                : "ONN 4K Google TV kit"}
-                              <span className="text-gray-300 font-semibold"> · 1 Year Live TV included</span>
+                          <div
+                            className="absolute inset-x-0 bottom-0 z-[13] h-[11%] max-h-[2.6rem] bg-gray-950 pointer-events-none sm:h-[9%] sm:max-h-[2.35rem]"
+                            aria-hidden
+                          />
+                          <div className="absolute bottom-1 left-0 right-0 z-[14] flex justify-center px-2 pointer-events-none">
+                            <span className="text-[10px] sm:text-[11px] font-bold text-white text-center leading-tight bg-black/85 border border-white/15 rounded-md px-2.5 py-1 max-w-[98%] shadow-md">
+                              {product.id === "onn-google-hd" ? "ONN Full HD kit" : "ONN 4K kit"}
+                              <span className="text-gray-300 font-semibold"> · 1 Yr Live TV</span>
                             </span>
                           </div>
                         </>
@@ -1641,11 +1643,7 @@ export default function MainStore() {
                       <QuickViewButton onClick={() => openQuickView(product)} />
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleWishlistItem(product); }}
-                        className={`absolute z-30 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 left-4 ${
-                          product.id === "onn-google-hd" || product.id === "onn-google-4k"
-                            ? "bottom-[5.25rem] sm:bottom-[5.5rem]"
-                            : "bottom-4"
-                        } ${
+                        className={`absolute z-30 bottom-4 left-4 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
                           isInWishlist(product.id) 
                             ? 'bg-red-500 text-white shadow-lg shadow-red-500/50' 
                             : 'bg-white/90 text-gray-700 hover:bg-red-500 hover:text-white'

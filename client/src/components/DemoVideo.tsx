@@ -1,10 +1,16 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Play, Pause, Volume2, VolumeX, Maximize, Tv, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
-/** Add your “what you get” screenshot as `client/public/images/example-video-cover.png`. */
-const preferredPoster = "/images/example-video-cover.png";
+/** Prefer your IPTV screenshot; falls back to kit art then site image. Drop files under `client/public/images/`. */
+const POSTER_CANDIDATES = [
+  "/images/example-video-cover.png",
+  "/images/example-video-cover.jpg",
+  "/images/example-video-cover.webp",
+  "/images/onn-full-hd-google-tv.webp",
+  "/images/onn-4k-google-tv.jpg",
+];
 const fallbackPoster = `/opengraph.jpg`;
 const demoVideoSrc = `${SUPABASE_BASE}/demo-video.mp4`;
 
@@ -12,8 +18,33 @@ export function DemoVideo() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  const [posterSrc, setPosterSrc] = useState(preferredPoster);
+  const [posterSrc, setPosterSrc] = useState(POSTER_CANDIDATES[0] ?? fallbackPoster);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const pickPoster = async () => {
+      for (const src of POSTER_CANDIDATES) {
+        if (cancelled) return;
+        const ok = await new Promise<boolean>((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = src;
+        });
+        if (cancelled) return;
+        if (ok) {
+          setPosterSrc(src);
+          return;
+        }
+      }
+      if (!cancelled) setPosterSrc(fallbackPoster);
+    };
+    pickPoster();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -95,7 +126,7 @@ export function DemoVideo() {
             </video>
             
             {!isPlaying && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-tr from-[#0A0A0F]/80 via-black/45 to-[#1A1A22]/70">
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-tr from-[#0A0A0F]/45 via-black/25 to-[#1A1A22]/50">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-25"></div>
                 
                 <motion.div 
