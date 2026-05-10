@@ -1,9 +1,10 @@
 import { useState, useRef } from "react";
-import { Play, Pause, Volume2, VolumeX, Maximize, Tv, Zap, Star } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Maximize, Tv, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
-const preferredPoster = "/images/reloaded-firetv-guide-cover.png"; // place provided cover image here
+/** Add your “what you get” screenshot as `client/public/images/example-video-cover.png`. */
+const preferredPoster = "/images/example-video-cover.png";
 const fallbackPoster = `/opengraph.jpg`;
 const demoVideoSrc = `${SUPABASE_BASE}/demo-video.mp4`;
 
@@ -54,15 +55,15 @@ export function DemoVideo() {
         >
           <div className="inline-flex items-center gap-2 bg-[#7C3AED]/20 backdrop-blur-sm border border-[#7C3AED]/30 rounded-full px-6 py-2 mb-6">
             <Tv className="w-5 h-5 text-[#00D4FF]" />
-            <span className="text-sm font-medium text-[#D9CCFF]">SEE RELOADED FIRE TV IN ACTION</span>
+            <span className="text-sm font-medium text-[#D9CCFF]">WHAT YOU GET</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] via-[#7C3AED] to-[#10F7BE]">
-              Watch the Setup Walkthrough
+              Example video.
             </span>
           </h2>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            This preview shows Reloaded Fire TV in action and the overall setup flow. After purchase, customers receive a separate device-specific tutorial video by email with the exact steps for their order.
+            This isn&apos;t a generic promo—it&apos;s a real look at what you get: the live TV player, categories, channel list, preview window, and guide-style layout. After you order, you still get a separate device-specific setup tutorial by email for your exact kit.
           </p>
         </motion.div>
         
@@ -117,16 +118,16 @@ export function DemoVideo() {
                       <Zap className="w-5 h-5 text-white" />
                     </div>
                     <div className="text-left">
-                      <p className="text-white font-bold text-lg">Reloaded Fire TV preview</p>
-                      <p className="text-sm text-gray-300">Service demo + setup overview before the emailed tutorial</p>
+                      <p className="text-white font-bold text-lg">What you get</p>
+                      <p className="text-sm text-gray-300">Actual player interface—browse categories, channels, and watch the preview pane</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-300">
-                    <span>Educational Tutorial</span>
-                    <span>•</span>
-                    <span>Easy Setup</span>
-                    <span>•</span>
-                    <span>All-in-One App</span>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-300">
+                    <span>Live TV player</span>
+                    <span className="hidden sm:inline">•</span>
+                    <span>Channel guide</span>
+                    <span className="hidden sm:inline">•</span>
+                    <span>Real interface</span>
                   </div>
                 </div>
               </div>
