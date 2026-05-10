@@ -66,6 +66,16 @@ jobs:
           if [ -n "${{ secrets.STRIPE_WEBHOOK_SECRET }}" ]; then
             echo "${{ secrets.STRIPE_WEBHOOK_SECRET }}" | npx wrangler pages secret put STRIPE_WEBHOOK_SECRET --project-name=streamerstickpro-live
           fi
+          # ONN kit Stripe Price IDs ($150 / $160 one-time) — optional; checkout uses these before CMS + DB when set.
+          if [ -n "${{ secrets.STRIPE_PRICE_ONN_GOOGLE_HD }}" ]; then
+            echo "${{ secrets.STRIPE_PRICE_ONN_GOOGLE_HD }}" | npx wrangler pages secret put STRIPE_PRICE_ONN_GOOGLE_HD --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.STRIPE_PRICE_ONN_GOOGLE_4K }}" ]; then
+            echo "${{ secrets.STRIPE_PRICE_ONN_GOOGLE_4K }}" | npx wrangler pages secret put STRIPE_PRICE_ONN_GOOGLE_4K --project-name=streamerstickpro-live
+          fi
+          if [ -n "${{ secrets.STRIPE_PRICE_MAP_JSON }}" ]; then
+            echo "${{ secrets.STRIPE_PRICE_MAP_JSON }}" | npx wrangler pages secret put STRIPE_PRICE_MAP_JSON --project-name=streamerstickpro-live
+          fi
           if [ -n "${{ secrets.SUPABASE_SERVICE_KEY }}" ]; then
             echo "${{ secrets.SUPABASE_SERVICE_KEY }}" | npx wrangler pages secret put SUPABASE_SERVICE_KEY --project-name=streamerstickpro-live
           fi
