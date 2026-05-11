@@ -960,6 +960,7 @@ export default function MainStore() {
             </Link>
             <Link href="/shop"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Shop</span></Link>
             <Link href="/onn"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">ONN</span></Link>
+            <Link href="/drive-of-the-south"><span className="hidden lg:inline px-2 py-1.5 text-sm text-amber-200/95 hover:text-amber-100 hover:bg-white/5 rounded font-medium">Drive South</span></Link>
             <Link href="/iptv-media-players"><span className="hidden xl:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Media</span></Link>
             <Link href="/tutorials"><span className="hidden xl:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Tutorials</span></Link>
             <Link href="/locations"><span className="hidden xl:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Locations</span></Link>
@@ -1975,6 +1976,7 @@ export default function MainStore() {
             <Link href="/onn"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">ONN setup</span></Link>
             <Link href="/iptv-media-players"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV Media Players</span></Link>
             <Link href="/bundles"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Bundles</span></Link>
+            <Link href="/drive-of-the-south"><span className="px-4 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/35 hover:border-amber-300/50 text-amber-100 hover:text-white font-medium transition-colors">Drive of the South</span></Link>
           </div>
         </div>
       </div>

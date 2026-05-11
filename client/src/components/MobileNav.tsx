@@ -16,6 +16,7 @@ import {
   Gift,
   PlayCircle,
   Smartphone,
+  Navigation,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,7 @@ export function MobileNav({ scrollToShop, scrollToFaq, scrollToAbout, onSupportC
     { label: "Shop plans & devices", icon: ShoppingCart, action: () => navigateToSection("shop") },
     { label: "Loaded devices", icon: Tv, action: () => { setLocation("/devices"); } },
     { label: "ONN Google TV", icon: Smartphone, action: () => { setLocation("/onn"); } },
+    { label: "Drive of the South", icon: Navigation, action: () => { setLocation("/drive-of-the-south"); } },
     { label: "Reloaded Fire TV", icon: Wifi, action: () => { setLocation("/iptv"); } },
     { label: "Bundles", icon: Package, action: () => { setLocation("/bundles"); } },
     {

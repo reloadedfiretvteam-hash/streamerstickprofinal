@@ -477,6 +477,7 @@ function generateSitemap(posts: BlogPost[]): string {
     { url: "/jailbroken-fire-sticks", priority: "0.9", changefreq: "monthly" },
     { url: "/firestick-devices", priority: "0.9", changefreq: "monthly" },
     { url: "/onn-google-tv", priority: "0.8", changefreq: "monthly" },
+    { url: "/drive-of-the-south", priority: "0.85", changefreq: "weekly" },
     { url: "/iptv-media-players", priority: "0.8", changefreq: "monthly" },
     { url: "/tivimate", priority: "0.8", changefreq: "monthly" },
     { url: "/iptv-smarters-pro", priority: "0.8", changefreq: "monthly" },

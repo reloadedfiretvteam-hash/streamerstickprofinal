@@ -64,6 +64,7 @@ export function PillarLayout({ title, description, breadcrumbs, children }: Pill
               <Link href="/locations"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Locations</span></Link>
               <Link href="/blog"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Blog</span></Link>
               <Link href="/shop"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Shop</span></Link>
+              <Link href="/drive-of-the-south"><span className="px-2 py-1 text-sm text-amber-200/90 hover:text-amber-100">Drive South</span></Link>
             </div>
           </div>
           <Button onClick={openCart} className="bg-orange-500 hover:bg-orange-600 text-white">

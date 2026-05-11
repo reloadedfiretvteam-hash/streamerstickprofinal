@@ -23,7 +23,7 @@ const NODES: SeoPillarNode[] = [
       "reloaded fire tv channels",
     ],
     intent: "commercial",
-    linksTo: ["/devices", "/bundles", "/setup", "/iptv-firestick", "/iptv-media-players", "/pricing", "/36hr-trial", "/blog", "/shop"],
+    linksTo: ["/devices", "/bundles", "/setup", "/iptv-firestick", "/iptv-media-players", "/pricing", "/36hr-trial", "/blog", "/shop", "/drive-of-the-south"],
   },
   {
     path: "/iptv-firestick",
@@ -66,6 +66,20 @@ const NODES: SeoPillarNode[] = [
     ],
     intent: "commercial",
     linksTo: ["/iptv-media-players", "/iptv", "/iptv-firestick", "/36hr-trial", "/shop"],
+  },
+  {
+    path: "/drive-of-the-south",
+    title: "Drive of the South",
+    primaryKeyword: "southern live tv streaming",
+    supportKeywords: [
+      "iptv southern states",
+      "college football streaming fire stick",
+      "cord cutting south",
+      "reloaded fire tv usa south",
+      "onn google tv southern households",
+    ],
+    intent: "commercial",
+    linksTo: ["/shop", "/36hr-trial", "/vpn", "/onn-google-tv", "/iptv", "/locations"],
   },
   {
     path: "/iptv-media-players",
@@ -192,7 +206,7 @@ const NODES: SeoPillarNode[] = [
       "reloaded fire tv plan checkout",
     ],
     intent: "transactional",
-    linksTo: ["/pricing", "/bundles", "/36hr-trial", "/iptv", "/devices", "/setup", "/onn-google-tv"],
+    linksTo: ["/pricing", "/bundles", "/36hr-trial", "/iptv", "/devices", "/setup", "/onn-google-tv", "/drive-of-the-south"],
   },
   {
     path: "/blog",
