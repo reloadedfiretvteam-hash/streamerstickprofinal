@@ -38,7 +38,6 @@ const Resources = lazy(() => import("@/pages/Resources"));
 const Trial36hr = lazy(() => import("@/pages/Trial36hr"));
 const Pricing = lazy(() => import("@/pages/Pricing"));
 const OnnGoogleTv = lazy(() => import("@/pages/OnnGoogleTv"));
-const DriveOfTheSouth = lazy(() => import("@/pages/DriveOfTheSouth"));
 const IptvSmartersPro = lazy(() => import("@/pages/IptvSmartersPro"));
 const Tivimate = lazy(() => import("@/pages/Tivimate"));
 const VsCompetitor = lazy(() => import("@/pages/VsCompetitor"));
@@ -123,8 +122,6 @@ function Router() {
         <Route path="/36hr-trial" component={Trial36hr} />
         <Route path="/pricing" component={Pricing} />
         <Route path="/onn-google-tv" component={OnnGoogleTv} />
-        <Route path="/drive-of-the-south" component={DriveOfTheSouth} />
-        <Route path="/drive" component={DriveOfTheSouth} />
         <Route path="/iptv-smarters-pro" component={IptvSmartersPro} />
         <Route path="/tivimate" component={Tivimate} />
         <Route path="/vs-:competitor" component={VsCompetitor} />
