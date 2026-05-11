@@ -61,7 +61,8 @@ import {
   Navigation,
   Percent,
   Download,
-  DollarSign
+  DollarSign,
+  Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -2637,6 +2638,19 @@ export default function AdminPanel() {
             <Palette className="w-4 h-4 mr-3" /> Visual Editor
           </Button>
           <Button 
+            variant={activeSection === "homepage-hq" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => {
+              setActiveSection("homepage-hq");
+              loadPageEdits();
+              loadWordPressCmsStatus();
+              loadPaymentHealth();
+            }}
+            data-testid="nav-homepage-hq"
+          >
+            <Home className="w-4 h-4 mr-3" /> Homepage HQ
+          </Button>
+          <Button 
             variant={activeSection === "wordpress-cms" ? "secondary" : "ghost"} 
             className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
             onClick={() => { setActiveSection("wordpress-cms"); loadWordPressCmsStatus(); }}
@@ -4311,6 +4325,217 @@ export default function AdminPanel() {
               </Tabs>
               </>
               ) : null}
+            </div>
+          )}
+
+          {activeSection === "homepage-hq" && (
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-3xl font-bold flex items-center gap-3">
+                  <Home className="w-8 h-8 text-orange-500" />
+                  Homepage HQ
+                </h2>
+                <p className="text-gray-400 mt-1 max-w-3xl">
+                  One place to see how your homepage is built: WordPress supplies the base JSON, Supabase{" "}
+                  <code className="text-gray-300">page_edits</code> layer on quick text and image tweaks, product
+                  prices flow from Supabase into Stripe at checkout, and secure / cloaked hosts read{" "}
+                  <code className="text-gray-300">prices.shadow</code> from WordPress so labels stay in sync. GitHub
+                  is only required when you change app code—not for day-to-day copy or admin pricing.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Badge className={envStatus?.hasStripeKey ? "bg-emerald-600" : "bg-red-600"}>
+                  Stripe {envStatus?.hasStripeKey ? "key OK" : "check env"}
+                </Badge>
+                <Badge className={envStatus?.hasSupabaseKey ? "bg-emerald-600" : "bg-amber-600"}>
+                  Supabase {envStatus?.hasSupabaseKey ? "service OK" : "anon / check"}
+                </Badge>
+                <Badge className={wordpressCmsStatus ? "bg-emerald-600" : "bg-gray-600"}>
+                  WordPress CMS {wordpressCmsStatus ? "reachable" : "not verified"}
+                </Badge>
+                <Badge variant="outline" className="border-gray-500 text-gray-300">
+                  Active home overrides: {pageEdits.filter((e) => e.pageId === "main" && e.isActive).length}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-sky-400" />
+                      WordPress (base homepage JSON)
+                    </CardTitle>
+                    <CardDescription className="text-gray-400">
+                      Hero, FAQ, trust copy, and structure. Updates the public <code className="text-gray-300">/api/cms/home</code>{" "}
+                      payload after cache (~5 min).
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      className="w-full bg-sky-600 hover:bg-sky-700"
+                      onClick={() => {
+                        setActiveSection("wordpress-cms");
+                        loadWordPressCmsStatus();
+                      }}
+                    >
+                      Open WordPress Headless
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Palette className="w-5 h-5 text-pink-400" />
+                      Supabase overrides (no deploy)
+                    </CardTitle>
+                    <CardDescription className="text-gray-400">
+                      Visual Editor writes <code className="text-gray-300">page_edits</code>. The storefront merges them on load via{" "}
+                      <code className="text-gray-300">/api/cms/page-overrides</code> (~2 min cache).
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                      onClick={() => setActiveSection("visual-editor")}
+                    >
+                      Open Visual Editor
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <DollarSign className="w-5 h-5 text-green-400" />
+                      Checkout pricing (Supabase + Stripe)
+                    </CardTitle>
+                    <CardDescription className="text-gray-400">
+                      Cart amounts use <code className="text-gray-300">real_products</code> and live Stripe prices. Changing a price in
+                      Products creates a new Stripe price so checkout matches the admin grid.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <Button
+                      className="w-full bg-green-600 hover:bg-green-700"
+                      onClick={() => {
+                        setActiveSection("products");
+                        if (!products.length) loadProducts();
+                      }}
+                    >
+                      Products & quick price grid
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full border-gray-600 text-gray-200"
+                      onClick={() => {
+                        setActiveSection("dashboard");
+                        loadPaymentHealth();
+                      }}
+                    >
+                      Payment health (dashboard)
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Lock className="w-5 h-5 text-amber-400" />
+                      Cloaked / secure storefront (MyClo-style host)
+                    </CardTitle>
+                    <CardDescription className="text-gray-400">
+                      On secure hostnames, the app uses WordPress <code className="text-gray-300">prices.shadow</code> for IPTV tier
+                      labels and maps. Keep shadow amounts aligned with what you sell in Products, or update both WordPress pricing JSON
+                      and Supabase when you run parallel funnels.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      variant="outline"
+                      className="w-full border-amber-700 text-amber-100"
+                      onClick={() => {
+                        setActiveSection("wordpress-cms");
+                        loadWordPressCmsStatus();
+                      }}
+                    >
+                      Edit pricing JSON in WordPress
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gray-800 border-gray-700 md:col-span-2">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Github className="w-5 h-5 text-purple-400" />
+                      GitHub & deploy
+                    </CardTitle>
+                    <CardDescription className="text-gray-400">
+                      Pushes code to your repo (e.g. Cloudflare Pages). Not needed for CMS-only or Visual Editor changes.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      variant="outline"
+                      className="border-gray-600 text-gray-200"
+                      onClick={() => {
+                        setActiveSection("github");
+                        loadGithubStatus();
+                      }}
+                    >
+                      Open GitHub Deploy
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Visual Editor field map (pageId = main)</CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Use <strong className="text-gray-200">section ID</strong> + <strong className="text-gray-200">element ID</strong>, or a
+                    single dotted <code className="text-gray-300">elementId</code> such as <code className="text-gray-300">hero.title</code>.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-gray-700 hover:bg-transparent">
+                        <TableHead className="text-gray-300">Section</TableHead>
+                        <TableHead className="text-gray-300">Element</TableHead>
+                        <TableHead className="text-gray-300">Type</TableHead>
+                        <TableHead className="text-gray-300">Effect</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {[
+                        ["hero", "title", "text", "Hero headline"],
+                        ["hero", "subtitle", "text", "Hero subhead"],
+                        ["hero", "proofline", "text", "Proof line under hero"],
+                        ["hero", "backgroundImageUrl", "image", "Hero background URL"],
+                        ["meta", "title", "text", "Browser tab title / SEO title"],
+                        ["meta", "description", "text", "Meta description"],
+                        ["meta", "keywords", "text", "Meta keywords"],
+                        ["trustBar", "text", "text", "Trust strip line"],
+                        ["disclaimer", "text", "text", "Disclaimer paragraph"],
+                        ["faq", "title", "text", "FAQ section title"],
+                        ["support", "email", "text", "Support email"],
+                        ["whyChoose", "title", "text", "Why choose title"],
+                        ["deviceSupport", "title", "text", "Device support title"],
+                        ["visualBenefits", "title / subtitle", "text", "Benefits heading or subhead"],
+                      ].map(([sec, el, typ, note]) => (
+                        <TableRow key={`${sec}-${el}`} className="border-gray-700">
+                          <TableCell className="font-mono text-xs text-sky-300">{sec}</TableCell>
+                          <TableCell className="font-mono text-xs text-pink-300">{el}</TableCell>
+                          <TableCell className="text-gray-400 text-sm">{typ}</TableCell>
+                          <TableCell className="text-gray-300 text-sm">{note}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
             </div>
           )}
 
@@ -7761,6 +7986,49 @@ export default function AdminPanel() {
                       <option value="button">Button</option>
                       <option value="image">Image</option>
                     </select>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 mb-2">Quick fields (homepage main)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(
+                      [
+                        { label: "Hero title", patch: { sectionId: "hero", elementId: "title", elementType: "text" as const } },
+                        { label: "Hero subtitle", patch: { sectionId: "hero", elementId: "subtitle", elementType: "text" as const } },
+                        { label: "Hero proof", patch: { sectionId: "hero", elementId: "proofline", elementType: "text" as const } },
+                        { label: "Hero bg image", patch: { sectionId: "hero", elementId: "backgroundImageUrl", elementType: "image" as const } },
+                        { label: "SEO title", patch: { sectionId: "meta", elementId: "title", elementType: "text" as const } },
+                        { label: "SEO description", patch: { sectionId: "meta", elementId: "description", elementType: "text" as const } },
+                        { label: "Trust bar", patch: { sectionId: "trustBar", elementId: "text", elementType: "text" as const } },
+                        { label: "FAQ title", patch: { sectionId: "faq", elementId: "title", elementType: "text" as const } },
+                      ] as const
+                    ).map((row) => (
+                      <Button
+                        key={row.label}
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="border-gray-600 text-gray-200 text-xs"
+                        onClick={() =>
+                          setEditingPageEdit({
+                            ...editingPageEdit,
+                            pageId: "main",
+                            ...row.patch,
+                            content:
+                              row.patch.elementType === "image"
+                                ? ""
+                                : editingPageEdit.content || "",
+                            imageUrl:
+                              row.patch.elementType === "image"
+                                ? editingPageEdit.imageUrl || ""
+                                : null,
+                          })
+                        }
+                      >
+                        {row.label}
+                      </Button>
+                    ))}
                   </div>
                 </div>
 

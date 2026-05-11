@@ -7,6 +7,7 @@
 import { Hono } from 'hono';
 import type { Env } from '../index';
 import { authMiddleware } from './auth';
+import { getStorage } from '../helpers';
 
 type WpPage = {
   id?: number;
@@ -252,6 +253,25 @@ function normalizePricing(payload: any, isShadow: boolean) {
 
 export function createCmsRoutes() {
   const app = new Hono<{ Bindings: Env }>();
+
+  /**
+   * Active Supabase `page_edits` for a page (default `main`). Merged on the client on top of WordPress home JSON.
+   * Short cache so Visual Editor changes show within ~2 minutes without redeploy.
+   */
+  app.get('/page-overrides', async (c) => {
+    try {
+      const pageId = String(c.req.query('pageId') || 'main').trim() || 'main';
+      const storage = getStorage(c.env);
+      const edits = await storage.getPageEdits(pageId);
+      return c.json({ data: edits, pageId }, 200, {
+        'Cache-Control': 'public, max-age=120',
+      });
+    } catch (e: any) {
+      return c.json({ data: [], pageId: 'main', error: e?.message || 'page_overrides_failed' }, 200, {
+        'Cache-Control': 'public, max-age=30',
+      });
+    }
+  });
 
   /** /api/cms/home — JSON content block for the home page */
   app.get('/home', async (c) => {

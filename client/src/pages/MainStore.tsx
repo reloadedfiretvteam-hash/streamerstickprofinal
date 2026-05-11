@@ -37,6 +37,10 @@ import { SitePromotionBanner } from "@/components/SitePromotionBanner";
 import { WeekPromotionStrip } from "@/components/WeekPromotionStrip";
 import type { Product as StoreCartProduct } from "@/lib/store";
 import { iptvRealProductId } from "@/lib/iptv-sku";
+import {
+  applySupabasePageEditsToHomeCms,
+  type HomeCmsOverrideEdit,
+} from "@/lib/merge-home-cms-overrides";
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
 const onnHdImg = "/images/onn-full-hd-google-tv.webp";
@@ -657,26 +661,40 @@ export default function MainStore() {
 
   const loadCmsHome = async () => {
     try {
-      const response = await apiCall('/api/cms/home');
-      if (!response.ok) return;
-      const result = await response.json();
-      const data = result?.data;
-      if (!data || typeof data !== 'object') return;
-      setCmsHome(data as CmsHomePayload);
-      if (data.meta) {
+      const [homeRes, ovRes] = await Promise.all([
+        apiCall("/api/cms/home"),
+        apiCall("/api/cms/page-overrides?pageId=main"),
+      ]);
+      const homeJson = homeRes.ok ? await homeRes.json().catch(() => ({})) : {};
+      const ovJson = ovRes.ok ? await ovRes.json().catch(() => ({ data: [] })) : { data: [] };
+      const raw = homeJson?.data;
+      const base =
+        raw && typeof raw === "object" ? (raw as CmsHomePayload) : null;
+      const overrideList = Array.isArray(ovJson?.data)
+        ? (ovJson.data as HomeCmsOverrideEdit[])
+        : [];
+      const merged = applySupabasePageEditsToHomeCms(
+        base as unknown as Record<string, unknown> | null,
+        overrideList,
+      ) as CmsHomePayload | null;
+      if (!merged || typeof merged !== "object") return;
+      setCmsHome(merged);
+      if (merged.meta) {
         setPageMeta({
-          title: data.meta.title || "IPTV Subscriptions ONN Google TV Kits VPN | StreamStickPro",
+          title:
+            merged.meta.title ||
+            "IPTV Subscriptions ONN Google TV Kits VPN | StreamStickPro",
           description:
-            data.meta.description ||
+            merged.meta.description ||
             "StreamStickPro: IPTV subscriptions, ONN Google TV kits ($150 Full HD, $160 4K), and Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, SSL-secured checkout, 24/7 support.",
-          path: data.meta.path || "/",
+          path: merged.meta.path || "/",
           keywords:
-            data.meta.keywords ||
+            merged.meta.keywords ||
             "IPTV subscription, ONN Google TV, Onn 4K streaming kit, Surfshark VPN IPTV, ISP throttling VPN",
         });
       }
     } catch (error) {
-      console.warn('Using default homepage CMS content:', error);
+      console.warn("Using default homepage CMS content:", error);
     }
   };
 
