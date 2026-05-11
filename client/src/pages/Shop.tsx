@@ -10,6 +10,8 @@ import { getStorageUrl } from "@/lib/supabase";
 import { SportsCarousel } from "@/components/SportsCarousel";
 import { DemoVideo } from "@/components/DemoVideo";
 import { FreeTrial } from "@/components/FreeTrial";
+import { WeekPromotionStrip } from "@/components/WeekPromotionStrip";
+import type { Product as StoreCartProduct } from "@/lib/store";
 import { QuickViewButton } from "@/components/QuickViewButton";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { setPageMeta, shopProductUrl } from "@/lib/seo";
@@ -192,7 +194,7 @@ const BUYER_PROFILE_CONFIG: Record<
 
 export default function Shop() {
   const [, setLocation] = useLocation();
-  const { addItem, addItemWithQuantity } = useCart();
+  const { addItem, addItemWithQuantity, openCart } = useCart();
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const [products, setProducts] = useState<Product[]>(defaultProducts);
   const [firestickQuantities, setFirestickQuantities] = useState<Record<string, number>>({});
@@ -586,6 +588,24 @@ export default function Shop() {
                 })}
               </div>
             </div>
+
+            <WeekPromotionStrip
+              variant="live"
+              catalogProducts={products.map(
+                (p): StoreCartProduct => ({
+                  id: p.id,
+                  name: p.name,
+                  price: p.price,
+                  image: p.image,
+                  category: p.category,
+                  description: p.description,
+                })
+              )}
+              onClaim={(promo, p) => {
+                addItemWithQuantity(p, 1, promo.displayPriceDollars, { sitePromotion: true });
+                openCart();
+              }}
+            />
             
             {/* Free Trial Box */}
             <FreeTrial />
@@ -933,7 +953,7 @@ export default function Shop() {
                         alt={product.name}
                         className={`w-full h-full object-cover transition-transform duration-700 ${
                           product.id === "onn-google-hd" || product.id === "onn-google-4k"
-                            ? "object-[center_58%] sm:object-[center_55%] group-hover:scale-[1.04]"
+                            ? "object-[center_40%] sm:object-[center_38%] group-hover:scale-[1.04]"
                             : "object-center group-hover:scale-110"
                         }`}
                         loading="lazy"
@@ -948,11 +968,11 @@ export default function Shop() {
                       {(product.id === "onn-google-hd" || product.id === "onn-google-4k") && (
                         <>
                           <div
-                            className="absolute inset-x-0 bottom-0 z-[12] h-[18%] max-h-[4.25rem] bg-gradient-to-t from-gray-950 via-gray-950/88 to-transparent pointer-events-none sm:h-[15%] sm:max-h-[3.75rem]"
+                            className="absolute inset-x-0 bottom-0 z-[12] h-[32%] max-h-[6.5rem] bg-gradient-to-t from-gray-950 via-gray-950/92 to-transparent pointer-events-none sm:h-[28%] sm:max-h-[5.75rem]"
                             aria-hidden
                           />
                           <div
-                            className="absolute inset-x-0 bottom-0 z-[13] h-[11%] max-h-[2.6rem] bg-gray-950 pointer-events-none sm:h-[9%] sm:max-h-[2.35rem]"
+                            className="absolute inset-x-0 bottom-0 z-[13] h-[20%] max-h-[3.75rem] bg-gray-950 pointer-events-none sm:h-[17%] sm:max-h-[3.25rem]"
                             aria-hidden
                           />
                           <div className="absolute bottom-1 left-0 right-0 z-[14] flex justify-center px-2 pointer-events-none">

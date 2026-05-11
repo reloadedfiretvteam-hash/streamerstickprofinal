@@ -60,7 +60,8 @@ import {
   MousePointer,
   Navigation,
   Percent,
-  Download
+  Download,
+  DollarSign
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -419,6 +420,9 @@ export default function AdminPanel() {
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  /** Quick-edit grid: dollars as strings for all checkout SKUs (`real_products`). */
+  const [catalogPriceDrafts, setCatalogPriceDrafts] = useState<Record<string, { reg: string; sale: string }>>({});
+  const [savingCatalogPriceId, setSavingCatalogPriceId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -1145,6 +1149,18 @@ export default function AdminPanel() {
     setLoadingProducts(false);
   };
 
+  useEffect(() => {
+    if (!products.length) return;
+    const next: Record<string, { reg: string; sale: string }> = {};
+    for (const p of products) {
+      next[p.id] = {
+        reg: String(centsToDollars(p.price)),
+        sale: p.sale_price ? String(centsToDollars(p.sale_price)) : "",
+      };
+    }
+    setCatalogPriceDrafts(next);
+  }, [products]);
+
   const loadSitePromotion = async () => {
     setLoadingSitePromotion(true);
     try {
@@ -1860,6 +1876,32 @@ export default function AdminPanel() {
   };
 
   const [resendingEmail, setResendingEmail] = useState<string | null>(null);
+  const [resendingCredentialsId, setResendingCredentialsId] = useState<string | null>(null);
+
+  const resendCredentialsOnly = async (orderId: string) => {
+    setResendingCredentialsId(orderId);
+    try {
+      const response = await authFetch(`/api/admin/orders/${orderId}/resend-credentials`, {
+        method: "POST",
+      });
+      const result = await response.json();
+      if (response.ok) {
+        const extra =
+          result.credentialsSent === false
+            ? " Provisioning may require manual review — check Payment Health for branch."
+            : "";
+        showToast(`Login / credentials email sent.${extra}`, "success");
+        loadPaymentHealth();
+      } else {
+        showToast(result.error || "Failed to send credentials email", "error");
+      }
+    } catch (error) {
+      console.error("Error resending credentials:", error);
+      showToast("Failed to send credentials email", "error");
+    } finally {
+      setResendingCredentialsId(null);
+    }
+  };
 
   const resendConfirmationEmail = async (orderId: string, customerEmail: string) => {
     setResendingEmail(orderId);
@@ -1873,7 +1915,8 @@ export default function AdminPanel() {
       const result = await response.json();
 
       if (response.ok) {
-        showToast('Confirmation email resent successfully!', 'success');
+        showToast("Order confirmation sent. If the customer needs login details, also tap Send login email.", "success");
+        loadPaymentHealth();
       } else {
         showToast(result.error || 'Failed to resend email', 'error');
       }
@@ -2178,6 +2221,61 @@ export default function AdminPanel() {
     }
 
     setSaving(false);
+  };
+
+  const saveCatalogPriceRow = async (productId: string) => {
+    const draft = catalogPriceDrafts[productId];
+    const productRow = products.find((p) => p.id === productId);
+    if (!draft || !productRow) {
+      showToast("Could not find that product row.", "error");
+      return;
+    }
+    const reg = parseFloat(draft.reg);
+    if (!Number.isFinite(reg) || reg <= 0) {
+      showToast("Enter a valid regular price (USD).", "error");
+      return;
+    }
+    const saleRaw = draft.sale.trim();
+    const saleNum = saleRaw === "" ? null : parseFloat(saleRaw);
+    if (saleNum != null && (!Number.isFinite(saleNum) || saleNum <= 0)) {
+      showToast("Sale price must be empty or a positive amount.", "error");
+      return;
+    }
+    if (saleNum != null && saleNum >= reg) {
+      showToast("Sale price must be less than regular price.", "error");
+      return;
+    }
+    const price = dollarsToCents(reg);
+    const sale_price = saleNum != null ? dollarsToCents(saleNum) : null;
+
+    setSavingCatalogPriceId(productId);
+    try {
+      const response = await authFetch(`/api/admin/products/${productId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ price, sale_price }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        showToast(result?.error || "Failed to update price", "error");
+        return;
+      }
+      const synced = await syncToShadowProduct({
+        ...productRow,
+        price,
+        sale_price,
+      });
+      if (synced) {
+        showToast("Price saved. Supabase, Stripe checkout, and shadow store are updated.", "success");
+      } else {
+        showToast("Price saved to catalog but shadow_products sync failed — retry from product editor.", "error");
+      }
+      await loadProducts();
+    } catch (e: any) {
+      showToast(e?.message || "Failed to save price", "error");
+    } finally {
+      setSavingCatalogPriceId(null);
+    }
   };
 
   const syncToShadowProduct = async (product: Product): Promise<boolean> => {
@@ -3027,12 +3125,14 @@ export default function AdminPanel() {
                         Orders Needing Email Attention
                       </CardTitle>
                       <CardDescription className="text-gray-400">
-                        Paid orders with missing credential delivery or follow-up risk.
+                        Paid orders with missing credential delivery or follow-up risk. Ask customers to check spam/promotions.{" "}
+                        <strong className="text-gray-200">Send login email</strong> delivers the username/password message;{" "}
+                        <strong className="text-gray-200">Resend</strong> sends order confirmation and re-runs provisioning when needed.
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {(paymentHealth?.ordersNeedingAttention || []).slice(0, 6).map((order) => (
+                        {(paymentHealth?.ordersNeedingAttention || []).slice(0, 12).map((order) => (
                           <div key={order.id} className="rounded-lg border border-gray-700 bg-gray-900/40 p-4">
                             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                               <div>
@@ -3047,19 +3147,35 @@ export default function AdminPanel() {
                                   </p>
                                 )}
                               </div>
-                              <div className="flex items-center gap-3">
-                                <Badge className="bg-amber-500/20 text-amber-300">
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                                <Badge className="bg-amber-500/20 text-amber-300 w-fit">
                                   {getProvisioningBranchLabel(order.provisioningBranch) || 'Needs attention'}
                                 </Badge>
-                                <Button
-                                  size="sm"
-                                  className="bg-cyan-500 hover:bg-cyan-600 text-white"
-                                  onClick={() => resendConfirmationEmail(order.id, order.customerEmail)}
-                                  disabled={resendingEmail === order.id}
-                                >
-                                  {resendingEmail === order.id ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-                                  Resend Email
-                                </Button>
+                                <div className="flex flex-wrap gap-2">
+                                  <Button
+                                    size="sm"
+                                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                                    onClick={() => resendCredentialsOnly(order.id)}
+                                    disabled={resendingCredentialsId === order.id || resendingEmail === order.id}
+                                    data-testid={`button-resend-credentials-${order.id}`}
+                                  >
+                                    {resendingCredentialsId === order.id ? (
+                                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    ) : (
+                                      <Lock className="w-4 h-4 mr-2" />
+                                    )}
+                                    Send login email
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    className="bg-cyan-500 hover:bg-cyan-600 text-white"
+                                    onClick={() => resendConfirmationEmail(order.id, order.customerEmail)}
+                                    disabled={resendingEmail === order.id || resendingCredentialsId === order.id}
+                                  >
+                                    {resendingEmail === order.id ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                                    Resend
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -3904,7 +4020,10 @@ export default function AdminPanel() {
                     <Package className="w-8 h-8 text-orange-500" />
                     Products Manager
                   </h2>
-                  <p className="text-gray-400">Manage your products and pricing. Changes sync to shadow products automatically.</p>
+                  <p className="text-gray-400">
+                    Manage your products and pricing. Edits here update <strong className="text-gray-200">real_products</strong>, create a new{" "}
+                    <strong className="text-gray-200">Stripe price</strong> for checkout, and sync the cloaked <strong className="text-gray-200">shadow_products</strong> row.
+                  </p>
                 </div>
                 <Button 
                   className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
@@ -3930,6 +4049,90 @@ export default function AdminPanel() {
                   <Plus className="w-4 h-4 mr-2" /> Add Product
                 </Button>
               </div>
+
+              <Card className="bg-gray-900/80 border border-emerald-500/30">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-white flex items-center gap-2 text-lg">
+                    <DollarSign className="w-5 h-5 text-emerald-400" />
+                    Quick price editor (all checkout SKUs)
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Amounts in USD. Each row saves that product only — the API updates Supabase and attaches a fresh Stripe <code className="text-gray-300">shadow_price_id</code>.
+                    Your live store reads these prices from the worker; no redeploy needed after saving.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {loadingProducts ? (
+                    <p className="text-sm text-gray-500 py-4">Loading catalog…</p>
+                  ) : (
+                    <div className="overflow-x-auto rounded-lg border border-gray-700">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-gray-700 hover:bg-transparent">
+                            <TableHead className="text-gray-400">Product ID</TableHead>
+                            <TableHead className="text-gray-400">Name</TableHead>
+                            <TableHead className="text-gray-400">Regular ($)</TableHead>
+                            <TableHead className="text-gray-400">Sale ($)</TableHead>
+                            <TableHead className="text-gray-400 text-right">Save</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {products.map((p) => (
+                            <TableRow key={p.id} className="border-gray-700">
+                              <TableCell className="font-mono text-xs text-gray-300">{p.id}</TableCell>
+                              <TableCell className="text-white text-sm max-w-[200px] truncate">{p.name}</TableCell>
+                              <TableCell className="w-28">
+                                <Input
+                                  className="bg-gray-800 border-gray-600 text-white h-9"
+                                  inputMode="decimal"
+                                  value={catalogPriceDrafts[p.id]?.reg ?? ""}
+                                  onChange={(e) =>
+                                    setCatalogPriceDrafts((prev) => ({
+                                      ...prev,
+                                      [p.id]: { reg: e.target.value, sale: prev[p.id]?.sale ?? "" },
+                                    }))
+                                  }
+                                  data-testid={`quick-price-reg-${p.id}`}
+                                />
+                              </TableCell>
+                              <TableCell className="w-28">
+                                <Input
+                                  className="bg-gray-800 border-gray-600 text-white h-9"
+                                  inputMode="decimal"
+                                  placeholder="—"
+                                  value={catalogPriceDrafts[p.id]?.sale ?? ""}
+                                  onChange={(e) =>
+                                    setCatalogPriceDrafts((prev) => ({
+                                      ...prev,
+                                      [p.id]: { reg: prev[p.id]?.reg ?? "", sale: e.target.value },
+                                    }))
+                                  }
+                                  data-testid={`quick-price-sale-${p.id}`}
+                                />
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button
+                                  size="sm"
+                                  className="bg-emerald-600 hover:bg-emerald-700"
+                                  disabled={savingCatalogPriceId === p.id}
+                                  onClick={() => saveCatalogPriceRow(p.id)}
+                                  data-testid={`quick-price-save-${p.id}`}
+                                >
+                                  {savingCatalogPriceId === p.id ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    "Save"
+                                  )}
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               <Tabs defaultValue="all" className="space-y-6">
                 <TabsList className="bg-gray-800 border border-gray-700">

@@ -1,24 +1,13 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { apiCall } from "@/lib/api";
 import type { Product } from "@/lib/store";
+import type { PublicPromotion } from "@/types/site-promotion";
+import { useSitePromotionPublic } from "@/hooks/useSitePromotionPublic";
+
+export type { PublicPromotion };
 
 const DISMISS_KEY = "ssp-promo-popup-dismissed";
-
-export type PublicPromotion = {
-  headline: string;
-  subheadline: string | null;
-  ctaLabel: string;
-  realProductId: string;
-  productName: string | null;
-  imageUrl: string | null;
-  displayPriceDollars: number;
-  shadowHeadline: string;
-  shadowSubheadline: string | null;
-  /** Changes when admin edits promo — new popup after dismiss. */
-  version?: string;
-};
 
 type Props =
   | {
@@ -32,41 +21,10 @@ type Props =
     };
 
 export function SitePromotionBanner(props: Props) {
-  const [promo, setPromo] = useState<PublicPromotion | null>(null);
+  const promo = useSitePromotionPublic();
   const [dismissedVersion, setDismissedVersion] = useState<string | null>(() =>
     typeof window !== "undefined" ? window.sessionStorage.getItem(DISMISS_KEY) : null
   );
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        let res = await apiCall("/api/site-promotion-public");
-        if (!res.ok) res = await apiCall("/api/promotion");
-        const ct = res.headers.get("content-type") || "";
-        if (!ct.includes("application/json")) {
-          if (!cancelled) setPromo(null);
-          return;
-        }
-        const json = await res.json();
-        if (!cancelled && json?.promotion) {
-          const p = json.promotion;
-          setPromo({
-            ...p,
-            version:
-              p.version ??
-              `${p.realProductId}-${p.displayPriceDollars}-${String(p.headline || "").slice(0, 24)}`,
-          });
-        }
-        else if (!cancelled) setPromo(null);
-      } catch {
-        if (!cancelled) setPromo(null);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const dismiss = useCallback(() => {
     if (!promo?.version) return;

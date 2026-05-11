@@ -597,6 +597,19 @@ export function createAdminRoutes() {
         return c.json({ error: "Order not found" }, 404);
       }
 
+      if (order.status !== 'paid' && order.status !== 'completed') {
+        return c.json(
+          {
+            error: `Order status is "${order.status}". Only paid or completed orders can receive login credentials.`,
+          },
+          400,
+        );
+      }
+
+      if (!order.customerEmail || !String(order.customerEmail).includes('@')) {
+        return c.json({ error: "Order has no valid customer email — update the order in Stripe or Supabase first." }, 400);
+      }
+
       if (orderNeedsProvisioning(order)) {
         await ensureProvisioningJob(storage, order, { source: 'admin.resend-credentials' });
         await processProvisioningJobByOrderId(c.env, order.id);
@@ -604,10 +617,16 @@ export function createAdminRoutes() {
         await sendCredentialsEmail(order, c.env, storage);
       }
 
-      return c.json({ success: true, message: "Credentials email sent" });
+      const refreshed = await storage.getOrder(c.req.param('id'));
+      return c.json({
+        success: true,
+        message: "Credentials flow completed (check logs if customer still reports empty inbox).",
+        credentialsSent: !!refreshed?.credentialsSent,
+        provisioningBranch: refreshed?.provisioningBranch ?? null,
+      });
     } catch (error: any) {
       console.error("Error resending credentials:", error);
-      return c.json({ error: "Failed to resend credentials" }, 500);
+      return c.json({ error: error?.message || "Failed to resend credentials" }, 500);
     }
   });
 

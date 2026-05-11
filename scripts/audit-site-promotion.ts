@@ -26,8 +26,10 @@ async function main() {
   await mustInclude("worker/routes/checkout.ts", ["getActiveSitePromotion", "applySitePromotion", "promoShadowPriceId"]);
   await mustInclude("worker/routes/admin.ts", ["app.get('/site-promotion'", "create-stripe-price"]);
   await mustInclude("worker/storage.ts", ["site_promotion", "getActiveSitePromotion", "upsertSitePromotionRow"]);
-  await mustInclude("client/src/pages/MainStore.tsx", ["SitePromotionBanner", 'variant="live"', "sitePromotion: true"]);
-  await mustInclude("client/src/components/SitePromotionBanner.tsx", ["/api/promotion", 'variant: "live"']);
+  await mustInclude("client/src/pages/MainStore.tsx", ["SitePromotionBanner", "WeekPromotionStrip", 'variant="live"', "sitePromotion: true"]);
+  await mustInclude("client/src/hooks/useSitePromotionPublic.ts", ["/api/site-promotion-public", "/api/promotion"]);
+  await mustInclude("client/src/components/SitePromotionBanner.tsx", ["useSitePromotionPublic", 'variant: "live"']);
+  await mustInclude("client/src/components/WeekPromotionStrip.tsx", ["useSitePromotionPublic", "This Week"]);
   await mustInclude("client/src/pages/AdminPanel.tsx", [
     "site-promotion",
     "nav-site-promotion",

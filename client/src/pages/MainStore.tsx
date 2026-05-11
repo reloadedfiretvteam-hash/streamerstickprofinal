@@ -34,6 +34,7 @@ import { AnimatedCounter } from "@/components/AnimatedCounter";
 import SupportMessageBox from "@/components/SupportMessageBox";
 import { trackVpnClick } from "@/lib/vpn-tracking";
 import { SitePromotionBanner } from "@/components/SitePromotionBanner";
+import { WeekPromotionStrip } from "@/components/WeekPromotionStrip";
 import type { Product as StoreCartProduct } from "@/lib/store";
 import { iptvRealProductId } from "@/lib/iptv-sku";
 
@@ -1236,6 +1237,24 @@ export default function MainStore() {
             <p className="text-center text-[15px] sm:text-lg text-gray-200 mb-8 max-w-2xl mx-auto leading-relaxed px-3">
               Choose subscription length and screen count. Use the <strong className="text-white">bright trial box</strong> first if you want to test streams—then pick a paid plan. Multi-device plans work across TVs, phones, and tablets at the same time.
             </p>
+
+            <WeekPromotionStrip
+              variant="live"
+              catalogProducts={products.map(
+                (p): StoreCartProduct => ({
+                  id: p.id,
+                  name: p.name,
+                  price: p.price,
+                  image: p.image,
+                  category: p.category,
+                  description: p.description,
+                })
+              )}
+              onClaim={(promo, p) => {
+                addItemWithQuantity(p, 1, promo.displayPriceDollars, { sitePromotion: true });
+                openCart();
+              }}
+            />
             
             {/* Free Trial Box */}
             <div id="free-trial">
@@ -1592,7 +1611,7 @@ export default function MainStore() {
                         alt={product.name}
                         className={`w-full h-full object-cover transition-transform duration-700 ${
                           product.id === "onn-google-hd" || product.id === "onn-google-4k"
-                            ? "object-[center_58%] sm:object-[center_55%] group-hover:scale-[1.04]"
+                            ? "object-[center_40%] sm:object-[center_38%] group-hover:scale-[1.04]"
                             : "object-center group-hover:scale-110"
                         }`}
                         loading="lazy"
@@ -1606,13 +1625,13 @@ export default function MainStore() {
                       />
                       {(product.id === "onn-google-hd" || product.id === "onn-google-4k") && (
                         <>
-                          {/* Thin footer mask only—hides retail banner text (e.g. fee claims), keeps device visible */}
+                          {/* Masks retail box footer (e.g. third‑party fee/marketing lines)—keeps device visible */}
                           <div
-                            className="absolute inset-x-0 bottom-0 z-[12] h-[18%] max-h-[4.25rem] bg-gradient-to-t from-gray-950 via-gray-950/88 to-transparent pointer-events-none sm:h-[15%] sm:max-h-[3.75rem]"
+                            className="absolute inset-x-0 bottom-0 z-[12] h-[32%] max-h-[6.5rem] bg-gradient-to-t from-gray-950 via-gray-950/92 to-transparent pointer-events-none sm:h-[28%] sm:max-h-[5.75rem]"
                             aria-hidden
                           />
                           <div
-                            className="absolute inset-x-0 bottom-0 z-[13] h-[11%] max-h-[2.6rem] bg-gray-950 pointer-events-none sm:h-[9%] sm:max-h-[2.35rem]"
+                            className="absolute inset-x-0 bottom-0 z-[13] h-[20%] max-h-[3.75rem] bg-gray-950 pointer-events-none sm:h-[17%] sm:max-h-[3.25rem]"
                             aria-hidden
                           />
                           <div className="absolute bottom-1 left-0 right-0 z-[14] flex justify-center px-2 pointer-events-none">

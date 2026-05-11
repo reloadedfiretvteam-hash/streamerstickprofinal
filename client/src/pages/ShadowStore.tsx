@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { SitePromotionBanner, type PublicPromotion } from "@/components/SitePromotionBanner";
+import { WeekPromotionStrip } from "@/components/WeekPromotionStrip";
 import { iptvRealProductId } from "@/lib/iptv-sku";
 
 const SUPABASE_URL = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/shadow-store";
@@ -455,6 +456,17 @@ export default function ShadowStore() {
           </Button>
         </div>
       </nav>
+
+      <WeekPromotionStrip
+        variant="shadow"
+        onClaim={(promo) => {
+          setPromoCheckout(promo);
+          setSelectedProduct(null);
+          setSelectedSEOProduct(null);
+          setShowCheckout(true);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+      />
 
       <section className="relative py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 -z-10 opacity-10">

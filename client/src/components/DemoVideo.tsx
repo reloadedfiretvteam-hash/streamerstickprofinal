@@ -3,13 +3,11 @@ import { Play, Pause, Volume2, VolumeX, Maximize, Tv, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 const SUPABASE_BASE = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges";
-/** Prefer your IPTV screenshot; falls back to kit art then site image. Drop files under `client/public/images/`. */
+/** Player / UI art only—avoid retail box shots that show third‑party fee/marketing banners. */
 const POSTER_CANDIDATES = [
-  "/images/example-video-cover.png",
-  "/images/example-video-cover.jpg",
-  "/images/example-video-cover.webp",
-  "/images/onn-full-hd-google-tv.webp",
-  "/images/onn-4k-google-tv.jpg",
+  `${SUPABASE_BASE}/iptv-subscription.jpg`,
+  "/images/iptv-subscription.jpg",
+  "/opengraph.jpg",
 ];
 const fallbackPoster = `/opengraph.jpg`;
 const demoVideoSrc = `${SUPABASE_BASE}/demo-video.mp4`;
