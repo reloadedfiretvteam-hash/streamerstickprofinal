@@ -125,6 +125,15 @@ export function DemoVideo() {
             
             {!isPlaying && (
               <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-tr from-[#0A0A0F]/45 via-black/25 to-[#1A1A22]/50">
+                {/* Covers any promo / fee wording baked into the poster image */}
+                <div
+                  className="absolute inset-x-0 top-0 z-[5] h-[30%] min-h-[3rem] bg-[#0a0a0f] pointer-events-none"
+                  aria-hidden
+                />
+                <div
+                  className="absolute inset-x-0 top-0 z-[5] h-[55%] pointer-events-none bg-gradient-to-b from-[#0a0a0f] via-[#0a0a0f]/90 to-transparent"
+                  aria-hidden
+                />
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-25"></div>
                 
                 <motion.div 

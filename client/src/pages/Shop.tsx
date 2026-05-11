@@ -948,39 +948,47 @@ export default function Shop() {
                   <div className="relative z-10">
                     <div className="relative h-56 sm:h-[15.5rem] overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-50" />
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className={`w-full h-full object-cover transition-transform duration-700 ${
-                          product.id === "onn-google-hd" || product.id === "onn-google-4k"
-                            ? "object-[center_40%] sm:object-[center_38%] group-hover:scale-[1.04]"
-                            : "object-center group-hover:scale-110"
-                        }`}
-                        loading="lazy"
-                        width={400}
-                        height={224}
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          const fb = product.id === "onn-google-hd" ? onnHdImg : onn4kImg;
-                          if (target.src !== fb) target.src = fb;
-                        }}
-                      />
+                      {product.id === "onn-google-hd" || product.id === "onn-google-4k" ? (
+                        <div className="absolute inset-0 overflow-hidden">
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="absolute bottom-0 left-1/2 h-[132%] w-full min-w-[108%] max-w-none -translate-x-1/2 object-cover object-bottom transition-transform duration-700 group-hover:scale-[1.06]"
+                            loading="lazy"
+                            width={400}
+                            height={224}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              const fb = product.id === "onn-google-hd" ? onnHdImg : onn4kImg;
+                              if (target.src !== fb) target.src = fb;
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
+                          loading="lazy"
+                          width={400}
+                          height={224}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            const fb = product.id === "onn-google-hd" ? onnHdImg : onn4kImg;
+                            if (target.src !== fb) target.src = fb;
+                          }}
+                        />
+                      )}
                       {(product.id === "onn-google-hd" || product.id === "onn-google-4k") && (
                         <>
                           <div
-                            className="absolute inset-x-0 bottom-0 z-[12] h-[32%] max-h-[6.5rem] bg-gradient-to-t from-gray-950 via-gray-950/92 to-transparent pointer-events-none sm:h-[28%] sm:max-h-[5.75rem]"
+                            className="absolute inset-x-0 top-0 z-[11] h-[26%] min-h-[3.25rem] bg-gray-950 pointer-events-none"
                             aria-hidden
                           />
                           <div
-                            className="absolute inset-x-0 bottom-0 z-[13] h-[20%] max-h-[3.75rem] bg-gray-950 pointer-events-none sm:h-[17%] sm:max-h-[3.25rem]"
+                            className="absolute inset-x-0 top-0 z-[11] h-[52%] pointer-events-none bg-gradient-to-b from-gray-950 via-gray-950/88 to-transparent"
                             aria-hidden
                           />
-                          <div className="absolute bottom-1 left-0 right-0 z-[14] flex justify-center px-2 pointer-events-none">
-                            <span className="text-[10px] sm:text-[11px] font-bold text-white text-center leading-tight bg-black/85 border border-white/15 rounded-md px-2.5 py-1 max-w-[98%] shadow-md">
-                              {product.id === "onn-google-hd" ? "ONN Full HD kit" : "ONN 4K kit"}
-                              <span className="text-gray-300 font-semibold"> · 1 Yr Live TV</span>
-                            </span>
-                          </div>
                         </>
                       )}
                       <div className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-full font-bold text-sm shadow-lg ${
