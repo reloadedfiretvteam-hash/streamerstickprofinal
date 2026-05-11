@@ -21,6 +21,7 @@ type WpPage = {
 const WP_ORIGIN      = 'https://indigo-meerkat-253284.hostingersite.com';
 const HOME_SLUG      = 'streamstick-home-v1';
 const PRICING_SLUG   = 'streamstick-pricing-v1';
+const SHADOW_SLUG    = 'streamstick-shadow-v1';
 const CACHE_SECONDS  = 300; // 5 minutes
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -291,6 +292,35 @@ export function createCmsRoutes() {
     }
   });
 
+  /** /api/cms/shadow — JSON for the cloaked storefront (ShadowStore); optional WP page */
+  app.get('/shadow', async (c) => {
+    try {
+      const slug = String(c.env.WP_SHADOW_PAGE_SLUG || SHADOW_SLUG).trim();
+      const auth = getAuthHeader(c.env);
+      const hostname = new URL(c.req.url).hostname;
+      const preferDraft = preferWordPressDraft(hostname, c.env, !!auth);
+      const { page, source } = await fetchPage(c.env, slug, preferDraft);
+      if (!page) {
+        return c.json(
+          { data: null, meta: { slug, found: false, source, hint: 'Use in-app defaults + page_edits pageId=shadow' } },
+          200,
+          { 'Cache-Control': `public, max-age=${CACHE_SECONDS}` },
+        );
+      }
+      const raw = page?.content?.raw || page?.content?.rendered || '';
+      const data = raw ? extractJson(raw) : null;
+      return c.json(
+        { data, meta: { slug, found: true, pageStatus: page?.status, updatedAt: page?.modified, source } },
+        200,
+        { 'Cache-Control': `public, max-age=${CACHE_SECONDS}` },
+      );
+    } catch (e: any) {
+      return c.json({ data: null, meta: { error: e?.message } }, 200, {
+        'Cache-Control': 'public, max-age=60',
+      });
+    }
+  });
+
   /** /api/cms/pricing — structured pricing data for the pricing page */
   app.get('/pricing', async (c) => {
     try {
@@ -368,6 +398,7 @@ export function createCmsRoutes() {
       const allowed = new Set([
         String(c.env.WP_HOME_PAGE_SLUG || HOME_SLUG).trim(),
         String(c.env.WP_PRICING_PAGE_SLUG || PRICING_SLUG).trim(),
+        String(c.env.WP_SHADOW_PAGE_SLUG || SHADOW_SLUG).trim(),
       ]);
       if (!allowed.has(slug)) return c.json({ error: 'CMS page is not editable from this endpoint', slug }, 403);
 
@@ -416,11 +447,12 @@ export function createCmsRoutes() {
     const auth = getAuthHeader(c.env);
     const homeSlug = String(c.env.WP_HOME_PAGE_SLUG || HOME_SLUG).trim();
     const pricingSlug = String(c.env.WP_PRICING_PAGE_SLUG || PRICING_SLUG).trim();
+    const shadowSlug = String(c.env.WP_SHADOW_PAGE_SLUG || SHADOW_SLUG).trim();
 
     const result: any = {
       origin,
       authConfigured: !!auth,
-      slugs: { home: homeSlug, pricing: pricingSlug },
+      slugs: { home: homeSlug, pricing: pricingSlug, shadow: shadowSlug },
       pages: {} as Record<string, { found: boolean; id?: number; status?: string; jsonOk?: boolean; error?: string }>,
       ok: false,
     };
@@ -440,7 +472,7 @@ export function createCmsRoutes() {
       return c.json(result, 502);
     }
 
-    for (const [key, slug] of [['home', homeSlug], ['pricing', pricingSlug]] as const) {
+    for (const [key, slug] of [['home', homeSlug], ['pricing', pricingSlug], ['shadow', shadowSlug]] as const) {
       try {
         const { page } = await fetchPage(c.env, slug, false);
         if (!page) {
@@ -463,6 +495,8 @@ export function createCmsRoutes() {
     result.ok = !!result.reachable
       && result.pages.home?.found
       && result.pages.pricing?.found;
+    /** Cloaked page is optional — site uses defaults + Supabase if WP page missing */
+    result.shadowOptional = !result.pages.shadow?.found || !result.pages.shadow?.jsonOk;
     return c.json(result, result.ok ? 200 : 502, { 'Cache-Control': 'no-store' });
   });
 

@@ -2648,7 +2648,7 @@ export default function AdminPanel() {
             }}
             data-testid="nav-homepage-hq"
           >
-            <Home className="w-4 h-4 mr-3" /> Homepage HQ
+            <Home className="w-4 h-4 mr-3" /> Site control
           </Button>
           <Button 
             variant={activeSection === "wordpress-cms" ? "secondary" : "ghost"} 
@@ -4333,16 +4333,40 @@ export default function AdminPanel() {
               <div>
                 <h2 className="text-3xl font-bold flex items-center gap-3">
                   <Home className="w-8 h-8 text-orange-500" />
-                  Homepage HQ
+                  Site control
                 </h2>
                 <p className="text-gray-400 mt-1 max-w-3xl">
-                  One place to see how your homepage is built: WordPress supplies the base JSON, Supabase{" "}
-                  <code className="text-gray-300">page_edits</code> layer on quick text and image tweaks, product
-                  prices flow from Supabase into Stripe at checkout, and secure / cloaked hosts read{" "}
-                  <code className="text-gray-300">prices.shadow</code> from WordPress so labels stay in sync. GitHub
-                  is only required when you change app code—not for day-to-day copy or admin pricing.
+                  Public homepage (<code className="text-gray-300">pageId=main</code>), cloaked storefront (
+                  <code className="text-gray-300">pageId=shadow</code>), and checkout all share the same product IDs. WordPress holds
+                  base JSON where configured; Supabase <code className="text-gray-300">page_edits</code> overlays copy and images without
+                  a deploy. Amounts charged always follow Supabase <code className="text-gray-300">real_products</code> + Stripe after you
+                  save in Products.
                 </p>
               </div>
+
+              <Card className="bg-gray-900/80 border-amber-900/50">
+                <CardHeader>
+                  <CardTitle className="text-amber-100 text-base">When you change prices (read this)</CardTitle>
+                  <CardDescription className="text-gray-400 text-sm space-y-2">
+                    <ol className="list-decimal list-inside space-y-1">
+                      <li>
+                        In <strong className="text-gray-200">Products</strong>, edit sale/list price and click Save — the API creates a
+                        new Stripe price id so checkout matches.
+                      </li>
+                      <li>
+                        Card labels on the <strong className="text-gray-200">public IPTV site</strong> come from your catalog; on{" "}
+                        <strong className="text-gray-200">cloaked SEO pages</strong> IPTV tier numbers still come from WordPress{" "}
+                        <code className="text-gray-300">prices.shadow</code> — align those with what you actually charge, or customers see
+                        mismatched text vs cart.
+                      </li>
+                      <li>
+                        <strong className="text-gray-200">Promotional banner</strong> uses its own Stripe promo price in{" "}
+                        <strong className="text-gray-200">Live page promotion</strong>; test with a small change before big launches.
+                      </li>
+                    </ol>
+                  </CardDescription>
+                </CardHeader>
+              </Card>
 
               <div className="flex flex-wrap gap-2">
                 <Badge className={envStatus?.hasStripeKey ? "bg-emerald-600" : "bg-red-600"}>
@@ -4355,7 +4379,10 @@ export default function AdminPanel() {
                   WordPress CMS {wordpressCmsStatus ? "reachable" : "not verified"}
                 </Badge>
                 <Badge variant="outline" className="border-gray-500 text-gray-300">
-                  Active home overrides: {pageEdits.filter((e) => e.pageId === "main" && e.isActive).length}
+                  Home overrides: {pageEdits.filter((e) => e.pageId === "main" && e.isActive).length}
+                </Badge>
+                <Badge variant="outline" className="border-amber-700 text-amber-100">
+                  Cloaked overrides: {pageEdits.filter((e) => e.pageId === "shadow" && e.isActive).length}
                 </Badge>
               </div>
 
@@ -4442,16 +4469,53 @@ export default function AdminPanel() {
                 <Card className="bg-gray-800 border-gray-700">
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-2">
-                      <Lock className="w-5 h-5 text-amber-400" />
-                      Cloaked / secure storefront (MyClo-style host)
+                      <Zap className="w-5 h-5 text-amber-400" />
+                      Live page promotion
                     </CardTitle>
                     <CardDescription className="text-gray-400">
-                      On secure hostnames, the app uses WordPress <code className="text-gray-300">prices.shadow</code> for IPTV tier
-                      labels and maps. Keep shadow amounts aligned with what you sell in Products, or update both WordPress pricing JSON
-                      and Supabase when you run parallel funnels.
+                      Site-wide strip + modal; ties to Supabase <code className="text-gray-300">site_promotion</code> and optional Stripe
+                      promo price. Does not replace product saves — it adds a campaign layer.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
+                    <Button
+                      className="w-full bg-amber-600 hover:bg-amber-500"
+                      onClick={() => {
+                        setActiveSection("site-promotion");
+                        loadSitePromotion();
+                        if (!products.length) loadProducts();
+                      }}
+                    >
+                      Edit promotion & banner
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Lock className="w-5 h-5 text-amber-400" />
+                      Cloaked storefront (web-design facade)
+                    </CardTitle>
+                    <CardDescription className="text-gray-400">
+                      <code className="text-gray-300">/api/cms/shadow</code> (optional WordPress page{" "}
+                      <code className="text-gray-300">streamstick-shadow-v1</code>) +{" "}
+                      <code className="text-gray-300">page_edits</code> with <code className="text-gray-300">pageId=shadow</code>. Design
+                      package cards still checkout real SKUs (<code className="text-gray-300">onn-google-*</code>); only labels/images are
+                      cosmetic. IPTV tier grids on this page use the same product ids — prices shown pull from{" "}
+                      <code className="text-gray-300">/api/products</code>.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <Button
+                      className="w-full bg-amber-700 hover:bg-amber-600 text-white"
+                      onClick={() => {
+                        setActiveSection("visual-editor");
+                        loadPageEdits();
+                      }}
+                    >
+                      Visual Editor → use page &quot;Cloaked storefront&quot;
+                    </Button>
                     <Button
                       variant="outline"
                       className="w-full border-amber-700 text-amber-100"
@@ -4460,7 +4524,7 @@ export default function AdminPanel() {
                         loadWordPressCmsStatus();
                       }}
                     >
-                      Edit pricing JSON in WordPress
+                      WordPress: pricing JSON (prices.shadow) + optional shadow page
                     </Button>
                   </CardContent>
                 </Card>
@@ -4524,10 +4588,62 @@ export default function AdminPanel() {
                         ["whyChoose", "title", "text", "Why choose title"],
                         ["deviceSupport", "title", "text", "Device support title"],
                         ["visualBenefits", "title / subtitle", "text", "Benefits heading or subhead"],
+                        ["productCards", "json", "json", "Replace feature cards array (valid JSON)"],
+                        ["advantages", "json", "json", "Replace bullet advantages array (JSON strings)"],
+                        ["faq", "itemsJson", "json", "Replace FAQ items array"],
+                        ["_config", "homeJson", "json", "Deep-merge partial homepage JSON (advanced)"],
                       ].map(([sec, el, typ, note]) => (
                         <TableRow key={`${sec}-${el}`} className="border-gray-700">
                           <TableCell className="font-mono text-xs text-sky-300">{sec}</TableCell>
                           <TableCell className="font-mono text-xs text-pink-300">{el}</TableCell>
+                          <TableCell className="text-gray-400 text-sm">{typ}</TableCell>
+                          <TableCell className="text-gray-300 text-sm">{note}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Cloaked page field map (pageId = shadow)</CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Or set <strong className="text-gray-200">Element type</strong> to <code className="text-gray-300">JSON</code>, section{" "}
+                    <code className="text-gray-300">_config</code>, element <code className="text-gray-300">payload</code> and paste a
+                    partial object (merges into defaults). Design rows: section <code className="text-gray-300">design</code>, element{" "}
+                    <code className="text-gray-300">onn-google-hd.name</code> (or <code className="text-gray-300">.description</code>,{" "}
+                    <code className="text-gray-300">.image</code>, <code className="text-gray-300">.features</code> with one bullet per line).
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-gray-700 hover:bg-transparent">
+                        <TableHead className="text-gray-300">Section</TableHead>
+                        <TableHead className="text-gray-300">Element</TableHead>
+                        <TableHead className="text-gray-300">Type</TableHead>
+                        <TableHead className="text-gray-300">Effect</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {[
+                        ["meta", "title", "text", "Browser tab title"],
+                        ["brand", "name", "text", "Logo / nav brand"],
+                        ["nav", "getStarted", "text", "Primary nav CTA"],
+                        ["hero", "badge", "text", "Hero pill"],
+                        ["hero", "titleLine1", "text", "Hero headline line 1"],
+                        ["hero", "titleLine2", "text", "Hero headline accent"],
+                        ["hero", "subtitle", "text", "Hero paragraph"],
+                        ["hero", "backgroundImageUrl", "image", "Hero background"],
+                        ["pricing", "designHeading", "text", "Design cards heading"],
+                        ["design", "onn-google-hd.name", "text", "Card title (HD package)"],
+                        ["design", "onn-google-4k.image", "image", "Card image URL (4K)"],
+                        ["_config", "payload", "json", "Partial ShadowCmsState merge"],
+                      ].map(([sec, el, typ, note]) => (
+                        <TableRow key={`sh-${sec}-${el}`} className="border-gray-700">
+                          <TableCell className="font-mono text-xs text-amber-200">{sec}</TableCell>
+                          <TableCell className="font-mono text-xs text-amber-100">{el}</TableCell>
                           <TableCell className="text-gray-400 text-sm">{typ}</TableCell>
                           <TableCell className="text-gray-300 text-sm">{note}</TableCell>
                         </TableRow>
@@ -7943,7 +8059,8 @@ export default function AdminPanel() {
                       className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600"
                       data-testid="select-page-id"
                     >
-                      <option value="main">Main Store</option>
+                      <option value="main">Main Store (public homepage)</option>
+                      <option value="shadow">Cloaked storefront</option>
                       <option value="checkout">Checkout</option>
                       <option value="blog">Blog</option>
                       <option value="success">Success Page</option>
@@ -7985,50 +8102,98 @@ export default function AdminPanel() {
                       <option value="paragraph">Paragraph</option>
                       <option value="button">Button</option>
                       <option value="image">Image</option>
+                      <option value="json">JSON (arrays / advanced)</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 mb-2">Quick fields (homepage main)</p>
+                  <p className="text-xs font-semibold text-gray-400 mb-2">
+                    Quick fields ({editingPageEdit.pageId === "shadow" ? "cloaked storefront" : "public homepage"})
+                  </p>
                   <div className="flex flex-wrap gap-2">
-                    {(
-                      [
-                        { label: "Hero title", patch: { sectionId: "hero", elementId: "title", elementType: "text" as const } },
-                        { label: "Hero subtitle", patch: { sectionId: "hero", elementId: "subtitle", elementType: "text" as const } },
-                        { label: "Hero proof", patch: { sectionId: "hero", elementId: "proofline", elementType: "text" as const } },
-                        { label: "Hero bg image", patch: { sectionId: "hero", elementId: "backgroundImageUrl", elementType: "image" as const } },
-                        { label: "SEO title", patch: { sectionId: "meta", elementId: "title", elementType: "text" as const } },
-                        { label: "SEO description", patch: { sectionId: "meta", elementId: "description", elementType: "text" as const } },
-                        { label: "Trust bar", patch: { sectionId: "trustBar", elementId: "text", elementType: "text" as const } },
-                        { label: "FAQ title", patch: { sectionId: "faq", elementId: "title", elementType: "text" as const } },
-                      ] as const
-                    ).map((row) => (
-                      <Button
-                        key={row.label}
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="border-gray-600 text-gray-200 text-xs"
-                        onClick={() =>
-                          setEditingPageEdit({
-                            ...editingPageEdit,
-                            pageId: "main",
-                            ...row.patch,
-                            content:
-                              row.patch.elementType === "image"
-                                ? ""
-                                : editingPageEdit.content || "",
-                            imageUrl:
-                              row.patch.elementType === "image"
-                                ? editingPageEdit.imageUrl || ""
-                                : null,
-                          })
-                        }
-                      >
-                        {row.label}
-                      </Button>
-                    ))}
+                    {editingPageEdit.pageId === "shadow"
+                      ? (
+                          [
+                            { label: "Brand name", patch: { sectionId: "brand", elementId: "name", elementType: "text" as const } },
+                            { label: "Tab title", patch: { sectionId: "meta", elementId: "title", elementType: "text" as const } },
+                            { label: "Hero badge", patch: { sectionId: "hero", elementId: "badge", elementType: "text" as const } },
+                            { label: "Hero line 1", patch: { sectionId: "hero", elementId: "titleLine1", elementType: "text" as const } },
+                            { label: "Hero accent", patch: { sectionId: "hero", elementId: "titleLine2", elementType: "text" as const } },
+                            { label: "Hero subtitle", patch: { sectionId: "hero", elementId: "subtitle", elementType: "text" as const } },
+                            { label: "Hero bg", patch: { sectionId: "hero", elementId: "backgroundImageUrl", elementType: "image" as const } },
+                            { label: "HD card title", patch: { sectionId: "design", elementId: "onn-google-hd.name", elementType: "text" as const } },
+                            { label: "4K card title", patch: { sectionId: "design", elementId: "onn-google-4k.name", elementType: "text" as const } },
+                            { label: "Full JSON patch", patch: { sectionId: "_config", elementId: "payload", elementType: "json" as const } },
+                          ] as const
+                        ).map((row) => (
+                          <Button
+                            key={row.label}
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="border-amber-900/80 text-amber-100 text-xs"
+                            onClick={() =>
+                              setEditingPageEdit({
+                                ...editingPageEdit,
+                                pageId: "shadow",
+                                ...row.patch,
+                                content:
+                                  row.patch.elementType === "image"
+                                    ? ""
+                                    : row.patch.elementType === "json"
+                                      ? "{\n  \"brand\": { \"name\": \"Your Agency\" }\n}"
+                                      : editingPageEdit.content || "",
+                                imageUrl:
+                                  row.patch.elementType === "image"
+                                    ? editingPageEdit.imageUrl || ""
+                                    : null,
+                              })
+                            }
+                          >
+                            {row.label}
+                          </Button>
+                        ))
+                      : (
+                          [
+                            { label: "Hero title", patch: { sectionId: "hero", elementId: "title", elementType: "text" as const } },
+                            { label: "Hero subtitle", patch: { sectionId: "hero", elementId: "subtitle", elementType: "text" as const } },
+                            { label: "Hero proof", patch: { sectionId: "hero", elementId: "proofline", elementType: "text" as const } },
+                            { label: "Hero bg image", patch: { sectionId: "hero", elementId: "backgroundImageUrl", elementType: "image" as const } },
+                            { label: "SEO title", patch: { sectionId: "meta", elementId: "title", elementType: "text" as const } },
+                            { label: "SEO description", patch: { sectionId: "meta", elementId: "description", elementType: "text" as const } },
+                            { label: "Trust bar", patch: { sectionId: "trustBar", elementId: "text", elementType: "text" as const } },
+                            { label: "FAQ title", patch: { sectionId: "faq", elementId: "title", elementType: "text" as const } },
+                            { label: "Product cards JSON", patch: { sectionId: "productCards", elementId: "json", elementType: "json" as const } },
+                          ] as const
+                        ).map((row) => (
+                          <Button
+                            key={row.label}
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="border-gray-600 text-gray-200 text-xs"
+                            onClick={() =>
+                              setEditingPageEdit({
+                                ...editingPageEdit,
+                                pageId: "main",
+                                ...row.patch,
+                                content:
+                                  row.patch.elementType === "image"
+                                    ? ""
+                                    : row.patch.elementType === "json"
+                                      ? "[]"
+                                      : editingPageEdit.content || "",
+                                imageUrl:
+                                  row.patch.elementType === "image"
+                                    ? editingPageEdit.imageUrl || ""
+                                    : null,
+                              })
+                            }
+                          >
+                            {row.label}
+                          </Button>
+                        ))}
                   </div>
                 </div>
 
@@ -8054,6 +8219,18 @@ export default function AdminPanel() {
                         />
                       </div>
                     )}
+                  </div>
+                ) : editingPageEdit.elementType === 'json' ? (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">JSON</label>
+                    <textarea
+                      value={editingPageEdit.content || ''}
+                      onChange={(e) => setEditingPageEdit({ ...editingPageEdit, content: e.target.value })}
+                      className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 min-h-[280px] font-mono text-sm"
+                      placeholder='[...] or { "hero": { ... } }'
+                      data-testid="input-content-json"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">Must be valid JSON. Invalid JSON is ignored on the storefront.</p>
                   </div>
                 ) : (
                   <div>

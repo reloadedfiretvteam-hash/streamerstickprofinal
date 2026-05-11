@@ -13,6 +13,25 @@ export type HomeCmsOverrideEdit = {
   isActive?: boolean | null;
 };
 
+function mergeDeepTarget(target: Record<string, unknown>, source: Record<string, unknown>): void {
+  for (const [k, v] of Object.entries(source)) {
+    if (v === undefined) continue;
+    const cur = target[k];
+    if (
+      v !== null &&
+      typeof v === "object" &&
+      !Array.isArray(v) &&
+      cur !== null &&
+      typeof cur === "object" &&
+      !Array.isArray(cur)
+    ) {
+      mergeDeepTarget(cur as Record<string, unknown>, v as Record<string, unknown>);
+    } else {
+      target[k] = v as unknown;
+    }
+  }
+}
+
 function deepSet(obj: Record<string, unknown>, path: string[], value: string): void {
   let cur: Record<string, unknown> = obj;
   for (let i = 0; i < path.length - 1; i++) {
@@ -96,6 +115,32 @@ export function applySupabasePageEditsToHomeCms<T extends Record<string, unknown
     } else if (sec === "visualBenefits" && (el === "title" || el === "subtitle")) {
       out.visualBenefits = (out.visualBenefits as Record<string, unknown>) || {};
       (out.visualBenefits as Record<string, unknown>)[el] = val;
+    } else if (sec === "productCards" && el === "json") {
+      try {
+        out.productCards = JSON.parse(val);
+      } catch {
+        /* ignore */
+      }
+    } else if (sec === "advantages" && el === "json") {
+      try {
+        out.advantages = JSON.parse(val);
+      } catch {
+        /* ignore */
+      }
+    } else if (sec === "faq" && el === "itemsJson") {
+      try {
+        out.faq = (out.faq as Record<string, unknown>) || {};
+        (out.faq as Record<string, unknown>).items = JSON.parse(val);
+      } catch {
+        /* ignore */
+      }
+    } else if (sec === "_config" && el === "homeJson" && e.elementType === "json") {
+      try {
+        const patch = JSON.parse(val) as Record<string, unknown>;
+        mergeDeepTarget(out, patch);
+      } catch {
+        /* ignore */
+      }
     }
   }
 

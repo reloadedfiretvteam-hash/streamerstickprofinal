@@ -55,6 +55,8 @@ export interface Env {
   WP_ORIGIN?: string;
   WORDPRESS_URL?: string;
   WP_HOME_PAGE_SLUG?: string;
+  /** Cloaked storefront JSON page (optional); defaults to streamstick-shadow-v1 */
+  WP_SHADOW_PAGE_SLUG?: string;
   WP_PRICING_PAGE_SLUG?: string;
   WP_APPLICATION_USER?: string;
   WP_APPLICATION_PASSWORD?: string;

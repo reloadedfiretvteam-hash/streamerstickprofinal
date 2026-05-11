@@ -11,16 +11,13 @@ import { useToast } from "@/hooks/use-toast";
 import { SitePromotionBanner, type PublicPromotion } from "@/components/SitePromotionBanner";
 import { WeekPromotionStrip } from "@/components/WeekPromotionStrip";
 import { iptvRealProductId } from "@/lib/iptv-sku";
+import { buildShadowCmsState, SHADOW_CMS_DEFAULTS, type ShadowCmsState } from "@/lib/shadow-cms";
+import type { HomeCmsOverrideEdit } from "@/lib/merge-home-cms-overrides";
 
-const SUPABASE_URL = "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/shadow-store";
-const heroBg = `${SUPABASE_URL}/modern_abstract_digi_3506c264.jpg`;
-
-const productImages = {
-  basic: `${SUPABASE_URL}/professional_web_des_bf1b8ff3.jpg`,
-  pro: `${SUPABASE_URL}/professional_web_des_596ca65d.jpg`,
-  enterprise: `${SUPABASE_URL}/professional_web_des_a7242567.jpg`,
-  seo: `${SUPABASE_URL}/seo_digital_marketin_96956a51.jpg`,
-  dev: `${SUPABASE_URL}/web_development_codi_7a6c5037.jpg`,
+/** Display-only fallback when /api/products has not loaded yet */
+const DESIGN_PRICE_FALLBACK: Record<string, number> = {
+  "onn-google-hd": 150,
+  "onn-google-4k": 160,
 };
 
 interface ShadowProduct {
@@ -124,81 +121,6 @@ const seoPricingMatrix: SEOPricingTier[] = [
   },
 ];
 
-/** Cloaked “web design” facade; real_product_id matches Supabase (onn-google-*). */
-const shadowProducts: ShadowProduct[] = [
-  {
-    id: "onn-google-hd",
-    name: "Basic Web Design",
-    shadowName: "Web Design Basic",
-    price: 150,
-    description:
-      "Perfect for personal blogs, portfolios, and small business landing pages. Includes responsive design and basic SEO setup.",
-    features: [
-      "5 Custom Pages",
-      "Mobile Responsive",
-      "Contact Form Integration",
-      "Basic SEO Setup",
-      "1 Round of Revisions",
-      "2 Week Delivery",
-    ],
-    category: "design",
-    period: "/project",
-    image: productImages.basic,
-  },
-  {
-    id: "onn-google-4k",
-    name: "Professional Web Design",
-    shadowName: "Web Design Pro",
-    price: 160,
-    description:
-      "Ideal for growing businesses. Full-featured website with CMS integration, advanced SEO, and premium support.",
-    features: [
-      "10 Custom Pages",
-      "CMS Integration",
-      "Advanced SEO Package",
-      "Social Media Integration",
-      "Analytics Dashboard",
-      "3 Rounds of Revisions",
-      "Priority Support",
-    ],
-    category: "design",
-    popular: true,
-    period: "/project",
-    image: productImages.pro,
-  },
-];
-
-const testimonials = [
-  {
-    name: "Sarah Mitchell",
-    company: "Mitchell & Co. Law Firm",
-    text: "WebFlow Design transformed our outdated website into a modern, professional platform. Our client inquiries increased by 40% within the first month!",
-    rating: 5,
-    image: "SM"
-  },
-  {
-    name: "David Chen",
-    company: "TechStart Solutions",
-    text: "The team delivered exactly what we needed - a sleek, fast website that converts visitors into customers. Highly recommend their Professional package.",
-    rating: 5,
-    image: "DC"
-  },
-  {
-    name: "Emily Rodriguez",
-    company: "Bloom Wellness Spa",
-    text: "From design to launch, the process was seamless. Our new site perfectly captures our brand and our online bookings have doubled.",
-    rating: 5,
-    image: "ER"
-  }
-];
-
-const portfolioItems = [
-  { name: "E-Commerce Platform", category: "Web Design", description: "Full-featured online store with payment integration" },
-  { name: "SaaS Dashboard", category: "Web Application", description: "Analytics dashboard for a tech startup" },
-  { name: "Restaurant Website", category: "Web Design", description: "Modern restaurant site with online ordering" },
-  { name: "Real Estate Portal", category: "Web Application", description: "Property listing platform with search" },
-];
-
 interface SelectedSEOProduct {
   productId: string;
   name: string;
@@ -225,6 +147,9 @@ export default function ShadowStore() {
   /** Direct checkout from homepage-style promo (real_product_id + Stripe promo price). */
   const [promoCheckout, setPromoCheckout] = useState<PublicPromotion | null>(null);
   const [apiProducts, setApiProducts] = useState<ApiRealProduct[]>([]);
+  const [shadowCms, setShadowCms] = useState<ShadowCmsState>(
+    () => JSON.parse(JSON.stringify(SHADOW_CMS_DEFAULTS)) as ShadowCmsState,
+  );
 
   useEffect(() => {
     (async () => {
@@ -239,15 +164,39 @@ export default function ShadowStore() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [wpRes, edRes] = await Promise.all([
+          apiCall("/api/cms/shadow"),
+          apiCall("/api/cms/page-overrides?pageId=shadow"),
+        ]);
+        const wpJson = wpRes.ok ? await wpRes.json().catch(() => ({})) : {};
+        const edJson = edRes.ok ? await edRes.json().catch(() => ({ data: [] })) : { data: [] };
+        const wpData = wpJson?.data ?? null;
+        const edits = (Array.isArray(edJson?.data) ? edJson.data : []) as HomeCmsOverrideEdit[];
+        const merged = buildShadowCmsState(wpData, edits);
+        if (!cancelled) setShadowCms(merged);
+      } catch {
+        if (!cancelled) {
+          setShadowCms(JSON.parse(JSON.stringify(SHADOW_CMS_DEFAULTS)) as ShadowCmsState);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     document.documentElement.classList.remove("dark");
     document.documentElement.classList.add("shadow-theme");
-    document.title = "Digital Solutions Agency | Web Design & SEO Services";
+    document.title = shadowCms.meta.title;
     return () => {
-       document.documentElement.classList.remove("shadow-theme");
-       document.documentElement.classList.add("dark");
-       document.title = "StreamStickPro - Premium Streaming Devices & Live TV";
-    }
-  }, []);
+      document.documentElement.classList.remove("shadow-theme");
+      document.documentElement.classList.add("dark");
+    };
+  }, [shadowCms.meta.title]);
 
   const handleSelectPlan = (product: ShadowProduct) => {
     setPromoCheckout(null);
@@ -315,13 +264,29 @@ export default function ShadowStore() {
   };
 
   const designProductsLive = useMemo(() => {
-    const designProducts = shadowProducts.filter((p) => p.category === "design");
-    return designProducts.map((p) => {
-      const api = apiProducts.find((x) => x.id === p.id);
-      const { effective, list, promo } = effectiveDollarsFromApi(api, p.price);
-      return { base: { ...p, price: effective }, list, promo };
-    });
-  }, [apiProducts]);
+    return shadowCms.designProductIds
+      .map((id) => {
+        const row = shadowCms.designProducts[id];
+        if (!row) return null;
+        const api = apiProducts.find((x) => x.id === id);
+        const fallback = DESIGN_PRICE_FALLBACK[id] ?? 0;
+        const { effective, list, promo } = effectiveDollarsFromApi(api, fallback);
+        const base: ShadowProduct = {
+          id,
+          name: row.name,
+          shadowName: row.shadowName,
+          price: effective,
+          description: row.description,
+          features: row.features,
+          category: "design",
+          period: row.period,
+          image: row.image,
+          popular: row.popular,
+        };
+        return { base, list, promo };
+      })
+      .filter(Boolean) as Array<{ base: ShadowProduct; list?: number; promo?: string | null }>;
+  }, [apiProducts, shadowCms]);
 
   const seoPricingLive = useMemo(() => {
     return seoPricingMatrix.map((plan) => ({
@@ -347,7 +312,7 @@ export default function ShadowStore() {
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-2 font-semibold text-xl text-primary cursor-pointer" onClick={() => { setShowCheckout(false); setSelectedProduct(null); setSelectedSEOProduct(null); setPromoCheckout(null); }}>
               <LayoutGrid className="w-6 h-6" />
-              <span>WebFlow Design</span>
+              <span>{shadowCms.brand.name}</span>
             </div>
           </div>
         </nav>
@@ -440,19 +405,19 @@ export default function ShadowStore() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 font-semibold text-xl text-primary">
             <LayoutGrid className="w-6 h-6" />
-            <span>WebFlow Design</span>
+            <span>{shadowCms.brand.name}</span>
           </div>
           
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <a href="#services" className="hover:text-primary transition-colors">Services</a>
-            <a href="#portfolio" className="hover:text-primary transition-colors">Portfolio</a>
-            <a href="#pricing" className="hover:text-primary transition-colors">Pricing</a>
-            <a href="#testimonials" className="hover:text-primary transition-colors">Testimonials</a>
-            <a href="#contact" className="hover:text-primary transition-colors">Contact</a>
+            <a href="#services" className="hover:text-primary transition-colors">{shadowCms.nav.services}</a>
+            <a href="#portfolio" className="hover:text-primary transition-colors">{shadowCms.nav.portfolio}</a>
+            <a href="#pricing" className="hover:text-primary transition-colors">{shadowCms.nav.pricing}</a>
+            <a href="#testimonials" className="hover:text-primary transition-colors">{shadowCms.nav.testimonials}</a>
+            <a href="#contact" className="hover:text-primary transition-colors">{shadowCms.nav.contact}</a>
           </div>
 
           <Button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
-            Get Started
+            {shadowCms.nav.getStarted}
           </Button>
         </div>
       </nav>
@@ -470,7 +435,7 @@ export default function ShadowStore() {
 
       <section className="relative py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 -z-10 opacity-10">
-          <img src={heroBg} className="w-full h-full object-cover" alt="Digital background" loading="eager" width={1920} height={600} fetchPriority="high" />
+          <img src={shadowCms.hero.backgroundImageUrl} className="w-full h-full object-cover" alt="" loading="eager" width={1920} height={600} fetchPriority="high" />
         </div>
         
         <div className="container mx-auto px-4">
@@ -480,37 +445,36 @@ export default function ShadowStore() {
             className="max-w-3xl mx-auto text-center space-y-8"
           >
             <Badge variant="outline" className="px-4 py-1 text-primary border-primary/20 bg-primary/5">
-              Award-Winning Web Design Agency 2026
+              {shadowCms.hero.badge}
             </Badge>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">
-              Digital Experiences <br/>
-              <span className="text-primary">That Drive Growth</span>
+              {shadowCms.hero.titleLine1} <br/>
+              <span className="text-primary">{shadowCms.hero.titleLine2}</span>
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              We build high-performance websites, SEO strategies, and digital campaigns 
-              that transform businesses. Over 500+ successful projects delivered worldwide.
+              {shadowCms.hero.subtitle}
             </p>
             <div className="flex items-center justify-center gap-4">
               <Button size="lg" className="h-12 px-8" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
-                View Packages <ArrowRight className="ml-2 w-4 h-4" />
+                {shadowCms.hero.ctaPrimary} <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
               <Button size="lg" variant="outline" className="h-12 px-8" onClick={() => document.getElementById('portfolio')?.scrollIntoView({ behavior: 'smooth' })}>
-                Our Portfolio
+                {shadowCms.hero.ctaSecondary}
               </Button>
             </div>
             
             <div className="flex items-center justify-center gap-8 pt-8 text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-primary" />
-                <span className="text-sm">500+ Clients</span>
+                <span className="text-sm">{shadowCms.hero.stat1}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Award className="w-5 h-5 text-primary" />
-                <span className="text-sm">Award Winning</span>
+                <span className="text-sm">{shadowCms.hero.stat2}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Globe className="w-5 h-5 text-primary" />
-                <span className="text-sm">Worldwide Service</span>
+                <span className="text-sm">{shadowCms.hero.stat3}</span>
               </div>
             </div>
           </motion.div>
@@ -520,66 +484,33 @@ export default function ShadowStore() {
       <section id="services" className="py-24 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Our Services</h2>
+            <h2 className="text-3xl font-bold mb-4">{shadowCms.services.title}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              From stunning websites to comprehensive SEO strategies, we provide everything your business needs to succeed online.
+              {shadowCms.services.subtitle}
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="border-none shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 text-primary">
-                  <MonitorIcon />
-                </div>
-                <CardTitle>Web Design</CardTitle>
-                <CardDescription>Responsive, modern websites built with the latest technologies.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0"/> Custom UI/UX Design</li>
-                  <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0"/> Mobile-First Responsive</li>
-                  <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0"/> SEO Optimized Structure</li>
-                  <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0"/> Fast Loading Performance</li>
-                </ul>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-none shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 text-primary">
-                  <SearchIcon />
-                </div>
-                <CardTitle>SEO & Marketing</CardTitle>
-                <CardDescription>Rank higher and drive more organic traffic to your site.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0"/> Keyword Research & Strategy</li>
-                  <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0"/> On-Page Optimization</li>
-                  <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0"/> Content Strategy</li>
-                  <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0"/> Monthly Analytics Reports</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 text-primary">
-                  <Code />
-                </div>
-                <CardTitle>Custom Development</CardTitle>
-                <CardDescription>Tailored solutions for complex business requirements.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0"/> Custom Web Applications</li>
-                  <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0"/> API & Integration Development</li>
-                  <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0"/> Database Architecture</li>
-                  <li className="flex gap-2"><Check className="w-4 h-4 text-primary flex-shrink-0"/> Cloud Infrastructure</li>
-                </ul>
-              </CardContent>
-            </Card>
+            {shadowCms.services.cards.map((card, idx) => (
+              <Card key={idx} className="border-none shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 text-primary">
+                    {idx === 0 ? <MonitorIcon /> : idx === 1 ? <SearchIcon /> : <Code />}
+                  </div>
+                  <CardTitle>{card.title}</CardTitle>
+                  <CardDescription>{card.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {card.bullets.map((line, i) => (
+                      <li key={i} className="flex gap-2">
+                        <Check className="w-4 h-4 text-primary flex-shrink-0" /> {line}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -587,12 +518,12 @@ export default function ShadowStore() {
       <section id="portfolio" className="py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Our Portfolio</h2>
-            <p className="text-muted-foreground">A selection of our recent work across various industries.</p>
+            <h2 className="text-3xl font-bold mb-4">{shadowCms.portfolio.title}</h2>
+            <p className="text-muted-foreground">{shadowCms.portfolio.subtitle}</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {portfolioItems.map((item, i) => (
+            {shadowCms.portfolioItems.map((item, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -615,11 +546,11 @@ export default function ShadowStore() {
       <section id="pricing" className="py-24 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Transparent Pricing</h2>
-            <p className="text-muted-foreground">Choose the package that fits your business needs. No hidden fees.</p>
+            <h2 className="text-3xl font-bold mb-4">{shadowCms.pricing.title}</h2>
+            <p className="text-muted-foreground">{shadowCms.pricing.subtitle}</p>
           </div>
 
-          <h3 className="text-xl font-semibold mb-6 text-center">Web Design Packages</h3>
+          <h3 className="text-xl font-semibold mb-6 text-center">{shadowCms.pricing.designHeading}</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
             {designProductsLive.map(({ base: product, list, promo }) => (
               <motion.div
@@ -679,9 +610,9 @@ export default function ShadowStore() {
             ))}
           </div>
           
-          <h3 className="text-xl font-semibold mb-6 text-center">SEO & Marketing Packages</h3>
+          <h3 className="text-xl font-semibold mb-6 text-center">{shadowCms.pricing.seoHeading}</h3>
           <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Choose your package duration and tier. Higher tiers include more keywords, pages, and dedicated support.
+            {shadowCms.pricing.seoSubtitle}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {seoPricingLive.map((plan) => {
@@ -773,12 +704,12 @@ export default function ShadowStore() {
       <section id="testimonials" className="py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">What Our Clients Say</h2>
-            <p className="text-muted-foreground">Don't just take our word for it - hear from our satisfied clients.</p>
+            <h2 className="text-3xl font-bold mb-4">{shadowCms.testimonials.title}</h2>
+            <p className="text-muted-foreground">{shadowCms.testimonials.subtitle}</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {testimonials.map((testimonial, i) => (
+            {shadowCms.testimonialCards.map((testimonial, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -788,14 +719,14 @@ export default function ShadowStore() {
                 <Card className="h-full">
                   <CardContent className="pt-6">
                     <div className="flex gap-1 mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      {[...Array(testimonial.rating)].map((_, j) => (
+                        <Star key={j} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                       ))}
                     </div>
                     <p className="text-muted-foreground mb-6 italic">"{testimonial.text}"</p>
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
-                        {testimonial.image}
+                        {testimonial.initials}
                       </div>
                       <div>
                         <div className="font-semibold text-sm">{testimonial.name}</div>
@@ -814,15 +745,15 @@ export default function ShadowStore() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div>
-              <h2 className="text-2xl font-bold mb-2">Ready to Transform Your Online Presence?</h2>
-              <p className="text-primary-foreground/80">Get started today and see results within weeks.</p>
+              <h2 className="text-2xl font-bold mb-2">{shadowCms.ctaBand.title}</h2>
+              <p className="text-primary-foreground/80">{shadowCms.ctaBand.subtitle}</p>
             </div>
             <div className="flex gap-4">
               <Button size="lg" variant="secondary" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
-                View Pricing
+                {shadowCms.ctaBand.primary}
               </Button>
               <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
-                Contact Us
+                {shadowCms.ctaBand.secondary}
               </Button>
             </div>
           </div>
@@ -833,8 +764,8 @@ export default function ShadowStore() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4">Get In Touch</h2>
-              <p className="text-muted-foreground">Have a project in mind? We'd love to hear from you.</p>
+              <h2 className="text-3xl font-bold mb-4">{shadowCms.contact.title}</h2>
+              <p className="text-muted-foreground">{shadowCms.contact.subtitle}</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -842,22 +773,22 @@ export default function ShadowStore() {
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary">
                   <Mail className="w-6 h-6" />
                 </div>
-                <h3 className="font-semibold mb-2">Email Us</h3>
-                <p className="text-muted-foreground text-sm">hello@webflowdesign.com</p>
+                <h3 className="font-semibold mb-2">{shadowCms.contact.emailLabel}</h3>
+                <p className="text-muted-foreground text-sm">{shadowCms.contact.email}</p>
               </div>
               <div className="text-center p-6">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary">
                   <Phone className="w-6 h-6" />
                 </div>
-                <h3 className="font-semibold mb-2">Call Us</h3>
-                <p className="text-muted-foreground text-sm">+1 (555) 123-4567</p>
+                <h3 className="font-semibold mb-2">{shadowCms.contact.phoneLabel}</h3>
+                <p className="text-muted-foreground text-sm">{shadowCms.contact.phone}</p>
               </div>
               <div className="text-center p-6">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary">
                   <MapPin className="w-6 h-6" />
                 </div>
-                <h3 className="font-semibold mb-2">Visit Us</h3>
-                <p className="text-muted-foreground text-sm">123 Design Street, NY 10001</p>
+                <h3 className="font-semibold mb-2">{shadowCms.contact.addressLabel}</h3>
+                <p className="text-muted-foreground text-sm">{shadowCms.contact.address}</p>
               </div>
             </div>
           </div>
@@ -870,9 +801,9 @@ export default function ShadowStore() {
             <div>
               <div className="flex items-center gap-2 font-semibold text-xl text-primary mb-4">
                 <LayoutGrid className="w-5 h-5" />
-                <span>WebFlow Design</span>
+                <span>{shadowCms.brand.name}</span>
               </div>
-              <p className="text-sm">Creating digital masterpieces for modern brands since 2018.</p>
+              <p className="text-sm">{shadowCms.footer.tagline}</p>
             </div>
             <div>
               <h4 className="font-semibold mb-4 text-foreground">Services</h4>
@@ -903,7 +834,7 @@ export default function ShadowStore() {
             </div>
           </div>
           <div className="border-t pt-8 text-center text-sm">
-            <p>© 2026 WebFlow Design Agency. All rights reserved.</p>
+            <p>{shadowCms.footer.copyright}</p>
           </div>
         </div>
       </footer>
