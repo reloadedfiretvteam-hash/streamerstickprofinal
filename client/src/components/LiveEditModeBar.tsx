@@ -46,6 +46,17 @@ export function LiveEditModeBar() {
             size="sm"
             className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"
             onClick={() => {
+              window.open("/admin#change-pricing", "_blank", "noopener,noreferrer");
+            }}
+          >
+            Price guide
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="border-amber-600/50 text-amber-100 hover:bg-amber-950/80"
+            onClick={() => {
               window.open("/admin#visual-editor", "_blank", "noopener,noreferrer");
             }}
           >

@@ -369,6 +369,7 @@ export default function AdminPanel() {
     if (!raw) return;
     const allowed = new Set([
       "dashboard",
+      "change-pricing",
       "products",
       "site-promotion",
       "visitors",
@@ -2516,12 +2517,23 @@ export default function AdminPanel() {
             <LayoutDashboard className="w-4 h-4 mr-3" /> Dashboard
           </Button>
           <Button 
+            variant={activeSection === "change-pricing" ? "secondary" : "ghost"} 
+            className="w-full justify-start bg-emerald-900/20 text-emerald-100 hover:text-white hover:bg-emerald-900/35 border border-emerald-700/30"
+            onClick={() => {
+              setActiveSection("change-pricing");
+              if (!products.length) loadProducts();
+            }}
+            data-testid="nav-change-pricing"
+          >
+            <DollarSign className="w-4 h-4 mr-3" /> Change prices (easy guide)
+          </Button>
+          <Button 
             variant={activeSection === "products" ? "secondary" : "ghost"} 
             className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
             onClick={() => setActiveSection("products")}
             data-testid="nav-products"
           >
-            <Package className="w-4 h-4 mr-3" /> Products
+            <Package className="w-4 h-4 mr-3" /> Products &amp; checkout prices
           </Button>
           <Button 
             variant={activeSection === "site-promotion" ? "secondary" : "ghost"} 
@@ -2533,7 +2545,7 @@ export default function AdminPanel() {
             }}
             data-testid="nav-site-promotion"
           >
-            <Zap className="w-4 h-4 mr-3" /> Live page promotion
+            <Zap className="w-4 h-4 mr-3" /> Sale popup &amp; banner
             {sitePromotionDraft.is_active ? (
               <Badge className="ml-auto bg-amber-500 text-white text-xs">On</Badge>
             ) : null}
@@ -2572,7 +2584,7 @@ export default function AdminPanel() {
             onClick={() => { setActiveSection("site-cms"); loadSiteCmsPricing(); }}
             data-testid="nav-site-cms"
           >
-            <BookOpen className="w-4 h-4 mr-3" /> Site CMS (pricing JSON)
+            <BookOpen className="w-4 h-4 mr-3" /> Pricing page text (advanced)
           </Button>
           <Button 
             variant={activeSection === "fulfillment" ? "secondary" : "ghost"} 
@@ -2959,6 +2971,16 @@ export default function AdminPanel() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
+                    <Button
+                      className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold"
+                      onClick={() => {
+                        setActiveSection("change-pricing");
+                        if (!products.length) loadProducts();
+                      }}
+                      data-testid="dashboard-change-pricing-guide"
+                    >
+                      <DollarSign className="w-4 h-4 mr-2" /> Change prices — simple guide
+                    </Button>
                     <Button 
                       className="w-full bg-orange-500 hover:bg-orange-600" 
                       onClick={() => setActiveSection("products")}
@@ -3349,6 +3371,148 @@ export default function AdminPanel() {
             </div>
           )}
 
+          {activeSection === "change-pricing" && (
+            <div className="space-y-8 max-w-3xl">
+              <div>
+                <h2 className="text-3xl font-bold flex items-center gap-3 text-white">
+                  <DollarSign className="w-9 h-9 text-emerald-400" />
+                  Change prices (simple)
+                </h2>
+                <p className="text-gray-300 mt-3 text-lg leading-relaxed">
+                  You do not need to be technical. Follow the steps in order.{" "}
+                  <strong className="text-white">Step 1</strong> controls what people actually pay in checkout for
+                  subscriptions and device kits—that is what most store owners use.
+                </p>
+              </div>
+
+              <Card className="bg-gradient-to-br from-emerald-950/60 to-gray-900 border-emerald-500/40 shadow-lg shadow-emerald-900/20">
+                <CardHeader className="pb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                    <span
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-gray-950 font-black text-xl"
+                      aria-hidden
+                    >
+                      1
+                    </span>
+                    <div>
+                      <CardTitle className="text-white text-xl">Regular store prices (checkout)</CardTitle>
+                      <CardDescription className="text-emerald-100/95 text-base mt-2 leading-relaxed">
+                        Change dollar amounts for IPTV plans, ONN kits, and anything else you sell. Click the pencil on a
+                        product, set <strong className="text-white">list price</strong> and optional{" "}
+                        <strong className="text-white">sale price</strong>, then save. The site and payment system stay in
+                        sync automatically.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-3">
+                  <Button
+                    className="bg-emerald-600 hover:bg-emerald-500 font-semibold"
+                    onClick={() => {
+                      setActiveSection("products");
+                      if (!products.length) loadProducts();
+                    }}
+                    data-testid="guide-open-products"
+                  >
+                    <Package className="w-4 h-4 mr-2" />
+                    Open Products &amp; checkout prices
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-amber-950/50 to-gray-900 border-amber-500/35">
+                <CardHeader className="pb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                    <span
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-500 text-gray-950 font-black text-xl"
+                      aria-hidden
+                    >
+                      2
+                    </span>
+                    <div>
+                      <CardTitle className="text-white text-xl">Special sale popup (optional)</CardTitle>
+                      <CardDescription className="text-amber-100/90 text-base mt-2 leading-relaxed">
+                        A limited-time offer window on the homepage and secure shop. It does{" "}
+                        <strong className="text-white">not</strong> replace Step 1—it adds a separate deal with its own
+                        price. Turn it on only after you pick a product and create the promo price as the screen explains.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-3">
+                  <Button
+                    className="bg-amber-600 hover:bg-amber-500 text-gray-950 font-semibold"
+                    onClick={() => {
+                      setActiveSection("site-promotion");
+                      loadSitePromotion();
+                      if (!products.length) loadProducts();
+                    }}
+                    data-testid="guide-open-promotion"
+                  >
+                    <Zap className="w-4 h-4 mr-2" />
+                    Open sale popup &amp; banner
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gray-800/90 border-sky-600/35">
+                <CardHeader className="pb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                    <span
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sky-500 text-gray-950 font-black text-xl"
+                      aria-hidden
+                    >
+                      3
+                    </span>
+                    <div>
+                      <CardTitle className="text-white text-xl">Pricing page wording (optional, advanced)</CardTitle>
+                      <CardDescription className="text-gray-300 text-base mt-2 leading-relaxed">
+                        For the public <strong className="text-white">/pricing</strong> page only: text and optional
+                        Stripe price maps in one JSON block. Skip this unless you are comfortable editing structured text
+                        or someone set it up for you.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-3">
+                  <Button
+                    variant="outline"
+                    className="border-sky-500/50 text-sky-100 hover:bg-sky-950/50"
+                    onClick={() => {
+                      setActiveSection("site-cms");
+                      loadSiteCmsPricing();
+                    }}
+                    data-testid="guide-open-site-cms"
+                  >
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    Open pricing page editor
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="text-gray-400 hover:text-white"
+                    onClick={() => window.open("/pricing", "_blank", "noopener,noreferrer")}
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    View live /pricing
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gray-900 border-gray-600">
+                <CardHeader>
+                  <CardTitle className="text-white text-base flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    Quick checks after you save
+                  </CardTitle>
+                  <CardDescription className="text-gray-400 text-sm leading-relaxed space-y-2">
+                    <p>Open your real homepage in a private window and add something to the cart—total should match what you set.</p>
+                    <p>If you use the sale popup, click the offer and confirm the cart shows the promo amount.</p>
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+          )}
+
           {activeSection === "visitors" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
@@ -3721,11 +3885,17 @@ export default function AdminPanel() {
                     <Zap className="w-5 h-5 text-amber-400" />
                     Homepage &amp; shadow store promotion
                   </CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Banner on streamstickpro.com and secure storefront. Stripe charges the <strong className="text-gray-200">promo price ID</strong> only when
-                    the customer uses the banner (cart flag). Regular catalog prices are unchanged. Setup: select a catalog product that has a linked Stripe
-                    shadow product, enter promo dollars → <strong className="text-gray-200">Create Stripe price</strong> → <strong className="text-gray-200">Save promotion</strong> → turn on and confirm with Amen.
-                    The amount shown at checkout must match the Stripe price you created; the worker stores both the Price ID and cents in Supabase.
+                  <CardDescription className="text-gray-400 space-y-2">
+                    <p className="text-gray-200 font-medium">
+                      Plain English: this is the optional “limited time deal” window on your site—not your everyday prices.
+                      Everyday prices live under <strong className="text-white">Products &amp; checkout prices</strong> or the{" "}
+                      <strong className="text-white">Change prices (easy guide)</strong> screen.
+                    </p>
+                    <p>
+                      Stripe only charges the <strong className="text-gray-200">promo price</strong> when a shopper uses this
+                      offer. Pick a product, type the promo dollar amount, click <strong className="text-gray-200">Create Stripe price</strong>, then{" "}
+                      <strong className="text-gray-200">Save promotion</strong>, then turn it on and confirm. The checkout total must match the promo you set.
+                    </p>
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-gray-200">
@@ -3951,8 +4121,8 @@ export default function AdminPanel() {
                     Products Manager
                   </h2>
                   <p className="text-gray-400">
-                    Manage your products and pricing. Edits here update <strong className="text-gray-200">real_products</strong>, create a new{" "}
-                    <strong className="text-gray-200">Stripe price</strong> for checkout, and sync the cloaked <strong className="text-gray-200">shadow_products</strong> row.
+                    <span className="text-gray-200">This is your main price list:</span> edit a product, set prices, save. That updates the catalog and
+                    checkout together. Need a walkthrough? Open <strong className="text-white">Change prices (easy guide)</strong> in the left menu.
                   </p>
                 </div>
                 <Button 
@@ -4261,22 +4431,20 @@ export default function AdminPanel() {
 
               <Card className="bg-gray-900/80 border-amber-900/50">
                 <CardHeader>
-                  <CardTitle className="text-amber-100 text-base">When you change prices (read this)</CardTitle>
-                  <CardDescription className="text-gray-400 text-sm space-y-2">
+                  <CardTitle className="text-amber-100 text-base">When you change prices</CardTitle>
+                  <CardDescription className="text-gray-400 text-sm space-y-3">
+                    <p>
+                      Start with the left menu: <strong className="text-white">Change prices (easy guide)</strong> — it explains everything in plain language.
+                    </p>
                     <ol className="list-decimal list-inside space-y-1">
                       <li>
-                        In <strong className="text-gray-200">Products</strong>, edit sale/list price and click Save — the API creates a
-                        new Stripe price id so checkout matches.
+                        <strong className="text-gray-200">Products &amp; checkout prices</strong> — everyday amounts customers pay; save after each change.
                       </li>
                       <li>
-                        The <strong className="text-gray-200">/pricing</strong> page reads optional Stripe{" "}
-                        <code className="text-gray-300">price_…</code> maps from <strong className="text-gray-200">Site CMS</strong> (
-                        <code className="text-gray-300">cms_pricing_json</code>). Keep those maps aligned with Products, or labels and cart
-                        can disagree.
+                        <strong className="text-gray-200">Pricing page text (advanced)</strong> — optional JSON for the public /pricing page; skip unless you need it.
                       </li>
                       <li>
-                        <strong className="text-gray-200">Promotional banner</strong> uses its own Stripe promo price in{" "}
-                        <strong className="text-gray-200">Live page promotion</strong>; test with a small change before big launches.
+                        <strong className="text-gray-200">Sale popup &amp; banner</strong> — optional limited-time offer; separate from everyday prices.
                       </li>
                     </ol>
                   </CardDescription>
