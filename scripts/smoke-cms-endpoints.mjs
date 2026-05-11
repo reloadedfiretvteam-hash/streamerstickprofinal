@@ -6,6 +6,17 @@
  *   SMOKE_BASE=https://your-domain.com node scripts/smoke-cms-endpoints.mjs
  */
 const BASE = (process.env.SMOKE_BASE || "https://streamstickpro.com").replace(/\/+$/, "");
+const baseHost = (() => {
+  try {
+    return new URL(BASE).hostname.toLowerCase();
+  } catch {
+    return "";
+  }
+})();
+const expectShadowPricing =
+  process.env.SMOKE_EXPECT_SHADOW_PRICING === "1" ||
+  baseHost === "secure.streamstickpro.com" ||
+  baseHost.endsWith(".secure.streamstickpro.com");
 
 const paths = [
   "/api/cms/health",
@@ -17,7 +28,7 @@ const paths = [
   "/api/products",
 ];
 
-function assertShape(path, j) {
+function assertShape(path, j, pricingExpectShadow) {
   if (path.includes("health")) {
     if (j?.ok !== true) return "health: expected ok=true";
     if (j.wordpress !== false) return "health: expected wordpress=false (Supabase-only CMS)";
@@ -64,7 +75,7 @@ async function main() {
         const ct = res.headers.get("content-type") || "";
         if (ct.includes("application/json")) {
           const j = await res.json().catch(() => null);
-          if (j) shapeErr = assertShape(p, j);
+          if (j) shapeErr = assertShape(p, j, expectShadowPricing);
           if (p.includes("health")) hint += j?.ok === false ? " (health:ok=false)" : " (health+shape)";
           if (p.includes("shadow") && j && "data" in j && j.data == null) hint += " (null base + page_edits)";
           if (shapeErr) hint += ` SHAPE:${shapeErr}`;
