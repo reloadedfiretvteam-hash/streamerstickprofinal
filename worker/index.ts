@@ -17,6 +17,7 @@ import { createEmailCampaignRoutes } from './routes/email-campaigns';
 import { createProvisioningRoutes } from './routes/provisioning';
 import { createCmsRoutes } from './routes/cms';
 import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from './helpers';
+import { effectiveRealProductChargeCents } from '../shared/schema';
 
 export interface Env {
   /** Only used in CI by run-supabase-migration.ts; not required by worker at runtime */
@@ -238,13 +239,14 @@ const sitePromotionPublicHandler = async (c: Context<{ Bindings: Env }>) => {
     const row = await storage.getSitePromotionRow();
     if (!row?.is_active) return c.json({ promotion: null });
     if (row.ends_at && new Date(row.ends_at).getTime() < Date.now()) return c.json({ promotion: null });
+    if (!row.real_product_id) return c.json({ promotion: null });
     const p = await storage.getRealProduct(row.real_product_id);
-    if (!row.real_product_id || !p?.shadowPriceId) return c.json({ promotion: null });
     const configuredCents = Number(row.promo_amount_cents);
-    const cents =
-      Number.isFinite(configuredCents) && configuredCents > 0
-        ? configuredCents
-        : Number(p.salePrice ?? p.price);
+    const centsFromRow = Number.isFinite(configuredCents) && configuredCents > 0 ? configuredCents : null;
+    const centsFromProduct = p
+      ? effectiveRealProductChargeCents({ price: p.price, salePrice: p.salePrice ?? null })
+      : null;
+    const cents = centsFromRow ?? centsFromProduct;
     if (!Number.isFinite(cents) || cents <= 0) return c.json({ promotion: null });
     const version =
       String(row.updated_at || row.real_product_id || '') +

@@ -360,6 +360,34 @@ function clearStoredToken(): void {
 export default function AdminPanel() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    const raw =
+      typeof window !== "undefined" && window.location.hash
+        ? window.location.hash.replace(/^#/, "").trim()
+        : "";
+    if (!raw) return;
+    const allowed = new Set([
+      "dashboard",
+      "products",
+      "site-promotion",
+      "visitors",
+      "visual-editor",
+      "homepage-hq",
+      "site-cms",
+      "fulfillment",
+      "customers",
+      "email-marketing",
+      "blog",
+      "seo-ads",
+      "github",
+      "seo",
+      "infrastructure",
+      "ai-assistant",
+      "settings",
+    ]);
+    if (allowed.has(raw)) setActiveSection(raw);
+  }, []);
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);

@@ -14,13 +14,15 @@ async function fetchSitePromotionOnce(): Promise<PublicPromotion | null> {
     try {
       let res = await apiCall("/api/site-promotion-public");
       if (!res.ok) res = await apiCall("/api/promotion");
+      if (!res.ok) {
+        return null;
+      }
       const ct = res.headers.get("content-type") || "";
       if (!ct.includes("application/json")) {
-        cachedPromo = null;
-        cacheReady = true;
         return null;
       }
       const json = await res.json();
+      cacheReady = true;
       if (json?.promotion) {
         const p = json.promotion;
         cachedPromo = {
@@ -32,11 +34,8 @@ async function fetchSitePromotionOnce(): Promise<PublicPromotion | null> {
       } else {
         cachedPromo = null;
       }
-      cacheReady = true;
       return cachedPromo;
     } catch {
-      cachedPromo = null;
-      cacheReady = true;
       return null;
     } finally {
       inflight = null;

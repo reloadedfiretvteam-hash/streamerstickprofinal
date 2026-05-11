@@ -64,6 +64,7 @@ const LoadingFallback = () => (
   </div>
 );
 import CanonicalTag from "@/components/CanonicalTag";
+import { LiveEditModeBar } from "@/components/LiveEditModeBar";
 
 const SECURE_HOSTS = (import.meta.env.VITE_SECURE_HOSTS || 'secure.streamstickpro.com').split(',').map((h: string) => h.trim().toLowerCase());
 
@@ -78,18 +79,22 @@ function Router() {
   if (isShadow) {
     return (
       <Suspense fallback={<LoadingFallback />}>
-        <Switch>
-          <Route path="/" component={ShadowStore} />
-          <Route path="/checkout" component={Checkout} />
-          <Route path="/success" component={Success} />
-          <Route component={NotFound} />
-        </Switch>
+        <>
+          <Switch>
+            <Route path="/" component={ShadowStore} />
+            <Route path="/checkout" component={Checkout} />
+            <Route path="/success" component={Success} />
+            <Route component={NotFound} />
+          </Switch>
+          <LiveEditModeBar />
+        </>
       </Suspense>
     );
   }
   
   return (
     <Suspense fallback={<LoadingFallback />}>
+      <>
       <Switch>
         <Route path="/" component={MainStore} />
         <Route path="/homepage" component={MainStore} />
@@ -142,6 +147,8 @@ function Router() {
         <Route path="/checkout-secure" component={Checkout} />
         <Route component={NotFound} />
       </Switch>
+      <LiveEditModeBar />
+      </>
     </Suspense>
   );
 }
