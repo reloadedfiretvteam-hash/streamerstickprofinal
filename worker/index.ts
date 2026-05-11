@@ -65,6 +65,8 @@ export interface Env {
   WP_REST_BASIC_AUTH?: string;
   SHADOW_HOSTS?: string;
   VITE_SECURE_HOSTS?: string;
+  /** Optional JSON for /api/cms/pricing when site_settings.cms_pricing_json is empty */
+  CMS_PRICING_JSON?: string;
   ASSETS: { fetch: (request: Request) => Promise<Response> };
   /** Xtream-style panel API directory, e.g. http://host:port/WDXTMHmn (appends /api.php if needed) */
   IPTV_PANEL_API_BASE?: string;

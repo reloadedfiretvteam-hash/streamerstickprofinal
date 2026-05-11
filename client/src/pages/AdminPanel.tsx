@@ -336,34 +336,6 @@ const shadowProductMap: Record<string, string> = {
   "1 Year IPTV": "SEO Enterprise"
 };
 
-const WORDPRESS_ORIGIN_FALLBACK = "https://indigo-meerkat-253284.hostingersite.com";
-const WORDPRESS_ORIGIN = (
-  ((import.meta as any)?.env?.VITE_WP_ORIGIN as string | undefined) ||
-  ((import.meta as any)?.env?.VITE_WORDPRESS_URL as string | undefined) ||
-  WORDPRESS_ORIGIN_FALLBACK
-).replace(/\/+$/, "");
-const WORDPRESS_ADMIN_URL = `${WORDPRESS_ORIGIN}/wp-admin/`;
-
-type WordPressCmsStatus = {
-  loadedAt?: string;
-  origin: string;
-  pages: Array<{
-    key: "home" | "pricing";
-    label: string;
-    slug: string;
-    id?: number;
-    status?: string;
-    title?: string;
-    updatedAt?: string;
-    hasData: boolean;
-    liveApiUrl: string;
-    publicUrl: string;
-    editUrl: string;
-    details: string;
-    error?: string;
-  }>;
-};
-
 const AUTH_TOKEN_KEY = 'admin_auth_token';
 
 function getStoredToken(): string | null {
@@ -576,15 +548,11 @@ export default function AdminPanel() {
     fromEmail?: string;
     supabaseUrl?: string;
   } | null>(null);
-  const [wordpressCmsStatus, setWordpressCmsStatus] = useState<WordPressCmsStatus | null>(null);
-  const [loadingWordpressCms, setLoadingWordpressCms] = useState(false);
-  const [savingWordpressCms, setSavingWordpressCms] = useState<"home" | "pricing" | null>(null);
-  const [wordpressHomeDraft, setWordpressHomeDraft] = useState<any | null>(null);
-  const [wordpressPricingDraft, setWordpressPricingDraft] = useState<any | null>(null);
-  const [wordpressPriceMapsText, setWordpressPriceMapsText] = useState<{ shadow: string; live: string }>({
-    shadow: "{}",
-    live: "{}",
-  });
+  const [cmsPricingJsonText, setCmsPricingJsonText] = useState(
+    '{\n  "meta": {},\n  "hero": {},\n  "plans": [],\n  "faq": {},\n  "prices": { "shadow": {}, "live": {} }\n}',
+  );
+  const [loadingSiteCms, setLoadingSiteCms] = useState(false);
+  const [savingSiteCms, setSavingSiteCms] = useState(false);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToast({ message, type: type === 'info' ? 'success' : type });
@@ -722,131 +690,52 @@ export default function AdminPanel() {
     }
   };
 
-  const loadWordPressCmsStatus = async () => {
-    setLoadingWordpressCms(true);
+  const loadSiteCmsPricing = async () => {
+    setLoadingSiteCms(true);
     try {
-      const [homeRes, pricingRes, pagesRes] = await Promise.all([
-        apiCall('/api/cms/home'),
-        apiCall('/api/cms/pricing'),
-        apiCall('/api/cms/pages'),
-      ]);
-
-      const [homeJson, pricingJson, pagesJson] = await Promise.all([
-        homeRes.json().catch(() => null),
-        pricingRes.json().catch(() => null),
-        pagesRes.json().catch(() => null),
-      ]);
-      if (homeJson?.data && typeof homeJson.data === 'object') {
-        setWordpressHomeDraft(homeJson.data);
+      const res = await authFetch('/api/admin/site-settings');
+      const json = await res.json();
+      const raw = json?.data?.cms_pricing_json;
+      if (typeof raw === 'string' && raw.trim()) {
+        try {
+          setCmsPricingJsonText(JSON.stringify(JSON.parse(raw), null, 2));
+        } catch {
+          setCmsPricingJsonText(raw);
+        }
       }
-      if (pricingJson?.data && typeof pricingJson.data === 'object') {
-        setWordpressPricingDraft(pricingJson.data);
-        setWordpressPriceMapsText({
-          shadow: JSON.stringify(pricingJson.data.shadow || {}, null, 2),
-          live: JSON.stringify(pricingJson.data.live || {}, null, 2),
-        });
-      }
-      const wpPages = Array.isArray(pagesJson?.data) ? pagesJson.data : [];
-      const pageBySlug = new Map(wpPages.map((page: any) => [String(page.slug || ''), page]));
-
-      const buildPageStatus = (
-        key: "home" | "pricing",
-        label: string,
-        slug: string,
-        liveApiUrl: string,
-        publicUrl: string,
-        payload: any,
-      ) => {
-        const wpPage: any = pageBySlug.get(slug) || {};
-        const pageId = Number(payload?.id || wpPage.id || 0) || undefined;
-        const data = payload?.data && typeof payload.data === 'object' ? payload.data : null;
-        const meta = payload?.meta || {};
-        const planCount = Array.isArray(data?.plans) ? data.plans.length : 0;
-        const faqCount = Array.isArray(data?.faq?.items) ? data.faq.items.length : 0;
-        const details =
-          key === "pricing"
-            ? `${planCount} plans · ${faqCount} FAQs · ${data?.selectedMode || "live"} Stripe map`
-            : `${Array.isArray(data?.productCards) ? data.productCards.length : 0} cards · ${faqCount} FAQs`;
-
-        return {
-          key,
-          label,
-          slug,
-          id: pageId,
-          status: String(meta.pageStatus || wpPage.status || ''),
-          title: String(wpPage.title?.rendered || data?.meta?.title || label),
-          updatedAt: String(meta.updatedAt || wpPage.modified || ''),
-          hasData: !!data,
-          liveApiUrl,
-          publicUrl,
-          editUrl: pageId ? `${WORDPRESS_ADMIN_URL}post.php?post=${pageId}&action=edit` : WORDPRESS_ADMIN_URL,
-          details,
-          error: payload?.error || meta.error,
-        };
-      };
-
-      setWordpressCmsStatus({
-        loadedAt: new Date().toISOString(),
-        origin: WORDPRESS_ORIGIN,
-        pages: [
-          buildPageStatus("home", "Homepage CMS", "streamstick-home-v1", "/api/cms/home", "/", homeJson),
-          buildPageStatus("pricing", "Pricing CMS", "streamstick-pricing-v1", "/api/cms/pricing", "/pricing", pricingJson),
-        ],
-      });
     } catch (e: any) {
-      showToast(e?.message || 'Failed to load WordPress CMS status', 'error');
+      showToast(e?.message || 'Failed to load site settings', 'error');
     } finally {
-      setLoadingWordpressCms(false);
+      setLoadingSiteCms(false);
     }
   };
 
-  const updateWordpressHomeDraft = (recipe: (draft: any) => any) => {
-    setWordpressHomeDraft((current: any) => recipe({ ...(current || {}) }));
-  };
-
-  const updateWordpressPricingDraft = (recipe: (draft: any) => any) => {
-    setWordpressPricingDraft((current: any) => recipe({ ...(current || {}) }));
-  };
-
-  const saveWordPressCmsPage = async (key: "home" | "pricing") => {
-    const slug = key === "home" ? "streamstick-home-v1" : "streamstick-pricing-v1";
-    let data = key === "home" ? wordpressHomeDraft : wordpressPricingDraft;
-    if (!data || typeof data !== 'object') {
-      showToast('Load WordPress CMS status before saving', 'error');
+  const saveSiteCmsPricing = async () => {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(cmsPricingJsonText);
+    } catch {
+      showToast('cms_pricing_json must be valid JSON', 'error');
       return;
     }
-
-    if (key === "pricing") {
-      try {
-        data = {
-          ...data,
-          prices: {
-            shadow: JSON.parse(wordpressPriceMapsText.shadow || "{}"),
-            live: JSON.parse(wordpressPriceMapsText.live || "{}"),
-          },
-        };
-        setWordpressPricingDraft(data);
-      } catch {
-        showToast('Stripe price maps must be valid JSON', 'error');
-        return;
-      }
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      showToast('cms_pricing_json must be a JSON object', 'error');
+      return;
     }
-
-    setSavingWordpressCms(key);
+    setSavingSiteCms(true);
     try {
-      const response = await authFetch(`/api/cms/page/${slug}`, {
-        method: 'PUT',
+      const res = await authFetch('/api/admin/site-settings', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data }),
+        body: JSON.stringify({ cms_pricing_json: cmsPricingJsonText }),
       });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok || result.error) throw new Error(result.error || 'WordPress save failed');
-      showToast(`${key === "home" ? "Homepage" : "Pricing"} CMS saved to WordPress`, 'success');
-      await loadWordPressCmsStatus();
+      const result = await res.json().catch(() => ({}));
+      if (result.error) throw new Error(result.error);
+      showToast('Pricing CMS saved to Supabase (site_settings.cms_pricing_json)', 'success');
     } catch (e: any) {
-      showToast(e?.message || 'Failed to save WordPress CMS page', 'error');
+      showToast(e?.message || 'Save failed', 'error');
     } finally {
-      setSavingWordpressCms(null);
+      setSavingSiteCms(false);
     }
   };
 
@@ -2643,7 +2532,6 @@ export default function AdminPanel() {
             onClick={() => {
               setActiveSection("homepage-hq");
               loadPageEdits();
-              loadWordPressCmsStatus();
               loadPaymentHealth();
             }}
             data-testid="nav-homepage-hq"
@@ -2651,12 +2539,12 @@ export default function AdminPanel() {
             <Home className="w-4 h-4 mr-3" /> Site control
           </Button>
           <Button 
-            variant={activeSection === "wordpress-cms" ? "secondary" : "ghost"} 
+            variant={activeSection === "site-cms" ? "secondary" : "ghost"} 
             className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
-            onClick={() => { setActiveSection("wordpress-cms"); loadWordPressCmsStatus(); }}
-            data-testid="nav-wordpress-cms"
+            onClick={() => { setActiveSection("site-cms"); loadSiteCmsPricing(); }}
+            data-testid="nav-site-cms"
           >
-            <BookOpen className="w-4 h-4 mr-3" /> WordPress Headless
+            <BookOpen className="w-4 h-4 mr-3" /> Site CMS (pricing JSON)
           </Button>
           <Button 
             variant={activeSection === "fulfillment" ? "secondary" : "ghost"} 
@@ -4336,11 +4224,10 @@ export default function AdminPanel() {
                   Site control
                 </h2>
                 <p className="text-gray-400 mt-1 max-w-3xl">
-                  Public homepage (<code className="text-gray-300">pageId=main</code>), cloaked storefront (
-                  <code className="text-gray-300">pageId=shadow</code>), and checkout all share the same product IDs. WordPress holds
-                  base JSON where configured; Supabase <code className="text-gray-300">page_edits</code> overlays copy and images without
-                  a deploy. Amounts charged always follow Supabase <code className="text-gray-300">real_products</code> + Stripe after you
-                  save in Products.
+                  Everything is <strong className="text-gray-200">React admin + Supabase</strong>:{" "}
+                  <code className="text-gray-300">page_edits</code> for homepage and cloaked copy/images,{" "}
+                  <code className="text-gray-300">site_settings.cms_pricing_json</code> for the pricing page / Stripe price-id maps, and{" "}
+                  <code className="text-gray-300">real_products</code> + Stripe for what customers are actually charged.
                 </p>
               </div>
 
@@ -4354,10 +4241,10 @@ export default function AdminPanel() {
                         new Stripe price id so checkout matches.
                       </li>
                       <li>
-                        Card labels on the <strong className="text-gray-200">public IPTV site</strong> come from your catalog; on{" "}
-                        <strong className="text-gray-200">cloaked SEO pages</strong> IPTV tier numbers still come from WordPress{" "}
-                        <code className="text-gray-300">prices.shadow</code> — align those with what you actually charge, or customers see
-                        mismatched text vs cart.
+                        The <strong className="text-gray-200">/pricing</strong> page reads optional Stripe{" "}
+                        <code className="text-gray-300">price_…</code> maps from <strong className="text-gray-200">Site CMS</strong> (
+                        <code className="text-gray-300">cms_pricing_json</code>). Keep those maps aligned with Products, or labels and cart
+                        can disagree.
                       </li>
                       <li>
                         <strong className="text-gray-200">Promotional banner</strong> uses its own Stripe promo price in{" "}
@@ -4375,8 +4262,8 @@ export default function AdminPanel() {
                 <Badge className={envStatus?.hasSupabaseKey ? "bg-emerald-600" : "bg-amber-600"}>
                   Supabase {envStatus?.hasSupabaseKey ? "service OK" : "anon / check"}
                 </Badge>
-                <Badge className={wordpressCmsStatus ? "bg-emerald-600" : "bg-gray-600"}>
-                  WordPress CMS {wordpressCmsStatus ? "reachable" : "not verified"}
+                <Badge className="bg-sky-700 text-white">
+                  CMS: Supabase (no WordPress)
                 </Badge>
                 <Badge variant="outline" className="border-gray-500 text-gray-300">
                   Home overrides: {pageEdits.filter((e) => e.pageId === "main" && e.isActive).length}
@@ -4391,22 +4278,23 @@ export default function AdminPanel() {
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-2">
                       <BookOpen className="w-5 h-5 text-sky-400" />
-                      WordPress (base homepage JSON)
+                      IPTV pricing page JSON
                     </CardTitle>
                     <CardDescription className="text-gray-400">
-                      Hero, FAQ, trust copy, and structure. Updates the public <code className="text-gray-300">/api/cms/home</code>{" "}
-                      payload after cache (~5 min).
+                      Stored in Supabase <code className="text-gray-300">site_settings.cms_pricing_json</code>. Powers{" "}
+                      <code className="text-gray-300">/api/cms/pricing</code> (plans copy + optional{" "}
+                      <code className="text-gray-300">prices.shadow</code> / <code className="text-gray-300">live</code> Stripe id maps).
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Button
                       className="w-full bg-sky-600 hover:bg-sky-700"
                       onClick={() => {
-                        setActiveSection("wordpress-cms");
-                        loadWordPressCmsStatus();
+                        setActiveSection("site-cms");
+                        loadSiteCmsPricing();
                       }}
                     >
-                      Open WordPress Headless
+                      Open Site CMS
                     </Button>
                   </CardContent>
                 </Card>
@@ -4498,12 +4386,10 @@ export default function AdminPanel() {
                       Cloaked storefront (web-design facade)
                     </CardTitle>
                     <CardDescription className="text-gray-400">
-                      <code className="text-gray-300">/api/cms/shadow</code> (optional WordPress page{" "}
-                      <code className="text-gray-300">streamstick-shadow-v1</code>) +{" "}
-                      <code className="text-gray-300">page_edits</code> with <code className="text-gray-300">pageId=shadow</code>. Design
-                      package cards still checkout real SKUs (<code className="text-gray-300">onn-google-*</code>); only labels/images are
-                      cosmetic. IPTV tier grids on this page use the same product ids — prices shown pull from{" "}
-                      <code className="text-gray-300">/api/products</code>.
+                      Built-in defaults + <code className="text-gray-300">page_edits</code> with{" "}
+                      <code className="text-gray-300">pageId=shadow</code>. Design package cards still checkout real SKUs (
+                      <code className="text-gray-300">onn-google-*</code>); only labels/images are cosmetic. IPTV tier grids use the same
+                      product ids — amounts shown pull from <code className="text-gray-300">/api/products</code>.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2">
@@ -4520,11 +4406,11 @@ export default function AdminPanel() {
                       variant="outline"
                       className="w-full border-amber-700 text-amber-100"
                       onClick={() => {
-                        setActiveSection("wordpress-cms");
-                        loadWordPressCmsStatus();
+                        setActiveSection("site-cms");
+                        loadSiteCmsPricing();
                       }}
                     >
-                      WordPress: pricing JSON (prices.shadow) + optional shadow page
+                      Edit pricing JSON (Site CMS)
                     </Button>
                   </CardContent>
                 </Card>
@@ -4857,505 +4743,72 @@ export default function AdminPanel() {
             </div>
           )}
 
-          {activeSection === "wordpress-cms" && (
+          {activeSection === "site-cms" && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
                   <h2 className="text-3xl font-bold flex items-center gap-3">
-                    <BookOpen className="w-8 h-8 text-blue-400" />
-                    WordPress Headless Control
+                    <BookOpen className="w-8 h-8 text-sky-400" />
+                    Site CMS — pricing and maps
                   </h2>
-                  <p className="text-gray-400">
-                    WordPress is the faceless backend for published homepage and pricing content. Stripe checkout remains separate.
+                  <p className="text-gray-400 max-w-3xl">
+                    One JSON document in Supabase <code className="text-gray-300">site_settings.cms_pricing_json</code>. It feeds{" "}
+                    <code className="text-gray-300">/api/cms/pricing</code> (pricing page UI plus optional Stripe{" "}
+                    <code className="text-gray-300">price_...</code> maps for shadow vs live hosts). Homepage and cloaked copy live in the{" "}
+                    <strong className="text-gray-200">Visual Editor</strong> (<code className="text-gray-300">page_edits</code>), not here.
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  <a href={WORDPRESS_ADMIN_URL} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" className="border-blue-500/50 text-blue-200 hover:bg-blue-950/40">
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Open WordPress
-                    </Button>
-                  </a>
-                  <Button
-                    variant="outline"
-                    onClick={loadWordPressCmsStatus}
-                    disabled={loadingWordpressCms}
-                    className="border-gray-600 text-gray-300"
-                  >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${loadingWordpressCms ? "animate-spin" : ""}`} />
-                    Refresh Status
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={loadSiteCmsPricing} disabled={loadingSiteCms} className="border-gray-600 text-gray-300">
+                    <RefreshCw className={"w-4 h-4 mr-2 " + (loadingSiteCms ? "animate-spin" : "")} />
+                    Reload from Supabase
                   </Button>
                   <Button
                     variant="outline"
                     onClick={async () => {
                       try {
-                        const res = await fetch('/api/cms/health');
+                        const res = await fetch("/api/cms/health");
                         const json = await res.json();
-                        if (json.ok) {
-                          showToast(`WordPress connection OK. home #${json.pages?.home?.id}, pricing #${json.pages?.pricing?.id}`, 'success');
-                        } else {
-                          const reasons: string[] = [];
-                          if (!json.authConfigured) reasons.push('App Password not configured');
-                          if (json.reachable === false) reasons.push('WordPress unreachable');
-                          if (!json.pages?.home?.found) reasons.push('home page missing');
-                          if (!json.pages?.pricing?.found) reasons.push('pricing page missing');
-                          showToast(`WordPress check failed: ${reasons.join(', ') || 'see /api/cms/health'}`, 'error');
-                        }
+                        showToast(json.ok ? "CMS worker OK" : "Health check issue", json.ok ? "success" : "error");
                       } catch (e: any) {
-                        showToast(`Health check error: ${e?.message || e}`, 'error');
+                        showToast(e?.message || "Health failed", "error");
                       }
                     }}
-                    className="border-emerald-500/50 text-emerald-200 hover:bg-emerald-950/40"
+                    className="border-emerald-600/50 text-emerald-200"
                   >
-                    Verify Connection
+                    Ping /api/cms/health
                   </Button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="bg-gray-800 border-gray-700">
-                  <CardContent className="p-4">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">WordPress origin</p>
-                    <a
-                      href={WORDPRESS_ORIGIN}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-300 hover:underline mt-1 inline-flex items-center gap-1 break-all"
-                    >
-                      {WORDPRESS_ORIGIN}
-                      <ExternalLink className="w-3 h-3 shrink-0" />
-                    </a>
-                  </CardContent>
-                </Card>
-                <Card className="bg-gray-800 border-gray-700">
-                  <CardContent className="p-4">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Live CMS bridge</p>
-                    <p className="text-white font-medium mt-1">
-                      {wordpressCmsStatus ? "Connected" : loadingWordpressCms ? "Checking..." : "Not checked"}
-                    </p>
-                    <p className="text-sm text-gray-400 mt-1">Uses `/api/cms/*` through the Cloudflare Worker.</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-gray-800 border-gray-700">
-                  <CardContent className="p-4">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Last verified</p>
-                    <p className="text-white font-medium mt-1">
-                      {wordpressCmsStatus?.loadedAt ? new Date(wordpressCmsStatus.loadedAt).toLocaleString() : "Run refresh"}
-                    </p>
-                    <p className="text-sm text-gray-400 mt-1">Public checks only; no secrets are displayed.</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {(wordpressHomeDraft || wordpressPricingDraft) && (
-                <Tabs defaultValue="home" className="space-y-4">
-                  <TabsList className="bg-gray-800 border border-gray-700">
-                    <TabsTrigger value="home">Homepage Editor</TabsTrigger>
-                    <TabsTrigger value="pricing">Pricing Editor</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="home">
-                    <Card className="bg-gray-800 border-gray-700">
-                      <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
-                          <Palette className="w-5 h-5 text-blue-400" />
-                          Homepage WordPress Controls
-                        </CardTitle>
-                        <CardDescription className="text-gray-400">
-                          These fields save back to `streamstick-home-v1` in WordPress and feed the real homepage through `/api/cms/home`.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">SEO Title</label>
-                            <Input
-                              value={wordpressHomeDraft?.meta?.title || ''}
-                              onChange={(e) => updateWordpressHomeDraft((draft) => ({ ...draft, meta: { ...(draft.meta || {}), title: e.target.value } }))}
-                              className="bg-gray-700 border-gray-600 text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Hero Title</label>
-                            <Input
-                              value={wordpressHomeDraft?.hero?.title || ''}
-                              onChange={(e) => updateWordpressHomeDraft((draft) => ({ ...draft, hero: { ...(draft.hero || {}), title: e.target.value } }))}
-                              className="bg-gray-700 border-gray-600 text-white"
-                            />
-                          </div>
-                          <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-300 mb-2">SEO Description</label>
-                            <textarea
-                              value={wordpressHomeDraft?.meta?.description || ''}
-                              onChange={(e) => updateWordpressHomeDraft((draft) => ({ ...draft, meta: { ...(draft.meta || {}), description: e.target.value } }))}
-                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white min-h-[80px]"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Hero Subtitle</label>
-                            <Input
-                              value={wordpressHomeDraft?.hero?.subtitle || ''}
-                              onChange={(e) => updateWordpressHomeDraft((draft) => ({ ...draft, hero: { ...(draft.hero || {}), subtitle: e.target.value } }))}
-                              className="bg-gray-700 border-gray-600 text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Proof Line</label>
-                            <Input
-                              value={wordpressHomeDraft?.hero?.proofline || ''}
-                              onChange={(e) => updateWordpressHomeDraft((draft) => ({ ...draft, hero: { ...(draft.hero || {}), proofline: e.target.value } }))}
-                              data-testid="wp-hero-proofline"
-                              className="bg-gray-700 border-gray-600 text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Support Email</label>
-                            <Input
-                              value={wordpressHomeDraft?.support?.email || ''}
-                              onChange={(e) => updateWordpressHomeDraft((draft) => ({ ...draft, support: { ...(draft.support || {}), email: e.target.value } }))}
-                              className="bg-gray-700 border-gray-600 text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">WhatsApp URL</label>
-                            <Input
-                              value={wordpressHomeDraft?.support?.whatsappUrl || ''}
-                              onChange={(e) => updateWordpressHomeDraft((draft) => ({ ...draft, support: { ...(draft.support || {}), whatsappUrl: e.target.value } }))}
-                              className="bg-gray-700 border-gray-600 text-white"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <h3 className="text-lg font-semibold text-white mb-3">Hero Image (WordPress Media Library)</h3>
-                          <div className="flex flex-col md:flex-row md:items-center gap-3">
-                            <Input
-                              value={wordpressHomeDraft?.hero?.imageUrl || ''}
-                              onChange={(e) => updateWordpressHomeDraft((draft) => ({ ...draft, hero: { ...(draft.hero || {}), imageUrl: e.target.value } }))}
-                              className="bg-gray-700 border-gray-600 text-white flex-1"
-                              placeholder="https://...wp-content/uploads/.../hero.jpg"
-                            />
-                            <input
-                              id="wp-hero-image-input"
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                const form = new FormData();
-                                form.append('file', file);
-                                form.append('alt', 'StreamStickPro hero image');
-                                try {
-                                  const res = await authFetch('/api/cms/media', { method: 'POST', body: form });
-                                  const json = await res.json();
-                                  if (!res.ok || !json.url) throw new Error(json.error || 'Upload failed');
-                                  updateWordpressHomeDraft((draft) => ({ ...draft, hero: { ...(draft.hero || {}), imageUrl: json.url } }));
-                                  showToast('Hero image uploaded to WordPress Media Library', 'success');
-                                } catch (err: any) {
-                                  showToast(`Image upload failed: ${err?.message || err}`, 'error');
-                                } finally {
-                                  e.target.value = '';
-                                }
-                              }}
-                            />
-                            <Button
-                              type="button"
-                              onClick={() => document.getElementById('wp-hero-image-input')?.click()}
-                              className="bg-emerald-600 hover:bg-emerald-700"
-                            >
-                              Upload Image
-                            </Button>
-                          </div>
-                          {wordpressHomeDraft?.hero?.imageUrl && (
-                            <img
-                              src={wordpressHomeDraft.hero.imageUrl}
-                              alt="Hero preview"
-                              className="mt-3 max-h-48 rounded border border-gray-700 object-cover"
-                            />
-                          )}
-                        </div>
-
-                        <div>
-                          <h3 className="text-lg font-semibold text-white mb-3">Homepage Cards</h3>
-                          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                            {(wordpressHomeDraft?.productCards || []).map((card: any, index: number) => (
-                              <div key={index} className="rounded-lg border border-gray-700 bg-gray-900/60 p-4 space-y-3">
-                                <Input
-                                  value={card.title || ''}
-                                  onChange={(e) => updateWordpressHomeDraft((draft) => {
-                                    const productCards = [...(draft.productCards || [])];
-                                    productCards[index] = { ...(productCards[index] || {}), title: e.target.value };
-                                    return { ...draft, productCards };
-                                  })}
-                                  className="bg-gray-700 border-gray-600 text-white"
-                                  placeholder="Card title"
-                                />
-                                <textarea
-                                  value={card.description || ''}
-                                  onChange={(e) => updateWordpressHomeDraft((draft) => {
-                                    const productCards = [...(draft.productCards || [])];
-                                    productCards[index] = { ...(productCards[index] || {}), description: e.target.value };
-                                    return { ...draft, productCards };
-                                  })}
-                                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white min-h-[80px]"
-                                  placeholder="Card description"
-                                />
-                                <div className="grid grid-cols-2 gap-3">
-                                  <Input
-                                    value={card.ctaLabel || ''}
-                                    onChange={(e) => updateWordpressHomeDraft((draft) => {
-                                      const productCards = [...(draft.productCards || [])];
-                                      productCards[index] = { ...(productCards[index] || {}), ctaLabel: e.target.value };
-                                      return { ...draft, productCards };
-                                    })}
-                                    className="bg-gray-700 border-gray-600 text-white"
-                                    placeholder="CTA label"
-                                  />
-                                  <Input
-                                    value={card.ctaHref || ''}
-                                    onChange={(e) => updateWordpressHomeDraft((draft) => {
-                                      const productCards = [...(draft.productCards || [])];
-                                      productCards[index] = { ...(productCards[index] || {}), ctaHref: e.target.value };
-                                      return { ...draft, productCards };
-                                    })}
-                                    className="bg-gray-700 border-gray-600 text-white"
-                                    placeholder="/link"
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <Button
-                          onClick={() => saveWordPressCmsPage("home")}
-                          disabled={savingWordpressCms === "home"}
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          {savingWordpressCms === "home" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                          Save Homepage to WordPress
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-
-                  <TabsContent value="pricing">
-                    <Card className="bg-gray-800 border-gray-700">
-                      <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
-                          <Percent className="w-5 h-5 text-blue-400" />
-                          Pricing WordPress Controls
-                        </CardTitle>
-                        <CardDescription className="text-gray-400">
-                          Edit pricing display text here. Stripe `price_...` maps are optional overrides and should only use verified Stripe Price IDs.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">SEO Title</label>
-                            <Input
-                              value={wordpressPricingDraft?.meta?.title || ''}
-                              onChange={(e) => updateWordpressPricingDraft((draft) => ({ ...draft, meta: { ...(draft.meta || {}), title: e.target.value } }))}
-                              className="bg-gray-700 border-gray-600 text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Hero Title</label>
-                            <Input
-                              value={wordpressPricingDraft?.hero?.title || ''}
-                              onChange={(e) => updateWordpressPricingDraft((draft) => ({ ...draft, hero: { ...(draft.hero || {}), title: e.target.value } }))}
-                              className="bg-gray-700 border-gray-600 text-white"
-                            />
-                          </div>
-                          <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Hero Description</label>
-                            <textarea
-                              value={wordpressPricingDraft?.hero?.description || ''}
-                              onChange={(e) => updateWordpressPricingDraft((draft) => ({ ...draft, hero: { ...(draft.hero || {}), description: e.target.value } }))}
-                              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white min-h-[80px]"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <h3 className="text-lg font-semibold text-white mb-3">Visible Plans</h3>
-                          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-                            {(wordpressPricingDraft?.plans || []).map((plan: any, index: number) => (
-                              <div key={index} className="rounded-lg border border-gray-700 bg-gray-900/60 p-4 space-y-3">
-                                <Input
-                                  value={plan.title || ''}
-                                  onChange={(e) => updateWordpressPricingDraft((draft) => {
-                                    const plans = [...(draft.plans || [])];
-                                    plans[index] = { ...(plans[index] || {}), title: e.target.value };
-                                    return { ...draft, plans };
-                                  })}
-                                  className="bg-gray-700 border-gray-600 text-white"
-                                  placeholder="Plan title"
-                                />
-                                <div className="grid grid-cols-2 gap-3">
-                                  <Input
-                                    value={plan.priceText || ''}
-                                    onChange={(e) => updateWordpressPricingDraft((draft) => {
-                                      const plans = [...(draft.plans || [])];
-                                      plans[index] = { ...(plans[index] || {}), priceText: e.target.value };
-                                      return { ...draft, plans };
-                                    })}
-                                    className="bg-gray-700 border-gray-600 text-white"
-                                    placeholder="$11"
-                                  />
-                                  <Input
-                                    value={plan.periodText || ''}
-                                    onChange={(e) => updateWordpressPricingDraft((draft) => {
-                                      const plans = [...(draft.plans || [])];
-                                      plans[index] = { ...(plans[index] || {}), periodText: e.target.value };
-                                      return { ...draft, plans };
-                                    })}
-                                    className="bg-gray-700 border-gray-600 text-white"
-                                    placeholder="/mo"
-                                  />
-                                </div>
-                                <Input
-                                  value={plan.ctaHref || ''}
-                                  onChange={(e) => updateWordpressPricingDraft((draft) => {
-                                    const plans = [...(draft.plans || [])];
-                                    plans[index] = { ...(plans[index] || {}), ctaHref: e.target.value };
-                                    return { ...draft, plans };
-                                  })}
-                                  className="bg-gray-700 border-gray-600 text-white"
-                                  placeholder="/shop"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Shadow Stripe Price ID Map</label>
-                            <textarea
-                              value={wordpressPriceMapsText.shadow}
-                              onChange={(e) => setWordpressPriceMapsText((current) => ({ ...current, shadow: e.target.value }))}
-                              className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white min-h-[140px] font-mono text-sm"
-                              placeholder='{"iptv-1-month":"price_..."}'
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Live Stripe Price ID Map</label>
-                            <textarea
-                              value={wordpressPriceMapsText.live}
-                              onChange={(e) => setWordpressPriceMapsText((current) => ({ ...current, live: e.target.value }))}
-                              className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white min-h-[140px] font-mono text-sm"
-                              placeholder='{"iptv-1-month":"price_..."}'
-                            />
-                          </div>
-                        </div>
-                        <p className="text-sm text-amber-300 bg-amber-950/30 border border-amber-500/30 rounded-lg p-3">
-                          Safety: displayed prices and Stripe charge IDs are separate. Empty maps keep checkout on the existing database-backed Stripe IDs.
-                        </p>
-
-                        <Button
-                          onClick={() => saveWordPressCmsPage("pricing")}
-                          disabled={savingWordpressCms === "pricing"}
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          {savingWordpressCms === "pricing" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                          Save Pricing to WordPress
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                </Tabs>
-              )}
-
-              {loadingWordpressCms && !wordpressCmsStatus ? (
-                <div className="flex justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  {(wordpressCmsStatus?.pages || []).map((page) => (
-                    <Card key={page.slug} className="bg-gray-800 border-gray-700">
-                      <CardHeader>
-                        <CardTitle className="text-white flex items-center justify-between gap-3">
-                          <span className="flex items-center gap-2">
-                            {page.hasData ? (
-                              <CheckCircle className="w-5 h-5 text-green-400" />
-                            ) : (
-                              <AlertCircle className="w-5 h-5 text-red-400" />
-                            )}
-                            {page.label}
-                          </span>
-                          <Badge className={page.status === "publish" ? "bg-green-500/20 text-green-300" : "bg-amber-500/20 text-amber-300"}>
-                            {page.status || "unknown"}
-                          </Badge>
-                        </CardTitle>
-                        <CardDescription className="text-gray-400">
-                          `{page.slug}` · {page.updatedAt ? `updated ${new Date(page.updatedAt).toLocaleString()}` : "no update date"}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                          <div className="rounded-lg bg-gray-900/70 border border-gray-700 p-3">
-                            <p className="text-gray-500 uppercase text-xs tracking-wide">WordPress title</p>
-                            <p className="text-gray-200 mt-1">{page.title || page.label}</p>
-                          </div>
-                          <div className="rounded-lg bg-gray-900/70 border border-gray-700 p-3">
-                            <p className="text-gray-500 uppercase text-xs tracking-wide">Payload</p>
-                            <p className="text-gray-200 mt-1">{page.details}</p>
-                          </div>
-                        </div>
-                        {page.error ? (
-                          <div className="rounded-lg border border-red-500/30 bg-red-950/30 p-3 text-sm text-red-200">
-                            {page.error}
-                          </div>
-                        ) : null}
-                        <div className="flex flex-wrap gap-3">
-                          <a href={page.editUrl} target="_blank" rel="noopener noreferrer">
-                            <Button className="bg-blue-600 hover:bg-blue-700">
-                              <Edit className="w-4 h-4 mr-2" />
-                              Edit in WordPress
-                            </Button>
-                          </a>
-                          <a href={page.liveApiUrl} target="_blank" rel="noopener noreferrer">
-                            <Button variant="outline" className="border-gray-600 text-gray-300">
-                              <ExternalLink className="w-4 h-4 mr-2" />
-                              API JSON
-                            </Button>
-                          </a>
-                          <a href={page.publicUrl} target="_blank" rel="noopener noreferrer">
-                            <Button variant="outline" className="border-gray-600 text-gray-300">
-                              <Eye className="w-4 h-4 mr-2" />
-                              View Page
-                            </Button>
-                          </a>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-
-              <Card className="bg-gray-800 border-blue-500/30">
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Lock className="w-5 h-5 text-blue-400" />
-                    Safe Workflow
-                  </CardTitle>
+                  <CardTitle className="text-white">cms_pricing_json</CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Must be one JSON object. Include <code className="text-gray-300">prices.shadow</code> and{" "}
+                    <code className="text-gray-300">prices.live</code> as maps of product key to Stripe price id. Optional:{" "}
+                    <code className="text-gray-300">meta</code>, <code className="text-gray-300">hero</code>,{" "}
+                    <code className="text-gray-300">plans</code>, <code className="text-gray-300">faq</code> for the pricing page.
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div className="rounded-lg bg-gray-900/70 border border-gray-700 p-4">
-                    <p className="font-semibold text-white mb-2">1. Edit in WordPress</p>
-                    <p className="text-gray-400">Homepage and pricing content live in WordPress JSON pages.</p>
-                  </div>
-                  <div className="rounded-lg bg-gray-900/70 border border-gray-700 p-4">
-                    <p className="font-semibold text-white mb-2">2. Verify the CMS bridge</p>
-                    <p className="text-gray-400">Use this screen to confirm the Worker reads current WordPress content.</p>
-                  </div>
-                  <div className="rounded-lg bg-gray-900/70 border border-gray-700 p-4">
-                    <p className="font-semibold text-white mb-2">3. Keep Stripe separate</p>
-                    <p className="text-gray-400">Pricing text can change here; actual Stripe Price IDs stay protected until final testing.</p>
+                <CardContent className="space-y-4">
+                  <textarea
+                    value={cmsPricingJsonText}
+                    onChange={(e) => setCmsPricingJsonText(e.target.value)}
+                    className="w-full min-h-[420px] font-mono text-sm px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white"
+                    spellCheck={false}
+                  />
+                  <div className="flex flex-wrap gap-3">
+                    <Button onClick={saveSiteCmsPricing} disabled={savingSiteCms} className="bg-sky-600 hover:bg-sky-700">
+                      {savingSiteCms ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                      Save to Supabase
+                    </Button>
+                    <a href="/pricing" target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" className="border-gray-600 text-gray-300">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Open /pricing
+                      </Button>
+                    </a>
                   </div>
                 </CardContent>
               </Card>

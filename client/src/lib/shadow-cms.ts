@@ -1,5 +1,5 @@
 /**
- * Cloaked / secure storefront (ShadowStore) — defaults + merge WordPress JSON + Supabase page_edits (pageId=shadow).
+ * Cloaked storefront (ShadowStore) — in-app defaults + optional base JSON + Supabase page_edits (pageId=shadow).
  * Checkout still uses real_product_id → Stripe; card labels and images are editorial only.
  */
 import type { HomeCmsOverrideEdit } from "./merge-home-cms-overrides";
@@ -88,7 +88,7 @@ export function deepMergeRecords(a: Record<string, unknown>, b: Record<string, u
   return out;
 }
 
-/** Baseline copy + structure; merged with WordPress / optional JSON patch edits. */
+/** Baseline copy + structure; merged with optional API base JSON + Visual Editor rows. */
 export const SHADOW_CMS_DEFAULTS: ShadowCmsState = {
   meta: { title: "Digital Solutions Agency | Web Design & SEO Services" },
   brand: { name: "WebFlow Design" },
@@ -271,14 +271,14 @@ function setPath(obj: Record<string, unknown>, path: string[], value: unknown): 
   cur[path[path.length - 1]] = value as unknown;
 }
 
-/** WordPress JSON may be partial; normalize to ShadowCmsState. */
+/** Optional /api/cms/shadow payload (usually null); normalize to ShadowCmsState. */
 export function normalizeShadowWpPayload(raw: unknown): Partial<ShadowCmsState> | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   return raw as Partial<ShadowCmsState>;
 }
 
 /**
- * Merge WordPress shadow page JSON + Visual Editor rows (pageId=shadow).
+ * Merge optional shadow base JSON + Visual Editor rows (pageId=shadow).
  * Advanced: elementType json, sectionId _config, elementId payload — body is partial ShadowCmsState JSON.
  */
 export function buildShadowCmsState(
