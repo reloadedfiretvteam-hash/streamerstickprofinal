@@ -4263,7 +4263,7 @@ export default function AdminPanel() {
                   Supabase {envStatus?.hasSupabaseKey ? "service OK" : "anon / check"}
                 </Badge>
                 <Badge className="bg-sky-700 text-white">
-                  CMS: Supabase (no WordPress)
+                  CMS: Supabase + Visual Editor
                 </Badge>
                 <Badge variant="outline" className="border-gray-500 text-gray-300">
                   Home overrides: {pageEdits.filter((e) => e.pageId === "main" && e.isActive).length}

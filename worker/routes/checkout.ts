@@ -60,7 +60,7 @@ async function getCmsPriceOverrides(requestUrl: string): Promise<Record<string, 
 
 /**
  * Dashboard/env Stripe Price IDs — highest priority for line items so $150 / $160 ONN kits charge correctly
- * on streamstickpro.com and secure (cloaked) hosts without relying on WordPress JSON or DB alone.
+ * on streamstickpro.com and secure (cloaked) hosts without relying on CMS pricing JSON or DB alone.
  */
 function getWorkerStripePriceOverrides(env: Env): Record<string, string> {
   const out: Record<string, string> = {};

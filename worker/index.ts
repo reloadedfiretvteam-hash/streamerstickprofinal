@@ -26,7 +26,7 @@ export interface Env {
   STRIPE_WEBHOOK_SECRET: string;
   /**
    * Optional: Stripe Price IDs for ONN hardware SKUs. When set, checkout uses these before
-   * WordPress CMS maps and before Supabase `shadow_price_id` — same behavior on main site and secure/cloaked host.
+   * CMS pricing maps (`cms_pricing_json` / env) and before Supabase `shadow_price_id` — same on main and secure/cloaked host.
    */
   STRIPE_PRICE_ONN_GOOGLE_HD?: string;
   STRIPE_PRICE_ONN_GOOGLE_4K?: string;
@@ -52,17 +52,6 @@ export interface Env {
   CLOUDFLARE_API_TOKEN?: string;
   CLOUDFLARE_ACCOUNT_ID?: string;
   NODE_ENV?: string;
-  WP_ORIGIN?: string;
-  WORDPRESS_URL?: string;
-  WP_HOME_PAGE_SLUG?: string;
-  /** Cloaked storefront JSON page (optional); defaults to streamstick-shadow-v1 */
-  WP_SHADOW_PAGE_SLUG?: string;
-  WP_PRICING_PAGE_SLUG?: string;
-  WP_APPLICATION_USER?: string;
-  WP_APPLICATION_PASSWORD?: string;
-  WORDPRESS_APPLICATION_USER?: string;
-  WORDPRESS_APPLICATION_PASSWORD?: string;
-  WP_REST_BASIC_AUTH?: string;
   SHADOW_HOSTS?: string;
   VITE_SECURE_HOSTS?: string;
   /** Optional JSON for /api/cms/pricing when site_settings.cms_pricing_json is empty */

@@ -1,14 +1,15 @@
 /**
- * Live end-to-end smoke for the WordPress headless integration.
- * Tests both sides: the deployed Cloudflare Worker (/api/cms/*) and the
- * WordPress plugin REST routes (/wp-json/streamstickpro/v1/*).
+ * Live smoke for the deployed Worker (/api/cms/*) plus optional legacy WordPress plugin checks.
+ *
+ * Worker CMS is Supabase-only: /home and /shadow return data=null; pricing uses site_settings / env.
  *
  * Run:
- *   WP_SMOKE_BASE=https://streamstickpro.com \
- *   WP_SMOKE_WP_ORIGIN=https://your-wp-host \
- *   tsx scripts/wp-smoke.ts
+ *   WP_SMOKE_BASE=https://streamstickpro.com tsx scripts/wp-smoke.ts
  *
- * Optional shadow check:
+ * Optional WordPress plugin check (skipped if unset):
+ *   WP_SMOKE_WP_ORIGIN=https://your-wp-host tsx scripts/wp-smoke.ts
+ *
+ * Optional shadow host pricing mode:
  *   WP_SMOKE_SHADOW_BASE=https://secure.streamstickpro.com tsx scripts/wp-smoke.ts
  *
  * Read-only — never sends auth, never writes. Safe to run after every deploy.
@@ -118,7 +119,7 @@ async function checkWordPressSide() {
 
 async function main() {
   console.log("=".repeat(70));
-  console.log(" StreamStickPro WordPress integration smoke");
+  console.log(" StreamStickPro CMS worker smoke (Supabase + optional WP plugin)");
   console.log("=".repeat(70));
 
   await checkWorkerSide();

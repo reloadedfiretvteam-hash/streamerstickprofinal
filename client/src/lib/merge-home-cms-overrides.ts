@@ -1,5 +1,6 @@
 /**
- * Merge Supabase `page_edits` (pageId=main) on top of WordPress `/api/cms/home` JSON.
+ * Merge Supabase `page_edits` (pageId=main) on top of the client homepage base (MainStore defaults).
+ * `/api/cms/home` returns no base document (null); merges apply the same shape as before.
  * Admin Visual Editor uses sectionId + elementId; dot paths in elementId also work (e.g. hero.title).
  */
 
