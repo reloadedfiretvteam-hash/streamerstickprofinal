@@ -13,6 +13,7 @@ import { FreeTrial } from "@/components/FreeTrial";
 import { WeekPromotionStrip } from "@/components/WeekPromotionStrip";
 import type { Product as StoreCartProduct } from "@/lib/store";
 import { QuickViewButton } from "@/components/QuickViewButton";
+import { OnnProductCardImage } from "@/components/OnnProductCardImage";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { setPageMeta, shopProductUrl } from "@/lib/seo";
 import { SEOSchema, ItemListSchema } from "@/components/SEOSchema";
@@ -947,23 +948,16 @@ export default function Shop() {
 
                   <div className="relative z-10">
                     <div className="relative h-56 sm:h-[15.5rem] overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-50" />
+                      {product.id !== "onn-google-hd" && product.id !== "onn-google-4k" ? (
+                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-50" />
+                      ) : null}
                       {product.id === "onn-google-hd" || product.id === "onn-google-4k" ? (
-                        <div className="absolute inset-0 overflow-hidden">
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            className="absolute bottom-0 left-1/2 h-[132%] w-full min-w-[108%] max-w-none -translate-x-1/2 object-cover object-bottom transition-transform duration-700 group-hover:scale-[1.06]"
-                            loading="lazy"
-                            width={400}
-                            height={224}
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              const fb = product.id === "onn-google-hd" ? onnHdImg : onn4kImg;
-                              if (target.src !== fb) target.src = fb;
-                            }}
-                          />
-                        </div>
+                        <OnnProductCardImage
+                          src={product.image}
+                          alt={product.name}
+                          fallbackSrc={product.id === "onn-google-hd" ? onnHdImg : onn4kImg}
+                          kitLabel={product.id === "onn-google-hd" ? "ONN Full HD · 1 Yr Live TV" : "ONN 4K · 1 Yr Live TV"}
+                        />
                       ) : (
                         <img
                           src={product.image}
@@ -979,18 +973,6 @@ export default function Shop() {
                           }}
                         />
                       )}
-                      {(product.id === "onn-google-hd" || product.id === "onn-google-4k") && (
-                        <>
-                          <div
-                            className="absolute inset-x-0 top-0 z-[11] h-[26%] min-h-[3.25rem] bg-gray-950 pointer-events-none"
-                            aria-hidden
-                          />
-                          <div
-                            className="absolute inset-x-0 top-0 z-[11] h-[52%] pointer-events-none bg-gradient-to-b from-gray-950 via-gray-950/88 to-transparent"
-                            aria-hidden
-                          />
-                        </>
-                      )}
                       <div className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-full font-bold text-sm shadow-lg ${
                         product.popular
                           ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
@@ -998,11 +980,6 @@ export default function Shop() {
                       }`}>
                         {product.badge}
                       </div>
-                      {(product.id === "onn-google-hd" || product.id === "onn-google-4k") && (
-                        <div className="absolute top-4 left-4 z-20 bg-green-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-lg">
-                          1 YEAR INCLUDED
-                        </div>
-                      )}
                       <QuickViewButton onClick={() => openQuickView(product)} />
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleWishlistItem(product); }}

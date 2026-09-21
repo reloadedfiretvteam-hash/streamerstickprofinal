@@ -781,11 +781,9 @@ export function createAdminRoutes() {
       let nextShadowPriceId = shadowPriceId ?? existingProduct.shadowPriceId ?? null;
 
       const effectiveCents = effectiveRealProductChargeCents({ price: normalizedPrice, salePrice: nextSale });
-      const saleInBody = Object.prototype.hasOwnProperty.call(body, 'sale_price');
-      const shouldSyncStripe =
-        hasPriceUpdate ||
-        saleInBody ||
-        body.force_stripe_resync === true;
+      // Stage 5: ordinary price/content edits must NOT create Stripe prices.
+      // Actual payment-price sync requires explicit owner-approved flag.
+      const shouldSyncStripe = body.force_stripe_resync === true || body.sync_payment_price === true;
 
       if (shouldSyncStripe) {
         const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
@@ -821,7 +819,14 @@ export function createAdminRoutes() {
         cardPromoLabel: nextCardLabel,
       });
 
-      return c.json({ data: product });
+      const warnings: string[] = [];
+      if ((hasPriceUpdate || Object.prototype.hasOwnProperty.call(body, 'sale_price')) && !shouldSyncStripe) {
+        warnings.push(
+          'Public catalog price saved without changing Stripe checkout. Use Payment Sync (force_stripe_resync) only when you intentionally change what customers are charged.',
+        );
+      }
+
+      return c.json({ data: product, payment_synced: shouldSyncStripe, warnings });
     } catch (error: any) {
       console.error("Error updating product:", error);
       return c.json({ error: "Failed to update product" }, 500);

@@ -31,18 +31,24 @@ jobs:
       - name: Run Supabase Migration
         run: npx tsx scripts/run-supabase-migration.ts
         env:
+          # Repo historically stored the URI as DATABASE_URL (not SUPABASE_DATABASE_URL).
           SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Apply Owner CMS Migration
+        run: npx tsx scripts/apply-owner-cms-migration.ts
+        env:
+          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       
       - name: Migration Summary
         run: |
           echo "## Migration Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Requires GitHub secret \`SUPABASE_DATABASE_URL\` (Supabase → Settings → Database → URI)." >> $GITHUB_STEP_SUMMARY
-          echo "Runs \`scripts/run-supabase-migration.ts\` plus \`supabase/migrations\` (202602*–202604*), then requests a **PostgREST schema reload** so \`sale_price\` and \`site_promotion\` are visible to the API." >> $GITHUB_STEP_SUMMARY
+          echo "Uses GitHub secrets \`DATABASE_URL\` and/or \`SUPABASE_DATABASE_URL\`." >> $GITHUB_STEP_SUMMARY
+          echo "Runs \`scripts/run-supabase-migration.ts\` then \`scripts/apply-owner-cms-migration.ts\` (owner CMS tables)." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "If sale prices or promo banner still look wrong in the app, open **Supabase → Settings → API** and reload the schema cache." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Core tables:" >> $GITHUB_STEP_SUMMARY
-          echo "- customers, password_reset_tokens, abandoned_carts" >> $GITHUB_STEP_SUMMARY
-          echo "- orders (updated columns)" >> $GITHUB_STEP_SUMMARY
-          echo "- site_promotion, real_products sale/card columns (from 202604* migrations)" >> $GITHUB_STEP_SUMMARY
+          echo "### Owner CMS tables:" >> $GITHUB_STEP_SUMMARY
+          echo "- cms_homepage, cms_banners, cms_device_content, cms_plan_content, cms_guides" >> $GITHUB_STEP_SUMMARY
+          echo "- cms_navigation, cms_brand_settings, cms_media_assets, cms_seo_metadata" >> $GITHUB_STEP_SUMMARY
+          echo "- cms_content_revisions, cms_admin_audit_log, site_promotion (if missing)" >> $GITHUB_STEP_SUMMARY

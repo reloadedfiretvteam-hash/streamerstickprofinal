@@ -17,6 +17,15 @@ const ShadowStore = lazy(() => import("@/pages/ShadowStore"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
 const Shop = lazy(() => import("@/pages/Shop"));
 const AdminPanel = lazy(() => import("@/pages/AdminPanel"));
+const DevicesCatalog = lazy(() => import("@/pages/DevicesCatalog"));
+const DeviceDetailPage = lazy(() => import("@/pages/DeviceDetailPage"));
+const PlansCatalog = lazy(() => import("@/pages/PlansCatalog"));
+const PlanDetailPage = lazy(() => import("@/pages/PlanDetailPage"));
+const GuidesCatalog = lazy(() => import("@/pages/GuidesPages"));
+const GuideDetailPage = lazy(() =>
+  import("@/pages/GuidesPages").then((m) => ({ default: m.GuideDetailPage })),
+);
+const SupportContactPage = lazy(() => import("@/pages/SupportContactPage"));
 const Blog = lazy(() => import("@/pages/Blog"));
 const Success = lazy(() => import("@/pages/Success"));
 const CustomerLogin = lazy(() => import("@/pages/CustomerLogin"));
@@ -102,6 +111,14 @@ function Router() {
         <Route path="/vpn" component={VpnPage} />
         <Route path="/onn" component={OnnGoogleTv} />
         <Route path="/shop" component={Shop} />
+        <Route path="/devices/:sku" component={DeviceDetailPage} />
+        <Route path="/devices" component={DevicesCatalog} />
+        <Route path="/plans/:code" component={PlanDetailPage} />
+        <Route path="/plans" component={PlansCatalog} />
+        <Route path="/guides/:slug" component={GuideDetailPage} />
+        <Route path="/guides" component={GuidesCatalog} />
+        <Route path="/support" component={SupportContactPage} />
+        <Route path="/contact" component={SupportContactPage} />
         <Route path="/shadow-services" component={ShadowStore} />
         <Route path="/admin" component={AdminPanel} />
         <Route path="/checkout" component={Checkout} />
@@ -119,7 +136,6 @@ function Router() {
         <Route path="/iptv-services" component={IptvServices} />
         <Route path="/iptv-firestick" component={IptvFirestick} />
         <Route path="/jailbroken-fire-sticks" component={JailbrokenFireSticks} />
-        <Route path="/devices" component={FirestickDevices} />
         <Route path="/firestick-devices" component={FirestickDevices} />
         <Route path="/best-iptv-firestick" component={BestIptvFirestick} />
         <Route path="/iptv-media-players" component={IptvMediaPlayers} />

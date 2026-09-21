@@ -1,6 +1,7 @@
 import { useState, useEffect, ChangeEvent, useCallback } from "react";
 import { useLocation } from "wouter";
 import { apiCall } from "@/lib/api";
+import { OwnerCmsPanel } from "@/components/owner-cms/OwnerCmsPanel";
 import { 
   LayoutDashboard, 
   Package, 
@@ -370,6 +371,7 @@ export default function AdminPanel() {
     const allowed = new Set([
       "dashboard",
       "change-pricing",
+      "change-images",
       "products",
       "site-promotion",
       "visitors",
@@ -424,7 +426,9 @@ export default function AdminPanel() {
   const [searchTerm, setSearchTerm] = useState("");
   /** Quick-edit grid: dollars as strings for all checkout SKUs (`real_products`). */
   const [catalogPriceDrafts, setCatalogPriceDrafts] = useState<Record<string, { reg: string; sale: string }>>({});
+  const [catalogImageDrafts, setCatalogImageDrafts] = useState<Record<string, string>>({});
   const [savingCatalogPriceId, setSavingCatalogPriceId] = useState<string | null>(null);
+  const [savingCatalogImageId, setSavingCatalogImageId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -1078,6 +1082,11 @@ export default function AdminPanel() {
       };
     }
     setCatalogPriceDrafts(next);
+    const imageNext: Record<string, string> = {};
+    for (const p of products) {
+      imageNext[p.id] = p.main_image || "";
+    }
+    setCatalogImageDrafts(imageNext);
   }, [products]);
 
   const loadSitePromotion = async () => {
@@ -2102,12 +2111,13 @@ export default function AdminPanel() {
           showToast(result?.error || 'Error updating product', 'error');
           return;
         }
-        const synced = await syncToShadowProduct(editingProduct);
-        if (synced) {
-          showToast('Product updated successfully! Price and checkout are now synced.', 'success');
-        } else {
-          showToast('Product updated but shadow sync failed. Please try again.', 'error');
-        }
+        // Content/catalog save only — does not create Stripe prices (Stage 5).
+        const warn = Array.isArray(result?.warnings) ? result.warnings.join(' ') : '';
+        showToast(
+          warn ||
+            'Product catalog fields saved. Checkout/Stripe amounts were not changed. Use Payment Sync only when intentionally updating what customers pay.',
+          'success',
+        );
         loadProducts();
         setEditingProduct(null);
       } catch (error: any) {
@@ -2115,6 +2125,7 @@ export default function AdminPanel() {
       }
     } else {
       try {
+        // New products still need a Stripe linkage to be sellable; confirm with owner via toast.
         const response = await authFetch('/api/admin/products/create-with-stripe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -2125,13 +2136,10 @@ export default function AdminPanel() {
           showToast(result?.error || 'Error creating product', 'error');
           return;
         }
-        const newId = result?.data?.id || normalizedId;
-        const synced = await syncToShadowProduct({ ...editingProduct, id: newId });
-        if (synced) {
-          showToast('Product created successfully! Price and checkout are now synced.', 'success');
-        } else {
-          showToast('Product created but shadow sync failed. Please try again.', 'error');
-        }
+        showToast(
+          'Product created with checkout linkage (new SKU only). Later price edits stay display-only unless you run Payment Sync.',
+          'success',
+        );
         loadProducts();
         setEditingProduct(null);
       } catch (error: any) {
@@ -2257,47 +2265,66 @@ export default function AdminPanel() {
     }
   };
 
+  const uploadStorageImage = async (file: File, folder: "products" | "page-edits"): Promise<string | null> => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      showToast("Please upload a valid image (JPEG, PNG, GIF, or WebP)", "error");
+      return null;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("Image must be less than 5MB", "error");
+      return null;
+    }
+
+    const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const fileName = `${folder}_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const filePath = `${folder}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage.from("images").upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      showToast("Failed to upload image: " + uploadError.message, "error");
+      return null;
+    }
+
+    return getStorageUrl("images", filePath);
+  };
+
   const uploadImage = async (file: File) => {
     if (!editingProduct) return;
-    
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      showToast('Please upload a valid image (JPEG, PNG, GIF, or WebP)', 'error');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('Image must be less than 5MB', 'error');
-      return;
-    }
 
     setUploading(true);
-
     try {
-      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const fileName = `product_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `products/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('images')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        showToast('Failed to upload image: ' + uploadError.message, 'error');
-        return;
+      const imageUrl = await uploadStorageImage(file, "products");
+      if (imageUrl) {
+        setEditingProduct({ ...editingProduct, main_image: imageUrl });
+        showToast("Image uploaded successfully!", "success");
       }
-
-      const imageUrl = getStorageUrl('images', filePath);
-      
-      setEditingProduct({ ...editingProduct, main_image: imageUrl });
-      showToast('Image uploaded successfully!', 'success');
     } catch (error: any) {
-      console.error('Upload error:', error);
-      showToast('Failed to upload image: ' + (error.message || 'Unknown error'), 'error');
+      console.error("Upload error:", error);
+      showToast("Failed to upload image: " + (error.message || "Unknown error"), "error");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const uploadPageEditImage = async (file: File) => {
+    if (!editingPageEdit) return;
+
+    setUploading(true);
+    try {
+      const imageUrl = await uploadStorageImage(file, "page-edits");
+      if (imageUrl) {
+        setEditingPageEdit({ ...editingPageEdit, imageUrl, elementType: "image" });
+        showToast("Image uploaded — click Save to publish on the site.", "success");
+      }
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      showToast("Failed to upload image: " + (error.message || "Unknown error"), "error");
     } finally {
       setUploading(false);
     }
@@ -2308,7 +2335,15 @@ export default function AdminPanel() {
     if (file) {
       uploadImage(file);
     }
-    e.target.value = '';
+    e.target.value = "";
+  };
+
+  const handlePageEditFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadPageEditImage(file);
+    }
+    e.target.value = "";
   };
 
   const formatTime = (dateString: string) => {
@@ -2680,6 +2715,14 @@ export default function AdminPanel() {
             data-testid="nav-ai-assistant"
           >
             <Sparkles className="w-4 h-4 mr-3" /> AI Assistant
+          </Button>
+          <Button 
+            variant={activeSection === "owner-cms" ? "secondary" : "ghost"} 
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5"
+            onClick={() => setActiveSection("owner-cms")}
+            data-testid="nav-owner-cms"
+          >
+            <FileText className="w-4 h-4 mr-3" /> Owner Content CMS
           </Button>
           <Button 
             variant={activeSection === "settings" ? "secondary" : "ghost"} 
@@ -6894,6 +6937,10 @@ export default function AdminPanel() {
                 </div>
               )}
             </div>
+          )}
+
+          {activeSection === "owner-cms" && (
+            <OwnerCmsPanel authFetch={authFetch} />
           )}
 
           {activeSection === "settings" && (

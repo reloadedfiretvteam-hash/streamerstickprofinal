@@ -35,6 +35,7 @@ import SupportMessageBox from "@/components/SupportMessageBox";
 import { trackVpnClick } from "@/lib/vpn-tracking";
 import { SitePromotionBanner } from "@/components/SitePromotionBanner";
 import { WeekPromotionStrip } from "@/components/WeekPromotionStrip";
+import { OnnProductCardImage } from "@/components/OnnProductCardImage";
 import type { Product as StoreCartProduct } from "@/lib/store";
 import { iptvRealProductId } from "@/lib/iptv-sku";
 import {
@@ -269,48 +270,38 @@ interface CmsHomePayload {
 }
 
 const defaultHeroCtas: Required<CmsHeroCta>[] = [
-  { label: "START 36HR IPTV TRIAL", href: "/36hr-trial", accent: "cyan", trackVpn: false },
-  { label: "SHOP ONN GOOGLE TV KITS", href: "/shop", accent: "gold", trackVpn: false },
-  { label: "ONN SETUP GUIDE", href: "/onn", accent: "violet", trackVpn: false },
-  { label: "GET SURFSHARK VPN", href: "/vpn", accent: "teal", trackVpn: true },
+  { label: "Shop Google TV Devices", href: "/devices", accent: "gold", trackVpn: false },
+  { label: "Explore Plans & Services", href: "/plans", accent: "cyan", trackVpn: false },
+  { label: "Setup & Compatibility Help", href: "/guides", accent: "violet", trackVpn: false },
 ];
 
 const defaultFeatureCards: Required<CmsFeatureCard>[] = [
   {
-    title: "IPTV Subscriptions",
-    description: "Get premium IPTV streaming with 18K+ live channels, 100K+ movies & series-on your schedule.",
-    bullets: ["All-in-one app login", "Multi-device support", "36hr risk-free trial"],
-    ctaLabel: "START 36HR IPTV TRIAL",
-    ctaHref: "/36hr-trial",
-    accent: "cyan",
-    trackVpn: false,
-  },
-  {
-    title: "ONN Google TV Kits",
-    description: "onn. Full HD and 4K devices with Google TV—hardware ships with 1-year Reloaded Fire TV and guided setup.",
-    bullets: ["$150 Full HD kit", "$160 4K kit", "Voice remote included"],
-    ctaLabel: "SHOP ONN KITS",
-    ctaHref: "/shop",
+    title: "I Need a Google TV Device",
+    description: "Shop ONN and Google TV kits with clear condition, inclusions, pricing, and setup support.",
+    bullets: ["Individual product pages", "Honest condition & inclusions", "Setup guidance included"],
+    ctaLabel: "Shop Google TV Devices",
+    ctaHref: "/devices",
     accent: "gold",
     trackVpn: false,
   },
   {
-    title: "Onn Google TV Devices",
-    description: "Onn Full HD and 4K Google TV kits with 1-year Reloaded Fire TV included.",
-    bullets: ["1080p or 4K options", "Easy plug & play", "Google TV + voice remote"],
-    ctaLabel: "ONN GOOGLE TV DEVICES",
-    ctaHref: "/onn",
-    accent: "violet",
+    title: "I Already Have a Compatible Device",
+    description: "Plans and services for Fire TV, Google TV, ONN, and other supported equipment you already own.",
+    bullets: ["No hardware required", "Compatible device guidance", "Clear plan details"],
+    ctaLabel: "Explore Plans & Services",
+    ctaHref: "/plans",
+    accent: "cyan",
     trackVpn: false,
   },
   {
-    title: "Surfshark VPN Protection",
-    description: "Essential VPN companion stops ISP throttling, fixes buffering, protects privacy.",
-    bullets: ["Hides IPTV from ISP", "Unthrottles 4K streams", "Encrypts all traffic", "Surfshark: Unlimited devices"],
-    ctaLabel: "GET SURFSHARK VPN",
-    ctaHref: "/vpn",
-    accent: "teal",
-    trackVpn: true,
+    title: "I Need Setup Help",
+    description: "Written guides, authorized videos, troubleshooting, and support paths.",
+    bullets: ["Step-by-step instructions", "Device & plan links", "Support when stuck"],
+    ctaLabel: "Get Setup Help",
+    ctaHref: "/guides",
+    accent: "violet",
+    trackVpn: false,
   },
 ];
 
@@ -478,7 +469,7 @@ export default function MainStore() {
   const isAboutInView = useInView(aboutRef, { once: true, margin: "-100px" });
   const isShopInView = useInView(shopRef, { once: true, margin: "-100px" });
   const heroContent = cmsHome?.hero;
-  const heroTitle = heroContent?.title || "Premium IPTV & preconfigured streaming devices";
+  const heroTitle = heroContent?.title || "Need a Device or Already Have One?";
   const heroSubtitle = heroContent?.subtitle || "36-hour trial · 18K+ live channels · guided setup in minutes";
   const heroProofline = heroContent?.proofline || "2,700+ customers · 99.9% uptime · SSL-secured checkout";
   const heroBackgroundImage = heroContent?.backgroundImageUrl || heroImg;
@@ -661,15 +652,22 @@ export default function MainStore() {
 
   const loadCmsHome = async () => {
     try {
-      const [homeRes, ovRes] = await Promise.all([
+      const [homeRes, ovRes, ownerHomeRes] = await Promise.all([
         apiCall("/api/cms/home"),
         apiCall("/api/cms/page-overrides?pageId=main"),
+        apiCall("/api/owner-cms/homepage"),
       ]);
       const homeJson = homeRes.ok ? await homeRes.json().catch(() => ({})) : {};
       const ovJson = ovRes.ok ? await ovRes.json().catch(() => ({ data: [] })) : { data: [] };
+      const ownerJson = ownerHomeRes.ok ? await ownerHomeRes.json().catch(() => ({})) : {};
+      const ownerDoc =
+        ownerJson?.data?.status === "published" && ownerJson?.data?.document
+          ? (ownerJson.data.document as CmsHomePayload)
+          : null;
       const raw = homeJson?.data;
       const base =
-        raw && typeof raw === "object" ? (raw as CmsHomePayload) : null;
+        ownerDoc ||
+        (raw && typeof raw === "object" ? (raw as CmsHomePayload) : null);
       const overrideList = Array.isArray(ovJson?.data)
         ? (ovJson.data as HomeCmsOverrideEdit[])
         : [];
@@ -678,23 +676,49 @@ export default function MainStore() {
         overrideList,
       ) as CmsHomePayload | null;
       if (!merged || typeof merged !== "object") return;
+      // Map owner CMS path tiles into productCards when present
+      const pathTiles = (ownerDoc as any)?.pathTiles;
+      if (Array.isArray(pathTiles) && pathTiles.length) {
+        (merged as any).productCards = pathTiles.map((t: any) => ({
+          title: t.title,
+          description: t.description,
+          bullets: [],
+          ctaLabel: t.title,
+          ctaHref: t.href,
+          accent: "gold",
+          trackVpn: false,
+        }));
+      }
+      if ((ownerDoc as any)?.hero) {
+        (merged as any).hero = {
+          ...((merged as any).hero || {}),
+          ...((ownerDoc as any).hero || {}),
+          title: (ownerDoc as any).hero?.title || (merged as any).hero?.title,
+          subtitle: (ownerDoc as any).hero?.subtitle || (merged as any).hero?.subtitle,
+        };
+        const h = (ownerDoc as any).hero;
+        if (h?.primaryCta || h?.secondaryCta || h?.supportCta) {
+          (merged as any).hero = {
+            ...(merged as any).hero,
+            ctas: [h.primaryCta, h.secondaryCta, h.supportCta].filter((c) => c?.label && c?.href),
+          };
+        }
+      }
       setCmsHome(merged);
       if (merged.meta) {
         setPageMeta({
           title:
             merged.meta.title ||
-            "IPTV Subscriptions ONN Google TV Kits VPN | StreamStickPro",
+            "StreamStickPro | Google TV Devices, Plans & Setup Help",
           description:
             merged.meta.description ||
-            "StreamStickPro: IPTV subscriptions, ONN Google TV kits ($150 Full HD, $160 4K), and Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, SSL-secured checkout, 24/7 support.",
+            "Shop Google TV devices, explore plans for compatible equipment, or get setup and compatibility help.",
           path: merged.meta.path || "/",
-          keywords:
-            merged.meta.keywords ||
-            "IPTV subscription, ONN Google TV, Onn 4K streaming kit, Surfshark VPN IPTV, ISP throttling VPN",
+          keywords: merged.meta.keywords,
         });
       }
-    } catch (error) {
-      console.warn("Using default homepage CMS content:", error);
+    } catch {
+      /* keep defaults */
     }
   };
 
@@ -1623,24 +1647,16 @@ export default function MainStore() {
 
                   <div className="relative z-10">
                     <div className="relative h-56 sm:h-[15.5rem] overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-50" />
+                      {product.id !== "onn-google-hd" && product.id !== "onn-google-4k" ? (
+                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-50" />
+                      ) : null}
                       {product.id === "onn-google-hd" || product.id === "onn-google-4k" ? (
-                        <div className="absolute inset-0 overflow-hidden">
-                          {/* Same /images/… assets: crop from bottom so retail box top (fee/marketing) is clipped off */}
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            className="absolute bottom-0 left-1/2 h-[132%] w-full min-w-[108%] max-w-none -translate-x-1/2 object-cover object-bottom transition-transform duration-700 group-hover:scale-[1.06]"
-                            loading="lazy"
-                            width={400}
-                            height={224}
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              const fb = product.id === "onn-google-hd" ? onnHdImg : onn4kImg;
-                              if (target.src !== fb) target.src = fb;
-                            }}
-                          />
-                        </div>
+                        <OnnProductCardImage
+                          src={product.image}
+                          alt={product.name}
+                          fallbackSrc={product.id === "onn-google-hd" ? onnHdImg : onn4kImg}
+                          kitLabel={product.id === "onn-google-hd" ? "ONN Full HD · 1 Yr Live TV" : "ONN 4K · 1 Yr Live TV"}
+                        />
                       ) : (
                         <img
                           src={product.image}
@@ -1656,19 +1672,6 @@ export default function MainStore() {
                           }}
                         />
                       )}
-                      {(product.id === "onn-google-hd" || product.id === "onn-google-4k") && (
-                        <>
-                          {/* Covers retail box copy (e.g. fee / promo lines) on the upper part of the photo */}
-                          <div
-                            className="absolute inset-x-0 top-0 z-[11] h-[26%] min-h-[3.25rem] bg-gray-950 pointer-events-none"
-                            aria-hidden
-                          />
-                          <div
-                            className="absolute inset-x-0 top-0 z-[11] h-[52%] pointer-events-none bg-gradient-to-b from-gray-950 via-gray-950/88 to-transparent"
-                            aria-hidden
-                          />
-                        </>
-                      )}
                       <div className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-full font-bold text-sm shadow-lg ${
                         product.popular
                           ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
@@ -1681,11 +1684,6 @@ export default function MainStore() {
                           {product.cardPromoLabel}
                         </div>
                       ) : null}
-                      {(product.id === "onn-google-hd" || product.id === "onn-google-4k") && (
-                        <div className={`absolute ${product.cardPromoLabel ? 'top-14' : 'top-4'} left-4 z-20 bg-green-500 text-white px-3 py-1 rounded-full font-bold text-xs shadow-lg`}>
-                          1 YEAR INCLUDED
-                        </div>
-                      )}
                       <QuickViewButton onClick={() => openQuickView(product)} />
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleWishlistItem(product); }}

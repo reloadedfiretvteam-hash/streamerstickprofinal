@@ -16,6 +16,7 @@ import { createAIAssistantRoutes } from './routes/ai-assistant';
 import { createEmailCampaignRoutes } from './routes/email-campaigns';
 import { createProvisioningRoutes } from './routes/provisioning';
 import { createCmsRoutes } from './routes/cms';
+import { createOwnerCmsPublicRoutes, createOwnerCmsAdminRoutes } from './routes/owner-cms';
 import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from './helpers';
 import { effectiveRealProductChargeCents } from '../shared/schema';
 
@@ -231,6 +232,7 @@ app.use('*', cors({
 app.route('/api/auth', createAuthRoutes());
 app.route('/api/products', createProductRoutes());
 app.route('/api/cms', createCmsRoutes());
+app.route('/api/owner-cms', createOwnerCmsPublicRoutes());
 
 /** Public homepage / shadow-store promotion (no Stripe secrets). */
 const sitePromotionPublicHandler = async (c: Context<{ Bindings: Env }>) => {
@@ -419,6 +421,7 @@ app.get('/api/marketing/click', async (c) => {
 
 app.use('/api/admin/*', authMiddleware);
 app.route('/api/admin', createAdminRoutes());
+app.route('/api/admin/cms', createOwnerCmsAdminRoutes());
 app.route('/api/stripe', createWebhookRoutes());
 app.route('/api/track', createVisitorRoutes());
 app.route('/api/admin/visitors', createVisitorRoutes());
