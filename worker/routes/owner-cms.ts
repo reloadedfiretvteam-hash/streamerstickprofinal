@@ -662,7 +662,9 @@ export function createOwnerCmsAdminRoutes() {
 
   app.post("/seed-from-products", async (c) => {
     const client = sb(c.env);
-    const { data: products, error } = await client.from("real_products").select("*");
+    const { data: products, error } = await client
+      .from("real_products")
+      .select("id,name,description,price,image_url,category,shadow_price_id");
     if (error) return c.json({ error: error.message }, 500);
     const devices: any[] = [];
     const plans: any[] = [];
