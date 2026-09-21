@@ -6,10 +6,27 @@ import postgres from "postgres";
 import { readFile } from "fs/promises";
 import path from "path";
 
+function normalizeDatabaseUrl(raw: string | undefined): string | null {
+  if (!raw) return null;
+  let url = String(raw).trim().replace(/^['"]|['"]$/g, "");
+  if (/^postgres(ql)?:\/\//i.test(url) === false && url.includes("@") && url.includes(":")) {
+    url = `postgresql://${url}`;
+  }
+  try {
+    new URL(url.replace(/^postgresql:/i, "http:").replace(/^postgres:/i, "http:"));
+  } catch {
+    return null;
+  }
+  return url;
+}
+
 async function main() {
-  const databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
+  const databaseUrl = normalizeDatabaseUrl(
+    process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL,
+  );
   if (!databaseUrl) {
-    console.error("Missing SUPABASE_DATABASE_URL or DATABASE_URL");
+    console.error("Missing or invalid SUPABASE_DATABASE_URL / DATABASE_URL");
+    console.error("Owner CMS will use site_settings JSON fallback until a valid Postgres URI is set.");
     process.exit(1);
   }
 

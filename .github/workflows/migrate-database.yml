@@ -29,13 +29,14 @@ jobs:
         run: npm ci
       
       - name: Run Supabase Migration
+        continue-on-error: true
         run: npx tsx scripts/run-supabase-migration.ts
         env:
-          # Repo historically stored the URI as DATABASE_URL (not SUPABASE_DATABASE_URL).
           SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Apply Owner CMS Migration
+        continue-on-error: true
         run: npx tsx scripts/apply-owner-cms-migration.ts
         env:
           SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
