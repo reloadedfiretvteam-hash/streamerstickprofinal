@@ -1530,6 +1530,29 @@ app.get('/sitemap-products.xml', async (c) => {
   return c.text(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=300' });
 });
 
+const SOCIAL_AD_IMAGES = [
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117219829-959f6fce-05cf-4371-bc8f-498cab2d6a84.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117221715-cdebd52c-8b4c-461d-bc23-cf7d8caeb09c.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117222964-a051cc76-9b6f-4218-a55b-2571ea650e37.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117224046-29bdf9ae-0e83-48b1-be8c-336c7001e49f.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117224984-ea609cc9-1312-452d-ad1d-4e55abeace33.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117226127-93ee29b8-45a5-43d2-a0a7-ac374e9c0f91.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117226999-baeaad1e-8194-4b5a-a62a-863ebe0163b5.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117227980-ed734406-072a-4009-83bf-2c3064705fc9.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117229077-00ae2615-b61b-4f3b-8371-faca80daeda4.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117230423-893c9418-1495-47c0-9729-cfa62db5f667.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117231272-24bcd902-46d2-45ef-9e15-a54122d8b3c5.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117232118-0c9e6c5c-d8b2-4fb5-8b85-2ad61c54b765.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117232882-42623b99-2c6d-40cb-9fae-c597351219ef.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117233670-6bf48d95-7e1d-44b0-a209-6a59682a8f42.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117234398-0d40ad69-704c-4d81-80a1-01dc1c0c55f3.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117235332-ab9c6c18-7007-4f37-9d25-d5d5578f1434.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117236375-d76ca8a1-cec3-4dc4-aa70-b46419330b05.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117237143-dadfb0d9-ac42-49a4-a658-6173974f8e7a.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117238040-0b53f382-c7e1-4a82-a808-f8e4ce03b38d.png',
+  'https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/owner-cms/1790117238965-1d264d6c-a528-483f-b856-f0f22da70bd4.png',
+];
+
 const STATIC_SITEMAP_PAGES = [
   { url: '/', priority: '1.0', changefreq: 'daily' },
   { url: '/shop', priority: '0.9', changefreq: 'daily' },
@@ -1570,6 +1593,7 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/vs-iptvencoder', priority: '0.85', changefreq: 'weekly' },
   { url: '/ultimate-iptv-catalog-2026', priority: '0.95', changefreq: 'daily' },
   { url: '/tools/catalog', priority: '0.85', changefreq: 'weekly' },
+  { url: '/social-ads.html', priority: '0.8', changefreq: 'weekly' },
 ];
 
 const EXCLUDED_BLOG_SLUGS = new Set([
@@ -1687,12 +1711,15 @@ app.get('/sitemap.xml', async (c) => {
 `;
 
   for (const page of STATIC_SITEMAP_PAGES) {
+    const images = page.url === '/social-ads.html'
+      ? SOCIAL_AD_IMAGES.map((img) => `    <image:image><image:loc>${img}</image:loc></image:image>`).join('\n')
+      : '';
     sitemap += `  <url>
     <loc>${baseUrl}${page.url}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>
+${images ? images + '\n' : ''}  </url>
 `;
   }
 
@@ -1814,6 +1841,7 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/iptv-firestick': { title: 'IPTV Fire Stick Search? Google Packages | StreamStickPro', description: 'Looking up IPTV for Fire Stick or Downloader? Shop the Google HD package or Google 4K package, or use a subscription on a Fire TV you already own.' },
   '/best-iptv-firestick': { title: 'Best IPTV Fire Stick 2026 | Google Packages | StreamStickPro', description: 'People comparing IPTV for Fire Stick can order a Google HD or 4K package, or run live TV on a Fire Stick they already own.' },
   '/devices': { title: 'ONN & Google TV Devices | StreamStickPro', description: 'Shop ONN and Google TV streaming devices with price, condition, and setup details. Fire Stick hardware is not sold on this page.' },
+  '/social-ads.html': { title: 'StreamStickPro ads | 36-hour free trial and Google packages', description: 'StreamStickPro ads: cut the cable bill, keep live TV, sports, movies, and a 36-hour free trial. Google HD package and Google 4K package.' },
   '/plans': { title: 'Plans for Devices You Already Own | StreamStickPro', description: 'Streaming plans for Fire TV, Google TV, ONN, and other devices you already own. Hardware is included only when the plan says so.' },
   '/guides': { title: 'Google TV & Device Setup Guides | StreamStickPro', description: 'Written setup steps for ONN and Google TV, plus troubleshooting. A video alone is not the guide. Links to devices and plans.' },
   '/support': { title: 'Support & Contact | StreamStickPro', description: 'Setup help, compatibility questions, and order support. Email the team, or open guides, devices, and plans from this page.' },
@@ -2188,7 +2216,7 @@ app.get('*', async (c) => {
     '/onn-google-tv', '/onn', '/iptv-smarters-pro', '/tivimate', '/ultimate-iptv-catalog-2026',
     '/tools/catalog', '/setup', '/setup-firestick', '/setup-onn', '/tutorials', '/seo-ads',
     '/locations', '/trial', '/firestick',
-    '/vpn', '/homepage', '/faq', '/vpn-protection',
+    '/vpn', '/homepage', '/faq', '/vpn-protection', '/social-ads.html',
     '/track-order', '/secure', '/checkout-secure', '/bundles',
   ]);
   const isKnownRoute =
