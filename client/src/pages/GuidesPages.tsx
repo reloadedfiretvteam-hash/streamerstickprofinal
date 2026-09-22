@@ -1,9 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
+import { StorefrontChrome } from "@/components/StorefrontChrome";
+import { setPageMeta } from "@/lib/seo";
 
 export function GuidesCatalog() {
   const [guides, setGuides] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setPageMeta({
+      title: "Google TV & Device Setup Guides | StreamStickPro",
+      description:
+        "Written setup steps for ONN and Google TV, plus troubleshooting. A video alone is not the guide. Links to devices and plans.",
+      path: "/guides",
+    });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -22,13 +33,14 @@ export function GuidesCatalog() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f4f6f8]">
+    <StorefrontChrome>
+    <div className="bg-[#f4f6f8]">
       <div className="bg-[#0b1220] text-white">
         <div className="mx-auto max-w-6xl px-4 py-16">
           <p className="text-sm uppercase tracking-[0.2em] text-blue-300">Setup &amp; Compatibility</p>
-          <h1 className="mt-3 text-4xl font-semibold md:text-5xl">Setup guides &amp; support help</h1>
+          <h1 className="mt-3 text-4xl font-semibold md:text-5xl">Setup guides you can follow</h1>
           <p className="mt-4 max-w-2xl text-slate-300">
-            Written instructions, authorized videos, troubleshooting, and links to devices and plans.
+            Each guide has written steps. A video can sit beside the steps. It does not replace them.
           </p>
         </div>
       </div>
@@ -37,10 +49,11 @@ export function GuidesCatalog() {
         {!loading && !guides.length && (
           <div className="rounded-2xl border bg-white p-8">
             <p className="text-slate-600">
-              CMS guides will appear here when published. Existing tutorials:{" "}
-              <Link href="/tutorials" className="text-blue-700 underline">
-                /tutorials
+              Written guides publish here from the admin panel. Video walkthroughs are on{" "}
+              <Link href="/setup" className="text-blue-700 underline">
+                the setup page
               </Link>
+              .
             </p>
           </div>
         )}
@@ -59,6 +72,7 @@ export function GuidesCatalog() {
         </div>
       </div>
     </div>
+    </StorefrontChrome>
   );
 }
 
@@ -88,20 +102,33 @@ export function GuideDetailPage() {
   }, [slug]);
 
   useEffect(() => {
-    if (guide?.seo_title) document.title = guide.seo_title;
-  }, [guide]);
+    if (!guide) return;
+    setPageMeta({
+      title: guide.seo_title || guide.title || "Setup guide",
+      description: guide.seo_description || guide.summary || "Written setup steps for StreamStickPro.",
+      path: `/guides/${encodeURIComponent(guide.slug || slug)}`,
+    });
+  }, [guide, slug]);
 
   if (error === "not_found") {
     return (
+      <StorefrontChrome>
       <div className="mx-auto max-w-3xl px-4 py-20">
         <h1 className="text-2xl font-semibold">Guide not found</h1>
         <Link href="/guides" className="mt-4 inline-block text-blue-700 underline">
           Back to guides
         </Link>
       </div>
+      </StorefrontChrome>
     );
   }
-  if (!guide) return <div className="mx-auto max-w-3xl px-4 py-20">Loading…</div>;
+  if (!guide) {
+    return (
+      <StorefrontChrome>
+        <div className="mx-auto max-w-3xl px-4 py-20">Loading…</div>
+      </StorefrontChrome>
+    );
+  }
 
   const steps = Array.isArray(guide.written_steps) ? guide.written_steps : [];
   const prereq = Array.isArray(guide.prerequisites) ? guide.prerequisites : [];
@@ -109,6 +136,7 @@ export function GuideDetailPage() {
   const yt = youtubeEmbedId(guide.youtube_url);
 
   return (
+    <StorefrontChrome>
     <article className="mx-auto max-w-3xl px-4 py-12">
       <p className="text-sm uppercase tracking-wide text-blue-700">{guide.category || "setup"}</p>
       <h1 className="mt-2 text-4xl font-semibold">{guide.title}</h1>
@@ -184,6 +212,7 @@ export function GuideDetailPage() {
         </Link>
       </div>
     </article>
+    </StorefrontChrome>
   );
 }
 

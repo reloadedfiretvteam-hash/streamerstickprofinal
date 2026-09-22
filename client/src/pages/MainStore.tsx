@@ -409,36 +409,36 @@ const defaultSupport = {
 };
 
 const heroCtaClasses: Record<CmsAccent, string> = {
-  cyan: "flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-[#0A0A0F] bg-[#00D4FF] hover:bg-[#33ddff] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-[#00D4FF]/50 cursor-pointer transition-transform hover:scale-[1.02]",
-  gold: "flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-[#0A0A0F] bg-[#FAD02C] hover:bg-[#fce35c] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-[#FAD02C]/40 cursor-pointer transition-transform hover:scale-[1.02]",
-  violet: "flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-white bg-[#7C3AED] hover:bg-[#8b4ff5] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-[#7C3AED]/50 cursor-pointer transition-transform hover:scale-[1.02]",
-  teal: "flex items-center justify-center min-h-[72px] rounded-2xl font-black text-base sm:text-lg text-[#0A0A0F] bg-[#0DD9D2] ring-2 ring-[#0DD9D2] ring-offset-2 ring-offset-[#0A0A0F] hover:bg-[#2ee8e0] shadow-[0_20px_60px_rgba(13,217,210,0.25)] cursor-pointer transition-transform hover:scale-[1.02]",
+  cyan: "flex items-center justify-center min-h-[64px] rounded-xl font-semibold text-base text-white bg-teal-600 hover:bg-teal-500 shadow-lg cursor-pointer",
+  gold: "flex items-center justify-center min-h-[64px] rounded-xl font-semibold text-base text-white bg-blue-600 hover:bg-blue-500 shadow-lg cursor-pointer",
+  violet: "flex items-center justify-center min-h-[64px] rounded-xl font-semibold text-base text-white bg-white/10 border border-white/25 hover:bg-white/15 cursor-pointer",
+  teal: "flex items-center justify-center min-h-[64px] rounded-xl font-semibold text-base text-[#0b1220] bg-teal-300 hover:bg-teal-200 cursor-pointer",
 };
 
 const featureCardThemes: Record<CmsAccent, { wrapper: string; title: string; check: string; button: string }> = {
   cyan: {
-    wrapper: "rounded-2xl p-8 border border-[#00D4FF]/35 bg-gradient-to-br from-[#00D4FF]/10 to-transparent shadow-[0_20px_60px_rgba(0,0,0,0.5)] flex flex-col",
-    title: "text-2xl font-black text-[#00D4FF] mb-3",
-    check: "w-4 h-4 text-[#00D4FF] shrink-0 mt-0.5",
-    button: "inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#00D4FF] text-[#0A0A0F] font-black hover:bg-[#33ddff] cursor-pointer",
+    wrapper: "rounded-2xl p-8 border border-white/10 bg-[#121826] shadow-lg flex flex-col",
+    title: "text-2xl font-semibold text-white mb-3",
+    check: "w-4 h-4 text-teal-400 shrink-0 mt-0.5",
+    button: "inline-flex items-center justify-center w-full min-h-[52px] rounded-xl bg-teal-600 text-white font-semibold hover:bg-teal-500 cursor-pointer",
   },
   gold: {
-    wrapper: "rounded-2xl p-8 border border-[#FAD02C]/35 bg-gradient-to-br from-[#FAD02C]/10 to-transparent shadow-[0_20px_60px_rgba(0,0,0,0.5)] flex flex-col",
-    title: "text-2xl font-black text-[#FAD02C] mb-3",
-    check: "w-4 h-4 text-[#FAD02C] shrink-0 mt-0.5",
-    button: "inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#FAD02C] text-[#0A0A0F] font-black hover:bg-[#fce35c] cursor-pointer",
+    wrapper: "rounded-2xl p-8 border border-white/10 bg-[#121826] shadow-lg flex flex-col",
+    title: "text-2xl font-semibold text-white mb-3",
+    check: "w-4 h-4 text-blue-400 shrink-0 mt-0.5",
+    button: "inline-flex items-center justify-center w-full min-h-[52px] rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-500 cursor-pointer",
   },
   violet: {
-    wrapper: "rounded-2xl p-8 border border-[#7C3AED]/35 bg-gradient-to-br from-[#7C3AED]/12 to-transparent shadow-[0_20px_60px_rgba(0,0,0,0.5)] flex flex-col",
-    title: "text-2xl font-black text-[#7C3AED] mb-3",
-    check: "w-4 h-4 text-[#7C3AED] shrink-0 mt-0.5",
-    button: "inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#7C3AED] text-white font-black hover:bg-[#8b4ff5] cursor-pointer",
+    wrapper: "rounded-2xl p-8 border border-white/10 bg-[#121826] shadow-lg flex flex-col",
+    title: "text-2xl font-semibold text-white mb-3",
+    check: "w-4 h-4 text-slate-300 shrink-0 mt-0.5",
+    button: "inline-flex items-center justify-center w-full min-h-[52px] rounded-xl bg-white text-[#0b1220] font-semibold hover:bg-slate-100 cursor-pointer",
   },
   teal: {
-    wrapper: "rounded-2xl p-8 border-2 border-[#0DD9D2]/50 bg-gradient-to-br from-[#0DD9D2]/12 to-transparent shadow-[0_20px_60px_rgba(13,217,210,0.12)] flex flex-col ring-1 ring-[#0DD9D2]/20",
-    title: "text-2xl font-black text-[#0DD9D2] mb-3",
-    check: "w-4 h-4 text-[#0DD9D2] shrink-0 mt-0.5",
-    button: "inline-flex items-center justify-center w-full min-h-[56px] rounded-2xl bg-[#0DD9D2] text-[#0A0A0F] font-black hover:bg-[#2ee8e0] cursor-pointer",
+    wrapper: "rounded-2xl p-8 border border-teal-400/30 bg-[#121826] shadow-lg flex flex-col",
+    title: "text-2xl font-semibold text-white mb-3",
+    check: "w-4 h-4 text-teal-300 shrink-0 mt-0.5",
+    button: "inline-flex items-center justify-center w-full min-h-[52px] rounded-xl bg-teal-500 text-[#0b1220] font-semibold hover:bg-teal-400 cursor-pointer",
   },
 };
 
@@ -636,12 +636,12 @@ export default function MainStore() {
     document.documentElement.classList.remove("shadow-theme");
     document.documentElement.classList.add("dark");
     setPageMeta({
-      title: "IPTV Subscriptions ONN Google TV Kits VPN | StreamStickPro",
+      title: "Google TV Devices, Plans & Setup | StreamStickPro",
       description:
-        "StreamStickPro: IPTV subscriptions, ONN Google TV kits ($150 Full HD, $160 4K), and Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, SSL-secured checkout, 24/7 support.",
+        "Shop ONN Google TV devices, compare plans for equipment you already own, or follow written setup guides. Secure checkout and support.",
       path: "/",
       keywords:
-        "IPTV subscription, ONN Google TV, Onn 4K streaming kit, Surfshark VPN IPTV, ISP throttling VPN",
+        "ONN Google TV, Google TV devices, IPTV plans, setup guide, StreamStickPro",
     });
     loadCmsHome();
     loadProducts();
@@ -676,13 +676,13 @@ export default function MainStore() {
       // Map owner CMS path tiles into productCards when present
       const pathTiles = (ownerDoc as any)?.pathTiles;
       if (Array.isArray(pathTiles) && pathTiles.length) {
-        (merged as any).productCards = pathTiles.map((t: any) => ({
+        (merged as any).productCards = pathTiles.map((t: any, index: number) => ({
           title: t.title,
           description: t.description,
-          bullets: [],
-          ctaLabel: t.title,
-          ctaHref: t.href,
-          accent: "gold",
+          bullets: Array.isArray(t.bullets) ? t.bullets : [],
+          ctaLabel: t.ctaLabel || ["Shop devices", "See plans", "Open guides"][index] || "Continue",
+          ctaHref: t.href || t.ctaHref || "/",
+          accent: (["gold", "cyan", "violet"] as const)[index % 3],
           trackVpn: false,
         }));
       }
@@ -706,10 +706,10 @@ export default function MainStore() {
         setPageMeta({
           title:
             merged.meta.title ||
-            "StreamStickPro | Google TV Devices, Plans & Setup Help",
+            "Google TV Devices, Plans & Setup | StreamStickPro",
           description:
             merged.meta.description ||
-            "Shop Google TV devices, explore plans for compatible equipment, or get setup and compatibility help.",
+            "Shop ONN Google TV devices, compare plans for equipment you already own, or follow written setup guides. Secure checkout and support.",
           path: merged.meta.path || "/",
           keywords: merged.meta.keywords,
         });
@@ -953,29 +953,9 @@ export default function MainStore() {
         <div className="container mx-auto px-4 h-16 md:h-[72px] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <MobileNav scrollToShop={scrollToShop} scrollToAbout={scrollToAbout} scrollToFaq={scrollToFaq} onSupportClick={openSupport} />
-            <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
-              <motion.div
-                animate={{
-                  scale: [1, 1.1, 0.95, 1.05, 1],
-                  opacity: [1, 0.8, 1, 0.9, 1],
-                  filter: [
-                    "brightness(1)",
-                    "brightness(1.3)",
-                    "brightness(1.1)",
-                    "brightness(1.2)",
-                    "brightness(1)"
-                  ]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                <Flame className="w-7 h-7 text-orange-500" />
-              </motion.div>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#FAD02C]">Stream Stick Pro</span>
-            </div>
+            <Link href="/">
+              <span className="font-semibold text-lg tracking-tight text-white">StreamStick Pro</span>
+            </Link>
           </div>
           
           <div className="flex items-center gap-2">
@@ -991,7 +971,7 @@ export default function MainStore() {
             </Link>
             <Button 
               onClick={openSupport} 
-              className="hidden md:flex bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-4 py-2 rounded-lg shadow-lg shadow-orange-500/30 transition-all transform hover:scale-105" 
+              className="hidden md:flex bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg" 
               data-testid="button-contact-header"
               aria-label="Contact us - open support message box"
             >
@@ -1014,7 +994,7 @@ export default function MainStore() {
             </Button>
             <Button 
               onClick={openCart} 
-              className="relative bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg shadow-orange-500/30"
+              className="relative bg-blue-600 hover:bg-blue-500 text-white"
               data-testid="button-cart"
               aria-label={`Shopping cart${items.length > 0 ? `, ${items.length} items` : ''}`}
             >
@@ -1051,7 +1031,7 @@ export default function MainStore() {
               if (el.src !== fallbackHeroImg) el.src = fallbackHeroImg;
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0F]/68 via-[#0A0A0F]/42 to-[#0A0A0F]/62" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0b1220]/90 via-[#0b1220]/78 to-[#0b1220]/88" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0F]/48 via-transparent to-[#0A0A0F]/48" />
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDgpIi8+PC9nPjwvc3ZnPg==')] opacity-20" />
         </div>
@@ -1124,10 +1104,14 @@ export default function MainStore() {
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#1A1A22] to-transparent pointer-events-none" aria-hidden />
       </section>
 
-      {/* 4 product cards — 2×2 desktop */}
-      <section className="py-16 md:py-24 lg:py-32 border-t border-white/5 bg-[#0A0A0F]/60">
+      {/* Three starting paths */}
+      <section className="py-16 md:py-20 border-t border-white/5 bg-[#0A0A0F]/60">
         <div className="container mx-auto px-4 max-w-6xl">
-          <div className="grid md:grid-cols-2 gap-8 md:gap-10">
+          <h2 className="text-2xl md:text-3xl font-semibold text-white text-center mb-3">Choose how you want to start</h2>
+          <p className="text-center text-[#B0B3B8] max-w-2xl mx-auto mb-10">
+            Buy a Google TV device, pick a plan for equipment you already own, or open a written setup guide.
+          </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featureCards.map((card, index) => {
               const accent = card.accent || defaultFeatureCards[index]?.accent || "cyan";
               const theme = featureCardThemes[accent];
@@ -1196,15 +1180,12 @@ export default function MainStore() {
             animate={isShopInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 bg-[#00D4FF]/15 backdrop-blur-sm border border-[#00D4FF]/35 rounded-full px-5 sm:px-6 py-2 mb-6">
-              <Flame className="w-5 h-5 text-[#FAD02C] shrink-0" />
-              <span className="text-xs sm:text-sm font-semibold text-[#00D4FF] tracking-wide">SHOP ALL PRODUCTS</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 sm:mb-6 leading-tight px-1">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] via-white to-[#FAD02C]">ONN Google TV kits &amp; IPTV plans</span>
+            <p className="text-sm font-semibold uppercase tracking-wide text-blue-200 mb-4">Shop</p>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold mb-5 text-white leading-tight px-1">
+              Google TV devices and plans
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-[#E8EAED] max-w-3xl mx-auto leading-relaxed px-1">
-              Same lineup thousands of customers use daily: 18K+ channels, 100K+ movies &amp; series, and step-by-step guidance for ONN Google TV and Android TV.
+              Device prices are for ONN and Google TV hardware. Plan prices are for service on equipment you already own.
             </p>
           </motion.div>
 

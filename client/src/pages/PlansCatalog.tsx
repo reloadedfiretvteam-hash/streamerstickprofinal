@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
+import { StorefrontChrome } from "@/components/StorefrontChrome";
+import { setPageMeta } from "@/lib/seo";
 
 function formatUsd(cents?: number | null) {
   if (cents == null || !Number.isFinite(cents)) return null;
@@ -9,6 +11,15 @@ function formatUsd(cents?: number | null) {
 export default function PlansCatalog() {
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setPageMeta({
+      title: "Plans for Devices You Already Own | StreamStickPro",
+      description:
+        "Streaming plans for Fire TV, Google TV, ONN, and other devices you already own. Hardware is included only when the plan says so.",
+      path: "/plans",
+    });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -27,14 +38,15 @@ export default function PlansCatalog() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f4f6f8]">
+    <StorefrontChrome>
+    <div className="bg-[#f4f6f8]">
       <div className="bg-[#0b1220] text-white">
         <div className="mx-auto max-w-6xl px-4 py-16">
           <p className="text-sm uppercase tracking-[0.2em] text-teal-300">Plans &amp; Services</p>
-          <h1 className="mt-3 text-4xl font-semibold md:text-5xl">Already have a compatible device?</h1>
+          <h1 className="mt-3 text-4xl font-semibold md:text-5xl">Plans for devices you already own</h1>
           <p className="mt-4 max-w-2xl text-slate-300">
-            Plans and services for customer-owned Fire TV, Google TV, ONN, and other supported equipment.
-            Hardware is not included unless a plan explicitly says so.
+            These plans are for Fire TV, Google TV, ONN, and other compatible equipment you already have.
+            A plan does not include a new device unless that plan says it does.
           </p>
         </div>
       </div>
@@ -81,5 +93,6 @@ export default function PlansCatalog() {
         </div>
       </div>
     </div>
+    </StorefrontChrome>
   );
 }

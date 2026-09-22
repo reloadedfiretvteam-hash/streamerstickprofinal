@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
+import { StorefrontChrome } from "@/components/StorefrontChrome";
+import { setPageMeta } from "@/lib/seo";
 
 function formatUsd(cents?: number | null) {
   if (cents == null || !Number.isFinite(cents)) return null;
@@ -32,25 +34,39 @@ export default function PlanDetailPage() {
   }, [code]);
 
   useEffect(() => {
-    if (plan?.seo_title) document.title = plan.seo_title;
-  }, [plan]);
+    if (!plan) return;
+    setPageMeta({
+      title: plan.seo_title || plan.public_title || "Streaming plan",
+      description: plan.seo_description || plan.short_description || "Streaming plan for a device you already own.",
+      path: `/plans/${encodeURIComponent(plan.code || code)}`,
+    });
+  }, [plan, code]);
 
   if (error === "not_found") {
     return (
+      <StorefrontChrome>
       <div className="mx-auto max-w-3xl px-4 py-20">
         <h1 className="text-2xl font-semibold">Plan not found</h1>
         <Link href="/plans" className="mt-4 inline-block text-blue-700 underline">
           Back to plans
         </Link>
       </div>
+      </StorefrontChrome>
     );
   }
-  if (!plan) return <div className="mx-auto max-w-3xl px-4 py-20">Loading…</div>;
+  if (!plan) {
+    return (
+      <StorefrontChrome>
+        <div className="mx-auto max-w-3xl px-4 py-20">Loading…</div>
+      </StorefrontChrome>
+    );
+  }
 
   const features = Array.isArray(plan.features) ? plan.features : [];
   const faq = Array.isArray(plan.faq) ? plan.faq : [];
 
   return (
+    <StorefrontChrome>
     <div className="mx-auto max-w-4xl px-4 py-12">
       <p className="text-sm uppercase tracking-wide text-teal-700">Plan / Service</p>
       <h1 className="mt-2 text-4xl font-semibold">{plan.public_title}</h1>
@@ -115,5 +131,6 @@ export default function PlanDetailPage() {
         </Link>
       </div>
     </div>
+    </StorefrontChrome>
   );
 }

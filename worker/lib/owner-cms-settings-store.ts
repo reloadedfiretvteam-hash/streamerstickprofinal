@@ -67,6 +67,54 @@ export async function tablesReady(client: SupabaseClient): Promise<boolean> {
   return !error;
 }
 
+export const starterSetupGuide = {
+  id: "starter-onn-google-tv",
+  slug: "set-up-onn-google-tv",
+  title: "Set up an ONN Google TV device",
+  summary:
+    "Connect the device, join Wi-Fi, sign in to Google, then open your streaming app and enter the login from your order email.",
+  category: "setup",
+  status: "published",
+  sort_order: 0,
+  prerequisites: [
+    "A television with an HDMI port",
+    "A working home Wi-Fi network and the password",
+    "The order email that contains your streaming login",
+  ],
+  written_steps: [
+    {
+      title: "Connect the device",
+      body: "Plug the ONN Google TV stick or box into an HDMI port on the TV. Connect power, turn the TV on, and switch the TV input to that HDMI port. Wait until the Google TV welcome screen appears.",
+    },
+    {
+      title: "Join Wi-Fi and sign in",
+      body: "Choose your Wi-Fi network and enter the password. Sign in with a Google account when asked. Accept the remote pairing prompt if the on-screen steps show one. Language and region can stay on the defaults unless you need a different country.",
+    },
+    {
+      title: "Open your streaming app",
+      body: "From the Google TV home screen, open the app named in your order email. If it is not installed, use the search icon on the home screen, type the app name, and install it from the Google Play listing.",
+    },
+    {
+      title: "Enter your login",
+      body: "Use the username and password from the order email. Do not share that login. After it signs in, pick a live channel and let it play for a minute so the picture and sound settle.",
+    },
+    {
+      title: "If it will not play",
+      body: "Confirm the TV is on the correct HDMI input, the device has internet (open another app and load a page), and the login matches the email exactly. Restart the device by unplugging power for 10 seconds. If it still fails, use Support and include the device model and the email on the order.",
+    },
+  ],
+  faq: [
+    {
+      question: "Does this page sell a Fire Stick?",
+      answer: "No. This guide is for ONN and Google TV devices. If you already own a Fire TV, use Plans & Services for a plan that fits equipment you already have.",
+    },
+    {
+      question: "Where do I get the login?",
+      answer: "It arrives in the order email after checkout. The guide does not create a new login.",
+    },
+  ],
+};
+
 export const settingsCms = {
   KEYS,
   getJson,
@@ -178,9 +226,9 @@ function defaultHomepageDocument() {
       },
     ],
     meta: {
-      title: "StreamStickPro | Google TV Devices, Plans & Setup Help",
+      title: "Google TV Devices, Plans & Setup | StreamStickPro",
       description:
-        "Shop Google TV devices, explore plans for compatible equipment, or get setup and compatibility help.",
+        "Shop ONN Google TV devices, compare plans for equipment you already own, or follow written setup guides.",
     },
   };
 }

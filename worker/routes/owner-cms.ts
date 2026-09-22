@@ -8,7 +8,7 @@ import { Hono } from "hono";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Env } from "../index";
 import { getSupabaseServiceKey, getSupabaseUrl } from "../helpers";
-import { settingsCms, tablesReady } from "../lib/owner-cms-settings-store";
+import { settingsCms, starterSetupGuide, tablesReady } from "../lib/owner-cms-settings-store";
 
 function sb(env: Env): SupabaseClient {
   return createClient(getSupabaseUrl(env), getSupabaseServiceKey(env), {
@@ -152,6 +152,19 @@ export function createOwnerCmsPublicRoutes() {
       } else {
         rows = (await settingsCms.listGuides(client)).filter((g) => g.status === "published");
       }
+      if (!rows.length) {
+        rows = [
+          {
+            id: starterSetupGuide.id,
+            slug: starterSetupGuide.slug,
+            title: starterSetupGuide.title,
+            summary: starterSetupGuide.summary,
+            category: starterSetupGuide.category,
+            status: starterSetupGuide.status,
+            sort_order: starterSetupGuide.sort_order,
+          },
+        ];
+      }
       return c.json({ data: rows }, 200);
     } catch (e: any) {
       return c.json({ data: [], error: e?.message }, 200);
@@ -169,6 +182,7 @@ export function createOwnerCmsPublicRoutes() {
       } else {
         data = (await settingsCms.listGuides(client)).find((g) => g.slug === slug && g.status === "published") || null;
       }
+      if (!data && slug === starterSetupGuide.slug) data = starterSetupGuide;
       if (!data) return c.json({ data: null, error: "not_found" }, 404);
       return c.json({ data }, 200);
     } catch (e: any) {

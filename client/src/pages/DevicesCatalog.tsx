@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
+import { StorefrontChrome } from "@/components/StorefrontChrome";
+import { setPageMeta } from "@/lib/seo";
 
 type CmsDevice = {
   sku: string;
@@ -25,6 +27,15 @@ export default function DevicesCatalog() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setPageMeta({
+      title: "ONN & Google TV Devices | StreamStickPro",
+      description:
+        "Shop ONN and Google TV streaming devices with price, condition, and setup details. Fire Stick hardware is not sold on this page.",
+      path: "/devices",
+    });
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
@@ -43,7 +54,8 @@ export default function DevicesCatalog() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f4f6f8] text-slate-900">
+    <StorefrontChrome>
+    <div className="bg-[#f4f6f8] text-slate-900">
       <div className="bg-[#0b1220] text-white">
         <div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-blue-300">Google TV Devices</p>
@@ -122,5 +134,6 @@ export default function DevicesCatalog() {
         </div>
       </div>
     </div>
+    </StorefrontChrome>
   );
 }

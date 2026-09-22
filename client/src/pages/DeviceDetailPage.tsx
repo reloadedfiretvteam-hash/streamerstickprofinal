@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
+import { StorefrontChrome } from "@/components/StorefrontChrome";
+import { setPageMeta } from "@/lib/seo";
 
 function formatUsd(cents?: number | null) {
   if (cents == null || !Number.isFinite(cents)) return null;
@@ -70,6 +72,11 @@ export default function DeviceDetailPage() {
     document.getElementById("device-jsonld")?.remove();
     document.head.appendChild(script);
     if (device.seo_title) document.title = device.seo_title;
+    setPageMeta({
+      title: device.seo_title || device.public_title || "Google TV device",
+      description: device.seo_description || device.short_description || "ONN or Google TV device details, price, and setup.",
+      path: `/devices/${encodeURIComponent(device.sku || "")}`,
+    });
     return () => {
       document.getElementById("device-jsonld")?.remove();
     };
@@ -77,17 +84,23 @@ export default function DeviceDetailPage() {
 
   if (error === "not_found") {
     return (
+      <StorefrontChrome>
       <div className="mx-auto max-w-3xl px-4 py-20">
         <h1 className="text-2xl font-semibold">Device not found</h1>
         <Link href="/devices" className="mt-4 inline-block text-blue-700 underline">
           Back to devices
         </Link>
       </div>
+      </StorefrontChrome>
     );
   }
 
   if (!device) {
-    return <div className="mx-auto max-w-3xl px-4 py-20 text-slate-600">Loading…</div>;
+    return (
+      <StorefrontChrome>
+        <div className="mx-auto max-w-3xl px-4 py-20 text-slate-600">Loading…</div>
+      </StorefrontChrome>
+    );
   }
 
   const price = formatUsd(device.public_display_price_cents);
@@ -96,7 +109,8 @@ export default function DeviceDetailPage() {
   const faq = Array.isArray(device.faq) ? device.faq : [];
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <StorefrontChrome>
+    <div className="bg-white text-slate-900">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 lg:grid-cols-2">
         <div className="overflow-hidden rounded-2xl bg-slate-100">
           {device.primary_image_url ? (
@@ -187,5 +201,6 @@ export default function DeviceDetailPage() {
         ) : null}
       </div>
     </div>
+    </StorefrontChrome>
   );
 }

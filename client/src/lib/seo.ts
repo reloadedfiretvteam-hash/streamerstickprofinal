@@ -32,7 +32,7 @@ export function truncateMetaDescription(
     const extra = ` ${appendBrand}`.slice(0, max - s.length);
     if (extra.length > 0) s = (s + extra).slice(0, max);
   }
-  return s || 'StreamStickPro – Reloaded Fire TV, Fire Sticks, 18K+ channels. USA, Canada, UK.';
+  return s || 'StreamStickPro – ONN Google TV devices, plans for equipment you own, and written setup guides.';
 }
 
 /**
@@ -89,12 +89,12 @@ export function setPageMeta(options: {
   setMeta('og:site_name', 'StreamStickPro', true);
   const ogImg = ogImage || `${SITE_URL}/opengraph.jpg`;
   setMeta('og:image', ogImg, true);
-  setMeta('og:image:alt', 'StreamStickPro — Reloaded Fire TV, Fire Stick, 18K+ channels', true);
+  setMeta('og:image:alt', 'StreamStickPro — Google TV devices, plans, and setup guides', true);
   setMeta('twitter:card', 'summary_large_image');
   setMeta('twitter:title', fullTitle);
   setMeta('twitter:description', safeDesc);
   setMeta('twitter:image', ogImg);
-  setMeta('twitter:image:alt', 'StreamStickPro — Reloaded Fire TV, Fire Stick, 18K+ channels');
+  setMeta('twitter:image:alt', 'StreamStickPro — Google TV devices, plans, and setup guides');
   if (publishedTime) setMeta('article:published_time', publishedTime, true);
   if (modifiedTime) setMeta('article:modified_time', modifiedTime, true);
   let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement;

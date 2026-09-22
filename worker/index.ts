@@ -1188,9 +1188,7 @@ const SEO_REDIRECTS_STATIC: Record<string, string> = {
   '/setup-onn': '/setup',
   '/trial': '/36hr-trial',
   '/free-trial': '/36hr-trial',
-  // Guides
-  '/guides': '/iptv',
-  '/guide': '/iptv',
+  '/guide': '/guides',
   // Fire Stick & jailbreak
   '/firestick': '/jailbroken-fire-sticks',
   '/fire-stick': '/jailbroken-fire-sticks',
@@ -1415,7 +1413,10 @@ app.get('/llms.txt', (c) => {
 - https://streamstickpro.com/iptv — Best IPTV service guide with channel lists, pricing, and setup
 - https://streamstickpro.com/iptv-firestick — How to set up IPTV on Amazon Fire Stick
 - https://streamstickpro.com/jailbroken-fire-sticks — Fire Stick jailbreaking and sideloading guide
-- https://streamstickpro.com/devices — Fire Stick HD vs 4K vs 4K Max comparison
+- https://streamstickpro.com/devices — ONN and Google TV devices for sale
+- https://streamstickpro.com/plans — Plans for compatible devices the customer already owns
+- https://streamstickpro.com/guides — Written setup guides
+- https://streamstickpro.com/support — Support and contact
 - https://streamstickpro.com/onn-google-tv — ONN Google TV 4K IPTV setup guide
 - https://streamstickpro.com/iptv-media-players — TiviMate, IPTV Smarters Pro, Perfect Player comparison
 - https://streamstickpro.com/tivimate — TiviMate IPTV player setup tutorial
@@ -1498,6 +1499,9 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/iptv', priority: '0.9', changefreq: 'weekly' },
   { url: '/iptv-firestick', priority: '0.9', changefreq: 'weekly' },
   { url: '/devices', priority: '0.9', changefreq: 'weekly' },
+  { url: '/plans', priority: '0.9', changefreq: 'weekly' },
+  { url: '/guides', priority: '0.9', changefreq: 'weekly' },
+  { url: '/support', priority: '0.7', changefreq: 'monthly' },
   { url: '/bundles', priority: '0.9', changefreq: 'weekly' },
   { url: '/best-iptv-firestick', priority: '0.9', changefreq: 'weekly' },
   { url: '/iptv-media-players', priority: '0.9', changefreq: 'weekly' },
@@ -1733,9 +1737,9 @@ app.post('/api/indexnow/ping', async (c) => {
 // ── Per-page SEO meta for SPA pages (critical: Googlebot sees unique meta per page) ──
 const PAGE_META: Record<string, { title: string; description: string; noindex?: boolean }> = {
   '/': {
-    title: 'IPTV Subscriptions Loaded Firesticks Onn VPN | StreamStickPro',
+    title: 'Google TV Devices, Plans & Setup | StreamStickPro',
     description:
-      'IPTV subscriptions, loaded Firesticks, ONN Google TV, Surfshark VPN for ISP throttling. 36-hour trial, 18K+ channels, McAfee Secure. StreamStickPro.',
+      'Shop ONN Google TV devices, compare plans for equipment you already own, or follow written setup guides. Secure checkout and support.',
   },
   '/vpn': {
     title: 'Surfshark VPN IPTV Buffering ISP Throttle Firestick | StreamStickPro',
@@ -1752,8 +1756,8 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
     description:
       'ONN Google TV streaming devices pre-configured for IPTV. 1-year Reloaded Fire TV included. Budget 4K power from StreamStickPro.',
   },
-  '/shop': { title: 'Shop IPTV Subscriptions & Fire Sticks | StreamStick Pro', description: 'Buy IPTV subscriptions, jailbroken Fire Sticks, and ONN Google TV devices. 18,000+ channels, instant setup, 24/7 support. Shop StreamStickPro now.' },
-  '/pricing': { title: 'IPTV Pricing & Subscription Plans 2026 | StreamStick Pro', description: 'IPTV pricing with multi-device options and Fire Stick bundles. 18,000+ channels, 100,000+ VOD, instant activation, 24/7 support. Compare plans now.' },
+  '/shop': { title: 'Shop Google TV Devices & IPTV Plans | StreamStickPro', description: 'Buy ONN Google TV devices and IPTV plans for equipment you already own. Listed prices, secure checkout, and setup help from StreamStickPro.' },
+  '/pricing': { title: 'IPTV Pricing & Plans | StreamStickPro', description: 'Compare IPTV plan lengths and how many screens can stream at once. 18,000+ channels, movies and series, instant activation, and 24/7 support.' },
   '/blog': { title: 'IPTV & Streaming Blog | Guides, News, Tips | StreamStick Pro', description: 'Expert IPTV guides, Fire Stick tutorials, streaming tips, and cord-cutting news. Updated weekly by the StreamStickPro editorial team.' },
   '/locations': { title: 'IPTV by City & Region | USA, Canada, UK | StreamStick Pro', description: 'Find IPTV service in your city. StreamStickPro covers 40,000+ locations across USA, Canada, and UK. Local guides, setup help, free trial.' },
   '/iptv': { title: 'IPTV Subscription — 18K+ Channels & VOD | StreamStickPro', description: 'StreamStickPro IPTV: 18,000+ live channels, huge VOD library, sports & international lineups. Instant credentials, TiviMate & Smarters-friendly setup, 36-hour trial. Works on Fire TV, ONN Google TV, and more.' },
@@ -1762,7 +1766,11 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/36hr-trial': { title: 'Free 36-Hour IPTV Trial | 18K+ Channels | StreamStick Pro', description: 'Try StreamStickPro free for 36 hours. 18,000+ live channels, VOD, EPG guide. No credit card required. Instant activation on all devices.' },
   '/iptv-firestick': { title: 'IPTV for Fire Stick 2026 | Setup Guide | StreamStick Pro', description: 'How to set up IPTV on Amazon Fire Stick. Step-by-step guide for IPTV Smarters Pro, TiviMate, and more. 18K+ channels with StreamStickPro.' },
   '/best-iptv-firestick': { title: 'Best IPTV for Fire Stick 2026 | Top Picks | StreamStick Pro', description: 'Best IPTV services for Amazon Fire Stick in 2026. Compare features, channels, prices. StreamStickPro rated #1 with 18K+ channels and free trial.' },
-  '/devices': { title: 'Reloaded Fire TV Devices — Fire Stick & ONN | StreamStickPro', description: 'Shop Fire Stick HD, 4K, and 4K Max plus ONN Google TV options with Reloaded Fire TV built in—guided onboarding, instant credentials, 1-year access included, 24/7 support.' },
+  '/devices': { title: 'ONN & Google TV Devices | StreamStickPro', description: 'Shop ONN and Google TV streaming devices with price, condition, and setup details. Fire Stick hardware is not sold on this page.' },
+  '/plans': { title: 'Plans for Devices You Already Own | StreamStickPro', description: 'Streaming plans for Fire TV, Google TV, ONN, and other devices you already own. Hardware is included only when the plan says so.' },
+  '/guides': { title: 'Google TV & Device Setup Guides | StreamStickPro', description: 'Written setup steps for ONN and Google TV, plus troubleshooting. A video alone is not the guide. Links to devices and plans.' },
+  '/support': { title: 'Support & Contact | StreamStickPro', description: 'Setup help, compatibility questions, and order support. Email the team, or open guides, devices, and plans from this page.' },
+  '/contact': { title: 'Contact StreamStickPro Support | StreamStickPro', description: 'Contact StreamStickPro for setup help, compatibility questions, and order support. Email the team and use the linked guides.' },
   '/iptv-media-players': { title: 'Best IPTV Media Players 2026 | Devices | StreamStick Pro', description: 'Top IPTV media players and apps: TiviMate, IPTV Smarters Pro, Kodi, Perfect Player, VLC. Expert setup guides and side-by-side comparisons.' },
   '/iptv-smarters-pro': { title: 'IPTV Smarters Pro Setup Guide 2026 | StreamStick Pro', description: 'Complete IPTV Smarters Pro setup guide. Install on Fire Stick, Android, iOS. Add StreamStickPro credentials and start streaming 18K+ channels.' },
   '/tivimate': { title: 'TiviMate IPTV Player Setup Guide 2026 | StreamStick Pro', description: 'TiviMate setup guide for IPTV. Install on Fire Stick and Android TV. EPG, catch-up, multi-view. Best settings for StreamStickPro streaming.' },
