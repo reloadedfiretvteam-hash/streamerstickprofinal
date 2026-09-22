@@ -2,6 +2,7 @@ import { useState, useEffect, ChangeEvent, useCallback } from "react";
 import { useLocation } from "wouter";
 import { apiCall } from "@/lib/api";
 import { OwnerCmsPanel } from "@/components/owner-cms/OwnerCmsPanel";
+import { BrandLogo } from "@/components/BrandLogo";
 import { 
   LayoutDashboard, 
   Package, 
@@ -2497,8 +2498,7 @@ export default function AdminPanel() {
         <Card className="w-full max-w-md bg-gray-800 border-gray-700">
           <CardHeader className="text-center">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <Flame className="w-8 h-8 text-orange-500" />
-              <span className="text-2xl font-bold text-white">StreamStickPro</span>
+              <BrandLogo invert className="text-2xl text-white" markClassName="h-8 w-8" />
             </div>
             <CardTitle className="text-xl text-white">Admin Login</CardTitle>
             <CardDescription className="text-gray-400">
@@ -2576,7 +2576,7 @@ export default function AdminPanel() {
       <aside className="w-64 border-r border-white/10 bg-gray-800 flex flex-col">
         <div className="p-6 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <Flame className="w-6 h-6 text-orange-500" />
+            <BrandLogo invert className="text-white" markClassName="h-6 w-6" wordmark={false} />
             <h1 className="font-bold text-xl tracking-tight">Admin Panel</h1>
           </div>
           <p className="text-xs text-gray-400 mt-1">StreamStickPro Management</p>

@@ -10,9 +10,6 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { SitePromotionBanner, type PublicPromotion } from "@/components/SitePromotionBanner";
 import { WeekPromotionStrip } from "@/components/WeekPromotionStrip";
-import { CmsStoreBanner } from "@/components/CmsStoreBanner";
-import { CmsEmailPromo } from "@/components/CmsEmailPromo";
-import { CmsPresence } from "@/components/CmsPresence";
 import { iptvRealProductId } from "@/lib/iptv-sku";
 import { buildShadowCmsState, SHADOW_CMS_DEFAULTS, type ShadowCmsState } from "@/lib/shadow-cms";
 import type { HomeCmsOverrideEdit } from "@/lib/merge-home-cms-overrides";
@@ -154,7 +151,6 @@ export default function ShadowStore() {
   const [shadowCms, setShadowCms] = useState<ShadowCmsState>(
     () => JSON.parse(JSON.stringify(SHADOW_CMS_DEFAULTS)) as ShadowCmsState,
   );
-  const [emailPromo, setEmailPromo] = useState<any>(null);
 
   useEffect(() => {
     (async () => {
@@ -185,7 +181,6 @@ export default function ShadowStore() {
         const merged = buildShadowCmsState(wpData, edits);
         const ownerDoc = ownerJson?.data?.status === "published" ? ownerJson?.data?.document : null;
         const cloaked = ownerDoc?.cloaked || null;
-        if (ownerDoc?.emailPromo) setEmailPromo(ownerDoc.emailPromo);
         if (cloaked && typeof cloaked === "object") {
           merged.hero = {
             ...merged.hero,
@@ -435,9 +430,6 @@ export default function ShadowStore() {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
-      <CmsStoreBanner page="cloak" />
-      <CmsPresence />
-      <CmsEmailPromo promo={emailPromo} page="cloak" />
       <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 font-semibold text-xl text-primary">

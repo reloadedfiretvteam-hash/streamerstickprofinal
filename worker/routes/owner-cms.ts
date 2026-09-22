@@ -10,6 +10,7 @@ import type { Env } from "../index";
 import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from "../helpers";
 import { sendEmail } from "../email-providers";
 import { settingsCms, starterSetupGuide, tablesReady } from "../lib/owner-cms-settings-store";
+import { asCmsDevice, googleDevices, loadShopProducts, merchantRssXml } from "../lib/shop-catalog";
 
 function validEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -107,6 +108,9 @@ export function createOwnerCmsPublicRoutes() {
       } else {
         rows = (await settingsCms.listDevices(client)).filter((d) => d.status === "published");
       }
+      if (!rows.length) {
+        rows = googleDevices(await loadShopProducts(client)).map(asCmsDevice);
+      }
       return c.json({ data: await overlayLivePrices(client, rows) }, 200);
     } catch (e: any) {
       return c.json({ data: [], error: e?.message }, 200);
@@ -124,10 +128,26 @@ export function createOwnerCmsPublicRoutes() {
       } else {
         data = (await settingsCms.listDevices(client)).find((d) => d.sku === sku && d.status === "published") || null;
       }
+      if (!data) {
+        const fallback = googleDevices(await loadShopProducts(client)).find((p) => p.id === sku);
+        data = fallback ? asCmsDevice(fallback) : null;
+      }
       if (!data) return c.json({ data: null, error: "not_found" }, 404);
       return c.json({ data: (await overlayLivePrices(client, [data]))[0] }, 200);
     } catch (e: any) {
       return c.json({ data: null, error: e?.message }, 500);
+    }
+  });
+
+  app.get("/google-merchant.xml", async (c) => {
+    try {
+      const products = googleDevices(await loadShopProducts(sb(c.env)));
+      return c.text(merchantRssXml(products), 200, {
+        "Content-Type": "application/xml; charset=utf-8",
+        "Cache-Control": "public, max-age=300",
+      });
+    } catch (e: any) {
+      return c.text(e?.message || "feed unavailable", 500);
     }
   });
 
@@ -295,6 +315,7 @@ export function createOwnerCmsPublicRoutes() {
       } else {
         data = (await settingsCms.listDevices(client)).filter((d) => d.status === "published");
       }
+      if (!data.length) data = googleDevices(await loadShopProducts(client)).map(asCmsDevice);
       const items = data
         .filter((d) => {
           const sku = String(d.sku || "").toLowerCase();

@@ -36,6 +36,7 @@ import { trackVpnClick } from "@/lib/vpn-tracking";
 import { SitePromotionBanner } from "@/components/SitePromotionBanner";
 import { WeekPromotionStrip } from "@/components/WeekPromotionStrip";
 import { CmsStoreBanner } from "@/components/CmsStoreBanner";
+import { BrandLogo } from "@/components/BrandLogo";
 import { CmsEmailPromo } from "@/components/CmsEmailPromo";
 import { CmsPresence } from "@/components/CmsPresence";
 import { OnnProductCardImage } from "@/components/OnnProductCardImage";
@@ -1041,7 +1042,7 @@ export default function MainStore() {
           <div className="flex items-center gap-3">
             <MobileNav scrollToShop={scrollToShop} scrollToAbout={scrollToAbout} scrollToFaq={scrollToFaq} onSupportClick={openSupport} />
             <Link href="/">
-              <span className="font-semibold text-lg tracking-tight text-white">StreamStick Pro</span>
+              <BrandLogo invert className="text-lg text-white" markClassName="h-8 w-8" />
             </Link>
           </div>
           
@@ -2526,8 +2527,7 @@ export default function MainStore() {
           <div className="grid md:grid-cols-5 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Flame className="w-8 h-8 text-orange-500" />
-                <span className="text-xl font-bold text-white">StreamStickPro</span>
+                <BrandLogo invert className="text-xl text-white" markClassName="h-8 w-8" />
               </div>
               <p className="text-sm text-gray-200 mb-4">
                 {footerTagline}

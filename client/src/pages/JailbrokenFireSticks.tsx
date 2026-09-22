@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { SEOSchema } from "@/components/SEOSchema";
 import { setPageMeta } from "@/lib/seo";
+import { NicheProductOffers } from "@/components/NicheProductOffers";
 import { JAILBREAK_IMAGES, getImageForSlot, fullImageUrl } from "@/data/seo-images";
 
 const breadcrumbs = [
@@ -14,8 +15,8 @@ export default function JailbrokenFireSticks() {
   useEffect(() => {
     const ogImg = fullImageUrl(getImageForSlot(JAILBREAK_IMAGES, 0).src);
     setPageMeta({
-      title: "Reloaded Fire TV Fire Stick 2026 | Jailbroken Fire Stick Guide | StreamStick Pro",
-      description: "Jailbroken Fire Stick guide for 2026: 18K+ channels, fast setup, and Fire Stick HD, 4K, 4K Max options. Shop now with StreamStick Pro.",
+      title: "Jailbroken Fire Stick Search? Buy ONN Google TV",
+      description: "Searching jailbroken, unlocked, or loaded Fire Stick? Order an ONN Google TV kit with live price, photo, and checkout instead of Fire Stick hardware.",
       path: "/jailbroken-fire-sticks",
       ogImage: ogImg,
     });
@@ -42,16 +43,17 @@ export default function JailbrokenFireSticks() {
       <BreadcrumbSchema items={breadcrumbs.map(b => ({ name: b.label, url: b.href }))} />
       <SEOSchema faq={faq} />
       <PillarLayout
-        title="Jailbroken Fire Sticks & Fire TV Device Guide 2026"
-        description="Guide to jailbroken Fire Sticks and Fire TV device options. Compare Fire Stick HD, 4K, and 4K Max with StreamStickPro."
+        title="Jailbroken or Unlocked Fire Stick Search? Get a Google TV Kit"
+        description="People searching jailbroken, unlocked, downloader, or IPTV Fire Stick usually want a ready streaming box. We sell ONN Google TV kits with price, picture, and an order link."
         breadcrumbs={breadcrumbs}
       >
+        <NicheProductOffers title="Order the Google TV kits that show up for this search" />
         <h2 id="what-are-jailbroken-fire-sticks">What Is a Jailbroken Fire Stick?</h2>
         <p>“Jailbroken” Fire Stick usually refers to a Fire TV device that can run apps from outside the Amazon Appstore (sideloading). In practice, most buyers want an easier way to watch Reloaded Fire TV with clear setup steps, an all-in-one app flow, and reliable support—without broken APKs or Kodi rebuilds.</p>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
           <img src={getImageForSlot(JAILBREAK_IMAGES, 0).src} alt={getImageForSlot(JAILBREAK_IMAGES, 0).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
         </figure>
-        <p>At StreamStickPro we focus on <Link href="/devices">Fire Stick device options</Link> and <Link href="/iptv">Reloaded Fire TV plans</Link> so you can start quickly with less setup time.</p>
+        <p>At StreamStickPro we sell <Link href="/devices">ONN Google TV kits</Link> and <Link href="/plans">plans for equipment you already own</Link>. If you searched jailbroken, unlocked, downloader, or IPTV Fire Stick, order a Google TV kit below.</p>
 
         <h2 id="fully-loaded-vs-diy">Setup Support vs Doing It Yourself</h2>
         <p>Doing it yourself means buying a Fire Stick, installing a player app, and adding a subscription. A guided option means you get instant credentials, an educational tutorial, and 24/7 help. That is ideal if you want to skip trial-and-error and get straight to <Link href="/iptv-firestick">Reloaded Fire TV on Fire Stick</Link> without dead links.</p>

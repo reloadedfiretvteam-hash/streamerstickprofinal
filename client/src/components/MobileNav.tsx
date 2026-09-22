@@ -1,8 +1,8 @@
 import { useState } from "react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { useLocation } from "wouter";
 import {
   Menu,
-  Flame,
   ShoppingCart,
   Tv,
   Wifi,
@@ -98,10 +98,7 @@ export function MobileNav({ scrollToShop, scrollToFaq, scrollToAbout, onSupportC
       <SheetContent side="left" className="w-[min(100vw-2rem,340px)] sm:w-[340px] bg-[#0A0A0F] border-r border-[#2A2A33] p-0">
         <SheetHeader className="p-6 border-b border-white/10">
           <SheetTitle className="flex items-center gap-2 text-white">
-            <Flame className="w-6 h-6 text-[#00D4FF]" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4FF] to-[#FAD02C] font-bold">
-              Stream Stick Pro
-            </span>
+            <BrandLogo invert className="text-white" markClassName="h-6 w-6" />
           </SheetTitle>
         </SheetHeader>
 

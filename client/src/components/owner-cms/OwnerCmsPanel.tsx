@@ -577,7 +577,7 @@ export function OwnerCmsPanel({ authFetch }: { authFetch: AuthFetch }) {
     starts_at: "",
     ends_at: "",
     show_real: true,
-    show_cloak: true,
+    show_cloak: false,
     is_active: true,
     status: "published",
   });

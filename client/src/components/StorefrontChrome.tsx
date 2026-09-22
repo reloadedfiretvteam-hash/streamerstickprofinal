@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "wouter";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const links = [
   { href: "/", label: "Home" },
@@ -15,7 +16,7 @@ export function StorefrontChrome({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0b1220] text-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <Link href="/" className="shrink-0 text-sm font-semibold tracking-tight text-white">
-            StreamStick Pro
+            <BrandLogo invert markClassName="h-8 w-8" />
           </Link>
           <nav className="hidden items-center gap-1 md:flex" aria-label="Store">
             {links.map((item) => (

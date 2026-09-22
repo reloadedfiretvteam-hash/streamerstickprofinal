@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { SEOSchema } from "@/components/SEOSchema";
 import { setPageMeta } from "@/lib/seo";
+import { NicheProductOffers } from "@/components/NicheProductOffers";
 
 const breadcrumbs = [
   { label: "Home", href: "/" },
@@ -13,9 +14,9 @@ const breadcrumbs = [
 export default function FirestickDevices() {
   useEffect(() => {
     setPageMeta({
-      title: "Reloaded Fire TV Devices | Fire Stick, Onn Google TV",
-      description: "Fire Stick and Onn Google TV device options with easy setup, guided onboarding, and a 1-year Reloaded Fire TV plan.",
-      path: "/devices",
+      title: "Fire Stick Search? Shop ONN Google TV Kits",
+      description: "Looking up Fire Stick, unlocked, or IPTV devices? Buy ONN Google TV kits with live price, photo, and a direct order link.",
+      path: "/firestick-devices",
       ogImage: "https://streamstickpro.com/images/devices-og.webp",
     });
 
@@ -56,6 +57,7 @@ export default function FirestickDevices() {
         description="Fire Stick and Onn Google TV device options with guided setup and a 1-year Reloaded Fire TV plan."
         breadcrumbs={breadcrumbs}
       >
+        <NicheProductOffers title="Live Google TV kits with price, photo, and order link" />
         <div className="space-y-12">
           <section className="rounded-2xl border border-amber-400/40 bg-amber-500/10 p-5 text-amber-50">
             <h2 className="text-lg font-semibold text-white">Fire Stick hardware is not a current product</h2>

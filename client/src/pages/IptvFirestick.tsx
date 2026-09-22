@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { PillarLayout, BreadcrumbSchema } from "@/components/PillarLayout";
 import { SEOSchema } from "@/components/SEOSchema";
 import { setPageMeta } from "@/lib/seo";
+import { NicheProductOffers } from "@/components/NicheProductOffers";
 
 const breadcrumbs = [
   { label: "Home", href: "/" },
@@ -35,6 +36,7 @@ export default function IptvFirestick() {
         description="Complete guide to Reloaded Fire TV on Fire Stick: TiviMate, Smarters, and setup in minutes with instant credentials—StreamStickPro."
         breadcrumbs={breadcrumbs}
       >
+        <NicheProductOffers title="Buy a Google TV kit if you searched IPTV Fire Stick" />
         <h2 id="best-iptv-firestick">Why Fire Stick Is Perfect for Reloaded Fire TV</h2>
         <p>Amazon Fire Stick is one of the most popular devices for <strong>Reloaded Fire TV live streaming</strong>. It’s affordable, supports all major streaming apps including TiviMate and Smarters, and runs smoothly with a good subscription. Whether you use Fire Stick HD, 4K, or <Link href="/devices">4K Max</Link>, you can enjoy thousands of channels and on-demand content—without dead-end app lists or Kodi rebuilds.</p>
 

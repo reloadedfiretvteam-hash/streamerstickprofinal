@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
 import { StorefrontChrome } from "@/components/StorefrontChrome";
 import { setPageMeta } from "@/lib/seo";
+import { useCart } from "@/lib/store";
 
 function formatUsd(cents?: number | null) {
   if (cents == null || !Number.isFinite(cents)) return null;
@@ -13,6 +14,7 @@ export default function DeviceDetailPage() {
   const sku = decodeURIComponent(params.sku || "");
   const [device, setDevice] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const { addItem, openCart } = useCart();
 
   useEffect(() => {
     let cancelled = false;
@@ -138,11 +140,28 @@ export default function DeviceDetailPage() {
           </div>
           <p className="mt-2 text-sm text-slate-500">Public display price · Availability: {device.availability}</p>
           <div className="mt-8 flex flex-wrap gap-3">
+            <button
+              type="button"
+              className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-medium text-white hover:bg-blue-500"
+              onClick={() => {
+                addItem({
+                  id: device.real_product_id || device.sku,
+                  name: device.public_title,
+                  price: (device.public_display_price_cents || 0) / 100,
+                  image: device.primary_image_url || "",
+                  category: "firestick",
+                  description: device.short_description || "",
+                });
+                openCart();
+              }}
+            >
+              Add to cart
+            </button>
             <Link
               href="/shop"
-              className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-medium text-white hover:bg-blue-500"
+              className="rounded-xl border px-5 py-3 text-sm font-medium"
             >
-              Continue to shop / checkout
+              View all products
             </Link>
             {device.setup_guide_link ? (
               <a href={device.setup_guide_link} className="rounded-xl border px-5 py-3 text-sm font-medium">

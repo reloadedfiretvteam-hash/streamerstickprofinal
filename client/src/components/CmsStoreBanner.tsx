@@ -63,7 +63,15 @@ export function CmsStoreBanner({ page }: { page: "real" | "cloak" }) {
     () =>
       banners.filter((banner) => {
         const targets = Array.isArray(banner.target_pages) ? banner.target_pages : ["*"];
-        if (!(targets.includes("*") || targets.includes(page) || targets.includes("homepage"))) return false;
+        if (page === "cloak") {
+          if (!targets.includes("cloak")) return false;
+        } else if (!(targets.includes("*") || targets.includes(page) || targets.includes("homepage") || targets.includes("real"))) {
+          return false;
+        }
+        const copy = `${banner.headline || ""} ${banner.subheadline || ""}`.toLowerCase();
+        if (page === "cloak" && /onn|iptv|fire stick|jailbreak|google tv kit|streaming device kit/.test(copy)) {
+          return false;
+        }
         if (hidden[banner.id] || localStorage.getItem(dismissedKey(banner.id))) return false;
         if (countdownLabel(banner.ends_at) === "ended") return false;
         return true;

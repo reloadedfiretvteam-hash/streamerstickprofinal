@@ -19,6 +19,7 @@ import { createCmsRoutes } from './routes/cms';
 import { createOwnerCmsPublicRoutes, createOwnerCmsAdminRoutes } from './routes/owner-cms';
 import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from './helpers';
 import { settingsCms, starterSetupGuide, tablesReady } from './lib/owner-cms-settings-store';
+import { googleDevices, loadShopProducts, merchantRssXml, productJsonLd, itemListJsonLd } from './lib/shop-catalog';
 import { createClient } from '@supabase/supabase-js';
 import { effectiveRealProductChargeCents } from '../shared/schema';
 
@@ -1309,6 +1310,9 @@ Allow: /feed.xml
 Allow: /opensearch.xml
 Allow: /llms.txt
 Allow: /ai.txt
+Allow: /google-merchant.xml
+Allow: /products.xml
+Allow: /sitemap-products.xml
 Disallow: /api/
 Disallow: /admin
 Disallow: /admin/
@@ -1422,6 +1426,9 @@ app.get('/llms.txt', (c) => {
 - https://streamstickpro.com/iptv-firestick — How to set up IPTV on Amazon Fire Stick
 - https://streamstickpro.com/jailbroken-fire-sticks — Fire Stick jailbreaking and sideloading guide
 - https://streamstickpro.com/devices — ONN and Google TV devices for sale
+- https://streamstickpro.com/devices/android-onn-4k — ONN 4K Streaming Device Kit product page
+- https://streamstickpro.com/devices/android-onn-pro — ONN 4K Ultra HD Pro Kit product page
+- https://streamstickpro.com/google-merchant.xml — Google/Bing product feed with price, image, and order link
 - https://streamstickpro.com/plans — Plans for compatible devices the customer already owns
 - https://streamstickpro.com/guides — Written setup guides
 - https://streamstickpro.com/support — Support and contact
@@ -1482,6 +1489,7 @@ const SITEMAP_INDEX_XML = (baseUrl: string, today: string) => `<?xml version="1.
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap><loc>${baseUrl}/sitemap-pages.xml</loc><lastmod>${today}</lastmod></sitemap>
   <sitemap><loc>${baseUrl}/sitemap-posts.xml</loc><lastmod>${today}</lastmod></sitemap>
+  <sitemap><loc>${baseUrl}/sitemap-products.xml</loc><lastmod>${today}</lastmod></sitemap>
 </sitemapindex>`;
 app.get('/sitemap-index.xml', (c) => {
   const today = new Date().toISOString().split('T')[0];
@@ -1489,6 +1497,37 @@ app.get('/sitemap-index.xml', (c) => {
     'Content-Type': 'application/xml; charset=utf-8',
     'Cache-Control': 'public, max-age=21600, s-maxage=21600',
   });
+});
+
+async function liveGoogleDevices(env: Env) {
+  const client = createClient(getSupabaseUrl(env), getSupabaseServiceKey(env), {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  return googleDevices(await loadShopProducts(client));
+}
+
+app.get('/google-merchant.xml', async (c) => {
+  try {
+    return c.text(merchantRssXml(await liveGoogleDevices(c.env)), 200, {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=300',
+    });
+  } catch (e: any) {
+    return c.text(e?.message || 'feed unavailable', 500);
+  }
+});
+app.get('/products.xml', (c) => c.redirect('/google-merchant.xml', 301));
+
+app.get('/sitemap-products.xml', async (c) => {
+  const today = new Date().toISOString().split('T')[0];
+  const products = await liveGoogleDevices(c.env).catch(() => []);
+  let xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`;
+  xml += `<url><loc>https://streamstickpro.com/devices</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.95</priority></url>`;
+  for (const product of products) {
+    xml += `<url><loc>https://streamstickpro.com/devices/${encodeURIComponent(product.id)}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.9</priority><image:image><image:loc>${product.imageUrl}</image:loc><image:title>${product.name.replace(/&/g, '&amp;')}</image:title></image:image></url>`;
+  }
+  xml += `</urlset>`;
+  return c.text(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=300' });
 });
 
 const STATIC_SITEMAP_PAGES = [
@@ -1915,7 +1954,14 @@ async function resolveCatalogMeta(pathname: string, env: Env): Promise<{ title: 
       const row = ready
         ? (await client.from('cms_device_content').select('public_title,short_description,seo_title,seo_description').eq('sku', sku).eq('status', 'published').maybeSingle()).data
         : (await settingsCms.listDevices(client)).find((d) => d.sku === sku && d.status === 'published');
-      if (!row) return null;
+      if (!row) {
+        const live = googleDevices(await loadShopProducts(client)).find((p) => p.id === sku);
+        if (!live) return null;
+        return normalizeMeta({
+          title: `${live.name} | StreamStickPro`,
+          description: live.description.slice(0, 155) || 'ONN Google TV device with live price and secure checkout.',
+        });
+      }
       return normalizeMeta({
         title: String(row.seo_title || row.public_title || 'Google TV device'),
         description: String(row.seo_description || row.short_description || 'ONN or Google TV device details, price, and setup.'),
@@ -2063,6 +2109,30 @@ function injectMeta(html: string, pathname: string, meta: { title: string; descr
   return out;
 }
 
+async function injectProductSchema(html: string, pathname: string, env: Env): Promise<string> {
+  try {
+    const products = await liveGoogleDevices(env);
+    if (!products.length) return html;
+    if (pathname === '/devices' || pathname === '/shop') {
+      return html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(itemListJsonLd(products))}</script></head>`);
+    }
+    const match = pathname.match(/^\/devices\/([^/]+)$/);
+    if (!match) return html;
+    const sku = decodeURIComponent(match[1]);
+    const product = products.find((p) => p.id === sku);
+    if (!product) return html;
+    const ld = productJsonLd(product);
+    let out = html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(ld)}</script></head>`);
+    if (product.imageUrl) {
+      out = out.replace(/<meta[^>]*property=["']og:image["'][^>]*>/i, `<meta property="og:image" content="${product.imageUrl}">`);
+      out = out.replace(/<meta[^>]*name=["']twitter:image["'][^>]*>/i, `<meta name="twitter:image" content="${product.imageUrl}">`);
+    }
+    return out;
+  } catch {
+    return html;
+  }
+}
+
 app.get('*', async (c) => {
   const url = new URL(c.req.url);
   const pathname = url.pathname;
@@ -2117,6 +2187,8 @@ app.get('*', async (c) => {
   const isKnownRoute =
     staticKnownRoutes.has(pathname) ||
     /^\/l\/[^/]+\/[^/]+\/[^/]+$/i.test(pathname) ||
+    /^\/devices\/[^/]+$/i.test(pathname) ||
+    /^\/plans\/[^/]+$/i.test(pathname) ||
     /^\/vs-[a-z0-9\-]+$/i.test(pathname) ||
     /^\/seo-ads\/[a-z0-9\-]+$/i.test(pathname) ||
     isBlogSlug ||
@@ -2130,7 +2202,7 @@ app.get('*', async (c) => {
       if (isKnownRoute && res.status >= 400) {
         const fallback = await c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
         const html = await fallback.text();
-        const fixed = injectMeta(html, pathname, effectiveMeta);
+        const fixed = await injectProductSchema(injectMeta(html, pathname, effectiveMeta), pathname, c.env);
         return applySecurityHeaders(new Response(fixed, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
       }
       return applySecurityHeaders(res, pathname, hostname);
@@ -2138,7 +2210,7 @@ app.get('*', async (c) => {
     const html = await res.text();
     const status = isKnownRoute ? 200 : 404;
     const fixed = isKnownRoute
-      ? injectMeta(html, pathname, effectiveMeta)
+      ? await injectProductSchema(injectMeta(html, pathname, effectiveMeta), pathname, c.env)
       : injectMeta(html, pathname, { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
     return applySecurityHeaders(new Response(fixed, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   } catch {
@@ -2146,7 +2218,7 @@ app.get('*', async (c) => {
     const html = await fallback.text();
     // Unknown routes get 404 so Google doesn't report "soft 404" for non-existent pages
     const status = isKnownRoute ? 200 : 404;
-    const fixed = isKnownRoute ? injectMeta(html, pathname, effectiveMeta) : injectMeta(html, pathname, { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
+    const fixed = isKnownRoute ? await injectProductSchema(injectMeta(html, pathname, effectiveMeta), pathname, c.env) : injectMeta(html, pathname, { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
     return applySecurityHeaders(new Response(fixed, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   }
 });

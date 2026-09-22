@@ -1,5 +1,6 @@
 import { Link } from "wouter";
-import { Flame, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
@@ -51,8 +52,7 @@ export function PillarLayout({ title, description, breadcrumbs, children }: Pill
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2 font-bold text-lg text-white hover:opacity-90">
-              <Flame className="w-6 h-6 text-orange-500" />
-              <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">Stream Stick Pro</span>
+              <BrandLogo invert className="text-white" markClassName="h-6 w-6" />
             </Link>
             <div className="hidden md:flex items-center gap-1">
               <Link href="/iptv"><span className="px-2 py-1 text-sm text-gray-300 hover:text-white">Reloaded Fire TV</span></Link>
