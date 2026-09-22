@@ -1008,10 +1008,18 @@ export default function MainStore() {
             </Button>
           </div>
         </div>
+        <div className="hidden md:flex lg:hidden gap-2 overflow-x-auto border-t border-white/10 px-4 py-2" aria-label="Tablet">
+          <Link href="/"><span className="inline-flex whitespace-nowrap rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-200">Home</span></Link>
+          <Link href="/devices"><span className="inline-flex whitespace-nowrap rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-200">Devices</span></Link>
+          <Link href="/plans"><span className="inline-flex whitespace-nowrap rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-200">Plans</span></Link>
+          <Link href="/guides"><span className="inline-flex whitespace-nowrap rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-200">Guides</span></Link>
+          <Link href="/support"><span className="inline-flex whitespace-nowrap rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-200">Support</span></Link>
+          <Link href="/shop"><span className="inline-flex whitespace-nowrap rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-200">Shop</span></Link>
+        </div>
       </nav>
 
       {/* Main Content */}
-      <main id="main-content" role="main">
+      <main id="main-content" role="main" className="pb-28 md:pb-0">
       {/* Elite hero — full viewport + photography (reliable on mobile; no fixed-attachment image) */}
       <section
         ref={heroRef}

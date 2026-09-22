@@ -18,6 +18,8 @@ import { createProvisioningRoutes } from './routes/provisioning';
 import { createCmsRoutes } from './routes/cms';
 import { createOwnerCmsPublicRoutes, createOwnerCmsAdminRoutes } from './routes/owner-cms';
 import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from './helpers';
+import { settingsCms, starterSetupGuide, tablesReady } from './lib/owner-cms-settings-store';
+import { createClient } from '@supabase/supabase-js';
 import { effectiveRealProductChargeCents } from '../shared/schema';
 
 export interface Env {
@@ -1299,7 +1301,7 @@ app.get('/robots.txt', (c) => {
 
   // Serve robots.txt directly (bypasses Cloudflare's managed content which overrides ASSETS.fetch)
   const body = `# StreamStickPro - robots.txt
-# Allow search engines; block AI training crawlers per Cloudflare managed content
+# Allow search engines and AI answer engines. Checkout, admin, and the cloaked host stay blocked.
 
 User-agent: *
 Allow: /
@@ -1344,6 +1346,12 @@ Allow: /
 User-agent: OAI-SearchBot
 Allow: /
 
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
 # Sitemaps
 Sitemap: https://streamstickpro.com/sitemap-index.xml
 Sitemap: https://streamstickpro.com/sitemap.xml
@@ -1376,7 +1384,7 @@ app.get('/feed.xml', async (c) => {
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>StreamStickPro – IPTV &amp; Fire Stick Blog</title>
+    <title>StreamStickPro – Setup guides and live TV</title>
     <link>${baseUrl}/blog/</link>
     <description>IPTV guides, Fire Stick tutorials, streaming tips, and cord-cutting news from StreamStickPro.</description>
     <language>en-us</language>
@@ -1399,8 +1407,8 @@ app.get('/llms.txt', (c) => {
   const body = `# StreamStickPro
 
 > Canonical domain: https://streamstickpro.com
-> Primary market: Premium IPTV streaming service with 18,000+ live channels, Fire Stick and ONN device bundles, setup tutorials, and 24/7 support. Cord-cutting alternative to cable TV.
-> Price range: IPTV plans from $11/month. Fire Stick bundles from $85. 36-hour free trial available.
+> Primary market: ONN and Google TV devices for sale, plans for compatible equipment the customer already owns, and written setup guides. Fire Stick hardware is not sold.
+> Price range: Device and plan prices are the amounts saved in the admin product list. A 36-hour trial is available for plans.
 > Coverage: USA, Canada, UK, and worldwide. NFL, NBA, MLB, UFC PPV, Premier League, and 100,000+ movies/series.
 
 ## Primary pages
@@ -1892,6 +1900,53 @@ const VS_META: Record<string, { title: string; description: string }> = {
   '/vs-iptvencoder': { title: 'StreamStickPro vs IPTV Encoder 2026 | Full Comparison', description: 'StreamStickPro vs IPTV Encoder: features, channels, pricing, support compared. StreamStickPro offers 18K+ channels and 24/7 customer support.' },
 };
 
+async function resolveCatalogMeta(pathname: string, env: Env): Promise<{ title: string; description: string } | null> {
+  const deviceMatch = pathname.match(/^\/devices\/([^/]+)$/);
+  const planMatch = pathname.match(/^\/plans\/([^/]+)$/);
+  const guideMatch = pathname.match(/^\/guides\/([^/]+)$/);
+  if (!deviceMatch && !planMatch && !guideMatch) return null;
+  try {
+    const client = createClient(getSupabaseUrl(env), getSupabaseServiceKey(env), {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const ready = await tablesReady(client);
+    if (deviceMatch) {
+      const sku = decodeURIComponent(deviceMatch[1]);
+      const row = ready
+        ? (await client.from('cms_device_content').select('public_title,short_description,seo_title,seo_description').eq('sku', sku).eq('status', 'published').maybeSingle()).data
+        : (await settingsCms.listDevices(client)).find((d) => d.sku === sku && d.status === 'published');
+      if (!row) return null;
+      return normalizeMeta({
+        title: String(row.seo_title || row.public_title || 'Google TV device'),
+        description: String(row.seo_description || row.short_description || 'ONN or Google TV device details, price, and setup.'),
+      });
+    }
+    if (planMatch) {
+      const code = decodeURIComponent(planMatch[1]);
+      const row = ready
+        ? (await client.from('cms_plan_content').select('public_title,short_description,seo_title,seo_description').eq('code', code).eq('status', 'published').maybeSingle()).data
+        : (await settingsCms.listPlans(client)).find((p) => p.code === code && p.status === 'published');
+      if (!row) return null;
+      return normalizeMeta({
+        title: String(row.seo_title || row.public_title || 'Streaming plan'),
+        description: String(row.seo_description || row.short_description || 'Streaming plan for a device you already own.'),
+      });
+    }
+    const slug = decodeURIComponent(guideMatch![1]);
+    let row = ready
+      ? (await client.from('cms_guides').select('title,summary,seo_title,seo_description').eq('slug', slug).eq('status', 'published').maybeSingle()).data
+      : (await settingsCms.listGuides(client)).find((g) => g.slug === slug && g.status === 'published');
+    if (!row && slug === starterSetupGuide.slug) row = starterSetupGuide;
+    if (!row) return null;
+    return normalizeMeta({
+      title: String(row.seo_title || row.title || 'Setup guide'),
+      description: String(row.seo_description || row.summary || 'Written setup steps for StreamStickPro.'),
+    });
+  } catch {
+    return null;
+  }
+}
+
 /** Resolve per-page meta: static map, vs pages, or fetch blog post from DB. */
 async function resolvePageMeta(pathname: string, env: Env): Promise<{ title: string; description: string; noindex?: boolean } | null> {
   const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/+$/, '');
@@ -1935,6 +1990,8 @@ async function resolvePageMeta(pathname: string, env: Env): Promise<{ title: str
       }
     } catch { /* DB unavailable — fall through */ }
   }
+  const catalogMeta = await resolveCatalogMeta(normalizedPath, env);
+  if (catalogMeta) return catalogMeta;
   return null;
 }
 
@@ -1948,6 +2005,12 @@ function buildBreadcrumbLD(pathname: string, pageTitle: string): string {
       if (pathname !== '/blog') crumbs.push({ name: 'Blog', url: base + '/blog' });
     } else if (pathname.startsWith('/vs-')) {
       crumbs.push({ name: 'Comparisons', url: base + '/iptv' });
+    } else if (pathname.startsWith('/devices')) {
+      if (pathname !== '/devices') crumbs.push({ name: 'Google TV Devices', url: base + '/devices' });
+    } else if (pathname.startsWith('/plans')) {
+      if (pathname !== '/plans') crumbs.push({ name: 'Plans', url: base + '/plans' });
+    } else if (pathname.startsWith('/guides')) {
+      if (pathname !== '/guides') crumbs.push({ name: 'Setup Guides', url: base + '/guides' });
     } else if (pathname.startsWith('/l/')) {
       crumbs.push({ name: 'Locations', url: base + '/locations' });
     }

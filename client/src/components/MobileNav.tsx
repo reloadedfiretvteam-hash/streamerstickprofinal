@@ -65,7 +65,7 @@ export function MobileNav({ scrollToShop, scrollToFaq, scrollToAbout, onSupportC
       ? [{ label: "How It Works", icon: ChevronRight, action: () => navigateToSection("about") }]
       : []),
     { label: "FAQ", icon: HelpCircle, action: () => navigateToSection("faq") },
-    { label: "Video tutorials", icon: PlayCircle, action: () => { setLocation("/tutorials"); } },
+    { label: "Setup videos", icon: PlayCircle, action: () => { setLocation("/setup"); } },
     { label: "Blog", icon: BookOpen, action: () => { setLocation("/blog"); } },
     { label: "Locations", icon: ChevronRight, action: () => { setLocation("/locations"); } },
     {

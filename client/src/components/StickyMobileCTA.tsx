@@ -42,7 +42,7 @@ export function StickyMobileCTA({ onContact }: StickyMobileCTAProps = {}) {
           exit={{ y: 100, opacity: 0 }}
           className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
         >
-          <div className="bg-gray-900/98 backdrop-blur-xl border-t-2 border-white/20 px-4 py-4 safe-area-pb shadow-2xl">
+          <div className="bg-gray-900/98 backdrop-blur-xl border-t-2 border-white/20 px-4 py-4 shadow-2xl" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
             <div className="grid grid-cols-[1fr_auto_1fr] gap-2">
               <button
                 onClick={goToTrial}
