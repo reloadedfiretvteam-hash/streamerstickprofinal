@@ -2999,7 +2999,11 @@ export function createAdminRoutes() {
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        const missing = /schema cache|does not exist|Could not find the table/i.test(String(error.message || ""));
+        if (missing) return c.json({ data: [] });
+        throw error;
+      }
       
       const ads = (data || []).map((d: any) => ({
         id: d.id,

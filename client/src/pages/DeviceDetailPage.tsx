@@ -138,7 +138,9 @@ export default function DeviceDetailPage() {
               <span className="rounded-md bg-amber-100 px-2 py-1 text-sm text-amber-800">{device.sale_label}</span>
             ) : null}
           </div>
-          <p className="mt-2 text-sm text-slate-500">Public display price · Availability: {device.availability}</p>
+          <p className="mt-2 text-sm text-slate-500">
+            Public display price · Availability: {device.availability || "in stock"}
+          </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <button
               type="button"
