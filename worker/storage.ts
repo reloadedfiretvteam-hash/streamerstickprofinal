@@ -395,12 +395,33 @@ export function createStorage(config: StorageConfig) {
       if (updates.salePrice !== undefined) dbUpdates.sale_price = updates.salePrice;
       if (updates.cardPromoLabel !== undefined) dbUpdates.card_promo_label = updates.cardPromoLabel;
 
-      const { data, error } = await supabase.from('real_products').update(dbUpdates).eq('id', id).select().single();
+      // sale_price and card_promo_label are optional columns. When the database has not been
+      // migrated yet, drop them and retry so a plain price change still goes through.
+      const OPTIONAL_COLUMNS = ['sale_price', 'card_promo_label'];
+      const run = (payload: any) =>
+        supabase.from('real_products').update(payload).eq('id', id).select().single();
+
+      let { data, error } = await run(dbUpdates);
+
       if (error) {
-        console.error('[updateRealProduct]', error.code || '', error.message || error);
-        throw new Error(
-          `${error.message || 'Failed to update product'}. If you just added sale_price, reload the API schema cache in Supabase (Settings → API).`,
+        const text = `${error.code || ''} ${error.message || ''}`.toLowerCase();
+        const missing = OPTIONAL_COLUMNS.filter(
+          (column) => column in dbUpdates && text.includes(column),
         );
+        if (missing.length) {
+          const retryPayload = { ...dbUpdates };
+          for (const column of missing) delete retryPayload[column];
+          if (Object.keys(retryPayload).length) {
+            console.warn('[updateRealProduct] retrying without missing columns:', missing.join(', '));
+            const retry = await run(retryPayload);
+            if (!retry.error) {
+              return retry.data ? this.mapProductFromDb(retry.data) : undefined;
+            }
+            error = retry.error;
+          }
+        }
+        console.error('[updateRealProduct]', error.code || '', error.message || error);
+        throw new Error(error.message || 'Failed to update product');
       }
       return data ? this.mapProductFromDb(data) : undefined;
     },

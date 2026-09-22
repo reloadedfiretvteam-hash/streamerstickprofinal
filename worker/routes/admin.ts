@@ -821,8 +821,9 @@ export function createAdminRoutes() {
       const normalizedCategory =
         category !== undefined ? normalizeRealProductCategory(category) : existingProduct.category ?? null;
 
+      const saleProvided = Object.prototype.hasOwnProperty.call(body, 'sale_price');
       let nextSale: number | null = existingProduct.salePrice ?? null;
-      if (Object.prototype.hasOwnProperty.call(body, 'sale_price')) {
+      if (saleProvided) {
         if (sale_price === null || sale_price === '' || sale_price === undefined) {
           nextSale = null;
         } else {
@@ -880,12 +881,13 @@ export function createAdminRoutes() {
         category: normalizedCategory,
         shadowProductId: nextShadowProductId,
         shadowPriceId: nextShadowPriceId,
-        salePrice: nextSale,
-        cardPromoLabel: nextCardLabel,
+        // Only touch the optional columns when the caller actually set them.
+        ...(saleProvided ? { salePrice: nextSale } : {}),
+        ...(card_promo_label !== undefined ? { cardPromoLabel: nextCardLabel } : {}),
       });
 
       const warnings: string[] = [];
-      if ((hasPriceUpdate || Object.prototype.hasOwnProperty.call(body, 'sale_price')) && !shouldSyncStripe) {
+      if ((hasPriceUpdate || saleProvided) && !shouldSyncStripe) {
         warnings.push(
           'Public catalog price saved without changing Stripe checkout. Use Payment Sync (force_stripe_resync) only when you intentionally change what customers are charged.',
         );
@@ -894,7 +896,7 @@ export function createAdminRoutes() {
       return c.json({ data: product, payment_synced: shouldSyncStripe, warnings });
     } catch (error: any) {
       console.error("Error updating product:", error);
-      return c.json({ error: "Failed to update product" }, 500);
+      return c.json({ error: error?.message || "Failed to update product" }, 500);
     }
   });
 
