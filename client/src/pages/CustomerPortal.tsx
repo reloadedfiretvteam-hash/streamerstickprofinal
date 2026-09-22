@@ -380,10 +380,11 @@ export default function CustomerPortal() {
                   Your Live TV Subscription Credentials
                 </CardTitle>
                 <CardDescription className="text-gray-400">
-                  Use these credentials to access your streaming service at{" "}
-                  <a href="http://ky-tv.cc" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline">
-                    ky-tv.cc
+                  Activation may take 1 to 2 hours. This site automatically gives you your username and password at{" "}
+                  <a href="http://kytv.xyz" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:underline">
+                    http://kytv.xyz
                   </a>
+                  . If you need any assistance, email reloadedfiretvteam@gmail.com.
                 </CardDescription>
               </CardHeader>
               <CardContent>

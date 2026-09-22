@@ -40,7 +40,7 @@ export function createOrderRoutes() {
         createdAt: order.createdAt,
         generatedUsername: order.status === 'completed' ? order.generatedUsername : undefined,
         generatedPassword: order.status === 'completed' ? order.generatedPassword : undefined,
-        serviceUrl: order.status === 'completed' ? (order.serviceUrl || 'http://ky-tv.cc') : undefined,
+        serviceUrl: order.status === 'completed' ? (order.serviceUrl && !/ky-tv\.cc/i.test(order.serviceUrl) ? order.serviceUrl : 'http://kytv.xyz') : undefined,
         setupVideoUrl: order.status === 'completed' ? order.setupVideoUrl : undefined,
       };
 

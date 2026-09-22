@@ -424,7 +424,7 @@ Deno.serve(async (req: Request) => {
                 realProductName = product.name || realProductName;
               }
               setupVideoUrl = product.setup_video_url || "";
-              serviceUrl = product.service_url || "";
+              serviceUrl = product.service_url && !/ky-tv\.cc/i.test(String(product.service_url)) ? product.service_url : "http://kytv.xyz";
               productType = product.category?.toLowerCase().includes("fire") ? "firestick" : "iptv";
             }
           }

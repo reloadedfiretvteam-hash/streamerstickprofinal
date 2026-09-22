@@ -68,7 +68,7 @@ export interface Env {
   IPTV_PANEL_TRIAL_PACKAGE?: string;
   /** Trial length in days as accepted by panel (e.g. 1.5 for ~36h) */
   IPTV_PANEL_TRIAL_EXP_DAYS?: string;
-  /** Shown in trial emails; falls back to http://ky-tv.cc in route if unset */
+  /** Shown in trial emails. An old ky-tv.cc value is ignored. */
   IPTV_PORTAL_URL?: string;
   /** Optional full URL to get.php (no query) or with ? — overrides default origin/get.php */
   IPTV_PANEL_M3U_BASE?: string;
@@ -624,8 +624,8 @@ app.post('/api/orders/manual', async (c) => {
 <h3>Items:</h3><pre style="background:#f5f5f5;padding:12px;border-radius:6px">${itemsList}</pre>
 <p><strong>Total:</strong> $${(total || 0).toFixed(2)}</p>
 <h3>Payment Instructions:</h3><p>${payInstructions}</p>
-<p>Once we receive your payment, we'll email your streaming credentials within 1 hour.</p>
-<p>Questions? Email: <a href="mailto:support@streamerstickpro.com">support@streamerstickpro.com</a></p>`,
+<p>Activation may take 1 to 2 hours. Your username and password are provided automatically at <a href="http://kytv.xyz">http://kytv.xyz</a>.</p>
+<p>If you need any assistance, email <a href="mailto:reloadedfiretvteam@gmail.com">reloadedfiretvteam@gmail.com</a>.</p>`,
     }).catch((err: any) => console.warn('[orders/manual] email send failed:', err?.message));
 
     return c.json({

@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
 import type { Env } from '../index';
+import { activationHelpHtml, customerPortalUrl } from '../email';
 import { sendEmail } from '../email-providers';
 import { isLikelyPanelUsernameConflict, verifyIptvTrialCredentials } from '../lib/iptv-panel-trial';
 import { getPanelAdapter } from '../lib/panel-adapter';
 
-const IPTV_PORTAL_DEFAULT = 'http://ky-tv.cc';
 const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
 const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
 const PANEL_TRIAL_ATTEMPTS = 4;
@@ -88,7 +88,7 @@ export function createTrialRoutes() {
         password: isExistingUser ? '(using existing password)' : password.substring(0, 10),
       };
 
-      const portalUrl = (c.env.IPTV_PORTAL_URL || IPTV_PORTAL_DEFAULT).replace(/\/+$/, '');
+      const portalUrl = customerPortalUrl(c.env.IPTV_PORTAL_URL);
       let panelProvisioned = false;
       let panelVerified = false;
       let panelVerificationStatus = '';
@@ -151,8 +151,7 @@ export function createTrialRoutes() {
               ${panelVerificationStatus ? `<div style="margin-top:8px;font-size:13px;color:#166534;"><strong>Panel status:</strong> ${panelVerificationStatus}</div>` : ''}
             </div>`
         : `<div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
-              <strong>⏳ Activating your trial:</strong> Our team will set up your 36-hour free trial within <strong>1 business hour</strong>. We'll send your confirmed login credentials to <strong>${email}</strong> once your account is ready.
-              <div style="margin-top:8px;font-size:13px;color:#92400e;">Business hours: 5 AM – 11 PM EST. Requests submitted outside hours will be processed first thing the next morning.</div>
+              <strong>Activation may take 1 to 2 hours.</strong> We will email your confirmed login to <strong>${email}</strong> when your account is ready. If you need any assistance, email ${OWNER_EMAIL}.
             </div>`;
 
       // Customer email (REQUIRED). Use unified sender (Resend → MailChannels fallback).
@@ -178,8 +177,9 @@ export function createTrialRoutes() {
             <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
               <p style="margin: 0 0 10px 0;"><strong>Service Portal URL:</strong></p>
               <p style="margin: 0;"><a href="${portalUrl}" style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 18px;" target="_blank">${portalUrl}</a></p>
-              <p style="margin: 10px 0 0 0; font-size: 14px;">Use this as your server/portal URL when the app asks for Xtream Codes or Xtream login details.</p>
+              <p style="margin: 10px 0 0 0; font-size: 14px;">This site automatically gives you your username and password. Use this address when the app asks for a server or portal URL.</p>
             </div>
+            ${activationHelpHtml()}
 
             <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
               <p style="margin: 0 0 10px 0;"><strong>📺 Setup Tutorial Video:</strong></p>

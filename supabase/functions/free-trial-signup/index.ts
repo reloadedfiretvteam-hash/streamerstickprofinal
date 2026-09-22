@@ -79,7 +79,7 @@ Deno.serve(async (req: Request) => {
     const username = generateUsername();
     const password = generatePassword();
     const orderNumber = generateOrderNumber();
-    const serviceUrl = product.service_url || 'http://ky-tv.cc';
+    const serviceUrl = product.service_url && !/ky-tv\.cc/i.test(product.service_url) ? product.service_url : 'http://kytv.xyz';
     const setupVideoUrl = product.setup_video_url || 'https://www.youtube.com/watch?v=YOUR_SETUP_VIDEO_ID';
 
     // Calculate trial expiration (36 hours from now)

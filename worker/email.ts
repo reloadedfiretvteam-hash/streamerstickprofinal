@@ -7,8 +7,24 @@ import { SURFSHARK_AFFILIATE_URL } from '../shared/surfshark-affiliate';
 import { variantsForRealProductId } from '../shared/real-product-id';
 
 const SETUP_VIDEO_URL = 'https://youtu.be/DYSOp6mUzDU';
-const IPTV_PORTAL_URL = 'http://ky-tv.cc';
+export const IPTV_PORTAL_URL = 'http://kytv.xyz';
 const DEFAULT_OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
+
+export function customerPortalUrl(envValue?: string | null): string {
+  const raw = String(envValue || '').trim().replace(/\/+$/, '');
+  if (!raw || /ky-tv\.cc/i.test(raw)) return IPTV_PORTAL_URL;
+  return raw;
+}
+
+export function activationHelpHtml(): string {
+  return `
+    <div style="background: #fff7ed; border-left: 4px solid #ea580c; padding: 15px; margin: 20px 0; border-radius: 8px;">
+      <p style="margin: 0 0 8px 0;"><strong>Activation may take 1 to 2 hours.</strong></p>
+      <p style="margin: 0 0 8px 0;">The site <a href="${IPTV_PORTAL_URL}" style="color: #c2410c; font-weight: bold;">${IPTV_PORTAL_URL}</a> automatically gives you your username and password.</p>
+      <p style="margin: 0;">If you need any assistance, email <a href="mailto:${DEFAULT_OWNER_EMAIL}" style="color: #c2410c;">${DEFAULT_OWNER_EMAIL}</a>.</p>
+    </div>
+  `;
+}
 
 export function getOwnerNotificationEmail(env: Env): string {
   return String(env.ORDER_NOTIFICATION_EMAIL || env.OWNER_EMAIL || DEFAULT_OWNER_EMAIL).trim() || DEFAULT_OWNER_EMAIL;
@@ -46,9 +62,9 @@ export async function sendOrderConfirmation(order: Order, env: Env): Promise<voi
         <p style="margin: 0; font-size: 14px; line-height: 1.5;">ISP throttling causes most IPTV buffering. A VPN encrypts your traffic so your ISP can&apos;t throttle streams as easily. Read the full guide at <a href="https://streamstickpro.com/vpn" style="color: #0891b2;">streamstickpro.com/vpn</a> — special offer: <a href="${surf}" style="color: #0891b2; font-weight: bold;">Get Surfshark VPN</a>.</p>
       </div>
       
-      <p>You will receive a separate account email after payment is confirmed and provisioning is completed.</p>
+      <p>Activation may take 1 to 2 hours. Your username and password are provided automatically at <a href="${IPTV_PORTAL_URL}">${IPTV_PORTAL_URL}</a>.</p>
       
-      <p>If you have any questions, please don't hesitate to reach out.</p>
+      <p>If you need any assistance, email <a href="mailto:${DEFAULT_OWNER_EMAIL}">${DEFAULT_OWNER_EMAIL}</a>.</p>
       
       <p>Best regards,<br>StreamStickPro Team</p>
     </div>
@@ -151,8 +167,9 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
     <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
       <p style="margin: 0 0 10px 0;"><strong>Service Portal URL:</strong></p>
       <p style="margin: 0;"><a href="${IPTV_PORTAL_URL}" style="color: #3b82f6; text-decoration: none; font-weight: bold; font-size: 18px;">${IPTV_PORTAL_URL}</a></p>
-      <p style="margin: 10px 0 0 0; font-size: 14px;">Use the credentials above to log in to your service portal.</p>
+      <p style="margin: 10px 0 0 0; font-size: 14px;">Use this address when the app asks for a server or portal URL.</p>
     </div>
+    ${activationHelpHtml()}
 
     <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
       <p style="margin: 0 0 10px 0;"><strong>📺 Setup Tutorial Video:</strong></p>
@@ -178,7 +195,7 @@ export async function sendCredentialsEmail(order: Order, env: Env, storage: Stor
         <strong>Important:</strong> Please save these credentials in a safe place. Do not share them with anyone.
       </div>
       
-      <p>If you need any assistance, please don't hesitate to reach out.</p>
+      <p>If you need any assistance, email <a href="mailto:${DEFAULT_OWNER_EMAIL}">${DEFAULT_OWNER_EMAIL}</a>.</p>
       
       <p>Best regards,<br>StreamStickPro Team</p>
     </div>
@@ -244,12 +261,13 @@ export async function sendRenewalConfirmationEmail(order: Order, env: Env): Prom
           ${passwordLine}
         </div>
       </div>
+      ${activationHelpHtml()}
       
       <div style="background: #ecfeff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0; border-radius: 8px;">
         <strong>Important:</strong> This follow-up confirms the account result for your paid order. Keep using the verified username above when logging into your IPTV apps.
       </div>
       
-      <p>Thank you for your order. If you have any questions, please don't hesitate to reach out.</p>
+      <p>Thank you for your order. If you need any assistance, email <a href="mailto:${DEFAULT_OWNER_EMAIL}">${DEFAULT_OWNER_EMAIL}</a>.</p>
       
       <p>Best regards,<br>StreamStickPro Team</p>
     </div>

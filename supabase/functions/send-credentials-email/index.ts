@@ -19,7 +19,7 @@ interface CredentialsEmailPayload {
   youtubeTutorialUrl?: string;
 }
 
-const SERVICE_URL = 'http://ky-tv.cc';
+const SERVICE_URL = 'http://kytv.xyz';
 const YOUTUBE_TUTORIAL_URL = 'https://www.youtube.com/watch?v=fDjDH_WAvYI';
 const OWNER_EMAIL = 'reloadedfiretvteam@gmail.com';
 

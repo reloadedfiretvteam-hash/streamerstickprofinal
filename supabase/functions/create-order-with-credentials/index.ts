@@ -72,7 +72,7 @@ Deno.serve(async (req: Request) => {
     // Get product details for setup video and service URL
     const productId = orderData.items[0]?.product_id;
     let setupVideoUrl = "https://www.youtube.com/watch?v=SETUP_VIDEO_ID"; // DEFAULT - Update with your actual YouTube video
-    let serviceUrl = "http://ky-tv.cc"; // DEFAULT SERVICE URL - SENT WITH EVERY ORDER
+    let serviceUrl = "http://kytv.xyz"; // DEFAULT SERVICE URL - SENT WITH EVERY ORDER
     let productType = "iptv";
 
     if (productId) {
@@ -84,7 +84,7 @@ Deno.serve(async (req: Request) => {
 
       if (product) {
         setupVideoUrl = product.setup_video_url || "";
-        serviceUrl = product.service_url || "";
+        serviceUrl = product.service_url && !/ky-tv\.cc/i.test(String(product.service_url)) ? product.service_url : "http://kytv.xyz";
         productType = product.category?.toLowerCase().includes("fire") ? "firestick" : "iptv";
       }
 

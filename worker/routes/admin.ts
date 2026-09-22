@@ -3421,7 +3421,7 @@ export function createAdminRoutes() {
         { name: 'orders.customer_message', sql: "ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_message TEXT" },
         { name: 'orders.customer_phone', sql: "ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_phone TEXT" },
         { name: 'orders.purchase_code', sql: "ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS purchase_code TEXT" },
-        { name: 'orders.service_url', sql: "ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS service_url TEXT DEFAULT 'http://ky-tv.cc'" },
+        { name: 'orders.service_url', sql: "ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS service_url TEXT DEFAULT 'http://kytv.xyz'" },
         { name: 'orders.purchase_code_index', sql: "CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_purchase_code ON public.orders(purchase_code) WHERE purchase_code IS NOT NULL" },
         { name: 'provisioning_jobs table', sql: `CREATE TABLE IF NOT EXISTS public.provisioning_jobs (
           id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
