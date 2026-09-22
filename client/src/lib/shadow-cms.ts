@@ -215,9 +215,10 @@ export const SHADOW_CMS_DEFAULTS: ShadowCmsState = {
     tagline: "Creating digital masterpieces for modern brands since 2018.",
     copyright: "© 2026 WebFlow Design Agency. All rights reserved.",
   },
-  designProductIds: ["onn-google-hd", "onn-google-4k"],
+  // These must be real_products ids so the cards show the live catalog price and charge it.
+  designProductIds: ["android-onn-4k", "android-onn-pro"],
   designProducts: {
-    "onn-google-hd": {
+    "android-onn-4k": {
       name: "Basic Web Design",
       shadowName: "Web Design Basic",
       description:
@@ -233,7 +234,7 @@ export const SHADOW_CMS_DEFAULTS: ShadowCmsState = {
       ],
       period: "/project",
     },
-    "onn-google-4k": {
+    "android-onn-pro": {
       name: "Professional Web Design",
       shadowName: "Web Design Pro",
       description:

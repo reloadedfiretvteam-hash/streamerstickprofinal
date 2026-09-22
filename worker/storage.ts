@@ -356,7 +356,12 @@ export function createStorage(config: StorageConfig) {
       const { data, error } = await supabase.from('real_products').select('*').in('id', variants);
       if (error || !data?.length) return undefined;
       const trimmed = id.trim();
-      const row = data.find((d: any) => d.id === trimmed) ?? data[0];
+      // Several aliases can exist at once, so resolve by alias order instead of row order.
+      // Row order from Postgres is not guaranteed and would charge an arbitrary price.
+      const row =
+        data.find((d: any) => d.id === trimmed) ??
+        variants.map((variant) => data.find((d: any) => d.id === variant)).find(Boolean) ??
+        data[0];
       return this.mapProductFromDb(row);
     },
 

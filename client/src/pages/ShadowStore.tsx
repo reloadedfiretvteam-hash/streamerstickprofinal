@@ -15,9 +15,10 @@ import { buildShadowCmsState, SHADOW_CMS_DEFAULTS, type ShadowCmsState } from "@
 import type { HomeCmsOverrideEdit } from "@/lib/merge-home-cms-overrides";
 
 /** Display-only fallback when /api/products has not loaded yet */
+/** Only used for the first paint; /api/products replaces these with the live catalog price. */
 const DESIGN_PRICE_FALLBACK: Record<string, number> = {
-  "onn-google-hd": 150,
-  "onn-google-4k": 160,
+  "android-onn-4k": 118,
+  "android-onn-pro": 125,
 };
 
 interface ShadowProduct {
