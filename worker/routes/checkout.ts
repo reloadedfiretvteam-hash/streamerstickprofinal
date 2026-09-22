@@ -93,7 +93,7 @@ function getWorkerStripePriceOverrides(env: Env): Record<string, string> {
     for (const alias of ['fs-hd', 'firestick-hd']) if (!out[alias]) out[alias] = hd;
   }
   if (k4) {
-    for (const alias of ['fs-4k', 'firestick-4k', 'android-onn-4k', 'android-onn-pro', 'fs-max', 'firestick-4k-max']) {
+    for (const alias of ['fs-4k', 'firestick-4k', 'fs-max', 'firestick-4k-max']) {
       if (!out[alias]) out[alias] = k4;
     }
   }
@@ -155,12 +155,13 @@ export function createCheckoutRoutes() {
         }
 
         const wantsPromo = item.applySitePromotion === true;
+        // Catalog Stripe price wins so HD ($140) and 4K ($150) are charged separately.
         let stripePriceId =
+          product.shadowPriceId ||
           workerPriceOverrides[item.productId] ||
           workerPriceOverrides[product.id] ||
           cmsPriceOverrides[item.productId] ||
-          cmsPriceOverrides[product.id] ||
-          product.shadowPriceId;
+          cmsPriceOverrides[product.id];
         let unitAmountCents = effectiveRealProductChargeCents({
           price: product.price,
           salePrice: product.salePrice ?? null,
@@ -184,11 +185,11 @@ export function createCheckoutRoutes() {
         const priceSource =
           wantsPromo && activePromo
             ? 'site_promotion'
-            : workerPriceOverrides[item.productId] || workerPriceOverrides[product.id]
-              ? 'worker_env'
-              : cmsPriceOverrides[item.productId] || cmsPriceOverrides[product.id]
-                ? 'cms_pricing'
-                : 'database';
+            : product.shadowPriceId
+              ? 'database'
+              : workerPriceOverrides[item.productId] || workerPriceOverrides[product.id]
+                ? 'worker_env'
+                : 'cms_pricing';
         debugLog("Checkout: Resolved line:", product.name, "priceId:", stripePriceId, "source:", priceSource, "promo:", wantsPromo && !!activePromo);
         productsWithQuantity.push({ product, quantity: item.quantity, stripePriceId, unitAmountCents });
       }

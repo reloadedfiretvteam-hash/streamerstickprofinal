@@ -16,8 +16,8 @@ import type { HomeCmsOverrideEdit } from "@/lib/merge-home-cms-overrides";
 /** Display-only fallback when /api/products has not loaded yet */
 /** Only used for the first paint; /api/products replaces these with the live catalog price. */
 const DESIGN_PRICE_FALLBACK: Record<string, number> = {
-  "android-onn-4k": 118,
-  "android-onn-pro": 125,
+  "android-onn-4k": 140,
+  "android-onn-pro": 150,
 };
 
 interface ShadowProduct {

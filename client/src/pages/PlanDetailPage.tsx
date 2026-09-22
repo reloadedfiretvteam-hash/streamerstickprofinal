@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
 import { StorefrontChrome } from "@/components/StorefrontChrome";
 import { setPageMeta } from "@/lib/seo";
+import { useCart } from "@/lib/store";
 
 function formatUsd(cents?: number | null) {
   if (cents == null || !Number.isFinite(cents)) return null;
@@ -11,6 +12,7 @@ function formatUsd(cents?: number | null) {
 export default function PlanDetailPage() {
   const params = useParams<{ code: string }>();
   const code = decodeURIComponent(params.code || "");
+  const { addItem, openCart } = useCart();
   const [plan, setPlan] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,16 +72,14 @@ export default function PlanDetailPage() {
     <div className="mx-auto max-w-4xl px-4 py-12">
       <p className="text-sm uppercase tracking-wide text-teal-700">Plan / Service</p>
       <h1 className="mt-2 text-4xl font-semibold">{plan.public_title}</h1>
-      <p className="mt-4 text-slate-600">{plan.short_description}</p>
+      <p className="mt-4 text-base leading-relaxed text-slate-800">{String(plan.short_description || "").replace(/real product mapped to .*/i, "Live TV subscription for a device you already own.")}</p>
       <div className="mt-6 flex items-baseline gap-3">
         <span className="text-3xl font-semibold">{formatUsd(plan.public_display_price_cents)}</span>
         {plan.public_compare_at_cents ? (
           <span className="text-lg text-slate-400 line-through">{formatUsd(plan.public_compare_at_cents)}</span>
         ) : null}
       </div>
-      <p className="mt-2 text-sm text-slate-500">
-        Public display price only — checkout amounts are protected and may differ until a separate payment sync.
-      </p>
+      <p className="mt-2 text-sm text-slate-700">Checkout charges this amount through Stripe.</p>
       {plan.billing_term ? <p className="mt-2 text-sm text-slate-600">{plan.billing_term}</p> : null}
       {plan.eligibility ? (
         <section className="mt-8">
@@ -122,11 +122,25 @@ export default function PlanDetailPage() {
           </div>
         </section>
       ) : null}
-      <div className="mt-10 flex gap-3">
-        <Link href="/shop" className="rounded-xl bg-blue-600 px-5 py-3 text-white">
-          Continue to shop
-        </Link>
-        <Link href="/guides" className="rounded-xl border px-5 py-3">
+      <div className="mt-10 flex flex-wrap gap-3">
+        <button
+          type="button"
+          className="rounded-xl bg-teal-600 px-5 py-3 text-base font-semibold text-white"
+          onClick={() => {
+            addItem({
+              id: plan.real_product_id || plan.code,
+              name: plan.public_title,
+              price: (Number(plan.public_display_price_cents) || 0) / 100,
+              image: plan.primary_image_url || "",
+              category: "iptv",
+              description: plan.short_description || "",
+            });
+            openCart();
+          }}
+        >
+          Add subscription to cart
+        </button>
+        <Link href="/guides" className="rounded-xl border border-slate-300 px-5 py-3 text-slate-900">
           Setup guides
         </Link>
       </div>

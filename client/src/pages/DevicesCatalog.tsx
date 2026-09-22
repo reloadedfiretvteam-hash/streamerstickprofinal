@@ -60,13 +60,13 @@ export default function DevicesCatalog() {
         <div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-blue-300">Google TV Devices</p>
           <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
-            Shop ONN &amp; Google TV devices
+            Google HD and 4K packages
           </h1>
-          <p className="mt-4 max-w-2xl text-base text-slate-300 md:text-lg">
-            Physical Google TV products with clear condition, inclusions, pricing, and setup support.
-            Fire Stick hardware is not sold here — if you already own a Fire TV, see{" "}
-            <Link href="/plans" className="text-blue-300 underline underline-offset-2">
-              Plans &amp; Services
+          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white">
+            The HD package is $140. The 4K package is $150. Each one includes the preloaded ONN Google TV device, a web tutorial, login credentials, and live TV service.
+            If you already own a device, see{" "}
+            <Link href="/plans" className="text-teal-200 underline underline-offset-2">
+              subscriptions
             </Link>
             .
           </p>
@@ -107,7 +107,7 @@ export default function DevicesCatalog() {
                     <img
                       src={d.primary_image_url}
                       alt={d.public_title}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full bg-white object-contain p-3"
                       loading="lazy"
                     />
                   ) : null}
@@ -124,9 +124,7 @@ export default function DevicesCatalog() {
                     {price ? <span className="text-xl font-semibold text-slate-900">{price}</span> : null}
                     {compare ? <span className="text-sm text-slate-400 line-through">{compare}</span> : null}
                   </div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">
-                    {d.condition || "new"} · {d.availability || "in_stock"}
-                  </p>
+                  <p className="text-sm font-medium text-slate-700">New · In stock</p>
                 </div>
               </Link>
             );

@@ -6,11 +6,11 @@ import type { Env } from '../index';
 const defaultProducts = [
   {
     id: 'onn-google-hd',
-    name: 'ONN Full HD (1080p) Google TV Kit',
-    price: 15000,
+    name: 'Google HD Package',
+    price: 14000,
     description:
       'onn. Full HD Streaming Device with Google TV, voice remote, and guided Reloaded Fire TV setup. Includes 1-year Reloaded Fire TV plan, tutorials, shipping, and 24/7 support.',
-    imageUrl: '/images/onn-full-hd-google-tv.webp',
+    imageUrl: '/images/google-hd-package.webp',
     category: 'devices',
     shadowProductId: '',
     createdAt: new Date().toISOString(),
@@ -18,11 +18,11 @@ const defaultProducts = [
   },
   {
     id: 'onn-google-4k',
-    name: 'ONN 4K Ultra HD Google TV Kit',
-    price: 16000,
+    name: 'Google 4K Package',
+    price: 15000,
     description:
       'onn. 4K Streaming Device with Google TV, HDR, Dolby Audio, voice remote, and guided Reloaded Fire TV setup. Includes 1-year Reloaded Fire TV plan, tutorials, shipping, and 24/7 support.',
-    imageUrl: '/images/onn-4k-google-tv.jpg',
+    imageUrl: '/images/google-4k-package.webp',
     category: 'devices',
     shadowProductId: '',
     createdAt: new Date().toISOString(),

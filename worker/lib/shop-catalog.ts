@@ -175,7 +175,7 @@ export function merchantRssXml(products: ShopProduct[]): string {
   <channel>
     <title>StreamStickPro Google TV Devices</title>
     <link>${SITE}/devices</link>
-    <description>ONN and Google TV kits with live prices for Google, Bing, and Merchant Center.</description>
+    <description>Google HD and 4K packages with live prices for Google, Bing, and Merchant Center.</description>
 ${items}
   </channel>
 </rss>`;
