@@ -35,6 +35,28 @@ function priceWarnings(row: any): string[] {
   return [];
 }
 
+/**
+ * Catalog rows carry their own copy of the price, which goes stale as soon as the owner
+ * changes a price. Overlay the live `real_products` price so the public catalog can never
+ * quote an amount that differs from what Stripe charges.
+ */
+async function overlayLivePrices(client: SupabaseClient, rows: any[]): Promise<any[]> {
+  const ids = Array.from(
+    new Set(rows.map((row) => row?.real_product_id).filter((id): id is string => !!id)),
+  );
+  if (!ids.length) return rows;
+  const { data, error } = await client.from("real_products").select("id,price").in("id", ids);
+  if (error || !data) return rows;
+  const livePrice = new Map<string, number>();
+  for (const product of data) {
+    if (typeof product.price === "number") livePrice.set(product.id, product.price);
+  }
+  return rows.map((row) => {
+    const live = row?.real_product_id ? livePrice.get(row.real_product_id) : undefined;
+    return typeof live === "number" ? { ...row, public_display_price_cents: live } : row;
+  });
+}
+
 export function createOwnerCmsPublicRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
@@ -80,7 +102,7 @@ export function createOwnerCmsPublicRoutes() {
       } else {
         rows = (await settingsCms.listDevices(client)).filter((d) => d.status === "published");
       }
-      return c.json({ data: rows }, 200);
+      return c.json({ data: await overlayLivePrices(client, rows) }, 200);
     } catch (e: any) {
       return c.json({ data: [], error: e?.message }, 200);
     }
@@ -98,7 +120,7 @@ export function createOwnerCmsPublicRoutes() {
         data = (await settingsCms.listDevices(client)).find((d) => d.sku === sku && d.status === "published") || null;
       }
       if (!data) return c.json({ data: null, error: "not_found" }, 404);
-      return c.json({ data }, 200);
+      return c.json({ data: (await overlayLivePrices(client, [data]))[0] }, 200);
     } catch (e: any) {
       return c.json({ data: null, error: e?.message }, 500);
     }
@@ -114,7 +136,7 @@ export function createOwnerCmsPublicRoutes() {
       } else {
         rows = (await settingsCms.listPlans(client)).filter((p) => p.status === "published");
       }
-      return c.json({ data: rows }, 200);
+      return c.json({ data: await overlayLivePrices(client, rows) }, 200);
     } catch (e: any) {
       return c.json({ data: [], error: e?.message }, 200);
     }
@@ -132,7 +154,7 @@ export function createOwnerCmsPublicRoutes() {
         data = (await settingsCms.listPlans(client)).find((p) => p.code === code && p.status === "published") || null;
       }
       if (!data) return c.json({ data: null, error: "not_found" }, 404);
-      return c.json({ data }, 200);
+      return c.json({ data: (await overlayLivePrices(client, [data]))[0] }, 200);
     } catch (e: any) {
       return c.json({ data: null, error: e?.message }, 500);
     }
