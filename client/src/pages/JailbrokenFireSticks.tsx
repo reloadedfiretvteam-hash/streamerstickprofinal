@@ -32,10 +32,10 @@ export default function JailbrokenFireSticks() {
 
   const faq = [
     { question: "What is a jailbroken Fire Stick?", answer: "A jailbroken Fire Stick usually means a Fire TV device that can run apps outside the Amazon store (sideloading). Many users use this term when they want a simpler setup experience with live TV apps like TiviMate or Smarters." },
-    { question: "Should I buy a device option or set it up myself?", answer: "If you want to save time, a device option with setup guidance is easiest. If you prefer full control, you can set up your own Fire Stick with StreamStickPro credentials." },
-    { question: "Are jailbroken Fire Sticks legal?", answer: "Sideloading apps on Fire Stick is allowed by Amazon. What you watch must comply with local laws. StreamStickPro provides devices and Reloaded Fire TV subscriptions that are ready to use; we recommend using the device within the terms of your subscription." },
-    { question: "What’s included with a Fire Stick purchase option?", answer: "Fire Stick purchase options include the device, instant login credentials, a 1-year Reloaded Fire TV plan (18,000+ channels, 100,000+ movies/series), an educational tutorial, and 24/7 support—no dead-end app lists or Kodi rebuilds." },
-    { question: "Can I get a Fire Stick 4K Max option?", answer: "Yes. StreamStickPro offers Fire Stick 4K Max options with Reloaded Fire TV and a 1-year plan. You get Wi-Fi 6E, 4K, and Dolby Vision support." },
+    { question: "Should I buy a device kit or set it up myself?", answer: "If you want a ready box, order an ONN Google TV kit with a live price, photo, and checkout link. If you already own a Fire Stick, use a StreamStickPro plan and the setup guide instead of buying new Fire Stick hardware." },
+    { question: "Are jailbroken Fire Sticks sold here?", answer: "No. StreamStickPro does not sell jailbroken, unlocked, or loaded Fire Stick hardware. Those searches are matched to ONN Google TV kits and plans for equipment you already own." },
+    { question: "What is included with a Google TV kit?", answer: "Each listed ONN Google TV kit shows the current price, product photo, and an order link. Kits are new Google TV devices with setup guidance and the plan stated on the product page." },
+    { question: "I searched Downloader, IPTV, or unlocked Fire Stick. What should I buy?", answer: "Buy the ONN Google TV kit shown on this page if you need hardware. If you already have a Fire Stick, open Plans and follow the Fire Stick setup guide." },
   ];
 
   return (
@@ -56,19 +56,19 @@ export default function JailbrokenFireSticks() {
         <p>At StreamStickPro we sell <Link href="/devices">ONN Google TV kits</Link> and <Link href="/plans">plans for equipment you already own</Link>. If you searched jailbroken, unlocked, downloader, or IPTV Fire Stick, order a Google TV kit below.</p>
 
         <h2 id="fully-loaded-vs-diy">Setup Support vs Doing It Yourself</h2>
-        <p>Doing it yourself means buying a Fire Stick, installing a player app, and adding a subscription. A guided option means you get instant credentials, an educational tutorial, and 24/7 help. That is ideal if you want to skip trial-and-error and get straight to <Link href="/iptv-firestick">Reloaded Fire TV on Fire Stick</Link> without dead links.</p>
+        <p>Doing it yourself means using a Fire Stick you already own, installing a player app, and adding a subscription. A guided hardware option is an <Link href="/devices">ONN Google TV kit</Link> with a live price and photo. Plans remain available for <Link href="/iptv-firestick">Reloaded Fire TV on Fire Stick</Link> you already have.</p>
 
         <h2 id="which-devices">Which Fire Stick Models Work Best?</h2>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
           <img src={getImageForSlot(JAILBREAK_IMAGES, 1).src} alt={getImageForSlot(JAILBREAK_IMAGES, 1).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
         </figure>
-        <p>Fire Stick HD, Fire Stick 4K, and Fire Stick 4K Max all work well for Reloaded Fire TV. 4K and 4K Max support 4K and HDR/Dolby Vision. We also offer ONN 4K streaming devices with Google TV. Compare options on our <Link href="/shop">Shop</Link> and <Link href="/devices">Fire Stick devices</Link> page.</p>
+        <p>Fire Stick HD, Fire Stick 4K, and Fire Stick 4K Max all work with Reloaded Fire TV if you already own one. Hardware for sale is ONN Google TV. Compare live kits on <Link href="/shop">Shop</Link> and <Link href="/devices">Google TV devices</Link>.</p>
 
         <h2 id="what-you-get">What You Get With a Fire Stick Option</h2>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
           <img src={getImageForSlot(JAILBREAK_IMAGES, 2).src} alt={getImageForSlot(JAILBREAK_IMAGES, 2).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
         </figure>
-        <p>You get the physical device, instant login credentials, and typically a 1-year Reloaded Fire TV plan (18,000+ live channels, 100,000+ movies and series). A quick educational tutorial and 24/7 support are included—no scavenger hunts for broken apps.</p>
+        <p>Google TV kits list the current price, photo, and checkout link on each product page. Plans for a Fire Stick you already own include credentials and setup help. Fire Stick hardware is not sold on this site.</p>
 
         <h2 id="faq">Jailbroken Fire Stick FAQ</h2>
         <ul>

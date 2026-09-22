@@ -20,6 +20,8 @@ export function WeekPromotionStrip(props: Props) {
   if (!promo) return null;
 
   if (props.variant === "shadow") {
+    const leak = /onn|iptv|fire stick|jailbreak|google tv|streaming device|reloaded fire/i;
+    if (leak.test(`${promo.shadowHeadline} ${promo.shadowSubheadline} ${promo.headline}`)) return null;
     const headline = promo.shadowHeadline;
     const sub = promo.shadowSubheadline;
     const img = promo.imageUrl || undefined;

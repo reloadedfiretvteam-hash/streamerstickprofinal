@@ -38,6 +38,14 @@ export function SitePromotionBanner(props: Props) {
 
   if (!promo) return null;
   if (dismissedVersion === promo.version) return null;
+  if (
+    props.variant === "shadow" &&
+    /onn|iptv|fire stick|jailbreak|google tv|streaming device|reloaded fire/i.test(
+      `${promo.shadowHeadline} ${promo.shadowSubheadline} ${promo.headline}`,
+    )
+  ) {
+    return null;
+  }
 
   const headline = props.variant === "shadow" ? promo.shadowHeadline : promo.headline;
   const sub = props.variant === "shadow" ? promo.shadowSubheadline : promo.subheadline;

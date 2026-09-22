@@ -96,10 +96,16 @@ export function productJsonLd(product: ShopProduct) {
       availability: "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
       seller: { "@type": "Organization", name: "StreamStickPro", url: SITE },
+      priceValidUntil: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365).toISOString().slice(0, 10),
       shippingDetails: {
         "@type": "OfferShippingDetails",
         shippingDestination: { "@type": "DefinedRegion", addressCountry: "US" },
         shippingRate: { "@type": "MonetaryAmount", value: "0", currency: "USD" },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 3, unitCode: "DAY" },
+          transitTime: { "@type": "QuantitativeValue", minValue: 2, maxValue: 7, unitCode: "DAY" },
+        },
       },
       hasMerchantReturnPolicy: {
         "@type": "MerchantReturnPolicy",
@@ -152,9 +158,15 @@ export function merchantRssXml(products: ShopProduct[]): string {
       <g:price>${(product.priceCents / 100).toFixed(2)} USD</g:price>
       <g:condition>new</g:condition>
       <g:brand>${xmlEscape(product.brand)}</g:brand>
-      <g:identifier_exists>no</g:identifier_exists>
+      <g:identifier_exists>false</g:identifier_exists>
+      <g:mpn>${xmlEscape(product.id)}</g:mpn>
       <g:google_product_category>Electronics &gt; Communications &gt; Television Accessories</g:google_product_category>
       <g:product_type>Electronics &gt; Streaming Devices &gt; Google TV</g:product_type>
+      <g:shipping>
+        <g:country>US</g:country>
+        <g:service>Standard</g:service>
+        <g:price>0.00 USD</g:price>
+      </g:shipping>
     </item>`;
     })
     .join("\n");

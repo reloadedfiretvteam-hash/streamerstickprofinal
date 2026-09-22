@@ -110,26 +110,17 @@ export async function submitUrlToIndexNow(url: string): Promise<IndexNowResponse
  * will notify search engines to re-crawl and discover new/updated products
  */
 export async function submitShopPageToIndexNow(): Promise<IndexNowResponse> {
-  return submitUrlToIndexNow('/shop');
+  return submitToIndexNow(['/shop', '/devices', '/google-merchant.xml']);
 }
 
-/**
- * Submit product page URL to IndexNow (deprecated - use submitShopPageToIndexNow)
- * Products are displayed on /shop page, not individual product pages
- * @deprecated Use submitShopPageToIndexNow() instead
- */
 export async function submitProductToIndexNow(productSlug: string): Promise<IndexNowResponse> {
-  // Submit shop page since products are listed there
-  return submitShopPageToIndexNow();
+  const sku = productSlug.replace(/^\/?devices\/?/, '');
+  return submitToIndexNow([`/devices/${sku}`, '/devices', '/shop']);
 }
 
-/**
- * Submit multiple product URLs at once (deprecated - use submitShopPageToIndexNow)
- * @deprecated Use submitShopPageToIndexNow() instead
- */
 export async function submitProductsToIndexNow(productSlugs: string[]): Promise<IndexNowResponse> {
-  // Submit shop page since products are listed there
-  return submitShopPageToIndexNow();
+  const urls = productSlugs.map((slug) => `/devices/${slug.replace(/^\/?devices\/?/, '')}`);
+  return submitToIndexNow(['/devices', '/shop', ...urls]);
 }
 
 /**
@@ -140,8 +131,12 @@ export const PILLAR_PATHS = [
   '/iptv-firestick',
   '/jailbroken-fire-sticks',
   '/devices',
+  '/devices/android-onn-4k',
+  '/devices/android-onn-pro',
   '/best-iptv-firestick',
   '/iptv-media-players',
+  '/google-merchant.xml',
+  '/sitemap-products.xml',
 ] as const;
 
 export async function submitMainPagesToIndexNow(): Promise<IndexNowResponse> {

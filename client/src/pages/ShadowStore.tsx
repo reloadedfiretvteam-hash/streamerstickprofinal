@@ -8,8 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { SitePromotionBanner, type PublicPromotion } from "@/components/SitePromotionBanner";
-import { WeekPromotionStrip } from "@/components/WeekPromotionStrip";
+import type { PublicPromotion } from "@/components/SitePromotionBanner";
 import { iptvRealProductId } from "@/lib/iptv-sku";
 import { buildShadowCmsState, SHADOW_CMS_DEFAULTS, type ShadowCmsState } from "@/lib/shadow-cms";
 import type { HomeCmsOverrideEdit } from "@/lib/merge-home-cms-overrides";
@@ -181,21 +180,24 @@ export default function ShadowStore() {
         const merged = buildShadowCmsState(wpData, edits);
         const ownerDoc = ownerJson?.data?.status === "published" ? ownerJson?.data?.document : null;
         const cloaked = ownerDoc?.cloaked || null;
+        const looksLikeRealStore = (value?: string) =>
+          /onn|iptv|fire stick|jailbreak|google tv|streaming device|reloaded fire/i.test(String(value || ""));
         if (cloaked && typeof cloaked === "object") {
           merged.hero = {
             ...merged.hero,
-            titleLine1: cloaked.titleLine1 || merged.hero.titleLine1,
-            titleLine2: cloaked.titleLine2 || merged.hero.titleLine2,
-            subtitle: cloaked.subtitle || merged.hero.subtitle,
+            titleLine1: looksLikeRealStore(cloaked.titleLine1) ? merged.hero.titleLine1 : cloaked.titleLine1 || merged.hero.titleLine1,
+            titleLine2: looksLikeRealStore(cloaked.titleLine2) ? merged.hero.titleLine2 : cloaked.titleLine2 || merged.hero.titleLine2,
+            subtitle: looksLikeRealStore(cloaked.subtitle) ? merged.hero.subtitle : cloaked.subtitle || merged.hero.subtitle,
             backgroundImageUrl: cloaked.backgroundImageUrl || merged.hero.backgroundImageUrl,
             videoUrl: cloaked.videoUrl || merged.hero.videoUrl,
-            badge: cloaked.badge || merged.hero.badge,
+            badge: looksLikeRealStore(cloaked.badge) ? merged.hero.badge : cloaked.badge || merged.hero.badge,
             ctaPrimary: cloaked.ctaPrimary || merged.hero.ctaPrimary,
             ctaSecondary: cloaked.ctaSecondary || merged.hero.ctaSecondary,
           };
           if (Array.isArray(cloaked.serviceCards) && cloaked.serviceCards.length) {
             merged.services.cards = merged.services.cards.map((card, index) => {
               const next = cloaked.serviceCards[index] || {};
+              if (looksLikeRealStore(next.title) || looksLikeRealStore(next.description)) return card;
               return {
                 ...card,
                 title: next.title || card.title,
@@ -450,17 +452,6 @@ export default function ShadowStore() {
           </Button>
         </div>
       </nav>
-
-      <WeekPromotionStrip
-        variant="shadow"
-        onClaim={(promo) => {
-          setPromoCheckout(promo);
-          setSelectedProduct(null);
-          setSelectedSEOProduct(null);
-          setShowCheckout(true);
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }}
-      />
 
       <section className="relative py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 -z-10 opacity-20">
@@ -883,16 +874,6 @@ export default function ShadowStore() {
         </div>
       </footer>
 
-      <SitePromotionBanner
-        variant="shadow"
-        onClaim={(promo) => {
-          setPromoCheckout(promo);
-          setSelectedProduct(null);
-          setSelectedSEOProduct(null);
-          setShowCheckout(true);
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }}
-      />
     </div>
   );
 }
