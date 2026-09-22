@@ -266,6 +266,30 @@ export function createOwnerCmsPublicRoutes() {
 export function createOwnerCmsAdminRoutes() {
   const app = new Hono<{ Bindings: Env }>();
 
+  app.post("/upload", async (c) => {
+    try {
+      const form = await c.req.formData();
+      const file = form.get("file");
+      if (!(file instanceof File)) return c.json({ error: "Choose an image file" }, 400);
+      if (file.size > 5 * 1024 * 1024) return c.json({ error: "Image must be smaller than 5 MB" }, 400);
+      const allowed = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+      if (!allowed.includes(file.type)) return c.json({ error: "Use a JPEG, PNG, GIF, or WebP image" }, 400);
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `owner-cms/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+      const client = sb(c.env);
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const { error } = await client.storage.from("imiges").upload(path, bytes, {
+        contentType: file.type,
+        upsert: false,
+      });
+      if (error) return c.json({ error: error.message }, 500);
+      const { data } = client.storage.from("imiges").getPublicUrl(path);
+      return c.json({ ok: true, url: data.publicUrl, path });
+    } catch (e: any) {
+      return c.json({ error: e?.message || "Upload failed" }, 500);
+    }
+  });
+
   app.get("/status", async (c) => {
     const client = sb(c.env);
     const ready = await tablesReady(client);

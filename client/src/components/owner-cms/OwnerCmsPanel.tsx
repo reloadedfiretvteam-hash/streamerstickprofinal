@@ -30,6 +30,7 @@ function HomepageFields({
   setHomepageDoc,
   busy,
   onSave,
+  onUpload,
 }: {
   homepageDoc: string;
   homepageStatus: string;
@@ -37,6 +38,7 @@ function HomepageFields({
   setHomepageDoc: (v: string) => void;
   busy: boolean;
   onSave: () => void;
+  onUpload: (file: File, target: "hero" | "cloaked") => void;
 }) {
   let parsed: any = {};
   let invalid = false;
@@ -46,14 +48,23 @@ function HomepageFields({
     invalid = true;
   }
   const hero = parsed?.hero || {};
+  const tiles = Array.isArray(parsed?.pathTiles) ? parsed.pathTiles : [];
+  const cloaked = parsed?.cloaked || {};
+  const meta = parsed?.meta || {};
+  const write = (next: Record<string, unknown>) => setHomepageDoc(JSON.stringify(next, null, 2));
   const setHero = (patch: Record<string, unknown>) => {
-    const next = { ...parsed, hero: { ...hero, ...patch } };
-    setHomepageDoc(JSON.stringify(next, null, 2));
+    write({ ...parsed, hero: { ...hero, ...patch } });
   };
   const setCta = (key: "primaryCta" | "secondaryCta" | "supportCta", field: "label" | "href", value: string) => {
     const current = hero[key] || {};
     setHero({ [key]: { ...current, [field]: value } });
   };
+  const setTile = (index: number, patch: Record<string, unknown>) => {
+    const nextTiles = tiles.map((t: any, i: number) => (i === index ? { ...t, ...patch } : t));
+    write({ ...parsed, pathTiles: nextTiles });
+  };
+  const setCloaked = (patch: Record<string, unknown>) => write({ ...parsed, cloaked: { ...cloaked, ...patch } });
+  const setMeta = (patch: Record<string, unknown>) => write({ ...parsed, meta: { ...meta, ...patch } });
 
   return (
     <div className="space-y-3 rounded-xl border border-slate-700 p-4">
@@ -114,6 +125,106 @@ function HomepageFields({
             value={hero.supportCta?.href || ""}
             onChange={(e) => setCta("supportCta", "href", e.target.value)}
           />
+          <Input
+            placeholder="Hero proof line"
+            value={hero.proofline || ""}
+            onChange={(e) => setHero({ proofline: e.target.value })}
+          />
+          <Input
+            placeholder="Homepage background image URL"
+            value={hero.backgroundImageUrl || ""}
+            onChange={(e) => setHero({ backgroundImageUrl: e.target.value })}
+          />
+          <label className="text-sm text-slate-300">
+            Upload homepage background
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              className="mt-1 block text-sm"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onUpload(file, "hero");
+              }}
+            />
+          </label>
+          <Input
+            placeholder="Search title (about 50 to 60 characters)"
+            value={meta.title || ""}
+            onChange={(e) => setMeta({ title: e.target.value })}
+          />
+          <Textarea
+            placeholder="Search description (about 50 to 160 characters)"
+            value={meta.description || ""}
+            onChange={(e) => setMeta({ description: e.target.value })}
+          />
+          <p className="pt-2 text-sm font-medium text-white">Three boxes under the hero</p>
+          {tiles.map((tile: any, index: number) => (
+            <div key={tile.id || index} className="grid gap-2 rounded-lg border border-slate-700 p-3">
+              <Input
+                placeholder="Box title"
+                value={tile.title || ""}
+                onChange={(e) => setTile(index, { title: e.target.value })}
+              />
+              <Textarea
+                placeholder="Box description"
+                value={tile.description || ""}
+                onChange={(e) => setTile(index, { description: e.target.value })}
+              />
+              <Input
+                placeholder="Button label"
+                value={tile.ctaLabel || ""}
+                onChange={(e) => setTile(index, { ctaLabel: e.target.value })}
+              />
+              <Input
+                placeholder="Button link"
+                value={tile.href || tile.ctaHref || ""}
+                onChange={(e) => setTile(index, { href: e.target.value, ctaHref: e.target.value })}
+              />
+              <select
+                className="w-full rounded border border-slate-600 bg-slate-900 p-2 text-white"
+                value={tile.accent || ["gold", "cyan", "violet"][index] || "gold"}
+                onChange={(e) => setTile(index, { accent: e.target.value })}
+              >
+                <option value="gold">Blue box</option>
+                <option value="cyan">Teal box</option>
+                <option value="violet">Light box</option>
+                <option value="teal">Bright teal box</option>
+              </select>
+            </div>
+          ))}
+          <p className="pt-2 text-sm font-medium text-white">Cloaked page</p>
+          <Input
+            placeholder="Cloaked headline line 1"
+            value={cloaked.titleLine1 || ""}
+            onChange={(e) => setCloaked({ titleLine1: e.target.value })}
+          />
+          <Input
+            placeholder="Cloaked headline line 2"
+            value={cloaked.titleLine2 || ""}
+            onChange={(e) => setCloaked({ titleLine2: e.target.value })}
+          />
+          <Textarea
+            placeholder="Cloaked supporting text"
+            value={cloaked.subtitle || ""}
+            onChange={(e) => setCloaked({ subtitle: e.target.value })}
+          />
+          <Input
+            placeholder="Cloaked background image URL"
+            value={cloaked.backgroundImageUrl || ""}
+            onChange={(e) => setCloaked({ backgroundImageUrl: e.target.value })}
+          />
+          <label className="text-sm text-slate-300">
+            Upload cloaked background
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              className="mt-1 block text-sm"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onUpload(file, "cloaked");
+              }}
+            />
+          </label>
         </div>
       )}
       <details className="text-sm text-slate-400">
@@ -205,6 +316,28 @@ export function OwnerCmsPanel({ authFetch }: { authFetch: AuthFetch }) {
     loadHomepage().catch(() => undefined);
     loadLists().catch(() => undefined);
   }, []);
+
+  const uploadHomepageImage = async (file: File, target: "hero" | "cloaked") => {
+    setBusy(true);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const res = await authFetch("/api/admin/cms/upload", { method: "POST", body });
+      const json = await res.json();
+      if (!res.ok || !json.url) throw new Error(json.error || "Upload failed");
+      const parsed = homepageDoc ? JSON.parse(homepageDoc) : {};
+      const next =
+        target === "hero"
+          ? { ...parsed, hero: { ...(parsed.hero || {}), backgroundImageUrl: json.url } }
+          : { ...parsed, cloaked: { ...(parsed.cloaked || {}), backgroundImageUrl: json.url } };
+      setHomepageDoc(JSON.stringify(next, null, 2));
+      toast({ title: "Image uploaded", description: "Click Save homepage to publish it." });
+    } catch (e: any) {
+      toast({ title: "Upload failed", description: e.message, variant: "destructive" });
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const saveHomepage = async () => {
     setBusy(true);
@@ -420,6 +553,7 @@ export function OwnerCmsPanel({ authFetch }: { authFetch: AuthFetch }) {
           setHomepageDoc={setHomepageDoc}
           busy={busy}
           onSave={saveHomepage}
+          onUpload={uploadHomepageImage}
         />
       )}
 

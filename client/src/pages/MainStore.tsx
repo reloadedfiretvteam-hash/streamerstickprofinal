@@ -682,7 +682,7 @@ export default function MainStore() {
           bullets: Array.isArray(t.bullets) ? t.bullets : [],
           ctaLabel: t.ctaLabel || ["Shop devices", "See plans", "Open guides"][index] || "Continue",
           ctaHref: t.href || t.ctaHref || "/",
-          accent: (["gold", "cyan", "violet"] as const)[index % 3],
+          accent: t.accent || (["gold", "cyan", "violet"] as const)[index % 3],
           trackVpn: false,
         }));
       }
@@ -692,6 +692,9 @@ export default function MainStore() {
           ...((ownerDoc as any).hero || {}),
           title: (ownerDoc as any).hero?.title || (merged as any).hero?.title,
           subtitle: (ownerDoc as any).hero?.subtitle || (merged as any).hero?.subtitle,
+          proofline: (ownerDoc as any).hero?.proofline || (merged as any).hero?.proofline,
+          backgroundImageUrl:
+            (ownerDoc as any).hero?.backgroundImageUrl || (merged as any).hero?.backgroundImageUrl,
         };
         const h = (ownerDoc as any).hero;
         if (h?.primaryCta || h?.secondaryCta || h?.supportCta) {

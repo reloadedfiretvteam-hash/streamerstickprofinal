@@ -230,5 +230,12 @@ function defaultHomepageDocument() {
       description:
         "Shop ONN Google TV devices, compare plans for equipment you already own, or follow written setup guides.",
     },
+    cloaked: {
+      titleLine1: "Digital Experiences",
+      titleLine2: "That Drive Growth",
+      subtitle:
+        "We build high-performance websites, SEO strategies, and digital campaigns that transform businesses.",
+      backgroundImageUrl: "",
+    },
   };
 }

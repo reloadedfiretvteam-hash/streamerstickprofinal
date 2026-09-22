@@ -167,15 +167,27 @@ export default function ShadowStore() {
     let cancelled = false;
     (async () => {
       try {
-        const [wpRes, edRes] = await Promise.all([
+        const [wpRes, edRes, ownerHomeRes] = await Promise.all([
           apiCall("/api/cms/shadow"),
           apiCall("/api/cms/page-overrides?pageId=shadow"),
+          apiCall("/api/owner-cms/homepage"),
         ]);
         const wpJson = wpRes.ok ? await wpRes.json().catch(() => ({})) : {};
         const edJson = edRes.ok ? await edRes.json().catch(() => ({ data: [] })) : { data: [] };
+        const ownerJson = ownerHomeRes.ok ? await ownerHomeRes.json().catch(() => ({})) : {};
         const wpData = wpJson?.data ?? null;
         const edits = (Array.isArray(edJson?.data) ? edJson.data : []) as HomeCmsOverrideEdit[];
         const merged = buildShadowCmsState(wpData, edits);
+        const cloaked = ownerJson?.data?.status === "published" ? ownerJson?.data?.document?.cloaked : null;
+        if (cloaked && typeof cloaked === "object") {
+          merged.hero = {
+            ...merged.hero,
+            titleLine1: cloaked.titleLine1 || merged.hero.titleLine1,
+            titleLine2: cloaked.titleLine2 || merged.hero.titleLine2,
+            subtitle: cloaked.subtitle || merged.hero.subtitle,
+            backgroundImageUrl: cloaked.backgroundImageUrl || merged.hero.backgroundImageUrl,
+          };
+        }
         if (!cancelled) setShadowCms(merged);
       } catch {
         if (!cancelled) {
