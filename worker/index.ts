@@ -1593,7 +1593,7 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/vs-iptvencoder', priority: '0.85', changefreq: 'weekly' },
   { url: '/ultimate-iptv-catalog-2026', priority: '0.95', changefreq: 'daily' },
   { url: '/tools/catalog', priority: '0.85', changefreq: 'weekly' },
-  { url: '/social-ads.html', priority: '0.8', changefreq: 'weekly' },
+  { url: '/social-ads', priority: '0.8', changefreq: 'weekly' },
 ];
 
 const EXCLUDED_BLOG_SLUGS = new Set([
@@ -1711,7 +1711,7 @@ app.get('/sitemap.xml', async (c) => {
 `;
 
   for (const page of STATIC_SITEMAP_PAGES) {
-    const images = page.url === '/social-ads.html'
+    const images = page.url === '/social-ads'
       ? SOCIAL_AD_IMAGES.map((img) => `    <image:image><image:loc>${img}</image:loc></image:image>`).join('\n')
       : '';
     sitemap += `  <url>
@@ -1841,7 +1841,7 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/iptv-firestick': { title: 'IPTV Fire Stick Search? Google Packages | StreamStickPro', description: 'Looking up IPTV for Fire Stick or Downloader? Shop the Google HD package or Google 4K package, or use a subscription on a Fire TV you already own.' },
   '/best-iptv-firestick': { title: 'Best IPTV Fire Stick 2026 | Google Packages | StreamStickPro', description: 'People comparing IPTV for Fire Stick can order a Google HD or 4K package, or run live TV on a Fire Stick they already own.' },
   '/devices': { title: 'ONN & Google TV Devices | StreamStickPro', description: 'Shop ONN and Google TV streaming devices with price, condition, and setup details. Fire Stick hardware is not sold on this page.' },
-  '/social-ads.html': { title: 'StreamStickPro ads | 36-hour free trial and Google packages', description: 'StreamStickPro ads: cut the cable bill, keep live TV, sports, movies, and a 36-hour free trial. Google HD package and Google 4K package.' },
+  '/social-ads': { title: 'StreamStickPro ads | 36-hour free trial and Google packages', description: 'StreamStickPro ads: cut the cable bill, keep live TV, sports, movies, and a 36-hour free trial. Google HD package and Google 4K package.' },
   '/plans': { title: 'Plans for Devices You Already Own | StreamStickPro', description: 'Streaming plans for Fire TV, Google TV, ONN, and other devices you already own. Hardware is included only when the plan says so.' },
   '/guides': { title: 'Google TV & Device Setup Guides | StreamStickPro', description: 'Written setup steps for ONN and Google TV, plus troubleshooting. A video alone is not the guide. Links to devices and plans.' },
   '/support': { title: 'Support & Contact | StreamStickPro', description: 'Setup help, compatibility questions, and order support. Email the team, or open guides, devices, and plans from this page.' },
@@ -2216,7 +2216,7 @@ app.get('*', async (c) => {
     '/onn-google-tv', '/onn', '/iptv-smarters-pro', '/tivimate', '/ultimate-iptv-catalog-2026',
     '/tools/catalog', '/setup', '/setup-firestick', '/setup-onn', '/tutorials', '/seo-ads',
     '/locations', '/trial', '/firestick',
-    '/vpn', '/homepage', '/faq', '/vpn-protection', '/social-ads.html',
+    '/vpn', '/homepage', '/faq', '/vpn-protection', '/social-ads',
     '/track-order', '/secure', '/checkout-secure', '/bundles',
   ]);
   const isKnownRoute =
