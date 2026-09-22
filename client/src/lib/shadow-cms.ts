@@ -38,11 +38,12 @@ export type ShadowCmsState = {
     stat2: string;
     stat3: string;
     backgroundImageUrl: string;
+    videoUrl?: string;
   };
   services: {
     title: string;
     subtitle: string;
-    cards: Array<{ title: string; description: string; bullets: string[] }>;
+    cards: Array<{ title: string; description: string; bullets: string[]; image?: string }>;
   };
   portfolio: { title: string; subtitle: string };
   portfolioItems: Array<{ name: string; category: string; description: string }>;

@@ -7,8 +7,13 @@
 import { Hono } from "hono";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Env } from "../index";
-import { getSupabaseServiceKey, getSupabaseUrl } from "../helpers";
+import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from "../helpers";
+import { sendEmail } from "../email-providers";
 import { settingsCms, starterSetupGuide, tablesReady } from "../lib/owner-cms-settings-store";
+
+function validEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
 
 function sb(env: Env): SupabaseClient {
   return createClient(getSupabaseUrl(env), getSupabaseServiceKey(env), {
@@ -225,6 +230,46 @@ export function createOwnerCmsPublicRoutes() {
     }
   });
 
+  app.get("/presence", async (c) => {
+    try {
+      const stats = await getStorage(c.env).getVisitorStats();
+      return c.json({
+        data: {
+          onlineNow: Number(stats.onlineNow || 0),
+          todayVisitors: Number(stats.todayVisitors || 0),
+        },
+      });
+    } catch {
+      return c.json({ data: { onlineNow: 0, todayVisitors: 0 } }, 200);
+    }
+  });
+
+  app.post("/subscribe", async (c) => {
+    try {
+      const body = await c.req.json().catch(() => ({}));
+      const email = String(body.email || "").trim().toLowerCase();
+      const source = String(body.source || "homepage-promo").slice(0, 80);
+      if (body.website) return c.json({ ok: true });
+      if (!validEmail(email)) return c.json({ error: "Enter a valid email" }, 400);
+      const client = sb(c.env);
+      const row = {
+        email,
+        source,
+        subscription_status: "subscribed",
+        subscriber_type: "prospect",
+      };
+      const { error } = await client.from("email_subscribers").upsert(row, { onConflict: "email" });
+      if (error) {
+        const list = await settingsCms.getJson<any[]>(client, settingsCms.KEYS.subscribers, []);
+        if (!list.some((item) => item.email === email)) list.unshift({ id: crypto.randomUUID(), ...row });
+        await settingsCms.setJson(client, settingsCms.KEYS.subscribers, list.slice(0, 5000));
+      }
+      return c.json({ ok: true });
+    } catch (e: any) {
+      return c.json({ error: e?.message || "Subscribe failed" }, 500);
+    }
+  });
+
   app.get("/brand", async (c) => {
     try {
       const client = sb(c.env);
@@ -292,11 +337,17 @@ export function createOwnerCmsAdminRoutes() {
     try {
       const form = await c.req.formData();
       const file = form.get("file");
-      if (!(file instanceof File)) return c.json({ error: "Choose an image file" }, 400);
-      if (file.size > 5 * 1024 * 1024) return c.json({ error: "Image must be smaller than 5 MB" }, 400);
-      const allowed = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-      if (!allowed.includes(file.type)) return c.json({ error: "Use a JPEG, PNG, GIF, or WebP image" }, 400);
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      if (!(file instanceof File)) return c.json({ error: "Choose an image or video file" }, 400);
+      const images = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+      const videos = ["video/mp4", "video/webm", "video/quicktime"];
+      const isVideo = videos.includes(file.type);
+      const isImage = images.includes(file.type);
+      if (!isImage && !isVideo) return c.json({ error: "Use a JPEG, PNG, GIF, WebP, MP4, or WebM file" }, 400);
+      const max = isVideo ? 40 * 1024 * 1024 : 8 * 1024 * 1024;
+      if (file.size > max) {
+        return c.json({ error: isVideo ? "Video must be smaller than 40 MB" : "Image must be smaller than 8 MB" }, 400);
+      }
+      const ext = (file.name.split(".").pop() || (isVideo ? "mp4" : "jpg")).toLowerCase().replace(/[^a-z0-9]/g, "") || (isVideo ? "mp4" : "jpg");
       const path = `owner-cms/${Date.now()}-${crypto.randomUUID()}.${ext}`;
       const client = sb(c.env);
       const bytes = new Uint8Array(await file.arrayBuffer());
@@ -306,7 +357,28 @@ export function createOwnerCmsAdminRoutes() {
       });
       if (error) return c.json({ error: error.message }, 500);
       const { data } = client.storage.from("imiges").getPublicUrl(path);
-      return c.json({ ok: true, url: data.publicUrl, path });
+      const mediaRow = {
+        id: crypto.randomUUID(),
+        file_name: file.name,
+        file_url: data.publicUrl,
+        file_type: file.type,
+        alt_text: "",
+        folder: isVideo ? "videos" : "images",
+        usage_refs: [],
+        created_at: new Date().toISOString(),
+      };
+      try {
+        if (await tablesReady(client)) {
+          await client.from("cms_media_assets").insert(mediaRow);
+        } else {
+          const list = await settingsCms.getJson<any[]>(client, settingsCms.KEYS.media, []);
+          list.unshift(mediaRow);
+          await settingsCms.setJson(client, settingsCms.KEYS.media, list.slice(0, 400));
+        }
+      } catch {
+        /* media index is optional */
+      }
+      return c.json({ ok: true, url: data.publicUrl, path, kind: isVideo ? "video" : "image" });
     } catch (e: any) {
       return c.json({ error: e?.message || "Upload failed" }, 500);
     }
@@ -400,6 +472,7 @@ export function createOwnerCmsAdminRoutes() {
       image_url: body.image_url ?? null,
       button_label: body.button_label ?? null,
       button_href: body.button_href ?? null,
+      coupon_code: body.coupon_code ?? null,
       target_pages: body.target_pages || ["*"],
       priority: Number(body.priority) || 0,
       is_active: Boolean(body.is_active),
@@ -707,7 +780,66 @@ export function createOwnerCmsAdminRoutes() {
   });
 
   app.post("/revisions/:id/restore", async (c) => {
-    return c.json({ error: "Restore from site_settings revisions: re-save snapshot manually via homepage editor for now" }, 501);
+    const id = c.req.param("id");
+    const client = sb(c.env);
+    const revisions = await settingsCms.listRevisions(client);
+    const revision = revisions.find((row) => row.id === id);
+    if (!revision?.snapshot) return c.json({ error: "That snapshot is not available" }, 404);
+    const current = await settingsCms.getHomepage(client);
+    await settingsCms.appendRevision(client, {
+      entity_type: "homepage",
+      entity_id: "default",
+      note: "pre-restore",
+      snapshot: current,
+    });
+    const restored = revision.snapshot;
+    await settingsCms.saveHomepage(client, restored);
+    await audit(client, "homepage.restore", "homepage", "default", { revision_id: id });
+    return c.json({ ok: true, data: restored });
+  });
+
+  app.get("/subscribers", async (c) => {
+    const client = sb(c.env);
+    const { data, error } = await client
+      .from("email_subscribers")
+      .select("*")
+      .limit(500);
+    if (!error) return c.json({ data: data || [] });
+    return c.json({ data: await settingsCms.getJson(client, settingsCms.KEYS.subscribers, []) });
+  });
+
+  app.post("/subscribers/send", async (c) => {
+    const body = await c.req.json().catch(() => ({}));
+    const subject = String(body.subject || "").trim();
+    const message = String(body.message || "").trim();
+    if (!subject || !message) return c.json({ error: "Subject and message are required" }, 400);
+    const client = sb(c.env);
+    let emails: string[] = [];
+    const { data, error } = await client.from("email_subscribers").select("email").limit(40);
+    if (!error && data) emails = data.map((row) => row.email).filter(Boolean);
+    else {
+      emails = (await settingsCms.getJson<any[]>(client, settingsCms.KEYS.subscribers, []))
+        .map((row) => row.email)
+        .filter(Boolean)
+        .slice(0, 40);
+    }
+    if (!emails.length) return c.json({ error: "No subscribers yet" }, 400);
+    let sent = 0;
+    const failures: string[] = [];
+    for (const email of emails) {
+      const result = await sendEmail(
+        {
+          to: email,
+          subject,
+          html: `<div style="font-family:sans-serif;line-height:1.5"><p>${message.replace(/</g, "&lt;")}</p><p style="color:#64748b;font-size:12px">You subscribed on StreamStickPro. Reply to this email if you want to be removed.</p></div>`,
+        },
+        c.env,
+      );
+      if (result.success) sent += 1;
+      else failures.push(email);
+    }
+    await audit(client, "email.promo.send", "subscribers", "list", { sent, failed: failures.length, subject });
+    return c.json({ ok: true, sent, failed: failures.length });
   });
 
   app.get("/audit", async (c) => {

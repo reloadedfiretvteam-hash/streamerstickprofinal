@@ -10,6 +10,9 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { SitePromotionBanner, type PublicPromotion } from "@/components/SitePromotionBanner";
 import { WeekPromotionStrip } from "@/components/WeekPromotionStrip";
+import { CmsStoreBanner } from "@/components/CmsStoreBanner";
+import { CmsEmailPromo } from "@/components/CmsEmailPromo";
+import { CmsPresence } from "@/components/CmsPresence";
 import { iptvRealProductId } from "@/lib/iptv-sku";
 import { buildShadowCmsState, SHADOW_CMS_DEFAULTS, type ShadowCmsState } from "@/lib/shadow-cms";
 import type { HomeCmsOverrideEdit } from "@/lib/merge-home-cms-overrides";
@@ -151,6 +154,7 @@ export default function ShadowStore() {
   const [shadowCms, setShadowCms] = useState<ShadowCmsState>(
     () => JSON.parse(JSON.stringify(SHADOW_CMS_DEFAULTS)) as ShadowCmsState,
   );
+  const [emailPromo, setEmailPromo] = useState<any>(null);
 
   useEffect(() => {
     (async () => {
@@ -179,7 +183,9 @@ export default function ShadowStore() {
         const wpData = wpJson?.data ?? null;
         const edits = (Array.isArray(edJson?.data) ? edJson.data : []) as HomeCmsOverrideEdit[];
         const merged = buildShadowCmsState(wpData, edits);
-        const cloaked = ownerJson?.data?.status === "published" ? ownerJson?.data?.document?.cloaked : null;
+        const ownerDoc = ownerJson?.data?.status === "published" ? ownerJson?.data?.document : null;
+        const cloaked = ownerDoc?.cloaked || null;
+        if (ownerDoc?.emailPromo) setEmailPromo(ownerDoc.emailPromo);
         if (cloaked && typeof cloaked === "object") {
           merged.hero = {
             ...merged.hero,
@@ -187,7 +193,22 @@ export default function ShadowStore() {
             titleLine2: cloaked.titleLine2 || merged.hero.titleLine2,
             subtitle: cloaked.subtitle || merged.hero.subtitle,
             backgroundImageUrl: cloaked.backgroundImageUrl || merged.hero.backgroundImageUrl,
+            videoUrl: cloaked.videoUrl || merged.hero.videoUrl,
+            badge: cloaked.badge || merged.hero.badge,
+            ctaPrimary: cloaked.ctaPrimary || merged.hero.ctaPrimary,
+            ctaSecondary: cloaked.ctaSecondary || merged.hero.ctaSecondary,
           };
+          if (Array.isArray(cloaked.serviceCards) && cloaked.serviceCards.length) {
+            merged.services.cards = merged.services.cards.map((card, index) => {
+              const next = cloaked.serviceCards[index] || {};
+              return {
+                ...card,
+                title: next.title || card.title,
+                description: next.description || card.description,
+                image: next.imageUrl || card.image,
+              };
+            });
+          }
         }
         if (!cancelled) setShadowCms(merged);
       } catch {
@@ -414,6 +435,9 @@ export default function ShadowStore() {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
+      <CmsStoreBanner page="cloak" />
+      <CmsPresence />
+      <CmsEmailPromo promo={emailPromo} page="cloak" />
       <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 font-semibold text-xl text-primary">
@@ -447,8 +471,20 @@ export default function ShadowStore() {
       />
 
       <section className="relative py-24 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 -z-10 opacity-10">
-          <img src={shadowCms.hero.backgroundImageUrl} className="w-full h-full object-cover" alt="" loading="eager" width={1920} height={600} fetchPriority="high" />
+        <div className="absolute inset-0 -z-10 opacity-20">
+          {shadowCms.hero.videoUrl ? (
+            <video
+              src={shadowCms.hero.videoUrl}
+              className="w-full h-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              poster={shadowCms.hero.backgroundImageUrl}
+            />
+          ) : (
+            <img src={shadowCms.hero.backgroundImageUrl} className="w-full h-full object-cover" alt="" loading="eager" width={1920} height={600} fetchPriority="high" />
+          )}
         </div>
         
         <div className="container mx-auto px-4">
@@ -505,7 +541,10 @@ export default function ShadowStore() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {shadowCms.services.cards.map((card, idx) => (
-              <Card key={idx} className="border-none shadow-lg hover:shadow-xl transition-shadow">
+              <Card key={idx} className="border-none shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
+                {card.image ? (
+                  <img src={card.image} alt="" className="h-40 w-full object-cover" />
+                ) : null}
                 <CardHeader>
                   <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 text-primary">
                     {idx === 0 ? <MonitorIcon /> : idx === 1 ? <SearchIcon /> : <Code />}

@@ -16,6 +16,7 @@ const KEYS = {
   media: "cms_media_v1",
   revisions: "cms_revisions_v1",
   audit: "cms_audit_v1",
+  subscribers: "cms_subscribers_v1",
 } as const;
 
 async function getJson<T>(client: SupabaseClient, key: string, fallback: T): Promise<T> {
@@ -204,6 +205,8 @@ function defaultHomepageDocument() {
       primaryCta: { label: "Shop Google TV Devices", href: "/devices" },
       secondaryCta: { label: "Explore Plans & Services", href: "/plans" },
       supportCta: { label: "Setup & Compatibility Help", href: "/guides" },
+      backgroundImageUrl: "",
+      videoUrl: "",
     },
     pathTiles: [
       {
@@ -211,18 +214,21 @@ function defaultHomepageDocument() {
         title: "I Need a Google TV Device",
         description: "Shop ONN and Google TV kits with clear condition, inclusions, and support.",
         href: "/devices",
+        imageUrl: "",
       },
       {
         id: "have-device",
         title: "I Already Have a Compatible Device",
         description: "Plans and services for equipment you already own.",
         href: "/plans",
+        imageUrl: "",
       },
       {
         id: "need-help",
         title: "I Need Setup Help",
         description: "Written guides, authorized videos, troubleshooting, and support.",
         href: "/guides",
+        imageUrl: "",
       },
     ],
     meta: {
@@ -236,6 +242,59 @@ function defaultHomepageDocument() {
       subtitle:
         "We build high-performance websites, SEO strategies, and digital campaigns that transform businesses.",
       backgroundImageUrl: "",
+      videoUrl: "",
+      badge: "Award-Winning Web Design Agency 2026",
+      ctaPrimary: "View Packages",
+      ctaSecondary: "Our Portfolio",
+      serviceCards: [
+        { title: "Web Design", description: "Responsive, modern websites built with the latest technologies.", imageUrl: "" },
+        { title: "SEO & Marketing", description: "Rank higher and drive more organic traffic to your site.", imageUrl: "" },
+        { title: "Custom Development", description: "Tailored solutions for complex business requirements.", imageUrl: "" },
+      ],
     },
+    theme: {
+      primaryColor: "#2563eb",
+      accentColor: "#14b8a6",
+      backgroundColor: "#0A0A0F",
+    },
+    trustBar: "2,700+ customers · 99.9% uptime · SSL-secured checkout · 18K+ channels",
+    faq: {
+      title: "Essential FAQ",
+      items: [
+        { question: "IPTV subscription vs loaded device?", answer: "IPTV is the streaming service only. A device kit is hardware that includes a 1-year Reloaded Fire TV plan." },
+        { question: "Do ONN kits include a subscription?", answer: "Yes. Every ONN kit ships with a 1-year Reloaded Fire TV subscription." },
+        { question: "How fast does service start?", answer: "Plan credentials arrive in the order email. Most customers are watching in 1 to 2 hours after payment." },
+      ],
+    },
+    disclaimer:
+      "Optimal performance requires 25Mbps+ internet. Device bundles include 1-year service where stated. Users are responsible for local laws and platform terms.",
+    footer: {
+      tagline: "Premium Live TV streaming with 18,000+ channels and 100,000+ movies & series. ONN Google TV kits available.",
+      email: "reloadedfiretvteam@gmail.com",
+      copyright: "StreamStickPro",
+    },
+    support: {
+      email: "reloadedfiretvteam@gmail.com",
+      availability: "24/7 support",
+    },
+    emailPromo: {
+      enabled: false,
+      headline: "Get a first-order promo",
+      subheadline: "Leave your email and we will send the current sale code.",
+      buttonLabel: "Send my code",
+      coupon: "",
+      delaySeconds: 12,
+    },
+    howItWorks: {
+      title: "How It Works",
+      subtitle: "Get started in minutes with our simple 4-step process",
+      steps: [
+        { step: "1", title: "Choose Your Device", description: "Choose an ONN Google TV kit at the listed price on this page.", icon: "📱" },
+        { step: "2", title: "Add a Plan", description: "Choose a Live TV plan if you already have a compatible device.", icon: "📺" },
+        { step: "3", title: "We Ship & Setup", description: "Your kit arrives with credentials and clear setup guidance.", icon: "🚀" },
+        { step: "4", title: "Start Streaming", description: "Plug in, connect Wi-Fi, and start watching.", icon: "🎬" },
+      ],
+    },
+    ogImage: "",
   };
 }

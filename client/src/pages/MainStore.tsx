@@ -35,6 +35,9 @@ import SupportMessageBox from "@/components/SupportMessageBox";
 import { trackVpnClick } from "@/lib/vpn-tracking";
 import { SitePromotionBanner } from "@/components/SitePromotionBanner";
 import { WeekPromotionStrip } from "@/components/WeekPromotionStrip";
+import { CmsStoreBanner } from "@/components/CmsStoreBanner";
+import { CmsEmailPromo } from "@/components/CmsEmailPromo";
+import { CmsPresence } from "@/components/CmsPresence";
 import { OnnProductCardImage } from "@/components/OnnProductCardImage";
 import type { Product as StoreCartProduct } from "@/lib/store";
 import { iptvRealProductId } from "@/lib/iptv-sku";
@@ -192,6 +195,7 @@ interface CmsFeatureCard {
   ctaHref?: string;
   accent?: CmsAccent;
   trackVpn?: boolean;
+  imageUrl?: string;
 }
 
 interface CmsHomePayload {
@@ -206,6 +210,7 @@ interface CmsHomePayload {
     subtitle?: string;
     proofline?: string;
     backgroundImageUrl?: string;
+    videoUrl?: string;
     ctas?: CmsHeroCta[];
   };
   productCards?: CmsFeatureCard[];
@@ -264,6 +269,37 @@ interface CmsHomePayload {
     whatsappUrl?: string;
     whatsappLabel?: string;
   };
+  theme?: {
+    primaryColor?: string;
+    accentColor?: string;
+    backgroundColor?: string;
+  };
+  footer?: {
+    tagline?: string;
+    email?: string;
+    copyright?: string;
+  };
+  emailPromo?: {
+    enabled?: boolean;
+    headline?: string;
+    subheadline?: string;
+    buttonLabel?: string;
+    coupon?: string;
+    delaySeconds?: number;
+  };
+  howItWorks?: {
+    title?: string;
+    subtitle?: string;
+    steps?: Array<{
+      step?: string;
+      title?: string;
+      description?: string;
+      icon?: string;
+      image?: string;
+      imageSrc?: string;
+    }>;
+  };
+  ogImage?: string;
 }
 
 const defaultHeroCtas: Required<CmsHeroCta>[] = [
@@ -470,6 +506,9 @@ export default function MainStore() {
   const heroSubtitle = heroContent?.subtitle || "36-hour trial · 18K+ live channels · guided setup in minutes";
   const heroProofline = heroContent?.proofline || "2,700+ customers · 99.9% uptime · SSL-secured checkout";
   const heroBackgroundImage = heroContent?.backgroundImageUrl || heroImg;
+  const heroVideoUrl = heroContent?.videoUrl || "";
+  const onnStreamingPrice = products.find((p) => p.id === "android-onn-4k")?.price;
+  const onnProPrice = products.find((p) => p.id === "android-onn-pro")?.price;
   const heroCtas = ((heroContent?.ctas?.filter((cta) => cta?.label && cta?.href).length || 0) > 0
     ? heroContent?.ctas?.filter((cta) => cta?.label && cta?.href)
     : defaultHeroCtas) as CmsHeroCta[];
@@ -522,10 +561,24 @@ export default function MainStore() {
     contactTitle: cmsHome?.trustSignals?.contactTitle || defaultTrustSignals.contactTitle,
     contactBody: cmsHome?.trustSignals?.contactBody || defaultTrustSignals.contactBody,
   };
-  const supportEmail = cmsHome?.support?.email || defaultSupport.email;
+  const supportEmail = cmsHome?.support?.email || cmsHome?.footer?.email || defaultSupport.email;
   const supportAvailability = cmsHome?.support?.availability || defaultSupport.availability;
   const supportWhatsappUrl = cmsHome?.support?.whatsappUrl || defaultSupport.whatsappUrl;
   const supportWhatsappLabel = cmsHome?.support?.whatsappLabel || defaultSupport.whatsappLabel;
+  const footerTagline =
+    cmsHome?.footer?.tagline ||
+    "Premium Live TV streaming with 18,000+ channels and 100,000+ movies & series. ONN Google TV kits available.";
+  const howItWorksTitle = cmsHome?.howItWorks?.title || "How It Works";
+  const howItWorksSubtitle = cmsHome?.howItWorks?.subtitle || "Get started in minutes with our simple 4-step process";
+  const howItWorksSteps =
+    (cmsHome?.howItWorks?.steps?.filter((item) => item?.title && item?.description).length || 0) > 0
+      ? cmsHome!.howItWorks!.steps!.filter((item) => item?.title && item?.description)
+      : [
+          { step: "1", title: "Choose Your Device", description: "Choose an ONN Google TV kit at the listed price on this page. All kits include clear setup guidance.", icon: "📱", imageSrc: onnHdImg },
+          { step: "2", title: "Add IPTV Subscription", description: "Choose your Live TV plan - 1 month, 3 months, or save with longer plans. Multi-device options available.", icon: "📺", image: "iptv-subscription-selection.jpg" },
+          { step: "3", title: "We Ship & Setup", description: "Your device arrives with credentials and clear setup guidance so you can get started quickly.", icon: "🚀", image: "device-setup-ready.jpg" },
+          { step: "4", title: "Start Streaming", description: "Plug in, connect to WiFi, and start watching 18,000+ channels and 100,000+ movies instantly.", icon: "🎬", image: "streaming-content.jpg" },
+        ];
 
   const firestickProductIdKey = useMemo(
     () =>
@@ -647,6 +700,14 @@ export default function MainStore() {
     loadProducts();
   }, []);
 
+  useEffect(() => {
+    const theme = cmsHome?.theme;
+    const root = document.documentElement;
+    if (theme?.primaryColor) root.style.setProperty("--cms-primary", theme.primaryColor);
+    if (theme?.accentColor) root.style.setProperty("--cms-accent", theme.accentColor);
+    if (theme?.backgroundColor) root.style.setProperty("--cms-bg", theme.backgroundColor);
+  }, [cmsHome?.theme]);
+
   const loadCmsHome = async () => {
     try {
       const [homeRes, ovRes, ownerHomeRes] = await Promise.all([
@@ -683,6 +744,7 @@ export default function MainStore() {
           ctaLabel: t.ctaLabel || ["Shop devices", "See plans", "Open guides"][index] || "Continue",
           ctaHref: t.href || t.ctaHref || "/",
           accent: t.accent || (["gold", "cyan", "violet"] as const)[index % 3],
+          imageUrl: t.imageUrl || "",
           trackVpn: false,
         }));
       }
@@ -695,6 +757,7 @@ export default function MainStore() {
           proofline: (ownerDoc as any).hero?.proofline || (merged as any).hero?.proofline,
           backgroundImageUrl:
             (ownerDoc as any).hero?.backgroundImageUrl || (merged as any).hero?.backgroundImageUrl,
+          videoUrl: (ownerDoc as any).hero?.videoUrl || (merged as any).hero?.videoUrl,
         };
         const h = (ownerDoc as any).hero;
         if (h?.primaryCta || h?.secondaryCta || h?.supportCta) {
@@ -704,6 +767,16 @@ export default function MainStore() {
           };
         }
       }
+      const extras = ownerDoc as any;
+      if (extras?.faq) (merged as any).faq = extras.faq;
+      if (extras?.theme) (merged as any).theme = extras.theme;
+      if (extras?.footer) (merged as any).footer = extras.footer;
+      if (extras?.emailPromo) (merged as any).emailPromo = extras.emailPromo;
+      if (extras?.howItWorks) (merged as any).howItWorks = extras.howItWorks;
+      if (extras?.trustBar) (merged as any).trustBar = extras.trustBar;
+      if (extras?.support) (merged as any).support = extras.support;
+      if (extras?.disclaimer) (merged as any).disclaimer = extras.disclaimer;
+      if (extras?.ogImage) (merged as any).ogImage = extras.ogImage;
       setCmsHome(merged);
       if (merged.meta) {
         setPageMeta({
@@ -715,6 +788,7 @@ export default function MainStore() {
             "Shop ONN Google TV devices, compare plans for equipment you already own, or follow written setup guides. Secure checkout and support.",
           path: merged.meta.path || "/",
           keywords: merged.meta.keywords,
+          ogImage: extras?.ogImage || merged.meta.ogImage,
         });
       }
     } catch {
@@ -913,7 +987,17 @@ export default function MainStore() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0A0A0F] via-[#12121a] to-[#1A1A22] text-white font-sans selection:bg-[#00D4FF] selection:text-[#0A0A0F] pb-32 md:pb-20 relative overflow-x-hidden">
+    <div
+      className="min-h-screen bg-gradient-to-b from-[#0A0A0F] via-[#12121a] to-[#1A1A22] text-white font-sans selection:bg-[#00D4FF] selection:text-[#0A0A0F] pb-32 md:pb-20 relative overflow-x-hidden"
+      style={{
+        backgroundColor: cmsHome?.theme?.backgroundColor || undefined,
+        ["--cms-primary" as string]: cmsHome?.theme?.primaryColor || "#2563eb",
+        ["--cms-accent" as string]: cmsHome?.theme?.accentColor || "#14b8a6",
+      }}
+    >
+      <CmsStoreBanner page="real" />
+      <CmsPresence />
+      <CmsEmailPromo promo={cmsHome?.emailPromo} page="real" />
       {/* Page backdrop: gradient only. Hero photo lives in the hero section so it stays visible on mobile (fixed attachment + low opacity hid it). */}
       <div className="fixed inset-0 z-0 pointer-events-none" aria-hidden>
         <div
@@ -1029,6 +1113,17 @@ export default function MainStore() {
         className="relative text-white overflow-hidden min-h-[100svh] flex flex-col justify-center z-10 py-14 sm:py-16 md:py-24 lg:py-32"
       >
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden>
+          {heroVideoUrl ? (
+            <video
+              src={heroVideoUrl}
+              className="absolute inset-0 h-full w-full object-cover object-center opacity-70"
+              autoPlay
+              muted
+              loop
+              playsInline
+              poster={heroBackgroundImage}
+            />
+          ) : (
           <img
             src={heroBackgroundImage}
             alt=""
@@ -1042,6 +1137,7 @@ export default function MainStore() {
               if (el.src !== fallbackHeroImg) el.src = fallbackHeroImg;
             }}
           />
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-[#0b1220]/90 via-[#0b1220]/78 to-[#0b1220]/88" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0F]/48 via-transparent to-[#0A0A0F]/48" />
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDgpIi8+PC9nPjwvc3ZnPg==')] opacity-20" />
@@ -1129,6 +1225,13 @@ export default function MainStore() {
               const bullets = card.bullets?.length ? card.bullets : defaultFeatureCards[index]?.bullets || [];
               return (
                 <div key={`${card.title}-${index}`} className={theme.wrapper}>
+                  {card.imageUrl ? (
+                    <img
+                      src={card.imageUrl}
+                      alt=""
+                      className="mb-4 h-36 w-full rounded-xl object-cover"
+                    />
+                  ) : null}
                   <h2 className={theme.title}>{card.title}</h2>
                   <p className="text-[#B0B3B8] leading-relaxed mb-6 flex-1 text-[15px] sm:text-base">
                     {card.description}
@@ -1467,14 +1570,14 @@ export default function MainStore() {
                   <tr className="border-b border-slate-700/50">
                     <th className="text-left p-3 sm:p-4 text-gray-200 font-medium text-sm sm:text-base">Features</th>
                     <th className="text-center p-3 sm:p-4">
-                      <div className="text-base sm:text-lg font-bold text-white">ONN Full HD</div>
-                      <div className="text-xl sm:text-2xl font-bold text-orange-400">$150</div>
-                      <div className="text-xs text-gray-200">1080p Google TV</div>
+                      <div className="text-base sm:text-lg font-bold text-white">ONN 4K Streaming</div>
+                      <div className="text-xl sm:text-2xl font-bold text-orange-400">{onnStreamingPrice != null ? `$${onnStreamingPrice}` : "Listed price"}</div>
+                      <div className="text-xs text-gray-200">Google TV kit</div>
                     </th>
                     <th className="text-center p-3 sm:p-4 bg-orange-500/10 relative">
                       <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-b">BEST VALUE</div>
-                      <div className="text-base sm:text-lg font-bold text-white pt-3 sm:pt-4">ONN 4K</div>
-                      <div className="text-xl sm:text-2xl font-bold text-orange-400">$160</div>
+                      <div className="text-base sm:text-lg font-bold text-white pt-3 sm:pt-4">ONN 4K Pro</div>
+                      <div className="text-xl sm:text-2xl font-bold text-orange-400">{onnProPrice != null ? `$${onnProPrice}` : "Listed price"}</div>
                       <div className="text-xs text-gray-200">4K Ultra HD</div>
                     </th>
                   </tr>
@@ -2240,44 +2343,15 @@ export default function MainStore() {
               <span className="text-sm font-medium text-blue-300">SIMPLE PROCESS</span>
             </div>
             <h2 className="text-4xl md:text-6xl font-black mb-6">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">How It Works</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">{howItWorksTitle}</span>
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Get started in minutes with our simple 4-step process
+              {howItWorksSubtitle}
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            {[
-              { 
-                step: "1", 
-                title: "Choose Your Device", 
-                description: "Choose ONN Full HD ($150) or ONN 4K ($160). All kits include clear setup guidance.",
-                icon: "📱",
-                imageSrc: onnHdImg,
-              },
-              { 
-                step: "2", 
-                title: "Add IPTV Subscription", 
-                description: "Choose your Live TV plan - 1 month, 3 months, or save with longer plans. Multi-device options available.",
-                icon: "📺",
-                image: "iptv-subscription-selection.jpg"
-              },
-              { 
-                step: "3", 
-                title: "We Ship & Setup", 
-                description: "Your device arrives with credentials and clear setup guidance so you can get started quickly.",
-                icon: "🚀",
-                image: "device-setup-ready.jpg"
-              },
-              { 
-                step: "4", 
-                title: "Start Streaming", 
-                description: "Plug in, connect to WiFi, and start watching 18,000+ channels and 100,000+ movies instantly.",
-                icon: "🎬",
-                image: "streaming-content.jpg"
-              }
-            ].map((item, index) => (
+            {howItWorksSteps.map((item, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
@@ -2286,9 +2360,9 @@ export default function MainStore() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-8 border-2 border-blue-400/20 shadow-2xl shadow-blue-500/10 hover:border-blue-400/40 transition-all"
               >
-                <div className="text-6xl mb-4">{item.icon}</div>
+                <div className="text-6xl mb-4">{item.icon || "✨"}</div>
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-black text-xl mb-4">
-                  {item.step}
+                  {item.step || String(index + 1)}
                 </div>
                 <h3 className="text-xl font-black text-white mb-3">{item.title}</h3>
                 <p className="text-gray-200 leading-relaxed">{item.description}</p>
@@ -2456,16 +2530,16 @@ export default function MainStore() {
                 <span className="text-xl font-bold text-white">StreamStickPro</span>
               </div>
               <p className="text-sm text-gray-200 mb-4">
-                Premium Live TV streaming with 18,000+ channels and 100,000+ movies & series. ONN Google TV kits available.
+                {footerTagline}
               </p>
               <div className="flex gap-3">
-                <a href="mailto:reloadedfiretvteam@gmail.com" className="w-10 h-10 bg-gray-800 hover:bg-orange-600 rounded-lg flex items-center justify-center transition-colors" data-testid="link-email" aria-label="Email us">
+                <a href={`mailto:${supportEmail}`} className="w-10 h-10 bg-gray-800 hover:bg-orange-600 rounded-lg flex items-center justify-center transition-colors" data-testid="link-email" aria-label="Email us">
                   <Mail className="w-5 h-5" aria-hidden="true" />
                 </a>
               </div>
               <div className="mt-4">
-                <a href="mailto:reloadedfiretvteam@gmail.com" className="text-sm text-orange-400 hover:text-orange-300">
-                  reloadedfiretvteam@gmail.com
+                <a href={`mailto:${supportEmail}`} className="text-sm text-orange-400 hover:text-orange-300">
+                  {supportEmail}
                 </a>
               </div>
             </div>
@@ -2532,7 +2606,7 @@ export default function MainStore() {
               <h3 className="text-white font-semibold mb-4">Support & Policies</h3>
               <ul className="space-y-2 text-sm">
                 <li><a href="#faq" className="hover:text-orange-400 transition-colors">FAQ</a></li>
-                <li><a href="mailto:reloadedfiretvteam@gmail.com" className="hover:text-orange-400 transition-colors">Contact Us</a></li>
+                <li><a href={`mailto:${supportEmail}`} className="hover:text-orange-400 transition-colors">Contact Us</a></li>
                 <li><a href="/terms" className="hover:text-orange-400 transition-colors">Terms of Service</a></li>
                 <li><a href="/privacy" className="hover:text-orange-400 transition-colors">Privacy Policy</a></li>
                 <li><a href="/refund" className="hover:text-orange-400 transition-colors">Refund Policy</a></li>
