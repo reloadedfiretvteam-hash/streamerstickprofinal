@@ -2159,7 +2159,14 @@ app.get('*', async (c) => {
     }
   }
   const isLowValueLocationPath = pathname.startsWith('/l/') && !isPriorityLocationPath(pathname);
-  const effectiveMeta = isLowValueLocationPath
+  const isSecureDomain = hostname === 'secure.streamstickpro.com' || hostname.endsWith('.secure.streamstickpro.com');
+  const effectiveMeta = isSecureDomain
+    ? {
+        title: 'Digital Solutions Agency | Web Design & SEO Services',
+        description: 'We build high-performance websites, SEO strategies, and digital campaigns that transform businesses.',
+        noindex: true,
+      }
+    : isLowValueLocationPath
     ? {
         title: 'Location Guide | StreamStickPro',
         description: 'Explore StreamStickPro IPTV and device setup resources.',
@@ -2202,23 +2209,24 @@ app.get('*', async (c) => {
       if (isKnownRoute && res.status >= 400) {
         const fallback = await c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
         const html = await fallback.text();
-        const fixed = await injectProductSchema(injectMeta(html, pathname, effectiveMeta), pathname, c.env);
+        const withMeta = injectMeta(html, pathname, effectiveMeta);
+        const fixed = isSecureDomain ? withMeta : await injectProductSchema(withMeta, pathname, c.env);
         return applySecurityHeaders(new Response(fixed, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
       }
       return applySecurityHeaders(res, pathname, hostname);
     }
     const html = await res.text();
     const status = isKnownRoute ? 200 : 404;
-    const fixed = isKnownRoute
-      ? await injectProductSchema(injectMeta(html, pathname, effectiveMeta), pathname, c.env)
-      : injectMeta(html, pathname, { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
+    const withMeta = injectMeta(html, pathname, isKnownRoute ? effectiveMeta : { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
+    const fixed = isKnownRoute && !isSecureDomain ? await injectProductSchema(withMeta, pathname, c.env) : withMeta;
     return applySecurityHeaders(new Response(fixed, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   } catch {
     const fallback = await c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
     const html = await fallback.text();
     // Unknown routes get 404 so Google doesn't report "soft 404" for non-existent pages
     const status = isKnownRoute ? 200 : 404;
-    const fixed = isKnownRoute ? await injectProductSchema(injectMeta(html, pathname, effectiveMeta), pathname, c.env) : injectMeta(html, pathname, { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
+    const withMeta = injectMeta(html, pathname, isKnownRoute ? effectiveMeta : { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
+    const fixed = isKnownRoute && !isSecureDomain ? await injectProductSchema(withMeta, pathname, c.env) : withMeta;
     return applySecurityHeaders(new Response(fixed, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   }
 });

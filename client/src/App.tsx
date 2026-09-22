@@ -171,22 +171,25 @@ function Router() {
 
 function AppContent() {
   useTracking();
-  
+  const hideRealStoreChrome = isShadowDomain();
+
   return (
     <>
-      <CanonicalTag />
-      <RetargetingPixels />
+      {!hideRealStoreChrome ? <CanonicalTag /> : null}
+      {!hideRealStoreChrome ? <RetargetingPixels /> : null}
       <Toaster />
-      <Suspense fallback={null}>
-        <ExitIntentPopup 
-          onClose={() => {}} 
-          onAction={() => {
-            // Optional: Scroll to shop section or open cart
-          }}
-        />
-        <CartDrawer />
-        <WishlistDrawer />
-      </Suspense>
+      {!hideRealStoreChrome ? (
+        <Suspense fallback={null}>
+          <ExitIntentPopup
+            onClose={() => {}}
+            onAction={() => {
+              // Optional: Scroll to shop section or open cart
+            }}
+          />
+          <CartDrawer />
+          <WishlistDrawer />
+        </Suspense>
+      ) : null}
       <Router />
     </>
   );
