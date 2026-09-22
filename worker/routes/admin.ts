@@ -711,6 +711,71 @@ export function createAdminRoutes() {
     }
   });
 
+  /**
+   * Reports what Stripe actually charges for each product next to the catalog price.
+   * Display price and Stripe price are separate records, so they can drift apart.
+   */
+  app.get('/products/checkout-price-audit', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      const products = await storage.getRealProducts();
+      if (!c.env.STRIPE_SECRET_KEY) {
+        return c.json({ error: 'Stripe secret key is not configured' }, 500);
+      }
+      const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);
+
+      const rows: any[] = [];
+      const chunkSize = 8;
+      for (let i = 0; i < products.length; i += chunkSize) {
+        const chunk = products.slice(i, i + chunkSize);
+        const settled = await Promise.all(
+          chunk.map(async (product) => {
+            const displayCents = effectiveRealProductChargeCents({
+              price: product.price,
+              salePrice: product.salePrice ?? null,
+            });
+            const base = {
+              id: product.id,
+              name: product.name,
+              display_cents: displayCents,
+              stripe_price_id: product.shadowPriceId ?? null,
+              stripe_cents: null as number | null,
+              stripe_active: null as boolean | null,
+              currency: null as string | null,
+              status: 'missing_price_id' as string,
+            };
+            if (!product.shadowPriceId) return base;
+            try {
+              const price = await stripe.prices.retrieve(product.shadowPriceId);
+              const stripeCents = typeof price.unit_amount === 'number' ? price.unit_amount : null;
+              return {
+                ...base,
+                stripe_cents: stripeCents,
+                stripe_active: price.active === true,
+                currency: price.currency ?? null,
+                status:
+                  stripeCents === null
+                    ? 'stripe_price_has_no_amount'
+                    : stripeCents === displayCents
+                      ? 'match'
+                      : 'mismatch',
+              };
+            } catch (err: any) {
+              return { ...base, status: `stripe_lookup_failed: ${err?.message || 'unknown error'}` };
+            }
+          }),
+        );
+        rows.push(...settled);
+      }
+
+      const mismatches = rows.filter((r) => r.status !== 'match');
+      return c.json({ data: rows, mismatch_count: mismatches.length, total: rows.length });
+    } catch (error: any) {
+      console.error('Error auditing checkout prices:', error);
+      return c.json({ error: error?.message || 'Failed to audit checkout prices' }, 500);
+    }
+  });
+
   app.post('/products', async (c) => {
     try {
       const storage = getStorage(c.env);

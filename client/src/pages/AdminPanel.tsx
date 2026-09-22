@@ -429,6 +429,20 @@ export default function AdminPanel() {
   const [catalogImageDrafts, setCatalogImageDrafts] = useState<Record<string, string>>({});
   const [savingCatalogPriceId, setSavingCatalogPriceId] = useState<string | null>(null);
   const [savingCatalogImageId, setSavingCatalogImageId] = useState<string | null>(null);
+  /** What Stripe actually charges per SKU, so display price drift is visible. */
+  type CheckoutPriceAuditRow = {
+    id: string;
+    name: string;
+    display_cents: number;
+    stripe_price_id: string | null;
+    stripe_cents: number | null;
+    stripe_active: boolean | null;
+    status: string;
+  };
+  const [checkoutPriceAudit, setCheckoutPriceAudit] = useState<Record<string, CheckoutPriceAuditRow>>({});
+  const [loadingPriceAudit, setLoadingPriceAudit] = useState(false);
+  /** When on, saving a price also creates the matching Stripe price customers are charged. */
+  const [syncStripeOnPriceSave, setSyncStripeOnPriceSave] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -2150,6 +2164,25 @@ export default function AdminPanel() {
     setSaving(false);
   };
 
+  const loadCheckoutPriceAudit = async () => {
+    setLoadingPriceAudit(true);
+    try {
+      const response = await authFetch('/api/admin/products/checkout-price-audit');
+      const result = await response.json();
+      if (!response.ok) {
+        showToast(result?.error || 'Could not read Stripe checkout prices', 'error');
+        return;
+      }
+      const map: Record<string, CheckoutPriceAuditRow> = {};
+      for (const row of (result.data || []) as CheckoutPriceAuditRow[]) map[row.id] = row;
+      setCheckoutPriceAudit(map);
+    } catch (e: any) {
+      showToast(e?.message || 'Could not read Stripe checkout prices', 'error');
+    } finally {
+      setLoadingPriceAudit(false);
+    }
+  };
+
   const saveCatalogPriceRow = async (productId: string) => {
     const draft = catalogPriceDrafts[productId];
     const productRow = products.find((p) => p.id === productId);
@@ -2180,7 +2213,7 @@ export default function AdminPanel() {
       const response = await authFetch(`/api/admin/products/${productId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ price, sale_price }),
+        body: JSON.stringify({ price, sale_price, sync_payment_price: syncStripeOnPriceSave }),
       });
       const result = await response.json();
       if (!response.ok) {
@@ -2192,12 +2225,19 @@ export default function AdminPanel() {
         price,
         sale_price,
       });
-      if (synced) {
-        showToast("Price saved. Supabase, Stripe checkout, and shadow store are updated.", "success");
+      const shown = ((sale_price ?? price) / 100).toFixed(2);
+      if (!synced) {
+        showToast("Price saved, but the cloaked store copy did not update — retry from the product editor.", "error");
+      } else if (result?.payment_synced) {
+        showToast(`Saved. Your pages and Stripe now both use $${shown}.`, "success");
       } else {
-        showToast("Price saved to catalog but shadow_products sync failed — retry from product editor.", "error");
+        showToast(
+          `Saved $${shown} on your pages only. Stripe still charges the old amount because Stripe sync was off.`,
+          "error",
+        );
       }
       await loadProducts();
+      await loadCheckoutPriceAudit();
     } catch (e: any) {
       showToast(e?.message || "Failed to save price", "error");
     } finally {
@@ -4164,8 +4204,9 @@ export default function AdminPanel() {
                     Products Manager
                   </h2>
                   <p className="text-gray-400">
-                    <span className="text-gray-200">This is your main price list:</span> edit a product, set prices, save. That updates the catalog and
-                    checkout together. Need a walkthrough? Open <strong className="text-white">Change prices (easy guide)</strong> in the left menu.
+                    <span className="text-gray-200">This is your main price list.</span> Use the quick price editor below to change prices — it can
+                    update your pages and Stripe together. Need a walkthrough? Open{" "}
+                    <strong className="text-white">Change prices (easy guide)</strong> in the left menu.
                   </p>
                 </div>
                 <Button 
@@ -4200,11 +4241,39 @@ export default function AdminPanel() {
                     Quick price editor (all checkout SKUs)
                   </CardTitle>
                   <CardDescription className="text-gray-400">
-                    Amounts in USD. Each row saves that product only — the API updates Supabase and attaches a fresh Stripe <code className="text-gray-300">shadow_price_id</code>.
-                    Your live store reads these prices from the worker; no redeploy needed after saving.
+                    Amounts in USD. Each row saves one product to Supabase, and your real page, cloaked page, and shop read it
+                    immediately with no redeploy. The <span className="text-gray-200">Stripe charges</span> column shows what
+                    customers are actually billed at checkout.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
+                  <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3">
+                    <label className="flex items-center gap-2 text-sm text-gray-200">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-emerald-500"
+                        checked={syncStripeOnPriceSave}
+                        onChange={(e) => setSyncStripeOnPriceSave(e.target.checked)}
+                        data-testid="toggle-stripe-price-sync"
+                      />
+                      Also change what Stripe charges customers
+                    </label>
+                    <span className="text-xs text-gray-400">
+                      {syncStripeOnPriceSave
+                        ? "On: saving a price updates your pages and Stripe together."
+                        : "Off: saving changes the price shown on your pages only. Stripe keeps billing the old amount."}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="ml-auto border-gray-600 text-gray-200"
+                      disabled={loadingPriceAudit}
+                      onClick={loadCheckoutPriceAudit}
+                      data-testid="button-check-stripe-prices"
+                    >
+                      {loadingPriceAudit ? <Loader2 className="w-4 h-4 animate-spin" /> : "Check Stripe prices"}
+                    </Button>
+                  </div>
                   {loadingProducts ? (
                     <p className="text-sm text-gray-500 py-4">Loading catalog…</p>
                   ) : (
@@ -4216,6 +4285,7 @@ export default function AdminPanel() {
                             <TableHead className="text-gray-400">Name</TableHead>
                             <TableHead className="text-gray-400">Regular ($)</TableHead>
                             <TableHead className="text-gray-400">Sale ($)</TableHead>
+                            <TableHead className="text-gray-400">Stripe charges</TableHead>
                             <TableHead className="text-gray-400 text-right">Save</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -4252,6 +4322,24 @@ export default function AdminPanel() {
                                   }
                                   data-testid={`quick-price-sale-${p.id}`}
                                 />
+                              </TableCell>
+                              <TableCell className="text-xs" data-testid={`stripe-price-${p.id}`}>
+                                {(() => {
+                                  const row = checkoutPriceAudit[p.id];
+                                  if (!row) return <span className="text-gray-500">Not checked</span>;
+                                  if (row.stripe_cents == null) {
+                                    return <span className="text-red-400">No Stripe price</span>;
+                                  }
+                                  const amount = `$${(row.stripe_cents / 100).toFixed(2)}`;
+                                  if (row.status === "match") {
+                                    return <span className="text-emerald-400">{amount} — matches</span>;
+                                  }
+                                  return (
+                                    <span className="text-amber-400">
+                                      {amount} — does not match your page
+                                    </span>
+                                  );
+                                })()}
                               </TableCell>
                               <TableCell className="text-right">
                                 <Button
