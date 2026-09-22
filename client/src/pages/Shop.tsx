@@ -112,8 +112,6 @@ const iptvPricingMatrix: IPTVPricing[] = [
   },
 ];
 
-const ONN_GOOGLE_DEVICE_ORDER = ["onn-google-hd", "onn-google-4k"] as const;
-
 const defaultProducts: Product[] = [
   {
     id: "onn-google-hd",
@@ -330,27 +328,20 @@ export default function Shop() {
         });
 
         const iptvOnly = mappedProducts.filter((p) => p.category === "iptv");
-        const onnMerged: Product[] = ONN_GOOGLE_DEVICE_ORDER.map((id) => {
-          const api = mappedProducts.find((p) => p.id === id);
-          const base = defaultProducts.find((p) => p.id === id)!;
-          const price = id === "onn-google-hd" ? 150 : 160;
-          return {
-            ...base,
-            ...(api
-              ? {
-                  name: api.name || base.name,
-                  description: api.description || base.description,
-                }
-              : {}),
-            image: id === "onn-google-hd" ? onnHdImg : onn4kImg,
-            price,
-            category: "firestick",
-            features: api?.features?.length ? api.features : base.features,
-            badge: api?.badge || base.badge,
-            popular: api?.popular ?? base.popular,
-          };
+        const googleDevices = mappedProducts.filter((p) => {
+          const id = String(p.id || "").toLowerCase();
+          const name = String(p.name || "").toLowerCase();
+          if (id.includes("firestick") || id.includes("fire-stick") || name.includes("fire stick")) return false;
+          return id.includes("onn") || name.includes("onn") || name.includes("google tv");
         });
-        setProducts([...onnMerged, ...iptvOnly]);
+        const deviceCards = googleDevices.length
+          ? googleDevices.map((p) => ({
+              ...p,
+              category: "firestick" as const,
+              image: p.image || (String(p.id).includes("4k") ? onn4kImg : onnHdImg),
+            }))
+          : defaultProducts;
+        setProducts([...deviceCards, ...iptvOnly]);
       }
     } catch (error) {
       console.warn('Using default products:', error);
