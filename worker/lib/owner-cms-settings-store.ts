@@ -199,42 +199,46 @@ export const settingsCms = {
 function defaultHomepageDocument() {
   return {
     hero: {
-      title: "Need a Device or Already Have One?",
+      title: "ONN Google TV Kits for Fire Stick and IPTV Searches",
       subtitle:
-        "Shop Google TV devices, explore plans for compatible equipment, or get setup and compatibility help.",
-      primaryCta: { label: "Shop Google TV Devices", href: "/devices" },
-      secondaryCta: { label: "Explore Plans & Services", href: "/plans" },
-      supportCta: { label: "Setup & Compatibility Help", href: "/guides" },
+        "Searched a Fire Stick, Downloader, IPTV, or an unlocked box? Order an ONN Google TV kit with the live price and photo, or open a plan if you already own a device.",
+      proofline: "18,000+ live channels · 100,000+ movies · broadband-ready setup · secure checkout",
+      primaryCta: { label: "Shop ONN Google TV Kits", href: "/devices" },
+      secondaryCta: { label: "Plans for a Device You Own", href: "/plans" },
+      supportCta: { label: "Surf Guides & City Pages", href: "/locations" },
       backgroundImageUrl: "",
       videoUrl: "",
     },
     pathTiles: [
       {
         id: "need-device",
-        title: "I Need a Google TV Device",
-        description: "Shop ONN and Google TV kits with clear condition, inclusions, and support.",
+        title: "Buy an ONN Google TV Kit",
+        description: "This is the hardware we sell when someone searches Fire Stick, Downloader, IPTV, jailbroken, or unlocked.",
         href: "/devices",
+        ctaLabel: "Shop Google TV Devices",
         imageUrl: "",
       },
       {
         id: "have-device",
-        title: "I Already Have a Compatible Device",
-        description: "Plans and services for equipment you already own.",
+        title: "Already Own a Fire Stick or Google TV?",
+        description: "Keep that device. A plan adds live TV on equipment you already have.",
         href: "/plans",
+        ctaLabel: "Explore Plans & Services",
         imageUrl: "",
       },
       {
         id: "need-help",
-        title: "I Need Setup Help",
-        description: "Written guides, authorized videos, troubleshooting, and support.",
-        href: "/guides",
+        title: "Broadband, Setup, and the Page Library",
+        description: "Open written setup, broadband help, and thousands of city and channel pages.",
+        href: "/locations",
+        ctaLabel: "Open the page library",
         imageUrl: "",
       },
     ],
     meta: {
-      title: "Google TV Devices, Plans & Setup | StreamStickPro",
+      title: "ONN Google TV Kits | Fire Stick & IPTV | StreamStickPro",
       description:
-        "Shop ONN Google TV devices, compare plans for equipment you already own, or follow written setup guides.",
+        "Searched Fire Stick, Downloader, IPTV, or an unlocked device? Buy an ONN Google TV kit with live price and photo, or open plans, broadband setup, and thousands of guides.",
     },
     cloaked: {
       titleLine1: "Digital Experiences",

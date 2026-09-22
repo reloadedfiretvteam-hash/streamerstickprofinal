@@ -1784,9 +1784,9 @@ app.post('/api/indexnow/ping', async (c) => {
 // ── Per-page SEO meta for SPA pages (critical: Googlebot sees unique meta per page) ──
 const PAGE_META: Record<string, { title: string; description: string; noindex?: boolean }> = {
   '/': {
-    title: 'Google TV Devices, Plans & Setup | StreamStickPro',
+    title: 'ONN Google TV Kits | Fire Stick & IPTV | StreamStickPro',
     description:
-      'Shop ONN Google TV devices, compare plans for equipment you already own, or follow written setup guides. Secure checkout and support.',
+      'Searched Fire Stick, Downloader, IPTV, or an unlocked device? Buy an ONN Google TV kit with live price and photo, or open plans, broadband setup, and thousands of guides.',
   },
   '/vpn': {
     title: 'Surfshark VPN IPTV Buffering ISP Throttle Firestick | StreamStickPro',

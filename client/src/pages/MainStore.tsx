@@ -304,36 +304,36 @@ interface CmsHomePayload {
 }
 
 const defaultHeroCtas: Required<CmsHeroCta>[] = [
-  { label: "Shop Google TV Devices", href: "/devices", accent: "gold", trackVpn: false },
-  { label: "Explore Plans & Services", href: "/plans", accent: "cyan", trackVpn: false },
-  { label: "Setup & Compatibility Help", href: "/guides", accent: "violet", trackVpn: false },
+  { label: "Shop ONN Google TV Kits", href: "/devices", accent: "gold", trackVpn: false },
+  { label: "Plans for a Device You Own", href: "/plans", accent: "cyan", trackVpn: false },
+  { label: "Surf Guides & City Pages", href: "/locations", accent: "violet", trackVpn: false },
 ];
 
 const defaultFeatureCards: Required<CmsFeatureCard>[] = [
   {
-    title: "I Need a Google TV Device",
-    description: "Shop ONN and Google TV kits with clear condition, inclusions, pricing, and setup support.",
-    bullets: ["Individual product pages", "Honest condition & inclusions", "Setup guidance included"],
+    title: "Buy an ONN Google TV Kit",
+    description: "This is the hardware we sell when someone searches Fire Stick, Downloader, IPTV, jailbroken, or unlocked.",
+    bullets: ["Live price and product photo", "Order link on every kit", "Setup included with the kit"],
     ctaLabel: "Shop Google TV Devices",
     ctaHref: "/devices",
     accent: "gold",
     trackVpn: false,
   },
   {
-    title: "I Already Have a Compatible Device",
-    description: "Plans and services for Fire TV, Google TV, ONN, and other supported equipment you already own.",
-    bullets: ["No hardware required", "Compatible device guidance", "Clear plan details"],
+    title: "Already Own a Fire Stick or Google TV?",
+    description: "Keep that device. A plan adds live TV on Fire TV, ONN, Google TV, and other equipment you already have.",
+    bullets: ["No new hardware required", "Works on a Fire Stick you own", "Clear plan length and screen count"],
     ctaLabel: "Explore Plans & Services",
     ctaHref: "/plans",
     accent: "cyan",
     trackVpn: false,
   },
   {
-    title: "I Need Setup Help",
-    description: "Written guides, authorized videos, troubleshooting, and support paths.",
-    bullets: ["Step-by-step instructions", "Device & plan links", "Support when stuck"],
-    ctaLabel: "Get Setup Help",
-    ctaHref: "/guides",
+    title: "Broadband, Setup, and the Page Library",
+    description: "Open written setup, a broadband and VPN path, or the city and channel pages across the site.",
+    bullets: ["Broadband and buffering help", "TiviMate and Smarters guides", "Thousands of city and catalog links"],
+    ctaLabel: "Open the page library",
+    ctaHref: "/locations",
     accent: "violet",
     trackVpn: false,
   },
@@ -503,9 +503,13 @@ export default function MainStore() {
   const isAboutInView = useInView(aboutRef, { once: true, margin: "-100px" });
   const isShopInView = useInView(shopRef, { once: true, margin: "-100px" });
   const heroContent = cmsHome?.hero;
-  const heroTitle = heroContent?.title || "Need a Device or Already Have One?";
-  const heroSubtitle = heroContent?.subtitle || "36-hour trial · 18K+ live channels · guided setup in minutes";
-  const heroProofline = heroContent?.proofline || "2,700+ customers · 99.9% uptime · SSL-secured checkout";
+  const heroTitle = heroContent?.title || "ONN Google TV Kits for Fire Stick and IPTV Searches";
+  const heroSubtitle =
+    heroContent?.subtitle ||
+    "Searched a Fire Stick, Downloader, IPTV, or an unlocked box? Order an ONN Google TV kit with the live price and photo, or open a plan if you already own a device.";
+  const heroProofline =
+    heroContent?.proofline ||
+    "18,000+ live channels · 100,000+ movies · broadband-ready setup · secure checkout";
   const heroBackgroundImage = heroContent?.backgroundImageUrl || heroImg;
   const heroVideoUrl = heroContent?.videoUrl || "";
   const onnStreamingPrice = products.find((p) => p.id === "android-onn-4k")?.price;
@@ -1139,7 +1143,7 @@ export default function MainStore() {
             }}
           />
           )}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0b1220]/90 via-[#0b1220]/78 to-[#0b1220]/88" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#071018]/92 via-[#0b1b33]/80 to-[#071018]/90" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0F]/48 via-transparent to-[#0A0A0F]/48" />
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDgpIi8+PC9nPjwvc3ZnPg==')] opacity-20" />
         </div>
@@ -1166,7 +1170,7 @@ export default function MainStore() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.1 }}
-              className="text-sm sm:text-base text-[#FAD02C]/95 font-medium mb-9 md:mb-11 leading-relaxed"
+              className="text-sm sm:text-base text-teal-200 font-medium mb-9 md:mb-11 leading-relaxed"
             >
               {heroProofline}
             </motion.p>
@@ -1262,8 +1266,64 @@ export default function MainStore() {
         </div>
       </section>
 
-      {/* Advantage proof — cyan highlight */}
-      <section className="py-12 md:py-16 lg:py-24 border-y border-[#00D4FF]/25 bg-[rgba(0,212,255,0.06)]">
+      <section className="py-14 md:py-16 border-t border-white/10 bg-[#08111c]">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h2 className="text-2xl md:text-3xl font-semibold text-white text-center">Surf the site from here</h2>
+          <p className="mt-3 text-center text-slate-300 max-w-3xl mx-auto">
+            Broadband help, the website library, and the niche pages people search. The city and catalog links below are the hundreds and thousands of pages on this site.
+          </p>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {[
+              {
+                title: "Niche searches",
+                links: [
+                  ["Jailbroken or unlocked Fire Stick", "/jailbroken-fire-sticks"],
+                  ["IPTV for Fire Stick", "/iptv-firestick"],
+                  ["Best IPTV for Fire Stick", "/best-iptv-firestick"],
+                  ["ONN Google TV", "/onn-google-tv"],
+                  ["Kits with price and photo", "/devices"],
+                ],
+              },
+              {
+                title: "Broadband and setup",
+                links: [
+                  ["Broadband and ISP buffering", "/vpn"],
+                  ["Setup on the device you have", "/setup"],
+                  ["IPTV media players", "/iptv-media-players"],
+                  ["TiviMate", "/tivimate"],
+                  ["IPTV Smarters Pro", "/iptv-smarters-pro"],
+                ],
+              },
+              {
+                title: "Website library",
+                links: [
+                  ["Thousands of city pages", "/locations"],
+                  ["Channel catalog", "/ultimate-iptv-catalog-2026"],
+                  ["Guides and blog", "/blog"],
+                  ["Plans", "/plans"],
+                  ["Shop", "/shop"],
+                ],
+              },
+            ].map((group) => (
+              <div key={group.title} className="rounded-2xl border border-white/10 bg-[#10192a] p-5">
+                <h3 className="text-lg font-semibold text-white">{group.title}</h3>
+                <ul className="mt-4 space-y-2">
+                  {group.links.map(([label, href]) => (
+                    <li key={href}>
+                      <Link href={href}>
+                        <span className="text-teal-200 hover:text-white">{label}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Advantage proof */}
+      <section className="py-12 md:py-16 lg:py-24 border-y border-blue-400/20 bg-[#0c1f3d]">
         <div className="container mx-auto px-4 max-w-4xl text-center">
           <h2 className="text-2xl md:text-4xl font-black text-white mb-8">Clear Advantages</h2>
           <ul className="text-left max-w-2xl mx-auto space-y-4 text-[#B0B3B8]">
@@ -2401,7 +2461,7 @@ export default function MainStore() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-6xl font-black mb-6">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">{visualBenefitsTitle}</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-teal-300">{visualBenefitsTitle}</span>
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
               {visualBenefitsSubtitle}
