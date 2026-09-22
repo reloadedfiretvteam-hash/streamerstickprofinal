@@ -147,7 +147,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
   },
 ];
 
-const deviceCatalogNote = "Listed price comes from your admin product price. Checkout still uses the existing payment setup.";
+const deviceCatalogNote = "Price shown is the current listed price for this device.";
 
 const defaultProducts: Product[] = [
   {
