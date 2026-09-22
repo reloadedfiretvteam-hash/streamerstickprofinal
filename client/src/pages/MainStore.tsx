@@ -991,22 +991,16 @@ export default function MainStore() {
           </div>
           
           <div className="flex items-center gap-2">
-            <Link href="/iptv-services"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-[#00D4FF] hover:bg-white/5 rounded font-medium">IPTV</span></Link>
-            <Link href="/vpn">
-              <span
-                className="hidden lg:inline px-2 py-1.5 text-sm text-[#0DD9D2] hover:text-white hover:bg-white/5 rounded font-medium"
-                onClick={() => trackVpnClick({ source: "/", placement: "header_vpn_link" })}
-              >
-                VPN
+            <Link href="/"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Home</span></Link>
+            <Link href="/devices"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Google TV Devices</span></Link>
+            <Link href="/plans"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Plans &amp; Services</span></Link>
+            <Link href="/guides"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Setup Guides</span></Link>
+            <Link href="/support"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Support</span></Link>
+            <Link href="/devices">
+              <span className="hidden md:inline-flex items-center rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+                Shop Google TV Devices
               </span>
             </Link>
-            <Link href="/shop"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Shop</span></Link>
-            <Link href="/onn"><span className="hidden lg:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">ONN</span></Link>
-            <Link href="/iptv-media-players"><span className="hidden xl:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Media</span></Link>
-            <Link href="/tutorials"><span className="hidden xl:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Tutorials</span></Link>
-            <Link href="/locations"><span className="hidden xl:inline px-2 py-1.5 text-sm text-[#B0B3B8] hover:text-white hover:bg-white/5 rounded font-medium">Locations</span></Link>
-            <Button variant="ghost" className="hidden md:flex text-[#B0B3B8] hover:text-white hover:bg-white/5 font-medium" onClick={scrollToAbout} data-testid="nav-how-it-works" aria-label="Scroll to How It Works section">How It Works</Button>
-            <Button variant="ghost" className="hidden md:flex text-[#B0B3B8] hover:text-white hover:bg-white/5 font-medium" onClick={scrollToShop} data-testid="nav-shop" aria-label="Scroll to Shop section">Shop</Button>
             <Button 
               onClick={openSupport} 
               className="hidden md:flex bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-4 py-2 rounded-lg shadow-lg shadow-orange-500/30 transition-all transform hover:scale-105" 
@@ -1105,7 +1099,7 @@ export default function MainStore() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.12 }}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-3xl mx-auto mb-10"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto mb-10"
             >
               {heroCtas.map((cta, index) => {
                 const accent = cta.accent || defaultHeroCtas[index]?.accent || "cyan";

@@ -42,7 +42,7 @@ export default function FirestickDevices() {
   const faq = [
     { question: "What is the best streaming device in 2026?", answer: "For most homes, Fire Stick 4K or 4K Max gives the best speed/value. ONN 4K with Google TV is a strong alternative. Stream Stick Pro bundles both with Reloaded Fire TV all-in-one setup and educational tutorials." },
     { question: "Fire Stick 4K vs 4K Max: which should I get?", answer: "4K Max adds Wi‑Fi 6E and faster performance. If you have a 4K TV and want the smoothest experience, choose 4K Max. For 1080p or lighter use, Fire Stick 4K or HD works great. All include our guided setup." },
-    { question: "Do you sell Fire Stick options?", answer: "Yes. Stream Stick Pro offers Fire Stick HD, 4K, and 4K Max bundles with Reloaded Fire TV all-in-one access, educational setup guidance, and a 1-year plan." },
+    { question: "Do you sell Fire Stick options?", answer: "No. Current physical products are Google TV / ONN devices. If you already own a Fire TV, plans and setup guides cover compatible customer-owned equipment." },
     { question: "What are Android streaming devices for Reloaded Fire TV?", answer: "Android streaming devices (e.g. ONN 4K, ONN 4K Pro) run Google TV and support the same player setup path. We bundle ONN devices with Reloaded Fire TV, guided setup, and a 1-year plan." },
     { question: "Can I use my Fire Stick for Reloaded Fire TV only?", answer: "Yes. Many customers use Fire Stick or ONN primarily for Reloaded Fire TV. Stream Stick Pro plans support multiple devices, so you can share across Fire Sticks and other devices with one subscription." },
   ];
@@ -57,6 +57,17 @@ export default function FirestickDevices() {
         breadcrumbs={breadcrumbs}
       >
         <div className="space-y-12">
+          <section className="rounded-2xl border border-amber-400/40 bg-amber-500/10 p-5 text-amber-50">
+            <h2 className="text-lg font-semibold text-white">Fire Stick hardware is not a current product</h2>
+            <p className="mt-2 text-sm text-amber-100">
+              Physical devices for sale are Google TV / ONN kits. If you already own a Fire TV, use plans and setup help for that device.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3 text-sm">
+              <Link href="/devices"><span className="rounded-lg bg-blue-600 px-3 py-2 text-white">Shop Google TV Devices</span></Link>
+              <Link href="/plans"><span className="rounded-lg border border-white/20 px-3 py-2">Plans &amp; Services</span></Link>
+              <Link href="/guides"><span className="rounded-lg border border-white/20 px-3 py-2">Setup Guides</span></Link>
+            </div>
+          </section>
           <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Link href="/iptv"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">Reloaded Fire TV access &amp; plans</span></Link>
             <Link href="/bundles"><span className="block rounded-xl border border-white/10 bg-white/5 p-4 text-white hover:border-cyan-400 transition-colors">Reloaded Fire TV &amp; device bundles</span></Link>

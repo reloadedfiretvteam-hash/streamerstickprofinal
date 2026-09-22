@@ -23,6 +23,114 @@ const SECTIONS = [
 
 type Section = (typeof SECTIONS)[number];
 
+function HomepageFields({
+  homepageDoc,
+  homepageStatus,
+  setHomepageStatus,
+  setHomepageDoc,
+  busy,
+  onSave,
+}: {
+  homepageDoc: string;
+  homepageStatus: string;
+  setHomepageStatus: (v: string) => void;
+  setHomepageDoc: (v: string) => void;
+  busy: boolean;
+  onSave: () => void;
+}) {
+  let parsed: any = {};
+  let invalid = false;
+  try {
+    parsed = homepageDoc ? JSON.parse(homepageDoc) : {};
+  } catch {
+    invalid = true;
+  }
+  const hero = parsed?.hero || {};
+  const setHero = (patch: Record<string, unknown>) => {
+    const next = { ...parsed, hero: { ...hero, ...patch } };
+    setHomepageDoc(JSON.stringify(next, null, 2));
+  };
+  const setCta = (key: "primaryCta" | "secondaryCta" | "supportCta", field: "label" | "href", value: string) => {
+    const current = hero[key] || {};
+    setHero({ [key]: { ...current, [field]: value } });
+  };
+
+  return (
+    <div className="space-y-3 rounded-xl border border-slate-700 p-4">
+      <p className="text-sm text-slate-300">
+        These fields are the live homepage hero. Saving does not change checkout or Stripe.
+      </p>
+      <label className="block text-sm text-slate-300">Publish status</label>
+      <select
+        className="w-full rounded border border-slate-600 bg-slate-900 p-2 text-white"
+        value={homepageStatus}
+        onChange={(e) => setHomepageStatus(e.target.value)}
+      >
+        <option value="draft">draft</option>
+        <option value="published">published</option>
+        <option value="scheduled">scheduled</option>
+      </select>
+      {invalid ? (
+        <p className="text-sm text-amber-300">Homepage document is not valid JSON. Fix the advanced box below before using the fields.</p>
+      ) : (
+        <div className="grid gap-2">
+          <Input
+            placeholder="Hero headline"
+            value={hero.title || ""}
+            onChange={(e) => setHero({ title: e.target.value })}
+          />
+          <Textarea
+            placeholder="Hero supporting text"
+            value={hero.subtitle || ""}
+            onChange={(e) => setHero({ subtitle: e.target.value })}
+          />
+          <Input
+            placeholder="Primary button label"
+            value={hero.primaryCta?.label || ""}
+            onChange={(e) => setCta("primaryCta", "label", e.target.value)}
+          />
+          <Input
+            placeholder="Primary button link"
+            value={hero.primaryCta?.href || ""}
+            onChange={(e) => setCta("primaryCta", "href", e.target.value)}
+          />
+          <Input
+            placeholder="Secondary button label"
+            value={hero.secondaryCta?.label || ""}
+            onChange={(e) => setCta("secondaryCta", "label", e.target.value)}
+          />
+          <Input
+            placeholder="Secondary button link"
+            value={hero.secondaryCta?.href || ""}
+            onChange={(e) => setCta("secondaryCta", "href", e.target.value)}
+          />
+          <Input
+            placeholder="Setup / support link label"
+            value={hero.supportCta?.label || ""}
+            onChange={(e) => setCta("supportCta", "label", e.target.value)}
+          />
+          <Input
+            placeholder="Setup / support link"
+            value={hero.supportCta?.href || ""}
+            onChange={(e) => setCta("supportCta", "href", e.target.value)}
+          />
+        </div>
+      )}
+      <details className="text-sm text-slate-400">
+        <summary className="cursor-pointer">Advanced document</summary>
+        <Textarea
+          className="mt-2 min-h-[200px] font-mono text-xs"
+          value={homepageDoc}
+          onChange={(e) => setHomepageDoc(e.target.value)}
+        />
+      </details>
+      <Button disabled={busy} onClick={onSave}>
+        Save homepage
+      </Button>
+    </div>
+  );
+}
+
 export function OwnerCmsPanel({ authFetch }: { authFetch: AuthFetch }) {
   const { toast } = useToast();
   const [section, setSection] = useState<Section>("dashboard");
@@ -305,26 +413,14 @@ export function OwnerCmsPanel({ authFetch }: { authFetch: AuthFetch }) {
       )}
 
       {section === "homepage" && (
-        <div className="space-y-3 rounded-xl border border-slate-700 p-4">
-          <label className="block text-sm text-slate-300">Status</label>
-          <select
-            className="w-full rounded border border-slate-600 bg-slate-900 p-2 text-white"
-            value={homepageStatus}
-            onChange={(e) => setHomepageStatus(e.target.value)}
-          >
-            <option value="draft">draft</option>
-            <option value="published">published</option>
-            <option value="scheduled">scheduled</option>
-          </select>
-          <Textarea
-            className="min-h-[320px] font-mono text-xs"
-            value={homepageDoc}
-            onChange={(e) => setHomepageDoc(e.target.value)}
-          />
-          <Button disabled={busy} onClick={saveHomepage}>
-            Save homepage
-          </Button>
-        </div>
+        <HomepageFields
+          homepageDoc={homepageDoc}
+          homepageStatus={homepageStatus}
+          setHomepageStatus={setHomepageStatus}
+          setHomepageDoc={setHomepageDoc}
+          busy={busy}
+          onSave={saveHomepage}
+        />
       )}
 
       {section === "banners" && (

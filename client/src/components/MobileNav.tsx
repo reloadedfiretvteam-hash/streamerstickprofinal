@@ -7,15 +7,12 @@ import {
   Tv,
   Wifi,
   Home,
-  Package,
   Shield,
   ChevronRight,
   BookOpen,
   HelpCircle,
   Mail,
-  Gift,
   PlayCircle,
-  Smartphone,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -51,12 +48,11 @@ export function MobileNav({ scrollToShop, scrollToFaq, scrollToAbout, onSupportC
 
   const menuItems: { label: string; icon: typeof Home; action: () => void }[] = [
     { label: "Home", icon: Home, action: () => { setLocation("/"); } },
-    { label: "36-Hour Trial", icon: Gift, action: () => { setLocation("/36hr-trial"); } },
-    { label: "Shop plans & devices", icon: ShoppingCart, action: () => navigateToSection("shop") },
-    { label: "Loaded devices", icon: Tv, action: () => { setLocation("/devices"); } },
-    { label: "ONN Google TV", icon: Smartphone, action: () => { setLocation("/onn"); } },
-    { label: "Reloaded Fire TV", icon: Wifi, action: () => { setLocation("/iptv"); } },
-    { label: "Bundles", icon: Package, action: () => { setLocation("/bundles"); } },
+    { label: "Google TV Devices", icon: Tv, action: () => { setLocation("/devices"); } },
+    { label: "Plans & Services", icon: Wifi, action: () => { setLocation("/plans"); } },
+    { label: "Setup Guides", icon: PlayCircle, action: () => { setLocation("/guides"); } },
+    { label: "Support", icon: Mail, action: () => { setLocation("/support"); } },
+    { label: "Shop", icon: ShoppingCart, action: () => { setLocation("/shop"); } },
     {
       label: "Surfshark VPN",
       icon: Shield,
@@ -69,7 +65,7 @@ export function MobileNav({ scrollToShop, scrollToFaq, scrollToAbout, onSupportC
       ? [{ label: "How It Works", icon: ChevronRight, action: () => navigateToSection("about") }]
       : []),
     { label: "FAQ", icon: HelpCircle, action: () => navigateToSection("faq") },
-    { label: "Tutorials", icon: PlayCircle, action: () => { setLocation("/tutorials"); } },
+    { label: "Video tutorials", icon: PlayCircle, action: () => { setLocation("/tutorials"); } },
     { label: "Blog", icon: BookOpen, action: () => { setLocation("/blog"); } },
     { label: "Locations", icon: ChevronRight, action: () => { setLocation("/locations"); } },
     {
