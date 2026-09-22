@@ -503,10 +503,10 @@ export default function MainStore() {
   const isAboutInView = useInView(aboutRef, { once: true, margin: "-100px" });
   const isShopInView = useInView(shopRef, { once: true, margin: "-100px" });
   const heroContent = cmsHome?.hero;
-  const heroTitle = heroContent?.title || "ONN Google TV Kits for Fire Stick and IPTV Searches";
+  const heroTitle = heroContent?.title || "Preloaded ONN Google TV Devices";
   const heroSubtitle =
     heroContent?.subtitle ||
-    "Searched a Fire Stick, Downloader, IPTV, or an unlocked box? Order an ONN Google TV kit with the live price and photo, or open a plan if you already own a device.";
+    "You get the Google TV device, a web tutorial, your login credentials, and live TV service. Subscriptions and a free 36-hour trial are for a Fire Stick or TV you already own.";
   const heroProofline =
     heroContent?.proofline ||
     "18,000+ live channels · 100,000+ movies · broadband-ready setup · secure checkout";
@@ -1213,7 +1213,70 @@ export default function MainStore() {
             </motion.div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#1A1A22] to-transparent pointer-events-none" aria-hidden />
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#f4f6f8] to-transparent pointer-events-none" aria-hidden />
+      </section>
+
+      <section id="shop-shelf" className="bg-[#f4f6f8] text-slate-900 py-12 md:py-16">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">The shop</p>
+          <h2 className="mt-2 text-3xl md:text-4xl font-semibold tracking-tight">Preloaded Google TV devices</h2>
+          <p className="mt-3 max-w-3xl text-base md:text-lg text-slate-600">
+            This is a Google TV device, not a Fire Stick. It arrives preloaded. In the box: the device, a web tutorial, your login credentials, and live TV service.
+          </p>
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
+            {["android-onn-4k", "android-onn-pro"].map((id) => {
+              const product = products.find((item) => item.id === id);
+              const price = product?.price;
+              const name = product?.name || (id === "android-onn-pro" ? "ONN 4K Ultra HD Pro" : "ONN 4K Streaming Device");
+              const image = product?.image || (id === "android-onn-pro" ? "/images/onn-4k-ultra-hd.webp" : "/images/onn-4k-google-tv.jpg");
+              return (
+                <article key={id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                  <img src={image} alt={name} className="h-64 w-full object-contain bg-white p-4" />
+                  <div className="space-y-3 p-5">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Preloaded · ships with service</p>
+                    <h3 className="text-2xl font-semibold">{name}</h3>
+                    <p className="text-3xl font-semibold">{price != null ? `$${price}` : "See price"}</p>
+                    <ul className="space-y-1 text-sm text-slate-600">
+                      <li>Google TV device, preloaded</li>
+                      <li>Web tutorial and login credentials</li>
+                      <li>Live TV service included with the device</li>
+                    </ul>
+                    <button
+                      type="button"
+                      className="mt-2 w-full rounded-xl bg-blue-700 px-4 py-3 font-semibold text-white hover:bg-blue-600"
+                      onClick={() => {
+                        if (!product) return;
+                        addItem(product);
+                        openCart();
+                      }}
+                    >
+                      Add to cart
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ["The device", "A preloaded ONN Google TV. Not a Fire Stick."],
+              ["Web tutorial", "A written and video walkthrough after you order."],
+              ["Credentials", "Your login arrives by email so you can sign in."],
+              ["Trial or subscription", "Free 36-hour trial, or a plan if you already own a device."],
+            ].map(([title, body]) => (
+              <div key={title} className="rounded-xl border border-slate-200 bg-white p-4">
+                <h3 className="font-semibold">{title}</h3>
+                <p className="mt-1 text-sm text-slate-600">{body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 flex flex-wrap gap-3 text-sm">
+            <Link href="/36hr-trial"><span className="rounded-full bg-slate-900 px-4 py-2 font-semibold text-white">Start the free trial</span></Link>
+            <Link href="/iptv"><span className="rounded-full border border-slate-300 bg-white px-4 py-2 font-semibold">IPTV subscriptions</span></Link>
+            <Link href="/jailbroken-fire-sticks"><span className="rounded-full border border-slate-300 bg-white px-4 py-2 font-semibold">Jailbroken Fire Stick searches</span></Link>
+            <Link href="/onn-google-tv"><span className="rounded-full border border-slate-300 bg-white px-4 py-2 font-semibold">ONN Google TV setup</span></Link>
+          </div>
+        </div>
       </section>
 
       {/* Three starting paths */}
@@ -1389,7 +1452,7 @@ export default function MainStore() {
             <div className="rounded-2xl border-2 border-orange-500/40 bg-[#0c1118]/95 p-5 sm:p-7 shadow-[0_0_28px_rgba(249,115,22,0.12)]">
               <div className="flex items-center gap-2 mb-4">
                 <Flame className="w-7 h-7 text-orange-400 shrink-0" aria-hidden />
-                <h3 className="text-lg sm:text-xl font-bold text-white leading-snug">What you get with an ONN Google TV kit</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-white leading-snug">What comes with a preloaded Google TV device</h3>
               </div>
               <ul className="space-y-3 text-[15px] sm:text-[17px] text-[#E8EAED] leading-relaxed">
                 <li className="flex gap-3">
@@ -1622,7 +1685,7 @@ export default function MainStore() {
                 Streaming Device Comparison
               </h3>
               <p className="text-[15px] sm:text-lg text-gray-200 max-w-2xl mx-auto leading-relaxed px-2">
-                Be streaming in about 10 minutes. Each ONN Google TV kit includes Reloaded Fire TV access, setup tutorials, a 1-year Live TV plan, shipping, and support—pick Full HD or 4K below.
+                Each preloaded Google TV device includes the hardware, a web tutorial, login credentials, and live TV service. Pick the 4K or the 4K Pro.
               </p>
             </div>
             <div className="max-w-3xl mx-auto bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl border border-slate-700/50 overflow-x-auto" data-testid="tier-comparison-table">
@@ -1633,7 +1696,7 @@ export default function MainStore() {
                     <th className="text-center p-3 sm:p-4">
                       <div className="text-base sm:text-lg font-bold text-white">ONN 4K Streaming</div>
                       <div className="text-xl sm:text-2xl font-bold text-orange-400">{onnStreamingPrice != null ? `$${onnStreamingPrice}` : "Listed price"}</div>
-                      <div className="text-xs text-gray-200">Google TV kit</div>
+                      <div className="text-xs text-gray-200">Preloaded Google TV</div>
                     </th>
                     <th className="text-center p-3 sm:p-4 bg-orange-500/10 relative">
                       <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-b">BEST VALUE</div>

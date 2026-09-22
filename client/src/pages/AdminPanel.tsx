@@ -3455,18 +3455,100 @@ export default function AdminPanel() {
           )}
 
           {activeSection === "change-pricing" && (
-            <div className="space-y-8 max-w-3xl">
+            <div className="space-y-8 max-w-5xl">
               <div>
                 <h2 className="text-3xl font-bold flex items-center gap-3 text-white">
                   <DollarSign className="w-9 h-9 text-emerald-400" />
                   Change prices (simple)
                 </h2>
                 <p className="text-gray-300 mt-3 text-lg leading-relaxed">
-                  You do not need to be technical. Follow the steps in order.{" "}
-                  <strong className="text-white">Step 1</strong> controls what people actually pay in checkout for
-                  subscriptions and device kits—that is what most store owners use.
+                  Type the dollar amount in the box and press Save on that row. That is the price on the shop and the price Stripe charges.
                 </p>
               </div>
+
+              <Card className="bg-gray-900/80 border border-emerald-500/40">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-white text-xl">Price boxes</CardTitle>
+                  <CardDescription className="text-emerald-100/90 text-base">
+                    Google TV devices are at the top. Subscriptions are under them. Leave Sale empty unless you want a lower checkout price.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <label className="mb-4 flex items-center gap-2 text-sm text-gray-200">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-emerald-500"
+                      checked={syncStripeOnPriceSave}
+                      onChange={(e) => setSyncStripeOnPriceSave(e.target.checked)}
+                    />
+                    Also change what Stripe charges
+                  </label>
+                  {loadingProducts ? (
+                    <p className="text-sm text-gray-400">Loading prices…</p>
+                  ) : (
+                    <div className="overflow-x-auto rounded-lg border border-gray-700">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-gray-700 hover:bg-transparent">
+                            <TableHead className="text-gray-400">What you sell</TableHead>
+                            <TableHead className="text-gray-400">Price ($)</TableHead>
+                            <TableHead className="text-gray-400">Sale ($)</TableHead>
+                            <TableHead className="text-right text-gray-400">Save</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {[...products]
+                            .sort((a, b) => Number(b.id.includes("onn")) - Number(a.id.includes("onn")) || a.name.localeCompare(b.name))
+                            .map((p) => (
+                              <TableRow key={`price-${p.id}`} className="border-gray-700">
+                                <TableCell className="text-white">
+                                  <div className="font-medium">{p.name}</div>
+                                  <div className="text-xs text-gray-500">{p.id}</div>
+                                </TableCell>
+                                <TableCell className="w-32">
+                                  <Input
+                                    className="h-10 bg-gray-800 border-gray-600 text-white"
+                                    inputMode="decimal"
+                                    value={catalogPriceDrafts[p.id]?.reg ?? ""}
+                                    onChange={(e) =>
+                                      setCatalogPriceDrafts((prev) => ({
+                                        ...prev,
+                                        [p.id]: { reg: e.target.value, sale: prev[p.id]?.sale ?? "" },
+                                      }))
+                                    }
+                                  />
+                                </TableCell>
+                                <TableCell className="w-32">
+                                  <Input
+                                    className="h-10 bg-gray-800 border-gray-600 text-white"
+                                    inputMode="decimal"
+                                    placeholder="none"
+                                    value={catalogPriceDrafts[p.id]?.sale ?? ""}
+                                    onChange={(e) =>
+                                      setCatalogPriceDrafts((prev) => ({
+                                        ...prev,
+                                        [p.id]: { reg: prev[p.id]?.reg ?? "", sale: e.target.value },
+                                      }))
+                                    }
+                                  />
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    className="bg-emerald-600 hover:bg-emerald-500"
+                                    disabled={savingCatalogPriceId === p.id}
+                                    onClick={() => saveCatalogPriceRow(p.id)}
+                                  >
+                                    {savingCatalogPriceId === p.id ? "Saving…" : "Save"}
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               <Card className="bg-gradient-to-br from-emerald-950/60 to-gray-900 border-emerald-500/40 shadow-lg shadow-emerald-900/20">
                 <CardHeader className="pb-2">
@@ -3480,10 +3562,7 @@ export default function AdminPanel() {
                     <div>
                       <CardTitle className="text-white text-xl">Regular store prices (checkout)</CardTitle>
                       <CardDescription className="text-emerald-100/95 text-base mt-2 leading-relaxed">
-                        Change dollar amounts for IPTV plans, ONN kits, and anything else you sell. Click the pencil on a
-                        product, set <strong className="text-white">list price</strong> and optional{" "}
-                        <strong className="text-white">sale price</strong>, then save. The site and payment system stay in
-                        sync automatically.
+                        The price boxes above are the ones to use. Type the dollars, press Save, and the shop plus Stripe use that amount.
                       </CardDescription>
                     </div>
                   </div>

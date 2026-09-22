@@ -199,9 +199,9 @@ export const settingsCms = {
 function defaultHomepageDocument() {
   return {
     hero: {
-      title: "ONN Google TV Kits for Fire Stick and IPTV Searches",
+      title: "Preloaded ONN Google TV Devices",
       subtitle:
-        "Searched a Fire Stick, Downloader, IPTV, or an unlocked box? Order an ONN Google TV kit with the live price and photo, or open a plan if you already own a device.",
+        "You get the Google TV device, a web tutorial, your login credentials, and live TV service. Subscriptions and a free 36-hour trial are for a Fire Stick or TV you already own.",
       proofline: "18,000+ live channels · 100,000+ movies · broadband-ready setup · secure checkout",
       primaryCta: { label: "Shop ONN Google TV Kits", href: "/devices" },
       secondaryCta: { label: "Plans for a Device You Own", href: "/plans" },
