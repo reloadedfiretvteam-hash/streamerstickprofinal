@@ -218,6 +218,8 @@ export const checkoutItemSchema = z.object({
   quantity: z.number().int().positive("Quantity must be a positive integer"),
   /** When true, server uses site_promotion.promo_shadow_price_id if promotion is active and matches productId. */
   applySitePromotion: z.boolean().optional(),
+  /** Which promotional banner this line came from. */
+  promotionId: z.string().optional(),
 });
 
 export const checkoutRequestSchema = z.object({

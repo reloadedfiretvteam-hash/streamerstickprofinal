@@ -286,8 +286,9 @@ export default function Checkout() {
   );
 
   const hasONNProduct = items.some(item => 
-    item.id.includes('onn') || item.id.includes('android-onn') ||
-    item.name?.toLowerCase().includes('onn') || item.name?.toLowerCase().includes('streaming device')
+    item.id.includes('onn') || item.id.includes('android-onn') || item.id === 'promo-hardware-200' ||
+    item.name?.toLowerCase().includes('onn') || item.name?.toLowerCase().includes('streaming device') ||
+    item.name?.toLowerCase().includes('google devices')
   );
 
   const hasPhysicalProduct = hasFireStickProduct || hasONNProduct;
@@ -390,11 +391,12 @@ export default function Checkout() {
 
     try {
       const checkoutItems = items.map((item) => {
-        const base: { productId: string; quantity: number; applySitePromotion?: boolean } = {
+        const base: { productId: string; quantity: number; applySitePromotion?: boolean; promotionId?: string } = {
           productId: item.id,
           quantity: item.quantity,
         };
         if (item.applySitePromotion) base.applySitePromotion = true;
+        if (item.promotionId) base.promotionId = item.promotionId;
         return base;
       });
 

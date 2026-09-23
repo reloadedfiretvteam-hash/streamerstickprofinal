@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { getStorage } from '../helpers';
 import type { Env } from '../index';
+import { isHiddenPromoProduct } from '../../shared/promo-banners';
 
 /** Fallback when Supabase has no rows; use Admin + Stripe price IDs in production. */
 const defaultProducts = [
@@ -36,7 +37,7 @@ export function createProductRoutes() {
   app.get('/', async (c) => {
     try {
       const storage = getStorage(c.env);
-      const products = await storage.getRealProducts();
+      const products = (await storage.getRealProducts()).filter((product) => !isHiddenPromoProduct(product));
       if (products && products.length > 0) {
         return c.json({ data: products });
       }

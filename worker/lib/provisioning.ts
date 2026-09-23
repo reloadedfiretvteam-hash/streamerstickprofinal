@@ -32,7 +32,8 @@ export function orderNeedsProvisioning(order: Order): boolean {
         x.startsWith('firestick-') ||
         x.startsWith('onn-google') ||
         x.startsWith('android-onn') ||
-        x.startsWith('fs-')
+        x.startsWith('fs-') ||
+        x === 'promo-hardware-200'
       )
         return true;
     }
@@ -384,6 +385,7 @@ function resolvePanelOrderConfig(order: Order, env: Env): {
 }
 
 function inferDurationDays(productId: string): number | null {
+  if (productId === 'promo-hardware-200') return 365;
   if (/2yr|24mo/i.test(productId)) return 730;
   if (/1yr|12m|12mo/i.test(productId)) return 365;
   if (/6mo|6m/i.test(productId)) return 180;
@@ -393,6 +395,7 @@ function inferDurationDays(productId: string): number | null {
 }
 
 function inferMaxConnections(productId: string): number | null {
+  if (productId === 'promo-hardware-200') return 1;
   const match = productId.match(/-(\d)d$/i);
   if (match) return Number(match[1]) || null;
   return null;

@@ -1,4 +1,5 @@
 export type PublicPromotion = {
+  id: string;
   headline: string;
   subheadline: string | null;
   ctaLabel: string;

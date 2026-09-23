@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { isHiddenPromoProduct } from "../../shared/promo-banners";
 
 export type ShopProduct = {
   id: string;
@@ -40,7 +41,7 @@ export async function loadShopProducts(client: SupabaseClient): Promise<ShopProd
     .select("id,name,description,price,image_url,category")
     .order("name");
   if (error || !data) return [];
-  return data.map((row) => ({
+  return data.filter((row) => !isHiddenPromoProduct({ id: row.id, category: row.category })).map((row) => ({
     id: String(row.id),
     name: String(row.name || row.id),
     description: String(row.description || row.name || ""),

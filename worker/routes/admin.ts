@@ -4,6 +4,7 @@ import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from '../helpers';
 import { sendCredentialsEmail, sendOrderConfirmation } from '../email';
 import { sendEmail } from '../email-providers';
 import { createCustomerSchema, updateCustomerSchema, effectiveRealProductChargeCents } from '../../shared/schema';
+import { PROMO_BANNER_DEFAULTS, isHiddenPromoProduct, promoBannerById } from '../../shared/promo-banners';
 import type { Env } from '../index';
 import { ensureProvisioningJob, orderNeedsProvisioning, processProvisioningJobByOrderId } from '../lib/provisioning';
 
@@ -703,7 +704,7 @@ export function createAdminRoutes() {
   app.get('/products', async (c) => {
     try {
       const storage = getStorage(c.env);
-      const products = await storage.getRealProducts();
+      const products = (await storage.getRealProducts()).filter((product) => !isHiddenPromoProduct(product));
       return c.json({ data: products });
     } catch (error: any) {
       console.error("Error fetching products:", error);
@@ -718,7 +719,7 @@ export function createAdminRoutes() {
   app.get('/products/checkout-price-audit', async (c) => {
     try {
       const storage = getStorage(c.env);
-      const products = await storage.getRealProducts();
+      const products = (await storage.getRealProducts()).filter((product) => !isHiddenPromoProduct(product));
       if (!c.env.STRIPE_SECRET_KEY) {
         return c.json({ error: 'Stripe secret key is not configured' }, 500);
       }
@@ -1041,6 +1042,143 @@ export function createAdminRoutes() {
     } catch (error: any) {
       console.error("Error creating promo Stripe price:", error);
       return c.json({ error: error.message || "Failed to create Stripe price" }, 500);
+    }
+  });
+
+  async function ensurePromoCatalog(storage: ReturnType<typeof getStorage>, env: Env) {
+    for (const banner of PROMO_BANNER_DEFAULTS) {
+      let product = await storage.getRealProduct(banner.realProductId);
+      if (!product) {
+        product = await storage.createRealProduct({
+          id: banner.realProductId,
+          name: banner.productName,
+          description: banner.productDescription,
+          price: banner.promoAmountCents,
+          category: 'promotion',
+          imageUrl: banner.imageUrl,
+        } as any);
+      }
+      const rows = await storage.listSitePromotionRows();
+      const existing = rows.find((row) => row.id === banner.id);
+      if (!existing) {
+        await storage.upsertSitePromotionRow({
+          id: banner.id,
+          is_active: false,
+          headline: banner.headline,
+          subheadline: banner.subheadline,
+          cta_label: 'Get this offer',
+          real_product_id: banner.realProductId,
+          promo_shadow_price_id: '',
+          promo_amount_cents: banner.promoAmountCents,
+          shadow_headline: banner.shadowHeadline,
+          shadow_subheadline: banner.shadowSubheadline,
+          ends_at: null,
+        });
+      }
+      if (!env.STRIPE_SECRET_KEY) continue;
+      try {
+        const fresh = await storage.getRealProduct(banner.realProductId);
+        const row = (await storage.listSitePromotionRows()).find((item) => item.id === banner.id);
+        if (!fresh || !row) continue;
+        if (row.promo_shadow_price_id && fresh.shadowPriceId) continue;
+        const stripe = new Stripe(env.STRIPE_SECRET_KEY);
+        let shadowProductId = fresh.shadowProductId;
+        if (!shadowProductId) {
+          const created = await stripe.products.create({
+            name: banner.stripeName,
+            description: banner.shadowSubheadline,
+            metadata: { realProductId: fresh.id, promotionId: banner.id },
+          });
+          shadowProductId = created.id;
+          await storage.updateRealProduct(fresh.id, { shadowProductId });
+        }
+        const stripePrice = await stripe.prices.create({
+          product: shadowProductId,
+          unit_amount: banner.promoAmountCents,
+          currency: 'usd',
+          metadata: { realProductId: fresh.id, promotionId: banner.id, sitePromotion: 'true' },
+        });
+        await storage.updateRealProduct(fresh.id, {
+          shadowProductId,
+          shadowPriceId: stripePrice.id,
+          price: banner.promoAmountCents,
+        });
+        await storage.upsertSitePromotionRow({
+          id: banner.id,
+          is_active: Boolean(row.is_active),
+          headline: String(row.headline || banner.headline),
+          subheadline: row.subheadline ?? banner.subheadline,
+          cta_label: row.cta_label || 'Get this offer',
+          real_product_id: banner.realProductId,
+          promo_shadow_price_id: stripePrice.id,
+          promo_amount_cents: banner.promoAmountCents,
+          shadow_headline: row.shadow_headline ?? banner.shadowHeadline,
+          shadow_subheadline: row.shadow_subheadline ?? banner.shadowSubheadline,
+          ends_at: row.ends_at || null,
+        });
+      } catch (error) {
+        console.error('Promo Stripe setup failed:', banner.id, error);
+      }
+    }
+  }
+
+  app.get('/site-promotions', async (c) => {
+    try {
+      const storage = getStorage(c.env);
+      await ensurePromoCatalog(storage, c.env);
+      const rows = await storage.listSitePromotionRows();
+      const banners = PROMO_BANNER_DEFAULTS.map((banner) => {
+        const row = rows.find((item) => item.id === banner.id);
+        return {
+          id: banner.id,
+          is_active: Boolean(row?.is_active),
+          headline: String(row?.headline || banner.headline),
+          subheadline: row?.subheadline ?? banner.subheadline,
+          promo_amount_cents: banner.promoAmountCents,
+          real_product_id: banner.realProductId,
+          promo_shadow_price_id: String(row?.promo_shadow_price_id || ''),
+          shadow_headline: row?.shadow_headline ?? banner.shadowHeadline,
+          stripeReady: Boolean(row?.promo_shadow_price_id),
+        };
+      });
+      return c.json({ data: banners });
+    } catch (error: any) {
+      console.error('Error loading promotional banners:', error);
+      return c.json({ error: error?.message || 'Failed to load promotional banners' }, 500);
+    }
+  });
+
+  app.put('/site-promotions/:id', async (c) => {
+    try {
+      const banner = promoBannerById(c.req.param('id'));
+      if (!banner) return c.json({ error: 'Unknown promotion' }, 404);
+      const storage = getStorage(c.env);
+      await ensurePromoCatalog(storage, c.env);
+      const body = await c.req.json().catch(() => ({}));
+      const rows = await storage.listSitePromotionRows();
+      const existing = rows.find((row) => row.id === banner.id);
+      const headline = String(body.headline ?? existing?.headline ?? banner.headline).trim() || banner.headline;
+      const is_active = Boolean(body.is_active);
+      if (is_active && !existing?.promo_shadow_price_id) {
+        return c.json({ error: 'Stripe price is not ready for this banner yet. Save again in a moment.' }, 400);
+      }
+      const data = await storage.upsertSitePromotionRow({
+        id: banner.id,
+        is_active,
+        headline,
+        subheadline: existing?.subheadline ?? banner.subheadline,
+        cta_label: 'Get this offer',
+        real_product_id: banner.realProductId,
+        promo_shadow_price_id: String(existing?.promo_shadow_price_id || ''),
+        promo_amount_cents: banner.promoAmountCents,
+        shadow_headline: existing?.shadow_headline ?? banner.shadowHeadline,
+        shadow_subheadline: existing?.shadow_subheadline ?? banner.shadowSubheadline,
+        ends_at: null,
+      });
+      return c.json({ data });
+    } catch (error: any) {
+      console.error('Error saving promotional banner:', error);
+      return c.json({ error: error?.message || 'Failed to save promotional banner' }, 500);
     }
   });
 

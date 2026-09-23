@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import type { PublicPromotion } from "@/components/SitePromotionBanner";
+import { WeekPromotionStrip } from "@/components/WeekPromotionStrip";
 import { iptvRealProductId } from "@/lib/iptv-sku";
 import { buildShadowCmsState, SHADOW_CMS_DEFAULTS, type ShadowCmsState } from "@/lib/shadow-cms";
 import type { HomeCmsOverrideEdit } from "@/lib/merge-home-cms-overrides";
@@ -271,7 +272,7 @@ export default function ShadowStore() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: [{ productId, quantity: 1, ...(applySitePromotion ? { applySitePromotion: true } : {}) }],
+          items: [{ productId, quantity: 1, ...(applySitePromotion ? { applySitePromotion: true, promotionId: promoCheckout?.id } : {}) }],
           customerEmail: email,
           customerName: name
         })
@@ -349,7 +350,7 @@ export default function ShadowStore() {
   }, [apiProducts]);
 
   if (showCheckout && (promoCheckout || selectedProduct || selectedSEOProduct)) {
-    const productName = promoCheckout?.productName || promoCheckout?.shadowHeadline || selectedProduct?.name || selectedSEOProduct?.name || "";
+    const productName = promoCheckout?.shadowHeadline || selectedProduct?.name || selectedSEOProduct?.name || "";
     const productSubtitle = promoCheckout
       ? "Limited promotion — secure checkout"
       : selectedProduct?.shadowName || `${selectedSEOProduct?.tier} tier - ${selectedSEOProduct?.duration}`;
@@ -530,6 +531,15 @@ export default function ShadowStore() {
           </motion.div>
         </div>
       </section>
+
+      <WeekPromotionStrip
+        variant="shadow"
+        onClaim={(promo) => {
+          setPromoCheckout(promo);
+          setShowCheckout(true);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+      />
 
       <section id="services" className="py-24 bg-muted/30">
         <div className="container mx-auto px-4">

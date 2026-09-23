@@ -32,6 +32,7 @@ interface CartItem extends Product {
   regularUnitPrice?: number;
   /** When true, checkout sends applySitePromotion and uses site_promotion Stripe price server-side. */
   applySitePromotion?: boolean;
+  promotionId?: string;
 }
 
 interface CartState {
@@ -42,7 +43,7 @@ interface CartState {
     product: Product,
     quantity: number,
     discountedPrice?: number,
-    opts?: { sitePromotion?: boolean }
+    opts?: { sitePromotion?: boolean; promotionId?: string }
   ) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -84,6 +85,7 @@ export const useCart = create<CartState>()(
       }),
       addItemWithQuantity: (product, quantity, discountedPrice, opts) => set((state) => {
         const sitePromo = opts?.sitePromotion === true;
+        const promotionId = opts?.promotionId;
         const priceToUse = discountedPrice ?? product.price;
         const isFirestick = isFirestickProduct(product.id);
         const regularSnap = product.price;
@@ -95,6 +97,7 @@ export const useCart = create<CartState>()(
               basePrice: product.price,
               regularUnitPrice: regularSnap,
               applySitePromotion: sitePromo,
+              promotionId,
             }
           : {
               ...product,
@@ -102,6 +105,7 @@ export const useCart = create<CartState>()(
               price: priceToUse,
               regularUnitPrice: regularSnap,
               applySitePromotion: sitePromo,
+              promotionId,
             };
         const existing = state.items.find(i => i.id === product.id);
         if (existing) {
@@ -131,6 +135,7 @@ export const useCart = create<CartState>()(
                     quantity: newQuantity,
                     price: recalculatedPrice,
                     applySitePromotion: newApplySitePromotion,
+                    promotionId: promotionId || i.promotionId,
                     regularUnitPrice: i.regularUnitPrice ?? reg,
                   }
                 : i

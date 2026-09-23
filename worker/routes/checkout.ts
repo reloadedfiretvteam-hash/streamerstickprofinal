@@ -145,7 +145,7 @@ export function createCheckoutRoutes() {
         existingCustomer = await storage.getCustomerByUsername(existingUsername) ?? null;
       }
 
-      const activePromo = await storage.getActiveSitePromotion();
+      const activePromos = await storage.listActiveSitePromotions();
       const cmsPriceOverrides = await getCmsPriceOverrides(c.req.url);
       const workerPriceOverrides = getWorkerStripePriceOverrides(c.env);
       type ResolvedLine = { product: any; quantity: number; stripePriceId: string; unitAmountCents: number };
@@ -172,8 +172,16 @@ export function createCheckoutRoutes() {
           salePrice: product.salePrice ?? null,
         });
 
+        const requestedPromoId = String(item.promotionId || "").trim();
+        const activePromo = wantsPromo
+          ? activePromos.find((promo) =>
+              requestedPromoId
+                ? promo.id === requestedPromoId && promo.realProductId === product.id
+                : promo.realProductId === product.id,
+            )
+          : undefined;
         if (wantsPromo) {
-          if (!activePromo || activePromo.realProductId !== product.id) {
+          if (!activePromo) {
             return c.json({
               error: "This promotion is not active or does not apply to this product. Remove the promotional item or refresh the page.",
             }, 400);
@@ -199,9 +207,7 @@ export function createCheckoutRoutes() {
         productsWithQuantity.push({ product, quantity: item.quantity, stripePriceId, unitAmountCents });
       }
 
-      const sitePromotionApplied = productsWithQuantity.some(
-        (p, idx) => items[idx]?.applySitePromotion === true && activePromo && p.product.id === activePromo.realProductId
-      );
+      const sitePromotionApplied = items.some((item) => item.applySitePromotion === true);
 
       debugLog("Checkout: Creating Stripe session");
       const stripe = new Stripe(c.env.STRIPE_SECRET_KEY);

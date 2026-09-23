@@ -284,7 +284,9 @@ export default function Shop() {
       const result = await response.json();
       
       if (result.data && result.data.length > 0) {
-        const mappedProducts: Product[] = result.data.map((p: any) => {
+        const mappedProducts: Product[] = result.data
+          .filter((p: any) => String(p.category || "").toLowerCase() !== "promotion" && !String(p.id || "").startsWith("iptv-promo-") && p.id !== "promo-hardware-200")
+          .map((p: any) => {
           const cat = String(p.category || '').toLowerCase();
           const isDeviceBundle =
             cat === 'devices' ||
@@ -609,7 +611,7 @@ export default function Shop() {
                 })
               )}
               onClaim={(promo, p) => {
-                addItemWithQuantity(p, 1, promo.displayPriceDollars, { sitePromotion: true });
+                addItemWithQuantity(p, 1, promo.displayPriceDollars, { sitePromotion: true, promotionId: promo.id });
                 openCart();
               }}
             />

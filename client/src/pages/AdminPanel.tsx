@@ -464,6 +464,16 @@ export default function AdminPanel() {
   const [loadingSitePromotion, setLoadingSitePromotion] = useState(false);
   const [savingSitePromotion, setSavingSitePromotion] = useState(false);
   const [promoPriceDollarsInput, setPromoPriceDollarsInput] = useState("");
+  const [promoBanners, setPromoBanners] = useState<Array<{
+    id: string;
+    is_active: boolean;
+    headline: string;
+    subheadline: string | null;
+    promo_amount_cents: number;
+    promo_shadow_price_id: string;
+    stripeReady: boolean;
+  }>>([]);
+  const [savingPromoId, setSavingPromoId] = useState<string | null>(null);
   const [promoAmenOpen, setPromoAmenOpen] = useState(false);
   const [promoConfirmCorrect, setPromoConfirmCorrect] = useState(false);
 
@@ -1059,7 +1069,7 @@ export default function AdminPanel() {
       const response = await authFetch('/api/admin/products');
       const result = await response.json();
       if (result.data) {
-        setProducts(result.data.map((p: any) => ({
+        setProducts(result.data.filter((p: any) => String(p.category || "").toLowerCase() !== "promotion" && !String(p.id || "").startsWith("iptv-promo-") && p.id !== "promo-hardware-200").map((p: any) => ({
           id: p.id,
           name: p.name,
           slug: p.id,
@@ -1107,6 +1117,13 @@ export default function AdminPanel() {
   const loadSitePromotion = async () => {
     setLoadingSitePromotion(true);
     try {
+      const bannerResponse = await authFetch("/api/admin/site-promotions");
+      const bannerJson = await bannerResponse.json();
+      if (bannerResponse.ok && Array.isArray(bannerJson.data)) {
+        setPromoBanners(bannerJson.data);
+      } else if (bannerJson?.error) {
+        showToast(String(bannerJson.error), "error");
+      }
       const response = await authFetch("/api/admin/site-promotion");
       const result = await response.json();
       if (!response.ok || result.error) {
@@ -1139,6 +1156,33 @@ export default function AdminPanel() {
       console.error("loadSitePromotion", e);
     } finally {
       setLoadingSitePromotion(false);
+    }
+  };
+
+  const savePromoBanner = async (id: string, patch: { is_active?: boolean; headline?: string }) => {
+    const current = promoBanners.find((banner) => banner.id === id);
+    if (!current) return;
+    setSavingPromoId(id);
+    try {
+      const response = await authFetch(`/api/admin/site-promotions/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          is_active: patch.is_active ?? current.is_active,
+          headline: patch.headline ?? current.headline,
+        }),
+      });
+      const json = await response.json();
+      if (!response.ok || json.error) throw new Error(json.error || "Could not save this banner");
+      showToast(
+        patch.is_active === true ? "Banner is on" : patch.is_active === false ? "Banner turned off" : "Promotion name saved",
+        "success",
+      );
+      await loadSitePromotion();
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : "Could not save this banner", "error");
+    } finally {
+      setSavingPromoId(null);
     }
   };
 
@@ -2620,9 +2664,9 @@ export default function AdminPanel() {
             }}
             data-testid="nav-site-promotion"
           >
-            <Zap className="w-4 h-4 mr-3" /> Sale popup &amp; banner
-            {sitePromotionDraft.is_active ? (
-              <Badge className="ml-auto bg-amber-500 text-white text-xs">On</Badge>
+            <Zap className="w-4 h-4 mr-3" /> Promotional banners
+            {promoBanners.some((banner) => banner.is_active) ? (
+              <Badge className="ml-auto bg-blue-600 text-white text-xs">On</Badge>
             ) : null}
           </Button>
           <Button 
@@ -4029,7 +4073,7 @@ export default function AdminPanel() {
             <div className="space-y-6">
               {activeSection === "site-promotion" ? (
                 <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400">
-                  <span>Dedicated screen for the popup on streamstickpro.com (and shadow store).</span>
+                  <span>Turn a banner on to show it on the website. Turn it off and it disappears. Prices stay $50, $90, and $200.</span>
                   <Button
                     type="button"
                     variant="outline"
@@ -4041,7 +4085,79 @@ export default function AdminPanel() {
                   </Button>
                 </div>
               ) : null}
-              <Card className="bg-gray-800/90 border-amber-500/30" data-testid="card-promotion-settings">
+              {activeSection === "site-promotion" ? (
+              <Card className="bg-gray-800/90 border-blue-500/40" data-testid="card-promo-banners">
+                <CardHeader>
+                  <CardTitle className="text-white">Promotional banners</CardTitle>
+                  <CardDescription className="text-gray-300">
+                    Type the holiday or special name, then turn the banner on. The price in the box is the price Stripe charges. Turn it off and the banner leaves the website. Everyday catalog prices stay the same.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {loadingSitePromotion && !promoBanners.length ? (
+                    <p className="text-sm text-gray-400">Loading banners…</p>
+                  ) : promoBanners.length ? (
+                    promoBanners.map((banner) => {
+                      const dollars = (banner.promo_amount_cents / 100).toFixed(0);
+                      return (
+                        <div key={banner.id} className="rounded-xl border border-gray-600 bg-gray-900 p-4">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <p className="text-2xl font-semibold text-white">${dollars}</p>
+                            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${banner.is_active ? "bg-green-500/20 text-green-300" : "bg-gray-700 text-gray-300"}`}>
+                              {banner.is_active ? "On" : "Off"}
+                            </span>
+                          </div>
+                          <label className="mt-3 block text-sm text-gray-300">
+                            Promotion name
+                            <Input
+                              value={banner.headline}
+                              placeholder="Holiday or special name"
+                              onChange={(e) =>
+                                setPromoBanners((rows) =>
+                                  rows.map((row) => (row.id === banner.id ? { ...row, headline: e.target.value } : row)),
+                                )
+                              }
+                              className="mt-1 bg-gray-950 border-gray-600 text-white"
+                            />
+                          </label>
+                          <p className="mt-2 text-sm text-gray-400">{banner.subheadline}</p>
+                          <p className="mt-1 text-xs text-gray-500">
+                            {banner.stripeReady ? "Connected to Stripe." : "Stripe price is still being prepared. Save once, then turn it on."}
+                          </p>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="border-gray-500 text-white"
+                              disabled={savingPromoId === banner.id}
+                              onClick={() => savePromoBanner(banner.id, { headline: banner.headline })}
+                            >
+                              {savingPromoId === banner.id ? "Saving…" : "Save name"}
+                            </Button>
+                            <Button
+                              type="button"
+                              className={banner.is_active ? "bg-gray-600 hover:bg-gray-500" : "bg-blue-600 hover:bg-blue-500"}
+                              disabled={savingPromoId === banner.id}
+                              onClick={() =>
+                                savePromoBanner(banner.id, {
+                                  headline: banner.headline,
+                                  is_active: !banner.is_active,
+                                })
+                              }
+                            >
+                              {banner.is_active ? "Turn off" : "Turn on"}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-sm text-gray-400">Banners are not loaded yet. Open this page again in a moment.</p>
+                  )}
+                </CardContent>
+              </Card>
+              ) : null}
+              <Card className="hidden bg-gray-800/90 border-amber-500/30" data-testid="card-promotion-settings">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <Zap className="w-5 h-5 text-amber-400" />

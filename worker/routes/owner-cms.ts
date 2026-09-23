@@ -883,6 +883,7 @@ export function createOwnerCmsAdminRoutes() {
     const plans: any[] = [];
     for (const p of products || []) {
       const id = String(p.id || "");
+      if (String(p.category || "").toLowerCase() === "promotion" || id.startsWith("iptv-promo-") || id === "promo-hardware-200") continue;
       const cat = String(p.category || "").toLowerCase();
       const isFirestickSku = /firestick|fire-stick/i.test(id);
       const isOnn = /onn|google/i.test(id) || /onn|google/i.test(String(p.name || ""));

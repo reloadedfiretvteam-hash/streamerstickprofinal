@@ -827,7 +827,9 @@ export default function MainStore() {
       const result = await response.json();
       
       if (result.data && result.data.length > 0) {
-        const mappedProducts: Product[] = result.data.map((p: any) => {
+        const mappedProducts: Product[] = result.data
+          .filter((p: any) => String(p.category || "").toLowerCase() !== "promotion" && !String(p.id || "").startsWith("iptv-promo-") && p.id !== "promo-hardware-200")
+          .map((p: any) => {
           const cat = String(p.category || '').toLowerCase();
           const isDeviceBundle =
             cat === 'devices' ||
@@ -1231,6 +1233,23 @@ export default function MainStore() {
       </section>
 
       <section id="shop-shelf" className="bg-[#f4f6f8] text-slate-900 py-12 md:py-16">
+        <WeekPromotionStrip
+          variant="live"
+          catalogProducts={products.map(
+            (p): StoreCartProduct => ({
+              id: p.id,
+              name: p.name,
+              price: p.price,
+              image: p.image,
+              category: p.category as StoreCartProduct["category"],
+              description: p.description,
+            })
+          )}
+          onClaim={(promo, p) => {
+            addItemWithQuantity(p, 1, promo.displayPriceDollars, { sitePromotion: true, promotionId: promo.id });
+            openCart();
+          }}
+        />
         <div className="container mx-auto px-4 max-w-6xl">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-700">The shop</p>
           <h2 className="mt-2 text-3xl md:text-4xl font-semibold tracking-tight">Google packages</h2>
@@ -1508,24 +1527,6 @@ export default function MainStore() {
               Choose subscription length and screen count. Use the <strong className="text-white">bright trial box</strong> first if you want to test streams—then pick a paid plan. Multi-device plans work across TVs, phones, and tablets at the same time.
             </p>
 
-            <WeekPromotionStrip
-              variant="live"
-              catalogProducts={products.map(
-                (p): StoreCartProduct => ({
-                  id: p.id,
-                  name: p.name,
-                  price: p.price,
-                  image: p.image,
-                  category: p.category,
-                  description: p.description,
-                })
-              )}
-              onClaim={(promo, p) => {
-                addItemWithQuantity(p, 1, promo.displayPriceDollars, { sitePromotion: true });
-                openCart();
-              }}
-            />
-            
             {/* Free Trial Box */}
             <div id="free-trial">
               <FreeTrial />
@@ -2776,7 +2777,7 @@ export default function MainStore() {
           })
         )}
         onClaim={(promo, p) => {
-          addItemWithQuantity(p, 1, promo.displayPriceDollars, { sitePromotion: true });
+          addItemWithQuantity(p, 1, promo.displayPriceDollars, { sitePromotion: true, promotionId: promo.id });
           openCart();
         }}
       />

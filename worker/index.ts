@@ -21,7 +21,6 @@ import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from './helpers';
 import { settingsCms, starterSetupGuide, tablesReady } from './lib/owner-cms-settings-store';
 import { googleDevices, loadShopProducts, merchantRssXml, productJsonLd, itemListJsonLd } from './lib/shop-catalog';
 import { createClient } from '@supabase/supabase-js';
-import { effectiveRealProductChargeCents } from '../shared/schema';
 import { isBlockedCountry, requestCountry } from './lib/geo-access';
 
 export interface Env {
@@ -255,39 +254,29 @@ app.route('/api/owner-cms', createOwnerCmsPublicRoutes());
 const sitePromotionPublicHandler = async (c: Context<{ Bindings: Env }>) => {
   try {
     const storage = getStorage(c.env);
-    const row = await storage.getSitePromotionRow();
-    if (!row?.is_active) return c.json({ promotion: null });
-    if (row.ends_at && new Date(row.ends_at).getTime() < Date.now()) return c.json({ promotion: null });
-    if (!row.real_product_id) return c.json({ promotion: null });
-    const p = await storage.getRealProduct(row.real_product_id);
-    const configuredCents = Number(row.promo_amount_cents);
-    const centsFromRow = Number.isFinite(configuredCents) && configuredCents > 0 ? configuredCents : null;
-    const centsFromProduct = p
-      ? effectiveRealProductChargeCents({ price: p.price, salePrice: p.salePrice ?? null })
-      : null;
-    const cents = centsFromRow ?? centsFromProduct;
-    if (!Number.isFinite(cents) || cents <= 0) return c.json({ promotion: null });
-    const version =
-      String(row.updated_at || row.real_product_id || '') +
-      String(cents) +
-      String(row.headline || '').slice(0, 48);
-    return c.json({
-      promotion: {
+    const rows = await storage.listActiveSitePromotions();
+    const promotions = [];
+    for (const row of rows) {
+      const product = await storage.getRealProduct(row.realProductId);
+      const version = `${row.id}-${row.updatedAt || ''}-${row.promoAmountCents}-${row.headline.slice(0, 24)}`;
+      promotions.push({
+        id: row.id,
         headline: row.headline,
         subheadline: row.subheadline,
-        ctaLabel: row.cta_label || 'Claim offer',
-        realProductId: row.real_product_id,
-        productName: p?.name || null,
-        imageUrl: p?.imageUrl || null,
-        displayPriceDollars: cents / 100,
-        shadowHeadline: row.shadow_headline || row.headline,
-        shadowSubheadline: row.shadow_subheadline || row.subheadline,
+        ctaLabel: row.ctaLabel || 'Get this offer',
+        realProductId: row.realProductId,
+        productName: product?.name || null,
+        imageUrl: product?.imageUrl || null,
+        displayPriceDollars: row.promoAmountCents / 100,
+        shadowHeadline: row.shadowHeadline || row.headline,
+        shadowSubheadline: row.shadowSubheadline || row.subheadline,
         version,
-      },
-    });
+      });
+    }
+    return c.json({ promotions, promotion: promotions[0] || null });
   } catch (err: any) {
     console.error('[site-promotion-public]', err?.message || err);
-    return c.json({ promotion: null });
+    return c.json({ promotions: [], promotion: null });
   }
 };
 app.get('/api/promotion', sitePromotionPublicHandler);

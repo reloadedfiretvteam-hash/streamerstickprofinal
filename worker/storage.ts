@@ -319,7 +319,8 @@ export function createStorage(config: StorageConfig) {
                 id.startsWith('firestick-') ||
                 id.startsWith('onn-google') ||
                 id.startsWith('android-onn') ||
-                id.startsWith('fs-'),
+                id.startsWith('fs-') ||
+                id === 'promo-hardware-200',
             );
           return (
             idLooksDevice ||
@@ -1292,37 +1293,70 @@ export function createStorage(config: StorageConfig) {
       }
     },
 
+    async listSitePromotionRows(): Promise<any[]> {
+      const { data, error } = await supabase.from('site_promotion').select('*').order('id');
+      if (error) throw new Error(error.message || 'site_promotion list failed');
+      return data || [];
+    },
+
+    async listActiveSitePromotions(): Promise<Array<{
+      id: string;
+      realProductId: string;
+      promoShadowPriceId: string;
+      promoAmountCents: number;
+      headline: string;
+      subheadline: string | null;
+      ctaLabel: string;
+      shadowHeadline: string | null;
+      shadowSubheadline: string | null;
+      updatedAt: string | null;
+    }>> {
+      try {
+        const { data, error } = await supabase.from('site_promotion').select('*').eq('is_active', true);
+        if (error || !data) return [];
+        const now = Date.now();
+        const active = [];
+        for (const row of data) {
+          if (row.ends_at && new Date(row.ends_at).getTime() < now) continue;
+          if (!row.real_product_id || !row.promo_shadow_price_id) continue;
+          const cents = Number(row.promo_amount_cents);
+          if (!Number.isFinite(cents) || cents <= 0) continue;
+          active.push({
+            id: String(row.id),
+            realProductId: String(row.real_product_id),
+            promoShadowPriceId: String(row.promo_shadow_price_id),
+            promoAmountCents: cents,
+            headline: String(row.headline || ''),
+            subheadline: row.subheadline != null ? String(row.subheadline) : null,
+            ctaLabel: String(row.cta_label || 'Get this offer'),
+            shadowHeadline: row.shadow_headline != null ? String(row.shadow_headline) : null,
+            shadowSubheadline: row.shadow_subheadline != null ? String(row.shadow_subheadline) : null,
+            updatedAt: row.updated_at != null ? String(row.updated_at) : null,
+          });
+        }
+        return active;
+      } catch {
+        return [];
+      }
+    },
+
     async getActiveSitePromotion(): Promise<{
       realProductId: string;
       promoShadowPriceId: string;
       promoAmountCents: number;
     } | null> {
-      try {
-        const { data, error } = await supabase.from('site_promotion').select('*').eq('id', 'default').maybeSingle();
-        if (error || !data || !data.is_active) return null;
-        if (data.ends_at && new Date(data.ends_at).getTime() < Date.now()) return null;
-        if (!data.real_product_id) return null;
-        const product = await this.getRealProduct(String(data.real_product_id));
-        if (!product?.shadowPriceId) return null;
-        const cents = Number(data.promo_amount_cents);
-        const promoAmountCents =
-          Number.isFinite(cents) && cents > 0
-            ? cents
-            : effectiveRealProductChargeCents({
-                price: product.price,
-                salePrice: product.salePrice ?? null,
-              });
-        return {
-          realProductId: String(data.real_product_id),
-          promoShadowPriceId: String(data.promo_shadow_price_id || product.shadowPriceId),
-          promoAmountCents,
-        };
-      } catch {
-        return null;
-      }
+      const rows = await this.listActiveSitePromotions();
+      const first = rows[0];
+      if (!first) return null;
+      return {
+        realProductId: first.realProductId,
+        promoShadowPriceId: first.promoShadowPriceId,
+        promoAmountCents: first.promoAmountCents,
+      };
     },
 
     async upsertSitePromotionRow(row: {
+      id?: string;
       is_active: boolean;
       headline: string;
       subheadline?: string | null;
@@ -1335,7 +1369,7 @@ export function createStorage(config: StorageConfig) {
       ends_at?: string | null;
     }): Promise<any> {
       const payload = {
-        id: 'default',
+        id: row.id || 'default',
         is_active: row.is_active,
         headline: row.headline || '',
         subheadline: row.subheadline ?? null,
