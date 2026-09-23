@@ -22,6 +22,7 @@ import { settingsCms, starterSetupGuide, tablesReady } from './lib/owner-cms-set
 import { googleDevices, loadShopProducts, merchantRssXml, productJsonLd, itemListJsonLd } from './lib/shop-catalog';
 import { createClient } from '@supabase/supabase-js';
 import { effectiveRealProductChargeCents } from '../shared/schema';
+import { isBlockedCountry, requestCountry } from './lib/geo-access';
 
 export interface Env {
   /** Only used in CI by run-supabase-migration.ts; not required by worker at runtime */
@@ -231,6 +232,19 @@ app.use('*', cors({
   allowHeaders: ['Content-Type', 'Authorization', 'stripe-signature'],
   credentials: true,
 }));
+
+app.use('*', async (c, next) => {
+  if (c.req.method === 'OPTIONS') return next();
+  const path = new URL(c.req.url).pathname;
+  // Stripe must still confirm paid orders. Those calls come from Stripe, not a shopper.
+  if (path.startsWith('/api/stripe')) return next();
+  const country = requestCountry(c);
+  if (!isBlockedCountry(country)) return next();
+  return c.html(
+    '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Unavailable | StreamStickPro</title><meta name="robots" content="noindex, nofollow"></head><body><h1>StreamStickPro is not available in your country.</h1></body></html>',
+    403,
+  );
+});
 
 app.route('/api/auth', createAuthRoutes());
 app.route('/api/products', createProductRoutes());
@@ -1612,6 +1626,12 @@ const PRIORITY_LOCATION_PREFIXES = [
   'london', 'manchester', 'birmingham', 'glasgow', 'liverpool', 'leeds', 'bristol',
 ];
 
+function isSearchMarketLocation(path: string): boolean {
+  const m = String(path || '').toLowerCase().match(/^\/l\/([^/]+)\//);
+  if (!m) return true;
+  return m[1] === 'usa' || m[1] === 'us' || m[1] === 'ca' || m[1] === 'canada';
+}
+
 function isPriorityLocationPath(path: string): boolean {
   const m = String(path || '').toLowerCase().match(/^\/l\/[^/]+\/[^/]+\/([^/]+)$/);
   if (!m) return false;
@@ -1639,6 +1659,7 @@ app.get('/sitemap-pages.xml', async (c) => {
     const storage = getStorage(c.env);
     const seoPages = await storage.getSeoPagesForSitemap(50000);
     for (const page of seoPages) {
+      if (String(page.path || '').startsWith('/l/') && !isSearchMarketLocation(page.path || '')) continue;
       if (String(page.path || '').startsWith('/l/') && !isPriorityLocationPath(page.path || '')) continue;
       const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : today;
       xml += `<url><loc>${baseUrl}${page.path}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`;
@@ -1646,6 +1667,7 @@ app.get('/sitemap-pages.xml', async (c) => {
     if (seoPages.length < 2000) {
       const idx = await getLocationPagesIndex(c);
       for (const item of idx?.list || []) {
+        if (String(item.path || '').startsWith('/l/') && !isSearchMarketLocation(item.path || '')) continue;
         if (String(item.path || '').startsWith('/l/') && !isPriorityLocationPath(item.path || '')) continue;
         xml += `<url><loc>${baseUrl}${item.path}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`;
       }
@@ -1745,6 +1767,7 @@ ${images ? images + '\n' : ''}  </url>
   }
 
   for (const page of seoPages) {
+    if (String(page.path || '').startsWith('/l/') && !isSearchMarketLocation(page.path || '')) continue;
     if (String(page.path || '').startsWith('/l/') && !isPriorityLocationPath(page.path || '')) continue;
     const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : today;
     sitemap += `  <url>
@@ -1759,6 +1782,7 @@ ${images ? images + '\n' : ''}  </url>
     try {
       const idx = await getLocationPagesIndex(c);
       for (const item of idx?.list || []) {
+        if (String(item.path || '').startsWith('/l/') && !isSearchMarketLocation(item.path || '')) continue;
         if (String(item.path || '').startsWith('/l/') && !isPriorityLocationPath(item.path || '')) continue;
         sitemap += `  <url>
     <loc>${baseUrl}${item.path}</loc>
@@ -1935,7 +1959,7 @@ function applySecurityHeaders(res: Response, pathname?: string, hostname?: strin
   // X-Robots-Tag: redundant signal that reinforces meta robots at HTTP level
   const noindexPaths = new Set(['/checkout', '/success', '/cancel', '/admin', '/customer-login', '/my-account', '/forgot-password', '/reset-password', '/shadow-services']);
   const isSecureDomain = hostname && (hostname === 'secure.streamstickpro.com' || hostname.endsWith('.secure.streamstickpro.com'));
-  const isLowValueLocationPath = !!pathname && pathname.startsWith('/l/') && !isPriorityLocationPath(pathname);
+  const isLowValueLocationPath = !!pathname && pathname.startsWith('/l/') && (!isPriorityLocationPath(pathname) || !isSearchMarketLocation(pathname));
   const isErrorStatus = next.status >= 400;
   if (isSecureDomain || (pathname && noindexPaths.has(pathname)) || isLowValueLocationPath || isErrorStatus) {
     next.headers.set('X-Robots-Tag', 'noindex, nofollow');
@@ -2186,7 +2210,7 @@ app.get('*', async (c) => {
       /* ignore */
     }
   }
-  const isLowValueLocationPath = pathname.startsWith('/l/') && !isPriorityLocationPath(pathname);
+  const isLowValueLocationPath = pathname.startsWith('/l/') && (!isPriorityLocationPath(pathname) || !isSearchMarketLocation(pathname));
   const isSecureDomain = hostname === 'secure.streamstickpro.com' || hostname.endsWith('.secure.streamstickpro.com');
   const effectiveMeta = isSecureDomain
     ? {

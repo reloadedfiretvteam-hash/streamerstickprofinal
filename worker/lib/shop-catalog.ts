@@ -96,6 +96,10 @@ export function productJsonLd(product: ShopProduct) {
       availability: "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
       seller: { "@type": "Organization", name: "StreamStickPro", url: SITE },
+      eligibleRegion: [
+        { "@type": "Country", name: "United States" },
+        { "@type": "Country", name: "Canada" },
+      ],
       priceValidUntil: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365).toISOString().slice(0, 10),
       shippingDetails: {
         "@type": "OfferShippingDetails",

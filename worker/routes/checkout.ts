@@ -6,6 +6,7 @@ import type { Env } from '../index';
 import { authMiddleware } from './auth';
 import { ensureProvisioningJob, orderNeedsProvisioning, processProvisioningJobByOrderId } from '../lib/provisioning';
 import { processCheckoutSessionCompletion } from '../lib/stripe-order-finalize';
+import { canPayFromCountry, requestCountry } from '../lib/geo-access';
 import { sendEmail } from '../email-providers';
 
 const isProduction = (env: Env) => (env.NODE_ENV || '').toLowerCase() === 'production';
@@ -110,6 +111,10 @@ export function createCheckoutRoutes() {
         if (!isProduction(c.env)) console.log(...args);
       };
       debugLog("Checkout: Starting checkout process");
+      const buyerCountry = requestCountry(c);
+      if (!canPayFromCountry(buyerCountry)) {
+        return c.json({ error: 'Checkout is available in the United States and Canada.' }, 403);
+      }
       const storage = getStorage(c.env);
       const body = await c.req.json();
       debugLog("Checkout: Received checkout payload");
