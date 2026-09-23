@@ -58,6 +58,7 @@ const PRODUCT_DURATION_DAYS: Record<string, number> = {
   'iptv-3mo': 90, 'iptv-3mo-1d': 90, 'iptv-3mo-2d': 90, 'iptv-3mo-3d': 90, 'iptv-3mo-4d': 90, 'iptv-3mo-5d': 90,
   'iptv-6mo': 180, 'iptv-6mo-1d': 180, 'iptv-6mo-2d': 180, 'iptv-6mo-3d': 180, 'iptv-6mo-4d': 180, 'iptv-6mo-5d': 180,
   'iptv-1yr': 365, 'iptv-1yr-1d': 365, 'iptv-1yr-2d': 365, 'iptv-1yr-3d': 365, 'iptv-1yr-4d': 365, 'iptv-1yr-5d': 365,
+  'iptv-2yr': 730, 'iptv-2yr-1d': 730, 'iptv-2yr-2d': 730, 'iptv-2yr-3d': 730, 'iptv-2yr-4d': 730, 'iptv-2yr-5d': 730,
 };
 
 function getSubscriptionStatus(order: Order): { status: 'active' | 'expiring_soon' | 'expired' | 'one_time'; expiryDate?: Date; daysLeft?: number } {

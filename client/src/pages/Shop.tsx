@@ -110,6 +110,20 @@ const iptvPricingMatrix: IPTVPricing[] = [
       { devices: 5, price: 220, productId: iptvRealProductId("1yr", 5) },
     ],
   },
+  {
+    duration: "2yr",
+    durationLabel: "2 Years",
+    badge: "TWO YEAR",
+    description: "Two-year live TV subscription for a device you already own. Pick one to five screens. Includes a web tutorial and login credentials.",
+    features: ["Extensive Live Content Library", "Thousands of Movies & Shows", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "Priority Customer Support (24/7)", "Maximum Savings"],
+    prices: [
+      { devices: 1, price: 100, productId: iptvRealProductId("2yr", 1) },
+      { devices: 2, price: 185, productId: iptvRealProductId("2yr", 2) },
+      { devices: 3, price: 265, productId: iptvRealProductId("2yr", 3) },
+      { devices: 4, price: 360, productId: iptvRealProductId("2yr", 4) },
+      { devices: 5, price: 415, productId: iptvRealProductId("2yr", 5) },
+    ],
+  },
 ];
 
 const defaultProducts: Product[] = [
@@ -202,6 +216,7 @@ export default function Shop() {
     "3mo": 1,
     "6mo": 1,
     "1yr": 1,
+    "2yr": 1,
   });
   const [buyerProfile, setBuyerProfile] = useState<BuyerProfile>("new");
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
@@ -602,7 +617,7 @@ export default function Shop() {
             {/* Free Trial Box */}
             <FreeTrial />
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid md:grid-cols-2 xl:grid-cols-5 gap-6">
               {iptvPricingMatrix.map((plan, index) => {
                 const deviceCount = selectedDevices[plan.duration];
                 const selectedPrice = plan.prices.find(p => p.devices === deviceCount) || plan.prices[0];
@@ -613,7 +628,8 @@ export default function Shop() {
                   'from-slate-800 via-slate-900 to-gray-900',
                   'from-blue-950/50 via-slate-900 to-gray-900',
                   'from-cyan-950/50 via-slate-900 to-gray-900',
-                  'from-emerald-950/50 via-slate-900 to-gray-900'
+                  'from-emerald-950/50 via-slate-900 to-gray-900',
+                  'from-amber-950/40 via-slate-900 to-gray-900',
                 ];
                 
                 return (
@@ -674,7 +690,7 @@ export default function Shop() {
                         }`}>
                           {plan.badge}
                         </div>
-                        {(plan.duration === "6mo" || plan.duration === "1yr") && (
+                        {(plan.duration === "6mo" || plan.duration === "1yr" || plan.duration === "2yr") && (
                           <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs shadow-lg">
                             LONGER TERM VALUE
                           </div>

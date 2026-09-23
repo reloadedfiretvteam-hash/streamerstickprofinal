@@ -384,6 +384,7 @@ function resolvePanelOrderConfig(order: Order, env: Env): {
 }
 
 function inferDurationDays(productId: string): number | null {
+  if (/2yr|24mo/i.test(productId)) return 730;
   if (/1yr|12m|12mo/i.test(productId)) return 365;
   if (/6mo|6m/i.test(productId)) return 180;
   if (/3mo|3m/i.test(productId)) return 90;

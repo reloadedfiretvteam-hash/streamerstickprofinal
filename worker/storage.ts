@@ -371,7 +371,7 @@ export function createStorage(config: StorageConfig) {
     },
 
     async createRealProduct(product: InsertRealProduct): Promise<RealProduct> {
-      const dbProduct = {
+      const dbProduct: Record<string, unknown> = {
         id: product.id,
         name: product.name,
         description: product.description,
@@ -383,7 +383,16 @@ export function createStorage(config: StorageConfig) {
         sale_price: product.salePrice ?? null,
         card_promo_label: product.cardPromoLabel ?? null,
       };
-      const { data, error } = await supabase.from('real_products').insert(dbProduct).select().single();
+      const optional = ['sale_price', 'card_promo_label'];
+      const insert = (payload: Record<string, unknown>) =>
+        supabase.from('real_products').insert(payload).select().single();
+      let { data, error } = await insert(dbProduct);
+      if (error && /sale_price|card_promo_label|schema cache/i.test(error.message || '')) {
+        for (const column of optional) delete dbProduct[column];
+        const retry = await insert(dbProduct);
+        data = retry.data;
+        error = retry.error;
+      }
       if (error) throw error;
       return this.mapProductFromDb(data);
     },

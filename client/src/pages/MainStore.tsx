@@ -155,6 +155,20 @@ const iptvPricingMatrix: IPTVPricing[] = [
       { devices: 5, price: 220, productId: iptvRealProductId("1yr", 5) },
     ],
   },
+  {
+    duration: "2yr",
+    durationLabel: "2 Years",
+    badge: "TWO YEAR",
+    description: "Two-year live TV subscription for a device you already own. Pick one to five screens. Includes a web tutorial and login credentials.",
+    features: productBenefitList,
+    prices: [
+      { devices: 1, price: 100, productId: iptvRealProductId("2yr", 1) },
+      { devices: 2, price: 185, productId: iptvRealProductId("2yr", 2) },
+      { devices: 3, price: 265, productId: iptvRealProductId("2yr", 3) },
+      { devices: 4, price: 360, productId: iptvRealProductId("2yr", 4) },
+      { devices: 5, price: 415, productId: iptvRealProductId("2yr", 5) },
+    ],
+  },
 ];
 
 const deviceCatalogNote = "Price shown is the current listed price for this device.";
@@ -495,6 +509,7 @@ export default function MainStore() {
     "3mo": 1,
     "6mo": 1,
     "1yr": 1,
+    "2yr": 1,
   });
   /** Quantity per ONN kit id (`onn-google-hd` / `onn-google-4k`). */
   const [firestickQuantities, setFirestickQuantities] = useState<Record<string, number>>({});
@@ -1522,7 +1537,7 @@ export default function MainStore() {
               <FreeTrial />
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid md:grid-cols-2 xl:grid-cols-5 gap-6">
               {iptvPricingMatrix.map((plan, index) => {
                 const deviceCount = selectedDevices[plan.duration] ?? 1;
                 const selectedPrice = plan.prices.find(p => p.devices === deviceCount) || plan.prices[0];
@@ -1536,7 +1551,8 @@ export default function MainStore() {
                   'from-slate-800 via-slate-900 to-gray-900',
                   'from-blue-950/50 via-slate-900 to-gray-900',
                   'from-cyan-950/50 via-slate-900 to-gray-900',
-                  'from-emerald-950/50 via-slate-900 to-gray-900'
+                  'from-emerald-950/50 via-slate-900 to-gray-900',
+                  'from-amber-950/40 via-slate-900 to-gray-900',
                 ];
                 
                 return (
@@ -1599,7 +1615,7 @@ export default function MainStore() {
                             {iptvPromo}
                           </div>
                         ) : null}
-                        {(plan.duration === "6mo" || plan.duration === "1yr") && (
+                        {(plan.duration === "6mo" || plan.duration === "1yr" || plan.duration === "2yr") && (
                           <div className={`absolute ${iptvPromo ? 'top-14' : 'top-4'} left-4 z-20 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-1 rounded-full font-bold text-xs shadow-lg`}>
                             LONGER TERM VALUE
                           </div>

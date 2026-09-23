@@ -119,6 +119,19 @@ const seoPricingMatrix: SEOPricingTier[] = [
       { tier: "enterprise", tierLabel: "Enterprise", price: 220, productId: iptvRealProductId("1yr", 5) },
     ],
   },
+  {
+    duration: "2yr",
+    durationLabel: "Website design and build",
+    description: "A two-year website design and build partnership. Choose the project size. The price shown is the full project price.",
+    features: ["Custom website design", "Build and launch", "Mobile responsive pages", "Revisions included", "Two-year partnership"],
+    prices: [
+      { tier: "starter", tierLabel: "Starter", price: 100, productId: iptvRealProductId("2yr", 1) },
+      { tier: "duo", tierLabel: "Duo", price: 185, productId: iptvRealProductId("2yr", 2) },
+      { tier: "team", tierLabel: "Team", price: 265, productId: iptvRealProductId("2yr", 3) },
+      { tier: "business", tierLabel: "Business", price: 360, productId: iptvRealProductId("2yr", 4) },
+      { tier: "enterprise", tierLabel: "Enterprise", price: 415, productId: iptvRealProductId("2yr", 5) },
+    ],
+  },
 ];
 
 interface SelectedSEOProduct {
@@ -143,6 +156,7 @@ export default function ShadowStore() {
     "3mo": "starter",
     "6mo": "starter",
     "1yr": "starter",
+    "2yr": "starter",
   });
   /** Direct checkout from homepage-style promo (real_product_id + Stripe promo price). */
   const [promoCheckout, setPromoCheckout] = useState<PublicPromotion | null>(null);
@@ -284,7 +298,9 @@ export default function ShadowStore() {
     const priceInfo = plan.prices.find(p => p.tier === tier) || plan.prices[0];
     setSelectedSEOProduct({
       productId: priceInfo.productId,
-      name: `SEO ${priceInfo.tierLabel} ${plan.durationLabel}`,
+      name: plan.duration === "2yr"
+        ? `Website design and build — ${priceInfo.tierLabel}`
+        : `SEO ${priceInfo.tierLabel} ${plan.durationLabel}`,
       price: priceInfo.price,
       duration: plan.duration,
       tier: priceInfo.tier,
@@ -356,7 +372,7 @@ export default function ShadowStore() {
           >
             <div className="text-center">
               <h1 className="text-3xl font-bold mb-2">Complete Your Order</h1>
-              <p className="text-muted-foreground">You're one step away from your new {selectedSEOProduct ? 'SEO package' : 'website'}</p>
+              <p className="text-muted-foreground">You're one step away from your new {selectedSEOProduct?.duration === "2yr" ? "website" : selectedSEOProduct ? "SEO package" : "website"}</p>
             </div>
 
             <Card className="border-2 border-primary/20">
@@ -649,7 +665,7 @@ export default function ShadowStore() {
           <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
             {shadowCms.pricing.seoSubtitle}
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 max-w-6xl mx-auto">
             {seoPricingLive.map((plan) => {
               const currentTier = selectedTiers[plan.duration];
               const tierRow = plan.prices.find(p => p.tier === currentTier) || plan.prices[0];
@@ -683,7 +699,7 @@ export default function ShadowStore() {
                       ) : null}
                       <span>
                         ${currentPrice.toFixed(2)}
-                        <span className="text-sm font-normal text-muted-foreground">/{plan.duration === "1mo" ? "mo" : plan.duration}</span>
+                        <span className="text-sm font-normal text-muted-foreground">/{plan.duration === "1mo" ? "mo" : plan.duration === "2yr" ? "project" : plan.duration}</span>
                       </span>
                     </div>
                   </div>
