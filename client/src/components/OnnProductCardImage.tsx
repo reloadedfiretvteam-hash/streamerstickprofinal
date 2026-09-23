@@ -16,7 +16,7 @@ export function OnnProductCardImage({ src, alt, fallbackSrc, kitLabel }: Props) 
       <img
         src={src}
         alt={alt}
-        className="h-full w-full object-cover object-[50%_56%] transition-transform duration-700 group-hover:scale-[1.05]"
+        className="h-full w-full object-contain object-center transition-transform duration-700 group-hover:scale-[1.03]"
         loading="lazy"
         width={400}
         height={248}

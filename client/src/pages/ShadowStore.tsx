@@ -202,7 +202,9 @@ export default function ShadowStore() {
             titleLine1: looksLikeRealStore(cloaked.titleLine1) ? merged.hero.titleLine1 : cloaked.titleLine1 || merged.hero.titleLine1,
             titleLine2: looksLikeRealStore(cloaked.titleLine2) ? merged.hero.titleLine2 : cloaked.titleLine2 || merged.hero.titleLine2,
             subtitle: looksLikeRealStore(cloaked.subtitle) ? merged.hero.subtitle : cloaked.subtitle || merged.hero.subtitle,
-            backgroundImageUrl: cloaked.backgroundImageUrl || merged.hero.backgroundImageUrl,
+            backgroundImageUrl: /iptv|firestick|fire-stick|onn|jailbreak|google-tv|stream/i.test(String(cloaked.backgroundImageUrl || ""))
+              ? merged.hero.backgroundImageUrl
+              : cloaked.backgroundImageUrl || merged.hero.backgroundImageUrl,
             videoUrl: cloaked.videoUrl || merged.hero.videoUrl,
             badge: looksLikeRealStore(cloaked.badge) ? merged.hero.badge : cloaked.badge || merged.hero.badge,
             ctaPrimary: cloaked.ctaPrimary || merged.hero.ctaPrimary,
@@ -706,12 +708,12 @@ export default function ShadowStore() {
                   
                   <div className="mb-4">
                     <label className="text-xs font-medium text-muted-foreground block mb-2">Select Tier</label>
-                    <div className="grid grid-cols-5 gap-1">
+                    <div className="flex flex-wrap gap-1">
                       {plan.prices.map((priceInfo) => (
                         <button
                           key={priceInfo.tier}
                           onClick={() => setSelectedTiers(prev => ({ ...prev, [plan.duration]: priceInfo.tier }))}
-                          className={`py-2 px-1 text-xs rounded-md transition-all ${
+                          className={`min-h-9 flex-1 px-2 py-2 text-xs rounded-md transition-all ${
                             currentTier === priceInfo.tier
                               ? 'bg-primary text-primary-foreground'
                               : 'bg-muted hover:bg-muted/80'
@@ -719,7 +721,7 @@ export default function ShadowStore() {
                           title={`${priceInfo.tierLabel} - $${priceInfo.price}`}
                           data-testid={`button-tier-${plan.duration}-${priceInfo.tier}`}
                         >
-                          {priceInfo.tierLabel.slice(0, 3)}
+                          {priceInfo.tierLabel}
                         </button>
                       ))}
                     </div>

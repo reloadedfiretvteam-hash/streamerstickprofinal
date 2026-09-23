@@ -112,7 +112,7 @@ export const SHADOW_CMS_DEFAULTS: ShadowCmsState = {
     stat1: "500+ Clients",
     stat2: "Award Winning",
     stat3: "Worldwide Service",
-    backgroundImageUrl: `${SUPABASE_SHADOW}/modern_abstract_digi_3506c264.jpg`,
+    backgroundImageUrl: `${SUPABASE_SHADOW}/professional_web_des_596ca65d.jpg`,
   },
   services: {
     title: "Our Services",

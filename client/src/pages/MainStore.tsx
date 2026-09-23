@@ -58,7 +58,10 @@ const packageArt: Record<string, string> = {
 };
 const iptvImg = `${SUPABASE_BASE}/iptv-subscription.jpg`;
 const fallbackHeroImg = onn4kImg;
-const heroImg = onnHdImg;
+
+function moneyWords(text: string) {
+  return text.replace(/(\d+)\s+dollars/gi, (_match, amount: string) => `$${amount}`);
+}
 const productBenefitList = [
   "18,000 live channels worldwide",
   "+24k VODs and Series",
@@ -433,7 +436,7 @@ const defaultVisualBenefitsCards = [
     description: "Your credentials arrive instantly via email. Start streaming in minutes, not days.",
     visual: "⚡",
     image: "instant-access.jpg",
-    color: "from-yellow-500/15 to-orange-500/5",
+    color: "from-yellow-500/15 to-blue-600/5",
     border: "border-yellow-400/30",
   },
   {
@@ -468,7 +471,7 @@ const defaultSupport = {
 const heroCtaClasses: Record<CmsAccent, string> = {
   cyan: "flex items-center justify-center min-h-[64px] rounded-xl font-semibold text-base text-white bg-teal-600 hover:bg-teal-500 shadow-lg cursor-pointer",
   gold: "flex items-center justify-center min-h-[64px] rounded-xl font-semibold text-base text-white bg-blue-600 hover:bg-blue-500 shadow-lg cursor-pointer",
-  violet: "flex items-center justify-center min-h-[64px] rounded-xl font-semibold text-base text-white bg-white/10 border border-white/25 hover:bg-white/15 cursor-pointer",
+  violet: "flex items-center justify-center min-h-[64px] rounded-xl font-semibold text-base text-[#0b1220] bg-white hover:bg-slate-100 shadow-lg cursor-pointer",
   teal: "flex items-center justify-center min-h-[64px] rounded-xl font-semibold text-base text-[#0b1220] bg-teal-300 hover:bg-teal-200 cursor-pointer",
 };
 
@@ -525,14 +528,13 @@ export default function MainStore() {
   const isShopInView = useInView(shopRef, { once: true, margin: "-100px" });
   const heroContent = cmsHome?.hero;
   const heroTitle = heroContent?.title || "Preloaded ONN Google TV Devices";
-  const heroSubtitle =
+  const heroSubtitle = moneyWords(
     heroContent?.subtitle ||
-    "You get the Google TV device, a web tutorial, your login credentials, and live TV service. Subscriptions and a free 36-hour trial are for a Fire Stick or TV you already own.";
+      "The HD package is $140. The 4K package is $150. Each one includes the preloaded ONN Google TV device, a web tutorial, your login credentials, and live TV service. Subscriptions and the free trial are for a device you already own.",
+  );
   const heroProofline =
     heroContent?.proofline ||
-    "18,000+ live channels · 100,000+ movies · broadband-ready setup · secure checkout";
-  const heroBackgroundImage = heroContent?.backgroundImageUrl || heroImg;
-  const heroVideoUrl = heroContent?.videoUrl || "";
+    "18,000+ live channels · 100,000+ movies · credentials by email · secure checkout";
   const onnStreamingPrice = products.find((p) => p.id === "android-onn-4k")?.price;
   const onnProPrice = products.find((p) => p.id === "android-onn-pro")?.price;
   const heroCtas = ((heroContent?.ctas?.filter((cta) => cta?.label && cta?.href).length || 0) > 0
@@ -1012,7 +1014,7 @@ export default function MainStore() {
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-b from-[#0A0A0F] via-[#12121a] to-[#1A1A22] text-white font-sans selection:bg-[#00D4FF] selection:text-[#0A0A0F] pb-32 md:pb-20 relative overflow-x-hidden"
+      className="min-h-screen bg-[#0b1220] text-white font-sans selection:bg-blue-500 selection:text-white pb-32 md:pb-20 relative overflow-x-hidden"
       style={{
         backgroundColor: cmsHome?.theme?.backgroundColor || undefined,
         ["--cms-primary" as string]: cmsHome?.theme?.primaryColor || "#2563eb",
@@ -1028,7 +1030,7 @@ export default function MainStore() {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 120% 80% at 50% -20%, rgba(0,212,255,0.16) 0%, transparent 55%), linear-gradient(to bottom, #0A0A0F 0%, #1A1A22 100%)",
+              "radial-gradient(ellipse 80% 45% at 80% 0%, rgba(37,99,235,0.22) 0%, transparent 50%), linear-gradient(to bottom, #0b1220 0%, #0b1220 100%)",
           }}
         />
       </div>
@@ -1131,49 +1133,18 @@ export default function MainStore() {
 
       {/* Main Content */}
       <main id="main-content" role="main" className="pb-28 md:pb-0">
-      {/* Elite hero — full viewport + photography (reliable on mobile; no fixed-attachment image) */}
-      <section
-        ref={heroRef}
-        className="relative text-white overflow-hidden min-h-[100svh] flex flex-col justify-center z-10 py-14 sm:py-16 md:py-24 lg:py-32"
-      >
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden>
-          {heroVideoUrl ? (
-            <video
-              src={heroVideoUrl}
-              className="absolute inset-0 h-full w-full object-cover object-center opacity-70"
-              autoPlay
-              muted
-              loop
-              playsInline
-              poster={heroBackgroundImage}
-            />
-          ) : (
-          <img
-            src={heroBackgroundImage}
-            alt=""
-            width={1920}
-            height={1080}
-            decoding="async"
-            fetchPriority="high"
-            className="absolute inset-0 h-full w-full object-cover object-[center_30%] sm:object-center scale-[1.06] sm:scale-100 opacity-[0.78] sm:opacity-[0.74] md:opacity-[0.70]"
-            onError={(e) => {
-              const el = e.currentTarget;
-              if (el.src !== fallbackHeroImg) el.src = fallbackHeroImg;
-            }}
-          />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#071018]/92 via-[#0b1b33]/80 to-[#071018]/90" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0F]/48 via-transparent to-[#0A0A0F]/48" />
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDgpIi8+PC9nPjwvc3ZnPg==')] opacity-20" />
+      <section ref={heroRef} className="relative z-10 overflow-hidden bg-[#0b1220] text-white">
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          <div className="absolute -left-16 top-0 h-64 w-64 rounded-full bg-blue-600/25 blur-3xl" />
+          <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-teal-400/15 blur-3xl" />
         </div>
-
-        <div className="container mx-auto px-4 sm:px-5 relative z-10 max-w-[100vw]">
-          <div className="max-w-5xl mx-auto text-center">
+        <div className="container relative z-10 mx-auto grid items-center gap-10 px-4 py-12 sm:px-5 md:py-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12 lg:py-20">
+          <div>
             <motion.h1
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-black leading-[1.12] sm:leading-[1.08] tracking-tight text-white mb-4 sm:mb-6 drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)]"
+              className="max-w-xl text-4xl font-black leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl"
             >
               {heroTitle}
             </motion.h1>
@@ -1181,7 +1152,7 @@ export default function MainStore() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.05 }}
-              className="text-base sm:text-lg md:text-xl text-[#E4E6EB] font-semibold mb-3 sm:mb-4 max-w-3xl mx-auto leading-relaxed px-1"
+              className="mt-5 max-w-xl text-base font-medium leading-relaxed text-slate-200 sm:text-lg"
             >
               {heroSubtitle}
             </motion.p>
@@ -1189,23 +1160,22 @@ export default function MainStore() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.1 }}
-              className="text-sm sm:text-base text-teal-200 font-medium mb-9 md:mb-11 leading-relaxed"
+              className="mt-4 max-w-xl text-sm font-medium leading-relaxed text-teal-200 sm:text-base"
             >
               {heroProofline}
             </motion.p>
-
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.12 }}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto mb-10"
+              className="mt-8 grid max-w-xl gap-3 sm:grid-cols-2"
             >
               {heroCtas.map((cta, index) => {
                 const accent = cta.accent || defaultHeroCtas[index]?.accent || "cyan";
                 const placement = cta.trackVpn ? "hero_vpn_cta" : undefined;
                 const href = cta.href || "/";
                 return (
-                  <Link key={`${cta.label}-${href}-${index}`} href={href}>
+                  <Link key={`${cta.label}-${href}-${index}`} href={href} className={index === heroCtas.length - 1 ? "sm:col-span-2" : undefined}>
                     <span
                       className={heroCtaClasses[accent]}
                       onClick={(event) => {
@@ -1224,22 +1194,40 @@ export default function MainStore() {
                 );
               })}
             </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm text-[#B0B3B8]"
-            >
+            <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold text-slate-300">
               {["Visa", "Mastercard", "Amex", "Discover", "Apple Pay", "Google Pay", "Link"].map((label) => (
-                <span key={label} className="px-3 py-1 rounded-full border border-white/10 bg-white/5 font-semibold">
+                <span key={label} className="rounded-full border border-white/15 bg-white/5 px-3 py-1">
                   {label}
                 </span>
               ))}
-            </motion.div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            {[
+              { id: "android-onn-4k", name: "Google HD Package", price: onnStreamingPrice ?? 140, label: "Full HD" },
+              { id: "android-onn-pro", name: "Google 4K Package", price: onnProPrice ?? 150, label: "4K" },
+            ].map((pack) => (
+              <Link key={pack.id} href="/devices">
+                <article className="overflow-hidden rounded-2xl border border-white/10 bg-[#10192a] shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
+                  <div className="flex aspect-[3/4] items-center justify-center bg-[#071018] p-2">
+                    <img
+                      src={packageArt[pack.id] || fallbackHeroImg}
+                      alt={pack.name}
+                      className="h-full w-full object-contain"
+                      width={480}
+                      height={640}
+                    />
+                  </div>
+                  <div className="border-t border-white/10 px-3 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-teal-200">{pack.label}</p>
+                    <p className="mt-1 text-base font-semibold text-white sm:text-lg">{pack.name}</p>
+                    <p className="text-xl font-semibold text-white">${pack.price}</p>
+                  </div>
+                </article>
+              </Link>
+            ))}
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#f4f6f8] to-transparent pointer-events-none" aria-hidden />
       </section>
 
       <section id="shop-shelf" className="bg-[#f4f6f8] text-slate-900 py-12 md:py-16">
@@ -1257,7 +1245,9 @@ export default function MainStore() {
               const image = packageArt[id] || product?.image || onn4kImg;
               return (
                 <article key={id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                  <img src={image} alt={name} className="h-64 w-full object-contain bg-white p-4" />
+                  <div className="flex aspect-[3/4] items-center justify-center bg-[#0b1220] p-3 sm:aspect-[4/5]">
+                    <img src={image} alt={name} className="h-full w-full object-contain" />
+                  </div>
                   <div className="space-y-3 p-5">
                     <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">{id === "android-onn-4k" ? "Full HD · $140" : "4K · $150"}</p>
                     <h3 className="text-2xl font-semibold">{name}</h3>
@@ -1297,16 +1287,16 @@ export default function MainStore() {
             ))}
           </div>
           <div className="mt-6 flex flex-wrap gap-3 text-sm">
-            <Link href="/36hr-trial"><span className="rounded-full bg-slate-900 px-4 py-2 font-semibold text-white">Start the free trial</span></Link>
-            <Link href="/iptv"><span className="rounded-full border border-slate-300 bg-white px-4 py-2 font-semibold">IPTV subscriptions</span></Link>
-            <Link href="/jailbroken-fire-sticks"><span className="rounded-full border border-slate-300 bg-white px-4 py-2 font-semibold">Jailbroken Fire Stick searches</span></Link>
+            <Link href="/36hr-trial"><span className="rounded-full bg-blue-700 px-4 py-2 font-semibold text-white">Start the free trial</span></Link>
+            <Link href="/plans"><span className="rounded-full border border-slate-300 bg-white px-4 py-2 font-semibold">Live TV plans</span></Link>
+            <Link href="/setup"><span className="rounded-full border border-slate-300 bg-white px-4 py-2 font-semibold">Setup for a device you own</span></Link>
             <Link href="/onn-google-tv"><span className="rounded-full border border-slate-300 bg-white px-4 py-2 font-semibold">ONN Google TV setup</span></Link>
           </div>
         </div>
       </section>
 
       {/* Three starting paths */}
-      <section className="py-16 md:py-20 border-t border-white/5 bg-[#0A0A0F]/60">
+      <section className="border-t border-white/5 bg-[#0b1220] py-16 md:py-20">
         <div className="container mx-auto px-4 max-w-6xl">
           <h2 className="text-2xl md:text-3xl font-semibold text-white text-center mb-3">Choose how you want to start</h2>
           <p className="text-center text-[#B0B3B8] max-w-2xl mx-auto mb-10">
@@ -1319,7 +1309,11 @@ export default function MainStore() {
               const bullets = card.bullets?.length ? card.bullets : defaultFeatureCards[index]?.bullets || [];
               return (
                 <div key={`${card.title}-${index}`} className={theme.wrapper}>
-                  {card.imageUrl ? (
+                  {index === 0 ? (
+                    <div className="mb-5 flex h-44 items-center justify-center overflow-hidden rounded-xl bg-[#071018] p-2">
+                      <img src={onn4kImg} alt="" className="h-full w-full object-contain" />
+                    </div>
+                  ) : card.imageUrl ? (
                     <img
                       src={card.imageUrl}
                       alt=""
@@ -1362,22 +1356,22 @@ export default function MainStore() {
         </div>
       </section>
 
-      <section className="py-14 md:py-16 border-t border-white/10 bg-[#08111c]">
+      <section className="border-t border-slate-200 bg-[#f4f6f8] py-14 text-slate-900 md:py-16">
         <div className="container mx-auto px-4 max-w-6xl">
-          <h2 className="text-2xl md:text-3xl font-semibold text-white text-center">Surf the site from here</h2>
-          <p className="mt-3 text-center text-slate-300 max-w-3xl mx-auto">
-            Broadband help, the website library, and the niche pages people search. The city and catalog links below are the hundreds and thousands of pages on this site.
+          <h2 className="text-2xl md:text-3xl font-semibold text-center">More on this site</h2>
+          <p className="mt-3 text-center text-slate-600 max-w-3xl mx-auto">
+            Setup help, plans, and the pages people use to find a device they already own.
           </p>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {[
               {
-                title: "Niche searches",
+                title: "Devices you already own",
                 links: [
-                  ["Jailbroken or unlocked Fire Stick", "/jailbroken-fire-sticks"],
-                  ["IPTV for Fire Stick", "/iptv-firestick"],
-                  ["Best IPTV for Fire Stick", "/best-iptv-firestick"],
+                  ["Fire Stick you already own", "/jailbroken-fire-sticks"],
+                  ["IPTV for a Fire Stick you own", "/iptv-firestick"],
+                  ["Plans for a Fire Stick you own", "/best-iptv-firestick"],
                   ["ONN Google TV", "/onn-google-tv"],
-                  ["Kits with price and photo", "/devices"],
+                  ["Google packages with price and photo", "/devices"],
                 ],
               },
               {
@@ -1393,7 +1387,7 @@ export default function MainStore() {
               {
                 title: "Website library",
                 links: [
-                  ["Thousands of city pages", "/locations"],
+                  ["City pages", "/locations"],
                   ["Channel catalog", "/ultimate-iptv-catalog-2026"],
                   ["Guides and blog", "/blog"],
                   ["Plans", "/plans"],
@@ -1401,13 +1395,13 @@ export default function MainStore() {
                 ],
               },
             ].map((group) => (
-              <div key={group.title} className="rounded-2xl border border-white/10 bg-[#10192a] p-5">
-                <h3 className="text-lg font-semibold text-white">{group.title}</h3>
+              <div key={group.title} className="rounded-2xl border border-slate-200 bg-white p-5">
+                <h3 className="text-lg font-semibold text-slate-900">{group.title}</h3>
                 <ul className="mt-4 space-y-2">
                   {group.links.map(([label, href]) => (
                     <li key={href}>
                       <Link href={href}>
-                        <span className="text-teal-200 hover:text-white">{label}</span>
+                        <span className="text-blue-700 hover:text-blue-900">{label}</span>
                       </Link>
                     </li>
                   ))}
@@ -1419,13 +1413,13 @@ export default function MainStore() {
       </section>
 
       {/* Advantage proof */}
-      <section className="py-12 md:py-16 lg:py-24 border-y border-blue-400/20 bg-[#0c1f3d]">
+      <section className="border-y border-white/10 bg-[#0b1220] py-12 md:py-16 lg:py-20">
         <div className="container mx-auto px-4 max-w-4xl text-center">
-          <h2 className="text-2xl md:text-4xl font-black text-white mb-8">Clear Advantages</h2>
-          <ul className="text-left max-w-2xl mx-auto space-y-4 text-[#B0B3B8]">
+          <h2 className="text-2xl md:text-4xl font-semibold text-white mb-8">Clear advantages</h2>
+          <ul className="text-left max-w-2xl mx-auto space-y-4 text-slate-300">
             {advantageLines.map((line) => (
               <li key={line} className="flex gap-3 items-start text-base md:text-lg">
-                <Check className="w-6 h-6 text-[#00D4FF] shrink-0" aria-hidden />
+                <Check className="w-6 h-6 text-teal-300 shrink-0" aria-hidden />
                 <span className="text-white">{line}</span>
               </li>
             ))}
@@ -1434,16 +1428,16 @@ export default function MainStore() {
       </section>
 
       {/* Trust bar */}
-      <section className="py-8 md:py-10 bg-[#1A1A22]/80 border-b border-white/5">
+      <section className="border-b border-white/10 bg-[#10192a] py-8 md:py-10">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-sm md:text-base text-[#FAD02C]/90 font-medium tracking-wide leading-relaxed px-2">
+          <p className="text-sm md:text-base text-teal-100 font-medium tracking-wide leading-relaxed px-2">
             {trustBarText}
           </p>
         </div>
       </section>
 
       {/* Shop Section */}
-      <section id="shop" ref={shopRef} className="py-24 bg-gradient-to-b from-gray-900/80 to-gray-800/80 backdrop-blur-sm">
+      <section id="shop" ref={shopRef} className="bg-[#0b1220] py-16 md:py-20">
         <div className="container mx-auto px-4">
           <motion.div 
             className="text-center mb-16"
@@ -1462,9 +1456,9 @@ export default function MainStore() {
 
           {/* What you get — subscriptions vs ONN kits */}
           <div className="max-w-5xl mx-auto mb-12 sm:mb-14 grid gap-5 md:grid-cols-2 px-1">
-            <div className="rounded-2xl border-2 border-[#00D4FF]/40 bg-[#0c1118]/95 p-5 sm:p-7 shadow-[0_0_28px_rgba(0,212,255,0.12)]">
-              <div className="flex items-center gap-2 mb-4">
-                <Zap className="w-7 h-7 text-[#00D4FF] shrink-0" aria-hidden />
+            <div className="rounded-2xl border border-blue-400/30 bg-[#10192a] p-5 sm:p-7">
+              <div className="mb-4 flex items-center gap-2">
+                <Zap className="h-7 w-7 shrink-0 text-blue-400" aria-hidden />
                 <h3 className="text-lg sm:text-xl font-bold text-white leading-snug">What you get with a subscription</h3>
               </div>
               <ul className="space-y-3 text-[15px] sm:text-[17px] text-[#E8EAED] leading-relaxed">
@@ -1482,9 +1476,9 @@ export default function MainStore() {
                 </li>
               </ul>
             </div>
-            <div className="rounded-2xl border-2 border-orange-500/40 bg-[#0c1118]/95 p-5 sm:p-7 shadow-[0_0_28px_rgba(249,115,22,0.12)]">
-              <div className="flex items-center gap-2 mb-4">
-                <Flame className="w-7 h-7 text-orange-400 shrink-0" aria-hidden />
+            <div className="rounded-2xl border border-teal-400/30 bg-[#10192a] p-5 sm:p-7">
+              <div className="mb-4 flex items-center gap-2">
+                <ShieldCheck className="h-7 w-7 shrink-0 text-teal-300" aria-hidden />
                 <h3 className="text-lg sm:text-xl font-bold text-white leading-snug">What comes with a preloaded Google TV device</h3>
               </div>
               <ul className="space-y-3 text-[15px] sm:text-[17px] text-[#E8EAED] leading-relaxed">
@@ -1577,7 +1571,7 @@ export default function MainStore() {
                     
                     {plan.popular && (
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
-                        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
+                        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 text-sm">
                           <Star className="w-4 h-4 fill-current" />
                           POPULAR
                         </div>
@@ -1606,7 +1600,7 @@ export default function MainStore() {
                             ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' 
                             : plan.popular 
                               ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
-                              : 'bg-orange-500 text-white'
+                              : 'bg-blue-600 text-white'
                         }`}>
                           {plan.badge}
                         </div>
@@ -1718,7 +1712,7 @@ export default function MainStore() {
           >
             <div className="text-center mb-8">
               <h3 className="text-3xl font-bold mb-4 flex items-center justify-center gap-3">
-                <Flame className="w-8 h-8 text-orange-500" />
+                <Flame className="w-8 h-8 text-blue-600" />
                 Streaming Device Comparison
               </h3>
               <p className="text-[15px] sm:text-lg text-gray-200 max-w-2xl mx-auto leading-relaxed px-2">
@@ -1732,13 +1726,13 @@ export default function MainStore() {
                     <th className="text-left p-3 sm:p-4 text-gray-200 font-medium text-sm sm:text-base">Features</th>
                     <th className="text-center p-3 sm:p-4">
                       <div className="text-base sm:text-lg font-bold text-white">Google HD Package</div>
-                      <div className="text-xl sm:text-2xl font-bold text-orange-400">{onnStreamingPrice != null ? `$${onnStreamingPrice}` : "Listed price"}</div>
+                      <div className="text-xl sm:text-2xl font-bold text-teal-300">{onnStreamingPrice != null ? `$${onnStreamingPrice}` : "Listed price"}</div>
                       <div className="text-xs text-gray-200">Preloaded Google TV</div>
                     </th>
-                    <th className="text-center p-3 sm:p-4 bg-orange-500/10 relative">
-                      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-b">BEST VALUE</div>
+                    <th className="text-center p-3 sm:p-4 bg-blue-600/10 relative">
+                      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-b">BEST VALUE</div>
                       <div className="text-base sm:text-lg font-bold text-white pt-3 sm:pt-4">Google 4K Package</div>
-                      <div className="text-xl sm:text-2xl font-bold text-orange-400">{onnProPrice != null ? `$${onnProPrice}` : "Listed price"}</div>
+                      <div className="text-xl sm:text-2xl font-bold text-teal-300">{onnProPrice != null ? `$${onnProPrice}` : "Listed price"}</div>
                       <div className="text-xs text-gray-200">4K Ultra HD</div>
                     </th>
                   </tr>
@@ -1747,98 +1741,72 @@ export default function MainStore() {
                   <tr className="border-b border-slate-700/30">
                     <td className="p-3 sm:p-4 text-gray-200">Resolution</td>
                     <td className="text-center p-3 sm:p-4 text-white">1080p Full HD</td>
-                    <td className="text-center p-3 sm:p-4 text-white bg-orange-500/5">4K Ultra HD</td>
+                    <td className="text-center p-3 sm:p-4 text-white bg-blue-600/5">4K Ultra HD</td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
                     <td className="p-3 sm:p-4 text-gray-200">HDR</td>
                     <td className="text-center p-3 sm:p-4"><span className="text-gray-400">—</span></td>
-                    <td className="text-center p-3 sm:p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
+                    <td className="text-center p-3 sm:p-4 bg-blue-600/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
                     <td className="p-3 sm:p-4 text-gray-200">Google TV + voice remote</td>
                     <td className="text-center p-3 sm:p-4"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
-                    <td className="text-center p-3 sm:p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
+                    <td className="text-center p-3 sm:p-4 bg-blue-600/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
                     <td className="p-3 sm:p-4 text-gray-200">1 Year Live TV included</td>
                     <td className="text-center p-3 sm:p-4"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
-                    <td className="text-center p-3 sm:p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
+                    <td className="text-center p-3 sm:p-4 bg-blue-600/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
                     <td className="p-3 sm:p-4 text-gray-200">18,000+ channels &amp; huge VOD</td>
                     <td className="text-center p-3 sm:p-4"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
-                    <td className="text-center p-3 sm:p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
+                    <td className="text-center p-3 sm:p-4 bg-blue-600/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
                   </tr>
                   <tr className="border-b border-slate-700/30">
                     <td className="p-3 sm:p-4 text-gray-200">Sports &amp; international</td>
                     <td className="text-center p-3 sm:p-4"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
-                    <td className="text-center p-3 sm:p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
+                    <td className="text-center p-3 sm:p-4 bg-blue-600/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
                   </tr>
                   <tr>
                     <td className="p-3 sm:p-4 text-gray-200">Setup help &amp; support</td>
                     <td className="text-center p-3 sm:p-4"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
-                    <td className="text-center p-3 sm:p-4 bg-orange-500/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
+                    <td className="text-center p-3 sm:p-4 bg-blue-600/5"><Check className="w-5 h-5 text-green-400 mx-auto" aria-hidden /></td>
                   </tr>
                 </tbody>
               </table>
             </div>
-                  {/* Device bundle note */}
-            <div className="mt-8 max-w-2xl mx-auto">
-              <div className="bg-gradient-to-r from-green-900/50 to-emerald-900/50 rounded-2xl p-6 border border-green-500/30" data-testid="discount-tiers">
-                <h4 className="text-xl font-bold text-center mb-4 text-green-400 flex items-center justify-center gap-2">
-                  <Gift className="w-6 h-6" />
-                        Device Bundle Pricing
-                </h4>
-                      <div className="grid gap-4 text-center md:grid-cols-3">
-                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                          <div className="text-2xl font-bold text-white">1</div>
-                          <div className="text-gray-200 text-sm">Device</div>
-                          <div className="text-orange-400 font-semibold mt-2">Catalog price</div>
-                        </div>
-                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                          <div className="text-2xl font-bold text-white">2+</div>
-                          <div className="text-gray-200 text-sm">Devices</div>
-                          <div className="text-green-400 font-bold mt-2">Same per-device catalog price</div>
-                        </div>
-                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                          <div className="text-2xl font-bold text-white">Checkout</div>
-                          <div className="text-gray-200 text-sm">Stripe hosted</div>
-                          <div className="text-cyan-300 font-bold mt-2">Matches listed device pricing</div>
-                        </div>
-                      </div>
-                <p className="text-center text-green-300 mt-4 text-sm">
-                        ${deviceCatalogNote}
-                </p>
-              </div>
-            </div>
+            <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-slate-300">
+              The HD package is ${onnStreamingPrice ?? 140}. The 4K package is ${onnProPrice ?? 150}. Checkout uses the price on the card.
+            </p>
           </motion.div>
 
           {/* ONN Google TV kits */}
           <div className="mb-16">
             <h3 className="text-3xl font-bold mb-8 text-center flex items-center justify-center gap-3">
-              <Flame className="w-8 h-8 text-orange-500" />
+              <Flame className="w-8 h-8 text-blue-600" />
               Choose Your Google Package
             </h3>
             <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
               {firestickProducts.map((product, index) => {
                 const cardGradients = [
                   'from-slate-800 via-slate-900 to-gray-900',
-                  'from-orange-950/60 via-slate-900 to-gray-900',
+                  'from-slate-900/60 via-slate-900 to-gray-900',
                   'from-indigo-950/60 via-slate-900 to-gray-900'
                 ];
                 const borderColors = [
-                  'border-slate-600/60 hover:border-orange-500/70',
-                  'border-orange-500/40 hover:border-orange-400',
+                  'border-slate-600/60 hover:border-blue-600/70',
+                  'border-blue-600/40 hover:border-teal-300',
                   'border-indigo-500/40 hover:border-indigo-400'
                 ];
                 const glowColors = [
                   'shadow-slate-500/20',
-                  'shadow-orange-500/40',
+                  'shadow-blue-600/40',
                   'shadow-indigo-500/30'
                 ];
                 const accentGradients = [
                   'from-slate-400/20 via-slate-500/10 to-transparent',
-                  'from-orange-400/30 via-amber-500/15 to-transparent',
+                  'from-teal-300/30 via-amber-500/15 to-transparent',
                   'from-indigo-400/25 via-purple-500/15 to-transparent'
                 ];
                 
@@ -1847,7 +1815,7 @@ export default function MainStore() {
                   key={product.id}
                   className={`relative rounded-2xl overflow-hidden transition-all duration-300 group ${
                     product.popular 
-                      ? 'ring-2 ring-orange-400 shadow-2xl shadow-orange-500/40' 
+                      ? 'ring-2 ring-teal-300 shadow-2xl shadow-blue-600/40' 
                       : `hover:shadow-xl ${glowColors[index]}`
                   }`}
                   data-testid={`card-product-${product.id}`}
@@ -1865,10 +1833,10 @@ export default function MainStore() {
                   <div className={`absolute inset-0 bg-gradient-to-b ${accentGradients[index]} opacity-80`} />
                   
                   {/* Radial highlight effect */}
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-500/15 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/15 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
                   
                   {/* Corner accent decorations */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-500/10 to-transparent rounded-bl-full" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-600/10 to-transparent rounded-bl-full" />
                   <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-tr-full" />
                   
                   {/* Animated border glow on hover */}
@@ -1876,7 +1844,7 @@ export default function MainStore() {
                   
                   {product.popular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce">
+                      <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
                         <Star className="w-4 h-4 fill-current" />
                         MOST POPULAR
                       </div>
@@ -1884,7 +1852,7 @@ export default function MainStore() {
                   )}
 
                   <div className="relative z-10">
-                    <div className="relative h-56 sm:h-[15.5rem] overflow-hidden">
+                    <div className="relative aspect-[3/4] overflow-hidden bg-[#071018]">
                       {product.id !== "onn-google-hd" && product.id !== "onn-google-4k" ? (
                         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-50" />
                       ) : null}
@@ -1912,7 +1880,7 @@ export default function MainStore() {
                       )}
                       <div className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-full font-bold text-sm shadow-lg ${
                         product.popular
-                          ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white'
                           : 'bg-blue-500 text-white'
                       }`}>
                         {product.badge}
@@ -1951,7 +1919,7 @@ export default function MainStore() {
                                 onClick={() => setFirestickQuantities(prev => ({ ...prev, [product.id]: qty }))}
                                 className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all relative ${
                                   firestickQuantities[product.id] === qty
-                                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                                     : 'bg-white/10 text-gray-200 hover:bg-white/20'
                                 }`}
                                 data-testid={`button-qty-${product.id}-${qty}`}
@@ -2024,7 +1992,7 @@ export default function MainStore() {
                           aria-label={`Add ${product.name} to cart`}
                           className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${
                             product.popular
-                              ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
+                              ? 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-teal-500 shadow-lg shadow-blue-600/50'
                               : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg'
                           }`}
                           data-testid={`button-add-${product.id}`}
@@ -2081,8 +2049,8 @@ export default function MainStore() {
           <section className="py-10">
             <div className="max-w-6xl mx-auto space-y-8">
               <div className="text-center">
-                <h3 className="text-3xl md:text-4xl font-black text-white mb-4">
-                  Reloaded Fire TV Device Bundles Built For Real Households
+                <h3 className="text-3xl md:text-4xl font-semibold text-white mb-4">
+                  What comes with a Google package
                 </h3>
                 <p className="text-gray-200 max-w-3xl mx-auto text-lg">
                   Google packages are made for easy setup and daily watching. You get the device, a tutorial, credentials, and live TV service.
@@ -2090,12 +2058,12 @@ export default function MainStore() {
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="rounded-2xl border border-orange-400/30 bg-gradient-to-br from-orange-500/10 to-red-500/5 p-6">
-                  <h4 className="text-2xl font-bold text-orange-300 mb-4">What You Get With Every Device Order</h4>
+                <div className="rounded-2xl border border-teal-300/30 bg-gradient-to-br from-blue-600/10 to-blue-500/5 p-6">
+                  <h4 className="text-2xl font-bold text-teal-200 mb-4">What You Get With Every Device Order</h4>
                   <ul className="space-y-3 text-gray-100">
                     {[
                       "Google HD package or Google 4K package, ready for guided setup",
-                      "Reloaded Fire TV all-in-one app workflow",
+                      "Web tutorial and login credentials",
                       "Educational tutorial videos for first-time users",
                       "1-year included access plan on device bundles",
                       "Instant login details and setup steps after purchase",
@@ -2213,7 +2181,7 @@ export default function MainStore() {
               <span key={`${item}-${index}`} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-medium"><Check className="w-5 h-5 text-green-400" /> {item}</span>
             ))}
             {deviceSupportApps.map((item, index) => (
-              <Link key={`${item.href}-${index}`} href={item.href!}><span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/20 border border-orange-400/40 text-orange-200 font-medium hover:bg-orange-500/30">{item.label}</span></Link>
+              <Link key={`${item.href}-${index}`} href={item.href!}><span className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600/20 border border-teal-300/40 text-blue-100 font-medium hover:bg-blue-600/30">{item.label}</span></Link>
             ))}
           </div>
         </div>
@@ -2234,11 +2202,11 @@ export default function MainStore() {
         <div className="container mx-auto px-4">
           <p className="text-center text-gray-400 text-sm mb-4">Browse by topic</p>
           <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6">
-            <Link href="/iptv-services"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV Services</span></Link>
-            <Link href="/shop"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Shop Google packages</span></Link>
-            <Link href="/onn"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">ONN setup</span></Link>
-            <Link href="/iptv-media-players"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV Media Players</span></Link>
-            <Link href="/bundles"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-orange-500/20 border border-white/10 hover:border-orange-400/40 text-gray-200 hover:text-white font-medium transition-colors">Bundles</span></Link>
+            <Link href="/iptv-services"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-blue-600/20 border border-white/10 hover:border-teal-300/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV Services</span></Link>
+            <Link href="/shop"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-blue-600/20 border border-white/10 hover:border-teal-300/40 text-gray-200 hover:text-white font-medium transition-colors">Shop Google packages</span></Link>
+            <Link href="/onn"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-blue-600/20 border border-white/10 hover:border-teal-300/40 text-gray-200 hover:text-white font-medium transition-colors">ONN setup</span></Link>
+            <Link href="/iptv-media-players"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-blue-600/20 border border-white/10 hover:border-teal-300/40 text-gray-200 hover:text-white font-medium transition-colors">IPTV Media Players</span></Link>
+            <Link href="/bundles"><span className="px-4 py-2 rounded-xl bg-white/5 hover:bg-blue-600/20 border border-white/10 hover:border-teal-300/40 text-gray-200 hover:text-white font-medium transition-colors">Bundles</span></Link>
           </div>
         </div>
       </div>
@@ -2257,7 +2225,7 @@ export default function MainStore() {
               Step-by-step video tutorials: install IPTV media player on ONN Google TV and Android TV.
             </p>
             <Link href="/tutorials">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-4 text-lg gap-2">
+              <Button className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-4 text-lg gap-2">
                 <Play className="w-5 h-5" aria-hidden="true" />
                 Watch Tutorials
               </Button>
@@ -2358,12 +2326,12 @@ export default function MainStore() {
             animate={isAboutInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full px-6 py-2 mb-6">
-              <Flame className="w-5 h-5 text-orange-400" />
-              <span className="text-sm font-medium text-orange-300">WHY CHOOSE US</span>
+            <div className="inline-flex items-center gap-2 bg-blue-600/20 backdrop-blur-sm border border-teal-300/30 rounded-full px-6 py-2 mb-6">
+              <Flame className="w-5 h-5 text-teal-300" />
+              <span className="text-sm font-medium text-teal-200">WHY CHOOSE US</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Break Free From Cable</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-blue-500">Break Free From Cable</span>
             </h2>
             <p className="text-lg sm:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed px-1">
               Premium streaming at a fraction of cable. Cancel anytime—no long-term lock-in.
@@ -2379,10 +2347,10 @@ export default function MainStore() {
             {/* Elite Glassmorphism Feature Cards */}
             <motion.div 
               variants={fadeInUp}
-              className="bg-gradient-to-br from-orange-500/15 via-red-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-10 border-2 border-orange-400/30 shadow-2xl shadow-orange-500/20 hover:border-orange-400/60 transition-all duration-300 hover:scale-105 hover:shadow-orange-500/40"
+              className="bg-gradient-to-br from-blue-600/15 via-red-500/5 to-transparent backdrop-blur-2xl rounded-3xl p-10 border-2 border-teal-300/30 shadow-2xl shadow-blue-600/20 hover:border-teal-300/60 transition-all duration-300 hover:scale-105 hover:shadow-blue-600/40"
               whileHover={{ y: -5 }}
             >
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-orange-500/50">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-teal-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-600/50">
                 <Zap className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-black mb-4 text-white">Be Streaming in 10 Minutes</h3>
@@ -2422,7 +2390,7 @@ export default function MainStore() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Learn More</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-blue-500">Learn More</span>
             </h2>
             <p className="text-gray-200 text-lg">Helpful guides to get the most out of your streaming experience</p>
           </div>
@@ -2433,14 +2401,14 @@ export default function MainStore() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className="bg-gray-800 border border-gray-700 rounded-2xl p-6 hover:border-orange-500/50 transition-all cursor-pointer h-full"
+                className="bg-gray-800 border border-gray-700 rounded-2xl p-6 hover:border-blue-600/50 transition-all cursor-pointer h-full"
               >
-                <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mb-4">
-                  <Flame className="w-6 h-6 text-orange-500" />
+                <div className="w-12 h-12 bg-blue-600/20 rounded-xl flex items-center justify-center mb-4">
+                  <Flame className="w-6 h-6 text-blue-600" />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">What Is a Streaming Device Setup?</h3>
                 <p className="text-gray-200 text-sm mb-4">Learn how device setup works and how to start streaming in about 10 minutes.</p>
-                <span className="text-orange-400 text-sm font-semibold flex items-center gap-1">
+                <span className="text-teal-300 text-sm font-semibold flex items-center gap-1">
                   Read More <ChevronRight className="w-4 h-4" />
                 </span>
               </motion.div>
@@ -2451,14 +2419,14 @@ export default function MainStore() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
-                className="bg-gray-800 border border-gray-700 rounded-2xl p-6 hover:border-orange-500/50 transition-all cursor-pointer h-full"
+                className="bg-gray-800 border border-gray-700 rounded-2xl p-6 hover:border-blue-600/50 transition-all cursor-pointer h-full"
               >
                 <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4">
                   <DollarSign className="w-6 h-6 text-green-500" />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">Streaming vs Cable: Complete Cost Guide</h3>
                 <p className="text-gray-200 text-sm mb-4">See how much you can save by switching from cable TV to streaming.</p>
-                <span className="text-orange-400 text-sm font-semibold flex items-center gap-1">
+                <span className="text-teal-300 text-sm font-semibold flex items-center gap-1">
                   Read More <ChevronRight className="w-4 h-4" />
                 </span>
               </motion.div>
@@ -2469,14 +2437,14 @@ export default function MainStore() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
-                className="bg-gray-800 border border-gray-700 rounded-2xl p-6 hover:border-orange-500/50 transition-all cursor-pointer h-full"
+                className="bg-gray-800 border border-gray-700 rounded-2xl p-6 hover:border-blue-600/50 transition-all cursor-pointer h-full"
               >
                 <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4">
                   <Star className="w-6 h-6 text-blue-500" />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">Best Live TV Sports Streaming 2026</h3>
                 <p className="text-gray-200 text-sm mb-4">Discover comprehensive sports coverage including NFL, NBA, UFC, and more.</p>
-                <span className="text-orange-400 text-sm font-semibold flex items-center gap-1">
+                <span className="text-teal-300 text-sm font-semibold flex items-center gap-1">
                   Read More <ChevronRight className="w-4 h-4" />
                 </span>
               </motion.div>
@@ -2487,7 +2455,7 @@ export default function MainStore() {
             <Button
               variant="outline"
               onClick={() => setLocation("/blog")}
-              className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10"
+              className="border-blue-600/50 text-teal-300 hover:bg-blue-600/10"
               data-testid="button-view-all-articles"
             >
               View All Articles <ChevronRight className="w-4 h-4 ml-2" />
@@ -2505,7 +2473,7 @@ export default function MainStore() {
               <span className="text-sm font-medium text-blue-300">SIMPLE PROCESS</span>
             </div>
             <h2 className="text-4xl md:text-6xl font-black mb-6">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">{howItWorksTitle}</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-blue-500">{howItWorksTitle}</span>
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
               {howItWorksSubtitle}
@@ -2627,7 +2595,7 @@ export default function MainStore() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Zap className="w-8 h-8 text-orange-400" />
+                <Zap className="w-8 h-8 text-teal-300" />
                 <div>
                   <p className="text-white font-semibold">{trustSignals.speedTitle}</p>
                   <p className="text-gray-400 text-sm">{trustSignals.speedBody}</p>
@@ -2646,7 +2614,7 @@ export default function MainStore() {
       </section>
 
       {/* Customer Support Email Banner - Fixed at bottom - More Prominent */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-orange-600 via-orange-500 to-red-500 text-white py-4 px-4 z-[99] border-t-4 border-orange-300/50 shadow-2xl">
+      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500 text-white py-4 px-4 z-[99] border-t-4 border-teal-200/50 shadow-2xl">
         <div className="container mx-auto flex items-center justify-center gap-4 flex-wrap">
           <Mail className="w-6 h-6 flex-shrink-0" />
           <span className="text-base md:text-lg font-semibold">Need Help? Contact us:</span>
@@ -2694,12 +2662,12 @@ export default function MainStore() {
                 {footerTagline}
               </p>
               <div className="flex gap-3">
-                <a href={`mailto:${supportEmail}`} className="w-10 h-10 bg-gray-800 hover:bg-orange-600 rounded-lg flex items-center justify-center transition-colors" data-testid="link-email" aria-label="Email us">
+                <a href={`mailto:${supportEmail}`} className="w-10 h-10 bg-gray-800 hover:bg-blue-500 rounded-lg flex items-center justify-center transition-colors" data-testid="link-email" aria-label="Email us">
                   <Mail className="w-5 h-5" aria-hidden="true" />
                 </a>
               </div>
               <div className="mt-4">
-                <a href={`mailto:${supportEmail}`} className="text-sm text-orange-400 hover:text-orange-300">
+                <a href={`mailto:${supportEmail}`} className="text-sm text-teal-300 hover:text-teal-200">
                   {supportEmail}
                 </a>
               </div>
@@ -2708,10 +2676,10 @@ export default function MainStore() {
             <div>
               <h3 className="text-white font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/"><span className="hover:text-orange-400 transition-colors cursor-pointer">Home</span></Link></li>
-                <li><a href="#shop" className="hover:text-orange-400 transition-colors cursor-pointer">Shop All Products</a></li>
-                <li><Link href="/blog"><span className="hover:text-orange-400 transition-colors cursor-pointer">Blog & Guides</span></Link></li>
-                <li><Link href="/resources"><span className="hover:text-orange-400 transition-colors cursor-pointer">Resources & Channel Directory</span></Link></li>
+                <li><Link href="/"><span className="hover:text-teal-300 transition-colors cursor-pointer">Home</span></Link></li>
+                <li><a href="#shop" className="hover:text-teal-300 transition-colors cursor-pointer">Shop All Products</a></li>
+                <li><Link href="/blog"><span className="hover:text-teal-300 transition-colors cursor-pointer">Blog & Guides</span></Link></li>
+                <li><Link href="/resources"><span className="hover:text-teal-300 transition-colors cursor-pointer">Resources & Channel Directory</span></Link></li>
                 <li>
                   <Link href="/vpn">
                     <span
@@ -2722,18 +2690,18 @@ export default function MainStore() {
                     </span>
                   </Link>
                 </li>
-                <li><a href="#about" className="hover:text-orange-400 transition-colors cursor-pointer">About Us</a></li>
+                <li><a href="#about" className="hover:text-teal-300 transition-colors cursor-pointer">About Us</a></li>
               </ul>
             </div>
 
             <div>
               <h3 className="text-white font-semibold mb-4">Guides</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/iptv-services"><span className="hover:text-orange-400 transition-colors">IPTV Services</span></Link></li>
-                <li><Link href="/shop"><span className="hover:text-orange-400 transition-colors">Shop Google packages</span></Link></li>
-                <li><Link href="/onn"><span className="hover:text-orange-400 transition-colors">ONN Google TV</span></Link></li>
-                <li><Link href="/iptv-media-players"><span className="hover:text-orange-400 transition-colors">IPTV Media Players</span></Link></li>
-                <li><Link href="/bundles"><span className="hover:text-orange-400 transition-colors">Bundles</span></Link></li>
+                <li><Link href="/iptv-services"><span className="hover:text-teal-300 transition-colors">IPTV Services</span></Link></li>
+                <li><Link href="/shop"><span className="hover:text-teal-300 transition-colors">Shop Google packages</span></Link></li>
+                <li><Link href="/onn"><span className="hover:text-teal-300 transition-colors">ONN Google TV</span></Link></li>
+                <li><Link href="/iptv-media-players"><span className="hover:text-teal-300 transition-colors">IPTV Media Players</span></Link></li>
+                <li><Link href="/bundles"><span className="hover:text-teal-300 transition-colors">Bundles</span></Link></li>
               </ul>
             </div>
 
@@ -2766,11 +2734,11 @@ export default function MainStore() {
             <div>
               <h3 className="text-white font-semibold mb-4">Support & Policies</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#faq" className="hover:text-orange-400 transition-colors">FAQ</a></li>
-                <li><a href={`mailto:${supportEmail}`} className="hover:text-orange-400 transition-colors">Contact Us</a></li>
-                <li><a href="/terms" className="hover:text-orange-400 transition-colors">Terms of Service</a></li>
-                <li><a href="/privacy" className="hover:text-orange-400 transition-colors">Privacy Policy</a></li>
-                <li><a href="/refund" className="hover:text-orange-400 transition-colors">Refund Policy</a></li>
+                <li><a href="#faq" className="hover:text-teal-300 transition-colors">FAQ</a></li>
+                <li><a href={`mailto:${supportEmail}`} className="hover:text-teal-300 transition-colors">Contact Us</a></li>
+                <li><a href="/terms" className="hover:text-teal-300 transition-colors">Terms of Service</a></li>
+                <li><a href="/privacy" className="hover:text-teal-300 transition-colors">Privacy Policy</a></li>
+                <li><a href="/refund" className="hover:text-teal-300 transition-colors">Refund Policy</a></li>
                 <li><a href="/admin" className="text-gray-600 hover:text-gray-200 transition-colors text-xs">Admin</a></li>
               </ul>
             </div>

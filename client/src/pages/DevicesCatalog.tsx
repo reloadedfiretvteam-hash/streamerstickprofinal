@@ -102,12 +102,12 @@ export default function DevicesCatalog() {
                 href={`/devices/${encodeURIComponent(d.sku)}`}
                 className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
-                <div className="aspect-[4/3] bg-slate-100">
+                <div className="aspect-[3/4] bg-[#0b1220]">
                   {d.primary_image_url ? (
                     <img
                       src={d.primary_image_url}
                       alt={d.public_title}
-                      className="h-full w-full bg-white object-contain p-3"
+                      className="h-full w-full object-contain p-2"
                       loading="lazy"
                     />
                   ) : null}

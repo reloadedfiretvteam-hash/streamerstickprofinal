@@ -499,12 +499,12 @@ export default function Shop() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 bg-orange-500/20 backdrop-blur-sm border border-orange-400/30 rounded-full px-6 py-2 mb-6">
-              <Flame className="w-5 h-5 text-orange-400 animate-pulse" />
+            <div className="inline-flex items-center gap-2 bg-blue-600/20 backdrop-blur-sm border border-teal-300/30 rounded-full px-6 py-2 mb-6">
+              <Flame className="w-5 h-5 text-teal-300 animate-pulse" />
               <span className="text-sm font-medium text-orange-300">ALL PLANS + ONN GOOGLE TV KITS</span>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Reloaded Fire TV Plans + ONN Kits</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-blue-500">Reloaded Fire TV Plans + ONN Kits</span>
             </h1>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
               This page includes all subscription plans and ONN Google TV device kits ($150 Full HD, $160 4K) in one place.
@@ -519,7 +519,7 @@ export default function Shop() {
           <div className="max-w-5xl mx-auto mb-10 rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm p-4 sm:p-5">
             <p className="text-white font-semibold text-sm sm:text-base mb-3">Fast decision path for new buyers</p>
             <div className="grid md:grid-cols-3 gap-3">
-              <div className="rounded-xl border border-orange-400/30 bg-orange-500/10 p-3">
+              <div className="rounded-xl border border-teal-300/30 bg-blue-600/10 p-3">
                 <div className="flex items-center gap-2 text-orange-200 font-semibold text-sm mb-1">
                   <Gift className="w-4 h-4" /> Try first
                 </div>
@@ -581,7 +581,7 @@ export default function Shop() {
                       onClick={() => applyBuyerProfile(profile)}
                       className={`rounded-xl border px-3 py-2.5 text-left transition-all ${
                         active
-                          ? "border-orange-400 bg-orange-500/20 text-orange-100 shadow-lg shadow-orange-500/20"
+                          ? "border-teal-300 bg-blue-600/20 text-orange-100 shadow-lg shadow-blue-600/20"
                           : "border-white/15 bg-white/5 text-gray-200 hover:bg-white/10"
                       }`}
                       data-testid={`button-profile-${profile}`}
@@ -639,7 +639,7 @@ export default function Shop() {
                       plan.popular 
                         ? 'ring-4 ring-blue-500 shadow-2xl shadow-blue-500/50 scale-105' 
                         : recommendedPlan
-                          ? 'ring-2 ring-orange-400 shadow-2xl shadow-orange-500/25'
+                          ? 'ring-2 ring-teal-300 shadow-2xl shadow-blue-600/25'
                         : 'hover:shadow-2xl hover:shadow-blue-500/20'
                     }`}
                     data-testid={`card-product-iptv-${plan.duration}`}
@@ -656,7 +656,7 @@ export default function Shop() {
                     
                     {plan.popular && (
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
-                        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce text-sm">
+                        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 text-sm">
                           <Star className="w-4 h-4 fill-current" />
                           POPULAR
                         </div>
@@ -664,7 +664,7 @@ export default function Shop() {
                     )}
                     {!plan.popular && recommendedPlan && (
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
-                        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-full font-bold shadow-lg text-xs">
+                        <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-2 rounded-full font-bold shadow-lg text-xs">
                           BEST FOR {BUYER_PROFILE_CONFIG[buyerProfile].label.toUpperCase()}
                         </div>
                       </div>
@@ -686,7 +686,7 @@ export default function Shop() {
                             ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' 
                             : plan.popular 
                               ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
-                              : 'bg-orange-500 text-white'
+                              : 'bg-blue-600 text-white'
                         }`}>
                           {plan.badge}
                         </div>
@@ -832,7 +832,7 @@ export default function Shop() {
           {/* ONN Google TV kits - DISPLAYED SECOND */}
           <div className="mb-16">
             <h3 className="text-3xl md:text-4xl font-bold mb-4 text-center flex items-center justify-center gap-3">
-              <Flame className="w-8 h-8 text-orange-500" />
+              <Flame className="w-8 h-8 text-blue-600" />
               ONN Google TV Device Kits
             </h3>
             <p className="text-center text-gray-300 mb-4 max-w-2xl mx-auto">
@@ -889,22 +889,22 @@ export default function Shop() {
                 const recommendedDevice = getDeviceTier(product.id) === BUYER_PROFILE_CONFIG[buyerProfile].deviceTier;
                 const cardGradients = [
                   'from-slate-800 via-slate-900 to-gray-900',
-                  'from-orange-950/60 via-slate-900 to-gray-900',
+                  'from-slate-900/60 via-slate-900 to-gray-900',
                   'from-indigo-950/60 via-slate-900 to-gray-900'
                 ];
                 const borderColors = [
-                  'border-slate-600/60 hover:border-orange-500/70',
-                  'border-orange-500/40 hover:border-orange-400',
+                  'border-slate-600/60 hover:border-blue-600/70',
+                  'border-blue-600/40 hover:border-teal-300',
                   'border-indigo-500/40 hover:border-indigo-400'
                 ];
                 const glowColors = [
                   'shadow-slate-500/20',
-                  'shadow-orange-500/40',
+                  'shadow-blue-600/40',
                   'shadow-indigo-500/30'
                 ];
                 const accentGradients = [
                   'from-slate-400/20 via-slate-500/10 to-transparent',
-                  'from-orange-400/30 via-amber-500/15 to-transparent',
+                  'from-teal-300/30 via-amber-500/15 to-transparent',
                   'from-indigo-400/25 via-purple-500/15 to-transparent'
                 ];
                 
@@ -914,9 +914,9 @@ export default function Shop() {
                   key={product.id}
                   className={`scroll-mt-28 relative rounded-2xl overflow-hidden transform transition-all duration-500 hover:scale-105 group ${
                     product.popular 
-                      ? 'ring-4 ring-orange-500 scale-105 shadow-2xl shadow-orange-500/50' 
+                      ? 'ring-4 ring-blue-600 scale-105 shadow-2xl shadow-blue-600/50' 
                       : recommendedDevice
-                        ? 'ring-2 ring-orange-400 shadow-2xl shadow-orange-500/25'
+                        ? 'ring-2 ring-teal-300 shadow-2xl shadow-blue-600/25'
                       : `hover:shadow-2xl ${glowColors[index]}`
                   }`}
                   data-testid={`card-product-${product.id}`}
@@ -930,16 +930,16 @@ export default function Shop() {
                   
                   <div className={`absolute inset-0 bg-gradient-to-b ${accentGradients[index]} opacity-80`} />
                   
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-500/15 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/15 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
                   
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-500/10 to-transparent rounded-bl-full" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-600/10 to-transparent rounded-bl-full" />
                   <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-tr-full" />
                   
                   <div className={`absolute inset-0 border-2 ${borderColors[index]} rounded-2xl transition-all duration-500 group-hover:shadow-[inset_0_0_20px_rgba(249,115,22,0.1)]`} />
                   
                   {product.popular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce">
+                      <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
                         <Star className="w-4 h-4 fill-current" />
                         MOST POPULAR
                       </div>
@@ -947,14 +947,14 @@ export default function Shop() {
                   )}
                   {!product.popular && recommendedDevice && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2 rounded-full font-bold shadow-lg text-xs">
+                      <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-2 rounded-full font-bold shadow-lg text-xs">
                         BEST FOR {BUYER_PROFILE_CONFIG[buyerProfile].label.toUpperCase()}
                       </div>
                     </div>
                   )}
 
                   <div className="relative z-10">
-                    <div className="relative h-56 sm:h-[15.5rem] overflow-hidden">
+                    <div className="relative aspect-[3/4] overflow-hidden bg-[#071018]">
                       {product.id !== "onn-google-hd" && product.id !== "onn-google-4k" ? (
                         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-50" />
                       ) : null}
@@ -982,7 +982,7 @@ export default function Shop() {
                       )}
                       <div className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-full font-bold text-sm shadow-lg ${
                         product.popular
-                          ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white'
                           : 'bg-blue-500 text-white'
                       }`}>
                         {product.badge}
@@ -1019,7 +1019,7 @@ export default function Shop() {
                                 onClick={() => setFirestickQuantities(prev => ({ ...prev, [product.id]: qty }))}
                                 className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all relative ${
                                   firestickQuantities[product.id] === qty
-                                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                                     : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                 }`}
                                 data-testid={`button-qty-${product.id}-${qty}`}
@@ -1044,7 +1044,7 @@ export default function Shop() {
                           return (
                             <>
                               <div className="flex items-baseline gap-2">
-                                <span className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400" data-testid={`text-price-${product.id}`}>
+                                <span className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-red-400" data-testid={`text-price-${product.id}`}>
                                   ${totalPrice.toFixed(2)}
                                 </span>
                                 {qty > 1 && (
@@ -1088,7 +1088,7 @@ export default function Shop() {
                           }}
                           className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${
                             product.popular
-                              ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-500/50'
+                              ? 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-red-600 shadow-lg shadow-blue-600/50'
                               : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg'
                           }`}
                           data-testid={`button-add-${product.id}`}
