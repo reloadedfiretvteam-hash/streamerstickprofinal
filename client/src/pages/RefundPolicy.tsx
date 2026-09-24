@@ -52,9 +52,9 @@ export default function RefundPolicy() {
             However, if you experience technical issues that prevent the service from working properly, our support team will work with you to resolve the issue. If we cannot resolve the issue within 48 hours, you may be eligible for a refund or credit.
           </p>
 
-          <h2 className="text-xl font-bold text-white mt-8 mb-4">Fire Stick Devices</h2>
+          <h2 className="text-xl font-bold text-white mt-8 mb-4">Devices</h2>
           <p className="text-gray-300 mb-4">
-            Physical Fire Stick devices may be returned within 7 days of delivery if:
+            A Google package or other physical device may be returned within 7 days of delivery if:
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 ml-4">
             <li>The device is defective or damaged on arrival</li>
@@ -62,7 +62,7 @@ export default function RefundPolicy() {
             <li>You contact support within 7 days of receiving the device</li>
           </ul>
           <p className="text-gray-300 mb-4">
-            Note: The IPTV subscription included with Fire Stick purchases is subject to the digital product policy above and is non-refundable once credentials are delivered.
+            Note: Live TV access included with a device purchase is subject to the digital product policy above and is non-refundable once credentials are delivered.
           </p>
 
           <h2 className="text-xl font-bold text-white mt-8 mb-4">How to Request a Refund</h2>

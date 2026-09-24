@@ -7024,18 +7024,12 @@ export default function AdminPanel() {
                   {infraData?.seo && (
                     <Card className="bg-gray-800 border-orange-500/30">
                       <CardContent className="p-4">
-                        <p className="text-xs text-orange-400 uppercase tracking-wide font-medium">SEO Domination status</p>
+                        <p className="text-xs text-orange-400 uppercase tracking-wide font-medium">Location pages</p>
                         <p className="text-white font-medium mt-1">
-                          {(infraData.seo.locationPageCount ?? 0).toLocaleString()} / 25,000 location pages
+                          City copies redirect to the shop
                         </p>
-                        <div className="mt-2 h-2 bg-gray-700 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-orange-500 rounded-full transition-all" 
-                            style={{ width: `${Math.min(100, ((infraData.seo.locationPageCount ?? 0) / 25000) * 100)}%` }} 
-                          />
-                        </div>
                         <p className="text-sm text-gray-500 mt-2">
-                          To add more: run <code className="bg-gray-700 px-1 rounded text-xs">npx tsx scripts/seed-25k-location-pages.ts</code> with <code className="bg-gray-700 px-1 rounded text-xs">SUPABASE_SERVICE_KEY</code> and <code className="bg-gray-700 px-1 rounded text-xs">VITE_SUPABASE_URL</code> in .env
+                          Do not generate more location pages. Extra city addresses were copies of the same page.
                         </p>
                       </CardContent>
                     </Card>

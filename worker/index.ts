@@ -993,190 +993,57 @@ app.get('/cron/provisioning', async (c) => {
   }
 });
 
-// Phase 4: OG-rich HTML for location pages (crawlers only) — must be before * redirect. DB first, then static build fallback so 25K pages have meta even without DB seed.
-app.get('/l/:country/:pageType/:slug', async (c, next) => {
-  const ua = (c.req.header('User-Agent') || '').toLowerCase();
-  const isCrawler = /bot|crawler|facebookexternalhit|twitterbot|linkedinbot|slurp|whatsapp|telegram|pinterest|discord/i.test(ua);
-  if (!isCrawler) return next();
-  const country = c.req.param('country');
-  const pageType = c.req.param('pageType');
-  const slug = c.req.param('slug');
-  const path = `/l/${country.toLowerCase()}/${pageType}/${slug}`;
-  let title = '';
-  let desc = '';
-  let faqJson: { question: string; answer: string }[] = [];
-  try {
-    const storage = getStorage(c.env);
-    // Parallel: location index (cached) + DB row. Do not chain: sum of latencies was tripping 15s crawls.
-    const [idx, page] = await Promise.all([
-      getLocationPagesIndex(c),
-      raceWithTimeout(storage.getSeoPageByPath(country, pageType, slug), SEO_PAGE_LOOKUP_MS, undefined),
-    ]);
-    if (page) {
-      title = (page.title || page.h1 || 'IPTV & Jailbroken Fire Stick').replace(/\[LOCATION\]/g, page.location || page.region || slug);
-      desc = (page.meta_description || page.p1_snippet || '').trim().substring(0, 160) || 'IPTV and Fire Stick guides for your area. StreamStickPro—18K+ channels, free trial. USA, Canada, UK.';
-      if (Array.isArray(page.faq_json) && page.faq_json.length > 0) {
-        faqJson = page.faq_json.map((f: any) => ({ question: f.question || f.q || '', answer: f.answer || f.a || '' })).filter((f: any) => f.question && f.answer);
-      }
-    } else {
-      const staticPage = idx?.byPath.get(path);
-      if (staticPage) {
-        title = staticPage.t;
-        desc = (staticPage.d || '').trim().substring(0, 160) || 'IPTV and Fire Stick guides for your area. StreamStickPro—18K+ channels, free trial. USA, Canada, UK.';
-      }
-    }
-    if (faqJson.length === 0) {
-      const loc = slug.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
-      const ct = country.toUpperCase();
-      faqJson = [
-        { question: `What is the best IPTV service in ${loc}, ${ct}?`, answer: `StreamStickPro is a top-rated IPTV service for ${loc} with 18,000+ live channels, 100,000+ movies and series, and a free 36-hour trial. Works on Fire Stick, ONN Google TV, and Smart TVs.` },
-        { question: `Can I get Fire Stick support in ${loc}?`, answer: `Yes. StreamStickPro supports Fire Stick users in ${loc} and across ${ct} with IPTV access, clear setup steps, and 24/7 support.` },
-        { question: `How do I set up IPTV on Google TV in ${loc}?`, answer: `Download IPTV Smarters Pro or TiviMate from the Google Play Store on your ONN Google TV. Enter your StreamStickPro credentials and you will have instant access to 18,000+ channels in ${loc}. Setup takes under 5 minutes.` },
-        { question: `Does StreamStickPro offer a free trial for ${loc} customers?`, answer: `Yes. StreamStickPro offers a 36-hour free IPTV trial for customers in ${loc}, ${ct}. No credit card required. Get instant login credentials and test 18,000+ live channels, VOD, and EPG guide.` },
-        { question: `What devices work with StreamStickPro IPTV in ${loc}?`, answer: `StreamStickPro works on Amazon Fire Stick, Fire TV Cube, ONN Google TV, Chromecast, Android TV, Samsung and LG Smart TVs, and MAG boxes in ${loc}. Use IPTV Smarters Pro or TiviMate for the best experience.` },
-      ];
-    }
-    faqJson = sanitizeFaq(faqJson);
-    if (!title) {
-      // Return real 404 for crawlers so GSC doesn't report "soft 404" (was: return next() → SPA 200 + "not found")
-      const notFoundHtml = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Page Not Found | StreamStickPro</title><meta name="robots" content="noindex, nofollow"><link rel="canonical" href="https://streamstickpro.com/"></head><body><h1>Page Not Found</h1><p>This location or topic page was not found.</p><p><a href="https://streamstickpro.com/">StreamStickPro Home</a></p></body></html>`;
-      return new Response(notFoundHtml, { status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
-    }
-    const url = `https://streamstickpro.com${path}`;
-    const ogImage = 'https://streamstickpro.com/opengraph.jpg';
-    const h1Text = escapeHtml(title);
-    const descSafe = escapeHtml(desc.substring(0, 160) || 'IPTV and Fire Stick guides. StreamStickPro—18K+ channels, free trial.');
-    const fullTitleRaw = `${title} | StreamStick Pro`;
-    const fullTitle = fullTitleRaw.length > 60 ? fullTitleRaw.slice(0, 57) + "..." : fullTitleRaw;
-    const fullTitleSafe = escapeHtml(fullTitle);
+const BLOG_COPY_SUFFIXES = [
+  'buyers-playbook',
+  'comparison',
+  'cost-breakdown',
+  'issue-fixes',
+  'mistakes-to-avoid',
+  'best-app-stack',
+  'beginner-checklist',
+];
 
-    // Dynamic internal linking (same region) for crawl depth + topical authority.
-    let dynamicRelated = '';
-    try {
-      const k = regionKey(country, pageType, slug);
-      const rel = (idx?.byRegionKey.get(k) || []).filter((p) => p !== path).slice(0, 8);
-      if (rel.length) {
-        const items = rel
-          .map((p) => {
-            const entry = idx?.byPath.get(p);
-            const label = escapeHtml((entry?.h || entry?.t || p).toString()).slice(0, 80);
-            return `<li><a href=\"https://streamstickpro.com${p}\">${label}</a></li>`;
-          })
-          .join('');
-        dynamicRelated = `<h3>More guides in your area</h3><ul>${items}</ul>`;
-      }
-    } catch {
-      /* ignore */
-    }
-
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${fullTitleSafe}</title>
-  <meta name="description" content="${descSafe}">
-  <link rel="canonical" href="${url}">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="${fullTitleSafe}">
-  <meta property="og:description" content="${descSafe}">
-  <meta property="og:url" content="${url}">
-  <meta property="og:image" content="${ogImage}">
-  <meta property="og:site_name" content="StreamStickPro">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${fullTitleSafe}">
-  <meta name="twitter:description" content="${descSafe}">
-  <meta name="twitter:image" content="${ogImage}">
-  <meta name="twitter:image:alt" content="${h1Text} – StreamStickPro IPTV">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="${h1Text} – StreamStickPro IPTV">
-  <meta name="robots" content="index, follow">
-  ${faqJson.length > 0 ? `<script type="application/ld+json">${JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqJson.map((f: { question: string; answer: string }) => ({
-      '@type': 'Question',
-      name: escapeHtml(f.question),
-      acceptedAnswer: { '@type': 'Answer', text: escapeHtml(f.answer) },
-    })),
-  })}</script>` : ''}
-</head>
-<body>
-  <a href="#main" class="skip-link">Skip to content</a>
-  <header role="banner">
-    <nav aria-label="Breadcrumb">
-      <ol itemscope itemtype="https://schema.org/BreadcrumbList">
-        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a itemprop="item" href="https://streamstickpro.com/"><span itemprop="name">Home</span></a><meta itemprop="position" content="1"></li>
-        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a itemprop="item" href="${url}"><span itemprop="name">${h1Text}</span></a><meta itemprop="position" content="2"></li>
-      </ol>
-    </nav>
-  </header>
-  <main id="main" role="main">
-    <article>
-      <h1>${h1Text}</h1>
-      <p class="lead">${descSafe}</p>
-      <section aria-labelledby="what-we-offer">
-        <h2 id="what-we-offer">IPTV Streaming in ${h1Text}</h2>
-        <p>StreamStickPro delivers <strong>18,000+ live channels</strong> and <strong>100,000+ movies and series</strong> to viewers in this area. Our service supports <strong>Fire Stick</strong>, <strong>ONN Google TV</strong>, and Smart TVs. Get a <strong>free 36-hour trial</strong>, instant login credentials, and 24/7 customer support across ${escapeHtml(country.toUpperCase())}.</p>
-      </section>
-      <section aria-labelledby="related">
-        <h2 id="related">Related</h2>
-        <ul>
-          <li><a href="https://streamstickpro.com/">Home &amp; 36hr Free Trial</a></li>
-          <li><a href="https://streamstickpro.com/36hr-trial">Start 36-Hour Free Trial</a></li>
-          <li><a href="https://streamstickpro.com/jailbroken-fire-sticks">Jailbroken Fire Sticks</a></li>
-          <li><a href="https://streamstickpro.com/iptv">IPTV access &amp; plans</a></li>
-          <li><a href="https://streamstickpro.com/onn-google-tv">ONN Google TV Setup</a></li>
-          <li><a href="https://streamstickpro.com/pricing">Pricing</a></li>
-          <li><a href="https://streamstickpro.com/shop">Shop</a></li>
-          <li><a href="https://streamstickpro.com/ultimate-iptv-catalog-2026">Explore 93K IPTV Catalog</a></li>
-        </ul>
-        ${dynamicRelated}
-      </section>
-    </article>
-  </main>
-  <footer role="contentinfo"><p>&copy; StreamStickPro. <a href="https://streamstickpro.com/">StreamStickPro</a> – IPTV, Fire Sticks, and streaming guides.</p></footer>
-  <noscript><p>Continue to <a href="${url}">${h1Text}</a>.</p></noscript>
-</body>
-</html>`;
-    return applySecurityHeaders(
-      new Response(html, {
-        headers: {
-          'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'public, max-age=600, s-maxage=86400, stale-while-revalidate=86400',
-        },
-      }),
-      path,
-    );
-  } catch {
-    const ua = (c.req.header('User-Agent') || '').toLowerCase();
-    if (/bot|crawler|spider|slurp|facebookexternalhit|twitterbot/i.test(ua)) {
-      return new Response('<!DOCTYPE html><html><head><meta name="robots" content="noindex"><title>Temporarily Unavailable</title></head><body><h1>Service Temporarily Unavailable</h1><p>Please retry shortly.</p></body></html>', {
-        status: 503,
-        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Retry-After': '120' },
-      });
-    }
-    return next();
+function spunGuideSlug(slug: string): string | null {
+  const value = String(slug || '').toLowerCase();
+  for (const suffix of BLOG_COPY_SUFFIXES) {
+    const token = `-${suffix}`;
+    if (!value.endsWith(token)) continue;
+    const base = value.slice(0, -token.length);
+    if (!base) return null;
+    return `${base}-complete-guide`;
   }
+  return null;
+}
+
+function canonicalBlogPath(path: string): string | null {
+  const match = String(path || '').match(/^\/blog\/([a-z0-9][a-z0-9-]*)\/?$/i);
+  if (!match) return null;
+  const guide = spunGuideSlug(match[1]);
+  return guide ? `/blog/${guide}/` : null;
+}
+
+function isCopiedBlogSlug(slug: string): boolean {
+  return spunGuideSlug(slug) !== null;
+}
+
+function locationCanonicalPath(pageType: string): string {
+  const type = String(pageType || '').toLowerCase();
+  if (type === 'iptv') return '/plans';
+  if (type === 'onn' || type === 'google') return '/onn-google-tv';
+  return '/devices';
+}
+
+// City copies are the same page with a place name swapped in. Send every one to the real page.
+app.get('/l/:country/:pageType/:slug', async (c, next) => {
+  const host = new URL(c.req.url).hostname;
+  if (host === 'secure.streamstickpro.com' || host.endsWith('.secure.streamstickpro.com')) return next();
+  const target = locationCanonicalPath(c.req.param('pageType'));
+  return c.redirect(`https://streamstickpro.com${target}`, 301);
 });
+
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-/** Sanitize FAQ for GSC: no empty/N/A/Location/short answers so Google does not show errors. */
-function sanitizeFaq(items: { question: string; answer: string }[]): { question: string; answer: string }[] {
-  const bad = new Set(['', 'n/a', 'na', 'location', '[location]', 'tbd', 'tba', '—', '–', '-']);
-  return items.filter((f) => {
-    const q = (f.question || '').trim();
-    const a = (f.answer || '').trim();
-    if (!q || !a) return false;
-    if (a.length < 25) return false;
-    if (bad.has(a.toLowerCase()) || bad.has(q.toLowerCase())) return false;
-    if (/^\[LOCATION\]$/i.test(a) || /^location$/i.test(a)) return false;
-    return true;
-  });
 }
 
 // SEO 301 redirects: DB (redirect_map) first, then static. Flood niche: IPTV, jailbreak, Canada/US/UK, devices, media players.
@@ -1253,6 +1120,8 @@ const SEO_REDIRECTS_STATIC: Record<string, string> = {
   '/best-iptv-service': '/iptv',
   '/catalog': '/ultimate-iptv-catalog-2026',
   '/tools': '/tools/catalog',
+  '/locations': '/devices',
+  '/contact': '/support',
 };
 app.get('*', async (c, next) => {
   const reqUrl = new URL(c.req.url);
@@ -1265,6 +1134,17 @@ app.get('*', async (c, next) => {
   };
   if (host === 'www.streamstickpro.com') {
     return c.redirect(`https://streamstickpro.com${path}${reqUrl.search}`, 301);
+  }
+  const isSecureHost = host === 'secure.streamstickpro.com' || host.endsWith('.secure.streamstickpro.com');
+  const blogCanonical = canonicalBlogPath(path);
+  if (!isSecureHost && blogCanonical && normalizePath(blogCanonical) !== normalizePath(path)) {
+    const guideSlug = blogCanonical.replace(/^\/blog\//, '').replace(/\/$/, '');
+    try {
+      const guide = await getStorage(c.env).getBlogPostBySlug(guideSlug);
+      if (guide) return c.redirect(`https://streamstickpro.com${blogCanonical}`, 301);
+    } catch {
+      /* keep the original post if the guide cannot be confirmed */
+    }
   }
   try {
     const storage = getStorage(c.env);
@@ -1414,59 +1294,28 @@ app.get('/llms.txt', (c) => {
   const body = `# StreamStickPro
 
 > Canonical domain: https://streamstickpro.com
-> Primary market: ONN and Google TV devices for sale, plans for compatible equipment the customer already owns, and written setup guides. Fire Stick hardware is not sold.
-> Price range: Device and plan prices are the amounts saved in the admin product list. A 36-hour trial is available for plans.
-> Coverage: USA, Canada, UK, and worldwide. NFL, NBA, MLB, UFC PPV, Premier League, and 100,000+ movies/series.
+> What this site sells: a Google HD package for $140 and a Google 4K package for $150. Each includes the device, setup help, and live TV service.
+> Plans: live TV for equipment the customer already owns, including a Fire Stick they already own. Fire Stick hardware is not sold.
+> Checkout: United States and Canada only.
+> A 36-hour trial is available for plans.
 
-## Primary pages
-- https://streamstickpro.com/
-- https://streamstickpro.com/shop
-- https://streamstickpro.com/36hr-trial
-- https://streamstickpro.com/pricing
-
-## Core guides
-- https://streamstickpro.com/iptv — Best IPTV service guide with channel lists, pricing, and setup
-- https://streamstickpro.com/iptv-firestick — How to set up IPTV on Amazon Fire Stick
-- https://streamstickpro.com/jailbroken-fire-sticks — Fire Stick jailbreaking and sideloading guide
-- https://streamstickpro.com/devices — ONN and Google TV devices for sale
-- https://streamstickpro.com/devices/android-onn-4k — ONN 4K Streaming Device Kit product page
-- https://streamstickpro.com/devices/android-onn-pro — ONN 4K Ultra HD Pro Kit product page
-- https://streamstickpro.com/google-merchant.xml — Google/Bing product feed with price, image, and order link
-- https://streamstickpro.com/plans — Plans for compatible devices the customer already owns
-- https://streamstickpro.com/guides — Written setup guides
-- https://streamstickpro.com/support — Support and contact
-- https://streamstickpro.com/onn-google-tv — ONN Google TV 4K IPTV setup guide
-- https://streamstickpro.com/iptv-media-players — TiviMate, IPTV Smarters Pro, Perfect Player comparison
-- https://streamstickpro.com/tivimate — TiviMate IPTV player setup tutorial
-- https://streamstickpro.com/iptv-smarters-pro — IPTV Smarters Pro setup with Xtream Codes
-- https://streamstickpro.com/setup — Video tutorials for Fire Stick and ONN device setup
-- https://streamstickpro.com/resources — IPTV channel directory and setup reference
-- https://streamstickpro.com/best-iptv-firestick — Best IPTV options for Fire Stick users
-- https://streamstickpro.com/ultimate-iptv-catalog-2026 — Full channel catalog with 18K+ channels
-
-## Competitor comparisons
-- https://streamstickpro.com/vs-youtube-tv — StreamStickPro vs YouTube TV
-- https://streamstickpro.com/vs-hulu-live — StreamStickPro vs Hulu + Live TV
-- https://streamstickpro.com/vs-fubo-tv — StreamStickPro vs FuboTV
-- https://streamstickpro.com/vs-sling-tv — StreamStickPro vs Sling TV
-- https://streamstickpro.com/vs-kodi — StreamStickPro vs Kodi
-- https://streamstickpro.com/vs-troypoint — StreamStickPro vs TroyPoint
-- https://streamstickpro.com/vs-roku — StreamStickPro vs Roku
-
-## Content feeds
-- https://streamstickpro.com/blog — 900+ articles on IPTV, cord cutting, and streaming
-- https://streamstickpro.com/feed.xml
-- https://streamstickpro.com/sitemap-index.xml
-- https://streamstickpro.com/sitemap.xml
-
-## Policy pages
+## Pages
+- https://streamstickpro.com/ — shop
+- https://streamstickpro.com/devices/android-onn-4k — Google HD package, $140
+- https://streamstickpro.com/devices/android-onn-pro — Google 4K package, $150
+- https://streamstickpro.com/plans — plans for a device the customer already owns
+- https://streamstickpro.com/36hr-trial — 36-hour trial
+- https://streamstickpro.com/setup — setup steps
+- https://streamstickpro.com/guides — written guides
+- https://streamstickpro.com/support — support
+- https://streamstickpro.com/google-merchant.xml — product feed with the same prices
+- https://streamstickpro.com/refund — 7-day return window for a device
 - https://streamstickpro.com/privacy
 - https://streamstickpro.com/terms
-- https://streamstickpro.com/refund
 
-## Excluded from indexing intent
-- https://secure.streamstickpro.com (shadow/secure checkout domain)
-- /checkout, /success, /cancel, /admin routes
+## Not part of search
+- https://secure.streamstickpro.com
+- /checkout, /success, /admin
 `;
   return c.text(body, 200, {
     'Content-Type': 'text/plain; charset=utf-8',
@@ -1562,7 +1411,6 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/blog/', priority: '0.9', changefreq: 'daily' },
   { url: '/vpn', priority: '0.92', changefreq: 'weekly' },
   { url: '/onn', priority: '0.92', changefreq: 'weekly' },
-  { url: '/locations', priority: '0.85', changefreq: 'daily' },
   { url: '/36hr-trial', priority: '0.95', changefreq: 'daily' },
   { url: '/pricing', priority: '0.9', changefreq: 'weekly' },
   { url: '/jailbroken-fire-sticks', priority: '0.9', changefreq: 'weekly' },
@@ -1648,16 +1496,14 @@ app.get('/sitemap-pages.xml', async (c) => {
     const storage = getStorage(c.env);
     const seoPages = await storage.getSeoPagesForSitemap(50000);
     for (const page of seoPages) {
-      if (String(page.path || '').startsWith('/l/') && !isSearchMarketLocation(page.path || '')) continue;
-      if (String(page.path || '').startsWith('/l/') && !isPriorityLocationPath(page.path || '')) continue;
+      if (String(page.path || '').startsWith('/l/')) continue;
       const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : today;
       xml += `<url><loc>${baseUrl}${page.path}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`;
     }
     if (seoPages.length < 2000) {
       const idx = await getLocationPagesIndex(c);
       for (const item of idx?.list || []) {
-        if (String(item.path || '').startsWith('/l/') && !isSearchMarketLocation(item.path || '')) continue;
-        if (String(item.path || '').startsWith('/l/') && !isPriorityLocationPath(item.path || '')) continue;
+        if (String(item.path || '').startsWith('/l/')) continue;
         xml += `<url><loc>${baseUrl}${item.path}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`;
       }
     }
@@ -1676,10 +1522,12 @@ app.get('/sitemap-posts.xml', async (c) => {
   try {
     const storage = getStorage(c.env);
     const blogPosts = await storage.getBlogPosts();
+    const publishedSlugs = new Set(blogPosts.map((post) => String(post?.slug || '').toLowerCase()).filter(Boolean));
     const seen = new Set<string>();
     for (const post of blogPosts) {
       const slug = String(post?.slug || '').toLowerCase();
-      if (!post.published || !slug || EXCLUDED_BLOG_SLUGS.has(slug) || seen.has(slug)) continue;
+      const guide = spunGuideSlug(slug);
+      if (!post.published || !slug || EXCLUDED_BLOG_SLUGS.has(slug) || (guide && publishedSlugs.has(guide)) || seen.has(slug)) continue;
       seen.add(slug);
       const postDate = post.updatedAt || post.publishedAt || null;
       const lastmod = postDate ? new Date(postDate).toISOString().split('T')[0] : today;
@@ -1735,10 +1583,12 @@ ${images ? images + '\n' : ''}  </url>
   }
 
   try {
+    const publishedSlugs = new Set(blogPosts.filter((post) => post?.published).map((post) => String(post?.slug || '').toLowerCase()).filter(Boolean));
     const seen = new Set<string>();
     for (const post of blogPosts) {
       const slug = String(post?.slug || '').toLowerCase();
-      if (!post.published || !slug || EXCLUDED_BLOG_SLUGS.has(slug) || seen.has(slug)) continue;
+      const guide = spunGuideSlug(slug);
+      if (!post.published || !slug || EXCLUDED_BLOG_SLUGS.has(slug) || (guide && publishedSlugs.has(guide)) || seen.has(slug)) continue;
       seen.add(slug);
       const postDate = post.updatedAt || post.publishedAt || null;
       const lastmod = postDate ? new Date(postDate).toISOString().split('T')[0] : today;
@@ -1756,8 +1606,7 @@ ${images ? images + '\n' : ''}  </url>
   }
 
   for (const page of seoPages) {
-    if (String(page.path || '').startsWith('/l/') && !isSearchMarketLocation(page.path || '')) continue;
-    if (String(page.path || '').startsWith('/l/') && !isPriorityLocationPath(page.path || '')) continue;
+    if (String(page.path || '').startsWith('/l/')) continue;
     const lastmod = page.updated_at ? new Date(page.updated_at).toISOString().split('T')[0] : today;
     sitemap += `  <url>
     <loc>${baseUrl}${page.path}</loc>
@@ -1771,8 +1620,7 @@ ${images ? images + '\n' : ''}  </url>
     try {
       const idx = await getLocationPagesIndex(c);
       for (const item of idx?.list || []) {
-        if (String(item.path || '').startsWith('/l/') && !isSearchMarketLocation(item.path || '')) continue;
-        if (String(item.path || '').startsWith('/l/') && !isPriorityLocationPath(item.path || '')) continue;
+        if (String(item.path || '').startsWith('/l/')) continue;
         sitemap += `  <url>
     <loc>${baseUrl}${item.path}</loc>
     <lastmod>${today}</lastmod>
@@ -1807,15 +1655,26 @@ app.post('/api/indexnow/ping', async (c) => {
   try {
     const body = await c.req.json().catch(() => ({}));
     const urls: string[] = Array.isArray(body.urls) ? body.urls.slice(0, 10000) : [];
-    if (!urls.length) return c.json({ error: 'urls array required' }, 400);
+    const kept = urls.filter((url) => {
+      try {
+        const path = new URL(String(url), 'https://streamstickpro.com').pathname;
+        if (path.startsWith('/l/')) return false;
+        const slug = path.match(/^\/blog\/([^/]+)\/?$/i)?.[1] || '';
+        if (slug && isCopiedBlogSlug(slug)) return false;
+        return path.startsWith('/');
+      } catch {
+        return false;
+      }
+    });
+    if (!kept.length) return c.json({ error: 'urls array required' }, 400);
     const key = '3b1a52f5f41a4138b1f21c3265180f44';
-    const payload = { host: 'streamstickpro.com', key, keyLocation: `https://streamstickpro.com/${key}.txt`, urlList: urls };
+    const payload = { host: 'streamstickpro.com', key, keyLocation: `https://streamstickpro.com/${key}.txt`, urlList: kept };
     const resp = await fetch('https://api.indexnow.org/indexnow', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
       body: JSON.stringify(payload),
     });
-    return c.json({ submitted: urls.length, status: resp.status, ok: resp.status >= 200 && resp.status < 300 });
+    return c.json({ submitted: kept.length, status: resp.status, ok: resp.status >= 200 && resp.status < 300 });
   } catch (err: any) {
     return c.json({ error: err.message }, 500);
   }
@@ -2163,7 +2022,10 @@ async function injectProductSchema(html: string, pathname: string, env: Env): Pr
     const product = products.find((p) => p.id === sku);
     if (!product) return html;
     const ld = productJsonLd(product);
+    const dollars = (product.priceCents / 100).toFixed(0);
+    const facts = `<article data-product-facts><h1>${escapeHtml(product.name)}</h1><p>Price: $${dollars}. In stock. Free shipping in the United States and Canada. Device returns follow the 7-day window on the refund page.</p><p>${escapeHtml(product.description)}</p><p><a href="/checkout">Checkout</a></p></article>`;
     let out = html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(ld)}</script></head>`);
+    out = out.replace('<div id="root">', `<div id="root">${facts}`);
     if (product.imageUrl) {
       out = out.replace(/<meta[^>]*property=["']og:image["'][^>]*>/i, `<meta property="og:image" content="${product.imageUrl}">`);
       out = out.replace(/<meta[^>]*name=["']twitter:image["'][^>]*>/i, `<meta name="twitter:image" content="${product.imageUrl}">`);

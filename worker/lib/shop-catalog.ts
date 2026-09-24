@@ -102,21 +102,21 @@ export function productJsonLd(product: ShopProduct) {
         { "@type": "Country", name: "Canada" },
       ],
       priceValidUntil: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365).toISOString().slice(0, 10),
-      shippingDetails: {
+      shippingDetails: ["US", "CA"].map((country) => ({
         "@type": "OfferShippingDetails",
-        shippingDestination: { "@type": "DefinedRegion", addressCountry: "US" },
+        shippingDestination: { "@type": "DefinedRegion", addressCountry: country },
         shippingRate: { "@type": "MonetaryAmount", value: "0", currency: "USD" },
         deliveryTime: {
           "@type": "ShippingDeliveryTime",
           handlingTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 3, unitCode: "DAY" },
           transitTime: { "@type": "QuantitativeValue", minValue: 2, maxValue: 7, unitCode: "DAY" },
         },
-      },
+      })),
       hasMerchantReturnPolicy: {
         "@type": "MerchantReturnPolicy",
         applicableCountry: "US",
         returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
-        merchantReturnDays: 14,
+        merchantReturnDays: 7,
         returnMethod: "https://schema.org/ReturnByMail",
         returnFees: "https://schema.org/FreeReturn",
       },
@@ -169,6 +169,11 @@ export function merchantRssXml(products: ShopProduct[]): string {
       <g:product_type>Electronics &gt; Streaming Devices &gt; Google TV</g:product_type>
       <g:shipping>
         <g:country>US</g:country>
+        <g:service>Standard</g:service>
+        <g:price>0.00 USD</g:price>
+      </g:shipping>
+      <g:shipping>
+        <g:country>CA</g:country>
         <g:service>Standard</g:service>
         <g:price>0.00 USD</g:price>
       </g:shipping>
