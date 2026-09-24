@@ -2009,6 +2009,21 @@ function injectMeta(html: string, pathname: string, meta: { title: string; descr
   return out;
 }
 
+function cloakHtml(html: string, pathname: string): string {
+  const path = pathname && pathname !== '/' ? pathname : '/';
+  const self = `https://secure.streamstickpro.com${path}`;
+  const agency = `<main id="main-content"><article><h1>Web design and SEO</h1><p>We build websites, search setup, and digital campaigns for businesses.</p></article></main>`;
+  let out = html.replace(/<div id="root">[\s\S]*?<\/div>/i, `<div id="root">${agency}</div>`);
+  out = out.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/gi, '');
+  out = out.replace(/<meta[^>]*name=["']keywords["'][^>]*>/i, '<meta name="keywords" content="web design, SEO, digital campaigns">');
+  out = out.replace(/<link[^>]*rel=["']canonical["'][^>]*>/i, `<link rel="canonical" href="${self}">`);
+  out = out.replace(/<meta[^>]*property=["']og:url["'][^>]*>/i, `<meta property="og:url" content="${self}">`);
+  out = out.replace(/<meta[^>]*property=["']og:image:alt["'][^>]*>/i, '<meta property="og:image:alt" content="Web design and SEO">');
+  out = out.replace(/<meta[^>]*name=["']twitter:image:alt["'][^>]*>/i, '<meta name="twitter:image:alt" content="Web design and SEO">');
+  out = out.replace(/<link[^>]*hreflang[^>]*>/gi, '');
+  return out;
+}
+
 async function injectProductSchema(html: string, pathname: string, env: Env): Promise<string> {
   try {
     const products = await liveGoogleDevices(env);
@@ -2113,7 +2128,7 @@ app.get('*', async (c) => {
         const fallback = await c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
         const html = await fallback.text();
         const withMeta = injectMeta(html, pathname, effectiveMeta);
-        const fixed = isSecureDomain ? withMeta : await injectProductSchema(withMeta, pathname, c.env);
+        const fixed = isSecureDomain ? cloakHtml(withMeta, pathname) : await injectProductSchema(withMeta, pathname, c.env);
         return applySecurityHeaders(new Response(fixed, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
       }
       return applySecurityHeaders(res, pathname, hostname);
@@ -2121,7 +2136,7 @@ app.get('*', async (c) => {
     const html = await res.text();
     const status = isKnownRoute ? 200 : 404;
     const withMeta = injectMeta(html, pathname, isKnownRoute ? effectiveMeta : { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
-    const fixed = isKnownRoute && !isSecureDomain ? await injectProductSchema(withMeta, pathname, c.env) : withMeta;
+    const fixed = isSecureDomain ? cloakHtml(withMeta, pathname) : (isKnownRoute ? await injectProductSchema(withMeta, pathname, c.env) : withMeta);
     return applySecurityHeaders(new Response(fixed, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   } catch {
     const fallback = await c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
@@ -2129,7 +2144,7 @@ app.get('*', async (c) => {
     // Unknown routes get 404 so Google doesn't report "soft 404" for non-existent pages
     const status = isKnownRoute ? 200 : 404;
     const withMeta = injectMeta(html, pathname, isKnownRoute ? effectiveMeta : { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
-    const fixed = isKnownRoute && !isSecureDomain ? await injectProductSchema(withMeta, pathname, c.env) : withMeta;
+    const fixed = isSecureDomain ? cloakHtml(withMeta, pathname) : (isKnownRoute ? await injectProductSchema(withMeta, pathname, c.env) : withMeta);
     return applySecurityHeaders(new Response(fixed, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   }
 });
