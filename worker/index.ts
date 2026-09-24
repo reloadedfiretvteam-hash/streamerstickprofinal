@@ -2021,6 +2021,12 @@ function cloakHtml(html: string, pathname: string): string {
   out = out.replace(/<meta[^>]*property=["']og:image:alt["'][^>]*>/i, '<meta property="og:image:alt" content="Web design and SEO">');
   out = out.replace(/<meta[^>]*name=["']twitter:image:alt["'][^>]*>/i, '<meta name="twitter:image:alt" content="Web design and SEO">');
   out = out.replace(/<link[^>]*hreflang[^>]*>/gi, '');
+  out = out.replace(/<link[^>]*rel=["']preload["'][^>]*>/gi, '');
+  out = out.replace(/<link[^>]*href=["']https:\/\/streamstickpro\.com[^"']*["'][^>]*>/gi, '');
+  out = out.replace(/<meta[^>]*name=["']author["'][^>]*>/i, '<meta name="author" content="Digital Solutions Agency">');
+  out = out.replace(/<meta[^>]*name=["']copyright["'][^>]*>/i, '');
+  out = out.replace(/<meta[^>]*property=["']og:site_name["'][^>]*>/i, '<meta property="og:site_name" content="Digital Solutions Agency">');
+  out = out.replace(/<meta[^>]*name=["']twitter:site["'][^>]*>/i, '');
   return out;
 }
 
