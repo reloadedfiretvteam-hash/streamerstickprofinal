@@ -102,20 +102,19 @@ async function runMigration() {
     await sql`CREATE INDEX IF NOT EXISTS orders_customer_id_idx ON orders (customer_id)`;
     console.log('✓ orders table columns');
 
-    // Enable RLS with permissive policies
+    // Keep RLS on, and do not add a public allow-all policy. The worker uses the service role.
     const tables = ['customers', 'password_reset_tokens', 'abandoned_carts'];
     for (const table of tables) {
       await sql`ALTER TABLE ${sql(table)} ENABLE ROW LEVEL SECURITY`;
       await sql`
-        DO $$ 
+        DO $$
         BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = ${table} AND policyname = 'Allow all access') THEN
-            EXECUTE format('CREATE POLICY "Allow all access" ON %I FOR ALL USING (true)', ${table});
-          END IF;
+          EXECUTE format('DROP POLICY IF EXISTS "Allow all access" ON %I', ${table});
+          EXECUTE format('DROP POLICY IF EXISTS "Allow all" ON %I', ${table});
         END $$
       `;
     }
-    console.log('✓ Row Level Security enabled');
+    console.log('✓ Row Level Security kept closed');
 
     // Verify table counts
     console.log('\n📊 Table verification:');

@@ -5071,7 +5071,7 @@ export default function AdminPanel() {
                     <Palette className="w-8 h-8 text-orange-500" />
                     Visual Editor
                   </h2>
-                  <p className="text-gray-400">Edit text and images on any page in real-time. Changes are saved to the database.</p>
+                  <p className="text-gray-400">Edit homepage words and pictures. Live colors stay with the built design so the shop and checkout match. Everyday prices are changed under Change prices.</p>
                 </div>
                 <div className="flex gap-3">
                   <Button 

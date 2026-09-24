@@ -40,6 +40,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { CmsEmailPromo } from "@/components/CmsEmailPromo";
 import { CmsPresence } from "@/components/CmsPresence";
 import { OnnProductCardImage } from "@/components/OnnProductCardImage";
+import { PriceTurnCard } from "@/components/PriceTurnCard";
 import type { Product as StoreCartProduct } from "@/lib/store";
 import { iptvRealProductId } from "@/lib/iptv-sku";
 import {
@@ -1204,29 +1205,20 @@ export default function MainStore() {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="grid min-w-0 grid-cols-2 gap-3 sm:gap-4">
             {[
               { id: "android-onn-4k", name: "Google HD Package", price: onnStreamingPrice ?? 140, label: "Full HD" },
               { id: "android-onn-pro", name: "Google 4K Package", price: onnProPrice ?? 150, label: "4K" },
             ].map((pack) => (
-              <Link key={pack.id} href="/devices">
-                <article className="overflow-hidden rounded-2xl border border-white/10 bg-[#10192a] shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
-                  <div className="flex aspect-[3/4] items-center justify-center bg-[#071018] p-2">
-                    <img
-                      src={packageArt[pack.id] || fallbackHeroImg}
-                      alt={pack.name}
-                      className="h-full w-full object-contain"
-                      width={480}
-                      height={640}
-                    />
-                  </div>
-                  <div className="border-t border-white/10 px-3 py-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-teal-200">{pack.label}</p>
-                    <p className="mt-1 text-base font-semibold text-white sm:text-lg">{pack.name}</p>
-                    <p className="text-xl font-semibold text-white">${pack.price}</p>
-                  </div>
-                </article>
-              </Link>
+              <PriceTurnCard
+                key={pack.id}
+                name={pack.name}
+                price={pack.price}
+                image={packageArt[pack.id] || fallbackHeroImg}
+                label={pack.label}
+                href={`/devices/${pack.id}`}
+                details={["Preloaded Google TV device", "Tutorial and login by email", "Live TV service included"]}
+              />
             ))}
           </div>
         </div>
@@ -1263,32 +1255,21 @@ export default function MainStore() {
               const name = id === "android-onn-4k" ? "Google HD Package" : "Google 4K Package";
               const image = packageArt[id] || product?.image || onn4kImg;
               return (
-                <article key={id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                  <div className="flex aspect-[3/4] items-center justify-center bg-[#0b1220] p-3 sm:aspect-[4/5]">
-                    <img src={image} alt={name} className="h-full w-full object-contain" />
-                  </div>
-                  <div className="space-y-3 p-5">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">{id === "android-onn-4k" ? "Full HD · $140" : "4K · $150"}</p>
-                    <h3 className="text-2xl font-semibold">{name}</h3>
-                    <p className="text-3xl font-semibold">{price != null ? `$${price}` : "See price"}</p>
-                    <ul className="space-y-1 text-sm text-slate-600">
-                      <li>Google TV device, preloaded</li>
-                      <li>Web tutorial and login credentials</li>
-                      <li>Live TV service included with the device</li>
-                    </ul>
-                    <button
-                      type="button"
-                      className="mt-2 w-full rounded-xl bg-blue-700 px-4 py-3 font-semibold text-white hover:bg-blue-600"
-                      onClick={() => {
-                        if (!product) return;
-                        addItem(product);
-                        openCart();
-                      }}
-                    >
-                      Add to cart
-                    </button>
-                  </div>
-                </article>
+                <PriceTurnCard
+                  key={id}
+                  tone="light"
+                  name={name}
+                  price={price}
+                  image={image}
+                  label={id === "android-onn-4k" ? "Full HD" : "4K"}
+                  href={`/devices/${id}`}
+                  details={["Google TV device, preloaded", "Web tutorial and login credentials", "Live TV service included with the device"]}
+                  onAdd={() => {
+                    if (!product) return;
+                    addItem(product);
+                    openCart();
+                  }}
+                />
               );
             })}
           </div>
@@ -1371,62 +1352,6 @@ export default function MainStore() {
                 </div>
               );
             })}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-t border-slate-200 bg-[#f4f6f8] py-14 text-slate-900 md:py-16">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <h2 className="text-2xl md:text-3xl font-semibold text-center">More on this site</h2>
-          <p className="mt-3 text-center text-slate-600 max-w-3xl mx-auto">
-            Setup help, plans, and the pages people use to find a device they already own.
-          </p>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {[
-              {
-                title: "Devices you already own",
-                links: [
-                  ["Fire Stick you already own", "/jailbroken-fire-sticks"],
-                  ["IPTV for a Fire Stick you own", "/iptv-firestick"],
-                  ["Plans for a Fire Stick you own", "/best-iptv-firestick"],
-                  ["ONN Google TV", "/onn-google-tv"],
-                  ["Google packages with price and photo", "/devices"],
-                ],
-              },
-              {
-                title: "Broadband and setup",
-                links: [
-                  ["Broadband and ISP buffering", "/vpn"],
-                  ["Setup on the device you have", "/setup"],
-                  ["IPTV media players", "/iptv-media-players"],
-                  ["TiviMate", "/tivimate"],
-                  ["IPTV Smarters Pro", "/iptv-smarters-pro"],
-                ],
-              },
-              {
-                title: "Website library",
-                links: [
-                  ["City pages", "/locations"],
-                  ["Channel catalog", "/ultimate-iptv-catalog-2026"],
-                  ["Guides and blog", "/blog"],
-                  ["Plans", "/plans"],
-                  ["Shop", "/shop"],
-                ],
-              },
-            ].map((group) => (
-              <div key={group.title} className="rounded-2xl border border-slate-200 bg-white p-5">
-                <h3 className="text-lg font-semibold text-slate-900">{group.title}</h3>
-                <ul className="mt-4 space-y-2">
-                  {group.links.map(([label, href]) => (
-                    <li key={href}>
-                      <Link href={href}>
-                        <span className="text-blue-700 hover:text-blue-900">{label}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -2117,6 +2042,62 @@ export default function MainStore() {
 
           {/* Sports Carousel */}
           <SportsCarousel />
+        </div>
+      </section>
+
+      <section className="border-t border-slate-200 bg-[#f4f6f8] py-14 text-slate-900 md:py-16">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h2 className="text-2xl md:text-3xl font-semibold text-center">More on this site</h2>
+          <p className="mt-3 text-center text-slate-600 max-w-3xl mx-auto">
+            Setup help, plans, and the pages for a device you already own.
+          </p>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {[
+              {
+                title: "Devices you already own",
+                links: [
+                  ["Fire Stick you already own", "/jailbroken-fire-sticks"],
+                  ["IPTV for a Fire Stick you own", "/iptv-firestick"],
+                  ["Plans for a Fire Stick you own", "/best-iptv-firestick"],
+                  ["ONN Google TV", "/onn-google-tv"],
+                  ["Google packages with price and photo", "/devices"],
+                ],
+              },
+              {
+                title: "Broadband and setup",
+                links: [
+                  ["Broadband and ISP buffering", "/vpn"],
+                  ["Setup on the device you have", "/setup"],
+                  ["IPTV media players", "/iptv-media-players"],
+                  ["TiviMate", "/tivimate"],
+                  ["IPTV Smarters Pro", "/iptv-smarters-pro"],
+                ],
+              },
+              {
+                title: "Website library",
+                links: [
+                  ["36-hour trial", "/36hr-trial"],
+                  ["Channel catalog", "/ultimate-iptv-catalog-2026"],
+                  ["Guides and blog", "/blog"],
+                  ["Plans", "/plans"],
+                  ["Shop", "/shop"],
+                ],
+              },
+            ].map((group) => (
+              <div key={group.title} className="rounded-2xl border border-slate-200 bg-white p-5">
+                <h3 className="text-lg font-semibold text-slate-900">{group.title}</h3>
+                <ul className="mt-4 space-y-2">
+                  {group.links.map(([label, href]) => (
+                    <li key={href}>
+                      <Link href={href}>
+                        <span className="text-blue-700 hover:text-blue-900">{label}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
