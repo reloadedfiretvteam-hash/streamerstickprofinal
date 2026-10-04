@@ -5,8 +5,8 @@ import { useCart } from "@/lib/store";
 
 const NAV = [
   { label: "Devices", href: "/devices" },
-  { label: "Plans", href: "/plans" },
-  { label: "Compatibility", href: "/compatibility" },
+  { label: "Subscriptions", href: "/plans" },
+  { label: "Trial", href: "/36hr-trial" },
   { label: "Setup", href: "/setup" },
   { label: "Learn", href: "/learn" },
   { label: "Support", href: "/support" },
@@ -46,7 +46,7 @@ export function V4Header() {
         </nav>
         <div className="flex items-center gap-2">
           <Link href="/36hr-trial">
-            <span className="v4-btn v4-btn-primary hidden min-h-11 px-4 text-sm sm:inline-flex">Try It</span>
+            <span className="v4-btn v4-btn-primary hidden min-h-11 px-4 text-sm sm:inline-flex">Free Trial</span>
           </Link>
           <button type="button" className="v4-btn v4-btn-secondary-dark min-h-11 px-3 text-sm" onClick={openCart}>
             Cart{count ? ` (${count})` : ""}
@@ -64,9 +64,9 @@ export function V4Header() {
       {open ? (
         <div className="border-t border-[#233145] bg-[#08111F] xl:hidden">
           <div className="v4-shell flex flex-col gap-1 py-4">
-            <Link href="/device-finder">
+            <Link href="/36hr-trial">
               <span className="v4-btn v4-btn-primary w-full" onClick={() => setOpen(false)}>
-                Find My Setup
+                Start the 36-hour trial
               </span>
             </Link>
             {NAV.map((item) => (
@@ -94,9 +94,9 @@ export function V4Footer() {
           </p>
         </div>
         {[
-          { title: "Shop", links: [["Devices", "/devices"], ["Plans", "/plans"], ["Compare", "/devices"]] },
+          { title: "Shop", links: [["Google packages", "/devices"], ["Subscriptions", "/plans"], ["36-hour trial", "/36hr-trial"]] },
           { title: "Help", links: [["Compatibility", "/compatibility"], ["Setup", "/setup"], ["Support", "/support"]] },
-          { title: "Company", links: [["Learn", "/learn"], ["36-hour trial", "/36hr-trial"], ["Refunds", "/refund"]] },
+          { title: "Company", links: [["Learn", "/learn"], ["Device finder", "/device-finder"], ["Refunds", "/refund"]] },
         ].map((group) => (
           <div key={group.title}>
             <h2 className="text-sm font-semibold uppercase tracking-[0.08em] text-[#A8B6C8]">{group.title}</h2>

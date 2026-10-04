@@ -3,6 +3,8 @@ import { Link, useParams } from "wouter";
 import { StorefrontChrome } from "@/components/StorefrontChrome";
 import { setPageMeta } from "@/lib/seo";
 import { useCart } from "@/lib/store";
+import { dollarsFromCatalog, packageImage } from "@/lib/package-art";
+import { apiCall } from "@/lib/api";
 
 function formatUsd(cents?: number | null) {
   if (cents == null || !Number.isFinite(cents)) return null;
@@ -22,9 +24,33 @@ export default function DeviceDetailPage() {
       try {
         const res = await fetch(`/api/owner-cms/devices/${encodeURIComponent(sku)}`);
         const json = await res.json();
+        if (json.data) {
+          if (!cancelled) {
+            setDevice({
+              ...json.data,
+              primary_image_url: packageImage(json.data.sku || sku, json.data.primary_image_url),
+            });
+          }
+          return;
+        }
+        const productRes = await apiCall(`/api/products/${encodeURIComponent(sku)}`);
+        const productJson = await productRes.json();
+        const product = productJson?.data;
         if (!cancelled) {
-          if (!json.data) setError("not_found");
-          else setDevice(json.data);
+          if (!product) setError("not_found");
+          else {
+            setDevice({
+              sku: product.id,
+              real_product_id: product.id,
+              public_title: product.name,
+              short_description: product.description,
+              public_display_price_cents: Math.round(dollarsFromCatalog(product.price) * 100),
+              primary_image_url: packageImage(product.id, product.imageUrl),
+              brand: "ONN",
+              condition: "new",
+              availability: "in stock",
+            });
+          }
         }
       } catch (e: any) {
         if (!cancelled) setError(e?.message || "error");
@@ -114,16 +140,12 @@ export default function DeviceDetailPage() {
     <StorefrontChrome>
     <div className="bg-white text-slate-900">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 lg:grid-cols-2">
-        <div className="overflow-hidden rounded-2xl bg-slate-100">
-          {device.primary_image_url ? (
-            <img
-              src={device.primary_image_url}
-              alt={device.image_alt || device.public_title}
-              className="w-full object-cover"
-            />
-          ) : (
-            <div className="flex aspect-square items-center justify-center text-slate-400">No image</div>
-          )}
+        <div className="overflow-hidden rounded-2xl bg-[#edf3f7]">
+          <img
+            src={packageImage(device.sku || sku, device.primary_image_url)}
+            alt={device.image_alt || device.public_title}
+            className="w-full object-contain p-6"
+          />
         </div>
         <div>
           <p className="text-sm uppercase tracking-wide text-blue-700">
@@ -150,7 +172,7 @@ export default function DeviceDetailPage() {
                   id: device.real_product_id || device.sku,
                   name: device.public_title,
                   price: (device.public_display_price_cents || 0) / 100,
-                  image: device.primary_image_url || "",
+                  image: packageImage(device.sku || sku, device.primary_image_url),
                   category: "firestick",
                   description: device.short_description || "",
                 });

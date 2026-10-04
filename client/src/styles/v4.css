@@ -68,6 +68,11 @@
   background: var(--v4-green-hover);
 }
 
+.v4-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .v4-btn-secondary-dark {
   background: transparent;
   color: var(--v4-light);

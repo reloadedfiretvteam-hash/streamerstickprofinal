@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { StorefrontChrome } from "@/components/StorefrontChrome";
 import { setPageMeta } from "@/lib/seo";
 import { useCart } from "@/lib/store";
+import { IPTV_IMG, packageImage } from "@/lib/package-art";
 
 function formatUsd(cents?: number | null) {
   if (cents == null || !Number.isFinite(cents)) return null;
@@ -77,7 +78,9 @@ export default function PlansCatalog() {
           {plans.map((p) => {
             const dollars = (Number(p.public_display_price_cents) || 0) / 100;
             return (
-              <article key={p.code} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <article key={p.code} className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <img src={packageImage(p.real_product_id || p.code, p.primary_image_url || IPTV_IMG)} alt="" className="h-40 w-full object-cover" />
+                <div className="flex flex-1 flex-col p-6">
                 <h2 className="text-xl font-semibold text-slate-900">
                   <Link href={`/plans/${encodeURIComponent(p.code)}`} className="hover:text-blue-700">
                     {p.public_title}
@@ -93,7 +96,7 @@ export default function PlansCatalog() {
                       id: p.real_product_id || p.code,
                       name: p.public_title,
                       price: dollars,
-                      image: p.primary_image_url || "",
+                      image: packageImage(p.real_product_id || p.code, p.primary_image_url || IPTV_IMG),
                       category: "iptv",
                       description: readablePlanCopy(p.short_description),
                     });
@@ -102,6 +105,7 @@ export default function PlansCatalog() {
                 >
                   Add subscription to cart
                 </button>
+                </div>
               </article>
             );
           })}

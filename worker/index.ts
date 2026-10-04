@@ -1699,9 +1699,9 @@ app.post('/api/indexnow/ping', async (c) => {
 // ── Per-page SEO meta for SPA pages (critical: Googlebot sees unique meta per page) ──
 const PAGE_META: Record<string, { title: string; description: string; noindex?: boolean }> = {
   '/': {
-    title: 'Streaming setup without the setup headache | StreamStickPro',
+    title: 'Google TV packages, subscriptions, and a 36-hour trial | StreamStickPro',
     description:
-      'Buy a Google TV device package or choose a streaming plan for a compatible device you already own. Device finder, setup guides, and checkout stay on StreamStickPro.',
+      'Buy a Google HD or 4K package, choose a live TV subscription for a device you already own, or start a 36-hour trial.',
   },
   '/compatibility': {
     title: 'Check the device you already own | StreamStickPro',

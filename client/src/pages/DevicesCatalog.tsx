@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { StorefrontChrome } from "@/components/StorefrontChrome";
 import { setPageMeta } from "@/lib/seo";
+import { dollarsFromCatalog, HD_ID, K4_ID, packageImage } from "@/lib/package-art";
+import { apiCall } from "@/lib/api";
 
 type CmsDevice = {
   sku: string;
@@ -41,7 +43,25 @@ export default function DevicesCatalog() {
       try {
         const res = await fetch("/api/owner-cms/devices");
         const json = await res.json();
-        if (!cancelled) setDevices(Array.isArray(json.data) ? json.data : []);
+        let rows: CmsDevice[] = Array.isArray(json.data) ? json.data : [];
+        if (!rows.length) {
+          const products = await apiCall("/api/products").then((r) => r.json());
+          rows = (Array.isArray(products?.data) ? products.data : [])
+            .filter((p: any) => p.id === HD_ID || p.id === K4_ID)
+            .map((p: any) => ({
+              sku: p.id,
+              public_title: p.id === HD_ID ? "Google HD Package" : "Google 4K Package",
+              short_description: p.description,
+              public_display_price_cents: Math.round(dollarsFromCatalog(p.price) * 100),
+              primary_image_url: packageImage(p.id, p.imageUrl),
+              availability: "in stock",
+              brand: "ONN",
+              condition: "new",
+            }));
+        } else {
+          rows = rows.map((d) => ({ ...d, primary_image_url: packageImage(d.sku, d.primary_image_url) }));
+        }
+        if (!cancelled) setDevices(rows);
       } catch (e: any) {
         if (!cancelled) setError(e?.message || "Failed to load devices");
       } finally {
@@ -102,15 +122,13 @@ export default function DevicesCatalog() {
                 href={`/devices/${encodeURIComponent(d.sku)}`}
                 className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
-                <div className="aspect-[3/4] bg-[#0b1220]">
-                  {d.primary_image_url ? (
-                    <img
-                      src={d.primary_image_url}
-                      alt={d.public_title}
-                      className="h-full w-full object-contain p-2"
-                      loading="lazy"
-                    />
-                  ) : null}
+                <div className="aspect-square bg-[#edf3f7]">
+                  <img
+                    src={packageImage(d.sku, d.primary_image_url)}
+                    alt={d.public_title}
+                    className="h-full w-full object-contain p-4"
+                    loading="lazy"
+                  />
                 </div>
                 <div className="space-y-2 p-5">
                   {d.sale_label ? (
