@@ -34,7 +34,7 @@ export default function HomeV4() {
     document.head.appendChild(inter);
     setPageMeta({
       title: "Google TV packages, subscriptions, and a 36-hour trial | StreamStickPro",
-      description: "Buy a Google HD or 4K package, choose a live TV subscription for a device you already own, or start a 36-hour trial.",
+      description: "Need a device? Buy a Google HD or 4K package. Already have a Fire Stick or Google TV? Pick a subscription or request the 36-hour trial.",
       path: "/",
     });
     apiCall("/api/products")
@@ -63,8 +63,8 @@ export default function HomeV4() {
   const hd = products.find((p) => p.id === HD_ID);
   const k4 = products.find((p) => p.id === K4_ID);
   const packages = [
-    { id: HD_ID, product: hd, name: "Google HD Package", price: hd?.price ?? 140, image: HD_IMG, label: "Full HD" },
-    { id: K4_ID, product: k4, name: "Google 4K Package", price: k4?.price ?? 150, image: K4_IMG, label: "4K" },
+    { id: HD_ID, product: hd, name: "Google HD Package", price: hd?.price ?? 140, image: HD_IMG, label: "Full HD TV" },
+    { id: K4_ID, product: k4, name: "Google 4K Package", price: k4?.price ?? 150, image: K4_IMG, label: "4K TV" },
   ];
 
   const addProduct = (product?: Product) => {
@@ -84,70 +84,54 @@ export default function HomeV4() {
   return (
     <div className="v4 min-h-screen">
       <div id="H01" className="bg-[#040A12] text-[#F8FAFC]">
-        <div className="v4-shell flex min-h-10 items-center justify-center py-2 text-center text-sm font-semibold">
+        <div className="v4-shell py-3 text-center text-base font-semibold">
           <Link href="/36hr-trial">
-            <span className="underline-offset-4 hover:underline">36-hour free trial for a Fire Stick, ONN, or Google TV you already own.</span>
+            <span className="underline-offset-4 hover:underline">Already own a device? Request the free 36-hour trial.</span>
           </Link>
         </div>
       </div>
       <V4Header />
 
       <main id="main-content">
-        <section id="H03" className="bg-[#08111F] text-[#F8FAFC]" aria-labelledby="hero-title">
-          <div className="v4-shell grid items-center gap-10 py-12 lg:grid-cols-[52fr_48fr] lg:py-20">
-            <div className="max-w-[640px]">
-              <p className="text-[13px] font-semibold tracking-[0.12em] text-[#79D5FF]">GOOGLE PACKAGES · SUBSCRIPTIONS · FREE TRIAL</p>
-              <h1 id="hero-title" className="mt-4 text-[36px] font-bold leading-[1.12] sm:text-[48px] lg:text-[58px] lg:leading-[1.06]">
-                Preloaded ONN Google TV devices.
-              </h1>
-              <p className="mt-5 max-w-[560px] text-lg leading-relaxed text-[#C9D4DF]">
-                This is StreamStickPro. Buy a Google HD or 4K package with the device, tutorial, login, and live TV. Or keep the device you already have and pick a subscription — or start the 36-hour trial.
-              </p>
-              <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                <a href="#packages" className="v4-btn v4-btn-primary">Shop Google packages</a>
-                <a href="#subscriptions" className="v4-btn v4-btn-secondary-dark">See subscriptions</a>
-                <Link href="/36hr-trial"><span className="v4-btn v4-btn-secondary-dark sm:col-span-2 w-full">Start the free 36-hour trial</span></Link>
-              </div>
-            </div>
-            <div className="grid min-w-0 grid-cols-2 gap-3">
-              {packages.map((pack) => (
-                <Link key={pack.id} href={`/devices/${pack.id}`}>
-                  <span className="block overflow-hidden rounded-[22px] border border-[#233145] bg-[#111C2E]">
-                    <img src={pack.image} alt={pack.name} className="h-44 w-full object-contain bg-[#0B1220] p-3 sm:h-56" />
-                    <span className="block p-3">
-                      <span className="text-xs font-semibold text-[#79D5FF]">{pack.label}</span>
-                      <strong className="mt-1 block text-sm sm:text-base">{pack.name}</strong>
-                      <span className="mt-1 block text-xl font-bold">{money(pack.price)}</span>
-                    </span>
-                  </span>
-                </Link>
-              ))}
-            </div>
+        <section className="bg-[#08111F] text-[#F8FAFC]" aria-labelledby="hero-title">
+          <div className="v4-shell py-16 lg:py-24">
+            <p className="text-base font-semibold text-[#79D5FF]">StreamStickPro</p>
+            <h1 id="hero-title" className="mt-4 max-w-4xl text-[42px] font-bold leading-[1.12] sm:text-[56px] lg:text-[64px]">
+              Need a device, or do you already have one?
+            </h1>
+            <p className="mt-6 max-w-3xl text-[20px] leading-relaxed text-[#D5DEE8] sm:text-[22px]">
+              This website sells two things. A Google TV package if you need the hardware. A live TV subscription if you already have a Fire Stick, ONN, or Google TV.
+            </p>
           </div>
         </section>
 
-        <section id="H04" className="bg-[#FCFBF7]" aria-labelledby="paths-title">
-          <div className="v4-shell py-14">
-            <h2 id="paths-title" className="text-center text-[32px] font-bold lg:text-[40px]">Choose how you want to start</h2>
-            <p className="mx-auto mt-4 max-w-[680px] text-center text-lg text-[#536275]">Three clear doors. You do not have to read the whole page.</p>
-            <div className="mt-10 grid gap-6 lg:grid-cols-3">
-              <article className="rounded-[22px] border border-[#D7DFE7] bg-white p-6">
-                <img src={HD_IMG} alt="" className="mb-5 h-40 w-full object-contain" />
-                <h3 className="text-2xl font-bold">I need a Google device</h3>
-                <p className="mt-3 text-[#536275]">HD $140 or 4K $150. Each package is the ONN Google TV, a web tutorial, login credentials, and live TV service.</p>
-                <a href="#packages" className="v4-btn v4-btn-primary mt-6 w-full">See Google packages</a>
+        <section id="start" className="bg-[#FCFBF7]" aria-labelledby="paths-title">
+          <div className="v4-shell py-14 lg:py-16">
+            <h2 id="paths-title" className="text-[34px] font-bold leading-tight lg:text-[44px]">Pick one. That is the whole site.</h2>
+            <div className="mt-10 grid gap-5">
+              <article className="v4-path">
+                <div className="v4-path-num" aria-hidden>1</div>
+                <div>
+                  <h3 className="text-[28px] font-bold leading-tight lg:text-[32px]">I need a Google TV device</h3>
+                  <p className="mt-2 max-w-2xl text-[20px] text-[#536275]">HD package is $140. 4K package is $150. You get the stick, a tutorial, a login, and live TV.</p>
+                </div>
+                <a href="#packages" className="v4-btn v4-btn-primary w-full min-w-[220px] lg:w-auto">See the devices</a>
               </article>
-              <article className="rounded-[22px] border border-[#D7DFE7] bg-white p-6">
-                <img src={IPTV_IMG} alt="" className="mb-5 h-40 w-full rounded-xl object-cover" />
-                <h3 className="text-2xl font-bold">I already have a device</h3>
-                <p className="mt-3 text-[#536275]">Keep your Fire Stick, ONN, or Google TV. Pick a live TV subscription by length and how many screens can play at once.</p>
-                <a href="#subscriptions" className="v4-btn v4-btn-secondary-light mt-6 w-full">See subscriptions</a>
+              <article className="v4-path">
+                <div className="v4-path-num" aria-hidden>2</div>
+                <div>
+                  <h3 className="text-[28px] font-bold leading-tight lg:text-[32px]">I already have a device</h3>
+                  <p className="mt-2 max-w-2xl text-[20px] text-[#536275]">Keep your Fire Stick or Google TV. Buy a subscription. Plans start at $11 for one month on one screen.</p>
+                </div>
+                <a href="#subscriptions" className="v4-btn v4-btn-secondary-light w-full min-w-[220px] lg:w-auto">See the plans</a>
               </article>
-              <article className="rounded-[22px] border border-[#23C768] bg-[#EAF9F0] p-6">
-                <p className="text-xs font-semibold tracking-[0.12em] text-[#08111F]">FREE TO REQUEST</p>
-                <h3 className="mt-3 text-2xl font-bold">Try it for 36 hours</h3>
-                <p className="mt-3 text-[#536275]">The trial is for a device you already own. It is a request, not instant access. Support confirms the terms before it starts.</p>
-                <Link href="/36hr-trial"><span className="v4-btn v4-btn-primary mt-6 w-full">Open the free trial</span></Link>
+              <article className="v4-path border-[#23C768] bg-[#EAF9F0]">
+                <div className="v4-path-num bg-[#23C768]" aria-hidden>3</div>
+                <div>
+                  <h3 className="text-[28px] font-bold leading-tight lg:text-[32px]">I want to try it first</h3>
+                  <p className="mt-2 max-w-2xl text-[20px] text-[#536275]">36-hour free trial. Only if you already own a device. You request it. Support writes back. It is not instant.</p>
+                </div>
+                <Link href="/36hr-trial"><span className="v4-btn v4-btn-primary w-full min-w-[220px] lg:w-auto">Start the trial</span></Link>
               </article>
             </div>
           </div>
@@ -155,27 +139,26 @@ export default function HomeV4() {
 
         <section id="packages" className="bg-[#F5F2EA]" aria-labelledby="hardware-title">
           <div className="v4-shell py-16">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#536275]">Google packages</p>
-            <h2 id="hardware-title" className="mt-2 text-[32px] font-bold lg:text-[42px]">The HD and 4K devices</h2>
-            <p className="mt-4 max-w-[680px] text-lg text-[#536275]">These are the only two hardware choices. Each photo is the package we sell. Fire Stick hardware is not for sale here.</p>
-            <div className="mt-10 grid gap-6 lg:grid-cols-2">
+            <h2 id="hardware-title" className="text-[34px] font-bold leading-tight lg:text-[44px]">The two Google packages</h2>
+            <p className="mt-4 max-w-3xl text-[20px] text-[#536275]">These photos are the products. We do not sell Fire Stick hardware.</p>
+            <div className="mt-10 grid gap-8 lg:grid-cols-2">
               {packages.map((pack) => (
-                <article key={pack.id} className="overflow-hidden rounded-[22px] border border-[#D7DFE7] bg-white">
-                  <img src={pack.image} alt={`${pack.name} device and box`} className="h-72 w-full bg-[#F0F3F5] object-contain p-6" />
-                  <div className="p-6">
-                    <p className="text-xs font-semibold tracking-[0.12em] text-[#536275]">{pack.label}</p>
-                    <h3 className="mt-2 text-2xl font-bold">{pack.name}</h3>
-                    <p className="mt-4 text-[32px] font-bold">{money(pack.price)}</p>
-                    <ul className="mt-3 space-y-1 text-[#536275]">
-                      <li>Preloaded ONN Google TV device</li>
-                      <li>Web tutorial and login by email</li>
-                      <li>Live TV service included with the package</li>
+                <article key={pack.id} className="overflow-hidden rounded-[28px] border border-[#D7DFE7] bg-white">
+                  <img src={pack.image} alt={`${pack.name} device and box`} className="h-80 w-full bg-[#F0F3F5] object-contain p-8" />
+                  <div className="p-8">
+                    <p className="text-base font-semibold text-[#536275]">{pack.label}</p>
+                    <h3 className="mt-2 text-[30px] font-bold">{pack.name}</h3>
+                    <p className="mt-4 text-[40px] font-bold leading-none">{money(pack.price)}</p>
+                    <ul className="mt-5 space-y-2 text-[18px] text-[#536275]">
+                      <li>ONN Google TV device, preloaded</li>
+                      <li>Tutorial and login sent by email</li>
+                      <li>Live TV included with the package</li>
                     </ul>
-                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                       <button type="button" className="v4-btn v4-btn-primary" disabled={!pack.product} onClick={() => addProduct(pack.product)}>
                         Add to cart
                       </button>
-                      <Link href={`/devices/${pack.id}`}><span className="v4-btn v4-btn-secondary-light">View package</span></Link>
+                      <Link href={`/devices/${pack.id}`}><span className="v4-btn v4-btn-secondary-light">Open this package</span></Link>
                     </div>
                   </div>
                 </article>
@@ -186,117 +169,65 @@ export default function HomeV4() {
 
         <section id="subscriptions" className="bg-[#08111F] text-[#F8FAFC]" aria-labelledby="plan-title">
           <div className="v4-shell py-16">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#79D5FF]">Subscriptions</p>
-            <h2 id="plan-title" className="mt-2 text-[32px] font-bold lg:text-[42px]">Already have the hardware? Choose a plan.</h2>
-            <p className="mt-4 max-w-[720px] text-lg text-[#C9D4DF]">These prices are for live TV on a Fire Stick, ONN, Google TV, or other compatible device you already own. A subscription does not ship a new box.</p>
-            <label className="mt-8 block max-w-xs font-semibold">
-              Screens playing at the same time
-              <select className="mt-2 min-h-[50px] w-full rounded-xl border border-[#233145] bg-[#111C2E] px-3" value={streams} onChange={(event) => setStreams(Number(event.target.value))}>
+            <h2 id="plan-title" className="text-[34px] font-bold leading-tight lg:text-[44px]">Subscriptions for a device you already own</h2>
+            <p className="mt-4 max-w-3xl text-[20px] text-[#C9D4DF]">No new box is shipped. Pick how many screens can play at the same time, then pick a length.</p>
+            <label className="mt-8 block max-w-md text-[18px] font-semibold">
+              How many screens at once?
+              <select className="mt-3 min-h-[56px] w-full rounded-xl border border-[#233145] bg-[#111C2E] px-4 text-[18px]" value={streams} onChange={(event) => setStreams(Number(event.target.value))}>
                 {[1, 2, 3, 4, 5].map((n) => (
                   <option key={n} value={n}>{n} {n === 1 ? "screen" : "screens"}</option>
                 ))}
               </select>
             </label>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="mt-8 grid gap-3">
               {DURATIONS.map((row) => {
                 const id = iptvRealProductId(row.key, streams);
                 const plan = products.find((p) => p.id === id);
                 return (
-                  <article key={row.key} className="flex flex-col rounded-[18px] bg-[#111C2E] p-5">
-                    <h3 className="text-lg font-bold">{row.label}</h3>
-                    <p className="mt-3 text-3xl font-bold">{plan ? money(plan.price) : "—"}</p>
-                    <p className="mt-2 text-sm text-[#A8B6C8]">{streams} simultaneous {streams === 1 ? "stream" : "streams"}</p>
-                    <button type="button" className="v4-btn v4-btn-primary mt-6" disabled={!plan} onClick={() => addPlan(row.key)}>
-                      {plan ? "Continue to checkout" : "Unavailable"}
+                  <article key={row.key} className="v4-plan-row">
+                    <h3 className="text-[24px] font-bold">{row.label}</h3>
+                    <p className="text-[32px] font-bold">{plan ? money(plan.price) : "—"}</p>
+                    <button type="button" className="v4-btn v4-btn-primary w-full min-w-[160px] lg:w-auto" disabled={!plan} onClick={() => addPlan(row.key)}>
+                      {plan ? "Choose" : "Unavailable"}
                     </button>
                   </article>
                 );
               })}
             </div>
-            <p className="mt-6 text-sm text-[#A8B6C8]">
-              Want to test first? <Link href="/36hr-trial"><span className="underline">Request the 36-hour trial</span></Link>
-              {" · "}
-              <Link href="/plans"><span className="underline">Open the full subscriptions page</span></Link>
+            <p className="mt-6 text-[18px] text-[#A8B6C8]">
+              Not sure yet? <Link href="/36hr-trial"><span className="underline">Request the 36-hour trial</span></Link>
             </p>
           </div>
         </section>
 
         <section id="trial" className="bg-[#EAF9F0]" aria-labelledby="trial-title">
-          <div className="v4-shell grid items-center gap-8 py-16 lg:grid-cols-2">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.16em]">Free trial</p>
-              <h2 id="trial-title" className="mt-2 text-[32px] font-bold">36 hours on a device you already own</h2>
-              <p className="mt-4 text-lg text-[#536275]">Use this if you already have a Fire Stick, ONN, or Google TV and want to try the service before buying a subscription. You send a request. Support replies with the confirmed terms. It is not a new device and it is not instant access.</p>
-            </div>
-            <div className="rounded-[22px] bg-white p-8">
-              <ol className="list-decimal space-y-3 pl-5 text-lg">
-                <li>Open the trial page and send the request.</li>
-                <li>Check email for the confirmed terms.</li>
-                <li>If you like it, come back and pick a subscription.</li>
-              </ol>
-              <Link href="/36hr-trial"><span className="v4-btn v4-btn-primary mt-8 w-full">Start the free trial</span></Link>
-            </div>
+          <div className="v4-shell py-16">
+            <h2 id="trial-title" className="max-w-4xl text-[34px] font-bold leading-tight lg:text-[44px]">The free trial is for people who already have a device.</h2>
+            <p className="mt-5 max-w-3xl text-[20px] text-[#3A4658]">It does not include a new Google TV. You send a request. Support emails the confirmed terms. Then you can buy a subscription if you like it.</p>
+            <Link href="/36hr-trial"><span className="v4-btn v4-btn-primary mt-8">Request the 36-hour trial</span></Link>
           </div>
         </section>
 
-        <section id="H11" className="bg-[#FCFBF7]" aria-labelledby="how-title">
-          <div className="v4-shell py-14">
-            <h2 id="how-title" className="text-[32px] font-bold">How the two paths work</h2>
-            <div className="mt-8 grid gap-8 md:grid-cols-2">
-              <div className="rounded-[22px] bg-[#EDF3F7] p-6">
-                <h3 className="text-xl font-bold">Google package</h3>
-                <ol className="mt-4 list-decimal space-y-2 pl-5 text-[#536275]">
-                  <li>Choose HD or 4K and check out.</li>
-                  <li>We ship the device in the United States or Canada.</li>
-                  <li>You get the tutorial, login, and live TV with the package.</li>
-                </ol>
-              </div>
-              <div className="rounded-[22px] bg-[#EAF9F0] p-6">
-                <h3 className="text-xl font-bold">Subscription or trial</h3>
-                <ol className="mt-4 list-decimal space-y-2 pl-5 text-[#536275]">
-                  <li>Keep the device you already own.</li>
-                  <li>Request the 36-hour trial, or pick a plan length and screens.</li>
-                  <li>Login and setup help arrive after the order or request is confirmed.</li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="H16" className="bg-[#F5F2EA]" aria-labelledby="faq-title">
-          <div className="v4-shell max-w-[1000px] py-14">
-            <h2 id="faq-title" className="text-[32px] font-bold">Quick answers</h2>
-            <div className="mt-8 space-y-3">
+        <section className="bg-[#FCFBF7]" aria-labelledby="faq-title">
+          <div className="v4-shell py-16">
+            <h2 id="faq-title" className="text-[34px] font-bold">If you are still unsure</h2>
+            <div className="mt-8 space-y-4">
               {[
-                ["What kind of website is this?", "StreamStickPro sells Google TV device packages and live TV subscriptions. The 36-hour trial is for people who already have a compatible device."],
-                ["Do I need a new device?", "Only if you want a Google HD or 4K package. If you already have a Fire Stick, ONN, or Google TV, use a subscription or the trial."],
-                ["Is Fire Stick hardware sold here?", "No. Plans and the trial are for a Fire TV you already own."],
-                ["What is included with a Google package?", "The device, a tutorial, login credentials, and live TV service. Exact contents are on each product page."],
-                ["Is the trial instant?", "No. You request it, then support confirms the terms. That is different from buying a subscription."],
+                ["What is this website?", "StreamStickPro. We sell Google TV packages and live TV subscriptions."],
+                ["Do I buy a Fire Stick here?", "No. If you already have one, buy a subscription or request the trial."],
+                ["What is in a Google package?", "The device, a tutorial, a login, and live TV."],
+                ["Is the trial instant?", "No. You request it. Support confirms it."],
               ].map(([q, a]) => (
-                <details key={q} className="rounded-xl border border-[#D7DFE7] bg-white px-5 py-4">
-                  <summary className="min-h-8 cursor-pointer font-semibold">{q}</summary>
-                  <p className="mt-3 text-[#536275]">{a}</p>
+                <details key={q} className="rounded-2xl border border-[#D7DFE7] bg-white px-6 py-5">
+                  <summary className="cursor-pointer text-[20px] font-semibold">{q}</summary>
+                  <p className="mt-3 text-[18px] text-[#536275]">{a}</p>
                 </details>
               ))}
             </div>
           </div>
         </section>
-
-        <section id="H17" className="bg-[#08111F] text-[#F8FAFC]" aria-labelledby="final-title">
-          <div className="v4-shell py-16 text-center">
-            <h2 id="final-title" className="mx-auto max-w-[760px] text-[32px] font-bold lg:text-[42px]">Device, subscription, or trial. Pick one and start.</h2>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a href="#packages" className="v4-btn v4-btn-primary">Google packages</a>
-              <a href="#subscriptions" className="v4-btn v4-btn-secondary-dark">Subscriptions</a>
-              <Link href="/36hr-trial"><span className="v4-btn v4-btn-secondary-dark">Free trial</span></Link>
-            </div>
-          </div>
-        </section>
       </main>
-      <div id="H18">
-        <V4Footer />
-      </div>
+      <V4Footer />
     </div>
   );
 }

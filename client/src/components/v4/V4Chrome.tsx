@@ -7,8 +7,6 @@ const NAV = [
   { label: "Devices", href: "/devices" },
   { label: "Subscriptions", href: "/plans" },
   { label: "Trial", href: "/36hr-trial" },
-  { label: "Setup", href: "/setup" },
-  { label: "Learn", href: "/learn" },
   { label: "Support", href: "/support" },
 ] as const;
 
@@ -33,11 +31,11 @@ export function V4Header() {
       </a>
       <div className="v4-shell flex h-16 items-center justify-between gap-3 lg:h-20">
         <Link href="/">
-          <span className="inline-flex max-w-[190px] items-center overflow-hidden">
+          <span className="inline-flex items-center">
             <Wordmark />
           </span>
         </Link>
-        <nav className="hidden items-center justify-center gap-6 text-[15px] font-semibold xl:flex" aria-label="Store">
+        <nav className="hidden items-center justify-center gap-8 text-[17px] font-semibold lg:flex" aria-label="Store">
           {NAV.map((item) => (
             <Link key={item.href} href={item.href}>
               <span className="min-h-11 px-1 py-2 hover:text-[#79D5FF]">{item.label}</span>
@@ -53,7 +51,7 @@ export function V4Header() {
           </button>
           <button
             type="button"
-            className="v4-btn v4-btn-secondary-dark min-h-11 min-w-11 px-3 xl:hidden"
+            className="v4-btn v4-btn-secondary-dark min-h-11 min-w-11 px-3 lg:hidden"
             aria-expanded={open}
             onClick={() => setOpen((value) => !value)}
           >
@@ -62,7 +60,7 @@ export function V4Header() {
         </div>
       </div>
       {open ? (
-        <div className="border-t border-[#233145] bg-[#08111F] xl:hidden">
+        <div className="border-t border-[#233145] bg-[#08111F] lg:hidden">
           <div className="v4-shell flex flex-col gap-1 py-4">
             <Link href="/36hr-trial">
               <span className="v4-btn v4-btn-primary w-full" onClick={() => setOpen(false)}>

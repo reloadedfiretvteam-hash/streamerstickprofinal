@@ -1701,7 +1701,7 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/': {
     title: 'Google TV packages, subscriptions, and a 36-hour trial | StreamStickPro',
     description:
-      'Buy a Google HD or 4K package, choose a live TV subscription for a device you already own, or start a 36-hour trial.',
+      'Need a device? Buy a Google HD or 4K package. Already have a Fire Stick or Google TV? Pick a subscription or request the 36-hour trial.',
   },
   '/compatibility': {
     title: 'Check the device you already own | StreamStickPro',
