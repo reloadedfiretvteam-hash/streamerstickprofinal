@@ -1,5 +1,7 @@
 import { Hono } from 'hono';
+import { createClient } from '@supabase/supabase-js';
 import type { Env } from '../index';
+import { getSupabaseServiceKey, getSupabaseUrl } from '../helpers';
 
 const TOKEN_EXPIRY = 24 * 60 * 60;
 // Fallback credentials used only when ADMIN_USERNAME/ADMIN_PASSWORD env vars are not set.
@@ -18,6 +20,37 @@ function getAdminCredentials(env: Env) {
     username: env.ADMIN_USERNAME?.trim() || FALLBACK_ADMIN_USERNAME,
     password: env.ADMIN_PASSWORD?.trim() || FALLBACK_ADMIN_PASSWORD,
   };
+}
+
+function sameText(a: string, b: string) {
+  return a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0;
+}
+
+async function matchesStoredPassword(password: string, stored: string, jwtSecret: string) {
+  if (!stored) return false;
+  if (sameText(password, stored)) return true;
+  return verifyPassword(password, stored, jwtSecret);
+}
+
+async function matchesTableAdmin(env: Env, username: string, password: string, jwtSecret: string) {
+  try {
+    const url = getSupabaseUrl(env);
+    const key = getSupabaseServiceKey(env);
+    if (!url || !key) return false;
+    const supabase = createClient(url, key, { auth: { persistSession: false } });
+    const { data } = await supabase.from('admin_credentials').select('username,password_hash');
+    const rows = Array.isArray(data) ? data : [];
+    for (const row of rows) {
+      const storedName = String(row.username || '');
+      const storedHash = String(row.password_hash || '');
+      if (sameText(storedName, username) && (await matchesStoredPassword(password, storedHash, jwtSecret))) {
+        return true;
+      }
+    }
+  } catch {
+    /* env login still available */
+  }
+  return false;
 }
 
 // Native Web Crypto JWT — works in all Cloudflare Workers runtimes
@@ -88,8 +121,10 @@ export function createAuthRoutes() {
 
       const jwtSecret = getJwtSecret(c.env);
       const { username: adminUsername, password: adminPassword } = getAdminCredentials(c.env);
+      const envOk = sameText(String(username), adminUsername) && sameText(String(password), adminPassword);
+      const tableOk = await matchesTableAdmin(c.env, String(username), String(password), jwtSecret);
 
-      if (username === adminUsername && password === adminPassword) {
+      if (envOk || tableOk) {
         const token = await jwtSign(
           { 
             sub: username, 

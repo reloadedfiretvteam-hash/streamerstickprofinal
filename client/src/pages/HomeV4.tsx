@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { apiCall } from "@/lib/api";
 import { iptvRealProductId, type IptvDurationKey } from "@/lib/iptv-sku";
@@ -15,6 +15,31 @@ const DURATIONS: { key: IptvDurationKey; label: string }[] = [
   { key: "1yr", label: "1 Year" },
   { key: "2yr", label: "2 Years" },
 ];
+
+function TiltCard({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const reset = () => {
+    if (ref.current) ref.current.style.transform = "";
+  };
+
+  const onMove = (event: MouseEvent<HTMLDivElement>) => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!window.matchMedia("(hover: hover)").matches) return;
+    const el = ref.current;
+    if (!el) return;
+    const box = el.getBoundingClientRect();
+    const x = (event.clientX - box.left) / box.width - 0.5;
+    const y = (event.clientY - box.top) / box.height - 0.5;
+    el.style.transform = `perspective(1100px) rotateY(${x * 12}deg) rotateX(${-y * 8}deg) translateY(-8px)`;
+  };
+
+  return (
+    <div ref={ref} className="v4-tilt" onMouseMove={onMove} onMouseLeave={reset}>
+      {children}
+    </div>
+  );
+}
 
 function money(n: number) {
   return `$${n}`;
@@ -151,25 +176,27 @@ export default function HomeV4() {
             <p className="mt-4 max-w-3xl text-[20px] text-[#536275]">These photos are the products. We do not sell Fire Stick hardware.</p>
             <div className="mt-10 grid gap-8 lg:grid-cols-2">
               {packages.map((pack) => (
-                <article key={pack.id} className="overflow-hidden rounded-[28px] border border-[#D7DFE7] bg-white">
-                  <img src={pack.image} alt={`${pack.name} device and box`} className="h-80 w-full bg-[#F0F3F5] object-contain p-8" />
-                  <div className="p-8">
-                    <p className="text-base font-semibold text-[#536275]">{pack.label}</p>
-                    <h3 className="mt-2 text-[30px] font-bold">{pack.name}</h3>
-                    <p className="mt-4 text-[40px] font-bold leading-none">{money(pack.price)}</p>
-                    <ul className="mt-5 space-y-2 text-[18px] text-[#536275]">
-                      <li>ONN Google TV device, preloaded</li>
-                      <li>Tutorial and login sent by email</li>
-                      <li>Live TV included with the package</li>
-                    </ul>
-                    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                      <button type="button" className="v4-btn v4-btn-primary" disabled={!pack.product} onClick={() => addProduct(pack.product)}>
-                        Add to cart
-                      </button>
-                      <Link href={`/devices/${pack.id}`}><span className="v4-btn v4-btn-secondary-light">Open this package</span></Link>
+                <TiltCard key={pack.id}>
+                  <article className="v4-tilt-inner">
+                    <img src={pack.image} alt={`${pack.name} device and box`} className="h-80 w-full bg-[#F0F3F5] object-contain p-8" />
+                    <div className="p-8">
+                      <p className="text-base font-semibold text-[#536275]">{pack.label}</p>
+                      <h3 className="mt-2 text-[30px] font-bold">{pack.name}</h3>
+                      <p className="mt-4 text-[40px] font-bold leading-none">{money(pack.price)}</p>
+                      <ul className="mt-5 space-y-2 text-[18px] text-[#536275]">
+                        <li>ONN Google TV device, preloaded</li>
+                        <li>Tutorial and login sent by email</li>
+                        <li>Live TV included with the package</li>
+                      </ul>
+                      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                        <button type="button" className="v4-btn v4-btn-primary" disabled={!pack.product} onClick={() => addProduct(pack.product)}>
+                          Add to cart
+                        </button>
+                        <Link href={`/devices/${pack.id}`}><span className="v4-btn v4-btn-secondary-light">Open this package</span></Link>
+                      </div>
                     </div>
-                  </div>
-                </article>
+                  </article>
+                </TiltCard>
               ))}
             </div>
           </div>
