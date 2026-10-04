@@ -53,11 +53,10 @@ export default function PlansCatalog() {
     <div className="bg-[#f4f6f8] text-slate-900">
       <div className="bg-[#0b1220] text-white">
         <div className="mx-auto max-w-6xl px-4 py-16">
-          <p className="text-sm uppercase tracking-[0.2em] text-teal-200">Subscriptions</p>
-          <h1 className="mt-3 text-4xl font-semibold md:text-5xl">Subscriptions for a device you already own</h1>
-          <p className="mt-4 max-w-2xl text-lg text-white leading-relaxed">
-            These plans are for a Fire Stick, Google TV, ONN, or other compatible device you already have.
-            A subscription does not include a new device. New hardware is in the Google packages.
+          <p className="text-sm uppercase tracking-[0.2em] text-teal-200">Live TV plans</p>
+          <h1 className="mt-3 text-4xl font-semibold md:text-5xl">Live TV, movies, and sports on a device you already own</h1>
+          <p className="mt-4 max-w-3xl text-lg text-white leading-relaxed">
+            A plan is the service only. Nothing ships. After checkout you get a tutorial and a login for a Fire Stick, ONN, or Google TV you already have. That login unlocks 18,000+ live channels, 100,000+ movies and series, and sports. New hardware is in the Google packages.
           </p>
         </div>
       </div>
@@ -103,7 +102,7 @@ export default function PlansCatalog() {
                     openCart();
                   }}
                 >
-                  Add subscription to cart
+                  Add live TV plan to cart
                 </button>
                 </div>
               </article>

@@ -6,9 +6,9 @@ import { useCart } from "@/lib/store";
 
 const NAV = [
   { label: "Devices", href: "/devices" },
-  { label: "Subscriptions", href: "/plans" },
+  { label: "Live TV plans", href: "/plans" },
   { label: "Trial", href: "/36hr-trial" },
-  { label: "Support", href: "/support" },
+  { label: "Support", href: "/support" },}
 ] as const;
 
 function Wordmark() {
@@ -89,11 +89,11 @@ export function V4Footer() {
         <div>
           <Wordmark />
           <p className="mt-4 max-w-xs text-sm text-[#A8B6C8]">
-            Google TV device packages and plans for a compatible device you already own. United States and Canada checkout.
+            Preloaded Google TV packages and live TV plans for a Fire Stick or Google TV you already own. United States and Canada checkout.
           </p>
         </div>
         {[
-          { title: "Shop", links: [["Google packages", "/devices"], ["Subscriptions", "/plans"], ["36-hour trial", "/36hr-trial"]] },
+          { title: "Shop", links: [["Google packages", "/devices"], ["Live TV plans", "/plans"], ["36-hour trial", "/36hr-trial"]] },
           { title: "Help", links: [["Compatibility", "/compatibility"], ["Setup", "/setup"], ["Support", "/support"]] },
           { title: "Company", links: [["Learn", "/learn"], ["Device finder", "/device-finder"], ["Refunds", "/refund"]] },
         ].map((group) => (

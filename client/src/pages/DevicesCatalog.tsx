@@ -78,17 +78,17 @@ export default function DevicesCatalog() {
     <div className="bg-[#f4f6f8] text-slate-900">
       <div className="bg-[#0b1220] text-white">
         <div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-blue-300">Google TV Devices</p>
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-blue-300">Shipped preloaded devices</p>
           <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
             Google HD and 4K packages
           </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white">
-            The HD package is $140. The 4K package is $150. Each one includes the preloaded ONN Google TV device, a web tutorial, login credentials, and live TV service.
-            If you already own a device, see{" "}
+          <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white">
+            HD is $140. 4K is $150. Each box is an ONN Google TV with the player already on it, plus one year of live TV, movies, and sports. We ship the device to the United States or Canada and email the tutorial and login. Fire Stick hardware is not sold here.
+            If you already own a stick, buy a{" "}
             <Link href="/plans" className="text-teal-200 underline underline-offset-2">
-              subscriptions
+              live TV plan
             </Link>
-            .
+            instead.
           </p>
         </div>
       </div>
