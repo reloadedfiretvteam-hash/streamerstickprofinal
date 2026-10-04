@@ -8,7 +8,7 @@ const NAV = [
   { label: "Devices", href: "/devices" },
   { label: "Live TV plans", href: "/plans" },
   { label: "Trial", href: "/36hr-trial" },
-  { label: "Support", href: "/support" },}
+  { label: "Support", href: "/support" },
 ] as const;
 
 function Wordmark() {
