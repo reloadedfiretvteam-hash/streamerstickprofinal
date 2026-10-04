@@ -35,7 +35,7 @@ export function V4Header() {
             <Wordmark />
           </span>
         </Link>
-        <nav className="hidden items-center justify-center gap-8 text-[17px] font-semibold lg:flex" aria-label="Store">
+        <nav className="hidden items-center justify-center gap-8 text-[17px] font-semibold md:flex" aria-label="Store">
           {NAV.map((item) => (
             <Link key={item.href} href={item.href}>
               <span className="min-h-11 px-1 py-2 hover:text-[#79D5FF]">{item.label}</span>
@@ -51,7 +51,7 @@ export function V4Header() {
           </button>
           <button
             type="button"
-            className="v4-btn v4-btn-secondary-dark min-h-11 min-w-11 px-3 lg:hidden"
+            className="v4-btn v4-btn-secondary-dark min-h-11 min-w-11 px-3 md:hidden"
             aria-expanded={open}
             onClick={() => setOpen((value) => !value)}
           >
@@ -60,7 +60,7 @@ export function V4Header() {
         </div>
       </div>
       {open ? (
-        <div className="border-t border-[#233145] bg-[#08111F] lg:hidden">
+        <div className="border-t border-[#233145] bg-[#08111F] md:hidden">
           <div className="v4-shell flex flex-col gap-1 py-4">
             <Link href="/36hr-trial">
               <span className="v4-btn v4-btn-primary w-full" onClick={() => setOpen(false)}>
