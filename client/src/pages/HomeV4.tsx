@@ -60,10 +60,6 @@ export default function HomeV4() {
 
   useEffect(() => {
     document.documentElement.classList.remove("dark");
-    const inter = document.createElement("link");
-    inter.rel = "stylesheet";
-    inter.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Sora:wght@600;700&display=swap";
-    document.head.appendChild(inter);
     setPageMeta({
       title: "Preloaded Google TV packages and live TV plans | StreamStickPro",
       description:
@@ -88,9 +84,6 @@ export default function HomeV4() {
         );
       })
       .catch(() => undefined);
-    return () => {
-      inter.remove();
-    };
   }, []);
 
   const hd = products.find((p) => p.id === HD_ID);
@@ -160,8 +153,8 @@ export default function HomeV4() {
               </div>
             </div>
             <div className="v4-hero-photos">
-              <img src={HD_IMG} alt="Google HD package device and box" />
-              <img src={K4_IMG} alt="Google 4K package device and box" />
+              <img src={HD_IMG} alt="Google HD package device and box" width="640" height="480" fetchPriority="high" decoding="async" />
+              <img src={K4_IMG} alt="Google 4K package device and box" width="640" height="480" decoding="async" />
             </div>
           </div>
         </section>
@@ -231,7 +224,7 @@ export default function HomeV4() {
               {packages.map((pack) => (
                 <TiltCard key={pack.id}>
                   <article className="v4-tilt-inner">
-                    <img src={pack.image} alt={`${pack.name} device and box`} className="h-80 w-full bg-[#F0F3F5] object-contain p-8" />
+                    <img src={pack.image} alt={`${pack.name} device and box`} width="800" height="640" decoding="async" className="h-80 w-full bg-[#F0F3F5] object-contain p-8" />
                     <div className="p-8">
                       <p className="text-base font-semibold text-[#536275]">{pack.label}</p>
                       <h3 className="mt-2 text-[30px] font-bold">{pack.name}</h3>
@@ -268,7 +261,7 @@ export default function HomeV4() {
                 <p className="mt-4 text-[20px] text-[#C9D4DF]">
                   A plan is the service only. We do not ship a stick. You keep your Fire Stick, ONN, or Google TV. After you pay, you get a tutorial and a login. That login unlocks live channels, movies, series, and sports on the devices you activate.
                 </p>
-                <img src={IPTV_IMG} alt="Live TV plan on a television" className="mt-8 w-full rounded-[24px] object-cover" />
+                <img src={IPTV_IMG} alt="Live TV plan on a television" width="900" height="600" decoding="async" className="mt-8 w-full rounded-[24px] object-cover" />
                 <ul className="v4-include-list v4-include-list-dark mt-6">
                   <li>18,000+ live TV channels</li>
                   <li>100,000+ movies and series</li>

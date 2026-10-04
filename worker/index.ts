@@ -1743,9 +1743,9 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/36hr-trial': { title: '36-hour trial request | StreamStickPro', description: 'Request a 36-hour trial only if you already own a supported device. Support writes back. It is not instant and it is not a package purchase.' },
   '/iptv-firestick': { title: 'IPTV Fire Stick Search? Google Packages | StreamStickPro', description: 'Looking up IPTV for Fire Stick or Downloader? Shop the Google HD package or Google 4K package, or use a subscription on a Fire TV you already own.' },
   '/best-iptv-firestick': { title: 'Best IPTV Fire Stick 2026 | Google Packages | StreamStickPro', description: 'People comparing IPTV for Fire Stick can order a Google HD or 4K package, or run live TV on a Fire Stick they already own.' },
-  '/devices': { title: 'ONN & Google TV Devices | StreamStickPro', description: 'Shop ONN and Google TV streaming devices with price, condition, and setup details. Fire Stick hardware is not sold on this page.' },
+  '/devices': { title: 'Preloaded Google HD and 4K packages | StreamStickPro', description: 'HD $140 and 4K $150. Each box is a shipped ONN Google TV with the player already on it and one year of live TV. Fire Stick hardware is not sold.' },
   '/social-ads': { title: 'StreamStickPro ads | 36-hour free trial and Google packages', description: 'StreamStickPro ads: cut the cable bill, keep live TV, sports, movies, and a 36-hour free trial. Google HD package and Google 4K package.' },
-  '/plans': { title: 'Plans for Devices You Already Own | StreamStickPro', description: 'Streaming plans for Fire TV, Google TV, ONN, and other devices you already own. Hardware is included only when the plan says so.' },
+  '/plans': { title: 'Live TV plans for a device you own | StreamStickPro', description: 'A plan is the service only. Nothing ships. After checkout you get a login for a Fire Stick, ONN, or Google TV you already own.' },
   '/guides': { title: 'Google TV & Device Setup Guides | StreamStickPro', description: 'Written setup steps for ONN and Google TV, plus troubleshooting. A video alone is not the guide. Links to devices and plans.' },
   '/support': { title: 'Support & Contact | StreamStickPro', description: 'Setup help, compatibility questions, and order support. Email the team, or open guides, devices, and plans from this page.' },
   '/contact': { title: 'Contact StreamStickPro Support | StreamStickPro', description: 'Contact StreamStickPro for setup help, compatibility questions, and order support. Email the team and use the linked guides.' },
@@ -2065,7 +2065,7 @@ async function injectProductSchema(html: string, pathname: string, env: Env): Pr
   try {
     const products = await liveGoogleDevices(env);
     if (!products.length) return html;
-    if (pathname === '/devices' || pathname === '/shop') {
+    if (pathname === '/' || pathname === '/devices' || pathname === '/shop') {
       return html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(itemListJsonLd(products))}</script></head>`);
     }
     const match = pathname.match(/^\/devices\/([^/]+)$/);
@@ -2135,7 +2135,7 @@ app.get('*', async (c) => {
   // Known SPA routes that should always return 200 (even without a static asset).
   // Blog slugs are only considered known if metadata resolves (post exists).
   const staticKnownRoutes = new Set([
-    '/', '/shop', '/shadow-services', '/admin', '/checkout', '/success', '/cancel', '/blog',
+    '/', '/shop', '/plans', '/shadow-services', '/admin', '/checkout', '/success', '/cancel', '/blog',
     '/customer-login', '/my-account', '/forgot-password', '/reset-password',
     '/terms', '/privacy', '/refund',     '/iptv', '/iptv-firestick', '/iptv-services', '/fire-sticks',
     '/jailbroken-fire-sticks', '/devices', '/firestick-devices', '/bundles', '/best-iptv-firestick',
@@ -2173,7 +2173,7 @@ app.get('*', async (c) => {
     }
     const html = await res.text();
     const status = isKnownRoute ? 200 : 404;
-    const withMeta = injectMeta(html, pathname, isKnownRoute ? effectiveMeta : { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
+    const withMeta = injectMeta(html, pathname, isKnownRoute ? effectiveMeta : { title: 'Page Not Found | StreamStickPro', description: 'This page was not found. Open Google TV packages, live TV plans, or the 36-hour trial on StreamStickPro.', noindex: true });
     const fixed = isSecureDomain ? cloakHtml(withMeta, pathname) : (isKnownRoute ? await injectProductSchema(withMeta, pathname, c.env) : withMeta);
     return applySecurityHeaders(new Response(fixed, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   } catch {
@@ -2181,7 +2181,7 @@ app.get('*', async (c) => {
     const html = await fallback.text();
     // Unknown routes get 404 so Google doesn't report "soft 404" for non-existent pages
     const status = isKnownRoute ? 200 : 404;
-    const withMeta = injectMeta(html, pathname, isKnownRoute ? effectiveMeta : { title: 'Page Not Found | StreamStickPro', description: 'The page you requested was not found. Browse IPTV subscriptions, Fire Sticks, and streaming guides at StreamStickPro.', noindex: true });
+    const withMeta = injectMeta(html, pathname, isKnownRoute ? effectiveMeta : { title: 'Page Not Found | StreamStickPro', description: 'This page was not found. Open Google TV packages, live TV plans, or the 36-hour trial on StreamStickPro.', noindex: true });
     const fixed = isSecureDomain ? cloakHtml(withMeta, pathname) : (isKnownRoute ? await injectProductSchema(withMeta, pathname, c.env) : withMeta);
     return applySecurityHeaders(new Response(fixed, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } }), pathname, hostname);
   }
