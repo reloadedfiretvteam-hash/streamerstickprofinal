@@ -10,7 +10,7 @@ import RetargetingPixels from "@/components/RetargetingPixels";
 import { Spinner } from "@/components/ui/spinner";
 
 // Only the public homepage loads immediately.
-import MainStore from "@/pages/MainStore";
+import HomeV4 from "@/pages/HomeV4";
 
 // Non-critical routes - lazy load for better performance
 const ShadowStore = lazy(() => import("@/pages/ShadowStore"));
@@ -26,6 +26,9 @@ const GuideDetailPage = lazy(() =>
   import("@/pages/GuidesPages").then((m) => ({ default: m.GuideDetailPage })),
 );
 const SupportContactPage = lazy(() => import("@/pages/SupportContactPage"));
+const CompatibilityHub = lazy(() => import("@/pages/CompatibilityHub"));
+const DeviceFinderPage = lazy(() => import("@/pages/DeviceFinderPage"));
+const LearnHub = lazy(() => import("@/pages/LearnHub"));
 const Blog = lazy(() => import("@/pages/Blog"));
 const Success = lazy(() => import("@/pages/Success"));
 const CustomerLogin = lazy(() => import("@/pages/CustomerLogin"));
@@ -105,9 +108,12 @@ function Router() {
     <Suspense fallback={<LoadingFallback />}>
       <>
       <Switch>
-        <Route path="/" component={MainStore} />
-        <Route path="/homepage" component={MainStore} />
-        <Route path="/faq" component={MainStore} />
+        <Route path="/" component={HomeV4} />
+        <Route path="/homepage" component={HomeV4} />
+        <Route path="/faq" component={HomeV4} />
+        <Route path="/compatibility" component={CompatibilityHub} />
+        <Route path="/device-finder" component={DeviceFinderPage} />
+        <Route path="/learn" component={LearnHub} />
         <Route path="/vpn" component={VpnPage} />
         <Route path="/onn" component={OnnGoogleTv} />
         <Route path="/shop" component={Shop} />

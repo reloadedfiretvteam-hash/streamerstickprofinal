@@ -1,0 +1,104 @@
+.v4 {
+  --v4-navy: #08111f;
+  --v4-ink: #040a12;
+  --v4-slate: #111c2e;
+  --v4-steel: #18263b;
+  --v4-white: #fcfbf7;
+  --v4-porcelain: #f5f2ea;
+  --v4-bluegray: #edf3f7;
+  --v4-text: #0b1220;
+  --v4-light: #f8fafc;
+  --v4-muted: #536275;
+  --v4-muted-light: #a8b6c8;
+  --v4-green: #23c768;
+  --v4-green-hover: #18a957;
+  --v4-tech: #3abef8;
+  --v4-focus: #79d5ff;
+  --v4-error: #b42318;
+  --v4-border: #d7dfe7;
+  --v4-max: 1240px;
+  background: var(--v4-white);
+  color: var(--v4-text);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.v4 h1,
+.v4 h2,
+.v4 h3,
+.v4 .v4-wordmark {
+  font-family: Sora, Inter, system-ui, sans-serif;
+}
+
+.v4-shell {
+  width: min(1240px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+@media (min-width: 768px) {
+  .v4-shell {
+    width: min(1240px, calc(100% - 64px));
+  }
+}
+
+.v4-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 14px 22px;
+  border-radius: 12px;
+  font: 600 16px/22px Inter, system-ui, sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 180ms ease, border-color 180ms ease;
+}
+
+.v4-btn:focus-visible {
+  outline: 3px solid var(--v4-focus);
+  outline-offset: 3px;
+}
+
+.v4-btn-primary {
+  background: var(--v4-green);
+  color: var(--v4-navy);
+}
+
+.v4-btn-primary:hover {
+  background: var(--v4-green-hover);
+}
+
+.v4-btn-secondary-dark {
+  background: transparent;
+  color: var(--v4-light);
+  border-color: var(--v4-muted-light);
+}
+
+.v4-btn-secondary-dark:hover {
+  background: var(--v4-steel);
+}
+
+.v4-btn-secondary-light {
+  background: var(--v4-navy);
+  color: var(--v4-light);
+}
+
+.v4-btn-secondary-light:hover {
+  background: var(--v4-steel);
+}
+
+.v4-link {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+.v4-link-light {
+  color: var(--v4-focus);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v4 * {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

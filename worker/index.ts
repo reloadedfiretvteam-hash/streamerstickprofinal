@@ -1122,6 +1122,19 @@ const SEO_REDIRECTS_STATIC: Record<string, string> = {
   '/tools': '/tools/catalog',
   '/locations': '/devices',
   '/contact': '/support',
+  '/devices/onn-google-tv-hd': '/devices/android-onn-4k',
+  '/devices/onn-google-tv-hd/': '/devices/android-onn-4k',
+  '/devices/onn-google-tv-4k': '/devices/android-onn-pro',
+  '/devices/onn-google-tv-4k/': '/devices/android-onn-pro',
+  '/devices/compare': '/devices',
+  '/compatibility/fire-tv': '/jailbroken-fire-sticks',
+  '/compatibility/google-tv': '/onn-google-tv',
+  '/compatibility/onn': '/onn-google-tv',
+  '/compatibility/android-tv': '/iptv-media-players',
+  '/compatibility/smart-tv': '/compatibility',
+  '/setup/fire-tv': '/setup',
+  '/setup/onn-google-tv': '/onn-google-tv',
+  '/setup/android-tv': '/setup',
 };
 app.get('*', async (c, next) => {
   const reqUrl = new URL(c.req.url);
@@ -1423,6 +1436,9 @@ const STATIC_SITEMAP_PAGES = [
   { url: '/plans', priority: '0.9', changefreq: 'weekly' },
   { url: '/guides', priority: '0.9', changefreq: 'weekly' },
   { url: '/support', priority: '0.7', changefreq: 'monthly' },
+  { url: '/compatibility', priority: '0.8', changefreq: 'weekly' },
+  { url: '/learn', priority: '0.8', changefreq: 'weekly' },
+  { url: '/device-finder', priority: '0.8', changefreq: 'weekly' },
   { url: '/bundles', priority: '0.9', changefreq: 'weekly' },
   { url: '/best-iptv-firestick', priority: '0.9', changefreq: 'weekly' },
   { url: '/iptv-media-players', priority: '0.9', changefreq: 'weekly' },
@@ -1683,9 +1699,24 @@ app.post('/api/indexnow/ping', async (c) => {
 // ── Per-page SEO meta for SPA pages (critical: Googlebot sees unique meta per page) ──
 const PAGE_META: Record<string, { title: string; description: string; noindex?: boolean }> = {
   '/': {
-    title: 'Preloaded ONN Google TV | IPTV, Trial, Fire Stick | StreamStickPro',
+    title: 'Streaming setup without the setup headache | StreamStickPro',
     description:
-      'Shop a preloaded ONN Google TV device with a web tutorial, login credentials, and live TV service. IPTV subscriptions and a free 36-hour trial if you already own a Fire Stick.',
+      'Buy a Google TV device package or choose a streaming plan for a compatible device you already own. Device finder, setup guides, and checkout stay on StreamStickPro.',
+  },
+  '/compatibility': {
+    title: 'Check the device you already own | StreamStickPro',
+    description:
+      'Compatibility depends on the exact model, platform, and supported player. Check Fire TV, Google TV, ONN, Android TV, or Smart TV before choosing a plan.',
+  },
+  '/learn': {
+    title: 'Learn streaming setup and plans | StreamStickPro',
+    description:
+      'Guides for Google TV packages, existing-device plans, compatibility, and setup. No extra location catalogs.',
+  },
+  '/device-finder': {
+    title: 'Find your setup | StreamStickPro',
+    description:
+      'Pick Fire TV, Google TV, ONN, Android TV, Smart TV, or I’m not sure to get the next compatibility and setup step.',
   },
   '/vpn': {
     title: 'Surfshark VPN IPTV Buffering ISP Throttle Firestick | StreamStickPro',
@@ -2112,6 +2143,7 @@ app.get('*', async (c) => {
     '/onn-google-tv', '/onn', '/iptv-smarters-pro', '/tivimate', '/ultimate-iptv-catalog-2026',
     '/tools/catalog', '/setup', '/setup-firestick', '/setup-onn', '/tutorials', '/seo-ads',
     '/locations', '/trial', '/firestick',
+    '/compatibility', '/learn', '/device-finder',
     '/vpn', '/homepage', '/faq', '/vpn-protection', '/social-ads',
     '/track-order', '/secure', '/checkout-secure', '/bundles',
   ]);
