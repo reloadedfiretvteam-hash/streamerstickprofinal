@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "wouter";
 import { BrandLogo } from "@/components/BrandLogo";
+import { FooterAdminSlot } from "@/components/OwnerStoreUtils";
 
 const links = [
   { href: "/", label: "Home" },
@@ -66,6 +67,7 @@ export function StorefrontChrome({ children }: { children: ReactNode }) {
           <Link href="/refund" className="hover:text-slate-900">
             Refunds
           </Link>
+          <FooterAdminSlot />
         </div>
       </footer>
     </div>

@@ -24,7 +24,7 @@ export default function HomeV4() {
   const [, setLocation] = useLocation();
   const { addItem, openCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
-  const [streams, setStreams] = useState(1);
+  const [devices, setDevices] = useState(1);
 
   useEffect(() => {
     document.documentElement.classList.remove("dark");
@@ -74,7 +74,7 @@ export default function HomeV4() {
   };
 
   const addPlan = (duration: IptvDurationKey) => {
-    const id = iptvRealProductId(duration, streams);
+    const id = iptvRealProductId(duration, devices);
     const plan = products.find((p) => p.id === id);
     if (!plan) return;
     addItem({ ...plan, image: packageImage(plan.id, IPTV_IMG) });
@@ -94,7 +94,7 @@ export default function HomeV4() {
 
       <main id="main-content">
         <section className="bg-[#08111F] text-[#F8FAFC]" aria-labelledby="hero-title">
-          <div className="v4-shell py-16 lg:py-24">
+          <div className="v4-shell py-16 lg:py-20">
             <p className="text-base font-semibold text-[#79D5FF]">StreamStickPro</p>
             <h1 id="hero-title" className="mt-4 max-w-4xl text-[42px] font-bold leading-[1.12] sm:text-[56px] lg:text-[64px]">
               Need a device, or do you already have one?
@@ -102,6 +102,14 @@ export default function HomeV4() {
             <p className="mt-6 max-w-3xl text-[20px] leading-relaxed text-[#D5DEE8] sm:text-[22px]">
               This website sells two things. A Google TV package if you need the hardware. A live TV subscription if you already have a Fire Stick, ONN, or Google TV.
             </p>
+            <div className="v4-trial-banner mt-10">
+              <div>
+                <p className="text-[15px] font-bold uppercase tracking-[0.12em]">Free 36-hour trial</p>
+                <p className="mt-2 text-[22px] font-bold leading-tight sm:text-[26px]">Already own a Fire Stick or Google TV? Try the service first.</p>
+                <p className="mt-2 text-[18px]">You send a request. Support writes back. It is not a new device and it is not instant.</p>
+              </div>
+              <Link href="/36hr-trial"><span className="v4-btn v4-btn-secondary-light bg-[#08111F] text-[#F8FAFC]">Start the free trial</span></Link>
+            </div>
           </div>
         </section>
 
@@ -121,7 +129,7 @@ export default function HomeV4() {
                 <div className="v4-path-num" aria-hidden>2</div>
                 <div>
                   <h3 className="text-[28px] font-bold leading-tight lg:text-[32px]">I already have a device</h3>
-                  <p className="mt-2 max-w-2xl text-[20px] text-[#536275]">Keep your Fire Stick or Google TV. Buy a subscription. Plans start at $11 for one month on one screen.</p>
+                  <p className="mt-2 max-w-2xl text-[20px] text-[#536275]">Keep your Fire Stick or Google TV. Buy a subscription. Plans start at $11 for one month on one device.</p>
                 </div>
                 <a href="#subscriptions" className="v4-btn v4-btn-secondary-light w-full min-w-[220px] lg:w-auto">See the plans</a>
               </article>
@@ -170,18 +178,26 @@ export default function HomeV4() {
         <section id="subscriptions" className="bg-[#08111F] text-[#F8FAFC]" aria-labelledby="plan-title">
           <div className="v4-shell py-16">
             <h2 id="plan-title" className="text-[34px] font-bold leading-tight lg:text-[44px]">Subscriptions for a device you already own</h2>
-            <p className="mt-4 max-w-3xl text-[20px] text-[#C9D4DF]">No new box is shipped. Pick how many screens can play at the same time, then pick a length.</p>
-            <label className="mt-8 block max-w-md text-[18px] font-semibold">
-              How many screens at once?
-              <select className="mt-3 min-h-[56px] w-full rounded-xl border border-[#233145] bg-[#111C2E] px-4 text-[18px]" value={streams} onChange={(event) => setStreams(Number(event.target.value))}>
+            <p className="mt-4 max-w-3xl text-[20px] text-[#C9D4DF]">No new box is shipped. First pick how many devices you want to activate, then pick the plan length.</p>
+            <fieldset className="mt-8">
+              <legend className="text-[20px] font-semibold">How many devices do you want to activate?</legend>
+              <div className="v4-device-opts">
                 {[1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>{n} {n === 1 ? "screen" : "screens"}</option>
+                  <button
+                    key={n}
+                    type="button"
+                    className="v4-device-opt"
+                    aria-pressed={devices === n}
+                    onClick={() => setDevices(n)}
+                  >
+                    {n} {n === 1 ? "device" : "devices"}
+                  </button>
                 ))}
-              </select>
-            </label>
+              </div>
+            </fieldset>
             <div className="mt-8 grid gap-3">
               {DURATIONS.map((row) => {
-                const id = iptvRealProductId(row.key, streams);
+                const id = iptvRealProductId(row.key, devices);
                 const plan = products.find((p) => p.id === id);
                 return (
                   <article key={row.key} className="v4-plan-row">
@@ -216,6 +232,7 @@ export default function HomeV4() {
                 ["What is this website?", "StreamStickPro. We sell Google TV packages and live TV subscriptions."],
                 ["Do I buy a Fire Stick here?", "No. If you already have one, buy a subscription or request the trial."],
                 ["What is in a Google package?", "The device, a tutorial, a login, and live TV."],
+                ["How many devices do I pick on a subscription?", "That is how many devices you want to activate on the plan. One device is one Fire Stick, ONN, or Google TV."],
                 ["Is the trial instant?", "No. You request it. Support confirms it."],
               ].map(([q, a]) => (
                 <details key={q} className="rounded-2xl border border-[#D7DFE7] bg-white px-6 py-5">

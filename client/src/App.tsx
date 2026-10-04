@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route } from "wouter";
+import { WhatsAppLiveChat } from "@/components/OwnerStoreUtils";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -194,6 +195,7 @@ function AppContent() {
           />
           <CartDrawer />
           <WishlistDrawer />
+          <WhatsAppLiveChat />
         </Suspense>
       ) : null}
       <Router />

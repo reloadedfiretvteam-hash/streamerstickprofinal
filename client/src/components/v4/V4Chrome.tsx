@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { BrandMark } from "@/components/BrandLogo";
+import { FooterAdminSlot } from "@/components/OwnerStoreUtils";
 import { useCart } from "@/lib/store";
 
 const NAV = [
@@ -44,9 +45,9 @@ export function V4Header() {
         </nav>
         <div className="flex items-center gap-2">
           <Link href="/36hr-trial">
-            <span className="v4-btn v4-btn-primary hidden min-h-11 px-4 text-sm sm:inline-flex">Free Trial</span>
+            <span className="v4-btn v4-btn-primary hidden px-5 sm:inline-flex">Free Trial</span>
           </Link>
-          <button type="button" className="v4-btn v4-btn-secondary-dark min-h-11 px-3 text-sm" onClick={openCart}>
+          <button type="button" className="v4-btn v4-btn-secondary-dark px-4" onClick={openCart}>
             Cart{count ? ` (${count})` : ""}
           </button>
           <button
@@ -111,10 +112,11 @@ export function V4Footer() {
         ))}
       </div>
       <div className="border-t border-[#233145]">
-        <div className="v4-shell flex flex-wrap gap-4 py-6 text-sm text-[#A8B6C8]">
+        <div className="v4-shell flex flex-wrap items-center gap-4 py-6 text-sm text-[#A8B6C8]">
           <Link href="/terms"><span>Terms</span></Link>
           <Link href="/privacy"><span>Privacy</span></Link>
           <Link href="/refund"><span>Refunds</span></Link>
+          <FooterAdminSlot />
         </div>
       </div>
     </footer>

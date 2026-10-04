@@ -27,7 +27,7 @@ export default function PlansCatalog() {
     setPageMeta({
       title: "Live TV Subscriptions | StreamStickPro",
       description:
-        "Live TV subscriptions for a Fire Stick, Google TV, or ONN device you already own. Pick the length and the number of screens, then check out.",
+        "Live TV subscriptions for a Fire Stick, Google TV, or ONN device you already own. Pick the length and how many devices you want to activate, then check out.",
       path: "/plans",
     });
   }, []);
