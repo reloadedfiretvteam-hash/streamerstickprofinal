@@ -10,10 +10,17 @@ function formatUsd(cents?: number | null) {
   return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
 }
 
+function publicLabel(text?: string | null) {
+  return String(text || "")
+    .replace(/IPTV/gi, "Live TV")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function readablePlanCopy(text?: string | null) {
-  const value = String(text || "").trim();
+  const value = publicLabel(text);
   if (!value || /real product mapped/i.test(value)) {
-    return "Live TV subscription for a Fire Stick, ONN, or Google TV you already own. Includes a web tutorial and login credentials.";
+    return "Live TV plan for a Fire Stick, ONN, or Google TV you already own. Includes a web tutorial and login credentials.";
   }
   return value;
 }
@@ -82,7 +89,7 @@ export default function PlansCatalog() {
                 <div className="flex flex-1 flex-col p-6">
                 <h2 className="text-xl font-semibold text-slate-900">
                   <Link href={`/plans/${encodeURIComponent(p.code)}`} className="hover:text-blue-700">
-                    {p.public_title}
+                    {publicLabel(p.public_title)}
                   </Link>
                 </h2>
                 <p className="mt-2 flex-1 text-base leading-relaxed text-slate-700">{readablePlanCopy(p.short_description)}</p>
@@ -93,7 +100,7 @@ export default function PlansCatalog() {
                   onClick={() => {
                     addItem({
                       id: p.real_product_id || p.code,
-                      name: p.public_title,
+                      name: publicLabel(p.public_title),
                       price: dollars,
                       image: packageImage(p.real_product_id || p.code, p.primary_image_url || IPTV_IMG),
                       category: "iptv",
