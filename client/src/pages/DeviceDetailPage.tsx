@@ -4,6 +4,7 @@ import { StorefrontChrome } from "@/components/StorefrontChrome";
 import { setPageMeta } from "@/lib/seo";
 import { useCart } from "@/lib/store";
 import { dollarsFromCatalog, packageImage } from "@/lib/package-art";
+import { HD_ID, K4_ID, publicDevicePath, resolveDeviceSku } from "@/lib/device-skus";
 import { apiCall } from "@/lib/api";
 
 function formatUsd(cents?: number | null) {
@@ -13,7 +14,7 @@ function formatUsd(cents?: number | null) {
 
 export default function DeviceDetailPage() {
   const params = useParams<{ sku: string }>();
-  const sku = decodeURIComponent(params.sku || "");
+  const sku = resolveDeviceSku(params.sku || "");
   const [device, setDevice] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const { addItem, openCart } = useCart();
@@ -103,7 +104,7 @@ export default function DeviceDetailPage() {
     setPageMeta({
       title: device.seo_title || device.public_title || "Google TV device",
       description: device.seo_description || device.short_description || "ONN or Google TV device details, price, and setup.",
-      path: `/devices/${encodeURIComponent(device.sku || "")}`,
+      path: publicDevicePath(device.sku || sku).replace(/\/$/, ""),
     });
     return () => {
       document.getElementById("device-jsonld")?.remove();
@@ -143,7 +144,14 @@ export default function DeviceDetailPage() {
         <div className="overflow-hidden rounded-2xl bg-[#edf3f7]">
           <img
             src={packageImage(device.sku || sku, device.primary_image_url)}
-            alt={device.image_alt || device.public_title}
+            alt={
+              device.image_alt ||
+              (sku === HD_ID
+                ? "ONN Full HD Google TV streaming stick with voice remote and retail box."
+                : sku === K4_ID
+                  ? "ONN 4K Google TV streaming box with voice remote and retail box."
+                  : device.public_title)
+            }
             className="w-full object-contain p-6"
           />
         </div>
@@ -161,7 +169,9 @@ export default function DeviceDetailPage() {
             ) : null}
           </div>
           <p className="mt-2 text-sm text-slate-500">
-            Public display price · Availability: {device.availability || "in stock"}
+            {String(device.availability || "").toLowerCase() === "in_stock" || String(device.availability || "").toLowerCase() === "in stock"
+              ? "In stock"
+              : "Check availability on this page before you order."}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <button

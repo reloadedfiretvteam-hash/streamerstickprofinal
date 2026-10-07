@@ -6,20 +6,20 @@ import { Play, Home, Check, ShieldCheck, Zap } from "lucide-react";
 import { setPageMeta } from "@/lib/seo";
 import { SEOSchema } from "@/components/SEOSchema";
 
-const TITLE = "Reloaded Fire TV Setup Guides - Firestick, Onn, Roku";
-const DESC = "Step-by-step guides to setup Reloaded Fire TV on Firestick, Onn Google TV, Roku devices.";
+const TITLE = "StreamStickPro setup guides for Fire TV and ONN";
+const DESC = "Written and video setup previews for Fire TV and ONN Google TV. Your order email has the login and the steps for your package or plan.";
 
 const VIDEOS = [
   {
     id: "9pZOoS-1NHg",
     title: "Install Media Player on Fire Stick",
-    label: "How to Set Up Reloaded Fire TV on Fire Stick",
+    label: "How to set up a Fire Stick you already own",
     description: "Preview the Fire Stick setup flow before buying. After purchase, customers receive a separate device-specific tutorial video by email with the exact steps for their order.",
   },
   {
     id: "w6s_Tcnnbpo",
     title: "Install Media Player on ONN Google Device",
-    label: "How to Set Up Reloaded Fire TV on ONN Google TV",
+    label: "How to set up an ONN Google TV",
     description: "Preview the ONN Google TV setup flow before buying. After purchase, customers receive a separate device-specific tutorial video by email with the exact steps for their order.",
   },
 ];
@@ -31,22 +31,22 @@ const FAQ_ITEMS = [
   },
   {
     question: "Do I need technical skills to follow these tutorials?",
-    answer: "No. The tutorials are designed for beginners. Each step is shown on screen with clear instructions. Most customers finish setup in under 10 minutes."
+    answer: "The public videos are meant for a first look. Follow the matching written guide, and email support if a step looks different from the screen in front of you."
   },
   {
     question: "What devices do these tutorials cover?",
-    answer: "We have tutorials for Amazon Fire Stick (HD, 4K, 4K Max) and ONN Google TV (4K, 4K Pro). The setup process is similar across all devices."
+    answer: "Public preview videos cover Fire Stick and ONN Google TV. Use the guide that matches the device in front of you. Do not assume a Pro or Plus model is the same product."
   },
   {
     question: "Can I contact support if I get stuck during setup?",
-    answer: "Absolutely. Our 24/7 support team is available via email at reloadedfiretvteam@gmail.com or WhatsApp. We walk you through any step you need help with."
+    answer: "Email support@streamstickpro.com with the model and the screen you are on. Do not send passwords in screenshots."
   },
 ];
 
 export default function Tutorials() {
   useEffect(() => {
     setPageMeta({
-      title: "Reloaded Fire TV Setup Guide Firestick Onn Roku | StreamStickPro",
+      title: "Setup guides | StreamStickPro",
       description: DESC,
       path: "/setup",
       ogImage: "https://streamstickpro.com/images/setup-og.webp",
@@ -64,11 +64,11 @@ export default function Tutorials() {
     };
 
     setMeta("og:title", "StreamStickPro Setup Guides", true);
-    setMeta("og:description", "Learn how to set up Reloaded Fire TV quickly and easily on all major devices.", true);
+    setMeta("og:description", "Setup previews for Fire TV and ONN Google TV. Order email has your login.", true);
     setMeta("og:image", "https://streamstickpro.com/images/setup-og.webp", true);
     setMeta("twitter:card", "summary_large_image");
     setMeta("twitter:title", "StreamStickPro Setup Guides");
-    setMeta("twitter:description", "Learn how to set up Reloaded Fire TV quickly and easily on all major devices.");
+    setMeta("twitter:description", "Setup previews for Fire TV and ONN Google TV. Order email has your login.");
     setMeta("twitter:image", "https://streamstickpro.com/images/setup-og.webp");
   }, []);
 
@@ -102,7 +102,7 @@ export default function Tutorials() {
             {[
               "Guided step-by-step walkthrough",
               "No technical skills needed",
-              "24/7 support if you get stuck",
+              "Support email if a step looks different",
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 text-green-300">
                 <Check className="w-4 h-4 shrink-0" />

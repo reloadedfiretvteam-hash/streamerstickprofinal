@@ -1,9 +1,12 @@
 import { useEffect } from "react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { StorefrontChrome } from "@/components/StorefrontChrome";
 import { setPageMeta } from "@/lib/seo";
 
 export default function SupportContactPage() {
+  const search = useSearch();
+  const topic = new URLSearchParams(search).get("topic");
+
   useEffect(() => {
     setPageMeta({
       title: "Support & Contact | StreamStickPro",
@@ -21,6 +24,7 @@ export default function SupportContactPage() {
           <h1 className="text-4xl font-semibold">Support and contact</h1>
           <p className="mt-4 text-slate-300">
             Use a guide first. Email us if the steps do not fix it. Include the email address on your order.
+            {topic === "compatibility" ? " This message is for a compatibility check. Include the exact model number." : ""}
           </p>
         </div>
       </div>
@@ -41,9 +45,9 @@ export default function SupportContactPage() {
           <h2 className="text-xl font-semibold">Plans &amp; services</h2>
           <p className="mt-2 text-slate-600">For equipment you already own.</p>
         </Link>
-        <a href="mailto:reloadedfiretvteam@gmail.com" className="rounded-2xl border bg-white p-6 shadow-sm hover:shadow-md md:col-span-2">
+        <a href="mailto:support@streamstickpro.com" className="rounded-2xl border bg-white p-6 shadow-sm hover:shadow-md md:col-span-2">
           <h2 className="text-xl font-semibold">Email support</h2>
-          <p className="mt-2 text-slate-600">reloadedfiretvteam@gmail.com — include your order email so we can find the purchase.</p>
+          <p className="mt-2 text-slate-600">support@streamstickpro.com — include your order email so we can find the purchase.</p>
         </a>
         <div className="rounded-2xl border bg-white p-6 md:col-span-2">
           <h2 className="text-xl font-semibold">Policies</h2>

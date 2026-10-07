@@ -8,8 +8,10 @@ export const IPTV_IMG =
 const ART: Record<string, string> = {
   "android-onn-4k": HD_IMG,
   "onn-google-hd": HD_IMG,
+  "onn-google-tv-hd": HD_IMG,
   "android-onn-pro": K4_IMG,
   "onn-google-4k": K4_IMG,
+  "onn-google-tv-4k": K4_IMG,
 };
 
 export function packageImage(id?: string | null, fallback?: string | null) {

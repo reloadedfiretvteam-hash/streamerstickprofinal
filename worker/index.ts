@@ -1121,11 +1121,8 @@ const SEO_REDIRECTS_STATIC: Record<string, string> = {
   '/catalog': '/ultimate-iptv-catalog-2026',
   '/tools': '/tools/catalog',
   '/locations': '/devices',
-  '/contact': '/support',
-  '/devices/onn-google-tv-hd': '/devices/android-onn-4k',
-  '/devices/onn-google-tv-hd/': '/devices/android-onn-4k',
-  '/devices/onn-google-tv-4k': '/devices/android-onn-pro',
-  '/devices/onn-google-tv-4k/': '/devices/android-onn-pro',
+  '/devices/onn-google-tv-hd/': '/devices/onn-google-tv-hd',
+  '/devices/onn-google-tv-4k/': '/devices/onn-google-tv-4k',
   '/devices/compare': '/devices',
   '/compatibility/fire-tv': '/jailbroken-fire-sticks',
   '/compatibility/google-tv': '/onn-google-tv',
@@ -1220,37 +1217,11 @@ Disallow: /customer-login
 Disallow: /my-account
 Disallow: /forgot-password
 Disallow: /reset-password
+Disallow: /staging
+Disallow: /staging/
 
 # Explicit allow for search/assistant crawlers
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Applebot
-Allow: /
-
-User-agent: DuckAssistBot
-Allow: /
-
-User-agent: ChatGPT-User
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: OAI-SearchBot
-Allow: /
-
-User-agent: GPTBot
-Allow: /
-
-User-agent: Google-Extended
-Allow: /
+# Do not add crawler-specific Allow: / groups. Those groups would drop the Disallow rules above.
 
 # Sitemaps
 Sitemap: https://streamstickpro.com/sitemap-index.xml
@@ -1307,15 +1278,15 @@ app.get('/llms.txt', (c) => {
   const body = `# StreamStickPro
 
 > Canonical domain: https://streamstickpro.com
-> What this site sells: a Google HD package for $140 and a Google 4K package for $150. Each includes the device, setup help, and live TV service.
+> What this site sells: ONN Google TV packages and live TV plans for compatible equipment the customer already owns. Prices and package contents come from the live catalog, not this file.
 > Plans: live TV for equipment the customer already owns, including a Fire Stick they already own. Fire Stick hardware is not sold.
 > Checkout: United States and Canada only.
-> A 36-hour trial is available for plans.
+> A 36-hour trial is a request, not instant activation.
 
 ## Pages
 - https://streamstickpro.com/ — shop
-- https://streamstickpro.com/devices/android-onn-4k — Google HD package, $140
-- https://streamstickpro.com/devices/android-onn-pro — Google 4K package, $150
+- https://streamstickpro.com/devices/onn-google-tv-hd — ONN Google TV HD package
+- https://streamstickpro.com/devices/onn-google-tv-4k — ONN Google TV 4K package
 - https://streamstickpro.com/plans — plans for a device the customer already owns
 - https://streamstickpro.com/36hr-trial — 36-hour trial
 - https://streamstickpro.com/setup — setup steps
@@ -1698,6 +1669,11 @@ app.post('/api/indexnow/ping', async (c) => {
 
 // ── Per-page SEO meta for SPA pages (critical: Googlebot sees unique meta per page) ──
 const PAGE_META: Record<string, { title: string; description: string; noindex?: boolean }> = {
+  '/staging': {
+    title: 'Staging preview | StreamStickPro',
+    description: 'Protected staging storefront for StreamStickPro review. Not the public homepage.',
+    noindex: true,
+  },
   '/': {
     title: 'Preloaded Google TV packages and live TV plans | StreamStickPro',
     description:
@@ -1743,7 +1719,7 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/36hr-trial': { title: '36-hour trial request | StreamStickPro', description: 'Request a 36-hour trial only if you already own a supported device. Support writes back. It is not instant and it is not a package purchase.' },
   '/iptv-firestick': { title: 'IPTV Fire Stick Search? Google Packages | StreamStickPro', description: 'Looking up IPTV for Fire Stick or Downloader? Shop the Google HD package or Google 4K package, or use a subscription on a Fire TV you already own.' },
   '/best-iptv-firestick': { title: 'Best IPTV Fire Stick 2026 | Google Packages | StreamStickPro', description: 'People comparing IPTV for Fire Stick can order a Google HD or 4K package, or run live TV on a Fire Stick they already own.' },
-  '/devices': { title: 'Preloaded Google HD and 4K packages | StreamStickPro', description: 'HD $140 and 4K $150. Each box is a shipped ONN Google TV with the player already on it and one year of live TV. Fire Stick hardware is not sold.' },
+  '/devices': { title: 'ONN Google TV device packages | StreamStickPro', description: 'Compare HD and 4K ONN Google TV packages. Prices, stock, and included items come from the live catalog. Fire Stick hardware is not sold.' },
   '/social-ads': { title: 'StreamStickPro ads | 36-hour free trial and Google packages', description: 'StreamStickPro ads: cut the cable bill, keep live TV, sports, movies, and a 36-hour free trial. Google HD package and Google 4K package.' },
   '/plans': { title: 'Live TV plans for a device you own | StreamStickPro', description: 'A plan is the service only. Nothing ships. After checkout you get a login for a Fire Stick, ONN, or Google TV you already own.' },
   '/guides': { title: 'Google TV & Device Setup Guides | StreamStickPro', description: 'Written setup steps for ONN and Google TV, plus troubleshooting. A video alone is not the guide. Links to devices and plans.' },
@@ -1752,8 +1728,8 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/iptv-media-players': { title: 'Best IPTV Media Players 2026 | Devices | StreamStick Pro', description: 'Top IPTV media players and apps: TiviMate, IPTV Smarters Pro, Kodi, Perfect Player, VLC. Expert setup guides and side-by-side comparisons.' },
   '/iptv-smarters-pro': { title: 'IPTV Smarters Pro Setup Guide 2026 | StreamStick Pro', description: 'Complete IPTV Smarters Pro setup guide. Install on Fire Stick, Android, iOS. Add StreamStickPro credentials and start streaming 18K+ channels.' },
   '/tivimate': { title: 'TiviMate IPTV Player Setup Guide 2026 | StreamStick Pro', description: 'TiviMate setup guide for IPTV. Install on Fire Stick and Android TV. EPG, catch-up, multi-view. Best settings for StreamStickPro streaming.' },
-  '/setup': { title: 'IPTV & Device Setup Guides | Fire TV, ONN, Roku | StreamStickPro', description: 'Step-by-step setup for IPTV on Fire TV Stick, ONN Google TV, and Roku paths—walkthroughs, player tips, and what to do after you get credentials.' },
-  '/bundles': { title: 'IPTV & Device Bundles | Fire Stick & ONN | StreamStickPro', description: 'Device plus IPTV bundles with Reloaded Fire TV, instant login delivery, guided setup, and 1-year access options—fewer dead links, clearer path to live TV.' },
+  '/setup': { title: 'Setup guides | StreamStickPro', description: 'Written and video setup previews for Fire TV and ONN Google TV. Your order email has the login and the steps for your package or plan.' },
+  '/bundles': { title: 'Packages and plans | StreamStickPro', description: 'ONN Google TV packages and live TV plans for a compatible device you already own. Fire Stick hardware is not sold.' },
   '/resources': { title: 'IPTV Streaming Resources & Tools 2026 | StreamStick Pro', description: 'IPTV resources, tools, speed tests, VPN guides, and troubleshooting. Everything you need for the best StreamStickPro streaming experience.' },
   '/ultimate-iptv-catalog-2026': { title: 'IPTV Channel Catalog 2026 | 93K+ Channels | StreamStick Pro', description: 'Explore the ultimate IPTV channel catalog: 93,000+ channels from 150+ countries. Search by country, genre, language. StreamStickPro.' },
   '/tools/catalog': { title: 'Free IPTV Tools & Streaming Utilities | StreamStick Pro', description: 'Free IPTV tools: speed test, M3U playlist validator, EPG checker, channel finder. StreamStickPro utilities for the best streaming setup.' },
@@ -1791,7 +1767,7 @@ function trimToWordBoundary(input: string, max: number): string {
   const sliced = value.slice(0, max - 1);
   const boundary = sliced.lastIndexOf(' ');
   const head = boundary > 30 ? sliced.slice(0, boundary) : sliced;
-  return `${head}...`;
+  return head;
 }
 
 /** Legacy URL paths that should emit canonical hrefs pointing at preferred URLs (matches SEO_REDIRECTS_STATIC where applicable). */
@@ -1836,11 +1812,12 @@ function applySecurityHeaders(res: Response, pathname?: string, hostname?: strin
   const next = new Response(res.body, { status: res.status, statusText: res.statusText, headers: new Headers(res.headers) });
   Object.entries(SECURITY_HEADERS).forEach(([k, v]) => next.headers.set(k, v));
   // X-Robots-Tag: redundant signal that reinforces meta robots at HTTP level
-  const noindexPaths = new Set(['/checkout', '/success', '/cancel', '/admin', '/customer-login', '/my-account', '/forgot-password', '/reset-password', '/shadow-services']);
+  const noindexPaths = new Set(['/checkout', '/success', '/cancel', '/admin', '/customer-login', '/my-account', '/forgot-password', '/reset-password', '/shadow-services', '/staging']);
   const isSecureDomain = hostname && (hostname === 'secure.streamstickpro.com' || hostname.endsWith('.secure.streamstickpro.com'));
+  const pathKey = pathname === '/' ? '/' : String(pathname || '').replace(/\/+$/, '');
   const isLowValueLocationPath = !!pathname && pathname.startsWith('/l/') && (!isPriorityLocationPath(pathname) || !isSearchMarketLocation(pathname));
   const isErrorStatus = next.status >= 400;
-  if (isSecureDomain || (pathname && noindexPaths.has(pathname)) || isLowValueLocationPath || isErrorStatus) {
+  if (isSecureDomain || noindexPaths.has(pathKey) || isLowValueLocationPath || isErrorStatus) {
     next.headers.set('X-Robots-Tag', 'noindex, nofollow');
   } else {
     next.headers.set('X-Robots-Tag', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
@@ -1881,7 +1858,13 @@ async function resolveCatalogMeta(pathname: string, env: Env): Promise<{ title: 
     });
     const ready = await tablesReady(client);
     if (deviceMatch) {
-      const sku = decodeURIComponent(deviceMatch[1]);
+      const requested = decodeURIComponent(deviceMatch[1]);
+      const sku =
+        requested === 'onn-google-tv-hd' || requested === 'onn-google-hd'
+          ? 'android-onn-4k'
+          : requested === 'onn-google-tv-4k' || requested === 'onn-google-4k'
+            ? 'android-onn-pro'
+            : requested;
       const row = ready
         ? (await client.from('cms_device_content').select('public_title,short_description,seo_title,seo_description').eq('sku', sku).eq('status', 'published').maybeSingle()).data
         : (await settingsCms.listDevices(client)).find((d) => d.sku === sku && d.status === 'published');
@@ -1940,7 +1923,7 @@ async function resolvePageMeta(pathname: string, env: Env): Promise<{ title: str
       const post = await storage.getBlogPostBySlug(blogMatch[1]);
       if (post) {
         const titleRaw = (post.title || 'Blog | StreamStickPro').toString();
-        const fullTitle = titleRaw.length > 60 ? titleRaw.slice(0, 57) + '...' : titleRaw;
+        const fullTitle = titleRaw;
         const descRaw = (post.excerpt || post.metaDescription || post.title || '').toString().slice(0, 160) || 'IPTV guides, Fire Stick tutorials, and streaming tips from StreamStickPro.';
         return normalizeMeta({ title: fullTitle, description: descRaw });
       }
@@ -1949,7 +1932,7 @@ async function resolvePageMeta(pathname: string, env: Env): Promise<{ title: str
       const candidate = (posts || []).find((p: any) => String(p?.slug || '').toLowerCase() === blogMatch[1].toLowerCase());
       if (candidate) {
         const titleRaw = (candidate.title || 'Blog | StreamStickPro').toString();
-        const fullTitle = titleRaw.length > 60 ? titleRaw.slice(0, 57) + '...' : titleRaw;
+        const fullTitle = titleRaw;
         const descRaw = (candidate.excerpt || candidate.metaDescription || candidate.title || '').toString().slice(0, 160) || 'IPTV guides, Fire Stick tutorials, and streaming tips from StreamStickPro.';
         return normalizeMeta({ title: fullTitle, description: descRaw });
       }
@@ -1960,7 +1943,7 @@ async function resolvePageMeta(pathname: string, env: Env): Promise<{ title: str
         const fallbackPost = json?.data;
         if (fallbackPost?.title) {
           const titleRaw = (fallbackPost.title || 'Blog | StreamStickPro').toString();
-          const fullTitle = titleRaw.length > 60 ? titleRaw.slice(0, 57) + '...' : titleRaw;
+          const fullTitle = titleRaw;
           const descRaw = (fallbackPost.excerpt || fallbackPost.metaDescription || fallbackPost.title || '').toString().slice(0, 160) || 'IPTV guides, Fire Stick tutorials, and streaming tips from StreamStickPro.';
           return normalizeMeta({ title: fullTitle, description: descRaw });
         }
@@ -2026,6 +2009,13 @@ function injectMeta(html: string, pathname: string, meta: { title: string; descr
   const breadcrumbLD = normalized.noindex ? '' : buildBreadcrumbLD(pathname, normalized.title);
 
   let out = html;
+  if (pathname !== '/') {
+    out = out.replace(/<script type="application\/ld\+json">\{\s*"@context": "https:\/\/schema.org",\s*"@type": "WebPage"[\s\S]*?<\/script>/i, '');
+    out = out.replace(
+      /<main id="main-content"[\s\S]*?<\/main>/i,
+      `<main id="main-content"><article><h1>${titleSafe}</h1><p>${descSafe}</p></article></main>`,
+    );
+  }
   out = out.replace(/<title>[^<]*<\/title>/i, `<title>${titleSafe}</title>`);
   out = out.replace(/<link[^>]*rel=["']canonical["'][^>]*>/i, `<link rel="canonical" href="${canon}">`);
   out = out.replace(/<meta[^>]*name=["']description["'][^>]*>/i, `<meta name="description" content="${descSafe}">`);
@@ -2068,16 +2058,22 @@ async function injectProductSchema(html: string, pathname: string, env: Env): Pr
     if (pathname === '/' || pathname === '/devices' || pathname === '/shop') {
       return html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(itemListJsonLd(products))}</script></head>`);
     }
-    const match = pathname.match(/^\/devices\/([^/]+)$/);
+    const match = pathname.match(/^\/devices\/([^/]+)\/?$/);
     if (!match) return html;
-    const sku = decodeURIComponent(match[1]);
+    const requested = decodeURIComponent(match[1]);
+    const sku =
+      requested === 'onn-google-tv-hd' || requested === 'onn-google-hd'
+        ? 'android-onn-4k'
+        : requested === 'onn-google-tv-4k' || requested === 'onn-google-4k'
+          ? 'android-onn-pro'
+          : requested;
     const product = products.find((p) => p.id === sku);
     if (!product) return html;
     const ld = productJsonLd(product);
     const dollars = (product.priceCents / 100).toFixed(0);
-    const facts = `<article data-product-facts><h1>${escapeHtml(product.name)}</h1><p>Price: $${dollars}. In stock. Free shipping in the United States and Canada. Device returns follow the 7-day window on the refund page.</p><p>${escapeHtml(product.description)}</p><p><a href="/checkout">Checkout</a></p></article>`;
+    const facts = `<article data-product-facts><h1>${escapeHtml(product.name)}</h1><p>Price: $${dollars}. Shipping to the United States and Canada follows the refund page. Device returns follow the 7-day window on the refund page.</p><p>${escapeHtml(product.description)}</p><p><a href="/checkout">Checkout</a></p></article>`;
     let out = html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(ld)}</script></head>`);
-    out = out.replace('<div id="root">', `<div id="root">${facts}`);
+    out = out.replace(/<div id="root">[\s\S]*?<\/div>/i, `<div id="root">${facts}</div>`);
     if (product.imageUrl) {
       out = out.replace(/<meta[^>]*property=["']og:image["'][^>]*>/i, `<meta property="og:image" content="${product.imageUrl}">`);
       out = out.replace(/<meta[^>]*name=["']twitter:image["'][^>]*>/i, `<meta name="twitter:image" content="${product.imageUrl}">`);
@@ -2135,7 +2131,7 @@ app.get('*', async (c) => {
   // Known SPA routes that should always return 200 (even without a static asset).
   // Blog slugs are only considered known if metadata resolves (post exists).
   const staticKnownRoutes = new Set([
-    '/', '/shop', '/plans', '/shadow-services', '/admin', '/checkout', '/success', '/cancel', '/blog',
+    '/', '/shop', '/plans', '/staging', '/shadow-services', '/admin', '/checkout', '/success', '/cancel', '/blog', '/contact', '/guides',
     '/customer-login', '/my-account', '/forgot-password', '/reset-password',
     '/terms', '/privacy', '/refund',     '/iptv', '/iptv-firestick', '/iptv-services', '/fire-sticks',
     '/jailbroken-fire-sticks', '/devices', '/firestick-devices', '/bundles', '/best-iptv-firestick',

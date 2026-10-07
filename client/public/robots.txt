@@ -1,5 +1,6 @@
 # StreamStickPro - robots.txt
-# Allow Googlebot/Bingbot; no Crawl-delay (Google ignores it, Crawl-delay can slow Bing indexing)
+# Allow search engines and AI answer engines. Checkout, admin, and staging stay blocked.
+# Do not add crawler-specific Allow: / groups. Those groups would drop the Disallow rules below.
 
 User-agent: *
 Allow: /
@@ -7,6 +8,9 @@ Allow: /feed.xml
 Allow: /opensearch.xml
 Allow: /llms.txt
 Allow: /ai.txt
+Allow: /google-merchant.xml
+Allow: /products.xml
+Allow: /sitemap-products.xml
 Disallow: /api/
 Disallow: /admin
 Disallow: /admin/
@@ -18,38 +22,8 @@ Disallow: /customer-login
 Disallow: /my-account
 Disallow: /forgot-password
 Disallow: /reset-password
+Disallow: /staging
+Disallow: /staging/
 
-# Explicit allow rules for search/assistant crawlers
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Applebot
-Allow: /
-
-User-agent: DuckAssistBot
-Allow: /
-
-User-agent: ChatGPT-User
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: OAI-SearchBot
-Allow: /
-
-# Clean URL parameters (prevents duplicate content from query strings)
-Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&ref&fbclid&gclid /
-
-# Canonical host
-Host: https://streamstickpro.com
-
-# Sitemaps (GSC: submit both; index contains sitemap-pages + sitemap-posts)
 Sitemap: https://streamstickpro.com/sitemap-index.xml
 Sitemap: https://streamstickpro.com/sitemap.xml

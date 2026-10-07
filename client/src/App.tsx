@@ -12,6 +12,7 @@ import { Spinner } from "@/components/ui/spinner";
 
 // Only the public homepage loads immediately.
 import HomeV4 from "@/pages/HomeV4";
+const StagingHome = lazy(() => import("@/pages/staging/StagingHome"));
 
 // Non-critical routes - lazy load for better performance
 const ShadowStore = lazy(() => import("@/pages/ShadowStore"));
@@ -109,23 +110,34 @@ function Router() {
     <Suspense fallback={<LoadingFallback />}>
       <>
       <Switch>
+        <Route path="/staging" component={StagingHome} />
+        <Route path="/staging/" component={StagingHome} />
         <Route path="/" component={HomeV4} />
         <Route path="/homepage" component={HomeV4} />
         <Route path="/faq" component={HomeV4} />
         <Route path="/compatibility" component={CompatibilityHub} />
+        <Route path="/compatibility/" component={CompatibilityHub} />
         <Route path="/device-finder" component={DeviceFinderPage} />
+        <Route path="/device-finder/" component={DeviceFinderPage} />
         <Route path="/learn" component={LearnHub} />
+        <Route path="/learn/" component={LearnHub} />
         <Route path="/vpn" component={VpnPage} />
         <Route path="/onn" component={OnnGoogleTv} />
         <Route path="/shop" component={Shop} />
+        <Route path="/devices/:sku/" component={DeviceDetailPage} />
         <Route path="/devices/:sku" component={DeviceDetailPage} />
         <Route path="/devices" component={DevicesCatalog} />
+        <Route path="/devices/" component={DevicesCatalog} />
         <Route path="/plans/:code" component={PlanDetailPage} />
+        <Route path="/plans/:code/" component={PlanDetailPage} />
         <Route path="/plans" component={PlansCatalog} />
+        <Route path="/plans/" component={PlansCatalog} />
         <Route path="/guides/:slug" component={GuideDetailPage} />
         <Route path="/guides" component={GuidesCatalog} />
         <Route path="/support" component={SupportContactPage} />
+        <Route path="/support/" component={SupportContactPage} />
         <Route path="/contact" component={SupportContactPage} />
+        <Route path="/contact/" component={SupportContactPage} />
         <Route path="/shadow-services" component={ShadowStore} />
         <Route path="/admin" component={AdminPanel} />
         <Route path="/checkout" component={Checkout} />
@@ -156,6 +168,7 @@ function Router() {
         <Route path="/ultimate-iptv-catalog-2026" component={UltimateIptvCatalog} />
         <Route path="/tools/catalog" component={ToolsCatalog} />
         <Route path="/setup" component={Tutorials} />
+        <Route path="/setup/" component={Tutorials} />
         <Route path="/setup-firestick" component={Tutorials} />
         <Route path="/setup-onn" component={Tutorials} />
         <Route path="/tutorials" component={Tutorials} />

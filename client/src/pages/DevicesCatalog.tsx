@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { StorefrontChrome } from "@/components/StorefrontChrome";
 import { setPageMeta } from "@/lib/seo";
 import { dollarsFromCatalog, HD_ID, K4_ID, packageImage } from "@/lib/package-art";
+import { publicDevicePath } from "@/lib/device-skus";
 import { apiCall } from "@/lib/api";
 
 type CmsDevice = {
@@ -50,11 +51,11 @@ export default function DevicesCatalog() {
             .filter((p: any) => p.id === HD_ID || p.id === K4_ID)
             .map((p: any) => ({
               sku: p.id,
-              public_title: p.id === HD_ID ? "Google HD Package" : "Google 4K Package",
+              public_title: p.name,
               short_description: p.description,
               public_display_price_cents: Math.round(dollarsFromCatalog(p.price) * 100),
               primary_image_url: packageImage(p.id, p.imageUrl),
-              availability: "in stock",
+              availability: p.availability || p.stock_status,
               brand: "ONN",
               condition: "new",
             }));
@@ -80,11 +81,11 @@ export default function DevicesCatalog() {
         <div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-blue-300">Shipped preloaded devices</p>
           <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
-            Google HD and 4K packages
+            ONN Google TV device packages
           </h1>
           <p className="mt-4 max-w-3xl text-lg leading-relaxed text-white">
-            HD is $140. 4K is $150. Each box is an ONN Google TV with the player already on it, plus one year of live TV, movies, and sports. We ship the device to the United States or Canada and email the tutorial and login. Fire Stick hardware is not sold here.
-            If you already own a stick, buy a{" "}
+            Compare the HD and 4K packages from the live catalog. Review the hardware, included items, price, and stock on each product page before ordering. Fire Stick hardware is not sold here.
+            If you already own a compatible device, choose a{" "}
             <Link href="/plans" className="text-teal-200 underline underline-offset-2">
               live TV plan
             </Link>
@@ -119,13 +120,19 @@ export default function DevicesCatalog() {
             return (
               <Link
                 key={d.sku}
-                href={`/devices/${encodeURIComponent(d.sku)}`}
+                href={publicDevicePath(d.sku)}
                 className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div className="aspect-square bg-[#edf3f7]">
                   <img
                     src={packageImage(d.sku, d.primary_image_url)}
-                    alt={d.public_title}
+                    alt={
+                      d.sku === HD_ID
+                        ? "ONN Full HD Google TV streaming stick with voice remote and retail box."
+                        : d.sku === K4_ID
+                          ? "ONN 4K Google TV streaming box with voice remote and retail box."
+                          : d.public_title
+                    }
                     className="h-full w-full object-contain p-4"
                     loading="lazy"
                   />
@@ -137,12 +144,17 @@ export default function DevicesCatalog() {
                     </span>
                   ) : null}
                   <h2 className="text-lg font-semibold group-hover:text-blue-700">{d.public_title}</h2>
-                  <p className="text-sm text-slate-600 line-clamp-2">{d.short_description}</p>
+                  <p className="text-sm text-slate-600">{d.short_description}</p>
                   <div className="flex items-baseline gap-2 pt-1">
                     {price ? <span className="text-xl font-semibold text-slate-900">{price}</span> : null}
                     {compare ? <span className="text-sm text-slate-400 line-through">{compare}</span> : null}
                   </div>
-                  <p className="text-sm font-medium text-slate-700">New · In stock</p>
+                  <p className="text-sm font-medium text-slate-700">
+                    {String(d.availability || "").toLowerCase() === "in_stock" ||
+                    String(d.availability || "").toLowerCase() === "in stock"
+                      ? "In stock"
+                      : "Check availability on the product page"}
+                  </p>
                 </div>
               </Link>
             );
