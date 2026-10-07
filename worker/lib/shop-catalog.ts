@@ -13,6 +13,18 @@ export type ShopProduct = {
 };
 
 const SITE = "https://streamstickpro.com";
+const HD_ID = "android-onn-4k";
+const K4_ID = "android-onn-pro";
+const HOSTED_IMAGES: Record<string, string> = {
+  [HD_ID]: `${SITE}/images/onn-full-hd-official-reference.png`,
+  [K4_ID]: `${SITE}/images/onn-4k-official-reference.png`,
+};
+
+function publicDeviceUrl(id: string) {
+  if (id === HD_ID) return `${SITE}/devices/onn-google-tv-hd`;
+  if (id === K4_ID) return `${SITE}/devices/onn-google-tv-4k`;
+  return `${SITE}/devices/${encodeURIComponent(id)}`;
+}
 
 export function isGoogleDeviceProduct(product: { id?: string; name?: string; category?: string }): boolean {
   const id = String(product.id || "").toLowerCase();
@@ -46,7 +58,7 @@ export async function loadShopProducts(client: SupabaseClient): Promise<ShopProd
     name: String(row.name || row.id),
     description: String(row.description || row.name || ""),
     priceCents: toCents(row.price),
-    imageUrl: absoluteImage(row.image_url),
+    imageUrl: HOSTED_IMAGES[String(row.id)] || absoluteImage(row.image_url),
     category: String(row.category || ""),
     brand: /onn/i.test(String(row.name || row.id)) ? "ONN" : "StreamStickPro",
     availability: "in_stock" as const,
@@ -69,7 +81,12 @@ export function asCmsDevice(product: ShopProduct) {
     full_description: product.description,
     public_display_price_cents: product.priceCents,
     primary_image_url: product.imageUrl,
-    image_alt: product.name,
+    image_alt:
+      product.id === HD_ID
+        ? "ONN Full HD Google TV streaming stick with voice remote and retail box."
+        : product.id === K4_ID
+          ? "ONN 4K Google TV streaming box with voice remote and retail box."
+          : product.name,
     availability: product.availability,
     status: "published",
     seo_title: `${product.name} | StreamStickPro`,
@@ -81,17 +98,17 @@ export function productJsonLd(product: ShopProduct) {
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-    "@id": `${SITE}/devices/${encodeURIComponent(product.id)}#product`,
+    "@id": `${publicDeviceUrl(product.id)}#product`,
     name: product.name,
     description: product.description,
     sku: product.id,
     mpn: product.id,
     brand: { "@type": "Brand", name: product.brand },
-    image: [product.imageUrl],
-    url: `${SITE}/devices/${encodeURIComponent(product.id)}`,
+    image: [HOSTED_IMAGES[product.id] || product.imageUrl],
+    url: publicDeviceUrl(product.id),
     offers: {
       "@type": "Offer",
-      url: `${SITE}/devices/${encodeURIComponent(product.id)}`,
+      url: publicDeviceUrl(product.id),
       priceCurrency: "USD",
       price: (product.priceCents / 100).toFixed(2),
       availability: "https://schema.org/InStock",
@@ -132,7 +149,7 @@ export function itemListJsonLd(products: ShopProduct[]) {
     itemListElement: products.map((product, index) => ({
       "@type": "ListItem",
       position: index + 1,
-      url: `${SITE}/devices/${encodeURIComponent(product.id)}`,
+      url: publicDeviceUrl(product.id),
       item: productJsonLd(product),
     })),
   };
@@ -149,7 +166,7 @@ function xmlEscape(value: string): string {
 export function merchantRssXml(products: ShopProduct[]): string {
   const items = products
     .map((product) => {
-      const link = `${SITE}/devices/${encodeURIComponent(product.id)}`;
+      const link = publicDeviceUrl(product.id);
       return `    <item>
       <title>${xmlEscape(product.name)}</title>
       <link>${xmlEscape(link)}</link>

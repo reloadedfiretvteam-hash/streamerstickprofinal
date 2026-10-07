@@ -237,7 +237,7 @@
 
 @media (min-width: 1024px) {
   .stg-hero {
-    background-image: image-set("/images/staging/hero-navy-studio-background.png" type("image/png"));
+    background-image: url("/images/staging/hero-navy-studio-background.jpg");
     background-size: cover;
     background-position: center;
   }

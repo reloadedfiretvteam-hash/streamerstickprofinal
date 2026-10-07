@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { apiCall } from "@/lib/api";
 import { iptvRealProductId, type IptvDurationKey } from "@/lib/iptv-sku";
 import { useCart, type Product } from "@/lib/store";
 import { setPageMeta } from "@/lib/seo";
 import { V4Footer, V4Header } from "@/components/v4/V4Chrome";
-import { dollarsFromCatalog, HD_ID, HD_IMG, IPTV_IMG, K4_ID, K4_IMG, packageImage } from "@/lib/package-art";
+import { publicDevicePath } from "@/lib/device-skus";
+import { dollarsFromCatalog, HD_ALT, HD_ID, HD_IMG, IPTV_IMG, K4_ALT, K4_ID, K4_IMG, packageImage } from "@/lib/package-art";
 import "@/styles/v4.css";
 
 const DURATIONS: { key: IptvDurationKey; label: string; note: string }[] = [
@@ -17,36 +18,11 @@ const DURATIONS: { key: IptvDurationKey; label: string; note: string }[] = [
 ];
 
 const SERVICE_GETS = [
-  { title: "Live TV", text: "18,000+ live channels from around the world. Local, news, sports, kids, and international lineups." },
-  { title: "Movies and series", text: "100,000+ on-demand titles. Watch when you want, not only live." },
-  { title: "Sports and PPV", text: "NFL, NBA, UFC, and other events that people actually search for." },
-  { title: "Your login", text: "After checkout, support emails the tutorial and the login. You put it on the device. No store visit." },
+  { title: "Live TV", text: "Watch live channels on the package or plan you buy. The catalog and your order email list what is included." },
+  { title: "Movies and series", text: "On-demand titles sit next to live TV. What you can play depends on the service in your order." },
+  { title: "Sports", text: "Sports are part of the live TV offer. Event availability follows the service, not a poster on the retail box." },
+  { title: "Your login", text: "After checkout, the order email provides the tutorial and login. You put it on the device. No store visit." },
 ];
-
-function TiltCard({ children }: { children: ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  const reset = () => {
-    if (ref.current) ref.current.style.transform = "";
-  };
-
-  const onMove = (event: MouseEvent<HTMLDivElement>) => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (!window.matchMedia("(hover: hover)").matches) return;
-    const el = ref.current;
-    if (!el) return;
-    const box = el.getBoundingClientRect();
-    const x = (event.clientX - box.left) / box.width - 0.5;
-    const y = (event.clientY - box.top) / box.height - 0.5;
-    el.style.transform = `perspective(1100px) rotateY(${x * 12}deg) rotateX(${-y * 8}deg) translateY(-8px)`;
-  };
-
-  return (
-    <div ref={ref} className="v4-tilt" onMouseMove={onMove} onMouseLeave={reset}>
-      {children}
-    </div>
-  );
-}
 
 function money(n: number) {
   return `$${n}`;
@@ -92,22 +68,20 @@ export default function HomeV4() {
     {
       id: HD_ID,
       product: hd,
-      name: "Google HD Package",
-      price: hd?.price ?? 140,
+      name: hd?.name || "Google HD Package",
       image: HD_IMG,
-      label: "Full HD · shipped",
-      pitch:
-        "ONN Google TV stick and voice remote, already loaded with the player. Plug it into HDMI, join Wi-Fi, enter the login we email you, and watch live TV, movies, and sports in Full HD.",
+      alt: HD_ALT,
+      label: "Full HD stick · shipped",
+      pitch: hd?.description || "Review the live catalog description before you order.",
     },
     {
       id: K4_ID,
       product: k4,
-      name: "Google 4K Package",
-      price: k4?.price ?? 150,
+      name: k4?.name || "Google 4K Package",
       image: K4_IMG,
-      label: "4K · shipped",
-      pitch:
-        "ONN 4K Google TV with HDR and Dolby Audio, already loaded. Same live TV, movies, and sports as HD, in 4K on a 4K television.",
+      alt: K4_ALT,
+      label: "4K box · shipped",
+      pitch: k4?.description || "Review the live catalog description before you order.",
     },
   ];
 
@@ -137,24 +111,27 @@ export default function HomeV4() {
       <V4Header />
 
       <main id="main-content">
-        <section className="bg-[#08111F] text-[#F8FAFC]" aria-labelledby="hero-title">
+        <section className="v4-hero-band" aria-labelledby="hero-title">
           <div className="v4-shell grid items-center gap-10 py-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:py-20">
             <div>
-              <p className="text-base font-semibold text-[#79D5FF]">StreamStickPro · United States and Canada</p>
+              <p className="text-base font-semibold text-[#79D5FF]">STREAMING MADE SIMPLER</p>
               <h1 id="hero-title" className="mt-4 max-w-4xl text-[40px] font-bold leading-[1.12] sm:text-[54px] lg:text-[60px]">
-                Watch live TV, movies, and sports on a preloaded Google TV — or on the stick you already own.
+                Streaming setup without the setup headache.
               </h1>
               <p className="mt-6 max-w-3xl text-[20px] leading-relaxed text-[#D5DEE8] sm:text-[22px]">
-                This is a live television service. You either buy a preloaded ONN Google TV and we ship it, or you buy a live TV plan and we email a login for a Fire Stick, ONN, or Google TV you already have.
+                Choose an ONN Google TV package or a live TV plan for a compatible device you already own. Explore live TV, movies, series, and sports, with a guide for your setup.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a href="#packages" className="v4-btn v4-btn-primary">See preloaded devices</a>
-                <a href="#subscriptions" className="v4-btn v4-btn-secondary-dark">See live TV plans</a>
+                <Link href="/devices/"><span className="v4-btn v4-btn-primary">Shop Google TV Devices</span></Link>
+                <Link href="/plans/"><span className="v4-btn v4-btn-secondary-dark">I Already Have a Device</span></Link>
               </div>
+              <p className="mt-5">
+                <Link href="/device-finder/"><span className="text-[#79D5FF] underline">Not sure what you need? Find my setup.</span></Link>
+              </p>
             </div>
-            <div className="v4-hero-photos">
-              <img src={HD_IMG} alt="Google HD package device and box" width="640" height="480" fetchPriority="high" decoding="async" />
-              <img src={K4_IMG} alt="Google 4K package device and box" width="640" height="480" decoding="async" />
+            <div className="v4-hero-panel">
+              <img src={K4_IMG} alt={K4_ALT} width="800" height="640" fetchPriority="high" decoding="async" />
+              <p className="mt-3 text-sm text-[#536275]">App logos on the retail packaging identify available apps. Separate subscriptions may be required.</p>
             </div>
           </div>
         </section>
@@ -185,7 +162,7 @@ export default function HomeV4() {
                 <div>
                   <h3 className="text-[28px] font-bold leading-tight lg:text-[32px]">I need a device shipped to me</h3>
                   <p className="mt-2 max-w-3xl text-[20px] text-[#536275]">
-                    HD is $140. 4K is $150. The box includes the ONN Google TV, the remote, one year of live TV service, the tutorial, and the login. We ship to the United States and Canada.
+                    Compare the HD stick package and the 4K box package. Price, included items, and stock come from the live catalog on each product page. Checkout is United States and Canada.
                   </p>
                 </div>
                 <a href="#packages" className="v4-btn v4-btn-primary w-full min-w-[220px] lg:w-auto">See the devices</a>
@@ -195,7 +172,7 @@ export default function HomeV4() {
                 <div>
                   <h3 className="text-[28px] font-bold leading-tight lg:text-[32px]">I already have a Fire Stick or Google TV</h3>
                   <p className="mt-2 max-w-3xl text-[20px] text-[#536275]">
-                    Buy a live TV plan. Nothing is shipped. You get the same channels, movies, and sports on the device sitting on your TV. Plans start at $11 for one month on one device.
+                    Buy a live TV plan. Nothing is shipped. You get a login for a Fire Stick, ONN, or Google TV you already have. Plan totals are shown in the catalog before checkout.
                   </p>
                 </div>
                 <a href="#subscriptions" className="v4-btn v4-btn-secondary-light w-full min-w-[220px] lg:w-auto">See live TV plans</a>
@@ -222,31 +199,24 @@ export default function HomeV4() {
             </p>
             <div className="mt-10 grid gap-8 lg:grid-cols-2">
               {packages.map((pack) => (
-                <TiltCard key={pack.id}>
-                  <article className="v4-tilt-inner">
-                    <img src={pack.image} alt={`${pack.name} device and box`} width="800" height="640" decoding="async" className="h-80 w-full bg-[#F0F3F5] object-contain p-8" />
-                    <div className="p-8">
-                      <p className="text-base font-semibold text-[#536275]">{pack.label}</p>
-                      <h3 className="mt-2 text-[30px] font-bold">{pack.name}</h3>
-                      <p className="mt-4 text-[40px] font-bold leading-none">{money(pack.price)}</p>
-                      <p className="mt-5 text-[18px] leading-relaxed text-[#3A4658]">{pack.pitch}</p>
-                      <ul className="v4-include-list mt-5">
-                        <li>ONN Google TV + voice remote in the box</li>
-                        <li>Player already installed — plug into HDMI</li>
-                        <li>1 year of live TV, movies, and sports</li>
-                        <li>Tutorial and login emailed after purchase</li>
-                        <li>Ships to the United States and Canada</li>
-                        <li>24/7 support after it arrives</li>
-                      </ul>
-                      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                        <button type="button" className="v4-btn v4-btn-primary" disabled={!pack.product} onClick={() => addProduct(pack.product)}>
-                          Add to cart
-                        </button>
-                        <Link href={`/devices/${pack.id}`}><span className="v4-btn v4-btn-secondary-light">Open this package</span></Link>
-                      </div>
+                <article key={pack.id} className="overflow-hidden rounded-[22px] border border-[#D7DFE7] bg-white">
+                  <img src={pack.image} alt={pack.alt} width="800" height="640" decoding="async" className="h-80 w-full bg-white object-contain p-8" />
+                  <div className="p-8">
+                    <p className="text-base font-semibold text-[#536275]">{pack.label}</p>
+                    <h3 className="mt-2 text-[30px] font-bold">{pack.name}</h3>
+                    <p className="mt-4 text-[40px] font-bold leading-none">{pack.product ? money(pack.product.price) : "Loading current price…"}</p>
+                    <p className="mt-5 text-[18px] leading-relaxed text-[#3A4658]">{pack.pitch}</p>
+                    <p className="mt-4 text-sm text-[#536275]">
+                      App logos on the retail packaging identify available apps. Separate subscriptions may be required. The retail box says US compatible only. Checkout is United States and Canada. Shipping and device compatibility are separate facts.
+                    </p>
+                    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                      <button type="button" className="v4-btn v4-btn-primary" disabled={!pack.product} onClick={() => addProduct(pack.product)}>
+                        Add to cart
+                      </button>
+                      <Link href={publicDevicePath(pack.id)}><span className="v4-btn v4-btn-secondary-light">Open this package</span></Link>
                     </div>
-                  </article>
-                </TiltCard>
+                  </div>
+                </article>
               ))}
             </div>
           </div>
@@ -263,9 +233,7 @@ export default function HomeV4() {
                 </p>
                 <img src={IPTV_IMG} alt="Live TV plan on a television" width="900" height="600" decoding="async" className="mt-8 w-full rounded-[24px] object-cover" />
                 <ul className="v4-include-list v4-include-list-dark mt-6">
-                  <li>18,000+ live TV channels</li>
-                  <li>100,000+ movies and series</li>
-                  <li>Sports and PPV events</li>
+                  <li>Live TV, movies, series, and sports</li>
                   <li>Login and setup guide by email</li>
                   <li>Nothing shipped. Works on a device you already have</li>
                 </ul>
@@ -349,8 +317,8 @@ export default function HomeV4() {
             <h2 id="faq-title" className="text-[34px] font-bold">Straight answers</h2>
             <div className="mt-8 space-y-4">
               {[
-                ["What am I getting with a live TV plan?", "A login. That login puts 18,000+ live channels, 100,000+ movies and series, and sports on a Fire Stick, ONN, or Google TV you already own. No box is shipped."],
-                ["What am I getting with a Google package?", "The ONN device, the remote, the player already on it, one year of the same live TV service, the tutorial, the login, and shipping to the US or Canada."],
+                ["What am I getting with a live TV plan?", "A login for a Fire Stick, ONN, or Google TV you already own. No box is shipped. The catalog lists duration, device allowance, and price."],
+                ["What am I getting with a Google package?", "The ONN hardware named on that product page, plus the items in the live catalog description. Review the package page before you order."],
                 ["Is the device delivered?", "Yes. Google packages ship. Live TV plans do not ship anything."],
                 ["Do you sell Fire Stick hardware?", "No. If you already have a Fire Stick, buy a live TV plan or request the trial."],
                 ["Is the trial instant?", "No. You request it. Support confirms it."],

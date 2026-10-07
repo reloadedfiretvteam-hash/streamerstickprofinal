@@ -4,7 +4,7 @@ import { iptvRealProductId, type IptvDurationKey } from "@/lib/iptv-sku";
 import { setPageMeta } from "@/lib/seo";
 import { useCart } from "@/lib/store";
 import { HD_ID, HD_SLUG, K4_ID, K4_SLUG, publicDevicePath } from "@/lib/device-skus";
-import { K4_IMG, HD_IMG, packageImage } from "@/lib/package-art";
+import { HD_ALT, HD_IMG, K4_ALT, K4_IMG, packageImage } from "@/lib/package-art";
 import { useShopCatalog } from "@/lib/use-shop-catalog";
 import { StagingFooter, StagingHeader } from "@/components/staging/StagingChrome";
 import "@/styles/staging.css";
@@ -21,14 +21,11 @@ const FINDER = ["Fire TV", "Google TV", "ONN", "Android TV", "Smart TV", "I’m 
 const PREF_KEY = "ssp-device-pref";
 
 function contentsFromDescription(description: string) {
-  const text = description.toLowerCase();
-  const items: string[] = [];
-  if (/onn|google tv|device/.test(text)) items.push("ONN Google TV hardware named in the catalog description");
-  if (/remote/.test(text)) items.push("Voice remote");
-  if (/tutorial|guide/.test(text)) items.push("Web tutorial");
-  if (/login|credential/.test(text)) items.push("Login credentials");
-  if (/live tv|service/.test(text)) items.push("Live TV service as described in the catalog");
-  return items.slice(0, 4);
+  return description
+    .split(/[.;]/)
+    .map((part) => part.replace(/^Google (HD|4K) Package:\s*/i, "").trim())
+    .filter((part) => part.length > 8)
+    .slice(0, 4);
 }
 
 function serviceTerm(description: string) {
@@ -98,7 +95,7 @@ export default function StagingHome() {
       name: "ONN Google TV HD Package",
       body: "An ONN Full HD Google TV stick with a voice remote and setup guidance. Review the included service and package details before ordering.",
       image: HD_IMG,
-      alt: "ONN Full HD Google TV streaming stick with voice remote and retail box.",
+      alt: HD_ALT,
       cta: "View HD Package",
       reverse: false,
     },
@@ -110,7 +107,7 @@ export default function StagingHome() {
       name: "ONN Google TV 4K Package",
       body: "A 4K-capable ONN Google TV device with a voice remote and setup guidance. Review the included service and package details before ordering.",
       image: K4_IMG,
-      alt: "ONN 4K Google TV streaming box with voice remote and retail box.",
+      alt: K4_ALT,
       cta: "View 4K Package",
       reverse: true,
     },
@@ -146,7 +143,7 @@ export default function StagingHome() {
               </p>
             </div>
             <div className="stg-product-panel mt-8 lg:mt-0">
-              <img src={K4_IMG} alt="ONN 4K Google TV streaming box with voice remote and retail box." width="800" height="640" />
+              <img src={K4_IMG} alt={K4_ALT} width="800" height="640" />
               <p className="mt-3 text-sm text-[#536275]">App logos on the retail packaging identify available apps. Separate subscriptions may be required.</p>
             </div>
           </div>
@@ -298,7 +295,7 @@ export default function StagingHome() {
               4K describes the hardware’s supported output. Picture quality depends on the content, TV, app, and internet connection.
             </p>
             <p className="stg-flag">
-              The three specified studio/reference photographs were not in the project files. These panels use the existing StreamStickPro package images until the supplied files are added under /images/staging/ and hardware match plus reuse rights are confirmed.
+              Product photos are the official Walmart pack shots for the ONN Full HD Google TV stick and the 2023 ONN 4K Google TV box, hosted on this site. They are not Pro or Plus models. Walmart owns those photographs; confirm commercial reuse before long-term production use. The retail box says US compatible only. Checkout is United States and Canada. Shipping and device compatibility are separate facts.
             </p>
           </div>
         </section>
@@ -309,9 +306,9 @@ export default function StagingHome() {
             <p className="mt-4 max-w-3xl text-[#536275]">Compare the hardware and package details side by side.</p>
             {(() => {
               const rows = [
-                ["Maximum device output", hd?.name.includes("HD") ? "Full HD, from the catalog name" : "See catalog name", k4?.name.includes("4K") ? "4K, from the catalog name" : "See catalog name"],
+                ["Maximum device output", "Full HD stick, from the catalog name and Walmart Full HD device photo", "4K box, from the catalog name and Walmart 2023 4K box photo"],
                 ["Best fit", "Not a catalog field", "Not a catalog field"],
-                ["Exact hardware model", "Not a separate model field in catalog", "Not a separate model field in catalog"],
+                ["Exact hardware model", "Walmart ONN Full HD Google TV streaming device. No separate model field in the catalog.", "Walmart 2023 ONN 4K Google TV streaming box. Not Pro or Plus. No separate model field in the catalog."],
                 ["Included physical items", contentsFromDescription(hd?.description || "").join("; ") || "See description", contentsFromDescription(k4?.description || "").join("; ") || "See description"],
                 ["Included service term", serviceTerm(hd?.description || "") || "Not listed as its own field", serviceTerm(k4?.description || "") || "Not listed as its own field"],
                 ["Setup guidance", /tutorial|guide/i.test(hd?.description || "") ? "Tutorial mentioned in description" : "See package page", /tutorial|guide/i.test(k4?.description || "") ? "Tutorial mentioned in description" : "See package page"],

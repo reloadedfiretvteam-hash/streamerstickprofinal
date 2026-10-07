@@ -1,7 +1,10 @@
 export const HD_ID = "android-onn-4k";
 export const K4_ID = "android-onn-pro";
-export const HD_IMG = "/images/google-hd-package.webp";
-export const K4_IMG = "/images/google-4k-package.webp";
+export const HD_IMG = "/images/onn-full-hd-official-reference.png";
+export const K4_IMG = "/images/onn-4k-official-reference.png";
+export const HD_ALT = "ONN Full HD Google TV streaming stick with voice remote and retail box.";
+export const K4_ALT = "ONN 4K Google TV streaming box with voice remote and retail box.";
+export const HERO_BG = "/images/staging/hero-navy-studio-background.jpg";
 export const IPTV_IMG =
   "https://emlqlmfzqsnqokrqvmcm.supabase.co/storage/v1/object/public/imiges/iptv-subscription.jpg";
 

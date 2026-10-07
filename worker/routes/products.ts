@@ -10,8 +10,8 @@ const defaultProducts = [
     name: 'Google HD Package',
     price: 14000,
     description:
-      'onn. Full HD Streaming Device with Google TV, voice remote, and guided Reloaded Fire TV setup. Includes 1-year Reloaded Fire TV plan, tutorials, shipping, and 24/7 support.',
-    imageUrl: '/images/google-hd-package.webp',
+      'Google HD Package: a preloaded ONN Full HD Google TV device, voice remote, web tutorial, login credentials, and live TV service. Ships ready to plug in.',
+    imageUrl: '/images/onn-full-hd-official-reference.png',
     category: 'devices',
     shadowProductId: '',
     createdAt: new Date().toISOString(),
@@ -22,8 +22,8 @@ const defaultProducts = [
     name: 'Google 4K Package',
     price: 15000,
     description:
-      'onn. 4K Streaming Device with Google TV, HDR, Dolby Audio, voice remote, and guided Reloaded Fire TV setup. Includes 1-year Reloaded Fire TV plan, tutorials, shipping, and 24/7 support.',
-    imageUrl: '/images/google-4k-package.webp',
+      'Google 4K Package: a preloaded ONN 4K Google TV device, voice remote, web tutorial, login credentials, and live TV service. Ships ready to plug in.',
+    imageUrl: '/images/onn-4k-official-reference.png',
     category: 'devices',
     shadowProductId: '',
     createdAt: new Date().toISOString(),
