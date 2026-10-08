@@ -5,6 +5,7 @@ import { iptvRealProductId, type IptvDurationKey } from "@/lib/iptv-sku";
 import { useCart, type Product } from "@/lib/store";
 import { setPageMeta } from "@/lib/seo";
 import { V4Footer, V4Header } from "@/components/v4/V4Chrome";
+import { DeviceFinderBlock } from "@/components/DeviceFinderBlock";
 import { SurfsharkOfferCards } from "@/components/SurfsharkOfferCards";
 import { publicDevicePath } from "@/lib/device-skus";
 import { dollarsFromCatalog, HD_ALT, HD_ID, HD_IMG, IPTV_IMG, K4_ALT, K4_ID, K4_IMG, packageImage } from "@/lib/package-art";
@@ -192,6 +193,8 @@ export default function HomeV4() {
           </div>
         </section>
 
+        <DeviceFinderBlock />
+
         <section id="packages" className="bg-[#F5F2EA]" aria-labelledby="hardware-title">
           <div className="v4-shell py-16">
             <h2 id="hardware-title" className="text-[34px] font-bold leading-tight lg:text-[44px]">Preloaded Google TV packages</h2>
@@ -228,6 +231,65 @@ export default function HomeV4() {
                   </div>
                 </article>
               ))}
+            </div>
+            <p className="mt-8 max-w-3xl text-sm text-[#536275]">
+              4K describes the hardware’s supported output. Picture quality depends on the content, TV, app, and internet connection.
+            </p>
+          </div>
+        </section>
+
+        <section className="bg-[#EDF3F7]" aria-labelledby="compare-title">
+          <div className="v4-shell py-16">
+            <h2 id="compare-title" className="text-[34px] font-bold leading-tight lg:text-[42px]">HD or 4K? Pick for the TV you have.</h2>
+            <p className="mt-4 max-w-3xl text-[#536275]">Compare the hardware and package details side by side. Prices come from the live catalog.</p>
+            <div className="mt-8 overflow-x-auto">
+              <table className="w-full min-w-[640px] border-collapse rounded-2xl bg-white">
+                <thead>
+                  <tr>
+                    <th className="p-4 text-left">Feature</th>
+                    <th className="p-4 text-left">HD Package</th>
+                    <th className="p-4 text-left">4K Package</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["Maximum device output", "Full HD stick", "4K box"],
+                    ["Included physical items", "Stick, voice remote, and retail box in the photo", "Box, voice remote, and retail box in the photo"],
+                    ["Included service", "Educational setup video, login credentials, and a 1-year live TV plan", "Educational setup video, login credentials, and a 1-year live TV plan"],
+                    ["Current price", hd ? money(hd.price) : "Loading current price…", k4 ? money(k4.price) : "Loading current price…"],
+                  ].map(([feature, a, b]) => (
+                    <tr key={feature} className="border-t border-[#D7DFE7]">
+                      <th className="p-4 text-left align-top">{feature}</th>
+                      <td className="p-4 align-top">{a}</td>
+                      <td className="p-4 align-top">{b}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-[#FCFBF7]" aria-labelledby="how-title-paths">
+          <div className="v4-shell py-16">
+            <h2 id="how-title-paths" className="text-[34px] font-bold leading-tight lg:text-[42px]">A clear next step, whichever path you choose.</h2>
+            <div className="mt-10 grid gap-5 lg:grid-cols-2">
+              <details className="rounded-[22px] border border-[#D7DFE7] bg-white p-8" open>
+                <summary className="cursor-pointer text-[24px] font-bold">I Need a Device</summary>
+                <ol className="mt-4 list-decimal space-y-3 pl-5">
+                  <li><strong>Choose your package.</strong> Compare the hardware and included items.</li>
+                  <li><strong>Review your order.</strong> Confirm the package terms, price, and delivery details.</li>
+                  <li><strong>Follow your setup video.</strong> The order email has the educational video and login. You do not buy a second plan unless you want another device allowance.</li>
+                </ol>
+              </details>
+              <details className="rounded-[22px] border border-[#D7DFE7] bg-white p-8" open>
+                <summary className="cursor-pointer text-[24px] font-bold">I Have a Device</summary>
+                <ol className="mt-4 list-decimal space-y-3 pl-5">
+                  <li><strong>Check compatibility.</strong> Confirm the model and supported setup path.</li>
+                  <li><strong>Choose your plan.</strong> Review the duration, device allowance, and price.</li>
+                  <li><strong>Follow your setup guide.</strong> Use the instructions for your existing device.</li>
+                </ol>
+              </details>
             </div>
           </div>
         </section>
@@ -298,7 +360,7 @@ export default function HomeV4() {
             <div className="v4-steps mt-10">
               {[
                 ["Pay here", "Secure checkout for United States and Canada. Prices on the cards are the prices you pay."],
-                ["We email the login", "The tutorial and credentials come by email. A Google package also ships the physical device."],
+                ["We email the login", "A Google package email includes the educational setup video, login credentials, and the 1-year live TV plan. A plan-only order emails the login. The device ships separately when you bought hardware."],
                 ["Plug in or open the app", "HDMI for a new ONN. On a Fire Stick you already own, open the player and sign in."],
                 ["Watch", "Live TV, movies, series, and sports on the devices you paid to activate."],
               ].map(([title, text], index) => (

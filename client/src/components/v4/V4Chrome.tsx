@@ -5,10 +5,12 @@ import { FooterAdminSlot } from "@/components/OwnerStoreUtils";
 import { useCart } from "@/lib/store";
 
 const NAV = [
-  { label: "Devices", href: "/devices" },
-  { label: "Live TV plans", href: "/plans" },
-  { label: "Trial", href: "/36hr-trial" },
-  { label: "Support", href: "/support" },
+  { label: "Devices", href: "/devices/" },
+  { label: "Plans", href: "/plans/" },
+  { label: "Compatibility", href: "/compatibility/" },
+  { label: "Setup", href: "/setup/" },
+  { label: "Learn", href: "/learn/" },
+  { label: "Support", href: "/support/" },
 ] as const;
 
 function Wordmark() {
@@ -36,7 +38,7 @@ export function V4Header() {
             <Wordmark />
           </span>
         </Link>
-        <nav className="hidden items-center justify-center gap-8 text-[17px] font-semibold md:flex" aria-label="Store">
+        <nav className="hidden items-center justify-center gap-6 text-[16px] font-semibold min-[1180px]:flex" aria-label="Store">
           {NAV.map((item) => (
             <Link key={item.href} href={item.href}>
               <span className="min-h-11 px-1 py-2 hover:text-[#79D5FF]">{item.label}</span>
@@ -44,6 +46,9 @@ export function V4Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <Link href="/device-finder/">
+            <span className="hidden min-h-11 px-2 py-2 text-[15px] font-semibold text-[#79D5FF] min-[1180px]:inline-flex">Device Finder</span>
+          </Link>
           <Link href="/36hr-trial">
             <span className="v4-btn v4-btn-primary hidden px-5 sm:inline-flex">Free Trial</span>
           </Link>
@@ -52,7 +57,7 @@ export function V4Header() {
           </button>
           <button
             type="button"
-            className="v4-btn v4-btn-secondary-dark min-h-11 min-w-11 px-3 md:hidden"
+            className="v4-btn v4-btn-secondary-dark min-h-11 min-w-11 px-3 min-[1180px]:hidden"
             aria-expanded={open}
             onClick={() => setOpen((value) => !value)}
           >
@@ -61,13 +66,11 @@ export function V4Header() {
         </div>
       </div>
       {open ? (
-        <div className="border-t border-[#233145] bg-[#08111F] md:hidden">
+        <div className="border-t border-[#233145] bg-[#08111F] min-[1180px]:hidden">
           <div className="v4-shell flex flex-col gap-1 py-4">
-            <Link href="/36hr-trial">
-              <span className="v4-btn v4-btn-primary w-full" onClick={() => setOpen(false)}>
-                Start the 36-hour trial
-              </span>
-            </Link>
+            <button type="button" className="v4-btn v4-btn-secondary-dark w-full" onClick={() => setOpen(false)}>
+              Close
+            </button>
             {NAV.map((item) => (
               <Link key={item.href} href={item.href}>
                 <span className="block min-h-11 py-3 font-semibold" onClick={() => setOpen(false)}>
@@ -75,6 +78,16 @@ export function V4Header() {
                 </span>
               </Link>
             ))}
+            <Link href="/device-finder/">
+              <span className="block min-h-11 py-3 font-semibold" onClick={() => setOpen(false)}>
+                Device Finder
+              </span>
+            </Link>
+            <Link href="/36hr-trial">
+              <span className="v4-btn v4-btn-primary mt-2 w-full" onClick={() => setOpen(false)}>
+                Request the 36-hour trial
+              </span>
+            </Link>
           </div>
         </div>
       ) : null}

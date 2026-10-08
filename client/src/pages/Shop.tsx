@@ -58,7 +58,7 @@ const iptvPricingMatrix: IPTVPricing[] = [
     durationLabel: "1 Month",
     badge: "STARTER",
     description: "Premium Live TV streaming with curated, working links—no dead Kodi lists, no endless broken app hunts.",
-    features: ["18,000+ Live TV Channels", "100,000+ Movies & Series", "Comprehensive Sports Coverage", "4K/HD Quality Streaming", "Works on All Devices", "Instant Email Delivery", "24/7 Customer Support (real humans)"],
+    features: ["Live TV, movies, series, and sports", "Login and setup guide by email", "For a device you already own"],
     prices: [
       { devices: 1, price: 11, productId: iptvRealProductId("1mo", 1) },
       { devices: 2, price: 25, productId: iptvRealProductId("1mo", 2) },

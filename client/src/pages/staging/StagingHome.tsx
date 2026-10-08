@@ -6,6 +6,7 @@ import { useCart } from "@/lib/store";
 import { HD_ID, HD_SLUG, K4_ID, K4_SLUG, publicDevicePath } from "@/lib/device-skus";
 import { HD_ALT, HD_IMG, K4_ALT, K4_IMG, packageImage } from "@/lib/package-art";
 import { useShopCatalog } from "@/lib/use-shop-catalog";
+import { SurfsharkOfferCards } from "@/components/SurfsharkOfferCards";
 import { StagingFooter, StagingHeader } from "@/components/staging/StagingChrome";
 import "@/styles/staging.css";
 
@@ -526,9 +527,23 @@ export default function StagingHome() {
             <ol className="mt-8 max-w-[720px] list-decimal space-y-4 pl-5">
               <li>You pay through the existing StreamStickPro checkout. United States and Canada only.</li>
               <li>A Google TV package is a shipped device. A live TV plan does not ship hardware.</li>
+              <li>For a Google TV package, the order email includes the educational setup video, login credentials, and the 1-year live TV plan.</li>
               <li>Your order email provides the login and setup instructions.</li>
               <li>If a step does not match the screen in front of you, contact support with the model number.</li>
             </ol>
+          </div>
+        </section>
+
+        <section className="bg-[#08111F] text-[#F8FAFC] stg-section" aria-labelledby="vpn-title">
+          <div className="stg-shell">
+            <h2 id="vpn-title">What a VPN is, and how it can stop buffering</h2>
+            <p className="mt-4 max-w-3xl text-[#C9D4DF]">
+              A VPN is optional. It is not the 1-year live TV plan. StreamStickPro may earn a commission if you buy Surfshark through these cards.
+            </p>
+            <div className="mt-10">
+              <SurfsharkOfferCards source="/staging" />
+            </div>
+            <Link href="/vpn"><span className="stg-btn stg-btn-secondary mt-8">Read the full VPN guide</span></Link>
           </div>
         </section>
 

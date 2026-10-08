@@ -48,7 +48,7 @@ export function SurfsharkOfferCards({ source }: { source: string }) {
               href={card.href}
               target="_blank"
               rel="noopener noreferrer sponsored"
-              className="v4-btn v4-btn-primary mt-6 inline-flex w-full"
+              className="mt-6 inline-flex min-h-[50px] w-full items-center justify-center rounded-xl bg-[#23C768] px-5 font-semibold text-[#08111F]"
               onClick={() =>
                 trackVpnClick({
                   source,

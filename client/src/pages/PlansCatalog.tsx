@@ -63,7 +63,7 @@ export default function PlansCatalog() {
           <p className="text-sm uppercase tracking-[0.2em] text-teal-200">Live TV plans</p>
           <h1 className="mt-3 text-4xl font-semibold md:text-5xl">Live TV, movies, and sports on a device you already own</h1>
           <p className="mt-4 max-w-3xl text-lg text-white leading-relaxed">
-            A plan is the service only. Nothing ships. After checkout you get a tutorial and a login for a Fire Stick, ONN, or Google TV you already have. That login unlocks 18,000+ live channels, 100,000+ movies and series, and sports. New hardware is in the Google packages.
+            A plan is the service only. Nothing ships. After checkout you get a tutorial and a login for a Fire Stick, ONN, or Google TV you already have. Live TV, movies, series, and sports follow the plan you buy. New hardware is in the Google packages.
           </p>
         </div>
       </div>
