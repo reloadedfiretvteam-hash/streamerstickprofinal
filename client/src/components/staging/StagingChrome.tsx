@@ -64,7 +64,10 @@ export function StagingHeader() {
   return (
     <header className="stg-header">
       <div className="stg-shell stg-header-row">
-        <Link href="/staging">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[200] focus:bg-white focus:px-3 focus:py-2 focus:text-[#0B1220]">
+          Skip to content
+        </a>
+        <Link href="/">
           <span className="inline-flex items-center">
             <Wordmark />
           </span>
@@ -141,7 +144,7 @@ export function StagingFooter() {
         {[
           { title: "Shop", links: STAGING_NAV.slice(0, 2).map((i) => [i.label, i.href] as const) },
           { title: "Help", links: STAGING_NAV.slice(2).map((i) => [i.label, i.href] as const) },
-          { title: "Company", links: [["Device finder", "/device-finder/"], ["Refunds", "/refund"], ["Terms", "/terms"]] as const },
+          { title: "Company", links: [["Shop", "/shop"], ["VPN", "/vpn"], ["Device finder", "/device-finder/"], ["Refunds", "/refund"], ["Terms", "/terms"]] as const },
         ].map((group) => (
           <div key={group.title}>
             <h2 className="text-sm font-semibold uppercase tracking-[0.08em] text-[#A8B6C8]">{group.title}</h2>

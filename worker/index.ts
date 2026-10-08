@@ -19,7 +19,7 @@ import { createCmsRoutes } from './routes/cms';
 import { createOwnerCmsPublicRoutes, createOwnerCmsAdminRoutes } from './routes/owner-cms';
 import { getStorage, getSupabaseServiceKey, getSupabaseUrl } from './helpers';
 import { settingsCms, starterSetupGuide, tablesReady } from './lib/owner-cms-settings-store';
-import { googleDevices, loadShopProducts, merchantRssXml, productJsonLd, itemListJsonLd } from './lib/shop-catalog';
+import { googleDevices, loadShopProducts, merchantRssXml, productJsonLd, itemListJsonLd, vpnLandingJsonLd } from './lib/shop-catalog';
 import { createClient } from '@supabase/supabase-js';
 import { isBlockedCountry, requestCountry } from './lib/geo-access';
 
@@ -756,18 +756,12 @@ app.get('/api/health', (c) => {
   });
 });
 
-// Catalog API: 93K catalog summary for Schema.org Dataset / AI citation (Nuclear SEO)
-const CATALOG_SUMMARY = {
-  channels: { usa: 847, france: 623, mexico: 456, india: 1247, total: 18000 },
-  movies: 60237,
-  series: 15423,
-  languages: 89,
-  countries: 195,
-  devices: 7,
-  hubUrl: 'https://streamstickpro.com/ultimate-iptv-catalog-2026',
-};
 app.get('/api/catalog-summary', (c) => {
-  return c.json(CATALOG_SUMMARY, 200, {
+  return c.json({
+    note: 'Channel, movie, and series counts are not published as invented totals.',
+    hubUrl: 'https://streamstickpro.com/devices',
+    plansUrl: 'https://streamstickpro.com/plans',
+  }, 200, {
     'Cache-Control': 'public, max-age=3600, s-maxage=86400',
     'Access-Control-Allow-Origin': 'https://streamstickpro.com',
   });
@@ -1050,6 +1044,8 @@ function escapeHtml(s: string): string {
 const SEO_REDIRECTS_STATIC: Record<string, string> = {
   // Canonical aliases (legacy URLs → preferred paths)
   '/homepage': '/',
+  '/faq': '/',
+  '/staging': '/',
   '/iptv-services': '/iptv',
   '/firestick-devices': '/devices',
   '/live-tv': '/iptv',
@@ -1669,15 +1665,10 @@ app.post('/api/indexnow/ping', async (c) => {
 
 // ── Per-page SEO meta for SPA pages (critical: Googlebot sees unique meta per page) ──
 const PAGE_META: Record<string, { title: string; description: string; noindex?: boolean }> = {
-  '/staging': {
-    title: 'Staging preview | StreamStickPro',
-    description: 'Protected staging storefront for StreamStickPro review. Not the public homepage.',
-    noindex: true,
-  },
   '/': {
-    title: 'Preloaded Google TV packages and live TV plans | StreamStickPro',
+    title: 'Google TV packages and live TV plans | StreamStickPro',
     description:
-      'Buy a shipped ONN Google TV with live TV, movies, and sports already set up, or buy a live TV plan for a Fire Stick or Google TV you already own.',
+      'Shop ONN Google TV HD and 4K packages, or a live TV plan for a device you already own. United States and Canada checkout.',
   },
   '/compatibility': {
     title: 'Check the device you already own | StreamStickPro',
@@ -1695,9 +1686,9 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
       'Pick Fire TV, Google TV, ONN, Android TV, Smart TV, or I’m not sure to get the next compatibility and setup step.',
   },
   '/vpn': {
-    title: 'What a VPN does for buffering | StreamStickPro',
+    title: 'VPN for streaming and buffering | StreamStickPro',
     description:
-      'A VPN encrypts traffic so your internet provider sees less of what you stream. That can reduce ISP throttling that shows up as buffering.',
+      'Learn how a VPN can reduce ISP throttling that looks like buffering. Surfshark VPN, Antivirus, and Adblock cards live on StreamStickPro.',
   },
   '/vpn-protection': {
     title: 'VPN Protection for Streaming | Privacy & ISP Tips | StreamStickPro',
@@ -1709,7 +1700,7 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
     description:
       'Google HD and 4K ONN packages for live TV. Photos, listed prices, and checkout. We do not sell Fire Stick hardware.',
   },
-  '/shop': { title: 'Shop Google TV packages and live TV plans | StreamStickPro', description: 'Shop ONN Google TV packages or a live TV plan for a device you already own. Prices come from the live catalog.' },
+  '/shop': { title: 'Shop Google TV devices and plans | StreamStickPro', description: 'Shop ONN Google TV HD and 4K device packages or a live TV plan for equipment you already own. Prices come from the live catalog.' },
   '/pricing': { title: 'Subscription prices | StreamStickPro', description: 'Choose a plan length and how many devices you want to activate. Prices come from the live catalog.' },
   '/blog': { title: 'Setup guides | StreamStickPro', description: 'Short guides for Google TV packages, existing-device plans, and setup. Spun city posts are not listed.' },
   '/locations': { title: 'City pages moved | StreamStickPro', description: 'City catalogs were removed. Use devices, subscriptions, or the compatibility page instead.', noindex: true },
@@ -1719,23 +1710,23 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
   '/36hr-trial': { title: '36-hour trial request | StreamStickPro', description: 'Request a 36-hour trial only if you already own a supported device. Support writes back. It is not instant and it is not a package purchase.' },
   '/iptv-firestick': { title: 'IPTV Fire Stick Search? Google Packages | StreamStickPro', description: 'Looking up IPTV for Fire Stick or Downloader? Shop the Google HD package or Google 4K package, or use a subscription on a Fire TV you already own.' },
   '/best-iptv-firestick': { title: 'Best IPTV Fire Stick 2026 | Google Packages | StreamStickPro', description: 'People comparing IPTV for Fire Stick can order a Google HD or 4K package, or run live TV on a Fire Stick they already own.' },
-  '/devices': { title: 'ONN Google TV device packages | StreamStickPro', description: 'Compare HD and 4K ONN Google TV packages. Prices, stock, and included items come from the live catalog. Fire Stick hardware is not sold.' },
+  '/devices': { title: 'ONN Google TV HD and 4K devices | StreamStickPro', description: 'Compare ONN Google TV HD and 4K device packages. Live catalog prices, stock, and included items. Fire Stick hardware is not sold.' },
   '/social-ads': { title: 'StreamStickPro ads | 36-hour free trial and Google packages', description: 'StreamStickPro ads: cut the cable bill, keep live TV, sports, movies, and a 36-hour free trial. Google HD package and Google 4K package.' },
   '/plans': { title: 'Live TV plans for a device you own | StreamStickPro', description: 'A plan is the service only. Nothing ships. After checkout you get a login for a Fire Stick, ONN, or Google TV you already own.' },
   '/guides': { title: 'Google TV & Device Setup Guides | StreamStickPro', description: 'Written setup steps for ONN and Google TV, plus troubleshooting. A video alone is not the guide. Links to devices and plans.' },
   '/support': { title: 'Support & Contact | StreamStickPro', description: 'Setup help, compatibility questions, and order support. Email the team, or open guides, devices, and plans from this page.' },
   '/contact': { title: 'Contact StreamStickPro Support | StreamStickPro', description: 'Contact StreamStickPro for setup help, compatibility questions, and order support. Email the team and use the linked guides.' },
-  '/iptv-media-players': { title: 'Best IPTV Media Players 2026 | Devices | StreamStick Pro', description: 'Top IPTV media players and apps: TiviMate, IPTV Smarters Pro, Kodi, Perfect Player, VLC. Expert setup guides and side-by-side comparisons.' },
-  '/iptv-smarters-pro': { title: 'IPTV Smarters Pro Setup Guide 2026 | StreamStick Pro', description: 'Complete IPTV Smarters Pro setup guide. Install on Fire Stick, Android, iOS. Add StreamStickPro credentials and start streaming 18K+ channels.' },
-  '/tivimate': { title: 'TiviMate IPTV Player Setup Guide 2026 | StreamStick Pro', description: 'TiviMate setup guide for IPTV. Install on Fire Stick and Android TV. EPG, catch-up, multi-view. Best settings for StreamStickPro streaming.' },
+  '/iptv-media-players': { title: 'Media players for live TV | StreamStickPro', description: 'Player apps used with StreamStickPro plans, including TiviMate and IPTV Smarters Pro. Setup still depends on the exact device.' },
+  '/iptv-smarters-pro': { title: 'IPTV Smarters Pro setup | StreamStickPro', description: 'How to install IPTV Smarters Pro and add StreamStickPro login details on a compatible Fire TV, Android, or Google TV device.' },
+  '/tivimate': { title: 'TiviMate setup | StreamStickPro', description: 'How to install TiviMate and add StreamStickPro login details on a compatible Fire TV or Android TV device.' },
   '/setup': { title: 'Setup guides | StreamStickPro', description: 'Written and video setup previews for Fire TV and ONN Google TV. Your order email has the login and the steps for your package or plan.' },
   '/bundles': { title: 'Packages and plans | StreamStickPro', description: 'ONN Google TV packages and live TV plans for a compatible device you already own. Fire Stick hardware is not sold.' },
-  '/resources': { title: 'IPTV Streaming Resources & Tools 2026 | StreamStick Pro', description: 'IPTV resources, tools, speed tests, VPN guides, and troubleshooting. Everything you need for the best StreamStickPro streaming experience.' },
-  '/ultimate-iptv-catalog-2026': { title: 'IPTV Channel Catalog 2026 | 93K+ Channels | StreamStick Pro', description: 'Explore the ultimate IPTV channel catalog: 93,000+ channels from 150+ countries. Search by country, genre, language. StreamStickPro.' },
-  '/tools/catalog': { title: 'Free IPTV Tools & Streaming Utilities | StreamStick Pro', description: 'Free IPTV tools: speed test, M3U playlist validator, EPG checker, channel finder. StreamStickPro utilities for the best streaming setup.' },
-  '/terms': { title: 'Terms of Service | IPTV & Streaming | StreamStick Pro', description: 'StreamStickPro terms of service. Read our policies on IPTV subscriptions, Fire Stick purchases, refunds, and account usage.' },
-  '/privacy': { title: 'Privacy Policy | Data Protection | StreamStick Pro', description: 'StreamStickPro privacy policy. How we collect, use, and protect your personal information. GDPR and CCPA compliant. Read our full policy.' },
-  '/refund': { title: 'Refund Policy | Money-Back Guarantee | StreamStick Pro', description: 'StreamStickPro refund policy. 7-day money-back guarantee on IPTV subscriptions. Learn how to request a refund and what purchases are covered.' },
+  '/resources': { title: 'Streaming resources | StreamStickPro', description: 'Setup help, VPN guide, and troubleshooting links for StreamStickPro Google TV packages and live TV plans.' },
+  '/ultimate-iptv-catalog-2026': { title: 'Live TV catalog notes | StreamStickPro', description: 'Use devices, plans, and setup guides for the current StreamStickPro offer. Channel lists are not invented on this page.', noindex: true },
+  '/tools/catalog': { title: 'Streaming tools | StreamStickPro', description: 'Optional utilities linked from StreamStickPro. Start with a Google TV package or a live TV plan for a device you already own.' },
+  '/terms': { title: 'Terms of Service | StreamStickPro', description: 'StreamStickPro terms for Google TV packages, live TV plans, checkout, and account use.' },
+  '/privacy': { title: 'Privacy Policy | StreamStickPro', description: 'How StreamStickPro collects, uses, and protects personal information.' },
+  '/refund': { title: 'Refund Policy | StreamStickPro', description: 'StreamStickPro refund window and what package or plan purchases it covers.' },
   '/shadow-services': { title: 'StreamStick Pro', description: 'StreamStickPro secure store.', noindex: true },
   '/checkout': { title: 'Checkout | StreamStick Pro', description: 'Complete your StreamStickPro purchase.', noindex: true },
   '/success': { title: 'Order Confirmed | StreamStick Pro', description: 'Your StreamStickPro order has been confirmed.', noindex: true },
@@ -1774,6 +1765,7 @@ function trimToWordBoundary(input: string, max: number): string {
 const LEGACY_CANONICAL_MAP: Record<string, string> = {
   '/homepage': '/',
   '/faq': '/',
+  '/staging': '/',
   '/iptv-services': '/iptv',
   '/firestick-devices': '/devices',
   '/live-tv': '/iptv',
@@ -1836,15 +1828,15 @@ function applySecurityHeaders(res: Response, pathname?: string, hostname?: strin
 
 // VS-competitor meta for crawler SSR
 const VS_META: Record<string, { title: string; description: string }> = {
-  '/vs-iptvstronger': { title: 'StreamStickPro vs IPTVStronger 2026 | Honest Comparison', description: 'Compare StreamStickPro vs IPTVStronger: channels, pricing, reliability, devices. See why StreamStickPro leads with 18K+ channels and free trial.' },
-  '/vs-troypoint': { title: 'StreamStickPro vs TroyPoint 2026 | IPTV Comparison', description: 'StreamStickPro vs TroyPoint comparison: features, pricing, and setup. StreamStickPro offers 18K+ channels and 24/7 support.' },
-  '/vs-hypotv': { title: 'StreamStickPro vs HypoTV 2026 | Which IPTV Is Better?', description: 'Compare StreamStickPro vs HypoTV: channel count, reliability, price, device support. StreamStickPro: 18K+ channels, 4K quality, free trial.' },
-  '/vs-tvworldwide': { title: 'StreamStickPro vs TV Worldwide 2026 | IPTV Showdown', description: 'StreamStickPro vs TV Worldwide: features, pricing, device support, channel count compared. 18K+ channels and free trial with StreamStickPro.' },
-  '/vs-iptvproviders': { title: 'StreamStickPro vs IPTV Providers 2026 | Best IPTV Service', description: 'StreamStickPro vs IPTV Providers: head-to-head comparison. Channels, VOD, price, reliability. StreamStickPro wins with 18K+ channels.' },
-  '/vs-xtremehd': { title: 'StreamStickPro vs XtremeHD 2026 | IPTV Full Comparison', description: 'Compare StreamStickPro vs XtremeHD IPTV: channels, streaming quality, pricing, support. StreamStickPro offers 18K+ channels and free 36-hour trial.' },
-  '/vs-iptvgreat': { title: 'StreamStickPro vs IPTV Great 2026 | Full Comparison', description: 'StreamStickPro vs IPTV Great: full comparison of features, channels, pricing, customer support. StreamStickPro leads with 18K+ channels.' },
-  '/vs-shoroc': { title: 'StreamStickPro vs Shoroc 2026 | IPTV Service Comparison', description: 'Compare StreamStickPro vs Shoroc IPTV service. Channels, reliability, pricing, devices. StreamStickPro: 18K+ channels, free trial included.' },
-  '/vs-iptvencoder': { title: 'StreamStickPro vs IPTV Encoder 2026 | Full Comparison', description: 'StreamStickPro vs IPTV Encoder: features, channels, pricing, support compared. StreamStickPro offers 18K+ channels and 24/7 customer support.' },
+  '/vs-iptvstronger': { title: 'StreamStickPro vs IPTVStronger | StreamStickPro', description: 'Compare Google TV packages, live TV plans, setup, and checkout. StreamStickPro does not invent channel counts on this page.' },
+  '/vs-troypoint': { title: 'StreamStickPro vs TroyPoint | StreamStickPro', description: 'Compare features, pricing, and setup. Review the live StreamStickPro catalog before you choose.' },
+  '/vs-hypotv': { title: 'StreamStickPro vs HypoTV | StreamStickPro', description: 'Compare reliability, price, and device support. StreamStickPro sells ONN Google TV packages and live TV plans.' },
+  '/vs-tvworldwide': { title: 'StreamStickPro vs TV Worldwide | StreamStickPro', description: 'Compare features, pricing, and device support. Use the live StreamStickPro catalog for current prices.' },
+  '/vs-iptvproviders': { title: 'StreamStickPro vs other providers | StreamStickPro', description: 'Compare Google TV packages and live TV plans. Prices and included items come from the live catalog.' },
+  '/vs-xtremehd': { title: 'StreamStickPro vs XtremeHD | StreamStickPro', description: 'Compare streaming quality, pricing, and support. StreamStickPro offers a 36-hour trial request if you already own a compatible device.' },
+  '/vs-iptvgreat': { title: 'StreamStickPro vs IPTV Great | StreamStickPro', description: 'Compare features, pricing, and support. Review StreamStickPro package and plan pages before you buy.' },
+  '/vs-shoroc': { title: 'StreamStickPro vs Shoroc | StreamStickPro', description: 'Compare reliability, pricing, and devices. StreamStickPro checkout is United States and Canada.' },
+  '/vs-iptvencoder': { title: 'StreamStickPro vs IPTV Encoder | StreamStickPro', description: 'Compare features, pricing, and support. StreamStickPro does not invent channel counts on this page.' },
 };
 
 async function resolveCatalogMeta(pathname: string, env: Env): Promise<{ title: string; description: string } | null> {
@@ -2027,6 +2019,20 @@ function injectMeta(html: string, pathname: string, meta: { title: string; descr
   out = out.replace(/<meta[^>]*name=["']twitter:description["'][^>]*>/i, `<meta name="twitter:description" content="${descSafe}">`);
   if (!/<meta[^>]*name=["']robots["'][^>]*>/i.test(out)) out = out.replace('</head>', `<meta name="robots" content="${robotsContent}"></head>`);
   if (breadcrumbLD) out = out.replace('</head>', `${breadcrumbLD}</head>`);
+  const ogImage =
+    pathname === '/vpn' || pathname.startsWith('/vpn-')
+      ? `${base}/images/vpn-search-ad-card.jpg`
+      : pathname === '/' || pathname.startsWith('/devices') || pathname === '/shop' || pathname === '/onn'
+        ? `${base}/images/onn-4k-official-reference.png`
+        : '';
+  if (ogImage) {
+    out = out.replace(/<meta[^>]*property=["']og:image["'][^>]*>/i, `<meta property="og:image" content="${ogImage}">`);
+    out = out.replace(/<meta[^>]*name=["']twitter:image["'][^>]*>/i, `<meta name="twitter:image" content="${ogImage}">`);
+    const ogAlt = pathname === '/vpn' || pathname.startsWith('/vpn-')
+      ? 'StreamStickPro VPN product card'
+      : 'ONN 4K Google TV package from StreamStickPro';
+    out = out.replace(/<meta[^>]*property=["']og:image:alt["'][^>]*>/i, `<meta property="og:image:alt" content="${ogAlt}">`);
+  }
   return out;
 }
 
@@ -2055,7 +2061,10 @@ async function injectProductSchema(html: string, pathname: string, env: Env): Pr
   try {
     const products = await liveGoogleDevices(env);
     if (!products.length) return html;
-    if (pathname === '/' || pathname === '/devices' || pathname === '/shop') {
+    if (pathname === '/vpn') {
+      return html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(vpnLandingJsonLd())}</script></head>`);
+    }
+    if (pathname === '/' || pathname === '/devices' || pathname === '/shop' || pathname === '/onn') {
       return html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(itemListJsonLd(products))}</script></head>`);
     }
     const match = pathname.match(/^\/devices\/([^/]+)\/?$/);

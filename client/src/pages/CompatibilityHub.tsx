@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { Link } from "wouter";
 import { setPageMeta } from "@/lib/seo";
-import { V4Footer, V4Header } from "@/components/v4/V4Chrome";
-import "@/styles/v4.css";
+import { StagingFooter, StagingHeader } from "@/components/staging/StagingChrome";
+import "@/styles/staging.css";
 
 export default function CompatibilityHub() {
   useEffect(() => {
@@ -15,9 +15,9 @@ export default function CompatibilityHub() {
   }, []);
 
   return (
-    <div className="v4 min-h-screen">
-      <V4Header />
-      <main id="main-content" className="v4-shell py-12">
+    <div className="stg min-h-screen">
+      <StagingHeader />
+      <main id="main-content" className="stg-shell stg-section">
         <p className="text-sm text-[#536275]"><Link href="/">Home</Link> / Compatibility</p>
         <h1 className="mt-6 max-w-[820px] text-[34px] font-bold lg:text-5xl">Check the device you already own.</h1>
         <p className="mt-4 max-w-[680px] text-lg text-[#536275]">Compatibility depends on the exact model, platform, and supported player. Check the details before choosing a plan.</p>
@@ -43,7 +43,7 @@ export default function CompatibilityHub() {
           Don’t see your device? <Link href="/contact/?topic=compatibility"><span className="underline">Send us its model number.</span></Link>
         </p>
       </main>
-      <V4Footer />
+      <StagingFooter />
     </div>
   );
 }

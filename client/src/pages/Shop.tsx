@@ -2,11 +2,11 @@ import { useEffect } from "react";
 import { Link } from "wouter";
 import { setPageMeta } from "@/lib/seo";
 import { useCart } from "@/lib/store";
-import { V4Footer, V4Header } from "@/components/v4/V4Chrome";
+import { StagingFooter, StagingHeader } from "@/components/staging/StagingChrome";
 import { publicDevicePath } from "@/lib/device-skus";
 import { HD_ALT, HD_ID, K4_ALT, K4_ID, packageImage } from "@/lib/package-art";
 import { useShopCatalog } from "@/lib/use-shop-catalog";
-import "@/styles/v4.css";
+import "@/styles/staging.css";
 
 export default function Shop() {
   const { addItem, openCart } = useCart();
@@ -16,20 +16,21 @@ export default function Shop() {
   useEffect(() => {
     document.documentElement.classList.remove("dark");
     setPageMeta({
-      title: "Shop Google TV packages and live TV plans | StreamStickPro",
+      title: "Shop Google TV devices and plans | StreamStickPro",
       description:
-        "Shop ONN Google TV packages or a live TV plan for a device you already own. Prices come from the live catalog.",
+        "Shop ONN Google TV HD and 4K device packages or a live TV plan for equipment you already own. Prices come from the live catalog.",
       path: "/shop",
+      ogImage: "https://streamstickpro.com/images/onn-4k-official-reference.png",
     });
   }, []);
 
   return (
-    <div className="v4 min-h-screen">
-      <V4Header />
+    <div className="stg min-h-screen">
+      <StagingHeader />
       <main id="main-content">
-        <section className="bg-[#08111F] text-[#F8FAFC]">
-          <div className="v4-shell py-16">
-            <h1 className="max-w-3xl text-[40px] font-bold leading-tight lg:text-[48px]">Shop StreamStickPro</h1>
+        <section className="stg-hero text-[#F8FAFC]">
+          <div className="stg-shell py-16">
+            <h1 className="max-w-3xl">Shop Google TV devices and live TV plans</h1>
             <p className="mt-4 max-w-2xl text-[#C9D4DF]">
               Two paths: a shipped ONN Google TV package, or a live TV plan for equipment you already own. Fire Stick hardware is not sold here.
             </p>
@@ -37,13 +38,13 @@ export default function Shop() {
         </section>
 
         <section className="bg-[#FCFBF7]">
-          <div className="v4-shell py-16">
-            <h2 className="text-[34px] font-bold">Google TV packages</h2>
+          <div className="stg-shell py-16">
+            <h2>Google TV packages</h2>
             <div className="mt-8 grid gap-6 lg:grid-cols-2">
               {[hd, k4].map((product) =>
                 product ? (
                   <article key={product.id} className="overflow-hidden rounded-[22px] border border-[#D7DFE7] bg-white">
-                    <div className="v4-device-stage">
+                    <div className="stg-story-media" style={{ height: 288 }}>
                       <img
                         src={packageImage(product.id, product.image)}
                         alt={product.id === HD_ID ? HD_ALT : product.id === K4_ID ? K4_ALT : product.name}
@@ -58,7 +59,7 @@ export default function Shop() {
                       <div className="mt-6 flex flex-wrap gap-3">
                         <button
                           type="button"
-                          className="v4-btn v4-btn-primary"
+                          className="stg-btn stg-btn-primary"
                           onClick={() => {
                             addItem({
                               id: product.id,
@@ -74,7 +75,7 @@ export default function Shop() {
                           Add to cart
                         </button>
                         <Link href={publicDevicePath(product.id)}>
-                          <span className="v4-btn v4-btn-secondary-light">Package details</span>
+                          <span className="stg-btn stg-btn-secondary-light">Package details</span>
                         </Link>
                       </div>
                     </div>
@@ -95,8 +96,8 @@ export default function Shop() {
         </section>
 
         <section className="bg-[#F5F2EA]">
-          <div className="v4-shell py-16">
-            <h2 className="text-[34px] font-bold">Live TV plans</h2>
+          <div className="stg-shell py-16">
+            <h2>Live TV plans</h2>
             <p className="mt-4 max-w-3xl text-[#536275]">No hardware ships. Totals come from the live catalog.</p>
             {status === "loading" ? <p className="mt-6">Loading current plans…</p> : null}
             <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -107,7 +108,7 @@ export default function Shop() {
                   <p className="mt-4 text-[28px] font-bold">{money(plan.price)}</p>
                   <button
                     type="button"
-                    className="v4-btn v4-btn-primary mt-5 w-full"
+                    className="stg-btn stg-btn-primary mt-5 w-full"
                     onClick={() => {
                       addItem({
                         id: plan.id,
@@ -129,7 +130,7 @@ export default function Shop() {
           </div>
         </section>
       </main>
-      <V4Footer />
+      <StagingFooter />
     </div>
   );
 }

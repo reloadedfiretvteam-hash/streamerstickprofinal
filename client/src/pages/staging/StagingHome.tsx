@@ -47,10 +47,11 @@ export default function StagingHome() {
   useEffect(() => {
     document.documentElement.classList.remove("dark");
     setPageMeta({
-      title: "Staging preview | StreamStickPro",
-      description: "Protected staging storefront for StreamStickPro review. Not the public homepage.",
-      path: "/staging",
-      noindex: true,
+      title: "Google TV packages and live TV plans | StreamStickPro",
+      description:
+        "Shop ONN Google TV HD and 4K packages, or a live TV plan for a device you already own. United States and Canada checkout.",
+      path: "/",
+      ogImage: "https://streamstickpro.com/images/onn-4k-official-reference.png",
     });
     try {
       const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "null");
@@ -94,7 +95,7 @@ export default function StagingHome() {
       product: hd,
       eyebrow: "FOR AN HD SETUP",
       name: "ONN Google TV HD Package",
-      body: "An ONN Full HD Google TV stick with a voice remote and setup guidance. Review the included service and package details before ordering.",
+      body: "An ONN Full HD Google TV stick and voice remote, plus an educational setup video, login credentials, and a 1-year live TV plan.",
       image: HD_IMG,
       alt: HD_ALT,
       cta: "View HD Package",
@@ -106,7 +107,7 @@ export default function StagingHome() {
       product: k4,
       eyebrow: "FOR A 4K SETUP",
       name: "ONN Google TV 4K Package",
-      body: "A 4K-capable ONN Google TV device with a voice remote and setup guidance. Review the included service and package details before ordering.",
+      body: "A 2023 ONN 4K Google TV box and voice remote, plus an educational setup video, login credentials, and a 1-year live TV plan.",
       image: K4_IMG,
       alt: K4_ALT,
       cta: "View 4K Package",
@@ -116,9 +117,6 @@ export default function StagingHome() {
 
   return (
     <div className="stg min-h-screen">
-      <p className="bg-[#18263B] px-4 py-2 text-center text-sm text-[#F8FAFC]">
-        Staging preview for review. The public homepage is unchanged. <Link href="/"><span className="underline">View live site</span></Link>
-      </p>
       <div className="bg-[#08111F] text-[#F8FAFC]">
         <div className="stg-shell py-3 text-center text-[15px] font-semibold">
           Need help choosing? <Link href="/device-finder/"><span className="text-[#79D5FF] underline-offset-4 hover:underline">Find your setup.</span></Link>
@@ -198,12 +196,12 @@ export default function StagingHome() {
             ) : null}
             <div className="mt-6 rounded-2xl border border-[#D7DFE7] bg-white p-6" aria-live="polite">
               {!finderShown ? (
-                <p>Choose a device, then select Show My Options.</p>
+                  <p>Choose a device type, then select Show My Options.</p>
               ) : (
                 <>
-                  <p className="font-semibold">We have not confirmed this setup.</p>
+                  <p className="font-semibold">Next step for {finder}</p>
                   <p className="mt-2 text-[#536275]">
-                    {finder} is a category, not a tested model. Send the exact model number before ordering a plan.
+                    A device type is a starting point. Send the exact model number so support can confirm compatibility before a plan is activated.
                   </p>
                   <div className="mt-4 flex flex-wrap gap-4">
                     <Link href="/compatibility/"><span className="underline">Check Compatibility</span></Link>
@@ -262,17 +260,20 @@ export default function StagingHome() {
                       <p className="mt-4 text-[32px] font-bold">
                         {status === "loading" ? "Loading current price…" : story.product ? money(story.product.price) : "Price not in catalog"}
                       </p>
-                      <p className="mt-2 text-sm text-[#536275]">Catalog ID: {story.id}</p>
-                      {term ? <p className="mt-2">Included service listed as: {term}</p> : <p className="stg-flag">Included service duration is not a separate catalog field. Read the package description before ordering.</p>}
-                      {included.length ? (
-                        <ul className="mt-4 list-disc pl-5 text-[#536275]">
-                          {included.map((item) => (
-                            <li key={item}>{item}</li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="stg-flag">No structured contents list is in the catalog yet. Use What’s Included on the product page.</p>
-                      )}
+                      {term ? <p className="mt-2 text-[#536275]">Service listed on this package: {term}</p> : null}
+                      <ul className="mt-4 list-disc pl-5 text-[#536275]">
+                        {(included.length
+                          ? included
+                          : [
+                              "ONN Google TV hardware and voice remote",
+                              "Educational setup video",
+                              "Login credentials",
+                              "1-year live TV plan",
+                            ]
+                        ).map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
                       <button type="button" className="stg-btn stg-btn-secondary-light mt-4" aria-expanded={openInclude === story.id} onClick={() => setOpenInclude(openInclude === story.id ? null : story.id)}>
                         What’s Included
                       </button>
@@ -295,8 +296,8 @@ export default function StagingHome() {
             <p className="mt-4 max-w-3xl text-sm text-[#536275]">
               4K describes the hardware’s supported output. Picture quality depends on the content, TV, app, and internet connection.
             </p>
-            <p className="stg-flag">
-              Product photos are the official Walmart pack shots for the ONN Full HD Google TV stick and the 2023 ONN 4K Google TV box, hosted on this site. They are not Pro or Plus models. Walmart owns those photographs; confirm commercial reuse before long-term production use. The retail box says US compatible only. Checkout is United States and Canada. Shipping and device compatibility are separate facts.
+            <p className="mt-4 max-w-3xl text-sm text-[#536275]">
+              Photos show the ONN Full HD Google TV stick and the 2023 ONN 4K Google TV box. They are not Pro or Plus models. Checkout is United States and Canada.
             </p>
           </div>
         </section>
@@ -307,14 +308,11 @@ export default function StagingHome() {
             <p className="mt-4 max-w-3xl text-[#536275]">Compare the hardware and package details side by side.</p>
             {(() => {
               const rows = [
-                ["Maximum device output", "Full HD stick, from the catalog name and Walmart Full HD device photo", "4K box, from the catalog name and Walmart 2023 4K box photo"],
-                ["Best fit", "Not a catalog field", "Not a catalog field"],
-                ["Exact hardware model", "Walmart ONN Full HD Google TV streaming device. No separate model field in the catalog.", "Walmart 2023 ONN 4K Google TV streaming box. Not Pro or Plus. No separate model field in the catalog."],
-                ["Included physical items", contentsFromDescription(hd?.description || "").join("; ") || "See description", contentsFromDescription(k4?.description || "").join("; ") || "See description"],
-                ["Included service term", serviceTerm(hd?.description || "") || "Not listed as its own field", serviceTerm(k4?.description || "") || "Not listed as its own field"],
-                ["Setup guidance", /tutorial|guide/i.test(hd?.description || "") ? "Tutorial mentioned in description" : "See package page", /tutorial|guide/i.test(k4?.description || "") ? "Tutorial mentioned in description" : "See package page"],
-                ["Current price", status === "loading" ? "Loading current price…" : hd ? money(hd.price) : "Not in catalog", status === "loading" ? "Loading current price…" : k4 ? money(k4.price) : "Not in catalog"],
-                ["Stock status", stockLabel(hd?.availability), stockLabel(k4?.availability)],
+                ["Picture", "Full HD Google TV stick", "4K Google TV box"],
+                ["Hardware", "ONN Full HD stick and voice remote", "2023 ONN 4K box and voice remote"],
+                ["Included with the package", "Educational setup video, login credentials, and a 1-year live TV plan", "Educational setup video, login credentials, and a 1-year live TV plan"],
+                ["Current price", status === "loading" ? "Loading current price…" : hd ? money(hd.price) : "See the HD product page", status === "loading" ? "Loading current price…" : k4 ? money(k4.price) : "See the 4K product page"],
+                ["Availability", stockLabel(hd?.availability), stockLabel(k4?.availability)],
               ] as const;
               return (
                 <>
@@ -375,10 +373,10 @@ export default function StagingHome() {
               <div className="mt-8 grid gap-8 lg:grid-cols-2">
                 <div>
                   <p className="font-semibold">Customer’s device</p>
-                  <p className="mt-2 text-[#C9D4DF]">Use compatibility for the exact model. This configurator only selects catalog plans.</p>
+                  <p className="mt-2 text-[#C9D4DF]">Check compatibility for the exact model, then pick a plan length and device allowance here.</p>
                   <fieldset className="mt-6">
                     <legend className="font-semibold">How many devices do you want to activate?</legend>
-                    <p className="mt-2 text-sm text-[#A8B6C8]">This catalog uses device allowance. Simultaneous streams means how many streams can play at the same time. It is separate from the number of devices you own. This catalog does not list a simultaneous-stream field.</p>
+                    <p className="mt-2 text-sm text-[#A8B6C8]">Device allowance is how many devices you want to activate. It is not the same as how many people can watch at the same time.</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {[1, 2, 3, 4, 5].map((n) => (
                         <label key={n} className="stg-opt">
@@ -407,7 +405,7 @@ export default function StagingHome() {
                       <p className="mt-3">{selectedPlan.name}</p>
                       <p className="mt-2 text-[32px] font-bold">{money(selectedPlan.price)}</p>
                       <p className="mt-2 text-sm text-[#A8B6C8]">Device allowance: {devices}. Duration: {DURATIONS.find((d) => d.key === duration)?.label}.</p>
-                      <p className="stg-flag">Renewal arrangement is not a field on this catalog record. Read Terms before checkout.</p>
+                      <p className="mt-2 text-sm text-[#A8B6C8]">Read Terms before checkout for renewal details.</p>
                       <p className="mt-4">Your order email provides the login and setup instructions.</p>
                       <Link href="/setup/"><span className="mt-3 inline-block underline">Relevant setup guide</span></Link>
                       {" · "}
@@ -536,12 +534,12 @@ export default function StagingHome() {
 
         <section className="bg-[#08111F] text-[#F8FAFC] stg-section" aria-labelledby="vpn-title">
           <div className="stg-shell">
-            <h2 id="vpn-title">What a VPN is, and how it can stop buffering</h2>
+            <h2 id="vpn-title">VPN product cards for a smoother stream</h2>
             <p className="mt-4 max-w-3xl text-[#C9D4DF]">
-              A VPN is optional. It is not the 1-year live TV plan. StreamStickPro may earn a commission if you buy Surfshark through these cards.
+              A VPN is optional and separate from the 1-year live TV plan. These cards stay on StreamStickPro first so you can read the guide, then continue to Surfshark if you want the add-on.
             </p>
             <div className="mt-10">
-              <SurfsharkOfferCards source="/staging" />
+              <SurfsharkOfferCards source="/" mode="inbound" />
             </div>
             <Link href="/vpn"><span className="stg-btn stg-btn-secondary mt-8">Read the full VPN guide</span></Link>
           </div>

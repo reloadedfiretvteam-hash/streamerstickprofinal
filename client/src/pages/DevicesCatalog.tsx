@@ -77,9 +77,9 @@ export default function DevicesCatalog() {
   return (
     <StorefrontChrome>
     <div className="bg-[#f4f6f8] text-slate-900">
-      <div className="bg-[#0b1220] text-white">
+      <div className="stg-hero text-white">
         <div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-blue-300">Shipped preloaded devices</p>
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-[#79D5FF]">Google TV devices</p>
           <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
             ONN Google TV device packages
           </h1>
@@ -123,7 +123,7 @@ export default function DevicesCatalog() {
                 href={publicDevicePath(d.sku)}
                 className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
-                <div className="aspect-square bg-[#edf3f7]">
+                <div className="stg-story-media aspect-square" style={{ height: "auto" }}>
                   <img
                     src={packageImage(d.sku, d.primary_image_url)}
                     alt={

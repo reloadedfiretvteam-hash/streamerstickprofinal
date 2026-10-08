@@ -42,7 +42,11 @@
   --dark-border: #233145;
   --text: #0b1220;
   --muted: #3a4658;
-  background: var(--white);
+  background-color: var(--white);
+  background-image: linear-gradient(180deg, rgba(252, 251, 247, 0.88), rgba(252, 251, 247, 0.94)), url("/images/staging/hero-navy-studio-background.jpg");
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center top;
   color: var(--text);
   font-family: Inter, system-ui, sans-serif;
   font-size: 18px;
@@ -231,16 +235,25 @@
 }
 
 .stg-hero {
-  background: var(--navy);
+  position: relative;
+  background: var(--navy) url("/images/staging/hero-navy-studio-background.jpg") center / cover no-repeat;
   color: var(--light);
 }
 
+.stg-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(8, 17, 31, 0.9) 0%, rgba(8, 17, 31, 0.68) 58%, rgba(8, 17, 31, 0.42) 100%);
+}
+
+.stg-hero-grid,
+.stg-hero .stg-shell {
+  position: relative;
+  z-index: 1;
+}
+
 @media (min-width: 1024px) {
-  .stg-hero {
-    background-image: url("/images/staging/hero-navy-studio-background.jpg");
-    background-size: cover;
-    background-position: center;
-  }
   .stg-hero-grid {
     display: grid;
     grid-template-columns: 56fr 44fr;
@@ -259,7 +272,7 @@
 }
 
 .stg-product-panel {
-  background: #fff;
+  background: #edf3f7 url("/images/device-studio-surface.jpg") center / cover no-repeat;
   border-radius: 22px;
   padding: 24px;
   border: 1px solid var(--border);
@@ -375,7 +388,7 @@
 
 .stg-story-media {
   height: 260px;
-  background: #fff;
+  background: #edf3f7 url("/images/device-studio-surface.jpg") center / cover no-repeat;
   border-radius: 18px;
   border: 1px solid var(--border);
   display: flex;

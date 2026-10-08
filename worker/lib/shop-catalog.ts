@@ -163,6 +163,55 @@ function xmlEscape(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
+export function vpnLandingJsonLd() {
+  const page = `${SITE}/vpn`;
+  const cards = [
+    {
+      id: "surfshark-vpn",
+      name: "Surfshark VPN",
+      description: "Encrypts your connection so your internet provider sees less of what you stream. That can reduce throttling that shows up as buffering.",
+      image: `${SITE}/images/vpn-search-ad-card.jpg`,
+    },
+    {
+      id: "surfshark-antivirus",
+      name: "Surfshark Antivirus",
+      description: "Optional device protection sold by Surfshark. Review current terms on the StreamStickPro VPN page before you continue.",
+      image: `${SITE}/images/vpn-buffering-explained.jpg`,
+    },
+    {
+      id: "surfshark-adblock",
+      name: "Surfshark Adblock",
+      description: "Optional ad-blocking from Surfshark. It is separate from the StreamStickPro live TV plan.",
+      image: `${SITE}/images/vpn-search-ad-card.jpg`,
+    },
+  ];
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "VPN product cards for streaming",
+    url: page,
+    itemListElement: cards.map((card, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${page}#${card.id}`,
+      item: {
+        "@type": "Product",
+        name: card.name,
+        description: card.description,
+        image: [card.image],
+        brand: { "@type": "Brand", name: "Surfshark" },
+        url: `${page}#${card.id}`,
+        offers: {
+          "@type": "Offer",
+          url: `${page}#${card.id}`,
+          availability: "https://schema.org/InStock",
+          seller: { "@type": "Organization", name: "StreamStickPro", url: SITE },
+        },
+      },
+    })),
+  };
+}
+
 export function merchantRssXml(products: ShopProduct[]): string {
   const items = products
     .map((product) => {

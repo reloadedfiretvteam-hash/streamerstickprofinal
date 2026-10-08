@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { WhatsAppLiveChat } from "@/components/OwnerStoreUtils";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -11,8 +11,7 @@ import RetargetingPixels from "@/components/RetargetingPixels";
 import { Spinner } from "@/components/ui/spinner";
 
 // Only the public homepage loads immediately.
-import HomeV4 from "@/pages/HomeV4";
-const StagingHome = lazy(() => import("@/pages/staging/StagingHome"));
+import StagingHome from "@/pages/staging/StagingHome";
 
 // Non-critical routes - lazy load for better performance
 const ShadowStore = lazy(() => import("@/pages/ShadowStore"));
@@ -110,11 +109,15 @@ function Router() {
     <Suspense fallback={<LoadingFallback />}>
       <>
       <Switch>
-        <Route path="/staging" component={StagingHome} />
-        <Route path="/staging/" component={StagingHome} />
-        <Route path="/" component={HomeV4} />
-        <Route path="/homepage" component={HomeV4} />
-        <Route path="/faq" component={HomeV4} />
+        <Route path="/staging">
+          <Redirect to="/" />
+        </Route>
+        <Route path="/staging/">
+          <Redirect to="/" />
+        </Route>
+        <Route path="/" component={StagingHome} />
+        <Route path="/homepage" component={StagingHome} />
+        <Route path="/faq" component={StagingHome} />
         <Route path="/compatibility" component={CompatibilityHub} />
         <Route path="/compatibility/" component={CompatibilityHub} />
         <Route path="/device-finder" component={DeviceFinderPage} />
