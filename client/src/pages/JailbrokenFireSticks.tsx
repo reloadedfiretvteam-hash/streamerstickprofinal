@@ -56,13 +56,13 @@ export default function JailbrokenFireSticks() {
         <p>At StreamStickPro we sell <Link href="/devices">ONN Google TV kits</Link> and <Link href="/plans">plans for equipment you already own</Link>. If you searched jailbroken, unlocked, downloader, or IPTV Fire Stick, order a Google TV kit below.</p>
 
         <h2 id="fully-loaded-vs-diy">Setup Support vs Doing It Yourself</h2>
-        <p>Doing it yourself means using a Fire Stick you already own, installing a player app, and adding a subscription. A guided hardware option is an <Link href="/devices">ONN Google TV kit</Link> with a live price and photo. Plans remain available for <Link href="/iptv-firestick">Reloaded Fire TV on Fire Stick</Link> you already have.</p>
+        <p>Doing it yourself means using a Fire Stick you already own, installing a player app, and adding a StreamStickPro live TV plan. A hardware option is an <Link href="/devices">ONN Google TV package</Link> with a live catalog price and photo.</p>
 
         <h2 id="which-devices">Which Fire Stick Models Work Best?</h2>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
           <img src={getImageForSlot(JAILBREAK_IMAGES, 1).src} alt={getImageForSlot(JAILBREAK_IMAGES, 1).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
         </figure>
-        <p>Fire Stick HD, Fire Stick 4K, and Fire Stick 4K Max all work with Reloaded Fire TV if you already own one. Hardware for sale is ONN Google TV. Compare live kits on <Link href="/shop">Shop</Link> and <Link href="/devices">Google TV devices</Link>.</p>
+        <p>If you already own a Fire Stick, check compatibility before you buy a plan. Hardware for sale is ONN Google TV. Compare live packages on <Link href="/shop">Shop</Link> and <Link href="/devices">Devices</Link>.</p>
 
         <h2 id="what-you-get">What You Get With a Fire Stick Option</h2>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
