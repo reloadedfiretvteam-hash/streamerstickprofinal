@@ -1709,7 +1709,7 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
     description:
       'Google HD and 4K ONN packages for live TV. Photos, listed prices, and checkout. We do not sell Fire Stick hardware.',
   },
-  '/shop': { title: 'Shop Google TV packages and subscriptions | StreamStickPro', description: 'Buy a Google HD or 4K package, or a live TV subscription for a Fire Stick, ONN, or Google TV you already own.' },
+  '/shop': { title: 'Shop Google TV packages and live TV plans | StreamStickPro', description: 'Shop ONN Google TV packages or a live TV plan for a device you already own. Prices come from the live catalog.' },
   '/pricing': { title: 'Subscription prices | StreamStickPro', description: 'Choose a plan length and how many devices you want to activate. Prices come from the live catalog.' },
   '/blog': { title: 'Setup guides | StreamStickPro', description: 'Short guides for Google TV packages, existing-device plans, and setup. Spun city posts are not listed.' },
   '/locations': { title: 'City pages moved | StreamStickPro', description: 'City catalogs were removed. Use devices, subscriptions, or the compatibility page instead.', noindex: true },

@@ -25,7 +25,17 @@ export default function LearnHub() {
           <article className="rounded-2xl border border-[#D7DFE7] bg-white p-6">
             <h2 className="text-2xl font-bold">Setup guides</h2>
             <p className="mt-2 text-[#536275]">Steps for the device in front of you.</p>
-            <Link href="/guides"><span className="v4-btn v4-btn-primary mt-6">Open guides</span></Link>
+            <Link href="/setup/"><span className="v4-btn v4-btn-primary mt-6">Open setup</span></Link>
+          </article>
+          <article className="rounded-2xl border border-[#D7DFE7] bg-white p-6">
+            <h2 className="text-2xl font-bold">VPN and buffering</h2>
+            <p className="mt-2 text-[#536275]">What a VPN is, and how it can stop ISP throttling.</p>
+            <Link href="/vpn"><span className="v4-btn v4-btn-primary mt-6">Read the VPN guide</span></Link>
+          </article>
+          <article className="rounded-2xl border border-[#D7DFE7] bg-white p-6">
+            <h2 className="text-2xl font-bold">Compatibility</h2>
+            <p className="mt-2 text-[#536275]">Check the device you already own before you buy a plan.</p>
+            <Link href="/compatibility/"><span className="v4-btn v4-btn-secondary-light mt-6">Check compatibility</span></Link>
           </article>
           <article className="rounded-2xl border border-[#D7DFE7] bg-white p-6">
             <h2 className="text-2xl font-bold">Articles</h2>

@@ -73,8 +73,8 @@ export default function PlansCatalog() {
           <div className="rounded-2xl border bg-white p-8">
             <p className="text-slate-800">
               Subscriptions will appear here. You can also open the{" "}
-              <Link href="/#shop" className="text-blue-700 underline">
-                homepage shop
+              <Link href="/#subscriptions" className="text-blue-700 underline">
+                homepage plans
               </Link>
               .
             </p>
