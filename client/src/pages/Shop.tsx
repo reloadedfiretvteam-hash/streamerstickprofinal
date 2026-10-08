@@ -6,6 +6,8 @@ import { StagingFooter, StagingHeader } from "@/components/staging/StagingChrome
 import { publicDevicePath } from "@/lib/device-skus";
 import { HD_ALT, HD_ID, K4_ALT, K4_ID, packageImage } from "@/lib/package-art";
 import { useShopCatalog } from "@/lib/use-shop-catalog";
+import { PackageIncludes, PlanIncludes } from "@/components/PlanIncludes";
+import { publicPlanDescription, publicPlanName } from "@/lib/offer-copy";
 import "@/styles/staging.css";
 
 export default function Shop() {
@@ -40,11 +42,14 @@ export default function Shop() {
         <section className="bg-[#FCFBF7]">
           <div className="stg-shell py-16">
             <h2>Google TV packages</h2>
-            <div className="mt-8 grid gap-6 lg:grid-cols-2">
+            <div className="stg-panel mt-6">
+              <PackageIncludes />
+            </div>
+            <div className="stg-device-grid mt-8">
               {[hd, k4].map((product) =>
                 product ? (
-                  <article key={product.id} className="overflow-hidden rounded-[22px] border border-[#D7DFE7] bg-white">
-                    <div className="stg-story-media" style={{ height: 288 }}>
+                  <article key={product.id} className="stg-device-card">
+                    <div className="stg-story-media">
                       <img
                         src={packageImage(product.id, product.image)}
                         alt={product.id === HD_ID ? HD_ALT : product.id === K4_ID ? K4_ALT : product.name}
@@ -98,13 +103,16 @@ export default function Shop() {
         <section className="bg-[#F5F2EA]">
           <div className="stg-shell py-16">
             <h2>Live TV plans</h2>
-            <p className="mt-4 max-w-3xl text-[#536275]">No hardware ships. Totals come from the live catalog.</p>
+            <p className="mt-4 max-w-3xl text-[#536275]">No hardware ships. Totals come from the live catalog. Each plan includes the same watch list and email setup.</p>
+            <div className="stg-panel mt-6">
+              <PlanIncludes />
+            </div>
             {status === "loading" ? <p className="mt-6">Loading current plans…</p> : null}
             <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {plans.map((plan) => (
                 <article key={plan.id} className="rounded-[18px] border border-[#D7DFE7] bg-white p-6">
-                  <h3 className="text-xl font-bold">{plan.name}</h3>
-                  <p className="mt-3 text-[#536275]">{plan.description}</p>
+                  <h3 className="text-xl font-bold">{publicPlanName(plan.name)}</h3>
+                  <p className="mt-3 text-[#536275]">{publicPlanDescription(plan.description)}</p>
                   <p className="mt-4 text-[28px] font-bold">{money(plan.price)}</p>
                   <button
                     type="button"
@@ -112,11 +120,11 @@ export default function Shop() {
                     onClick={() => {
                       addItem({
                         id: plan.id,
-                        name: plan.name,
+                        name: publicPlanName(plan.name),
                         price: plan.price,
                         image: packageImage(plan.id, plan.image),
                         category: "iptv",
-                        description: plan.description,
+                        description: publicPlanDescription(plan.description),
                       });
                       openCart();
                     }}

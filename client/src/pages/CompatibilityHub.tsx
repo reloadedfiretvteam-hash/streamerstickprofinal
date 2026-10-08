@@ -23,10 +23,10 @@ export default function CompatibilityHub() {
         <p className="mt-4 max-w-[680px] text-lg text-[#536275]">Compatibility depends on the exact model, platform, and supported player. Check the details before choosing a plan.</p>
         <ul className="mt-10 space-y-4">
           {[
-            ["Fire TV", "/setup/", "/plans/"],
-            ["Google TV", "/setup/", "/devices/"],
-            ["ONN", "/setup/", "/devices/"],
-            ["Android TV", "/setup/", "/plans/"],
+            ["Fire TV", "/setup/#firestick", "/plans/"],
+            ["Google TV", "/setup/#onn-google", "/devices/"],
+            ["ONN", "/setup/#onn-google", "/devices/"],
+            ["Android TV", "/setup/#onn-google", "/plans/"],
             ["Smart TV", "/setup/", "/contact/?topic=compatibility"],
           ].map(([name, guide, extra]) => (
             <li key={name} className="rounded-2xl border border-[#D7DFE7] bg-white p-6">

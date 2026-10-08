@@ -61,7 +61,8 @@ export function DeviceFinderBlock() {
               </p>
               <div className="mt-4 flex flex-wrap gap-4">
                 <Link href="/compatibility/"><span className="underline">Check Compatibility</span></Link>
-                <Link href="/setup/"><span className="underline">Setup guides</span></Link>
+                <Link href="/setup/#firestick"><span className="underline">Fire Stick setup</span></Link>
+                <Link href="/setup/#onn-google"><span className="underline">ONN setup</span></Link>
                 <Link href="/contact/?topic=compatibility"><span className="underline">Contact with model number</span></Link>
               </div>
             </>

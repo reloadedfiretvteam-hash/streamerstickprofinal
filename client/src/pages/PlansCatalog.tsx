@@ -4,26 +4,14 @@ import { StorefrontChrome } from "@/components/StorefrontChrome";
 import { setPageMeta } from "@/lib/seo";
 import { useCart } from "@/lib/store";
 import { IPTV_IMG, packageImage } from "@/lib/package-art";
+import { PlanIncludes } from "@/components/PlanIncludes";
+import { publicPlanDescription, publicPlanName } from "@/lib/offer-copy";
 
 function formatUsd(cents?: number | null) {
   if (cents == null || !Number.isFinite(cents)) return null;
   return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
 }
 
-function publicLabel(text?: string | null) {
-  return String(text || "")
-    .replace(/IPTV/gi, "Live TV")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function readablePlanCopy(text?: string | null) {
-  const value = publicLabel(text);
-  if (!value || /real product mapped/i.test(value)) {
-    return "Live TV plan for a Fire Stick, ONN, or Google TV you already own. Includes a web tutorial and login credentials.";
-  }
-  return value;
-}
 
 export default function PlansCatalog() {
   const [plans, setPlans] = useState<any[]>([]);
@@ -63,11 +51,15 @@ export default function PlansCatalog() {
           <p className="text-sm uppercase tracking-[0.2em] text-teal-200">Live TV plans</p>
           <h1 className="mt-3 text-4xl font-semibold md:text-5xl">Live TV, movies, and sports on a device you already own</h1>
           <p className="mt-4 max-w-3xl text-lg text-white leading-relaxed">
-            A plan is the service only. Nothing ships. After checkout you get a tutorial and a login for a Fire Stick, ONN, or Google TV you already have. Live TV, movies, series, and sports follow the plan you buy. New hardware is in the Google packages.
+            A plan is the service only. Nothing ships. After checkout you get login credentials and an educational setup video for a Fire Stick, ONN, or Google TV you already have.
           </p>
         </div>
       </div>
-      <div className="mx-auto max-w-6xl px-4 py-12">
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        <div className="stg-panel mb-8">
+          <h2 className="mb-4 text-2xl font-bold">What every live TV plan includes</h2>
+          <PlanIncludes />
+        </div>
         {loading && <p className="text-slate-700">Loading subscriptions…</p>}
         {!loading && !plans.length && (
           <div className="rounded-2xl border bg-white p-8">
@@ -89,10 +81,10 @@ export default function PlansCatalog() {
                 <div className="flex flex-1 flex-col p-6">
                 <h2 className="text-xl font-semibold text-slate-900">
                   <Link href={`/plans/${encodeURIComponent(p.code)}`} className="hover:text-blue-700">
-                    {publicLabel(p.public_title)}
+                    {publicPlanName(p.public_title)}
                   </Link>
                 </h2>
-                <p className="mt-2 flex-1 text-base leading-relaxed text-slate-700">{readablePlanCopy(p.short_description)}</p>
+                <p className="mt-2 flex-1 text-base leading-relaxed text-slate-700">{publicPlanDescription(p.short_description)}</p>
                 <div className="mt-4 text-3xl font-semibold text-slate-900">{formatUsd(p.public_display_price_cents)}</div>
                 <button
                   type="button"
@@ -100,11 +92,11 @@ export default function PlansCatalog() {
                   onClick={() => {
                     addItem({
                       id: p.real_product_id || p.code,
-                      name: publicLabel(p.public_title),
+                      name: publicPlanName(p.public_title),
                       price: dollars,
                       image: packageImage(p.real_product_id || p.code, p.primary_image_url || IPTV_IMG),
                       category: "iptv",
-                      description: readablePlanCopy(p.short_description),
+                      description: publicPlanDescription(p.short_description),
                     });
                     openCart();
                   }}

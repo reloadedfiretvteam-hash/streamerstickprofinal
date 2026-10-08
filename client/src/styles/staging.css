@@ -72,18 +72,18 @@
 }
 
 .stg-section {
-  padding: 56px 0;
+  padding: 40px 0;
 }
 
 @media (min-width: 768px) {
   .stg-section {
-    padding: 72px 0;
+    padding: 52px 0;
   }
 }
 
 @media (min-width: 1024px) {
   .stg-section {
-    padding: 92px 0;
+    padding: 64px 0;
   }
 }
 
@@ -363,20 +363,40 @@
   }
 }
 
+.stg-device-grid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 1024px) {
+  .stg-device-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.stg-device-card {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: #fff;
+  overflow: hidden;
+}
+
 .stg-story {
   display: grid;
-  gap: 36px;
+  gap: 16px;
   align-items: center;
   border: 1px solid var(--border);
-  border-radius: 22px;
+  border-radius: 20px;
   background: #fff;
-  padding: 24px;
+  padding: 16px;
 }
 
 @media (min-width: 1024px) {
   .stg-story {
     grid-template-columns: 52fr 48fr;
-    padding: 40px;
+    padding: 20px;
   }
   .stg-story-rev {
     grid-template-columns: 48fr 52fr;
@@ -387,10 +407,10 @@
 }
 
 .stg-story-media {
-  height: 260px;
+  height: 210px;
   background: #edf3f7 url("/images/device-studio-surface.jpg") center / cover no-repeat;
-  border-radius: 18px;
-  border: 1px solid var(--border);
+  border-radius: 0;
+  border: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -398,14 +418,52 @@
 
 @media (min-width: 768px) {
   .stg-story-media {
-    height: 280px;
+    height: 230px;
   }
 }
 
 @media (min-width: 1024px) {
   .stg-story-media {
-    height: 420px;
+    height: 250px;
   }
+}
+
+.stg-include-grid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .stg-include-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.stg-include-grid li {
+  padding-left: 16px;
+  position: relative;
+}
+
+.stg-include-grid li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: var(--green);
+}
+
+.stg-video {
+  aspect-ratio: 16 / 9;
+  background: #040a12;
+}
+
+.stg-video iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 .stg-story-media img {
