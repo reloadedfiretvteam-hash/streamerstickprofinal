@@ -94,7 +94,7 @@ export function V4Footer() {
         </div>
         {[
           { title: "Shop", links: [["Google packages", "/devices"], ["Live TV plans", "/plans"], ["36-hour trial", "/36hr-trial"]] },
-          { title: "Help", links: [["Compatibility", "/compatibility"], ["Setup", "/setup"], ["Support", "/support"]] },
+          { title: "Help", links: [["Compatibility", "/compatibility"], ["Setup", "/setup"], ["VPN guide", "/vpn"], ["Support", "/support"]] },
           { title: "Company", links: [["Learn", "/learn"], ["Device finder", "/device-finder"], ["Refunds", "/refund"]] },
         ].map((group) => (
           <div key={group.title}>

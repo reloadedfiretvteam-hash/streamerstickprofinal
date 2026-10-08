@@ -1695,9 +1695,9 @@ const PAGE_META: Record<string, { title: string; description: string; noindex?: 
       'Pick Fire TV, Google TV, ONN, Android TV, Smart TV, or I’m not sure to get the next compatibility and setup step.',
   },
   '/vpn': {
-    title: 'Surfshark VPN IPTV Buffering ISP Throttle Firestick | StreamStickPro',
+    title: 'What a VPN does for buffering | StreamStickPro',
     description:
-      'Stop ISP throttling on IPTV with Surfshark VPN. Firestick and ONN setup, unlimited devices, camouflage mode. StreamStickPro guide and special offer.',
+      'A VPN encrypts traffic so your internet provider sees less of what you stream. That can reduce ISP throttling that shows up as buffering.',
   },
   '/vpn-protection': {
     title: 'VPN Protection for Streaming | Privacy & ISP Tips | StreamStickPro',

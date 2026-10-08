@@ -10,7 +10,7 @@ const defaultProducts = [
     name: 'Google HD Package',
     price: 14000,
     description:
-      'Google HD Package: a preloaded ONN Full HD Google TV device, voice remote, web tutorial, login credentials, and live TV service. Ships ready to plug in.',
+      'Google HD Package: a preloaded ONN Full HD Google TV stick, voice remote, educational setup video, login credentials, and a 1-year live TV plan. Ships ready to plug in.',
     imageUrl: '/images/onn-full-hd-official-reference.png',
     category: 'devices',
     shadowProductId: '',
@@ -22,7 +22,7 @@ const defaultProducts = [
     name: 'Google 4K Package',
     price: 15000,
     description:
-      'Google 4K Package: a preloaded ONN 4K Google TV device, voice remote, web tutorial, login credentials, and live TV service. Ships ready to plug in.',
+      'Google 4K Package: a preloaded ONN 4K Google TV box, voice remote, educational setup video, login credentials, and a 1-year live TV plan. Ships ready to plug in.',
     imageUrl: '/images/onn-4k-official-reference.png',
     category: 'devices',
     shadowProductId: '',

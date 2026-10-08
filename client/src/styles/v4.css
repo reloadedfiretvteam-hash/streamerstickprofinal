@@ -178,6 +178,22 @@
   }
 }
 
+.v4-device-stage {
+  position: relative;
+  min-height: 320px;
+  background: #f5f2ea url("/images/device-studio-surface.jpg") center / cover no-repeat;
+  border-bottom: 1px solid #d7dfe7;
+}
+
+.v4-device-stage img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 320px;
+  object-fit: contain;
+  padding: 28px;
+}
+
 .v4-hero-panel {
   background: #fff;
   border-radius: 22px;

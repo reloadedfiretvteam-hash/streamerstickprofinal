@@ -5,6 +5,7 @@ import { iptvRealProductId, type IptvDurationKey } from "@/lib/iptv-sku";
 import { useCart, type Product } from "@/lib/store";
 import { setPageMeta } from "@/lib/seo";
 import { V4Footer, V4Header } from "@/components/v4/V4Chrome";
+import { SurfsharkOfferCards } from "@/components/SurfsharkOfferCards";
 import { publicDevicePath } from "@/lib/device-skus";
 import { dollarsFromCatalog, HD_ALT, HD_ID, HD_IMG, IPTV_IMG, K4_ALT, K4_ID, K4_IMG, packageImage } from "@/lib/package-art";
 import "@/styles/v4.css";
@@ -200,12 +201,21 @@ export default function HomeV4() {
             <div className="mt-10 grid gap-8 lg:grid-cols-2">
               {packages.map((pack) => (
                 <article key={pack.id} className="overflow-hidden rounded-[22px] border border-[#D7DFE7] bg-white">
-                  <img src={pack.image} alt={pack.alt} width="800" height="640" decoding="async" className="h-80 w-full bg-white object-contain p-8" />
+                  <div className="v4-device-stage">
+                    <img src={pack.image} alt={pack.alt} width="800" height="640" decoding="async" />
+                  </div>
                   <div className="p-8">
                     <p className="text-base font-semibold text-[#536275]">{pack.label}</p>
                     <h3 className="mt-2 text-[30px] font-bold">{pack.name}</h3>
                     <p className="mt-4 text-[40px] font-bold leading-none">{pack.product ? money(pack.product.price) : "Loading current price…"}</p>
                     <p className="mt-5 text-[18px] leading-relaxed text-[#3A4658]">{pack.pitch}</p>
+                    <ul className="v4-include-list mt-5">
+                      <li>ONN Google TV hardware in the photo</li>
+                      <li>Voice remote</li>
+                      <li>Educational setup video</li>
+                      <li>Login credentials</li>
+                      <li>1-year live TV plan</li>
+                    </ul>
                     <p className="mt-4 text-sm text-[#536275]">
                       App logos on the retail packaging identify available apps. Separate subscriptions may be required. The retail box says US compatible only. Checkout is United States and Canada. Shipping and device compatibility are separate facts.
                     </p>
@@ -312,13 +322,32 @@ export default function HomeV4() {
           </div>
         </section>
 
+        <section id="vpn" className="bg-[#08111F] text-[#F8FAFC]" aria-labelledby="vpn-title">
+          <div className="v4-shell py-16">
+            <p className="text-sm font-semibold tracking-[0.14em] text-[#79D5FF]">OPTIONAL · SURFSHARK</p>
+            <h2 id="vpn-title" className="mt-3 text-[34px] font-bold leading-tight lg:text-[44px]">What a VPN is, and how it can stop buffering</h2>
+            <div className="mt-8 grid gap-8 lg:grid-cols-2">
+              <img src="/images/vpn-buffering-explained.jpg" alt="Congested network path versus a clear encrypted route." width="1200" height="675" className="w-full rounded-[22px] object-cover" />
+              <div className="max-w-[720px] space-y-4 text-[18px] leading-relaxed text-[#C9D4DF]">
+                <p>A VPN creates an encrypted tunnel from your device to the internet. Your provider sees a VPN connection instead of the exact streaming app.</p>
+                <p>If the provider was slowing video traffic, that slowdown can look like buffering. A VPN can hide the video so the cap lifts. It does not replace a 1-year live TV plan, and it cannot fix weak Wi-Fi by itself.</p>
+                <p>StreamStickPro may earn a commission if you buy through these cards. Surfshark sets the price.</p>
+                <Link href="/vpn"><span className="v4-btn v4-btn-secondary-dark mt-2">Read the full VPN guide</span></Link>
+              </div>
+            </div>
+            <div className="mt-10">
+              <SurfsharkOfferCards source="/" />
+            </div>
+          </div>
+        </section>
+
         <section className="bg-[#FCFBF7]" aria-labelledby="faq-title">
           <div className="v4-shell py-16">
             <h2 id="faq-title" className="text-[34px] font-bold">Straight answers</h2>
             <div className="mt-8 space-y-4">
               {[
                 ["What am I getting with a live TV plan?", "A login for a Fire Stick, ONN, or Google TV you already own. No box is shipped. The catalog lists duration, device allowance, and price."],
-                ["What am I getting with a Google package?", "The ONN hardware named on that product page, plus the items in the live catalog description. Review the package page before you order."],
+                ["What am I getting with a Google package?", "The ONN hardware in the photo, an educational setup video, login credentials, and a 1-year live TV plan. Price comes from the live catalog."],
                 ["Is the device delivered?", "Yes. Google packages ship. Live TV plans do not ship anything."],
                 ["Do you sell Fire Stick hardware?", "No. If you already have a Fire Stick, buy a live TV plan or request the trial."],
                 ["Is the trial instant?", "No. You request it. Support confirms it."],
