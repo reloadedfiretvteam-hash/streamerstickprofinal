@@ -501,7 +501,9 @@
 }
 
 .stg-video {
+  position: relative;
   aspect-ratio: 16 / 9;
+  min-height: 220px;
   background: #040a12;
 }
 
@@ -599,16 +601,18 @@
   color: #536275;
 }
 
-.stg-works ul {
+.stg-works ul,
+.stg-works-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 12px 0;
+  margin: 12px 0 0;
   padding: 0;
   list-style: none;
 }
 
-.stg-works li {
+.stg-works li,
+.stg-works-list li {
   padding: 8px 12px;
   border-radius: 999px;
   background: #edf3f7;

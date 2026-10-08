@@ -153,30 +153,20 @@ export default function StagingHome() {
           </div>
         </section>
 
-        <section className="stg-section">
-          <div className="stg-shell stg-glass">
-            <div className="stg-trust">
-              {[
-                ["Pay here", "Secure checkout for the United States and Canada."],
-                ["Email next", "Login credentials and the educational setup video."],
-                ["Then watch", "Live TV, movies, series, and sports on the plan you buy."],
-                ["Get help", "Setup, billing, and model questions at support@streamstickpro.com."],
-              ].map(([title, text]) => (
-                <article key={title}>
-                  <h3 className="text-[18px]">{title}</h3>
-                  <p className="mt-2 text-[15px] text-[#536275]">{text}</p>
-                </article>
-              ))}
-            </div>
-            <div className="stg-works" aria-label="Device types people shop for">
-              <p className="stg-works-label">Works with a device you already own</p>
-              <ul>
+        <section className="stg-section" aria-labelledby="after-title">
+          <div className="stg-shell">
+            <article className="stg-glass">
+              <h2 id="after-title">What happens after you order</h2>
+              <p className="mt-4 max-w-3xl text-[#3A4658]">
+                You check out for the United States or Canada. We email your login and the Fire Stick setup video, the same one we send with a trial. You follow that video, then watch live TV on the plan you bought. If a screen does not match, email support@streamstickpro.com and tell us the model.
+              </p>
+              <p className="stg-works-label mt-6">A plan is for a device you already own</p>
+              <ul className="stg-works-list">
                 {WORKS_ON.map((name) => (
                   <li key={name}>{name}</li>
                 ))}
               </ul>
-              <p className="stg-works-note">Own one of these? The live TV plan is for that device. Email the model number if you want us to confirm it.</p>
-            </div>
+            </article>
           </div>
         </section>
 
@@ -451,7 +441,7 @@ export default function StagingHome() {
           <div className="stg-shell">
             <h2 id="setup-title">Setup videos</h2>
             <p className="mt-3 max-w-3xl text-[#F8FAFC]">
-              Watch the Fire Stick guide or the ONN Google TV guide. Your order email also includes the setup video and login for that order.
+              The Fire Stick box is the video we email with trials and subscriptions. The ONN box is a walkthrough for putting a media player on an ONN Google TV.
             </p>
             <div className="mt-8">
               <SetupGuideVideos compact />

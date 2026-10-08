@@ -7,9 +7,10 @@ export function SetupGuideVideos({ compact = false }: { compact?: boolean }) {
         <article key={guide.id} id={guide.id} className="stg-panel overflow-hidden p-0">
           <div className="stg-video">
             <iframe
-              src={`https://www.youtube.com/embed/${guide.youtube}`}
+              src={`https://www.youtube-nocookie.com/embed/${guide.youtube}`}
               title={guide.title}
               allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
               loading="lazy"
             />
