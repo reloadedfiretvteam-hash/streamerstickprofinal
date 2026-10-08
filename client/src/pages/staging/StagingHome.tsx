@@ -12,13 +12,21 @@ import { StagingFooter, StagingHeader } from "@/components/staging/StagingChrome
 import { PLAN_INCLUDES, publicPlanName } from "@/lib/offer-copy";
 import "@/styles/staging.css";
 
-const DURATIONS: { key: IptvDurationKey; label: string; note: string }[] = [
-  { key: "1mo", label: "1 Month", note: "Shortest plan" },
-  { key: "3mo", label: "3 Months", note: "A season" },
-  { key: "6mo", label: "6 Months", note: "Half year" },
-  { key: "1yr", label: "1 Year", note: "Most common" },
-  { key: "2yr", label: "2 Years", note: "Longest plan" },
+const DURATIONS: { key: IptvDurationKey; label: string; note: string; months: number }[] = [
+  { key: "1mo", label: "1 Month", note: "Shortest plan", months: 1 },
+  { key: "3mo", label: "3 Months", note: "A season", months: 3 },
+  { key: "6mo", label: "6 Months", note: "Half year", months: 6 },
+  { key: "1yr", label: "1 Year", note: "Most common", months: 12 },
+  { key: "2yr", label: "2 Years", note: "Longest plan", months: 24 },
 ];
+
+const WORKS_ON = ["Fire TV", "Google TV", "ONN", "Android TV", "Smart TV"] as const;
+
+function householdHint(count: number): string {
+  if (count === 1) return "One TV you want us to activate.";
+  if (count <= 3) return "A living room plus one or two more TVs.";
+  return "A larger household. Pick one card for every device you want activated.";
+}
 
 const PLAN_CARD_POINTS = [
   "Live TV, movies, and sports",
@@ -116,6 +124,7 @@ export default function StagingHome() {
       image: K4_IMG,
       alt: K4_ALT,
       chips: ["4K box", "Voice remote", "HDMI"],
+      featured: true,
     },
   ];
 
@@ -157,6 +166,15 @@ export default function StagingHome() {
                   <p className="mt-2 text-[15px] text-[#536275]">{text}</p>
                 </article>
               ))}
+            </div>
+            <div className="stg-works" aria-label="Device types people shop for">
+              <p className="stg-works-label">Works with a device you already own</p>
+              <ul>
+                {WORKS_ON.map((name) => (
+                  <li key={name}>{name}</li>
+                ))}
+              </ul>
+              <p className="stg-works-note">A type is not a tested model. Send the exact model if you want support to confirm a plan.</p>
             </div>
           </div>
         </section>
@@ -210,6 +228,44 @@ export default function StagingHome() {
                 )}
               </div>
             </div>
+            <div className="stg-table-wrap mt-8" aria-labelledby="compare-title">
+              <h2 id="compare-title" className="mb-4">Package or plan</h2>
+              <table className="stg-table">
+                <caption className="sr-only">What ships with a Google TV package versus a live TV plan</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">You get</th>
+                    <th scope="col">Google TV package</th>
+                    <th scope="col">Live TV plan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["Hardware", "ONN stick or 4K box plus voice remote", "Nothing ships"],
+                    ["Live TV", "1-year plan in the order email", "The length you pick on the cards"],
+                    ["Login and video", "Credentials plus educational setup video", "Credentials plus educational setup video"],
+                    ["Best if", "You need a player for the TV", "You already own Fire Stick, Google TV, ONN, Android TV, or a smart TV"],
+                  ].map(([row, pack, plan]) => (
+                    <tr key={row}>
+                      <th scope="row">{row}</th>
+                      <td>{pack}</td>
+                      <td>{plan}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="stg-compare-stack mt-8" aria-labelledby="compare-title-m">
+              <h2 id="compare-title-m">Package or plan</h2>
+              <article className="stg-panel">
+                <h3>Google TV package</h3>
+                <p className="mt-2 text-[#536275]">ONN hardware ships. Email has login, setup video, and a 1-year live TV plan.</p>
+              </article>
+              <article className="stg-panel">
+                <h3>Live TV plan</h3>
+                <p className="mt-2 text-[#536275]">Nothing ships. You pick length and how many devices to activate. Same login and setup video by email.</p>
+              </article>
+            </div>
           </div>
         </section>
 
@@ -221,6 +277,7 @@ export default function StagingHome() {
               {packages.map((item) => (
                 <article key={item.id} className="stg-device-card">
                   <div className="stg-story-media">
+                    {"featured" in item && item.featured ? <p className="stg-badge">Best for a 4K TV</p> : null}
                     <img src={item.image} alt={item.alt} width="800" height="640" />
                   </div>
                   <div className="p-5">
@@ -257,6 +314,9 @@ export default function StagingHome() {
             </p>
             <fieldset className="mt-6">
               <legend className="font-semibold">How many devices do you want to activate?</legend>
+              <p className="mt-2 max-w-3xl text-sm text-[#A8B6C8]">
+                Count TVs you want on this order. This is an activation count, not a listed simultaneous-stream number.
+              </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button
@@ -270,6 +330,7 @@ export default function StagingHome() {
                   </button>
                 ))}
               </div>
+              <p className="mt-3 text-sm text-[#C9D4DF]" aria-live="polite">{householdHint(devices)}</p>
             </fieldset>
             {status === "loading" ? <p className="mt-6">Loading current plans…</p> : null}
             {status === "error" ? (
@@ -280,14 +341,19 @@ export default function StagingHome() {
             <div className="stg-plan-grid mt-6">
               {DURATIONS.map((row) => {
                 const plan = byId(iptvRealProductId(row.key, devices));
+                const recommended = row.key === "1yr";
                 return (
-                  <article key={row.key} className="stg-plan-card" data-on={duration === row.key ? "true" : "false"}>
+                  <article key={row.key} className="stg-plan-card" data-on={duration === row.key || recommended ? "true" : "false"} data-featured={recommended ? "true" : "false"}>
+                    {recommended ? <p className="stg-badge stg-badge-dark">Most common</p> : null}
                     <p className="text-sm text-[#A8B6C8]">{row.note}</p>
                     <h3 className="mt-1 text-[20px]">{row.label}</h3>
                     <p className="mt-2 text-[28px] font-bold">
                       {status === "loading" ? "…" : plan ? money(plan.price) : "—"}
                     </p>
-                    <p className="mt-1 text-sm text-[#A8B6C8]">{devices} device{devices === 1 ? "" : "s"}</p>
+                    <p className="mt-1 text-sm text-[#A8B6C8]">
+                      {devices} device{devices === 1 ? "" : "s"}
+                      {plan && row.months > 1 ? ` · ${money(Math.round(plan.price / row.months))} / mo` : ""}
+                    </p>
                     <ul>
                       {PLAN_CARD_POINTS.map((point) => (
                         <li key={point}>{point}</li>
@@ -387,16 +453,31 @@ export default function StagingHome() {
                 ["Is the trial instant?", "No. You request 36 hours. Support writes back. It is not a free device."],
                 ["Which player do I install?", "Use the player named in your order email. The public videos show the general Fire Stick and ONN Google TV flow."],
                 ["Do I need a VPN?", "Only if you want one. It is optional and sold by Surfshark, not as part of the 1-year plan."],
+                ["Is the price on the card the price I pay?", "Yes. Package and plan totals come from the live catalog. Longer plans also show that total divided by the months on the card."],
+                ["What if I already own a Fire Stick?", "Buy a live TV plan. Use the Fire Stick setup video. We do not sell jailbroken or loaded Fire Stick hardware."],
+                ["How do refunds work?", "Read the refund page before you pay. Support is support@streamstickpro.com."],
               ].map(([q, a]) => (
                 <details key={q} className="stg-panel">
                   <summary className="cursor-pointer font-semibold">{q}</summary>
-                  <p className="mt-3 text-[#536275]">{a}</p>
+                  <p className="mt-3 text-[#536275]">
+                    {q === "How do refunds work?" ? (
+                      <>
+                        Read the <Link href="/refund"><span className="underline">refund page</span></Link> before you pay. Support is support@streamstickpro.com.
+                      </>
+                    ) : (
+                      a
+                    )}
+                  </p>
                 </details>
               ))}
             </div>
           </div>
         </section>
       </main>
+      <nav className="stg-sticky-shop" aria-label="Shop shortcuts">
+        <a href="#packages">Packages</a>
+        <a href="#plans">Plans</a>
+      </nav>
       <StagingFooter />
     </div>
   );
