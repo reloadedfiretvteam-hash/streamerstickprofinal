@@ -136,24 +136,25 @@ export default function StagingHome() {
           <div className="stg-shell stg-hero-grid py-14">
             <div className="stg-hero-copy">
               <p className="text-sm font-semibold tracking-[0.14em] text-[#79D5FF]">TWO WAYS TO WATCH</p>
-              <h1 id="hero-title" className="mt-4">A Google TV package, or a plan for the box you already own.</h1>
-              <p className="mt-5 text-[#D5DEE8]">
-                StreamStickPro sells ONN Google TV hardware with a 1-year live TV plan, or a live TV plan alone. Fire Stick hardware is not sold. Checkout is United States and Canada.
+              <h1 id="hero-title" className="mt-4">A Google TV package, or a live TV plan for the TV you already have.</h1>
+              <p className="mt-5 text-[#F8FAFC]">
+                Take home an ONN Google TV with a 1-year live TV plan. Or keep the Fire Stick, Google TV, or smart TV you own and start with 36 hours before you buy.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a href="#packages"><span className="stg-btn stg-btn-primary">Shop Google TV packages</span></a>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <a href="#trial"><span className="stg-btn stg-btn-primary">Request the 36-hour trial</span></a>
+                <a href="#packages"><span className="stg-btn stg-btn-secondary">Shop Google TV packages</span></a>
                 <a href="#plans"><span className="stg-btn stg-btn-secondary">Shop live TV plans</span></a>
               </div>
             </div>
             <div className="stg-product-panel mt-8 lg:mt-0">
               <img src={K4_IMG} alt={K4_ALT} width="800" height="640" />
-              <p className="mt-3 text-sm text-[#536275]">Retail-box app logos are apps on Google TV. Separate store subscriptions may be required.</p>
+              <p className="mt-3 text-sm text-[#0B1220]">ONN Google TV 4K. App logos on the box are Google TV apps. Those apps can need their own subscriptions.</p>
             </div>
           </div>
         </section>
 
-        <section className="bg-[#FCFBF7] stg-section">
-          <div className="stg-shell">
+        <section className="stg-section">
+          <div className="stg-shell stg-glass">
             <div className="stg-trust">
               {[
                 ["Pay here", "Secure checkout for the United States and Canada."],
@@ -174,12 +175,12 @@ export default function StagingHome() {
                   <li key={name}>{name}</li>
                 ))}
               </ul>
-              <p className="stg-works-note">A type is not a tested model. Send the exact model if you want support to confirm a plan.</p>
+              <p className="stg-works-note">Own one of these? The live TV plan is for that device. Email the model number if you want us to confirm it.</p>
             </div>
           </div>
         </section>
 
-        <section className="bg-[#F5F2EA] stg-section" aria-labelledby="start-title">
+        <section className="stg-section" aria-labelledby="start-title">
           <div className="stg-shell">
             <h2 id="start-title">Start with what you have at home</h2>
             <div className="stg-two mt-6">
@@ -196,7 +197,7 @@ export default function StagingHome() {
             </div>
             <div className="stg-panel mt-4">
               <h3 id="finder-title">What are you watching on?</h3>
-              <p className="mt-2 text-[#536275]">Pick a type so we can point you to the matching setup video.</p>
+                <p className="mt-2 text-[#536275]">Tell us the device. We will point you to the Fire Stick video or the ONN Google TV video.</p>
               <div className="stg-finder mt-4">
                 {FINDER.map((label) => (
                   <label key={label}>
@@ -218,7 +219,7 @@ export default function StagingHome() {
                 ) : (
                   <>
                     <p className="font-semibold">{finder} next step</p>
-                    <p className="mt-2 text-[#536275]">A type is not a tested model. Send the exact model number if you want support to confirm a plan.</p>
+                    <p className="mt-2 text-[#536275]">Open the matching setup video, or email the model number and we will confirm the plan fits.</p>
                     <div className="mt-3 flex flex-wrap gap-4">
                       <Link href="/setup/#firestick"><span className="underline">Fire Stick video</span></Link>
                       <Link href="/setup/#onn-google"><span className="underline">ONN Google TV video</span></Link>
@@ -269,10 +270,10 @@ export default function StagingHome() {
           </div>
         </section>
 
-        <section id="packages" className="bg-[#FCFBF7] stg-section" aria-labelledby="hardware-title">
+        <section id="packages" className="stg-section" aria-labelledby="hardware-title">
           <div className="stg-shell">
             <h2 id="hardware-title">Google TV packages</h2>
-            <p className="mt-3 max-w-3xl text-[#536275]">Same contents. Different picture. Choose HD or 4K for the TV you have, the way a device store compares two streamers.</p>
+            <p className="mt-3 max-w-3xl text-[#F8FAFC]">Same contents. Different picture. Choose HD or 4K for the TV you have.</p>
             <div className="stg-device-grid mt-8">
               {packages.map((item) => (
                 <article key={item.id} className="stg-device-card">
@@ -306,16 +307,34 @@ export default function StagingHome() {
           </div>
         </section>
 
-        <section id="plans" className="bg-[#08111F] text-[#F8FAFC] stg-section" aria-labelledby="plan-title">
+        <section id="trial" className="stg-section" aria-labelledby="trial-title">
           <div className="stg-shell">
-            <h2 id="plan-title">Live TV plan cards</h2>
-            <p className="mt-3 max-w-3xl text-[#C9D4DF]">
-              Same service on every card. You only change length and how many devices you activate. No hardware ships.
+            <article className="stg-trial">
+              <div>
+                <p className="text-sm font-semibold tracking-[0.14em] text-[#23C768]">TRY IT BEFORE A PLAN</p>
+                <h2 id="trial-title" className="mt-3">36-hour live TV trial</h2>
+                <p className="mt-4 max-w-xl text-[#F8FAFC]">
+                  Already own a Fire Stick, Google TV, ONN, or smart TV? Request 36 hours of live TV before you choose a subscription. We email you back. No device ships with the trial.
+                </p>
+              </div>
+              <div>
+                <Link href="/36hr-trial"><span className="stg-btn stg-btn-primary w-full">Request the 36-hour trial</span></Link>
+                <a href="#plans"><span className="stg-btn stg-btn-secondary mt-3 w-full">Or see the plans</span></a>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="plans" className="stg-section" aria-labelledby="plan-title">
+          <div className="stg-shell">
+            <h2 id="plan-title">Live TV plans</h2>
+            <p className="mt-3 max-w-3xl text-[#F8FAFC]">
+              Same live TV on every card. Pick the length and how many devices to activate. Nothing ships.
             </p>
             <fieldset className="mt-6">
-              <legend className="font-semibold">How many devices do you want to activate?</legend>
-              <p className="mt-2 max-w-3xl text-sm text-[#A8B6C8]">
-                Count TVs you want on this order. This is an activation count, not a listed simultaneous-stream number.
+              <legend className="font-semibold">How many TVs should this plan cover?</legend>
+              <p className="mt-2 max-w-3xl text-sm text-[#D5DEE8]">
+                Pick a number for this order. One card covers that many devices.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {[1, 2, 3, 4, 5].map((n) => (
@@ -372,7 +391,7 @@ export default function StagingHome() {
               })}
             </div>
             <div className="stg-two mt-8">
-              <article className="rounded-[16px] border border-[#233145] p-5">
+              <article className="rounded-[16px] border border-[#233145] bg-[#111c2e] p-5">
                 <h3>What you watch</h3>
                 <ul className="mt-3 space-y-2 text-[#C9D4DF]">
                   {PLAN_INCLUDES.watch.map((item) => (
@@ -380,7 +399,7 @@ export default function StagingHome() {
                   ))}
                 </ul>
               </article>
-              <article className="rounded-[16px] border border-[#233145] p-5">
+              <article className="rounded-[16px] border border-[#233145] bg-[#111c2e] p-5">
                 <h3>What arrives after you pay</h3>
                 <ul className="mt-3 space-y-2 text-[#C9D4DF]">
                   {PLAN_INCLUDES.afterOrder.map((item) => (
@@ -389,15 +408,26 @@ export default function StagingHome() {
                 </ul>
               </article>
             </div>
-            <p className="mt-6 text-sm text-[#A8B6C8]">
-              <Link href="/36hr-trial"><span className="underline">36-hour trial is a request</span></Link>
-              , not instant access.{" "}
+            <p className="mt-6 text-sm text-[#D5DEE8]">
+              Still deciding? <a href="#trial" className="underline">The 36-hour trial is above these plans.</a>{" "}
               <Link href="/terms"><span className="underline">Terms</span></Link>
             </p>
           </div>
         </section>
 
-        <section className="bg-[#FCFBF7] stg-section" aria-labelledby="how-title">
+        <section id="vpn" className="stg-section" aria-labelledby="vpn-title">
+          <div className="stg-shell">
+            <h2 id="vpn-title">VPN products</h2>
+            <p className="mt-3 max-w-3xl text-[#F8FAFC]">
+              Surfshark VPN, Antivirus, and Adblock are products on this site. Open a card here first. You only leave for Surfshark if you decide to buy one.
+            </p>
+            <div className="mt-8">
+              <SurfsharkOfferCards source="/" mode="inbound" />
+            </div>
+          </div>
+        </section>
+
+        <section className="stg-section" aria-labelledby="how-title">
           <div className="stg-shell">
             <h2 id="how-title">How an order works</h2>
             <div className="stg-steps mt-6">
@@ -417,11 +447,11 @@ export default function StagingHome() {
           </div>
         </section>
 
-        <section className="bg-[#F5F2EA] stg-section" aria-labelledby="setup-title">
+        <section className="stg-section" aria-labelledby="setup-title">
           <div className="stg-shell">
             <h2 id="setup-title">Setup videos</h2>
-            <p className="mt-3 max-w-3xl text-[#536275]">
-              These are the public media-player previews. The email with your credentials also has the educational setup video for that order.
+            <p className="mt-3 max-w-3xl text-[#F8FAFC]">
+              Watch the Fire Stick guide or the ONN Google TV guide. Your order email also includes the setup video and login for that order.
             </p>
             <div className="mt-8">
               <SetupGuideVideos compact />
@@ -429,20 +459,7 @@ export default function StagingHome() {
           </div>
         </section>
 
-        <section className="bg-[#08111F] text-[#F8FAFC] stg-section" aria-labelledby="vpn-title">
-          <div className="stg-shell">
-            <h2 id="vpn-title">Optional VPN cards</h2>
-            <p className="mt-3 max-w-3xl text-[#C9D4DF]">
-              A VPN is not the live TV plan. Stay on StreamStickPro first, then continue to Surfshark if you want the add-on.
-            </p>
-            <div className="mt-8">
-              <SurfsharkOfferCards source="/" mode="inbound" />
-            </div>
-            <Link href="/vpn"><span className="stg-btn stg-btn-secondary mt-8">Read the VPN guide</span></Link>
-          </div>
-        </section>
-
-        <section className="bg-[#F5F2EA] stg-section" aria-labelledby="faq-title">
+        <section className="stg-section" aria-labelledby="faq-title">
           <div className="stg-shell">
             <h2 id="faq-title">Before you buy</h2>
             <div className="mt-6 max-w-[800px] space-y-3">

@@ -83,6 +83,9 @@ export function StagingHeader() {
           <Link href="/device-finder/">
             <span className="hidden min-h-11 px-2 py-2 text-[15px] font-semibold text-[#79D5FF] min-[1180px]:inline-flex">Device Finder</span>
           </Link>
+          <Link href="/36hr-trial">
+            <span className="stg-btn stg-btn-primary px-4">36-hour trial</span>
+          </Link>
           <button type="button" className="stg-btn stg-btn-secondary px-4" onClick={openCart}>
             Cart{count ? ` (${count})` : ""}
           </button>
@@ -119,6 +122,16 @@ export function StagingHeader() {
                 </span>
               </Link>
             ))}
+            <Link href="/36hr-trial">
+              <span className="block min-h-11 py-3 font-semibold" onClick={() => setOpen(false)}>
+                36-hour trial
+              </span>
+            </Link>
+            <Link href="/vpn">
+              <span className="block min-h-11 py-3 font-semibold" onClick={() => setOpen(false)}>
+                VPN products
+              </span>
+            </Link>
             <Link href="/device-finder/">
               <span className="block min-h-11 py-3 font-semibold" onClick={() => setOpen(false)}>
                 Device Finder
