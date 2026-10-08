@@ -49,7 +49,7 @@ export default function JailbrokenFireSticks() {
       >
         <NicheProductOffers title="Order the Google TV kits that show up for this search" />
         <h2 id="what-are-jailbroken-fire-sticks">What Is a Jailbroken Fire Stick?</h2>
-        <p>“Jailbroken” Fire Stick usually refers to a Fire TV device that can run apps from outside the Amazon Appstore (sideloading). In practice, most buyers want an easier way to watch Reloaded Fire TV with clear setup steps, an all-in-one app flow, and reliable support—without broken APKs or Kodi rebuilds.</p>
+        <p>“Jailbroken” Fire Stick usually refers to a Fire TV device that can run apps from outside the Amazon Appstore. StreamStickPro does not sell that hardware. If you already own a Fire Stick, check compatibility and a live TV plan. If you need hardware, shop an ONN Google TV package.</p>
         <figure className="my-6 rounded-lg overflow-hidden max-w-xl">
           <img src={getImageForSlot(JAILBREAK_IMAGES, 0).src} alt={getImageForSlot(JAILBREAK_IMAGES, 0).alt} className="w-full h-auto" width={600} height={340} loading="lazy" />
         </figure>
