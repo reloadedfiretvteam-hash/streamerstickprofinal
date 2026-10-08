@@ -466,6 +466,134 @@
   border: 0;
 }
 
+.stg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.stg-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #edf3f7;
+  color: #18263b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stg-trust {
+  display: grid;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .stg-trust {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.stg-trust article {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px;
+}
+
+.stg-plan-grid {
+  display: grid;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .stg-plan-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1180px) {
+  .stg-plan-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.stg-plan-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 16px;
+  border: 1px solid var(--dark-border);
+  border-radius: 16px;
+  background: #111c2e;
+}
+
+.stg-plan-card[data-on="true"] {
+  border-color: var(--green);
+  box-shadow: inset 0 0 0 1px var(--green);
+}
+
+.stg-plan-card ul {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stg-plan-card li {
+  position: relative;
+  padding: 6px 0 6px 16px;
+  color: #c9d4df;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.stg-plan-card li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.7em;
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: var(--green);
+}
+
+.stg-steps {
+  display: grid;
+  gap: 12px;
+  counter-reset: step;
+}
+
+@media (min-width: 768px) {
+  .stg-steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.stg-steps article {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fff;
+  padding: 18px;
+}
+
+.stg-steps article::before {
+  counter-increment: step;
+  content: counter(step);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 10px;
+  border-radius: 99px;
+  background: var(--green);
+  color: var(--navy);
+  font: 700 14px/1 Sora, Inter, sans-serif;
+}
+
 .stg-story-media img {
   width: 100%;
   height: 100%;
