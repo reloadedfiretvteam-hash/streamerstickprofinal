@@ -474,10 +474,6 @@ export default function StagingHome() {
           </div>
         </section>
       </main>
-      <nav className="stg-sticky-shop" aria-label="Shop shortcuts">
-        <a href="#packages">Packages</a>
-        <a href="#plans">Plans</a>
-      </nav>
       <StagingFooter />
     </div>
   );

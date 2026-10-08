@@ -595,45 +595,6 @@
   z-index: 1;
 }
 
-.stg-sticky-shop {
-  display: none;
-}
-
-@media (max-width: 767px) {
-  .stg {
-    padding-bottom: 76px;
-  }
-
-  .stg-sticky-shop {
-    position: sticky;
-    bottom: 0;
-    z-index: 30;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-    background: #08111fe6;
-    border-top: 1px solid #233145;
-  }
-
-  .stg-sticky-shop a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 48px;
-    border-radius: 12px;
-    background: var(--green);
-    color: var(--navy);
-    font: 700 15px/1 Sora, Inter, sans-serif;
-    text-decoration: none;
-  }
-
-  .stg-sticky-shop a:last-child {
-    background: #233145;
-    color: #f8fafc;
-  }
-}
-
 .stg-plan-card ul {
   margin: 12px 0 0;
   padding: 0;
